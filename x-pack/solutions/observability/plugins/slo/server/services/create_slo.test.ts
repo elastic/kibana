@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
   ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
@@ -24,11 +25,8 @@ import {
 } from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 describe('CreateSLO', () => {
-  let mockEsClient: ElasticsearchClientMock;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockLogger: jest.Mocked<MockedLogger>;
@@ -40,7 +38,6 @@ describe('CreateSLO', () => {
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
   beforeEach(() => {
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectsClient = savedObjectsClientMock.create();
     mockLogger = loggingSystemMock.createLogger();
@@ -48,7 +45,6 @@ describe('CreateSLO', () => {
     mockTransformManager = createTransformManagerMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     createSLO = new CreateSLO(
-      mockEsClient,
       mockScopedClusterClient,
       mockRepository,
       mockSavedObjectsClient,
@@ -63,7 +59,7 @@ describe('CreateSLO', () => {
 
   describe('happy path', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
       mockSavedObjectsClient.find.mockResolvedValue({
@@ -108,7 +104,7 @@ describe('CreateSLO', () => {
         mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.calls[0]
       ).toMatchSnapshot();
       expect(mockSummaryTransformManager.install).toHaveBeenCalled();
-      expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
+      expect(mockScopedClusterClient.asCurrentUser.index.mock.calls[0]).toMatchSnapshot();
 
       expect(response).toEqual(expect.objectContaining({ id: 'unique-id' }));
     });
@@ -178,7 +174,7 @@ describe('CreateSLO', () => {
 
   describe('unhappy path', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
       mockSavedObjectsClient.find.mockResolvedValue({
@@ -190,7 +186,7 @@ describe('CreateSLO', () => {
     });
 
     it('throws a SecurityException error when the user does not have the required privileges', async () => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
       } as SecurityHasPrivilegesResponse);
 
@@ -242,7 +238,9 @@ describe('CreateSLO', () => {
     });
 
     it('rollbacks completed operations when create temporary document fails', async () => {
-      mockEsClient.index.mockRejectedValue(new Error('temporary document index failed'));
+      mockScopedClusterClient.asCurrentUser.index.mockRejectedValue(
+        new Error('temporary document index failed')
+      );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
       await expect(createSLO.execute(sloParams)).rejects.toThrowError(
