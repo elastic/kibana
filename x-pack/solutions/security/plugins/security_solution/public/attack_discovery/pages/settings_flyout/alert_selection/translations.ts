@@ -21,11 +21,33 @@ export const ALERTS_SUMMARY = i18n.translate(
   }
 );
 
+export const CONNECTOR = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.connectorTitle',
+  {
+    defaultMessage: 'Connector',
+  }
+);
+
 export const CUSTOMIZE_THE_ALERTS = i18n.translate(
   'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.customizeTheAlertsLabel',
   {
     defaultMessage:
       'Customize the set of alerts that will be analyzed when generating Attack discoveries.',
+  }
+);
+
+export const CUSTOMIZE_THE_CONNECTOR_AND_ALERTS = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.customizeTheConnectorAndAlertsLabel',
+  {
+    defaultMessage:
+      'Customize the connector and alerts that will be analyzed when generating Attack discoveries on the fly. Scheduled Attack discoveries are set up independently.',
+  }
+);
+
+export const CUSTOM_QUERY = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.customQueryLabel',
+  {
+    defaultMessage: 'Custom query',
   }
 );
 
