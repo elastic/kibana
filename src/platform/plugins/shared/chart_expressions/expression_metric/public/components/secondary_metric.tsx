@@ -31,7 +31,7 @@ const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvai
 
 function getDeltaValue(rawValue: number | undefined, baselineValue: number | undefined) {
   // Return NAN delta for now if either side of the formula is not a number
-  if (rawValue == null || baselineValue == null || Number.isFinite(baselineValue)) {
+  if (rawValue == null || baselineValue == null || !Number.isFinite(baselineValue)) {
     return NaN;
   }
   return rawValue - baselineValue;
@@ -107,9 +107,35 @@ function getValueToShow(
     if (Number.isNaN(deltaValue)) {
       return notAvailable;
     }
-    return formatter?.(deltaValue) ?? deltaValue;
+    return formatter?.(deltaValue) ?? String(deltaValue);
   }
-  return value;
+  return String(value);
+}
+
+function getTrendDescription(
+  showValue: boolean,
+  hasIcon: boolean,
+  value: string,
+  direction: string
+) {
+  if (showValue) {
+    return undefined;
+  }
+  if (hasIcon) {
+    return i18n.translate('expressionMetricVis.secondaryMetric.trend', {
+      defaultMessage: 'Value: {value} - Changed to {direction}',
+      values: {
+        value,
+        direction,
+      },
+    });
+  }
+  return i18n.translate('expressionMetricVis.secondaryMetric.trendnoDifferences', {
+    defaultMessage: 'Value: {value} - No differences',
+    values: {
+      value,
+    },
+  });
 }
 
 function SecondaryMetricValue({
@@ -157,22 +183,15 @@ function SecondaryMetricValue({
         aria-label={
           // Make the information accessible also for screen readers
           // so show it only when icon only mode to avoid to be reduntant
-          trendConfig.value
-            ? undefined
-            : i18n.translate('expressionMetricVis.secondaryMetric.trend', {
-                defaultMessage: 'Value: {value} - Changed to {direction}',
-                values: {
-                  value: valueToShow,
-                  direction: iconLabel,
-                },
-              })
+          getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)
         }
         color={translatedColor}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
         {trendConfig.value ? valueToShow : null}
-        {trendConfig.icon && icon ? ` ${icon}` : null}
+        {trendConfig.value && trendConfig.icon && icon ? ' ' : ''}
+        {trendConfig.icon && icon ? icon : null}
       </EuiBadge>
     );
   }

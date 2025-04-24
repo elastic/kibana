@@ -25,10 +25,13 @@ const formattedValue = faker.string.numeric(3);
 const rawValue = parseInt(formattedValue, 10);
 
 const trendLabels = {
-  arrowUp: 'upward direction',
-  arrowDown: 'downward direction',
-  grab: 'stable',
-};
+  arrowUp: { icon: '\u{2191}', description: 'upward direction' },
+  arrowDown: { icon: '\u{2193}', description: 'downward direction' },
+  equal: { icon: '\u{003D}', description: 'stable' },
+  na: { icon: '', description: '' },
+} as const;
+
+type TrendLabelsKeys = keyof typeof trendLabels;
 
 function renderSecondaryMetric(props: Partial<SecondaryMetricProps> = {}) {
   render(
@@ -103,206 +106,196 @@ describe('Secondary metric', () => {
         faker.color.rgb(),
         faker.color.rgb(),
       ];
+      const [lowerColor, neutralColor, higherColor] = palette;
 
-      const trendCombinations = [
-        { baseline: rawValue - 1, color: palette[2], icon: 'arrowUp' as const },
-        { baseline: rawValue + 1, color: palette[0], icon: 'arrowDown' as const },
-        { baseline: rawValue, color: palette[1], icon: 'grab' as const },
+      const badgeConfigs = [
+        { showIcon: true, showValue: true, name: 'both icon and values' },
+        { showIcon: false, showValue: true, name: 'value only' },
+        { showIcon: true, showValue: false, name: 'icon only' },
       ];
-      describe('with both icon and values', () => {
+
+      interface TrendCombination {
+        // this is used just to make the title stable
+        valueFinite: string;
+        value: number | undefined;
+        // this is used just to make the title stable
+        baselineFinite: string;
+        baseline: number | undefined;
+        color: string;
+        icon: TrendLabelsKeys;
+      }
+
+      const trendCombinations: TrendCombination[] = [
+        {
+          valueFinite: 'finite',
+          value: rawValue,
+          baselineFinite: 'finite',
+          baseline: rawValue - 1,
+          color: higherColor,
+          icon: 'arrowUp',
+        },
+        {
+          valueFinite: 'finite',
+          value: rawValue,
+          baselineFinite: 'finite',
+          baseline: rawValue + 1,
+          color: lowerColor,
+          icon: 'arrowDown',
+        },
+        {
+          valueFinite: 'finite',
+          value: rawValue,
+          baselineFinite: 'finite',
+          baseline: rawValue,
+          color: neutralColor,
+          icon: 'equal',
+        },
+        {
+          valueFinite: 'finite',
+          value: rawValue,
+          baselineFinite: 'NaN',
+          baseline: NaN,
+          color: neutralColor,
+          icon: 'na',
+        },
+        {
+          valueFinite: 'finite',
+          value: rawValue,
+          baselineFinite: 'undefined',
+          baseline: undefined,
+          color: neutralColor,
+          icon: 'na',
+        },
+        {
+          valueFinite: 'undefined',
+          value: undefined,
+          baselineFinite: 'finite',
+          baseline: rawValue,
+          color: neutralColor,
+          icon: 'na',
+        },
+        {
+          valueFinite: 'NaN',
+          value: NaN,
+          baselineFinite: 'finite',
+          baseline: rawValue,
+          color: neutralColor,
+          icon: 'na',
+        },
+        {
+          valueFinite: 'NaN',
+          value: NaN,
+          baselineFinite: 'NaN',
+          baseline: NaN,
+          color: neutralColor,
+          icon: 'na',
+        },
+        {
+          valueFinite: 'undefined',
+          value: undefined,
+          baselineFinite: 'undefined',
+          baseline: undefined,
+          color: neutralColor,
+          icon: 'na',
+        },
+      ];
+      // When compared to primary, the icon and color are inverted
+      const trendCombinationCompareToPrimary: TrendCombination[] = trendCombinations.map((item) => {
+        const newProps: Pick<TrendCombination, 'icon' | 'color'> =
+          item.icon === 'arrowUp'
+            ? { icon: 'arrowDown', color: lowerColor }
+            : item.icon === 'arrowDown'
+            ? { icon: 'arrowUp', color: higherColor }
+            : // equal and na are the same
+              { icon: item.icon, color: item.color };
+        return {
+          ...item,
+          ...newProps,
+        };
+      });
+      describe.each(badgeConfigs)('with $name', ({ showIcon, showValue }) => {
         it.each(trendCombinations)(
-          'should render a badge with the trend icon "$icon" and the formatted value',
-          ({ baseline, color, icon }) => {
+          '[Fixed baseline] should render a badge with the trend icon "$icon" and the formatted value (rawValue: $valueFinite, baseline: $baselineFinite)',
+          ({ value, baseline, color, icon }) => {
             renderSecondaryMetric({
+              row: { [id]: value },
               trendConfig: {
-                icon: true,
-                value: true,
+                icon: showIcon,
+                value: showValue,
                 palette,
                 baselineValue: baseline,
                 compareToPrimary: false,
               },
             });
 
-            const trendLabel = trendLabels[icon];
-            const el = screen.getByTitle(formattedValue);
+            const { icon: iconText, description } = trendLabels[icon];
 
-            expect(el).toBeInTheDocument();
-            expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
-            expect(screen.getByText(formattedValue)).toBeInTheDocument();
-            // unfortuantely the icon is not rendered, so check for the wrapper for now
-            expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
-            expect(
-              screen.queryByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`)
-            ).not.toBeInTheDocument();
+            if (showValue) {
+              const badgeText = `${formattedValue}${showIcon && iconText ? ` ${iconText}` : ''}`;
+              const el = screen.getByTitle(badgeText);
+              expect(el).toBeInTheDocument();
+              expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
+            }
+            if (showValue) {
+              expect(
+                screen.queryByLabelText(`Value: ${formattedValue} - Changed to ${description}`)
+              ).not.toBeInTheDocument();
+            } else {
+              if (icon === 'na') {
+                expect(
+                  screen.queryByLabelText(`Value: ${formattedValue} - No differences`)
+                ).toBeInTheDocument();
+              } else {
+                expect(
+                  screen.getByLabelText(`Value: ${formattedValue} - Changed to ${description}`)
+                ).toBeInTheDocument();
+              }
+            }
           }
         );
 
-        it('should compute the delta value correctly with undefined baseline', () => {
-          renderSecondaryMetric({
-            trendConfig: {
-              icon: true,
-              value: true,
-              palette,
-              baselineValue: undefined,
-              compareToPrimary: false,
-            },
-          });
-
-          const icon = 'grab';
-
-          const trendLabel = trendLabels[icon];
-          const el = screen.getByTitle(formattedValue);
-
-          expect(el).toBeInTheDocument();
-          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[1]}`);
-          expect(screen.getByText(formattedValue)).toBeInTheDocument();
-          // unfortuantely the icon is not rendered, so check for the wrapper for now
-          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
-          expect(
-            screen.queryByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`)
-          ).not.toBeInTheDocument();
-        });
-
-        it('should compute the delta value correctly with undefined rawValue', () => {
-          renderSecondaryMetric({
-            row: { [id]: undefined },
-            getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
-            trendConfig: {
-              icon: true,
-              value: true,
-              palette,
-              baselineValue: 1,
-              compareToPrimary: false,
-            },
-          });
-
-          const icon = 'grab';
-
-          const trendLabel = trendLabels[icon];
-          const el = screen.getByTitle('N/A');
-
-          expect(el).toBeInTheDocument();
-          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[1]}`);
-          expect(screen.getByText('N/A')).toBeInTheDocument();
-          // unfortuantely the icon is not rendered, so check for the wrapper for now
-          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
-          expect(
-            screen.queryByLabelText(`Value: 'N/A' - Changed to ${trendLabel}`)
-          ).not.toBeInTheDocument();
-        });
-
-        it('should compute the delta value correctly with both baseline and rawValue undefined', () => {
-          renderSecondaryMetric({
-            row: { [id]: undefined },
-            getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
-            trendConfig: {
-              icon: true,
-              value: true,
-              palette,
-              baselineValue: 0,
-              compareToPrimary: false,
-            },
-          });
-
-          const icon = 'grab';
-
-          const trendLabel = trendLabels[icon];
-          const el = screen.getByTitle('N/A');
-
-          expect(el).toBeInTheDocument();
-          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[1]}`);
-          expect(screen.getByText('N/A')).toBeInTheDocument();
-          // unfortuantely the icon is not rendered, so check for the wrapper for now
-          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
-          expect(
-            screen.queryByLabelText(`Value: N/A - Changed to ${trendLabel}`)
-          ).not.toBeInTheDocument();
-        });
-
-        it('should show the delta when compared to primary', () => {
-          const PRIMARY_VALUE = faker.number.int();
-          // note that secondary value should be higher in this case to show a downward trend
-          const RAW_VALUE = PRIMARY_VALUE + 1;
-          renderSecondaryMetric({
-            row: { [id]: RAW_VALUE },
-            getMetricFormatter: jest.fn(() => (v: unknown) => `${v}`),
-            trendConfig: {
-              icon: true,
-              value: true,
-              palette,
-              baselineValue: PRIMARY_VALUE,
-              compareToPrimary: true,
-            },
-          });
-
-          const icon = 'arrowDown';
-          const finalResult = PRIMARY_VALUE - RAW_VALUE;
-
-          const trendLabel = trendLabels[icon];
-          const el = screen.getByTitle(finalResult);
-
-          expect(el).toBeInTheDocument();
-          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[0]}`);
-          expect(screen.getByText(finalResult)).toBeInTheDocument();
-          // unfortuantely the icon is not rendered, so check for the wrapper for now
-          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
-
-          expect(
-            screen.queryByLabelText(`Value: ${finalResult} - Changed to ${trendLabel}`)
-          ).not.toBeInTheDocument();
-        });
-      });
-
-      describe('with icon only', () => {
-        it.each(trendCombinations)(
-          'should render only the icon "$icon"',
-          ({ baseline, color, icon }) => {
+        it.each(trendCombinationCompareToPrimary)(
+          '[Compare to primary] should render a badge with the trend icon "$icon" and the formatted value (rawValue: $valueFinite, baseline: $baselineFinite)',
+          ({ value, baseline, color, icon }) => {
             renderSecondaryMetric({
+              row: { [id]: value },
+              getMetricFormatter: jest.fn(() => (v: unknown) => String(v)),
               trendConfig: {
-                icon: true,
-                value: false,
+                icon: showIcon,
+                value: showValue,
                 palette,
                 baselineValue: baseline,
-                compareToPrimary: false,
+                compareToPrimary: true,
               },
             });
 
-            const trendLabel = trendLabels[icon];
+            const { icon: iconText, description } = trendLabels[icon];
+            const deltaValue =
+              baseline == null || Number.isNaN(baseline) || value == null || Number.isNaN(value)
+                ? 'N/A'
+                : baseline - value;
 
-            const el = screen.getByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`);
-
-            expect(el).toBeInTheDocument();
-            expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
-            expect(screen.queryByText(formattedValue)).not.toBeInTheDocument();
-            // unfortuantely the icon is not rendered, so check for the wrapper for now
-            expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
-          }
-        );
-      });
-
-      describe('with value only', () => {
-        it.each(trendCombinations)(
-          'should render the badge with value and color $color',
-          ({ baseline, color, icon }) => {
-            renderSecondaryMetric({
-              trendConfig: {
-                icon: false,
-                value: true,
-                palette,
-                baselineValue: baseline,
-                compareToPrimary: false,
-              },
-            });
-
-            const trendLabel = trendLabels[icon];
-
-            expect(screen.getByTitle(formattedValue)).toHaveStyle(
-              `--euiBadgeBackgroundColor: ${color}`
-            );
-            expect(
-              screen.queryByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`)
-            ).not.toBeInTheDocument();
-            expect(screen.getByText(formattedValue)).toBeInTheDocument();
+            if (showValue) {
+              const badgeText = `${deltaValue}${showIcon && iconText ? ` ${iconText}` : ''}`;
+              const el = screen.getByTitle(badgeText);
+              expect(el).toBeInTheDocument();
+              expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
+            }
+            if (showValue) {
+              expect(
+                screen.queryByLabelText(`Value: ${deltaValue} - Changed to ${description}`)
+              ).not.toBeInTheDocument();
+            } else {
+              if (icon === 'na') {
+                expect(
+                  screen.queryByLabelText(`Value: ${deltaValue} - No differences`)
+                ).toBeInTheDocument();
+              } else {
+                expect(
+                  screen.getByLabelText(`Value: ${deltaValue} - Changed to ${description}`)
+                ).toBeInTheDocument();
+              }
+            }
           }
         );
       });
