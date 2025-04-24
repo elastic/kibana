@@ -21,11 +21,13 @@ import {
   type DraggableProvidedDragHandleProps,
   keys,
   useGeneratedHtmlId,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../../types';
+import { TabStatus } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
 import { TabPreview, type TabPreviewProps } from '../tab_preview';
 
@@ -67,6 +69,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
+  const { status } = getPreviewData(item);
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
@@ -189,6 +192,7 @@ export const Tab: React.FC<TabProps> = (props) => {
             />
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
+              {status === TabStatus.RUNNING && <EuiLoadingSpinner size="m" />}
               <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
               </EuiText>
@@ -313,6 +317,9 @@ function getTabContentCss(euiTheme: EuiThemeComputed) {
 
 function getTabLabelContainerCss(euiTheme: EuiThemeComputed) {
   return css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
     width: 100%;
     height: ${euiTheme.size.l};
     padding-top: ${euiTheme.size.xxs};
