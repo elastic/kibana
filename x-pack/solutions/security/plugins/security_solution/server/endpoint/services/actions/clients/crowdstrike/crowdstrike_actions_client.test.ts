@@ -404,22 +404,24 @@ describe('CrowdstrikeActionsClient class', () => {
       ).rejects.toThrow('Unable to find elastic agent IDs for Crowdstrike agent ids: [1-2-3]');
     });
 
-    it.each`
-      method         | options
-      ${'isolate'}   | ${createCrowdstrikeIsolationOptions()}
-      ${'isolate'}   | ${createCrowdstrikeIsolationOptions()}
-      ${'runscript'} | ${responseActionsClientMock.createRunScriptOptions()}
-    `('$method should error if unable to validate agent id', async ({ method, options }) => {
-      (
-        classConstructorOptions.endpointService.getInternalFleetServices().agent
-          .getByIds as jest.Mock
-      ).mockImplementation(async () => {
-        throw new AgentNotFoundError('Agent some-id not found');
-      });
-      await expect(
-        crowdstrikeActionsClient[method as keyof ResponseActionsClient](options)
-      ).rejects.toThrow('Agent some-id not found');
-      expect(classConstructorOptions.connectorActions.execute).not.toHaveBeenCalled();
-    });
+    it.each(responseActionsClientMock.getClientSupportedResponseActionMethodNames('crowdstrike'))(
+      'should error if %s is called with invalid agent ids',
+      async (method) => {
+        (
+          classConstructorOptions.endpointService.getInternalFleetServices().agent
+            .getByIds as jest.Mock
+        ).mockImplementation(async () => {
+          throw new AgentNotFoundError('Agent some-id not found');
+        });
+        const options = responseActionsClientMock.getOptionsForResponseActionMethod(method);
+
+        await expect(
+          // @ts-expect-error
+          crowdstrikeActionsClient[method](options)
+        ).rejects.toThrow('Agent some-id not found');
+
+        expect(classConstructorOptions.connectorActions.execute).not.toHaveBeenCalled();
+      }
+    );
   });
 });
