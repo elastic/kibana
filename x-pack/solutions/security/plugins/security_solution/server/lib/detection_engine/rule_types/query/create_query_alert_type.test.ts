@@ -31,6 +31,7 @@ jest.mock('../utils/utils', () => ({
     };
   }),
   hasReadIndexPrivileges: jest.fn(async () => undefined),
+  checkForFrozenIndices: jest.fn(async () => []),
 }));
 
 jest.mock('../utils/get_list_client', () => ({
