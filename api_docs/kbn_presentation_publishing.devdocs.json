@@ -1551,15 +1551,7 @@
           "\nA function which will get the view mode from the API or the parent API. if this api has a view mode AND its\nparent has a view mode, we consider the APIs version the source of truth."
         ],
         "signature": [
-          "(api?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.CanAccessViewMode",
-            "text": "CanAccessViewMode"
-          },
-          " | undefined) => ",
+          "(api?: unknown) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1576,24 +1568,17 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.getInheritedViewMode.$1",
-            "type": "CompoundType",
+            "type": "Unknown",
             "tags": [],
             "label": "api",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.CanAccessViewMode",
-                "text": "CanAccessViewMode"
-              },
-              " | undefined"
+              "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1746,15 +1731,7 @@
         "label": "getViewModeSubject",
         "description": [],
         "signature": [
-          "(api?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.CanAccessViewMode",
-            "text": "CanAccessViewMode"
-          },
-          " | undefined) => ",
+          "(api?: unknown) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1779,24 +1756,17 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.getViewModeSubject.$1",
-            "type": "CompoundType",
+            "type": "Unknown",
             "tags": [],
             "label": "api",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.CanAccessViewMode",
-                "text": "CanAccessViewMode"
-              },
-              " | undefined"
+              "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],

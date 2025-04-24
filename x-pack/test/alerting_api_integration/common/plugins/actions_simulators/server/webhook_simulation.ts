@@ -10,9 +10,9 @@ import expect from '@kbn/expect';
 import http from 'http';
 import https from 'https';
 import { promisify } from 'util';
-import { fromNullable, map, filter, getOrElse } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { constant } from 'fp-ts/lib/function';
+import { fromNullable, map, filter, getOrElse } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
+import { constant } from 'fp-ts/function';
 import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 
 export async function initPlugin() {

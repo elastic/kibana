@@ -795,6 +795,133 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.Execution.canUseCachedResult",
+            "type": "Function",
+            "tags": [],
+            "label": "#canUseCachedResult",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, input: unknown, args: Record<string, unknown>) => { hash: string; value: ",
+              "FunctionCacheItem",
+              "; valid: boolean; } | { hash: string | undefined; value: undefined; valid: false; }"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.canUseCachedResult.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.canUseCachedResult.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.canUseCachedResult.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.Execution.getSideEffectFn",
+            "type": "Function",
+            "tags": [],
+            "label": "#getSideEffectFn",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, args: Record<string, unknown>) => (() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.getSideEffectFn.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.getSideEffectFn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2216,11 +2343,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunction.allowCache",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "allowCache",
             "description": [
               "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -8437,10 +8567,10 @@
             "tags": [],
             "label": "allowCache",
             "description": [
-              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.\n\nIt is possible to collect side effects produced by the function\n(e.g. logging, sending events to the server, etc.) and return a\nhandler to reproduce such side effects when the function cache is used\ninstead of the original function implementation."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | { withSideEffects(args: Arguments, context: Context): () => void; } | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -10674,7 +10804,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
             "deprecated": false,
@@ -10688,7 +10818,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
             "deprecated": false,
@@ -12508,7 +12638,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
         "deprecated": false,
@@ -12525,7 +12655,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
         "deprecated": false,
@@ -14371,6 +14501,133 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.Execution.canUseCachedResult",
+            "type": "Function",
+            "tags": [],
+            "label": "#canUseCachedResult",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, input: unknown, args: Record<string, unknown>) => { hash: string; value: ",
+              "FunctionCacheItem",
+              "; valid: boolean; } | { hash: string | undefined; value: undefined; valid: false; }"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.canUseCachedResult.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.canUseCachedResult.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.canUseCachedResult.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.Execution.getSideEffectFn",
+            "type": "Function",
+            "tags": [],
+            "label": "#getSideEffectFn",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, args: Record<string, unknown>) => (() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.getSideEffectFn.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.getSideEffectFn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15573,11 +15830,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunction.allowCache",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "allowCache",
             "description": [
               "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -19814,10 +20074,10 @@
             "tags": [],
             "label": "allowCache",
             "description": [
-              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.\n\nIt is possible to collect side effects produced by the function\n(e.g. logging, sending events to the server, etc.) and return a\nhandler to reproduce such side effects when the function cache is used\ninstead of the original function implementation."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | { withSideEffects(args: Arguments, context: Context): () => void; } | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -21072,7 +21332,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
             "deprecated": false,
@@ -21086,7 +21346,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
             "deprecated": false,
@@ -22337,7 +22597,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
         "deprecated": false,
@@ -22354,7 +22614,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
         "deprecated": false,
@@ -23527,6 +23787,133 @@
                 "description": [],
                 "signature": [
                   "T"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.Execution.canUseCachedResult",
+            "type": "Function",
+            "tags": [],
+            "label": "#canUseCachedResult",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, input: unknown, args: Record<string, unknown>) => { hash: string; value: ",
+              "FunctionCacheItem",
+              "; valid: boolean; } | { hash: string | undefined; value: undefined; valid: false; }"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.canUseCachedResult.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.canUseCachedResult.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.canUseCachedResult.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.Execution.getSideEffectFn",
+            "type": "Function",
+            "tags": [],
+            "label": "#getSideEffectFn",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, args: Record<string, unknown>) => (() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.getSideEffectFn.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.getSideEffectFn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
                 "deprecated": false,
@@ -24956,11 +25343,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.ExpressionFunction.allowCache",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "allowCache",
             "description": [
               "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -30004,7 +30394,7 @@
             "label": "fontFamily",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
+              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\" | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/types/style.ts",
             "deprecated": false,
@@ -32810,10 +33200,10 @@
             "tags": [],
             "label": "allowCache",
             "description": [
-              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.\n\nIt is possible to collect side effects produced by the function\n(e.g. logging, sending events to the server, etc.) and return a\nhandler to reproduce such side effects when the function cache is used\ninstead of the original function implementation."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | { withSideEffects(args: Arguments, context: Context): () => void; } | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -35251,7 +35641,7 @@
             "label": "label",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
             "deprecated": false,
@@ -35265,7 +35655,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+              "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
             "deprecated": false,
@@ -35328,7 +35718,7 @@
             "label": "family",
             "description": [],
             "signature": [
-              "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\" | undefined"
+              "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\" | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/font.ts",
             "deprecated": false,
@@ -37678,7 +38068,7 @@
           "\nThis type contains a unions of all supported font labels, or the the name of\nthe font the user would see in a UI."
         ],
         "signature": [
-          "\"Open Sans\" | \"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Optima\" | \"Palatino\""
+          "\"American Typewriter\" | \"Arial\" | \"Baskerville\" | \"Book Antiqua\" | \"Brush Script\" | \"Chalkboard\" | \"Didot\" | \"Futura\" | \"Gill Sans\" | \"Helvetica Neue\" | \"Hoefler Text\" | \"Inter\" | \"Lucida Grande\" | \"Myriad\" | \"Open Sans\" | \"Optima\" | \"Palatino\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
         "deprecated": false,
@@ -37695,7 +38085,7 @@
           "\nA collection of supported fonts."
         ],
         "signature": [
-          "({ label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Inter\"; value: \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
+          "({ label: \"American Typewriter\"; value: \"'American Typewriter', 'Courier New', Courier, Monaco, mono\"; } | { label: \"Arial\"; value: \"Arial, sans-serif\"; } | { label: \"Baskerville\"; value: \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Book Antiqua\"; value: \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Brush Script\"; value: \"'Brush Script MT', 'Comic Sans', sans-serif\"; } | { label: \"Chalkboard\"; value: \"Chalkboard, 'Comic Sans', sans-serif\"; } | { label: \"Didot\"; value: \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\"; } | { label: \"Futura\"; value: \"Futura, Impact, Helvetica, Arial, sans-serif\"; } | { label: \"Gill Sans\"; value: \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Helvetica Neue\"; value: \"'Helvetica Neue', Helvetica, Arial, sans-serif\"; } | { label: \"Hoefler Text\"; value: \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\"; } | { label: \"Inter\"; value: \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\"; } | { label: \"Lucida Grande\"; value: \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Myriad\"; value: \"Myriad, Helvetica, Arial, sans-serif\"; } | { label: \"Open Sans\"; value: \"'Open Sans', Helvetica, Arial, sans-serif\"; } | { label: \"Optima\"; value: \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\"; } | { label: \"Palatino\"; value: \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\"; })[]"
         ],
         "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
         "deprecated": false,
@@ -37712,7 +38102,7 @@
           "\nThis type contains a union of all supported font values, equivalent to the CSS\n`font-value` property."
         ],
         "signature": [
-          "\"'Open Sans', Helvetica, Arial, sans-serif\" | \"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
+          "\"'American Typewriter', 'Courier New', Courier, Monaco, mono\" | \"Arial, sans-serif\" | \"Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\" | \"'Brush Script MT', 'Comic Sans', sans-serif\" | \"Chalkboard, 'Comic Sans', sans-serif\" | \"Didot, Georgia, Garamond, 'Times New Roman', Times, serif\" | \"Futura, Impact, Helvetica, Arial, sans-serif\" | \"'Gill Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"'Helvetica Neue', Helvetica, Arial, sans-serif\" | \"'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif\" | \"'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'\" | \"'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif\" | \"Myriad, Helvetica, Arial, sans-serif\" | \"'Open Sans', Helvetica, Arial, sans-serif\" | \"Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif\" | \"Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/fonts.ts",
         "deprecated": false,
