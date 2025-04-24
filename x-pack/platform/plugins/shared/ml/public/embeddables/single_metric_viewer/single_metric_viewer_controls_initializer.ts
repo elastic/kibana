@@ -6,7 +6,6 @@
  */
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject } from 'rxjs';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type {
