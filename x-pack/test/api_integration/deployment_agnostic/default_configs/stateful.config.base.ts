@@ -161,12 +161,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
           '--xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true',
-          `--logging.loggers=${JSON.stringify([
-            {
-              name: 'plugins.streams',
-              level: 'debug',
-            },
-          ])}`,
         ],
       },
     };
