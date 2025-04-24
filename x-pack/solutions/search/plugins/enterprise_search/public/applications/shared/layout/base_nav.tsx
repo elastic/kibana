@@ -40,10 +40,10 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
     ),
   });
 
-  // Content
+  // Data
   navItems.push({
-    'data-test-subj': 'searchSideNav-Content',
-    id: 'content',
+    'data-test-subj': 'searchSideNav-Data',
+    id: 'data',
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
@@ -69,8 +69,8 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         id: 'crawlers',
       },
     ],
-    name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
-      defaultMessage: 'Content',
+    name: i18n.translate('xpack.enterpriseSearch.nav.dataTitle', {
+      defaultMessage: 'Data',
     }),
   });
 
