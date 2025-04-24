@@ -24,6 +24,9 @@ disabled:
   # Playwright
   - x-pack/test/security_solution_playwright/playwright.config.ts
 
+  # Gen AI Evals run weekly via their own pipeline
+  - x-pack/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
