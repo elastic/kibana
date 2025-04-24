@@ -134,14 +134,13 @@ const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRo
 
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
-  const getElserIdMock = jest.fn();
   let server: ReturnType<typeof serverMock.create>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
-    registerRoutes(server.router, loggerMock, getElserIdMock);
+    registerRoutes(server.router, loggerMock);
   });
 
   it('should call `cancelAttackDiscoveryRouteMock`', () => {
@@ -201,7 +200,7 @@ describe('registerRoutes', () => {
   });
 
   it('should call `postEvaluateRouteMock`', () => {
-    expect(postEvaluateRouteMock).toHaveBeenCalledWith(server.router, getElserIdMock);
+    expect(postEvaluateRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `getCapabilitiesRouteMock`', () => {
@@ -225,14 +224,11 @@ describe('registerRoutes', () => {
   });
 
   it('should call `chatCompleteRouteMock`', () => {
-    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, getElserIdMock);
+    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `postActionsConnectorExecuteRouteMock`', () => {
-    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(
-      server.router,
-      getElserIdMock
-    );
+    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `bulkActionKnowledgeBaseEntriesRouteMock`', () => {
