@@ -27,12 +27,12 @@ export default ({ getService }: FtrProviderContext) => {
     const index = 'test_idx';
     const { indexListOfDocuments } = dataGeneratorFactory({ es, index, log });
 
-    const cleanOperationsLIFO: Array<() => Promise<void>> = [];
-    const addCleanOperation = (operation: () => Promise<void>) =>
-      cleanOperationsLIFO.push(operation);
+    const cleanOperationsStack: Array<() => Promise<void>> = [];
+    const pushToCleanOperationStack = (operation: () => Promise<void>) =>
+      cleanOperationsStack.push(operation);
     const runCleanOperations = async () => {
-      for (let idx = cleanOperationsLIFO.length - 1; idx >= 0; idx--) {
-        await cleanOperationsLIFO[idx]();
+      for (let idx = cleanOperationsStack.length - 1; idx >= 0; idx--) {
+        await cleanOperationsStack[idx]();
       }
     };
 
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      addCleanOperation(async () => {
+      pushToCleanOperationStack(async () => {
         await supertest
           .delete(`/api/snapshot_restore/repositories/${snapshotName}`)
           .set('kbn-xsrf', 'foo')
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       // We need to delete the index before deleting the snapshot
-      addCleanOperation(async () => {
+      pushToCleanOperationStack(async () => {
         await supertest
           .post('/api/index_management/indices/delete')
           .set('kbn-xsrf', 'foo')
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      addCleanOperation(async () => {
+      pushToCleanOperationStack(async () => {
         await supertest
           .delete(`/api/index_lifecycle_management/policies/${frozenIlmName}`)
           .set('kbn-xsrf', 'foo')
@@ -176,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      addCleanOperation(async () => {
+      pushToCleanOperationStack(async () => {
         await supertest
           .post('/api/index_lifecycle_management/index/remove')
           .set('kbn-xsrf', 'foo')
