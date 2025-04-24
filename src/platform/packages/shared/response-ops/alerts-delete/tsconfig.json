@@ -12,6 +12,6 @@
     "@kbn/alerting-plugin",
     "@kbn/core-http-browser",
     "@kbn/i18n-react",
-    "@kbn/cases-plugin",
+    "@kbn/alerting-types",
   ]
 }
