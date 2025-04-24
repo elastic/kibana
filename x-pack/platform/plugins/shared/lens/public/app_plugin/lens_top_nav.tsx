@@ -221,6 +221,8 @@ function getLensTopNavConfig(options: {
       label: i18n.translate('xpack.lens.app.shareTitle', {
         defaultMessage: 'Export',
       }),
+      iconType: 'download',
+      iconOnly: true,
       run: actions.export.execute,
       testId: 'lnsApp_exportButton',
       description: i18n.translate('xpack.lens.app.shareTitleAria', {
@@ -236,6 +238,8 @@ function getLensTopNavConfig(options: {
       label: i18n.translate('xpack.lens.app.shareTitle', {
         defaultMessage: 'Share',
       }),
+      iconType: 'share',
+      iconOnly: true,
       run: actions.share.execute,
       testId: 'lnsApp_shareButton',
       description: i18n.translate('xpack.lens.app.shareTitleAria', {

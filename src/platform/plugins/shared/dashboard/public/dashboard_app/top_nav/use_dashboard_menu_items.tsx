@@ -190,6 +190,8 @@ export const useDashboardMenuItems = ({
       share: {
         ...topNavStrings.share,
         id: 'share',
+        iconType: 'share',
+        iconOnly: true,
         testId: 'shareTopNavButton',
         disableButton: disableTopNav,
         run: showShare,
@@ -198,6 +200,8 @@ export const useDashboardMenuItems = ({
       export: {
         ...topNavStrings.export,
         id: 'export',
+        iconType: 'download',
+        iconOnly: true,
         testId: 'exportTopNavButton',
         disableButton: disableTopNav, // TODO: add logic to disable this button if the user doesn't have export capabilities
         run: (anchorElement) => showShare(anchorElement, true),
@@ -290,7 +294,13 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
+
+    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
+
+    // insert share menu item before the last item in edit mode
+    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+
+    return editModeTopNavConfigItems;
   }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

@@ -426,6 +426,8 @@ export const getTopNavConfig = (
     },
     {
       id: 'export',
+      iconType: 'download',
+      iconOnly: true,
       label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
         defaultMessage: 'export',
       }),
@@ -439,6 +441,8 @@ export const getTopNavConfig = (
     },
     {
       id: 'share',
+      iconType: 'share',
+      iconOnly: true,
       label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
         defaultMessage: 'share',
       }),
