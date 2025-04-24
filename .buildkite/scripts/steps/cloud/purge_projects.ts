@@ -102,7 +102,7 @@ async function purgeProjects() {
     } else if (
       !Boolean(
         pullRequest.labels.filter((label: any) =>
-          /^ci:project-deploy-(elasticsearch|security|observability)$/.test(label.name)
+          /^ci:project-deploy-(elasticsearch|security|observability|ai4soc)$/.test(label.name)
         ).length
       )
     ) {
