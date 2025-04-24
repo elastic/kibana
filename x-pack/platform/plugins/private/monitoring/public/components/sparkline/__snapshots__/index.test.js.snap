@@ -3,70 +3,24 @@
 exports[`Sparkline component does not show tooltip initially 1`] = `
 <div>
   <div
-    css={
-      Object {
-        "height": "2em",
-      }
-    }
+    className="css-9ufo15-Sparkline"
   />
 </div>
 `;
 
-exports[`Sparkline component shows tooltip on hover 1`] = `
+exports[`Sparkline component with EuiProvider shows tooltip on hover 1`] = `
 <div>
   <div
-    css={
+    css="unknown styles"
+  />
+  <EmotionCssPropInternal
+    __EMOTION_TYPE_PLEASE_DO_NOT_USE__="i"
+    className="fa fa-caret-right"
+    style={
       Object {
-        "height": "2em",
+        "width": 6,
       }
     }
   />
-  <div
-    className="monSparklineTooltip__container"
-    style={
-      Object {
-        "left": 210,
-        "top": 17,
-      }
-    }
-  >
-    <i
-      className="fa fa-caret-left"
-      style={
-        Object {
-          "display": "block",
-          "width": 6,
-        }
-      }
-    />
-    <div
-      css={[Function]}
-      style={
-        Object {
-          "height": 56,
-          "width": 220,
-        }
-      }
-    >
-      <div
-        css={[Function]}
-      >
-        1513814914
-      </div>
-      <div
-        css={[Function]}
-      >
-        25
-      </div>
-    </div>
-    <i
-      className="fa fa-caret-right"
-      style={
-        Object {
-          "width": 6,
-        }
-      }
-    />
-  </div>
 </div>
 `;

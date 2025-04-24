@@ -44,7 +44,7 @@ export const tourSteps: {
     content: (
       <FormattedMessage
         id="xpack.securitySolution.siemMigrations.rules.tour.statusStepContent"
-        defaultMessage="{installed} rules have a check mark. Click {view} to access rule details. {translated} rules are ready to {install}, or for your to {edit}. Rules with errors can be {reprocessed}. Learn more about our AI Translations here.
+        defaultMessage="{installed} rules have a check mark. Click {view} to access rule details. {translated} rules are ready to {install}, or for your to {edit}. Rules with errors can be {reprocessed}.
         {lineBreak}{lineBreak}
         Learn more about our {link}"
         values={{

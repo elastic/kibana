@@ -84,6 +84,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.BANNERS_LINK_COLOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "BANNERS_LINK_COLOR_ID",
+        "description": [],
+        "signature": [
+          "\"banners:linkColor\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.BANNERS_PLACEMENT_ID",
         "type": "string",
         "tags": [],
@@ -1968,21 +1983,6 @@
         "description": [],
         "signature": [
           "\"timepicker:timeDefaults\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.VISUALIZATION_COLOR_MAPPING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZATION_COLOR_MAPPING_ID",
-        "description": [],
-        "signature": [
-          "\"visualization:colorMapping\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

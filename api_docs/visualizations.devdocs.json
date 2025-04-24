@@ -4082,7 +4082,13 @@
             "description": [],
             "signature": [
               "{ readonly useTimefilter: () => ",
-              "TimefilterHook",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.TimefilterHook",
+                "text": "TimefilterHook"
+              },
               "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
@@ -13683,7 +13689,7 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"time\" | \"ordinal\" | \"linear\" | undefined"
+              "\"time\" | \"linear\" | \"ordinal\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

@@ -13,7 +13,9 @@
     "server": true,
     "requiredPlugins": [
       "actions",
+      "alerting",
       "data",
+      "eventLog",
       "ml",
       "taskManager",
       "licensing",

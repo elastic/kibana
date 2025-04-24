@@ -56,10 +56,10 @@ function renderFlyout(output?: Output) {
   return { utils };
 }
 
-const logstashInputsLabels = [
+const sslInputsLabels = [
   'Client SSL certificate key',
   'Client SSL certificate',
-  'Server SSL certificate authorities (optional)',
+  'Server SSL certificate authorities',
 ];
 
 const kafkaInputsLabels = [
@@ -74,14 +74,8 @@ const kafkaInputsLabels = [
   'Key (optional)',
 ];
 
-const kafkaSectionsLabels = [
-  'Authentication',
-  'Partitioning',
-  'Topics',
-  'Headers',
-  'Compression',
-  'Broker settings',
-];
+// leave out 'Authentication', is now present in all the outputs
+const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression', 'Broker settings'];
 
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
@@ -122,22 +116,24 @@ describe('EditOutputFlyout', () => {
       is_default_monitoring: false,
     });
 
-    expect(
-      utils.queryByLabelText('Elasticsearch CA trusted fingerprint (optional)')
-    ).not.toBeNull();
+    expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
+    fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
 
-    // Shows SSL inputs
-    logstashInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).not.toBeNull();
-    });
+    await waitFor(() => {
+      // Shows SSL inputs
+      sslInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).not.toBeNull();
+      });
 
-    // Does not show kafka inputs nor sections
-    kafkaInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).toBeNull();
-    });
+      // Does not show kafka inputs nor sections
+      kafkaInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).toBeNull();
+      });
 
-    kafkaSectionsLabels.forEach((label) => {
-      expect(utils.queryByText(label)).toBeNull();
+      // 'Authentication' is now present in the main flyout, it shoul
+      kafkaSectionsLabels.forEach((label) => {
+        expect(utils.queryByText(label)).toBeNull();
+      });
     });
   });
 
@@ -148,20 +144,28 @@ describe('EditOutputFlyout', () => {
       id: 'output123',
       is_default: false,
       is_default_monitoring: false,
+      ssl: {
+        certificate: 'ssl-cert-value',
+        key: 'ssl-key-value',
+      },
     });
+    expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
+    fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
 
-    // Show logstash SSL inputs
-    logstashInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).not.toBeNull();
-    });
+    await waitFor(() => {
+      // Show SSL inputs
+      sslInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).not.toBeNull();
+      });
 
-    // Does not show kafka inputs nor sections
-    kafkaInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).toBeNull();
-    });
+      // Does not show kafka inputs nor sections
+      kafkaInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).toBeNull();
+      });
 
-    kafkaSectionsLabels.forEach((label) => {
-      expect(utils.queryByText(label)).toBeNull();
+      kafkaSectionsLabels.forEach((label) => {
+        expect(utils.queryByText(label)).toBeNull();
+      });
     });
   });
 
@@ -355,7 +359,25 @@ describe('EditOutputFlyout', () => {
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost');
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).not.toBeNull();
+
+    expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
+    fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
+
+    await waitFor(() => {
+      // Show SSL inputs
+      sslInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).not.toBeNull();
+      });
+
+      // Does not show kafka inputs nor sections
+      kafkaInputsLabels.forEach((label) => {
+        expect(utils.queryByLabelText(label)).toBeNull();
+      });
+
+      kafkaSectionsLabels.forEach((label) => {
+        expect(utils.queryByText(label)).toBeNull();
+      });
+    });
   });
 
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
@@ -386,13 +408,11 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('settingsOutputsFlyout.kibanaURLInput')).toBeNull();
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).toBeNull();
 
     fireEvent.click(utils.getByTestId('syncIntegrationsSwitch'));
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost:5601');
-    expect((utils.getByTestId('kibanaAPIKeySecretInput') as HTMLInputElement).value).toEqual('key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 
@@ -401,9 +421,9 @@ describe('EditOutputFlyout', () => {
         'outputR',
         expect.objectContaining({
           sync_integrations: true,
-          secrets: { service_token: '1234', kibana_api_key: 'key' },
+          secrets: { service_token: '1234' },
           service_token: undefined,
-          kibana_api_key: undefined,
+          kibana_api_key: 'key',
           kibana_url: 'http://localhost:5601',
         })
       );

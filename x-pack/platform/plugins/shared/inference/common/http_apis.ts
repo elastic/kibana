@@ -14,12 +14,15 @@ import type {
 
 export type ChatCompleteRequestBody = {
   connectorId: string;
-  stream?: boolean;
   system?: string;
   temperature?: number;
   modelName?: string;
   messages: Message[];
   functionCalling?: FunctionCallingMode;
+  maxRetries?: number;
+  retryConfiguration?: {
+    retryOn?: 'all' | 'auto';
+  };
 } & ToolOptions;
 
 export interface GetConnectorsResponseBody {

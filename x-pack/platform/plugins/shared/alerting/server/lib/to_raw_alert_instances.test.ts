@@ -31,5 +31,14 @@ describe('toRawAlertInstances', () => {
       const { rawRecoveredAlerts } = toRawAlertInstances({}, recoveredAlerts);
       expect(keys(rawRecoveredAlerts)).toEqual(['1', '2']);
     });
+
+    test('should return all flapping recovered alerts', () => {
+      const recoveredAlerts = {
+        '1': new Alert('1', { meta: { flappingHistory: flapping } }),
+        '2': new Alert('2', { meta: { flappingHistory: notFlapping } }),
+      };
+      const { rawRecoveredAlerts } = toRawAlertInstances({}, recoveredAlerts, true);
+      expect(keys(rawRecoveredAlerts)).toEqual(['1']);
+    });
   });
 });

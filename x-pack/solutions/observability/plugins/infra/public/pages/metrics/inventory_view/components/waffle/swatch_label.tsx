@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiColorPickerSwatch, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export interface Props {
@@ -17,7 +18,15 @@ export const SwatchLabel = ({ label, color }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiColorPickerSwatch color={color} />
+        <EuiIcon
+          type="stopFilled"
+          color={color}
+          size="xl"
+          aria-label={i18n.translate('xpack.infra.legendControls.iconColorLabel', {
+            defaultMessage: '{label} color',
+            values: { label },
+          })}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="xs">

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { useLogicalAndFields } from '../../common/constants';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
@@ -21,11 +22,11 @@ const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
 );
 
-export const QuerySchema = schema.object({
-  page: schema.maybe(schema.number()),
-  perPage: schema.maybe(schema.number()),
-  sortField: MonitorSortFieldSchema,
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
+  Type<string>
+];
+
+const CommonQuerySchema = {
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
   tags: StringOrArraySchema,
@@ -34,30 +35,32 @@ export const QuerySchema = schema.object({
   projects: StringOrArraySchema,
   schedules: StringOrArraySchema,
   status: StringOrArraySchema,
-  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
   monitorQueryIds: StringOrArraySchema,
+  showFromAllSpaces: schema.maybe(schema.boolean()),
+  useLogicalAndFor: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
+  ),
+};
+
+export const QuerySchema = schema.object({
+  ...CommonQuerySchema,
+  page: schema.maybe(schema.number()),
+  perPage: schema.maybe(schema.number()),
+  sortField: MonitorSortFieldSchema,
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
   internal: schema.maybe(
     schema.boolean({
       defaultValue: false,
     })
   ),
-  showFromAllSpaces: schema.maybe(schema.boolean()),
 });
 
 export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 
 export const OverviewStatusSchema = schema.object({
-  query: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  tags: StringOrArraySchema,
-  monitorTypes: StringOrArraySchema,
-  locations: StringOrArraySchema,
-  projects: StringOrArraySchema,
-  monitorQueryIds: StringOrArraySchema,
-  schedules: StringOrArraySchema,
-  status: StringOrArraySchema,
+  ...CommonQuerySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
-  showFromAllSpaces: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
@@ -110,51 +113,65 @@ interface Filters {
   projects?: string | string[];
   schedules?: string | string[];
   monitorQueryIds?: string | string[];
+  configIds?: string | string[];
 }
 
-export const getMonitorFilters = async (context: RouteContext) => {
+export const getMonitorFilters = async (
+  context: RouteContext<Record<string, any>, OverviewStatusQuery>
+) => {
   const {
     tags,
     monitorTypes,
-    locations,
     filter = '',
     projects,
     schedules,
     monitorQueryIds,
+    locations: queryLocations,
+    useLogicalAndFor,
   } = context.request.query;
-  const locationFilter = await parseLocationFilter(context, locations);
+  const locations = await parseLocationFilter(context, queryLocations);
 
-  return parseArrayFilters({
-    filter,
-    tags,
-    monitorTypes,
-    locations,
-    projects,
-    schedules,
-    monitorQueryIds,
-    locationFilter,
-  });
+  return parseArrayFilters(
+    {
+      filter,
+      tags,
+      monitorTypes,
+      projects,
+      schedules,
+      monitorQueryIds,
+      locations,
+    },
+    useLogicalAndFor
+  );
 };
 
-export const parseArrayFilters = ({
-  tags,
-  filter,
-  configIds,
-  projects,
-  monitorTypes,
-  schedules,
-  monitorQueryIds,
-  locationFilter,
-}: Filters & {
-  locationFilter?: string | string[];
-  configIds?: string[];
-}) => {
+export const parseArrayFilters = (
+  {
+    tags,
+    filter,
+    configIds,
+    projects,
+    monitorTypes,
+    schedules,
+    monitorQueryIds,
+    locations,
+  }: Filters,
+  useLogicalAndFor: MonitorsQuery['useLogicalAndFor'] = []
+) => {
   const filtersStr = [
     filter,
-    getSavedObjectKqlFilter({ field: 'tags', values: tags }),
+    getSavedObjectKqlFilter({
+      field: 'tags',
+      values: tags,
+      operator: useLogicalAndFor.includes('tags') ? 'AND' : 'OR',
+    }),
     getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
     getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
-    getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
+    getSavedObjectKqlFilter({
+      field: 'locations.id',
+      values: locations,
+      operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
+    }),
     getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
     getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
     getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),
@@ -162,7 +179,7 @@ export const parseArrayFilters = ({
     .filter((f) => !!f)
     .join(' AND ');
 
-  return { filtersStr, locationFilter };
+  return { filtersStr, locationIds: locations };
 };
 
 export const getSavedObjectKqlFilter = ({
@@ -199,12 +216,24 @@ export const getSavedObjectKqlFilter = ({
   return `${fieldKey}:"${escapeQuotes(values)}"`;
 };
 
-const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {
+export const parseLocationFilter = async (
+  {
+    syntheticsMonitorClient,
+    savedObjectsClient,
+    server,
+  }: Pick<RouteContext, 'syntheticsMonitorClient' | 'savedObjectsClient' | 'server'>,
+  locations?: string | string[]
+) => {
   if (!locations || locations?.length === 0) {
     return;
   }
 
-  const { allLocations } = await getAllLocations(context);
+  const { allLocations } = await getAllLocations({
+    syntheticsMonitorClient,
+    savedObjectsClient,
+    server,
+    excludeAgentPolicies: true,
+  });
 
   if (Array.isArray(locations)) {
     return locations

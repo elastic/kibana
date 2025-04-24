@@ -5,6 +5,7 @@
     "src": [
       "{projectRoot}/**/*.ts",
       "{projectRoot}/**/*.tsx",
+      "{workspaceRoot}/typings/**/*",
       "!{projectRoot}/target/**/*"
     ]
   },

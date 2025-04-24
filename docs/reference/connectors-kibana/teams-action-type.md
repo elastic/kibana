@@ -14,10 +14,8 @@ The Microsoft Teams connector uses a webhook to send notifications.
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/teams-connector.png
-:alt: Teams connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Teams connector](../images/teams-connector.png)
 
 
 ### Connector configuration [teams-connector-configuration]
@@ -35,10 +33,8 @@ Webhook URL
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/teams-params-test.png
-:alt: Teams params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Teams params test](../images/teams-params-test.png)
 
 Microsoft Teams actions have the following properties.
 

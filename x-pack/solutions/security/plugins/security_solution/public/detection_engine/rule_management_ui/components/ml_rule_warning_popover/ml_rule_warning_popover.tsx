@@ -28,7 +28,7 @@ import { getCapitalizedStatusText } from '../../../../detections/components/rule
 import type { Rule } from '../../../rule_management/logic';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
-import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { getMachineLearningJobId } from '../../../common/helpers';
 
 const POPOVER_WIDTH = '340px';
 

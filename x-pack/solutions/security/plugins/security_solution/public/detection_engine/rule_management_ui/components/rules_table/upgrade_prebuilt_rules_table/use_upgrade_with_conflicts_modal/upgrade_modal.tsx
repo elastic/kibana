@@ -65,12 +65,14 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
       <EuiModalFooter>
         {numOfRulesWithoutConflicts > 0 && (
           <EuiButton onClick={confirmUpgradingRulesWithoutConflicts}>
-            {i18n.UPGRADE_RULES_WITHOUT_CONFLICTS}
+            {i18n.UPGRADE_RULES_WITHOUT_CONFLICTS(numOfRulesWithoutConflicts)}
           </EuiButton>
         )}
         {numOfRulesWithSolvableConflicts > 0 && (
           <EuiButton onClick={confirmUpgradingRulesWithSolvableConflicts} color="warning">
-            {i18n.UPGRADE_RULES_WITH_CONFLICTS}
+            {i18n.UPGRADE_RULES_WITH_CONFLICTS(
+              numOfRulesWithoutConflicts + numOfRulesWithSolvableConflicts
+            )}
           </EuiButton>
         )}
         <EuiButtonEmpty onClick={onCancel}>{i18n.UPGRADE_CONFLICTS_MODAL_CANCEL}</EuiButtonEmpty>

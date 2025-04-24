@@ -241,6 +241,24 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       ]);
     });
 
+    describe('#validateByPolicyItem()', () => {
+      let currentItem: ExceptionListItemSchema;
+
+      beforeEach(() => {
+        currentItem = createExceptionListItemMock({
+          tags: exceptionLikeItem.tags,
+        });
+      });
+
+      it('should not error if policy is not returned by fleet for active space, but it is already associated with item', async () => {
+        packagePolicyService.getByIDs.mockResolvedValue([]);
+
+        await expect(
+          initValidator()._validateByPolicyItem(exceptionLikeItem, currentItem)
+        ).resolves.toBeUndefined();
+      });
+    });
+
     describe('#validateCreateOnwerSpaceIds()', () => {
       it('should error if adding an spaceOwnerId but has no global artifact management authz', async () => {
         setArtifactOwnerSpaceId(exceptionLikeItem, 'foo');

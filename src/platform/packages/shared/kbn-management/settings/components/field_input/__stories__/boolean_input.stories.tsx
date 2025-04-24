@@ -9,5 +9,9 @@
 
 import { getInputStory, getStory } from './common';
 
-export default getStory('Boolean Input', 'An input with a boolean value.');
+const Story = getStory('Boolean Input', 'An input with a boolean value.');
 export const BooleanInput = getInputStory('boolean' as const);
+
+export default {
+  ...Story,
+};

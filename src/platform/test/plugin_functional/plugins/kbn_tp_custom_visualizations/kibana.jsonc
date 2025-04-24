@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kbn-tp-custom-visualizations-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "kbnTpCustomVisualizations",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "visualizations"
+    ]
+  }
+}

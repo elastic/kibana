@@ -11,7 +11,10 @@ import type {
   FindRulesRequestQueryV1,
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
-import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
+import {
+  findRulesRequestQuerySchemaV1,
+  findRuleParamsExamplesV1,
+} from '../../../../../common/routes/rule/apis/find';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import type { ILicenseState } from '../../../../lib';
@@ -35,6 +38,7 @@ export const findRulesRoute = (
         access: 'public',
         summary: 'Get information about rules',
         tags: ['oas-tag:alerting'],
+        oasOperationObject: findRuleParamsExamplesV1,
       },
       validate: {
         request: {
@@ -86,7 +90,7 @@ export const findRulesRoute = (
         });
 
         const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
+          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields, false);
 
         return res.ok({
           body: responseBody,

@@ -169,4 +169,13 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     clickMenuTriggerButton();
     expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual('click me 2');
   });
+
+  it('should display menu item `hoverInfo` when no `hoverInfo` is provided to menu component', () => {
+    items[1].hoverInfo = 'item hover info here';
+    render();
+    clickMenuTriggerButton();
+    expect(renderResult.getByTestId('testMenu-item-1').textContent).toEqual(
+      'click me 2item hover info here'
+    );
+  });
 });

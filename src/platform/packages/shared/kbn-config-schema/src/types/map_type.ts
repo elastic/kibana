@@ -11,9 +11,9 @@ import typeDetect from 'type-detect';
 import { SchemaTypeError, SchemaTypesError } from '../errors';
 import { internals } from '../internals';
 import { META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES } from '../oas_meta_fields';
-import { Type, TypeOptions, ExtendsDeepOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
 
-export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
+export type MapOfOptions<K, V> = TypeOptions<Map<K, V>> & UnknownOptions;
 
 export class MapOfType<K, V> extends Type<Map<K, V>> {
   private readonly keyType: Type<K>;
@@ -22,12 +22,18 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
 
   constructor(keyType: Type<K>, valueType: Type<V>, options: MapOfOptions<K, V> = {}) {
     const defaultValue = options.defaultValue;
-    const schema = internals
+    let schema = internals
       .map()
       .entries(keyType.getSchema(), valueType.getSchema())
       .meta({
         [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
       });
+
+    // Only set stripUnknown if we have an explicit value of unknowns
+    const { unknowns } = options;
+    if (unknowns) {
+      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+    }
 
     super(schema, {
       ...options,

@@ -59,6 +59,7 @@ export const getCaseRoute = () =>
 export const resolveCaseRoute = createCasesRoute({
   method: 'get',
   path: `${CASE_DETAILS_URL}/resolve`,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
   },

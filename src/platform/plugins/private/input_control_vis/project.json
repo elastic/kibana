@@ -6,6 +6,7 @@
       "{projectRoot}/public/**/*",
       "{projectRoot}/server/**/*",
       "{projectRoot}/*.ts",
+      "{workspaceRoot}/typings/**/*",
       "!{projectRoot}/target/**/*"
     ]
   },

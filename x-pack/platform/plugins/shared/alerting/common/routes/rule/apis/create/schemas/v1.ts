@@ -6,9 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
+import {
+  ruleParamsSchemaWithDefaultValueV1,
+  createRuleParamsExamplesV1,
+} from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
-import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
+import { notifyWhenSchemaV1, alertDelaySchemaV1, artifactsSchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 import { flappingSchemaV1 } from '../../../common';
 
@@ -186,7 +189,10 @@ export const createBodySchema = schema.object({
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  artifacts: schema.maybe(artifactsSchemaV1),
 });
+
+export { createRuleParamsExamplesV1 };
 
 export const createParamsSchema = schema.object({
   id: schema.maybe(

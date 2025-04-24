@@ -9,6 +9,8 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 import { LRUCache } from 'lru-cache';
 
+import type { TemplateDelegate } from '@kbn/handlebars';
+
 import type { AssetsMap, PackagePolicyAssetsMap } from '../../../../common/types';
 
 import type { PackageInfo } from '../../../../common';
@@ -18,6 +20,7 @@ const cacheStore = new AsyncLocalStorage<CacheSession>();
 const PACKAGE_INFO_CACHE_SIZE = 20;
 const PACKAGE_ASSETS_MAP_CACHE_SIZE = 1;
 const AGENT_TEMPLATE_ASSETS_MAP_CACHE_SIZE = 5;
+const HANDLEBARS_COMPILE_TEMPLATE_CACHE_SIZE = 200;
 
 class CacheSession {
   private _packageInfoCache?: LRUCache<string, PackageInfo>;
@@ -25,6 +28,10 @@ class CacheSession {
   private _packageAssetsMap?: LRUCache<string, AssetsMap>;
 
   private _agentTemplateAssetsMap?: LRUCache<string, PackagePolicyAssetsMap>;
+
+  private _handlebarsCompiledTemplate?: LRUCache<string, TemplateDelegate>;
+
+  private _isSpaceAwarenessEnabledCache?: boolean;
 
   getPackageInfoCache() {
     if (!this._packageInfoCache) {
@@ -52,6 +59,25 @@ class CacheSession {
     }
     return this._agentTemplateAssetsMap;
   }
+
+  getHandlebarsCompiledTemplateCache() {
+    if (!this._handlebarsCompiledTemplate) {
+      this._handlebarsCompiledTemplate = new LRUCache<string, TemplateDelegate>({
+        max: HANDLEBARS_COMPILE_TEMPLATE_CACHE_SIZE,
+      });
+    }
+    return this._handlebarsCompiledTemplate;
+  }
+
+  getIsSpaceAwarenessEnabledCache() {
+    if (typeof this._isSpaceAwarenessEnabledCache === 'boolean') {
+      return this._isSpaceAwarenessEnabledCache;
+    }
+  }
+
+  setIsSpaceAwarenessEnabledCache(val: boolean) {
+    this._isSpaceAwarenessEnabledCache = val;
+  }
 }
 
 export function getPackageInfoCache(pkgName: string, pkgVersion: string) {
@@ -64,6 +90,14 @@ export function setPackageInfoCache(pkgName: string, pkgVersion: string, package
 
 export function getPackageAssetsMapCache(pkgName: string, pkgVersion: string) {
   return cacheStore.getStore()?.getPackageAssetsMapCache()?.get(`${pkgName}:${pkgVersion}`);
+}
+
+export function getIsSpaceAwarenessEnabledCache() {
+  return cacheStore.getStore()?.getIsSpaceAwarenessEnabledCache();
+}
+
+export function setIsSpaceAwarenessEnabledCache(val: boolean) {
+  return cacheStore.getStore()?.setIsSpaceAwarenessEnabledCache(val);
 }
 
 export function setPackageAssetsMapCache(
@@ -90,6 +124,14 @@ export function setAgentTemplateAssetsMapCache(
     .getStore()
     ?.getAgentTemplateAssetsMapCache()
     ?.set(`${pkgName}:${pkgVersion}`, assetsMap);
+}
+
+export function getHandlebarsCompiledTemplateCache(tplStr: string) {
+  return cacheStore.getStore()?.getHandlebarsCompiledTemplateCache()?.get(tplStr);
+}
+
+export function setHandlebarsCompiledTemplateCache(tplStr: string, tpl: TemplateDelegate) {
+  return cacheStore.getStore()?.getHandlebarsCompiledTemplateCache()?.set(tplStr, tpl);
 }
 
 export async function runWithCache<T = any>(cb: () => Promise<T>): Promise<T> {

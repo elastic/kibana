@@ -9,6 +9,7 @@
 
 import React, { PureComponent, ChangeEvent } from 'react';
 import { injectI18n, FormattedMessage, WrappedComponentProps } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import {
   EuiAccordion,
@@ -18,6 +19,7 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
+  UseEuiTheme,
 } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -25,8 +27,6 @@ import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
 import { InputControlVisDependencies } from '../../plugin';
-
-import './control_editor.scss';
 
 interface ControlEditorUiProps {
   controlIndex: number;
@@ -169,7 +169,15 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & WrappedCompon
 
   render() {
     return (
-      <EuiPanel grow={false} className="icvControlEditor__panel">
+      <EuiPanel
+        grow={false}
+        css={({ euiTheme }: UseEuiTheme) =>
+          css({
+            zIndex: 1,
+            marginBottom: euiTheme.size.base,
+          })
+        }
+      >
         <EuiAccordion
           id="controlEditorAccordion"
           buttonContent={getTitle(this.props.controlParams, this.props.controlIndex)}

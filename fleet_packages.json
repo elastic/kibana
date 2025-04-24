@@ -30,7 +30,7 @@
   },
   {
     "name": "elastic_agent",
-    "version": "2.0.3"
+    "version": "2.2.1"
   },
   {
     "name": "endpoint",
@@ -42,12 +42,12 @@
   },
   {
     "name": "profiler_symbolizer",
-    "version": "8.14.1",
+    "version": "8.17.3",
     "forceAlignStackVersion": true
   },
   {
     "name": "profiler_collector",
-    "version": "8.14.1",
+    "version": "8.17.3",
     "forceAlignStackVersion": true
   },
   {
@@ -56,6 +56,6 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "8.17.7"
+    "version": "9.0.1"
   }
 ]

@@ -18,6 +18,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -29,6 +30,7 @@ window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 export const mockAssistantAvailability: AssistantAvailability = {
+  hasSearchAILakeConfigurations: false,
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
@@ -92,9 +94,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
             }}
             userProfileService={jest.fn() as unknown as UserProfileService}
             chrome={chrome}
-            spaceId="default"
           >
-            {children}
+            <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
           </AssistantProvider>
         </QueryClientProvider>
       </ThemeProvider>

@@ -16,7 +16,6 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import {
   analyticsServiceMock,
-  chromeServiceMock,
   coreMock,
   docLinksServiceMock,
   scopedHistoryMock,
@@ -150,18 +149,19 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
+  corePluginMock.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('classic'));
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: corePluginMock.application,
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
-    chrome: chromeServiceMock.createStartContract(),
+    chrome: corePluginMock.chrome,
     history: {
       location: {
         search: '',
       },
-      listen: jest.fn(),
+      listen: jest.fn(() => () => {}),
     },
     getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,

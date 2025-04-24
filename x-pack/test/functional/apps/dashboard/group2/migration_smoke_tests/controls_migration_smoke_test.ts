@@ -65,6 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // There should be 0 error embeddables on the dashboard
       const errorEmbeddables = await testSubjects.findAll('embeddableStackError');
       expect(errorEmbeddables.length).to.be(0);
+
+      // There should be 2 controls on the dashboard and no errors on the controls
+      expect(await dashboardControls.getControlsCount()).to.be(2);
+      await testSubjects.missingOrFail('control-frame-error');
     });
 
     it('loads all controls from the saved dashboard', async () => {

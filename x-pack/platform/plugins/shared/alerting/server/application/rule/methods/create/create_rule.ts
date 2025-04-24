@@ -191,13 +191,15 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   const allActions = [...data.actions, ...(data.systemActions ?? [])];
+  const artifacts = data.artifacts ?? {};
   // Extract saved object references for this rule
   const {
     references,
     params: updatedParams,
     actions: actionsWithRefs,
+    artifacts: artifactsWithRefs,
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, allActions, validatedRuleTypeParams)
+    extractReferences(context, ruleType, allActions, validatedRuleTypeParams, artifacts)
   );
 
   const createTime = Date.now();
@@ -210,6 +212,7 @@ export async function createRule<Params extends RuleParams = never>(
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
     actionsWithRefs,
+    artifactsWithRefs,
     rule: {
       ...restData,
       // TODO (http-versioning) create a rule domain version of this function

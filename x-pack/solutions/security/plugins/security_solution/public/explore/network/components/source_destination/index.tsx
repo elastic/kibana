@@ -26,6 +26,7 @@ EuiFlexItemMarginTop.displayName = 'EuiFlexItemMarginTop';
 export const SourceDestination = React.memo<SourceDestinationProps>(
   ({
     contextId,
+    scopeId,
     destinationBytes,
     destinationGeoContinentName,
     destinationGeoCountryName,
@@ -55,6 +56,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     <EuiFlexGroup alignItems="center" direction="column" justifyContent="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <Network
+          scopeId={scopeId}
           bytes={networkBytes}
           packets={networkPackets}
           communityId={networkCommunityId}
@@ -69,6 +71,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
       <EuiFlexItemMarginTop grow={false}>
         <SourceDestinationWithArrows
           contextId={contextId}
+          scopeId={scopeId}
           destinationBytes={destinationBytes}
           destinationGeoContinentName={destinationGeoContinentName}
           destinationGeoCountryName={destinationGeoCountryName}

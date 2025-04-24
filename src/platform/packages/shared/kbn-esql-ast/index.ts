@@ -11,7 +11,7 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
@@ -26,9 +26,9 @@ export type {
   ESQLColumn,
   ESQLLiteral,
   ESQLParamLiteral,
-  AstProviderFn,
   EditorError,
   ESQLAstNode,
+  ESQLInlineCast,
 } from './src/types';
 
 export {
@@ -56,7 +56,6 @@ export {
   parseErrors,
   type ParseOptions,
   type ParseResult,
-  getAstAndSyntaxErrors,
   ESQLErrorListener,
 } from './src/parser';
 

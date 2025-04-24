@@ -19,6 +19,12 @@ export const registerUsageMetricsRoute = (
     .post({
       access: 'internal',
       path: DATA_USAGE_METRICS_API_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to scoped ES client',
+        },
+      },
     })
     .addVersion(
       {

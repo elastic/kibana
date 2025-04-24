@@ -8,10 +8,7 @@
 import type { FC } from 'react';
 import styled from 'styled-components';
 import React, { memo } from 'react';
-import type {
-  RuleStepProps,
-  ScheduleStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { RuleStepProps, ScheduleStepRule } from '../../../common/types';
 import { StepRuleDescription } from '../description_step';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
@@ -22,6 +19,7 @@ import { ScheduleItemField } from '../../../rule_creation/components/schedule_it
 const StyledForm = styled(Form)`
   max-width: 235px !important;
 `;
+
 interface StepScheduleRuleProps extends RuleStepProps {
   form: FormHook<ScheduleStepRule>;
 }

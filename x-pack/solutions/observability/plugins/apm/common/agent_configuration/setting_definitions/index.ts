@@ -7,17 +7,18 @@
 
 import * as t from 'io-ts';
 import { sortBy } from 'lodash';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { booleanRt } from '../runtime_types/boolean_rt';
 import { getIntegerRt } from '../runtime_types/integer_rt';
-import { isRumOrMobileAgentName } from '../../agent_name';
+import { isEDOTAgentName, isRumOrMobileAgentName } from '../../agent_name';
 import { floatThreeDecimalPlacesRt } from '../runtime_types/float_three_decimal_places_rt';
 import { floatFourDecimalPlacesRt } from '../runtime_types/float_four_decimal_places_rt';
 import type { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
+import { edotSDKSettings } from './edot_sdk_settings';
 import { mobileSettings } from './mobile_settings';
 import { getDurationRt } from '../runtime_types/duration_rt';
 import { getBytesRt } from '../runtime_types/bytes_rt';
@@ -111,9 +112,11 @@ export function filterByAgent(agentName?: AgentName) {
         return false;
       }
 
-      // only options that apply to every agent (ignoring RUM) should be returned
+      // only options that apply to every agent (ignoring RUM and EDOT) should be returned
       if (setting.excludeAgents) {
-        return setting.excludeAgents.every(isRumOrMobileAgentName);
+        return setting.excludeAgents.every(
+          (agent) => isRumOrMobileAgentName(agent) || isEDOTAgentName(agent)
+        );
       }
 
       return true;
@@ -139,6 +142,8 @@ export function validateSetting(setting: SettingDefinition, value: unknown) {
 }
 
 export const settingDefinitions: SettingDefinition[] = sortBy(
-  [...generalSettings, ...javaSettings, ...mobileSettings].map(getSettingDefaults),
+  [...generalSettings, ...javaSettings, ...mobileSettings, ...edotSDKSettings].map(
+    getSettingDefaults
+  ),
   'key'
 );

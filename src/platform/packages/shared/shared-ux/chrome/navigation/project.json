@@ -5,6 +5,7 @@
     "src": [
       "{projectRoot}/**/*.ts",
       "{projectRoot}/**/*.tsx",
+      "{workspaceRoot}/typings/emotion.d.ts",
       "!{projectRoot}/target/**/*"
     ]
   },

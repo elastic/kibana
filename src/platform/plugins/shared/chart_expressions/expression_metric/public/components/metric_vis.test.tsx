@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { shallow } from 'enzyme';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { MetricVis, MetricVisComponentProps } from './metric_vis';
@@ -1372,7 +1372,10 @@ describe('MetricVisComponent', function () {
         extra,
       } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
-      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
+      return {
+        primary: valueFormatter(primaryMetric),
+        secondary: (extra as ReactElement).props.children[1],
+      };
     };
 
     it.each`
@@ -1503,6 +1506,53 @@ describe('MetricVisComponent', function () {
       const settingsComponent = component.find(Settings);
       expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
       expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
+
+  describe('ES|QL metric chart', () => {
+    it('keyword value should remain string', () => {
+      const dataFromESQL: Datatable = {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'a',
+            name: 'alpha',
+            meta: {
+              esType: 'keyword',
+              type: 'string',
+              sourceParams: {
+                indexPattern: 'index',
+              },
+            },
+          },
+        ],
+        rows: [{ a: '12h50m30s' }],
+        meta: {
+          type: 'es_ql',
+        },
+      };
+
+      const config: Props['config'] = {
+        dimensions: {
+          metric: 'a',
+        },
+        metric: {
+          color: '#FFFFFF',
+          iconAlign: 'left',
+          maxCols: 3,
+          titlesTextAlign: 'left',
+          valueFontSize: 'default',
+          valuesTextAlign: 'right',
+        },
+      };
+
+      const component = shallow(
+        <MetricVis config={config} data={dataFromESQL} {...defaultProps} />
+      );
+
+      const { data } = component.find(Metric).props();
+      const formattedMetricValue = data[0][0]!.value;
+      expect(formattedMetricValue).toEqual('string-12h50m30s');
     });
   });
 });
