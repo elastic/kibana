@@ -20,6 +20,7 @@ export interface AssistantRowControlColumnProps {
 /**
  * Renders the assistant icon and opens the assistant flyout for the current alert when clicked.
  * This is used in the AI for SOC alert summary table.
+ * TODO: reimplement in the alert table once context issue is resolved https://github.com/elastic/kibana/issues/219142
  */
 export const AssistantRowControlColumn = memo(({ alert }: AssistantRowControlColumnProps) => {
   const { showAssistantOverlay } = useAssistant({ alert });

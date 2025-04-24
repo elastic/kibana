@@ -37,7 +37,7 @@ export const ActionsCell = memo(({ alert, ecsAlert }: ActionsCellProps) => (
       <OpenFlyoutRowControlColumn alert={alert} />
     </EuiFlexItem>
     <EuiFlexItem>
-      <MoreActionsRowControlColumn alert={alert} ecsAlert={ecsAlert} />
+      <MoreActionsRowControlColumn ecsAlert={ecsAlert} />
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

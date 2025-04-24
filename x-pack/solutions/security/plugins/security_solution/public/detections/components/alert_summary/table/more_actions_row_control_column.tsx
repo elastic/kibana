@@ -9,10 +9,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { i18n } from '@kbn/i18n';
-import type { Alert } from '@kbn/alerting-types';
-import { useAssistant } from '../../../hooks/alert_summary/use_assistant';
-import { useAddToCaseActions } from '../../alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertTagsActions } from '../../alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAddToCaseActions } from '../../alerts_table/timeline_actions/use_add_to_case_actions';
 
 export const MORE_ACTIONS_BUTTON_TEST_ID = 'alert-summary-table-row-action-more-actions';
 
@@ -29,23 +27,12 @@ export const ADD_TO_CASE_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const ASK_ASSISTANT = i18n.translate(
-  'xpack.securitySolution.alertSummary.table.askAssistant',
-  {
-    defaultMessage: 'Ask AI assistant',
-  }
-);
-
 export interface MoreActionsRowControlColumnProps {
   /**
    * Alert data
    * The Ecs type is @deprecated but needed for the case actions within the more action dropdown
    */
   ecsAlert: Ecs;
-  /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
-   */
-  alert: Alert;
 }
 
 /**
@@ -57,7 +44,7 @@ export interface MoreActionsRowControlColumnProps {
  * - apply alert tags
  */
 export const MoreActionsRowControlColumn = memo(
-  ({ alert, ecsAlert }: MoreActionsRowControlColumnProps) => {
+  ({ ecsAlert }: MoreActionsRowControlColumnProps) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
@@ -82,18 +69,6 @@ export const MoreActionsRowControlColumn = memo(
       ariaLabel: ADD_TO_CASE_ARIA_LABEL,
       isInDetections: true,
     });
-    const { showAssistantOverlay } = useAssistant({ alert });
-    const assistantChatItem = useMemo(
-      () => ({
-        'aria-label': ASK_ASSISTANT,
-        'data-test-subj': 'open-assistant-chat',
-        key: 'open-assistant-chat',
-        onClick: showAssistantOverlay,
-        size: 's',
-        name: ASK_ASSISTANT,
-      }),
-      [showAssistantOverlay]
-    );
 
     const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
       closePopover,
@@ -104,11 +79,11 @@ export const MoreActionsRowControlColumn = memo(
       () => [
         {
           id: 0,
-          items: [assistantChatItem, ...addToCaseActionItems, ...alertTagsItems],
+          items: [...addToCaseActionItems, ...alertTagsItems],
         },
         ...alertTagsPanels,
       ],
-      [addToCaseActionItems, alertTagsItems, alertTagsPanels, assistantChatItem]
+      [addToCaseActionItems, alertTagsItems, alertTagsPanels]
     );
 
     return (
