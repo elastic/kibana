@@ -9,9 +9,6 @@ import expect from '@kbn/expect';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
-import AdmZip from 'adm-zip';
-import path from 'path';
-import fs from 'fs';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   LlmProxy,
@@ -19,8 +16,11 @@ import {
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
-import { LOCAL_PRODUCT_DOC_PATH } from '../../../../../default_configs/stateful.config.base';
+import {
+  installProductDoc,
+  uninstallProductDoc,
+  createProductDoc,
+} from '../../utils/product_doc_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -95,20 +95,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
       before(async () => {
-        // Read all entries in the base path
-        const entries = fs.readdirSync(LOCAL_PRODUCT_DOC_PATH, { withFileTypes: true });
-
-        for (const entry of entries) {
-          if (entry.isDirectory()) {
-            const folderName = entry.name;
-            const folderPath = path.join(LOCAL_PRODUCT_DOC_PATH, folderName);
-            const outputZipPath = path.join(LOCAL_PRODUCT_DOC_PATH, `${folderName}.zip`);
-            // Create and write zip
-            const zip = new AdmZip();
-            zip.addLocalFolder(folderPath);
-            zip.writeZip(outputZipPath);
-          }
-        }
+        await createProductDoc(supertest);
 
         llmProxy = await createLlmProxy(log);
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({

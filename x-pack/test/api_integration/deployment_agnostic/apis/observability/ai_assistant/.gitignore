@@ -1,0 +1,5 @@
+# unzipped snapshot folder
+knowledge_base/snapshot_kb_8.10/
+
+# Ignore all zip files
+complete/product_docs/*.zip
