@@ -38,11 +38,7 @@ import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import type { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import {
-  infraCustomDashboardsSavedObjectType,
-  inventoryViewSavedObjectType,
-  metricsExplorerViewSavedObjectType,
-} from './saved_objects';
+import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
 import { InventoryViewsService } from './services/inventory_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { RulesService } from './services/rules';
@@ -139,7 +135,6 @@ export class InfraServerPlugin
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
-    core.savedObjects.registerType(infraCustomDashboardsSavedObjectType);
     if (this.config.featureFlags.metricsExplorerEnabled) {
       core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
     }
