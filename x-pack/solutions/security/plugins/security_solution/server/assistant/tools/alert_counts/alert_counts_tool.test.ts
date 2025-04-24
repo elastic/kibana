@@ -185,7 +185,7 @@ describe('AlertCountsTool', () => {
     });
 
     it('returns null when the alertsIndexPattern is undefined', () => {
-      const tool = ALERT_COUNTS_TOOL.getTool({
+      const tool = await ALERT_COUNTS_TOOL.getTool({
         // alertsIndexPattern is undefined
         esClient,
         replacements,

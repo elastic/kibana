@@ -263,8 +263,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(result).toContain('Citation,{reference(exampleContentReferenceId)}');
     });
 
-    it('returns null when alertsIndexPattern is undefined', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when alertsIndexPattern is undefined', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         // alertsIndexPattern is undefined
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -277,8 +277,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null when size is undefined', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when size is undefined', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
@@ -291,8 +291,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns null when size out of range', () => {
-      const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
+    it('returns null when size out of range', async () => {
+      const tool = await OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         alertsIndexPattern,
         anonymizationFields,
         onNewReplacements: jest.fn(),
