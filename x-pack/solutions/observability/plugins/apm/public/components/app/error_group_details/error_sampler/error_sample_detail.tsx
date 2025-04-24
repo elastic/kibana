@@ -92,10 +92,7 @@ export function ErrorSampleDetails({
 
   const router = useApmRouter();
 
-  const {
-    path: { groupId },
-    query,
-  } = useAnyOfApmParams(
+  const { query } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'

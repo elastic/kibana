@@ -6,16 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { Breadcrumb } from '../breadcrumb';
 
 export function TraceOverview({ children }: { children: React.ReactElement }) {
-  const router = useApmRouter();
-
-  const { query } = useApmParams('/traces');
-
   const title = i18n.translate('xpack.apm.views.traceOverview.title', {
     defaultMessage: 'Traces',
   });
