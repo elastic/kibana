@@ -21,7 +21,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { UnifiedHistogramState } from '@kbn/unified-histogram';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram';
-import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
+import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
