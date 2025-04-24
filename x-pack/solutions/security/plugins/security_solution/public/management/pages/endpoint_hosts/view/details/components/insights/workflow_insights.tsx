@@ -16,6 +16,8 @@ import {
 import { DefendInsightStatusEnum } from '@kbn/elastic-assistant-common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
+
+import { ActionType } from '../../../../../../../../common/endpoint/types/workflow_insights';
 import {
   TECHNICAL_PREVIEW_TOOLTIP,
   TECHNICAL_PREVIEW,
@@ -93,6 +95,11 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     );
   }, [insights]);
 
+  const activeInsights = useMemo(
+    () => (insights ?? []).filter((insight) => insight.action.type === ActionType.Refreshed),
+    [insights]
+  );
+
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
       if (insightGenerationFailures) {
@@ -151,7 +158,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         />
         <EuiSpacer size={'m'} />
         <WorkflowInsightsResults
-          results={insights}
+          results={activeInsights}
           scanCompleted={!insightGenerationFailures && scanCompleted && userTriggeredScan}
           endpointId={endpointId}
         />

@@ -9,7 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 import type { SecurityWorkflowInsight } from '../../../../../../../common/endpoint/types/workflow_insights';
-import { ActionType } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../../../../common/endpoint/constants';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 
@@ -34,7 +33,6 @@ export const useFetchInsights = ({
         const result = await http.get<SecurityWorkflowInsight[]>(WORKFLOW_INSIGHTS_ROUTE, {
           version: API_VERSIONS.internal.v1,
           query: {
-            actionTypes: JSON.stringify([ActionType.Refreshed]),
             targetIds: JSON.stringify([endpointId]),
             size: 100,
           },

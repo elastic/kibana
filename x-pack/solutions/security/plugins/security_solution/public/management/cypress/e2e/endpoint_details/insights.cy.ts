@@ -32,6 +32,7 @@ const {
   selectConnector,
   clickScanButton,
   insightsResultExists,
+  nInsightResultsExist,
   insightsEmptyResultsCalloutDoesNotExist,
   clickInsightsResultRemediationButton,
   scanButtonShouldBe,
@@ -175,7 +176,14 @@ describe(
         // defend insights is 3 but workflow insights is 0
         stubDefendInsightsApiResponse({
           status: 'succeeded',
-          insights: [{ events: [{}, {}] }, { events: [{}] }],
+          insights: [
+            {
+              events: [{}, {}],
+            },
+            {
+              events: [{}],
+            },
+          ],
         });
         stubWorkflowInsightsApiResponse(endpointId, 0);
 
@@ -189,12 +197,12 @@ describe(
         insightsEmptyResultsCalloutDoesNotExist();
         scanButtonShouldBe('disabled');
 
-        // workflow insights is now 3
+        // workflow insights is now 6
         stubWorkflowInsightsApiResponse(endpointId, 3);
 
         // insights should be displayed now
         expectWorkflowInsightsApiToBeCalled();
-        insightsResultExists();
+        nInsightResultsExist(3);
         scanButtonShouldBe('enabled');
 
         // ensure that GET workflow insights is not called again
