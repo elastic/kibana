@@ -197,7 +197,7 @@ describe(
         insightsEmptyResultsCalloutDoesNotExist();
         scanButtonShouldBe('disabled');
 
-        // workflow insights is now 6
+        // workflow insights is now 3
         stubWorkflowInsightsApiResponse(endpointId, 3);
 
         // insights should be displayed now
