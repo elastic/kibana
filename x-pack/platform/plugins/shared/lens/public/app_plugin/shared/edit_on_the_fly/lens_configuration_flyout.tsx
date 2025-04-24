@@ -63,6 +63,8 @@ export function LensEditConfigurationFlyout({
   panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
+  const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
+
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
@@ -70,22 +72,9 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
+
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
-  const previousAttributes = useRef<TypedLensSerializedState['attributes']>(
-    activeVisualization.convertToRuntimeState
-      ? {
-          ...attributes,
-          state: {
-            ...attributes.state,
-            visualization: activeVisualization.convertToRuntimeState(
-              attributes.state.visualization,
-              attributes.state.datasourceStates.formBased
-            ),
-          },
-        }
-      : attributes
-  );
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
@@ -95,9 +84,10 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
 
-  const attributesChanged: boolean = useMemo(() => {
-    const previousAttrs = previousAttributes.current;
+  const attributesChanged = useMemo<boolean>(() => {
+    if (isNewPanel) return true;
 
+    const previousAttrs = previousAttributes.current;
     const datasourceStatesAreSame =
       datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
         ? datasourceMap[datasourceId].isEqual(
@@ -107,6 +97,8 @@ export function LensEditConfigurationFlyout({
             attributes.references
           )
         : false;
+
+    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -128,13 +120,14 @@ export function LensEditConfigurationFlyout({
         })()
       : isEqual(visualizationState, previousAttrs.state.visualization);
 
-    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+    return !visualizationStateIsEqual;
   }, [
     datasourceStates,
     datasourceId,
     datasourceMap,
     attributes.references,
     visualization.state,
+    isNewPanel,
     visualizationMap,
     annotationGroups,
   ]);
