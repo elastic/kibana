@@ -90,6 +90,14 @@ export interface ReportingJobResponse {
   job: ReportApiJSON;
 }
 
+export interface ScheduledReportingJobResponse {
+  /**
+   * Details of a new report job that was requested
+   * @public
+   */
+  job: ReportApiJSON;
+}
+
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }

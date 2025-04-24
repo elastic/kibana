@@ -26,6 +26,7 @@ export const INTERNAL_ROUTES = {
   },
   HEALTH: prefixInternalPath + '/_health',
   GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path
+  SCHEDULE_PREFIX: prefixInternalPath + '/schedule', // exportTypeId is added to the final path
 };
 
 const prefixPublicPath = '/api/reporting';
