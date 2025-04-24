@@ -8,6 +8,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors/constants/doc_links';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { type ClientConfigType } from '../common/types/config';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
 import {
   SearchConnectorsPluginSetup,
@@ -29,10 +30,12 @@ export class SearchConnectorsPlugin
 {
   private readonly isServerless: boolean;
   private readonly kibanaVersion: string;
+  private readonly config: ClientConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.config = initializerContext.config.get<ClientConfigType>();
   }
 
   public setup(
@@ -43,7 +46,7 @@ export class SearchConnectorsPlugin
     const connectorTypes = getConnectorTypes(core.http.staticAssets);
     const kibanaVersion = this.kibanaVersion;
 
-    if (this.isServerless === true) {
+    if (this.config.ui.enabled && this.isServerless === true) {
       management.sections.section.data.registerApp({
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
