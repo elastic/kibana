@@ -26,7 +26,7 @@ export interface DocViewerProps extends DocViewRenderProps {
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
  */
-export function DocViewer({ docViews, initialTab, ...renderProps }: DocViewerProps) {
+export function DocViewer({ docViews, initialTabId, ...renderProps }: DocViewerProps) {
   const tabs = docViews
     .filter(({ enabled }) => enabled) // Filter out disabled doc views
     .map(({ id, title, render, component }: DocView) => ({
@@ -46,12 +46,10 @@ export function DocViewer({ docViews, initialTab, ...renderProps }: DocViewerPro
 
   const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(
-    initialTab || storedInitialTabId
+    initialTabId || storedInitialTabId
   );
 
-  const initialSelectedTab = selectedTabId
-    ? tabs.find(({ id }) => id === selectedTabId)
-    : undefined;
+  const selectedTab = selectedTabId ? tabs.find(({ id }) => id === selectedTabId) : undefined;
 
   const onTabClick = useCallback(
     (tab: EuiTabbedContentTab) => {
@@ -69,12 +67,7 @@ export function DocViewer({ docViews, initialTab, ...renderProps }: DocViewerPro
 
   return (
     <div className="kbnDocViewer" data-test-subj="kbnDocViewer">
-      <EuiTabbedContent
-        size="s"
-        tabs={tabs}
-        initialSelectedTab={initialSelectedTab}
-        onTabClick={onTabClick}
-      />
+      <EuiTabbedContent size="s" tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
     </div>
   );
 }

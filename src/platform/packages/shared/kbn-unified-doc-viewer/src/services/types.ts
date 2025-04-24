@@ -44,7 +44,7 @@ export interface DocViewRenderProps {
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
   decreaseAvailableHeightBy?: number;
-  initialTab?: string;
+  initialTabId?: string;
 }
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (

@@ -46,7 +46,7 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
           }
 
           context.initialLogOverviewAccordionSection$.next(actionName);
-          setExpandedDoc(props.record, 'doc_view_logs_overview');
+          setExpandedDoc(props.record, { initialTabId: 'doc_view_logs_overview' });
 
           const dataTestSubj = {
             stacktrace: 'unifiedDocViewLogsOverviewStacktraceAccordion',
