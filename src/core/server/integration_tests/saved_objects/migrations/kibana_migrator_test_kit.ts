@@ -339,9 +339,13 @@ export const deleteSavedObjectIndices = async (
   client: ElasticsearchClient,
   index: string[] = ALL_SAVED_OBJECT_INDICES
 ) => {
-  const indices = await client.indices.get({ index, ignore_unavailable: true }, { ignore: [404] });
+  const res = await client.indices.get({ index, ignore_unavailable: true }, { ignore: [404] });
+  const indices = Object.keys(res);
+  if (!indices.length) {
+    return [];
+  }
   return await client.indices.delete(
-    { index: Object.keys(indices), ignore_unavailable: true },
+    { index: indices, ignore_unavailable: true },
     { ignore: [404] }
   );
 };
