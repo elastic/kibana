@@ -756,6 +756,9 @@ export function XYChart({
   const applicationQuery = data.query.queryString.getQuery();
   const canCreateFilters =
     !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
+  // ES|QL charts are allowed to create alert rules only in dashboards
+  const canCreateAlerts =
+    isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
   return (
     <>
@@ -803,6 +806,7 @@ export function XYChart({
                 xAxisFormatter,
                 formatFactory,
                 isEsqlMode,
+                canCreateAlerts,
                 interactive && !args.detailedTooltip
               )}
               customTooltip={
