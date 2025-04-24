@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
 import { useInternalStateSelector } from '../../state_management/redux';
 
@@ -19,9 +19,7 @@ export const useChartPortals = () => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const chartPortalNodes = useRef<ChartPortalNodes>({});
 
-  useEffect(() => {
-    chartPortalNodes.current = updatePortals(chartPortalNodes.current, allTabIds);
-  }, [allTabIds]);
+  chartPortalNodes.current = updatePortals(chartPortalNodes.current, allTabIds);
 
   return {
     chartPortalNodes: chartPortalNodes.current,

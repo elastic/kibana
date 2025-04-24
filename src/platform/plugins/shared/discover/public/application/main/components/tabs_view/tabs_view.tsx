@@ -12,7 +12,6 @@ import React, { useState } from 'react';
 import { pick } from 'lodash';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
-  CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
@@ -21,7 +20,6 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
-import { ChartPortalsRenderer, useChartPortals } from '../chart';
 
 export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
@@ -30,26 +28,15 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
-  const { chartPortalNodes, currentChartPortalNode } = useChartPortals();
 
   return (
-    <>
-      <ChartPortalsRenderer
-        chartPortalNodes={chartPortalNodes}
-        runtimeStateManager={props.runtimeStateManager}
-      />
-      <UnifiedTabs
-        services={services}
-        initialItems={initialItems}
-        onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
-        createItem={() => createTabItem(allTabs)}
-        getPreviewData={getPreviewData}
-        renderContent={() => (
-          <CurrentTabProvider currentTabId={currentTabId} chartPortalNode={currentChartPortalNode}>
-            <DiscoverSessionView key={currentTabId} {...props} />
-          </CurrentTabProvider>
-        )}
-      />
-    </>
+    <UnifiedTabs
+      services={services}
+      initialItems={initialItems}
+      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
+      createItem={() => createTabItem(allTabs)}
+      getPreviewData={getPreviewData}
+      renderContent={() => <DiscoverSessionView key={currentTabId} {...props} />}
+    />
   );
 };

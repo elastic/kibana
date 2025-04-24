@@ -52,7 +52,7 @@ export {
   CurrentTabProvider,
   useCurrentTabSelector,
   useCurrentTabAction,
-  useCurrentTabChartPortalNode,
+  useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 

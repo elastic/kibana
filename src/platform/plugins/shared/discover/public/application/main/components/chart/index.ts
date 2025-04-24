@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useChartPortals } from './use_chart_portals';
+export { type ChartPortalNode, useChartPortals } from './use_chart_portals';
 export { ChartPortalsRenderer } from './chart_portals_renderer';

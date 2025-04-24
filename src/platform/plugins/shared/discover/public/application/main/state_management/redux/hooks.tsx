@@ -17,7 +17,6 @@ import {
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext } from 'react';
-import { type HtmlPortalNode } from 'react-reverse-portal';
 import { useAdHocDataViews } from './runtime_state';
 import type { DiscoverInternalState, TabState } from './types';
 import {
@@ -27,6 +26,7 @@ import {
 } from './internal_state';
 import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
+import type { ChartPortalNode } from '../../components/chart';
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -51,7 +51,7 @@ export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalStat
 
 interface CurrentTabContextValue {
   currentTabId: string;
-  chartPortalNode?: HtmlPortalNode;
+  currentChartPortalNode?: ChartPortalNode;
   injectCurrentTab: TabActionInjector;
 }
 
@@ -59,16 +59,16 @@ const currentTabContext = createContext<CurrentTabContextValue | undefined>(unde
 
 export const CurrentTabProvider = ({
   currentTabId,
-  chartPortalNode,
+  currentChartPortalNode,
   children,
-}: PropsWithChildren<{ currentTabId: string; chartPortalNode?: HtmlPortalNode }>) => {
+}: PropsWithChildren<{ currentTabId: string; currentChartPortalNode?: ChartPortalNode }>) => {
   const contextValue = useMemo<CurrentTabContextValue>(
     () => ({
       currentTabId,
-      chartPortalNode,
+      currentChartPortalNode,
       injectCurrentTab: createTabActionInjector(currentTabId),
     }),
-    [chartPortalNode, currentTabId]
+    [currentChartPortalNode, currentTabId]
   );
 
   return <currentTabContext.Provider value={contextValue}>{children}</currentTabContext.Provider>;
@@ -96,7 +96,7 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
   return useMemo(() => injectCurrentTab(actionCreator), [actionCreator, injectCurrentTab]);
 };
 
-export const useCurrentTabChartPortalNode = () => useCurrentTabContext().chartPortalNode;
+export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();

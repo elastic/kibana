@@ -22,6 +22,7 @@ import {
   createRuntimeStateManager,
   internalStateActions,
   CurrentTabProvider,
+  useInternalStateSelector,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -35,6 +36,7 @@ import {
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 import { TABS_ENABLED } from '../../constants';
+import { ChartPortalsRenderer, useChartPortals } from './components/chart';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -131,25 +133,41 @@ export const DiscoverMainRoute = ({
     );
   }
 
-  const sessionViewProps: DiscoverSessionViewProps = {
-    customizationContext,
-    customizationCallbacks,
-    urlStateStorage,
-    internalState,
-    runtimeStateManager,
-  };
-
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
+        <ConditionalTabsWrapper
+          customizationContext={customizationContext}
+          customizationCallbacks={customizationCallbacks}
+          urlStateStorage={urlStateStorage}
+          internalState={internalState}
+          runtimeStateManager={runtimeStateManager}
+        />
+      </rootProfileState.AppWrapper>
+    </InternalStateProvider>
+  );
+};
+
+const ConditionalTabsWrapper = (sessionViewProps: DiscoverSessionViewProps) => {
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  const { chartPortalNodes, currentChartPortalNode } = useChartPortals();
+
+  return (
+    <>
+      <ChartPortalsRenderer
+        chartPortalNodes={chartPortalNodes}
+        runtimeStateManager={sessionViewProps.runtimeStateManager}
+      />
+      <CurrentTabProvider
+        currentTabId={currentTabId}
+        currentChartPortalNode={currentChartPortalNode}
+      >
         {TABS_ENABLED ? (
           <TabsView {...sessionViewProps} />
         ) : (
-          <CurrentTabProvider currentTabId={internalState.getState().tabs.unsafeCurrentId}>
-            <DiscoverSessionView {...sessionViewProps} />
-          </CurrentTabProvider>
+          <DiscoverSessionView {...sessionViewProps} />
         )}
-      </rootProfileState.AppWrapper>
-    </InternalStateProvider>
+      </CurrentTabProvider>
+    </>
   );
 };
