@@ -21,6 +21,8 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.assistant,
       ProductFeatureKey.alertsSummary,
       ProductFeatureKey.configurations,
+      ProductFeatureKey.externalDetections,
+      ProductFeatureKey.externalRuleActions,
     ],
     essentials: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
     complete: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
