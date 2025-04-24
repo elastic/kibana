@@ -34,6 +34,7 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { MisconfigurationFindingsPreviewPanelKey } from '../../../flyout/csp_details/findings_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
@@ -94,7 +95,15 @@ const getFindingsStats = (
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
+  ({
+    field,
+    value,
+    scopeId,
+  }: {
+    field: CloudPostureEntityIdentifier;
+    value: string;
+    scopeId: string;
+  }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -190,7 +199,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
       currentFilter
     );
 
-    const { openFlyout } = useExpandableFlyoutApi();
+    const { openPreviewPanel } = useExpandableFlyoutApi();
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
@@ -205,12 +214,21 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 METRIC_TYPE.CLICK,
                 NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
               );
-              openFlyout({
-                right: {
-                  id: 'findings-misconfiguration-panel',
-                  params: {
-                    resourceId: finding.resource.id,
-                    ruleId: finding.rule.id,
+              openPreviewPanel({
+                id: MisconfigurationFindingsPreviewPanelKey,
+                params: {
+                  resourceId: finding.resource.id,
+                  ruleId: finding.rule.id,
+                  scopeId,
+                  banner: {
+                    title: i18n.translate(
+                      'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
+                      {
+                        defaultMessage: 'Preview finding details',
+                      }
+                    ),
+                    backgroundColor: 'warning',
+                    textColor: 'warning',
                   },
                 },
               });

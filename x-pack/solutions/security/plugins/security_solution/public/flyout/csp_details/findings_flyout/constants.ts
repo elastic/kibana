@@ -9,3 +9,6 @@ import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cl
 
 export const MisconfigurationFindingsPanelKey: FindingsMisconfigurationPanelExpandableFlyoutProps['key'] =
   'findings-misconfiguration-panel';
+
+export const MisconfigurationFindingsPreviewPanelKey: FindingsMisconfigurationPanelExpandableFlyoutProps['key'] =
+  'findings-misconfiguration-panel-preview';
