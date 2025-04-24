@@ -8,9 +8,9 @@
 import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { BuildFlavor } from '@kbn/config';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantPluginCoreSetupDependencies,
@@ -23,7 +23,9 @@ import { appContextService } from '../services/app_context';
 export interface IRequestContextFactory {
   create(
     context: RequestHandlerContext,
-    request: KibanaRequest
+    request: KibanaRequest,
+    eventLogIndex: string,
+    eventLogger: IEventLogger
   ): Promise<ElasticAssistantApiRequestHandlerContext>;
 }
 
@@ -49,7 +51,9 @@ export class RequestContextFactory implements IRequestContextFactory {
 
   public async create(
     context: Omit<ElasticAssistantRequestHandlerContext, 'elasticAssistant'>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    eventLogIndex: string,
+    eventLogger: IEventLogger
   ): Promise<ElasticAssistantApiRequestHandlerContext> {
     const { options } = this;
     const { core, plugins } = options;
@@ -90,7 +94,9 @@ export class RequestContextFactory implements IRequestContextFactory {
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,
-
+      eventLogIndex,
+      /** for writing to the event log */
+      eventLogger,
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
       getSpaceId,

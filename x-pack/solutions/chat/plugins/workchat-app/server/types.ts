@@ -8,7 +8,11 @@
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkchatIntegrationDefinition } from '@kbn/wci-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import {
+  WorkChatFrameworkPluginSetup,
+  WorkChatFrameworkPluginStart,
+} from '@kbn/workchat-framework-plugin/server';
 
 export interface WorkChatAppPluginSetup {
   integrations: {
@@ -19,10 +23,12 @@ export interface WorkChatAppPluginSetup {
 export interface WorkChatAppPluginStart {}
 
 export interface WorkChatAppPluginSetupDependencies {
+  workchatFramework: WorkChatFrameworkPluginSetup;
   features: FeaturesPluginSetup;
 }
 
 export interface WorkChatAppPluginStartDependencies {
+  workchatFramework: WorkChatFrameworkPluginStart;
   inference: InferenceServerStart;
   actions: ActionsPluginStart;
 }
