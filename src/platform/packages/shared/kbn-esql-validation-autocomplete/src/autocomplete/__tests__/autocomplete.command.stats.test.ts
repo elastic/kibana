@@ -555,7 +555,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `?interval` option', async () => {
-          const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
+          const suggestions = await suggest('FROM index_a | STATS BY BUCKET(@timestamp, /)', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [
@@ -580,7 +580,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `Create control` option when ? is being typed', async () => {
-          const suggestions = await suggest('FROM a | STATS PERCENTILE(bytes, ?/)', {
+          const suggestions = await suggest('FROM index_b | STATS PERCENTILE(bytes, ?/)', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [],
