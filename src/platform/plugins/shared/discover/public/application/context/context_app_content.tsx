@@ -34,6 +34,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
@@ -103,6 +104,20 @@ export function ContextAppContent({
   const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+  const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
+  const [resetTabId, setResetTabId] = useState(uuidv4());
+
+  const setExpandedDocWithInitialTab = useCallback(
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
+      setExpandedDoc(doc);
+      if (options.initialTabId) {
+        setResetTabId(uuidv4());
+        setInitialTabId(options.initialTabId);
+      }
+    },
+    []
+  );
+
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
@@ -141,10 +156,20 @@ export function ContextAppContent({
         onRemoveColumn={onRemoveColumn}
         onAddColumn={onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
+        initialTabId={initialTabId}
+        setExpandedDoc={setExpandedDocWithInitialTab}
+        key={resetTabId}
       />
     ),
-    [addFilter, dataView, onAddColumn, onRemoveColumn]
+    [
+      addFilter,
+      dataView,
+      onAddColumn,
+      onRemoveColumn,
+      resetTabId,
+      setExpandedDocWithInitialTab,
+      initialTabId,
+    ]
   );
 
   const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -223,7 +248,7 @@ export function ContextAppContent({
             isPaginationEnabled={false}
             rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
             controlColumnIds={controlColumnIds}
-            setExpandedDoc={setExpandedDoc}
+            setExpandedDoc={setExpandedDocWithInitialTab}
             onFilter={addFilter}
             onSetColumns={onSetColumns}
             configRowHeight={configRowHeight}

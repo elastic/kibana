@@ -45,15 +45,15 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-  const [initialTab, setInitialTab] = useState<string | undefined>(undefined);
+  const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
   const [resetTabId, setResetTabId] = useState(uuidv4());
 
   const setExpandedDocWithInitialTab = useCallback(
-    (doc: DataTableRecord | undefined, initialTabValue?: string) => {
+    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       setExpandedDoc(doc);
-      if (initialTabValue) {
+      if (options.initialTabId) {
         setResetTabId(uuidv4());
-        setInitialTab(initialTabValue);
+        setInitialTabId(options.initialTabId);
       }
     },
     []
@@ -79,7 +79,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onAddColumn={props.onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDocWithInitialTab}
-        initialTab={initialTab}
+        initialTabId={initialTabId}
         query={props.query}
         filters={props.filters}
         key={resetTabId}
@@ -94,7 +94,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.query,
       props.filters,
       setExpandedDocWithInitialTab,
-      initialTab,
+      initialTabId,
       resetTabId,
     ]
   );

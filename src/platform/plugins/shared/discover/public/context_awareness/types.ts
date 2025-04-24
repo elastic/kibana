@@ -184,9 +184,9 @@ export interface RowControlsExtensionParams {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    * @param record - The record to display in the flyout
-   * @param initialTab - The tab to display in the flyout
+   * @param initialTabId - The tabId to display in the flyout
    */
-  setExpandedDoc?: (record: DataTableRecord, initialTab?: string) => void;
+  setExpandedDoc?: (record: DataTableRecord, initialTabId?: string) => void;
 }
 
 /**

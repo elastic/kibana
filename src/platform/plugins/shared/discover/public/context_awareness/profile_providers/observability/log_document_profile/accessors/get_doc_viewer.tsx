@@ -60,7 +60,6 @@ export const createGetDocViewer =
             return (
               <UnifiedDocViewerLogsOverview
                 {...props}
-                key={overviewContext?.initialAccordionSection} // Force remount to handle use case where user clicks on stacktrace and then degraded docs on the same row when the flyout os already open
                 docViewerAccordionState={accordionState}
                 renderAIAssistant={logsAIAssistantFeature?.render}
                 renderStreamsField={streamsFeature?.renderStreamsField}

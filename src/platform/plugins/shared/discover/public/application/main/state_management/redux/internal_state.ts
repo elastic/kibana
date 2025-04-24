@@ -129,8 +129,8 @@ export const internalStateSlice = createSlice({
       state.expandedDoc = action.payload;
     },
 
-    setDocTab: (state, action: PayloadAction<DocView['id']>) => {
-      state.initialTab = action.payload;
+    setInitialDocViewerTabId: (state, action: PayloadAction<DocView['id']>) => {
+      state.initialDocViewerTabId = action.payload;
     },
 
     resetDocTab: (state) => {

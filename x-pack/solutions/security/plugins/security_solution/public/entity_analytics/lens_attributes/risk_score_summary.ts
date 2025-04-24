@@ -28,9 +28,9 @@ export const getRiskScoreSummaryAttributes: (
   // TODO: may need to pass riskColors in props, here, when severity palette agreed and hook created
   // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
 ) => LensAttributes = ({ spaceId, query, severity, riskEntity }) => {
-  const layerIds = [uuidv4(), uuidv4()];
-  const internalReferenceId = uuidv4();
-  const columnIds = [uuidv4(), uuidv4(), uuidv4()];
+  const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
+  const internalReferenceId = `internal-reference-id-${uuidv4()}`;
+  const columnIds = [`column-id1-${uuidv4()}`, `column-id2-${uuidv4()}`, `column-id3-${uuidv4()}`];
   const sourceField = EntityTypeToScoreField[riskEntity];
   return {
     title: 'Risk score summary',
