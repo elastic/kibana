@@ -671,10 +671,3 @@ function throttlingDocsLink({ href }: { href: string }) {
     { defaultMessage: 'read notice here.' }
   )}</a>`;
 }
-
-function traceExplorerDocsLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank">${i18n.translate(
-    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
-    { defaultMessage: 'Learn more.' }
-  )}</a>`;
-}
