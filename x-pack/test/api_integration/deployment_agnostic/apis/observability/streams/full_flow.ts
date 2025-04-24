@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -358,10 +358,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should allow to update field type to incompatible type', async () => {
-        const body: IngestStreamUpsertRequest = {
+        const body: Streams.WiredStream.UpsertRequest = {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -383,6 +384,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...body,
             stream: {
+              description: '',
               ingest: {
                 ...body.stream.ingest,
                 wired: {
@@ -401,10 +403,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should not allow to update field type to system', async () => {
-        const body: IngestStreamUpsertRequest = {
+        const body: Streams.WiredStream.UpsertRequest = {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -453,7 +456,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(deleteResponse.status).to.eql(200);
 
         const streamResponse = await getStream(apiClient, 'logs.nginx');
-        expect((streamResponse.stream as WiredStreamDefinition).ingest.wired.routing).to.eql([
+        expect(
+          (streamResponse.stream as Streams.WiredStream.Definition).ingest.wired.routing
+        ).to.eql([
           {
             destination: 'logs.nginx.error',
             if: {

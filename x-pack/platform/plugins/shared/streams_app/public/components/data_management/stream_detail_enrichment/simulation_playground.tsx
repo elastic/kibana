@@ -15,7 +15,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -47,7 +47,7 @@ export const SimulationPlayground = () => {
   );
 
   const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
-  const canViewDetectedFields = isWiredStreamGetResponse(definition);
+  const canViewDetectedFields = Streams.WiredStream.GetResponse.is(definition);
 
   return (
     <>

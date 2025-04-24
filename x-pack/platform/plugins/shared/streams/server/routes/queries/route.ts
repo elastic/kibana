@@ -15,6 +15,7 @@ import {
 import { z } from '@kbn/zod';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { createServerRoute } from '../create_server_route';
+
 export interface ListQueriesResponse {
   queries: StreamQuery[];
 }

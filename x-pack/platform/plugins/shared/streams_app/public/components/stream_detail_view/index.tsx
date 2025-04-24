@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
-import { IngestStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
@@ -22,7 +22,7 @@ const getStreamDetailTabs = ({
   definition,
   router,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   router: StatefulStreamsAppRouter;
 }) =>
   ({
@@ -62,7 +62,7 @@ export type StreamDetailTabs = ReturnType<typeof getStreamDetailTabs>;
 export type StreamDetailTabName = keyof StreamDetailTabs;
 
 function isValidStreamDetailTab(value: string): value is StreamDetailTabName {
-  return ['overview', 'dashboards'].includes(value as StreamDetailTabName);
+  return ['overview', 'dashboards', 'significant_events'].includes(value as StreamDetailTabName);
 }
 
 export function StreamDetailView() {
@@ -92,7 +92,7 @@ export function StreamDetailView() {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {key}
             <EuiBadgeGroup gutterSize="s">
-              {isUnwiredStreamDefinition(definition.stream) && <ClassicStreamBadge />}
+              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
             </EuiBadgeGroup>
           </EuiFlexGroup>

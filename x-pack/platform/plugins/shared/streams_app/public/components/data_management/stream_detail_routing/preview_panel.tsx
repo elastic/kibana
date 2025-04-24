@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import React, { useEffect } from 'react';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
@@ -29,7 +29,7 @@ export function PreviewPanel({
   definition,
   routingAppState,
 }: {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
 }) {
   const { timeState, timeState$ } = useTimefilter();

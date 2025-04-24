@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getChartsTheme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
@@ -22,7 +23,6 @@ import { merge } from 'lodash';
 import React, { useMemo } from 'react';
 import { Subject } from 'rxjs';
 import { DeepPartial } from 'utility-types';
-import { getChartsTheme } from '@elastic/charts';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 import { StreamsAppStartDependencies } from '../public/types';

@@ -21,7 +21,7 @@ import {
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { Observable, from as rxjsFrom, map } from 'rxjs';
+import { Observable, map, from as rxjsFrom } from 'rxjs';
 import { createServerRoute } from '../../create_server_route';
 import {
   GeneratedSignificantEventQuery,

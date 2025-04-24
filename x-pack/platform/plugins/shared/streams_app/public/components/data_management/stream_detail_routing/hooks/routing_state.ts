@@ -7,7 +7,7 @@
 
 import { DragStart, DropResult, euiDragDropReorder } from '@elastic/eui';
 import { IToasts, Toast } from '@kbn/core/public';
-import { RoutingDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams, RoutingDefinition } from '@kbn/streams-schema';
 import React, { useCallback, useEffect } from 'react';
 import { useDebounced } from '../../../../util/use_debounce';
 
@@ -19,7 +19,7 @@ export interface ChildUnderEdit {
 export const RoutingStateContext = React.createContext<
   | {
       routingAppState: ReturnType<typeof useRoutingState>;
-      definition: WiredStreamGetResponse;
+      definition: Streams.WiredStream.GetResponse;
       refreshDefinition: () => void;
     }
   | undefined
@@ -37,7 +37,7 @@ export function useRoutingState({
   definition,
   toasts,
 }: {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   toasts: IToasts;
 }) {
   const [lastDisplayedToast, setLastDisplayedToast] = React.useState<Toast | undefined>();
@@ -55,9 +55,9 @@ export function useRoutingState({
   );
 
   // Child streams: either represents the child streams as they are, or the new order from drag and drop.
-  const [childStreams, setChildStreams] = React.useState<
-    WiredStreamGetResponse['stream']['ingest']['wired']['routing']
-  >(definition.stream.ingest.wired.routing ?? []);
+  const [childStreams, setChildStreams] = React.useState<RoutingDefinition[]>(
+    definition.stream.ingest.wired.routing ?? []
+  );
 
   useEffect(() => {
     setChildStreams(definition.stream.ingest.wired.routing ?? []);

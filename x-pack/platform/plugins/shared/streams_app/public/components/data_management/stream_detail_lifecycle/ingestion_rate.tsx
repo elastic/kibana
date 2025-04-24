@@ -5,44 +5,36 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import React from 'react';
-import { capitalize } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, PhaseName, isIlmLifecycle } from '@kbn/streams-schema';
+import { AreaSeries, Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  useEuiTheme,
-  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
-import {
-  AreaSeries,
-  Axis,
-  BarSeries,
-  Chart,
-  DARK_THEME,
-  LIGHT_THEME,
-  Settings,
-} from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { TimeState } from '@kbn/es-query';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
-import { formatBytes } from './helpers/format_bytes';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
-import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
+import { i18n } from '@kbn/i18n';
+import { PhaseName, Streams, isIlmLifecycle } from '@kbn/streams-schema';
+import { capitalize } from 'lodash';
+import moment from 'moment';
+import React from 'react';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { formatBytes } from './helpers/format_bytes';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
+import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
+import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
 
 export function IngestionRate({
   definition,
   stats,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
 }) {
@@ -115,7 +107,7 @@ function ChartAreaSeries({
   timeState,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;
@@ -125,7 +117,7 @@ function ChartAreaSeries({
     isLoading: isLoadingIngestionRate,
     error: ingestionRateError,
   } = useIngestionRate({ definition, stats, timeState });
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
@@ -134,7 +126,7 @@ function ChartAreaSeries({
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+        <Settings showLegend={false} baseTheme={chartBaseTheme} />
 
         <AreaSeries
           id="ingestionRate"
@@ -180,7 +172,7 @@ function ChartBarSeries({
   timeState,
   isLoadingStats,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
   isLoadingStats: boolean;
@@ -191,7 +183,7 @@ function ChartBarSeries({
     error: ingestionRateError,
   } = useIngestionRatePerTier({ definition, stats, timeState });
   const { ilmPhases } = useIlmPhasesColorAndDescription();
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
@@ -200,7 +192,7 @@ function ChartBarSeries({
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+        <Settings showLegend={false} baseTheme={chartBaseTheme} />
         {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
           <BarSeries
             id={`ingestionRate-${tier}`}

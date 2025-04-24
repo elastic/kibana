@@ -68,6 +68,8 @@
     "@kbn/ingest-pipelines-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/kibana-utils-plugin",
-    "@kbn/calculate-auto"
+    "@kbn/calculate-auto",
+    "@kbn/content-packs-schema",
+    "@kbn/charts-theme"
   ]
 }

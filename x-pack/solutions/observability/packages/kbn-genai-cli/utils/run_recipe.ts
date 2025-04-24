@@ -35,6 +35,7 @@ export function runRecipe(callback: RunRecipeCallback) {
         log,
         signal,
         kibanaClient,
+        connectorId: flags.connectorId as string | undefined,
       });
 
       return await callback({
@@ -46,7 +47,12 @@ export function runRecipe(callback: RunRecipeCallback) {
       });
     },
     {
-      flags: {},
+      flags: {
+        boolean: ['connectorId'],
+        help: `
+          --connectorId  Use a specific connector id
+        `,
+      },
     }
   );
 }

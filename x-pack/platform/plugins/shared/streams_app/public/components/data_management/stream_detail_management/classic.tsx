@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnwiredStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
@@ -29,7 +29,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: UnwiredStreamGetResponse;
+  definition: Streams.UnwiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -48,7 +48,7 @@ export function ClassicStreamDetailManagement({
                 values: { streamId: key },
               })}
               <EuiBadgeGroup gutterSize="s">
-                {isUnwiredStreamDefinition(definition.stream) && <ClassicStreamBadge />}
+                {Streams.UnwiredStream.Definition.is(definition.stream) && <ClassicStreamBadge />}
                 <LifecycleBadge lifecycle={definition.effective_lifecycle} />
               </EuiBadgeGroup>
             </EuiFlexGroup>

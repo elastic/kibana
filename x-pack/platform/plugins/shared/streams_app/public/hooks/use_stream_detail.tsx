@@ -7,12 +7,8 @@
 
 import React from 'react';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import {
-  IngestStreamGetResponse,
-  isWiredStreamGetResponse,
-  isUnwiredStreamGetResponse,
-} from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export interface StreamDetailContextProviderProps {
@@ -21,7 +17,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   loading: boolean;
   refresh: () => void;
 }
@@ -49,7 +45,7 @@ export function StreamDetailContextProvider({
           },
         })
         .then((response) => {
-          if (isWiredStreamGetResponse(response) || isUnwiredStreamGetResponse(response)) {
+          if (Streams.ingest.all.GetResponse.is(response)) {
             return response;
           }
 

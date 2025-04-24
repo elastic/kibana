@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamDefinition, isWiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -57,7 +57,7 @@ interface FieldSummaryProps {
   field: SchemaField;
   isEditing: boolean;
   toggleEditMode: () => void;
-  stream: IngestStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   onChange: (field: Partial<SchemaField>) => void;
 }
 
@@ -108,6 +108,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                         tab: 'schemaEditor',
                       },
                     })}
+                    target="_blank"
                   >
                     {i18n.translate('xpack.streams.fieldSummary.editInParentButtonLabel', {
                       defaultMessage: 'Edit in parent stream',
@@ -202,7 +203,9 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
         <EuiHorizontalRule margin="xs" />
       </EuiFlexGroup>
-      {isEditing && isWiredStreamDefinition(stream) && stream.ingest.wired.routing.length > 0 ? (
+      {isEditing &&
+      Streams.WiredStream.Definition.is(stream) &&
+      stream.ingest.wired.routing.length > 0 ? (
         <EuiFlexItem grow={false}>
           <ChildrenAffectedCallout childStreams={stream.ingest.wired.routing} />
         </EuiFlexItem>

@@ -40,6 +40,7 @@ export function StreamsAppSearchBar({
   dataViews,
   showDatePicker = false,
   showSubmitButton = true,
+  showQueryInput,
 }: StreamsAppSearchBarProps) {
   const { timeState, setTime, refresh } = useTimefilter();
 
@@ -63,6 +64,7 @@ export function StreamsAppSearchBar({
         onQueryChange?.({ query: nextQuery });
       }}
       query={query}
+      showQueryInput={showQueryInput}
       showSubmitButton={showSubmitButton}
       dateRangeFrom={showDatePicker ? timeState.timeRange.from : undefined}
       dateRangeTo={showDatePicker ? timeState.timeRange.to : undefined}
