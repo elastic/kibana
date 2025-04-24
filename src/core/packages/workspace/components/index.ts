@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+export { Workspace, type WorkspaceProps } from './workspace';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
-};
+export {
+  type WorkspaceToolProps,
+  type WorkspaceToolbarButtonProps,
+  WorkspaceToolbarButton,
+  type WorkspaceToolbarButtonComponentProps,
+  WorkspaceToolbarButtonComponent,
+} from './toolbar';

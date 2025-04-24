@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { css } from '@emotion/react';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
+const root = css`
+  position: sticky;
+  overflow: hidden;
+  grid-area: header;
+  top: var(--kbnWorkspace--header-top, 0);
+  height: var(--kbnWorkspace--header-height, 100vh);
+  width: var(--kbnWorkspace--header-width, 100vw);
+`;
+
+export const styles = {
+  root,
 };

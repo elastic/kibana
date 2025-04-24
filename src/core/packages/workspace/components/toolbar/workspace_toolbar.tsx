@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React, { ReactNode } from 'react';
+import { styles } from './workspace_toolbar.styles';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
+export const WorkspaceToolbar = ({ children }: { children: ReactNode }) => {
+  return <nav css={styles.root}>{children}</nav>;
 };

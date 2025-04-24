@@ -7,13 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { css } from '@emotion/react';
+import { EmotionFn } from '../types';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/workspace/**/*.stories.+(tsx|mdx)',
-  ],
+const root: EmotionFn = ({ euiTheme }) => css`
+  position: sticky;
+  overflow: hidden;
+  grid-area: toolbar;
+  top: var(--kbnWorkspace--toolbar-top, 0);
+  height: var(--kbnWorkspace--toolbar-height, 100vh);
+  width: var(--kbnWorkspace--toolbar-width, 0);
+  align-self: start;
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const styles = {
+  root,
 };
