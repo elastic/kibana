@@ -25224,6 +25224,73 @@ paths:
       summary: Enable an SLO
       tags:
         - slo
+  /s/{spaceId}/internal/observability/slos/_definitions:
+    get:
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getDefinitionsOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: Indicates if the API returns only outdated SLO or all SLO definitions
+          example: true
+          in: query
+          name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Filters the SLOs by tag
+          in: query
+          name: tags
+          schema:
+            type: string
+        - description: Filters the SLOs by name
+          example: my service availability
+          in: query
+          name: search
+          schema:
+            type: string
+        - description: The page to use for pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of SLOs returned by page
+          example: 100
+          in: query
+          name: perPage
+          schema:
+            default: 100
+            maximum: 1000
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Get the SLO definitions
+      tags:
+        - slo
 components:
   examples:
     Alerting_get_health_response:
@@ -46225,6 +46292,55 @@ components:
         value:
           type: string
       title: FilterMeta
+      type: object
+    SLOs_find_slo_definitions_response:
+      description: |
+        A paginated response of SLO definitions matching the query.
+      oneOf:
+        - type: object
+          properties:
+            page:
+              example: 1
+              type: number
+            perPage:
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            total:
+              example: 34
+              type: number
+        - type: object
+          properties:
+            page:
+              default: 1
+              description: for backward compability
+              type: number
+            perPage:
+              description: for backward compability
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            searchAfter:
+              description: the cursor to provide to get the next paged results
+              example:
+                - some-slo-id
+                - other-cursor-id
+              items:
+                type: string
+              type: array
+            size:
+              example: 25
+              type: number
+            total:
+              example: 34
+              type: number
+      title: Find SLO definitions response
       type: object
     SLOs_find_slo_response:
       description: |
