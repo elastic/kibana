@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableImperativeApi,
+  AlertsTableProps,
+} from '@kbn/response-ops-alerts-table/types';
 import {
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -243,7 +246,12 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
     [packages, ruleResponse]
   );
 
-  const bulkActions = useAdditionalBulkActions();
+  const refetchRef = useRef<AlertsTableImperativeApi>(null);
+  const refetch = useCallback(() => {
+    refetchRef.current?.refresh();
+  }, []);
+
+  const bulkActions = useAdditionalBulkActions({ refetch });
 
   return (
     <EuiDataGridStyleWrapper>
@@ -258,6 +266,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
         gridStyle={GRID_STYLE}
         id={TableId.alertsOnAlertSummaryPage}
         query={query}
+        ref={refetchRef}
         renderActionsCell={ActionsCell}
         renderAdditionalToolbarControls={renderAdditionalToolbarControls}
         renderCellValue={CellValue}

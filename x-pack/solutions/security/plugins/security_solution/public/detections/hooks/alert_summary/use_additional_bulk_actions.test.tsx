@@ -18,7 +18,7 @@ describe('useAdditionalBulkActions', () => {
       alertTagsPanels: ['panel'],
     });
 
-    const hookResult = renderHook(() => useAdditionalBulkActions());
+    const hookResult = renderHook(() => useAdditionalBulkActions({ refetch: jest.fn() }));
 
     expect(hookResult.result.current).toEqual([
       {
