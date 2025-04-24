@@ -170,7 +170,6 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-
   [ALERT_ATTACK_DISCOVERY_USERS]: {
     type: 'nested',
     array: true,
