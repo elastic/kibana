@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
@@ -41,7 +41,8 @@ export const postActionsConnectorExecuteRoute = (
 ) => {
   // add 30 seconds to the response timeout
   // to allow for the request to be aborted
-  const RESPONSE_TIMEOUT = (config?.responseTimeout as number) + 30 * 1000; // 3 minutes
+  const RESPONSE_TIMEOUT = (config?.responseTimeout as number) + 30 * 1000;
+
   router.versioned
     .post({
       access: 'internal',
@@ -174,30 +175,42 @@ export const postActionsConnectorExecuteRoute = (
                 ? `${systemPrompt}\n\n${additionalSystemPrompt}`
                 : additionalSystemPrompt;
           }
-          return await langChainExecute({
-            abortSignal,
-            isStream: request.body.subAction !== 'invokeAI',
-            actionsClient,
-            actionTypeId,
-            connectorId,
-            contentReferencesStore,
-            isOssModel,
-            conversationId,
-            context: ctx,
-            logger,
-            inference,
-            messages: (newMessage ? [newMessage] : messages) ?? [],
-            onLlmResponse,
-            onNewReplacements,
-            replacements: latestReplacements,
-            request,
-            response,
-            telemetry,
-            savedObjectsClient,
-            screenContext,
-            systemPrompt,
-            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-          });
+
+          const timeout = new Promise((_, reject) => {
+            setTimeout(() => {
+              reject(
+                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
+              );
+            }, config?.responseTimeout as number);
+          }) as unknown as IKibanaResponse;
+
+          return await Promise.race([
+            langChainExecute({
+              abortSignal,
+              isStream: request.body.subAction !== 'invokeAI',
+              actionsClient,
+              actionTypeId,
+              connectorId,
+              contentReferencesStore,
+              isOssModel,
+              conversationId,
+              context: ctx,
+              logger,
+              inference,
+              messages: (newMessage ? [newMessage] : messages) ?? [],
+              onLlmResponse,
+              onNewReplacements,
+              replacements: latestReplacements,
+              request,
+              response,
+              telemetry,
+              savedObjectsClient,
+              screenContext,
+              systemPrompt,
+              ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+            }),
+            timeout,
+          ]);
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

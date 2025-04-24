@@ -41,13 +41,12 @@ export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
 };
 
-// add 30 seconds to the response timeout
 export const chatCompleteRoute = (
   router: ElasticAssistantPluginRouter,
   config?: ConfigSchema
 ): void => {
-  // to allow for the request to be aborted
   const RESPONSE_TIMEOUT = (config?.responseTimeout as number) + 30 * 1000;
+
   router.versioned
     .post({
       access: 'public',

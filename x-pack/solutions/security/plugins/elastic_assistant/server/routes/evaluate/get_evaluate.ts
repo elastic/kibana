@@ -60,7 +60,6 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
           return checkResponse.response;
         }
 
-        // Fetch datasets from LangSmith // TODO: plumb apiKey so this will work in cloud w/o env vars
         const datasets = await fetchLangSmithDatasets({
           logger,
         });
