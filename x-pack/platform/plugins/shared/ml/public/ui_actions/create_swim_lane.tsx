@@ -76,9 +76,11 @@ export function createAddSwimlanePanelAction(
 
         presentationContainerParent.addNewPanel({
           panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-          initialState: {
-            ...initialState,
-            title: initialState.panelTitle,
+          serializedState: {
+            rawState: {
+              ...initialState,
+              title: initialState.panelTitle,
+            },
           },
         });
       } catch (e) {
