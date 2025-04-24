@@ -19,7 +19,7 @@ export const getTemperatureIfValid = (
   if (connector?.type === InferenceConnectorType.OpenAI && model) {
     const normalizedModelName = model.toLowerCase();
     const shouldExcludeTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some((m) =>
-      normalizedModelName.includes(m)
+      normalizedModelName.startsWith(m)
     );
     return shouldExcludeTemperature ? {} : { temperature };
   }

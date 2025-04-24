@@ -22,6 +22,14 @@ describe('getTemperatureIfValid', () => {
     ).toEqual({
       temperature: 0.7,
     });
+    expect(
+      getTemperatureIfValid(0.7, {
+        connector: OPENAI_CONNECTOR,
+        modelName: 'gpt-fake-o1',
+      })
+    ).toEqual({
+      temperature: 0.7,
+    });
   });
 
   it('returns an object with temperature if not OpenAI connector', () => {
@@ -36,10 +44,10 @@ describe('getTemperatureIfValid', () => {
   });
 
   it("returns an empty object for OpenAI models that don't support temperature", () => {
-    ['o1', 'o3', 'o1-mini', 'o3-mini'].forEach((model) => {
-      expect(
-        getTemperatureIfValid(0.7, { connector: OPENAI_CONNECTOR, modelName: 'o1-mini' })
-      ).toEqual({});
+    ['o1', 'o1-pro', 'o3', 'o1-mini', 'o3-mini'].forEach((model) => {
+      expect(getTemperatureIfValid(0.7, { connector: OPENAI_CONNECTOR, modelName: model })).toEqual(
+        {}
+      );
     });
   });
 });
