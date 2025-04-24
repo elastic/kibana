@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
-import { InPortal } from 'react-reverse-portal';
+import React, { type PropsWithChildren, useCallback, useEffect, useRef } from 'react';
+import { type HtmlPortalNode, InPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram-plugin/public';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
-import type { ChartPortalNodes } from './use_chart_portals';
 import {
   useInternalStateSelector,
   type RuntimeStateManager,
@@ -29,20 +28,48 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useDiscoverHistogram } from './use_discover_histogram';
 
+export type ChartPortalNode = HtmlPortalNode;
+export type ChartPortalNodes = Record<string, ChartPortalNode>;
+
 export const ChartPortalsRenderer = ({
-  chartPortalNodes,
   runtimeStateManager,
-}: {
-  chartPortalNodes: ChartPortalNodes;
+  children,
+}: PropsWithChildren<{
   runtimeStateManager: RuntimeStateManager;
-}) =>
-  Object.keys(chartPortalNodes).map((tabId) => {
-    return (
-      <InPortal key={tabId} node={chartPortalNodes[tabId]}>
-        <UnifiedHistogramGuard tabId={tabId} runtimeStateManager={runtimeStateManager} />
-      </InPortal>
-    );
-  });
+}>) => {
+  const allTabIds = useInternalStateSelector((state) => state.tabs.allIds);
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  const chartPortalNodes = useRef<ChartPortalNodes>({});
+
+  chartPortalNodes.current = updatePortals(chartPortalNodes.current, allTabIds);
+
+  return (
+    <>
+      {Object.keys(chartPortalNodes.current).map((tabId) => {
+        return (
+          <InPortal key={tabId} node={chartPortalNodes.current[tabId]}>
+            <UnifiedHistogramGuard tabId={tabId} runtimeStateManager={runtimeStateManager} />
+          </InPortal>
+        );
+      })}
+      <CurrentTabProvider
+        currentTabId={currentTabId}
+        currentChartPortalNode={chartPortalNodes.current[currentTabId]}
+      >
+        {children}
+      </CurrentTabProvider>
+    </>
+  );
+};
+
+const updatePortals = (portals: ChartPortalNodes, tabsIds: string[]) =>
+  tabsIds.reduce<ChartPortalNodes>(
+    (acc, tabId) => ({
+      ...acc,
+      [tabId]: portals[tabId] || createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
+    }),
+    {}
+  );
 
 interface UnifiedHistogramGuardProps {
   tabId: string;
