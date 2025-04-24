@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useLocation } from 'react-router-dom';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
@@ -17,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useAssistantContext } from '../../assistant_context';
 import { AttackDiscoveryDetails } from './attack_discovery_details';
 import { useFindAttackDiscoveries } from './use_find_attack_discoveries';
@@ -30,6 +32,9 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
   const { assistantAvailability, http, navigateToApp } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
 
+  const { pathname } = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const { isLoading, data } = useFindAttackDiscoveries({
     alertIds: [id],
     http,
@@ -37,11 +42,17 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
   });
   const [attackDiscovery, setAttackDiscovery] = useState<AttackDiscoveryAlert | null>(null);
   const handleNavigateToAttackDiscovery = useCallback(
-    (attackDiscoveryId: string) =>
-      navigateToApp('security', {
-        path: `attack_discovery?id=${attackDiscoveryId}`,
-      }),
-    [navigateToApp]
+    (attackDiscoveryId: string) => {
+      if (pathname.includes('attack_discovery')) {
+        searchParams.set('id', attackDiscoveryId);
+        setSearchParams(searchParams);
+      } else {
+        navigateToApp('security', {
+          path: `attack_discovery?id=${attackDiscoveryId}`,
+        });
+      }
+    },
+    [pathname, searchParams, setSearchParams, navigateToApp]
   );
   useEffect(() => {
     if (data != null && data.data.length > 0) {
