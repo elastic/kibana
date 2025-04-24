@@ -22,6 +22,7 @@ export interface RenderAppProps {
 
 export const renderApp = ({ element, services, customizationContext }: RenderAppProps) => {
   const { capabilities, chrome, data, core } = services;
+  const WorkspaceStateProvider = chrome.workspace.getStateProvider();
 
   if (!capabilities.discover_v2.save) {
     chrome.setBadge({
@@ -36,7 +37,9 @@ export const renderApp = ({ element, services, customizationContext }: RenderApp
   }
 
   const unmount = toMountPoint(
-    <DiscoverRouter services={services} customizationContext={customizationContext} />,
+    <WorkspaceStateProvider>
+      <DiscoverRouter services={services} customizationContext={customizationContext} />
+    </WorkspaceStateProvider>,
     core
   )(element);
 

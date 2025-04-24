@@ -54,7 +54,9 @@ export const ActionTypeSelectorModal = React.memo(
                   data-test-subj={`action-option-${actionType.name}`}
                   onClick={() => onSelect(actionType)}
                 >
-                  <EuiIcon size="xl" type={fullAction.iconClass} />
+                  <React.Suspense fallback={<></>}>
+                    <EuiIcon size="xl" type={fullAction.iconClass} />
+                  </React.Suspense>
                 </EuiKeyPadMenuItem>
               </EuiFlexItem>
             );
