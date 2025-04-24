@@ -19,6 +19,7 @@
       "actions",
       "alerting",
       "data",
+      "eventLog",
       "ml",
       "taskManager",
       "licensing",
