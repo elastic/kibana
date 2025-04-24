@@ -899,9 +899,9 @@
               "(node: React.ReactNode, params: ",
               {
                 "pluginId": "@kbn/react-kibana-mount",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnReactKibanaMountPluginApi",
-                "section": "def-public.ToMountPointParams",
+                "section": "def-common.ToMountPointParams",
                 "text": "ToMountPointParams"
               },
               ") => ",
