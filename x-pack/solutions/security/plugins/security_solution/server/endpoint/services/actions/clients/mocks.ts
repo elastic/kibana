@@ -22,6 +22,10 @@ import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attac
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
+import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { ResponseActionsClient } from '../..';
 import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
@@ -83,6 +87,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
   const endpointService = new EndpointAppContextService();
+  const endpointServiceStartContract = createMockEndpointAppContextServiceStartContract();
 
   esClient.index.mockImplementation((async (payload) => {
     switch (payload.index) {
@@ -111,9 +116,46 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     (async () => {}) as unknown as jest.Mocked<AttachmentsSubClient>['bulkCreate']
   );
 
+  // Mock some Fleet apis in order to support the `fetchFleetInfoForAgents()` method
+  const fleetStartServices = endpointServiceStartContract.fleetStartServices;
+  const packagePolicy = new FleetPackagePolicyGenerator('seed').generate();
+
+  fleetStartServices.agentService.asInternalUser.getByIds.mockImplementation(async (agentIds) => {
+    return agentIds?.map((id) =>
+      new FleetAgentGenerator('seed').generate({ id, policy_id: packagePolicy.policy_ids[0] })
+    );
+  });
+  fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
+    const kueryInfo = await getPackagePolicyInfoFromFleetKuery(options.kuery ?? '');
+
+    const packagePolicyOverrides: Parameters<FleetPackagePolicyGenerator['generate']>[0] = {
+      id: packagePolicy.id,
+    };
+
+    if (kueryInfo.packageNames.length > 0) {
+      packagePolicyOverrides.package = {
+        name: kueryInfo.packageNames[0],
+        version: '1.0.0',
+        title: kueryInfo.packageNames[0],
+      };
+    }
+
+    if (kueryInfo.agentPolicyIds) {
+      packagePolicyOverrides.policy_ids = [kueryInfo.agentPolicyIds[0]];
+    }
+
+    return {
+      items: [new FleetPackagePolicyGenerator('seed').generate(packagePolicyOverrides)],
+      size: 1,
+      page: 1,
+      perPage: 20,
+      total: 1,
+    };
+  });
+
   endpointService.setup(createMockEndpointAppContextServiceSetupContract());
   endpointService.start({
-    ...createMockEndpointAppContextServiceStartContract(),
+    ...endpointServiceStartContract,
     esClient,
   });
 
@@ -121,6 +163,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     esClient,
     casesClient,
     endpointService,
+    spaceId: DEFAULT_SPACE_ID,
     username: 'foo',
     isAutomated: false,
   };
