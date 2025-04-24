@@ -18,7 +18,6 @@ import {
 import { css } from '@emotion/react';
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import type { AttackDiscoveryScheduleSchema } from './types';
@@ -50,7 +49,6 @@ export interface UseEditFormProps {
   initialValue?: AttackDiscoveryScheduleSchema;
   onSave?: (scheduleData: AttackDiscoveryScheduleSchema) => void;
   saveButtonTitle?: string;
-  stats: AttackDiscoveryStats | null;
 }
 
 export const useEditForm = (props: UseEditFormProps): UseEditForm => {
