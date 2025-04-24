@@ -355,6 +355,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.alerting.rules.run.alerts.max (number?)',
         'xpack.alerting.maintenanceWindow.enabled (boolean?)',
         'xpack.alerting.rulesSettings.enabled (boolean?)',
+        'xpack.alerting.disabledRuleTypes (array?)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',

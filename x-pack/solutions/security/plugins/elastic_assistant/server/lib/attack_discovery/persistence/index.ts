@@ -141,6 +141,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     const aggs = getFindAttackDiscoveryAlertsAggregation();
 
     const {
+      alertIds,
       connectorNames,
       end,
       ids,
@@ -155,6 +156,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     } = findAttackDiscoveryAlertsParams;
 
     const filter = combineFindAttackDiscoveryFilters({
+      alertIds,
       connectorNames,
       end,
       ids,
