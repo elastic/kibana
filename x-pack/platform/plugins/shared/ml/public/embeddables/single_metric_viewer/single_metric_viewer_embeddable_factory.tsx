@@ -175,7 +175,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
               onError={(error) => blockingError$.next(error)}
               selectedDetectorIndex={singleMetricViewerData?.selectedDetectorIndex}
               selectedEntities={singleMetricViewerData?.selectedEntities}
-              // ??
               selectedJobId={singleMetricViewerData?.jobIds[0]}
               forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
