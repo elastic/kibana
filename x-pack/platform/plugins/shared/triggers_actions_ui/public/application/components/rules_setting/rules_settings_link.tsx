@@ -18,10 +18,12 @@ export interface RuleSettingsLinkProps {
 export const RulesSettingsLink = ({ alertDeleteCategoryIds }: RuleSettingsLinkProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {
-    application: { capabilities },
+    application: {
+      capabilities: { rulesSettings = {} },
+    },
   } = useKibana().services;
 
-  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = capabilities.rulesSettings;
+  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = rulesSettings;
 
   if (!show || (!readFlappingSettingsUI && !readQueryDelaySettingsUI)) {
     return null;

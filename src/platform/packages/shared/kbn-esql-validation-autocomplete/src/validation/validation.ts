@@ -8,7 +8,6 @@
  */
 
 import {
-  AstProviderFn,
   ESQLAst,
   ESQLAstTimeseriesCommand,
   ESQLColumn,
@@ -17,6 +16,7 @@ import {
   ESQLMessage,
   ESQLSource,
   isIdentifier,
+  parse,
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
@@ -24,6 +24,7 @@ import {
   areFieldAndVariableTypesCompatible,
   getColumnExists,
   getCommandDefinition,
+  hasWildcard,
   isColumnItem,
   isFunctionItem,
   isOptionItem,
@@ -65,11 +66,10 @@ import { validate as validateTimeseriesCommand } from './commands/metrics';
  */
 export async function validateQuery(
   queryString: string,
-  astProvider: AstProviderFn,
   options: ValidationOptions = {},
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
-  const result = await validateAst(queryString, astProvider, callbacks);
+  const result = await validateAst(queryString, callbacks);
   // early return if we do not want to ignore errors
   if (!options.ignoreOnMissingCallbacks) {
     return result;
@@ -128,12 +128,11 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
  */
 async function validateAst(
   queryString: string,
-  astProvider: AstProviderFn,
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
-  const parsingResult = await astProvider(queryString);
+  const parsingResult = parse(queryString);
 
   const { ast } = parsingResult;
 
@@ -284,11 +283,12 @@ function validateCommand(
                 locations: arg.location,
               })
             );
-          } else if (isSourceItem(arg)) {
-            messages.push(...validateSource(arg, references));
           }
         }
       }
+
+      const sources = command.args.filter((arg) => isSourceItem(arg)) as ESQLSource[];
+      messages.push(...validateSources(sources, references));
     }
   }
 
@@ -388,16 +388,56 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>, ast: 
   return messages;
 }
 
-export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
+export function validateSources(
+  sources: ESQLSource[],
+  { sources: availableSources }: ReferenceMaps
+) {
   const messages: ESQLMessage[] = [];
-  if (source.incomplete) {
-    return messages;
+
+  const knownIndexNames = [];
+  const knownIndexPatterns = [];
+  const unknownIndexNames = [];
+  const unknownIndexPatterns = [];
+
+  for (const source of sources) {
+    if (source.incomplete) {
+      return messages;
+    }
+
+    if (source.sourceType === 'index') {
+      const index = source.index;
+      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
+      if (!sourceName) continue;
+
+      if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
+        knownIndexNames.push(source);
+      }
+      if (sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
+        knownIndexPatterns.push(source);
+      }
+      if (!sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {
+        unknownIndexNames.push(source);
+      }
+      if (!sourceExists(sourceName, availableSources) && hasWildcard(sourceName)) {
+        unknownIndexPatterns.push(source);
+      }
+    }
   }
 
-  if (source.sourceType === 'index') {
-    const index = source.index;
-    const indexName = source.cluster ? source.name : index?.valueUnquoted;
-    if (indexName && !sourceExists(indexName, sources)) {
+  unknownIndexNames.forEach((source) => {
+    messages.push(
+      getMessageFromId({
+        messageId: 'unknownIndex',
+        values: { name: source.name },
+        locations: source.location,
+      })
+    );
+  });
+
+  if (knownIndexNames.length + unknownIndexNames.length + knownIndexPatterns.length === 0) {
+    // only if there are no known index names, no known index patterns, and no unknown
+    // index names do we worry about creating errors for unknown index patterns
+    unknownIndexPatterns.forEach((source) => {
       messages.push(
         getMessageFromId({
           messageId: 'unknownIndex',
@@ -405,7 +445,7 @@ export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
           locations: source.location,
         })
       );
-    }
+    });
   }
 
   return messages;
