@@ -58,7 +58,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *hardware_events.action* - Remove, insert, change properties, etc
 * *ntfs_journal_events.action* - Change action (Write, Delete, etc)
 * *scheduled_tasks.action* - Actions executed by the scheduled task
-* *socket_events.action* - The socket action (bind, listen, close)
+* *socket_events.action* - The socket action (bind, connect, accept)
 * *windows_firewall_rules.action* - Action for the rule or default setting
 * *yara_events.action* - Change action (UPDATE, REMOVE, etc)
 
@@ -146,7 +146,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **allow_signed_enabled** - keyword, number.long
 
-* *alf.allow_signed_enabled* - 1 If allow signed mode is enabled else 0
+* *alf.allow_signed_enabled* - 1 If allow signed mode is enabled else 0 (not supported on macOS 15+)
 
 **ambient_brightness_enabled** - keyword, text.text
 
@@ -166,7 +166,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **antispyware** - keyword, text.text
 
-* *windows_security_center.antispyware* - Deprecated (always *Good*).
+* *windows_security_center.antispyware* - Deprecated (always 'Good').
 
 **antivirus** - keyword, text.text
 
@@ -314,7 +314,6 @@ For more information about osquery tables, see the [osquery schema documentation
 * *chrome_extensions.author* - Optional extension author
 * *npm_packages.author* - Package-supplied author
 * *python_packages.author* - Optional package author
-* *safari_extensions.author* - Optional extension author
 
 **authority** - keyword, text.text
 
@@ -658,7 +657,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **carve** - keyword, number.long
 
-* *carves.carve* - Set this value to *1* to start a file carve
+* *carves.carve* - Set this value to '1' to start a file carve
 
 **carve_guid** - keyword, text.text
 
@@ -698,7 +697,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **cgroup_path** - keyword, text.text
 
-* *processes.cgroup_path* - The full hierarchical path of the process’s control group
+* *processes.cgroup_path* - The full hierarchical path of the process's control group
 
 **chain** - keyword, text.text
 
@@ -820,7 +819,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **code_integrity_policy_enforcement_status** - keyword, text.text
 
-* *hvci_status.code_integrity_policy_enforcement_status* - The status of the code integrity policy enforcement settings. Returns UNKNOWN if an error is encountered.
+* *deviceguard_status.code_integrity_policy_enforcement_status* - The status of the code integrity policy enforcement settings. Returns UNKNOWN if an error is encountered.
 
 **codename** - keyword, text.text
 
@@ -982,6 +981,10 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *memory_devices.configured_clock_speed* - Configured speed of memory device in megatransfers per second (MT/s)
 
+**configured_security_services** - keyword, text.text
+
+* *deviceguard_status.configured_security_services* - The list of configured Device Guard services. Returns UNKNOWN if an error is encountered.
+
 **configured_voltage** - keyword, number.long
 
 * *memory_devices.configured_voltage* - Configured operating voltage of device in millivolts
@@ -1057,7 +1060,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **cosine_similarity** - keyword, number.double
 
-* *powershell_events.cosine_similarity* - How similar the Powershell script is to a provided *normal* character frequency
+* *powershell_events.cosine_similarity* - How similar the Powershell script is to a provided 'normal' character frequency
 
 **count** - keyword, number.long
 
@@ -1211,7 +1214,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **current_capacity** - keyword, number.long
 
-* *battery.current_capacity* - The battery’s current capacity (level of charge) in mAh
+* *battery.current_capacity* - The battery's current capacity (level of charge) in mAh
 
 **current_clock_speed** - keyword, number.long
 
@@ -1327,7 +1330,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **dependencies** - keyword, text.text
 
-* *kernel_panics.dependencies* - Module dependencies existing in crashed module’s backtrace
+* *kernel_panics.dependencies* - Module dependencies existing in crashed module's backtrace
 
 **depth** - keyword, number.long
 
@@ -1340,21 +1343,21 @@ For more information about osquery tables, see the [osquery schema documentation
 * *browser_plugins.description* - Plugin description text
 * *chassis_info.description* - An extended description of the chassis if available.
 * *chrome_extensions.description* - Extension-optional description
-* *disk_info.description* - The OS’s description of the disk.
+* *disk_info.description* - The OS's description of the disk.
 * *drivers.description* - Driver description
 * *firefox_addons.description* - Addon-supplied description string
 * *interface_details.description* - Short description of the object a one-line string.
 * *kernel_keys.description* - The key description.
 * *keychain_acls.description* - The description included with the ACL entry
 * *keychain_items.description* - Optional item description
-* *logical_drives.description* - The canonical description of the drive, e.g. *Logical Fixed Disk*, *CD-ROM Disk*.
+* *logical_drives.description* - The canonical description of the drive, e.g. 'Logical Fixed Disk', 'CD-ROM Disk'.
 * *lxd_images.description* - Image description
 * *lxd_instances.description* - Instance description
 * *npm_packages.description* - Package-supplied description
 * *osquery_flags.description* - Flag description
 * *patches.description* - Fuller description of the patch.
 * *safari_extensions.description* - Optional extension description text
-* *secureboot.description* - (Apple Silicon) Human-readable description: *Full Security*, *Reduced Security*, or *Permissive Security*
+* *secureboot.description* - (Apple Silicon) Human-readable description: 'Full Security', 'Reduced Security', or 'Permissive Security'
 * *services.description* - Service Description
 * *shared_resources.description* - A textual description of the object
 * *smbios_tables.description* - Table entry description
@@ -1365,7 +1368,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **designed_capacity** - keyword, number.long
 
-* *battery.designed_capacity* - The battery’s designed capacity in mAh
+* *battery.designed_capacity* - The battery's designed capacity in mAh
 
 **dest_filename** - keyword, text.text
 
@@ -1392,7 +1395,6 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **developer_id** - keyword, text.text
 
-* *safari_extensions.developer_id* - Optional developer identifier
 * *xprotect_meta.developer_id* - Developer identity (SHA1) of extension
 
 **development_region** - keyword, text.text
@@ -1426,7 +1428,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *bitlocker_info.device_id* - ID of the encrypted drive.
 * *cpu_info.device_id* - The DeviceID of the CPU.
 * *drivers.device_id* - Device ID
-* *logical_drives.device_id* - The drive id, usually the drive name, e.g., *C:*.
+* *logical_drives.device_id* - The drive id, usually the drive name, e.g., 'C:'.
 
 **device_locator** - keyword, text.text
 
@@ -1472,7 +1474,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *hash.directory* - Must provide a path or directory
 * *npm_packages.directory* - Directory where node_modules are located
 * *python_packages.directory* - Directory where Python modules are located
-* *users.directory* - User’s home directory
+* *users.directory* - User's home directory
 
 **disabled** - keyword
 
@@ -1536,7 +1538,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **dns_domain** - keyword, text.text
 
-* *interface_details.dns_domain* - Organization name followed by a period and an extension that indicates the type of organization, such as *microsoft.com*.
+* *interface_details.dns_domain* - Organization name followed by a period and an extension that indicates the type of organization, such as 'microsoft.com'.
 
 **dns_domain_name** - keyword, text.text
 
@@ -1625,7 +1627,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **dump_certificate** - keyword, number.long
 
-* *curl_certificate.dump_certificate* - Set this value to *1* to dump certificate
+* *curl_certificate.dump_certificate* - Set this value to '1' to dump certificate
 
 **duration** - keyword, number.long
 
@@ -1904,10 +1906,6 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *curl_certificate.extended_key_usage* - Extended usage of key in certificate
 
-**extension_type** - keyword, text.text
-
-* *safari_extensions.extension_type* - Extension Type: WebOrAppExtension or LegacyExtension
-
 **extensions** - keyword, text.text
 
 * *osquery_info.extensions* - osquery extensions status
@@ -1924,7 +1922,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **facility** - keyword, text.text
 
-* *asl.facility* - Sender’s facility.  Default is *user*.
+* *asl.facility* - Sender's facility.  Default is 'user'.
 * *syslog_events.facility* - Syslog facility
 
 **fahrenheit** - keyword, number.double
@@ -2050,7 +2048,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **firewall_unload** - keyword, number.long
 
-* *alf.firewall_unload* - 1 If firewall unloading enabled else 0
+* *alf.firewall_unload* - 1 If firewall unloading enabled else 0 (not supported on macOS 15+)
 
 **firmware_type** - keyword, text.text
 
@@ -2089,7 +2087,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **force_logoff_when_expire** - keyword, number.long
 
-* *security_profile_info.force_logoff_when_expire* - Determines whether SMB client sessions with the SMB server will be forcibly disconnected when the client’s logon hours expire
+* *security_profile_info.force_logoff_when_expire* - Determines whether SMB client sessions with the SMB server will be forcibly disconnected when the client's logon hours expire
 
 **forced** - keyword, number.long
 
@@ -2286,6 +2284,10 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *shadow.hash_alg* - Password hashing algorithm
 
+**hash_executable** - keyword, number.long
+
+* *signature.hash_executable* - Set to 1 to also hash the executable, or 0 otherwise. Default is 1
+
 **hash_resources** - keyword, number.long
 
 * *signature.hash_resources* - Set to 1 to also hash resources, or 0 otherwise. Default is 1
@@ -2308,7 +2310,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **health** - keyword, text.text
 
-* *battery.health* - One of the following: "Good" describes a well-performing battery, "Fair" describes a functional battery with limited capacity, or "Poor" describes a battery that’s not capable of providing power
+* *battery.health* - One of the following: "Good" describes a well-performing battery, "Fair" describes a functional battery with limited capacity, or "Poor" describes a battery that's not capable of providing power
 
 **hidden** - keyword, number.long
 
@@ -2345,10 +2347,10 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **host** - keyword, text.text
 
-* *asl.host* - Sender’s address (set by the server).
+* *asl.host* - Sender's address (set by the server).
 * *last.host* - Entry hostname
 * *logged_in_users.host* - Remote hostname
-* *preferences.host* - *current* or *any* host, where *current* takes precedence
+* *preferences.host* - 'current' or 'any' host, where 'current' takes precedence
 * *syslog_events.host* - Hostname configured for syslog
 
 **host_ip** - keyword, text.text
@@ -2616,7 +2618,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **instance_identifier** - keyword, text.text
 
-* *hvci_status.instance_identifier* - The instance ID of Device Guard.
+* *deviceguard_status.instance_identifier* - The instance ID of Device Guard.
 
 **instance_type** - keyword, text.text
 
@@ -2919,7 +2921,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *keychain_items.label* - Generic item name
 * *launchd.label* - Daemon or agent service name
 * *launchd_overrides.label* - Daemon or agent service name
-* *quicklook_cache.label* - Parsed version *gen* field
+* *quicklook_cache.label* - Parsed version 'gen' field
 * *sandboxes.label* - UTI-format bundle or label ID
 
 **language** - keyword, text.text
@@ -3109,7 +3111,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **logging_option** - keyword, number.long
 
-* *alf.logging_option* - Firewall logging option
+* *alf.logging_option* - Firewall logging option (not supported on macOS 15+)
 
 **logical_processors** - keyword, number.long
 
@@ -3133,7 +3135,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **logon_sid** - keyword, text.text
 
-* *logon_sessions.logon_sid* - The user’s security identifier (SID).
+* *logon_sessions.logon_sid* - The user's security identifier (SID).
 
 **logon_time** - keyword, number.long
 
@@ -3220,12 +3222,12 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **manufacturer** - keyword, text.text
 
-* *battery.manufacturer* - The battery manufacturer’s name
+* *battery.manufacturer* - The battery manufacturer's name
 * *chassis_info.manufacturer* - The manufacturer of the chassis.
 * *cpu_info.manufacturer* - The manufacturer of the CPU.
 * *disk_info.manufacturer* - The manufacturer of the disk.
 * *drivers.manufacturer* - Device manufacturer
-* *interface_details.manufacturer* - Name of the network adapter’s manufacturer.
+* *interface_details.manufacturer* - Name of the network adapter's manufacturer.
 * *memory_devices.manufacturer* - Manufacturer ID string
 * *video_info.manufacturer* - The manufacturer of the gpu.
 
@@ -3263,7 +3265,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **max_capacity** - keyword, number.long
 
-* *battery.max_capacity* - The battery’s actual capacity when it is fully charged in mAh
+* *battery.max_capacity* - The battery's actual capacity when it is fully charged in mAh
 * *memory_arrays.max_capacity* - Maximum capacity of array in gigabytes
 
 **max_clock_speed** - keyword, number.long
@@ -3548,7 +3550,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **model** - keyword, text.text
 
-* *battery.model* - The battery’s model number
+* *battery.model* - The battery's model number
 * *block_devices.model* - Block device model string identifier
 * *chassis_info.model* - The model of the chassis.
 * *cpu_info.model* - The model of the CPU.
@@ -3580,7 +3582,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **module_backtrace** - keyword, text.text
 
-* *kernel_panics.module_backtrace* - Modules appearing in the crashed module’s backtrace
+* *kernel_panics.module_backtrace* - Modules appearing in the crashed module's backtrace
 
 **module_path** - keyword, text.text
 
@@ -3680,7 +3682,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *nvram.name* - Variable name
 * *os_version.name* - Distribution or product name
 * *osquery_events.name* - Event publisher or subscriber name
-* *osquery_extensions.name* - Extension’s name
+* *osquery_extensions.name* - Extension's name
 * *osquery_flags.name* - Flag name
 * *osquery_packs.name* - The given name for this query pack
 * *osquery_registry.name* - Name of the plugin item
@@ -3903,7 +3905,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **opaque_version** - keyword, text.text
 
-* *gatekeeper.opaque_version* - Version of Gatekeeper’s gkopaque.bundle
+* *gatekeeper.opaque_version* - Version of Gatekeeper's gkopaque.bundle
 
 **operation** - keyword, text.text
 
@@ -3988,7 +3990,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **ouid** - keyword, number.long
 
-* *apparmor_events.ouid* - Object owner’s user ID
+* *apparmor_events.ouid* - Object owner's user ID
 
 **outiface** - keyword, text.text
 
@@ -4082,13 +4084,17 @@ For more information about osquery tables, see the [osquery schema documentation
 * *bpf_process_events.parent* - Parent process ID
 * *bpf_socket_events.parent* - Parent process ID
 * *crashes.parent* - Parent PID of the crashed process
-* *docker_container_processes.parent* - Process parent’s PID
+* *docker_container_processes.parent* - Process parent's PID
 * *es_process_events.parent* - Parent process ID
 * *es_process_file_events.parent* - Parent process ID
 * *iokit_devicetree.parent* - Parent device registry ID
 * *iokit_registry.parent* - Parent registry ID
-* *process_events.parent* - Process parent’s PID, or -1 if cannot be determined.
-* *processes.parent* - Process parent’s PID
+* *process_events.parent* - Process parent's PID, or -1 if cannot be determined.
+* *processes.parent* - Process parent's PID
+
+**parent_pidversion** - keyword, number.long
+
+* *es_process_events.parent_pidversion* - The pidversion of the parent process.
 
 **parent_process_sequence_number** - keyword, number.long
 
@@ -4096,7 +4102,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **parent_ref_number** - keyword, text.text
 
-* *ntfs_journal_events.parent_ref_number* - The ordinal that associates a journal record with a filename’s parent directory
+* *ntfs_journal_events.parent_ref_number* - The ordinal that associates a journal record with a filename's parent directory
 
 **part_number** - keyword, text.text
 
@@ -4127,11 +4133,11 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **partner_fd** - keyword, number.long
 
-* *process_open_pipes.partner_fd* - File descriptor of shared pipe at partner’s end
+* *process_open_pipes.partner_fd* - File descriptor of shared pipe at partner's end
 
 **partner_mode** - keyword, text.text
 
-* *process_open_pipes.partner_mode* - Mode of shared pipe at partner’s end
+* *process_open_pipes.partner_mode* - Mode of shared pipe at partner's end
 
 **partner_pid** - keyword, number.long
 
@@ -4163,7 +4169,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **path** - keyword, text.text
 
-* *alf_exceptions.path* - Path to the executable that is excepted
+* *alf_exceptions.path* - Path to the executable that is excepted. On macOS 15+ this can also be a bundle identifier
 * *apparmor_profiles.path* - Unique, aa-status compatible, policy identifier.
 * *appcompat_shims.path* - This is the path to the SDB database.
 * *apps.path* - Absolute and full Name.app path
@@ -4211,7 +4217,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *ntfs_acl_permissions.path* - Path to the file or directory.
 * *ntfs_journal_events.path* - Path
 * *office_mru.path* - File path
-* *osquery_extensions.path* - Path of the extension’s Thrift connection or library path
+* *osquery_extensions.path* - Path of the extension's Thrift connection or library path
 * *package_bom.path* - Path of package bom
 * *package_receipts.path* - Path of receipt plist
 * *plist.path* - (required) read preferences from a plist
@@ -4227,7 +4233,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *quicklook_cache.path* - Path of file
 * *registry.path* - Full path to the value
 * *rpm_package_files.path* - File path within the package
-* *safari_extensions.path* - Path to extension XAR bundle
+* *safari_extensions.path* - Path to the Info.plist describing the extension
 * *sandboxes.path* - Path to sandbox container directory
 * *scheduled_tasks.path* - Path to the executable to be run
 * *services.path* - Path to Service Executable
@@ -4372,7 +4378,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *last.pid* - Process (or thread) ID
 * *listening_ports.pid* - Process (or thread) ID
 * *logged_in_users.pid* - Process (or thread) ID
-* *lxd_instances.pid* - Instance’s process ID
+* *lxd_instances.pid* - Instance's process ID
 * *osquery_info.pid* - Process (or thread/handle) ID
 * *pipes.pid* - Process ID of the process to which the pipe belongs
 * *process_envs.pid* - Process (or thread) ID
@@ -4424,6 +4430,10 @@ For more information about osquery tables, see the [osquery schema documentation
 **pids** - keyword, number.long
 
 * *docker_container_stats.pids* - Number of processes
+
+**pidversion** - keyword, number.long
+
+* *es_process_events.pidversion* - Process ID version
 
 **pixels** - keyword, text.text
 
@@ -4963,6 +4973,14 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *crashes.responsible* - Process responsible for the crashed process
 
+**responsible_pid** - keyword, number.long
+
+* *es_process_events.responsible_pid* - The pid of the process responsible for this process.
+
+**responsible_pidversion** - keyword, number.long
+
+* *es_process_events.responsible_pidversion* - The pidversion of the process responsible for this process.
+
 **result** - keyword, text.text
 
 * *authenticode.result* - The signature check result
@@ -5053,6 +5071,10 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *prefetch.run_count* - Number of times the application has been run.
 
+**running_security_services** - keyword, text.text
+
+* *deviceguard_status.running_security_services* - The list of running Device Guard services. Returns UNKNOWN if an error is encountered.
+
 **rw** - keyword, number.long
 
 * *docker_container_mounts.rw* - 1 if read/write. 0 otherwise
@@ -5100,7 +5122,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **scripting_engine** - keyword, text.text
 
-* *wmi_script_event_consumers.scripting_engine* - Name of the scripting engine to use, for example, *VBScript*. This property cannot be NULL.
+* *wmi_script_event_consumers.scripting_engine* - Name of the scripting engine to use, for example, 'VBScript'. This property cannot be NULL.
 
 **sdb_id** - keyword, text.text
 
@@ -5159,7 +5181,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **sender** - keyword, text.text
 
-* *asl.sender* - Sender’s identification string.  Default is process name.
+* *asl.sender* - Sender's identification string.  Default is process name.
 * *unified_log.sender* - the name of the binary image that made the entry
 
 **sensor_backend_server** - keyword, text.text
@@ -5190,7 +5212,7 @@ For more information about osquery tables, see the [osquery schema documentation
 **serial_number** - keyword, text.text
 
 * *authenticode.serial_number* - The certificate serial number
-* *battery.serial_number* - The battery’s serial number
+* *battery.serial_number* - The battery's serial number
 * *connected_displays.serial_number* - The serial number of the display. (may not be unique)
 * *curl_certificate.serial_number* - Certificate serial number
 * *kernel_keys.serial_number* - The serial key of the key.
@@ -5249,6 +5271,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **session_id** - keyword, number.long
 
+* *es_process_events.session_id* - The identifier of the session that contains the process group.
 * *logon_sessions.session_id* - The Terminal Services session identifier.
 * *process_etw_events.session_id* - Session ID
 * *winbaseobj.session_id* - Terminal Services Session Id
@@ -5316,7 +5339,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **shell** - keyword, text.text
 
-* *users.shell* - User’s configured default shell
+* *users.shell* - User's configured default shell
 
 **shell_only** - keyword, number.long
 
@@ -5354,7 +5377,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *background_activities_moderator.sid* - User SID.
 * *certificates.sid* - SID
-* *logged_in_users.sid* - The user’s unique security identifier
+* *logged_in_users.sid* - The user's unique security identifier
 * *office_mru.sid* - User SID
 * *shellbags.sid* - User SID
 * *userassist.sid* - User SID.
@@ -5589,7 +5612,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **state** - keyword
 
-* *alf_exceptions.state* - Firewall exception state
+* *alf_exceptions.state* - Firewall exception state. 0 if the application is configured to allow incoming connections, 2 if the application is configured to block incoming connections and 3 if the application is configuted to allow incoming connections but with additional restrictions.
 * *battery.state* - One of the following: "AC Power" indicates the battery is connected to an external power source, "Battery Power" indicates that the battery is drawing internal power, "Off Line" indicates the battery is off-line or no longer connected
 * *chrome_extensions.state* - 1 if this extension is enabled
 * *docker_container_processes.state* - Process state
@@ -5613,7 +5636,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **statename** - keyword, text.text
 
-* *windows_optional_features.statename* - Installation state name. *Enabled*,*Disabled*,*Absent*
+* *windows_optional_features.statename* - Installation state name. 'Enabled','Disabled','Absent'
 
 **status** - keyword, text.text
 
@@ -5630,7 +5653,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *services.status* - Service Current status: STOPPED, START_PENDING, STOP_PENDING, RUNNING, CONTINUE_PENDING, PAUSE_PENDING, PAUSED
 * *shared_memory.status* - Destination/attach status
 * *shared_resources.status* - String that indicates the current status of the object.
-* *socket_events.status* - Either *succeeded*, *failed*, *in_progress* (connect() on non-blocking socket) or *no_client* (null accept() on non-blocking socket)
+* *socket_events.status* - Either 'succeeded', 'failed', 'in_progress' (connect() on non-blocking socket) or 'no_client' (null accept() on non-blocking socket)
 * *startup_items.status* - Startup status; either enabled or disabled
 
 **stderr_path** - keyword, text.text
@@ -5754,7 +5777,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **success** - keyword, number.long
 
-* *socket_events.success* - Deprecated. Use the *status* column instead
+* *socket_events.success* - Deprecated. Use the 'status' column instead
 
 **suid** - keyword
 
@@ -5829,7 +5852,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **system_model** - keyword, text.text
 
-* *kernel_panics.system_model* - Physical system model, for example *MacBookPro12,1 (Mac-E43C1C25D4880AD6)*
+* *kernel_panics.system_model* - Physical system model, for example 'MacBookPro12,1 (Mac-E43C1C25D4880AD6)'
 
 **system_time** - keyword, number.long
 
@@ -5964,6 +5987,10 @@ For more information about osquery tables, see the [osquery schema documentation
 * *unified_log.timestamp* - unix timestamp associated with the entry
 * *windows_eventlog.timestamp* - Timestamp to selectively filter the events
 
+**timestamp_double** - keyword, text.text
+
+* *unified_log.timestamp_double* - floating point timestamp associated with the entry
+
 **timestamp_ms** - keyword, number.long
 
 * *prometheus_metrics.timestamp_ms* - Unix timestamp of collected data in MS
@@ -5992,7 +6019,7 @@ For more information about osquery tables, see the [osquery schema documentation
 **total_size** - keyword, number.long
 
 * *docker_container_processes.total_size* - Total virtual memory size
-* *processes.total_size* - Total virtual memory size (Linux, Windows) or *footprint* (macOS)
+* *processes.total_size* - Total virtual memory size (Linux, Windows) or 'footprint' (macOS)
 
 **total_width** - keyword, number.long
 
@@ -6037,7 +6064,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *crashes.type* - Type of crash log
 * *device_file.type* - File status
 * *device_firmware.type* - Type of device
-* *device_partitions.type* - Filesystem type if recognized, otherwise, *meta*, *normal*, or *unallocated*
+* *device_partitions.type* - Filesystem type if recognized, otherwise, 'meta', 'normal', or 'unallocated'
 * *disk_encryption.type* - Description of cipher type and mode if available
 * *disk_info.type* - The interface type of the disk.
 * *dns_cache.type* - DNS record type
@@ -6048,14 +6075,14 @@ For more information about osquery tables, see the [osquery schema documentation
 * *file.type* - File status
 * *firefox_addons.type* - Extension, addon, webapp
 * *hardware_events.type* - Type of hardware and hardware event
-* *homebrew_packages.type* - Package type (*formula* or *cask*)
+* *homebrew_packages.type* - Package type ('formula' or 'cask')
 * *interface_addresses.type* - Type of address. One of dhcp, manual, auto, other, unknown
 * *interface_details.type* - Interface type (includes virtual)
 * *kernel_keys.type* - The key type.
 * *keychain_items.type* - Keychain item type (class)
 * *last.type* - Entry type, according to ut_type types (utmp.h)
 * *logged_in_users.type* - Login type
-* *logical_drives.type* - Deprecated (always *Unknown*).
+* *logical_drives.type* - Deprecated (always 'Unknown').
 * *lxd_certificates.type* - Type of the certificate
 * *lxd_networks.type* - Type of network
 * *mounts.type* - Mounted device type
@@ -6066,7 +6093,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *osquery_flags.type* - Flag type
 * *process_etw_events.type* - Event Type (ProcessStart, ProcessStop)
 * *process_open_pipes.type* - Pipe Type: named vs unnamed/anonymous
-* *registry.type* - Type of the registry value, or *subkey* if item is a subkey
+* *registry.type* - Type of the registry value, or 'subkey' if item is a subkey
 * *routes.type* - Type of route
 * *selinux_events.type* - Event type
 * *shared_resources.type* - Type of resource being shared. Types include: disk drives, print queues, interprocess communications (IPC), and general devices.
@@ -6085,7 +6112,7 @@ For more information about osquery tables, see the [osquery schema documentation
 **type_name** - keyword, text.text
 
 * *last.type_name* - Entry type name, according to ut_type types (utmp.h)
-* *shared_resources.type_name* - Human readable value for the *type* column
+* *shared_resources.type_name* - Human readable value for the 'type' column
 
 **uid** - keyword
 
@@ -6129,7 +6156,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **umci_policy_status** - keyword, text.text
 
-* *hvci_status.umci_policy_status* - The status of the User Mode Code Integrity security settings. Returns UNKNOWN if an error is encountered.
+* *deviceguard_status.umci_policy_status* - The status of the User Mode Code Integrity security settings. Returns UNKNOWN if an error is encountered.
 
 **uncompressed** - keyword, number.long
 
@@ -6186,11 +6213,10 @@ For more information about osquery tables, see the [osquery schema documentation
 **update_url** - keyword, text.text
 
 * *chrome_extensions.update_url* - Extension-supplied update URI
-* *safari_extensions.update_url* - Extension-supplied update URI
 
 **upid** - keyword, number.long
 
-* *processes.upid* - A 64bit pid that is never reused. Returns -1 if we couldn’t gather them from the system.
+* *processes.upid* - A 64bit pid that is never reused. Returns -1 if we couldn't gather them from the system.
 
 **uploaded_at** - keyword, text.text
 
@@ -6202,7 +6228,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **uppid** - keyword, number.long
 
-* *processes.uppid* - The 64bit parent pid that is never reused. Returns -1 if we couldn’t gather them from the system.
+* *processes.uppid* - The 64bit parent pid that is never reused. Returns -1 if we couldn't gather them from the system.
 
 **uptime** - keyword, number.long
 
@@ -6316,7 +6342,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *osquery_extensions.uuid* - The transient ID assigned for communication
 * *osquery_info.uuid* - Unique ID provided by the system
 * *system_info.uuid* - Unique ID provided by the system
-* *users.uuid* - User’s UUID (Apple) or SID (Windows)
+* *users.uuid* - User's UUID (Apple) or SID (Windows)
 * *vscode_extensions.uuid* - Extension UUID
 
 **valid_from** - keyword, text.text
@@ -6367,7 +6393,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **vbs_status** - keyword, text.text
 
-* *hvci_status.vbs_status* - The status of the virtualization based security settings. Returns UNKNOWN if an error is encountered.
+* *deviceguard_status.vbs_status* - The status of the virtualization based security settings. Returns UNKNOWN if an error is encountered.
 
 **vendor** - keyword, text.text
 
@@ -6405,14 +6431,14 @@ For more information about osquery tables, see the [osquery schema documentation
 * *curl_certificate.version* - Version Number
 * *deb_packages.version* - Package version
 * *device_firmware.version* - Firmware version
+* *deviceguard_status.version* - The version number of the Device Guard build.
 * *docker_version.version* - Docker version
 * *drivers.version* - Driver version
 * *es_process_events.version* - Version of EndpointSecurity event
 * *es_process_file_events.version* - Version of EndpointSecurity event
 * *firefox_addons.version* - Addon-supplied version string
-* *gatekeeper.version* - Version of Gatekeeper’s gke.bundle
-* *homebrew_packages.version* - Current *linked* version
-* *hvci_status.version* - The version number of the Device Guard build.
+* *gatekeeper.version* - Version of Gatekeeper's gke.bundle
+* *homebrew_packages.version* - Current 'linked' version
 * *ie_extensions.version* - Version of the executable
 * *intel_me_info.version* - Intel ME version
 * *kernel_extensions.version* - Extension version
@@ -6420,7 +6446,7 @@ For more information about osquery tables, see the [osquery schema documentation
 * *npm_packages.version* - Package-supplied version
 * *office_mru.version* - Office application version number
 * *os_version.version* - Pretty, suitable for presentation, OS version
-* *osquery_extensions.version* - Extension’s version
+* *osquery_extensions.version* - Extension's version
 * *osquery_info.version* - osquery toolkit version
 * *osquery_packs.version* - Minimum osquery version that this query will run on
 * *package_install_history.version* - Package display version
@@ -6469,7 +6495,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **voltage** - keyword, number.long
 
-* *battery.voltage* - The battery’s current voltage in mV
+* *battery.voltage* - The battery's current voltage in mV
 
 **volume_creation** - keyword, text.text
 
@@ -6487,6 +6513,10 @@ For more information about osquery tables, see the [osquery schema documentation
 **volume_size** - keyword, number.long
 
 * *platform_info.volume_size* - (Optional) size of firmware volume
+
+**vscode_edition** - keyword, text.text
+
+* *vscode_extensions.vscode_edition* - VSCode or VSCode Insiders
 
 **wall_time** - keyword, number.long
 
@@ -6569,4 +6599,3 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *azure_instance_metadata.zone* - Availability zone of the VM
 * *ycloud_instance_metadata.zone* - Availability zone of the VM
-
