@@ -13,6 +13,7 @@ import type {
 import {
   ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_ARTIFACT_LIST_IDS,
+  ENDPOINT_LIST_ID,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
