@@ -15,10 +15,7 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
-import {
-  createLogsDataSourceProfileProvider,
-  type LogOverViewAccordionExpandedValue,
-} from './profile';
+import { type LogOverviewContext, createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
@@ -50,9 +47,7 @@ describe('logsDataSourceProfileProvider', () => {
     isMatch: true,
     context: {
       category: DataSourceCategory.Logs,
-      initialLogOverviewAccordionSection$: new BehaviorSubject<LogOverViewAccordionExpandedValue>(
-        undefined
-      ),
+      logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
     },
   };
   const RESOLUTION_MISMATCH = {
@@ -172,8 +167,7 @@ describe('logsDataSourceProfileProvider', () => {
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: {
             category: DataSourceCategory.Logs,
-            initialLogOverviewAccordionSection$:
-              new BehaviorSubject<LogOverViewAccordionExpandedValue>(undefined),
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
           },
         });
       const getRowIndicator = getRowIndicatorProvider?.({
@@ -191,8 +185,7 @@ describe('logsDataSourceProfileProvider', () => {
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: {
             category: DataSourceCategory.Logs,
-            initialLogOverviewAccordionSection$:
-              new BehaviorSubject<LogOverViewAccordionExpandedValue>(undefined),
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
           },
         });
       const getRowIndicator = getRowIndicatorProvider?.({
@@ -208,8 +201,7 @@ describe('logsDataSourceProfileProvider', () => {
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
           context: {
             category: DataSourceCategory.Logs,
-            initialLogOverviewAccordionSection$:
-              new BehaviorSubject<LogOverViewAccordionExpandedValue>(undefined),
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
           },
         });
       const getRowIndicator = getRowIndicatorProvider?.({
@@ -227,8 +219,7 @@ describe('logsDataSourceProfileProvider', () => {
         {
           context: {
             category: DataSourceCategory.Logs,
-            initialLogOverviewAccordionSection$:
-              new BehaviorSubject<LogOverViewAccordionExpandedValue>(undefined),
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
           },
         }
       );
@@ -254,8 +245,7 @@ describe('logsDataSourceProfileProvider', () => {
         logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
           context: {
             category: DataSourceCategory.Logs,
-            initialLogOverviewAccordionSection$:
-              new BehaviorSubject<LogOverViewAccordionExpandedValue>(undefined),
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
           },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({

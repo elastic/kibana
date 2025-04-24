@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DataSourceCategory } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import type { LogOverViewAccordionExpandedValue, LogsDataSourceProfileProvider } from '../profile';
+import type { LogOverviewContext, LogsDataSourceProfileProvider } from '../profile';
 
 export const createResolve = (
   baseIndexPattern: string
@@ -36,9 +36,7 @@ export const createResolve = (
       isMatch: true,
       context: {
         category: DataSourceCategory.Logs,
-        initialLogOverviewAccordionSection$: new BehaviorSubject<LogOverViewAccordionExpandedValue>(
-          undefined
-        ),
+        logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
       },
     };
   };

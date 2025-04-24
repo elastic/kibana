@@ -20,7 +20,7 @@ import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import type { LogOverViewAccordionExpandedValue } from '../logs_data_source_profile/profile';
+import type { LogOverviewContext } from '../logs_data_source_profile/profile';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
@@ -38,9 +38,7 @@ describe('logDocumentProfileProvider', () => {
     isMatch: true,
     context: {
       type: DocumentType.Log,
-      initialLogOverviewAccordionSection$: new BehaviorSubject<LogOverViewAccordionExpandedValue>(
-        undefined
-      ),
+      logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
     },
   };
   const RESOLUTION_MISMATCH = {
@@ -157,8 +155,7 @@ describe('logDocumentProfileProvider', () => {
         {
           context: {
             type: DocumentType.Log,
-            initialLogOverviewAccordionSection$:
-              new BehaviorSubject<LogOverViewAccordionExpandedValue>(undefined),
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
           },
         }
       );

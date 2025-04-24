@@ -14,7 +14,7 @@ import type { DataSourceProfileProviderParams, RootContext } from '../../../../p
 import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { createResolve } from './create_resolve';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import type { LogOverViewAccordionExpandedValue } from '../profile';
+import type { LogOverviewContext } from '../profile';
 
 describe('createResolve', () => {
   const VALID_INDEX_PATTERN = 'valid';
@@ -27,9 +27,7 @@ describe('createResolve', () => {
     isMatch: true,
     context: {
       category: DataSourceCategory.Logs,
-      initialLogOverviewAccordionSection$: new BehaviorSubject<LogOverViewAccordionExpandedValue>(
-        undefined
-      ),
+      logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
     },
   };
   const RESOLUTION_MISMATCH = {

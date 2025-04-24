@@ -24,8 +24,13 @@ import type { ContextWithProfileId } from '../../../profile_service';
 
 export type LogOverViewAccordionExpandedValue = 'stacktrace' | 'quality_issues' | undefined;
 
+export interface LogOverviewContext {
+  recordId: string;
+  initialAccordionSection: LogOverViewAccordionExpandedValue;
+}
+
 export interface LogsDataSourceContext {
-  initialLogOverviewAccordionSection$: BehaviorSubject<LogOverViewAccordionExpandedValue>;
+  logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
 }
 
 export type LogsDataSourceProfileProvider = DataSourceProfileProvider<LogsDataSourceContext>;
@@ -63,9 +68,7 @@ export const createLogsDataSourceProfileProvider = (
       isMatch: true,
       context: {
         category: DataSourceCategory.Logs,
-        initialLogOverviewAccordionSection$: new BehaviorSubject<LogOverViewAccordionExpandedValue>(
-          undefined
-        ),
+        logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
       },
     };
   },
