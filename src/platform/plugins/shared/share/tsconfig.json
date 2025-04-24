@@ -1,9 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/emotion.d.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-utils-plugin",
@@ -27,7 +27,5 @@
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
