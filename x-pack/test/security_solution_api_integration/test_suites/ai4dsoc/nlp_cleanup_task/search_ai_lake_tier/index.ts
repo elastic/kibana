@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('GenAI - NLP Cleanup Task', function () {
+  describe('AI4DSOC - NLP Cleanup Task', function () {
     loadTestFile(require.resolve('./task_execution'));
   });
 }

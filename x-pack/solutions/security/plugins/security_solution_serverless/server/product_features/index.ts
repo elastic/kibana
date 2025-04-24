@@ -61,10 +61,13 @@ export const registerProductFeatures = (
 };
 
 /**
- * Get the security product tier from the security product type in the config. If not available, will check aiSoc
- * product type and return the search_ai_lake tier.
+ * Get the product tier from the security/ai_soc product type in the config. This is used to determine if AI features
+ * are available in the given configuration.
  */
-export const getSecurityProductTier = (config: ServerlessSecurityConfig, logger: Logger): Tier => {
+export const getSecurityAiSocProductTier = (
+  config: ServerlessSecurityConfig,
+  logger: Logger
+): Tier => {
   const securityProductType = config.productTypes.find(
     (productType) => productType.product_line === ProductLine.security
   );
