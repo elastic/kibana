@@ -261,9 +261,11 @@ export const LogEntryExampleMessageTable: React.FC<{
         },
         '& .euiTableRowCell': {
           borderColor: euiTheme.colors.borderBaseFloating,
+          fontFamily: euiTheme.font.familyCode,
         },
         '& .euiTableCellContent': {
           padding: 0,
+          height: '24px',
         },
       }}
     >
