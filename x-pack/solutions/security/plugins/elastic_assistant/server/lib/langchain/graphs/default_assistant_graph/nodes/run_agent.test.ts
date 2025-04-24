@@ -12,7 +12,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AIMessage } from '@langchain/core/messages';
 import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
-import { Content } from '@kbn/home-plugin/public/application/components/tutorial/content';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 jest.mock('../../../../prompt', () => ({
