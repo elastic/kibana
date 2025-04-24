@@ -48,7 +48,7 @@ describe('Context API', () => {
       const querySub = query$.subscribe(querySpy);
       const filtersSub = filters$.subscribe(filtersSpy);
 
-      // Reset spies after the initial emition
+      // Reset spies after the initial emission
       querySpy.mockClear();
       filtersSpy.mockClear();
 
