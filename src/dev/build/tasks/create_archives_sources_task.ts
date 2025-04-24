@@ -56,7 +56,7 @@ export const CreateArchivesSources: Task = {
             {
               select: [
                 'serverless.yml',
-                'serverless.{es,oblt,security}.yml',
+                'serverless.{chat,es,oblt,security}.yml',
                 'serverless.security.{search_ai_lake,essentials,complete}.yml',
               ],
             }
