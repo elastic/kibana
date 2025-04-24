@@ -207,7 +207,7 @@ export async function getEditLensConfiguration(
       })
     );
 
-    const configPanelProps = {
+    const configPanelProps: EditConfigPanelProps = {
       attributes: currentAttributes,
       updatePanelState,
       updateSuggestion,
