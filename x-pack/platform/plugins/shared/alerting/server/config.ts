@@ -75,6 +75,12 @@ export const configSchema = schema.object({
   rulesSettings: schema.object({
     cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
   }),
+  maintenanceWindow: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  disabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
