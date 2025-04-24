@@ -26,7 +26,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
-import type { ResponseActionsClient } from '../..';
+import type { ResponseActionsClient, ResponseActionsClientMethods } from '../..';
 import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
@@ -56,6 +56,9 @@ import type {
   ScanActionRequestBody,
   RunScriptActionRequestBody,
 } from '../../../../../common/api/endpoint';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
   esClient: ElasticsearchClientMock;
@@ -86,6 +89,8 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
 const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
+
+  // TODO:PT refactor mock to instead use Mocked endpoint context and not the real class with mocked dependencies
   const endpointService = new EndpointAppContextService();
   const endpointServiceStartContract = createMockEndpointAppContextServiceStartContract();
 
@@ -396,9 +401,84 @@ const setConnectorActionsClientExecuteResponseMock = (
   });
 };
 
+const getClientSupportedResponseActionMethodNames = (
+  agentType: ResponseActionAgentType
+): ResponseActionsClientMethods[] => {
+  const methods: ResponseActionsClientMethods[] = [];
+
+  for (const responseActionApiName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+    if (isActionSupportedByAgentType(agentType, responseActionApiName, 'manual')) {
+      // Map (if necessary) the response action name to the method name that is defined in the
+      // Response Actions client class
+      switch (responseActionApiName) {
+        case 'unisolate':
+          methods.push('release');
+          break;
+
+        case 'running-processes':
+          methods.push('runningProcesses');
+          break;
+
+        case 'get-file':
+          methods.push('getFile');
+          break;
+
+        case 'kill-process':
+          methods.push('killProcess');
+          break;
+
+        case 'suspend-process':
+          methods.push('suspendProcess');
+          break;
+
+        default:
+          methods.push(responseActionApiName);
+      }
+    }
+  }
+
+  return methods;
+};
+
+const getOptionsForResponseActionMethod = (method: ResponseActionsClientMethods) => {
+  switch (method) {
+    case 'isolate':
+    case 'release':
+      return createNoParamsResponseActionOptionsMock();
+
+    case 'scan':
+      return createScanOptionsMock();
+
+    case 'upload':
+      return createUploadOptionsMock();
+
+    case 'execute':
+      return createExecuteOptionsMock();
+
+    case 'runscript':
+      return createRunScriptOptionsMock();
+
+    case 'killProcess':
+    case 'suspendProcess':
+      return createKillOrSuspendProcessOptionsMock();
+
+    case 'runningProcesses':
+      return createRunningProcessesOptionsMock();
+
+    case 'getFile':
+      return createGetFileOptionsMock();
+
+    default:
+      throw new Error(`Mock options are not defined for response action method [${method}]`);
+  }
+};
+
 export const responseActionsClientMock = Object.freeze({
   create: createResponseActionClientMock,
   createConstructorOptions: createConstructorOptionsMock,
+
+  getClientSupportedResponseActionMethodNames,
+  getOptionsForResponseActionMethod,
 
   createIsolateOptions: createNoParamsResponseActionOptionsMock,
   createReleaseOptions: createNoParamsResponseActionOptionsMock,
