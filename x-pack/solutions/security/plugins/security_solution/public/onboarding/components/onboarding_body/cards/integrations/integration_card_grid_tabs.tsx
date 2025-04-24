@@ -84,6 +84,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       setSelectedSubCategory,
     } = useAvailablePackages({
       prereleaseIntegrationsEnabled: false,
+      excludePolicyTemplatesFromInstallationStatus: true,
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);

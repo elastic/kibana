@@ -585,6 +585,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
+  is_policy_template?: boolean;
   packagePoliciesInfo?: { count: number };
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
