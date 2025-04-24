@@ -184,7 +184,7 @@ describe('AlertCountsTool', () => {
       expect(result).toContain('Citation: {reference(exampleContentReferenceId)}');
     });
 
-    it('returns null when the alertsIndexPattern is undefined', () => {
+    it('returns null when the alertsIndexPattern is undefined', async () => {
       const tool = await ALERT_COUNTS_TOOL.getTool({
         // alertsIndexPattern is undefined
         esClient,
