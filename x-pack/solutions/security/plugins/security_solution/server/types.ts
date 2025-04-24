@@ -41,6 +41,7 @@ import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_
 import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import type { PadPrecheckAndInstallClient } from './lib/entity_analytics/privilege_monitoring/pad_precheck_and_install_client';
 
 export { AppClient };
 
@@ -67,6 +68,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
+  getPadPrecheckAndInstallClient: () => PadPrecheckAndInstallClient;
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;

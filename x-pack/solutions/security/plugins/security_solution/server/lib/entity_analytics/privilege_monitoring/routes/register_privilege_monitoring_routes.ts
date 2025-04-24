@@ -10,6 +10,8 @@ import { healthCheckPrivilegeMonitoringRoute } from './health';
 
 import { initPrivilegeMonitoringEngineRoute } from './init';
 
+import { padPrecheckAndInstallRoute } from './pad_precheck_and_install';
+
 export const registerPrivilegeMonitoringRoutes = ({
   router,
   logger,
@@ -18,4 +20,5 @@ export const registerPrivilegeMonitoringRoutes = ({
 }: EntityAnalyticsRoutesDeps) => {
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  padPrecheckAndInstallRoute(router, logger, config);
 };
