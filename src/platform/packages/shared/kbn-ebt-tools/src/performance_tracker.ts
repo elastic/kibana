@@ -12,8 +12,6 @@ import { groupBy } from 'lodash';
 
 import type { Logger } from '@kbn/logging';
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 /**
  * PERFORMANCE_TRACKER_TYPES defines top-level categories to be use as
  * the mark name. They are used to group marks and measures by type.
@@ -91,12 +89,10 @@ export const createPerformanceTracker = ({ type, instance, logger }: Performance
      * @returns The created performance mark
      */
     mark: (name: PerformanceTrackerMarks) => {
-      if (!isProduction) {
-        try {
-          performance.mark(createMarkName(name), { detail: { id } });
-        } catch (error) {
-          logger?.error('Error creating performance mark:', error);
-        }
+      try {
+        performance.mark(createMarkName(name), { detail: { id } });
+      } catch (error) {
+        logger?.error('Error creating performance mark:', error);
       }
     },
   };
