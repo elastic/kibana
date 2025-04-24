@@ -28,7 +28,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ConnectionDetails } from '../connection_details/connection_details';
 import { QuickStats } from '../quick_stats/quick_stats';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
-import { IndexDocuments } from '../index_documents/index_documents';
+import { IndexDetailsData } from './details_page_data';
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
 import { SearchIndexDetailsTabs } from '../../routes';
@@ -100,7 +100,7 @@ export const SearchIndexDetailsPage = () => {
           defaultMessage: 'Data',
         }),
         content: (
-          <IndexDocuments
+          <IndexDetailsData
             indexName={indexName}
             indexDocuments={indexDocuments}
             isInitialLoading={indexDocumentsIsInitialLoading}
