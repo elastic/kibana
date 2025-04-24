@@ -43,7 +43,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         'x-elastic-product-origin',
         'x-kbn-context',
     ];
-    private options: Options;
+    protected options: Options;
 
     protected constructor({
         options = defaultOptions,
@@ -69,7 +69,8 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         }
         const yamlOpenApiSpec = await fs.promises.readFile(options.apiSpecPath, 'utf8');
         const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
-        const dereferencedOas = new Oas(jsonOpenApiSpec);
+        const fixedJsonOpenApiSpec = super.fixOpenApiSpecIteratively(jsonOpenApiSpec);
+        const dereferencedOas = new Oas(fixedJsonOpenApiSpec);
         await dereferencedOas.dereference();
         return new KibanaClientTool({
             options: options,

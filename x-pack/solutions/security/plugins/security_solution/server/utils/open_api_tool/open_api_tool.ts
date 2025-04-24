@@ -1,5 +1,5 @@
 import Oas from "oas";
-import { formatToolName, isOperation, Operation } from "./utils";
+import { fixOpenApiSpecIteratively, formatToolName, isOperation, Operation } from "./utils";
 import { JsonSchema, jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { SchemaObject } from 'oas/dist/types.cjs';
 import { z } from "zod";
@@ -17,6 +17,11 @@ export abstract class OpenApiTool<T> {
     }) {
         const { dereferencedOas } = args;
         this.dereferencedOas = dereferencedOas;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static fixOpenApiSpecIteratively(openApiSpec: any): any {
+        return fixOpenApiSpecIteratively(openApiSpec);
     }
 
     protected getOperations() {
@@ -76,12 +81,12 @@ export abstract class OpenApiTool<T> {
         // Create internal node for each group
         const tools = Object.entries(groupedToolsByOperationTags)
             .filter(([tag, _]) => !!tag)
-            .map(async ([tag, toolsAndOperations]) => {
+            .map(async ([tag, internalToolsAndOperations]) => {
                 const internalNode = await this.getInternalNode({
                     ...args,
-                    tools: Promise.all(toolsAndOperations.map(toolAndOperation => toolAndOperation.tool)),
+                    tools: Promise.all(internalToolsAndOperations.map(toolAndOperation => toolAndOperation.tool)),
                     name: formatToolName(`kibana_${tag}_agent`),
-                    description: toolsAndOperations.map(toolAndOperation => toolAndOperation.operation.getOperationId()).join('\n'),
+                    description: internalToolsAndOperations.map(toolAndOperation => toolAndOperation.operation.getOperationId()).join('\n'),
                 })
                 return internalNode
             })

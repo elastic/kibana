@@ -36,8 +36,9 @@ export const formatToolName = (toolName: string) => {
  * 
  * Since OpenAi does not support empty array items, we need to replace them with a more generic type.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fixOpenApiSpecIteratively = (obj: any): any => {
-    const stack: any[] = [obj];
+    const stack = [obj];
     const result = obj;
 
     while (stack.length > 0) {
