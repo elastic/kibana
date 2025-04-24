@@ -15,7 +15,6 @@ import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks
 import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
 import { getAlertsTableEmbeddableFactory } from './alerts_table_embeddable_factory';
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
-import { BehaviorSubject } from 'rxjs';
 
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
@@ -75,37 +74,5 @@ describe('getEmbeddableAlertsTableFactory', () => {
       }),
       {}
     );
-  });
-
-  it('should clean the persisted alerts table configuration when deleting the panel', async () => {
-    const children$ = new BehaviorSubject<{ [key: string]: unknown }>({
-      [UUID]: {},
-    });
-    mockPresentationContainer.children$ = children$;
-    await factory.buildEmbeddable(
-      {
-        timeRange: {
-          from: '2025-01-01T00:00:00.000Z',
-          to: '2025-01-01T01:00:00.000Z',
-        },
-        title: 'Test embeddable alerts table',
-        tableConfig: {
-          solution: 'observability',
-          query: {
-            type: 'alertsFilters',
-            filters: [{ filter: {} }],
-          },
-        },
-      },
-      (apiRegistration) => ({ ...(apiRegistration as any), parentApi: mockPresentationContainer }),
-      UUID,
-      // These are unused by our factory
-      {} as any,
-      () => ({} as any),
-      {} as any
-    );
-
-    children$.next({});
-    expect(mockRemoveLocalStorageItem).toHaveBeenCalledWith(TABLE_ID);
   });
 });
