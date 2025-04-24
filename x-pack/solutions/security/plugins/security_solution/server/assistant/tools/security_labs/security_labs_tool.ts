@@ -11,10 +11,11 @@ import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { knowledgeBaseReference, contentReferenceString } from '@kbn/elastic-assistant-common';
+import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
-import { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 
-type SecurityLabsToolParams = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'kbDataClient'>>;
+type SecurityLabsToolParams = AssistantToolParams &
+  RequiredDefined<Pick<AssistantToolParams, 'kbDataClient'>>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called

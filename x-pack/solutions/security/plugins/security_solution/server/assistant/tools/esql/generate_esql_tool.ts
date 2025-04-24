@@ -14,8 +14,8 @@ import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
 import { getGenerateEsqlGraph } from './graphs/generate_esql/generate_esql';
 
-type GenerateEsqlParams = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'assistantContext' | 'createLlmInstance'>>
-
+type GenerateEsqlParams = AssistantToolParams &
+  RequiredDefined<Pick<AssistantToolParams, 'assistantContext' | 'createLlmInstance'>>;
 
 const TOOL_NAME = 'GenerateESQLTool';
 

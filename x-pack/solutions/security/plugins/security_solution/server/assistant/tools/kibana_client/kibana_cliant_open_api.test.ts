@@ -1,62 +1,71 @@
-import { KibanaClientTool, kibanaOpenApiSpec, kibanaServerlessOpenApiSpec } from "./kibana_client_open_api";
-import { KibanaClientToolParams } from "./kibana_client_tool";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  KibanaClientTool,
+  kibanaOpenApiSpec,
+  kibanaServerlessOpenApiSpec,
+} from './kibana_client_open_api';
+import type { KibanaClientToolParams } from './kibana_client_tool';
 
 const assistantToolParams = {
-    createLlmInstance: jest.fn().mockReturnValue({ bindTools: jest.fn().mockReturnValue({}) }),
-    connectorId: 'fake-connector',
-} as unknown as KibanaClientToolParams
+  createLlmInstance: jest.fn().mockReturnValue({ bindTools: jest.fn().mockReturnValue({}) }),
+  connectorId: 'fake-connector',
+} as unknown as KibanaClientToolParams;
 
-describe("kibana_client_open_api", () => {
-    it("can initialize KibanaClientTool default", async () => {
+describe('kibana_client_open_api', () => {
+  it('can initialize KibanaClientTool default', async () => {
+    const kibanaClientTool = await KibanaClientTool.create();
 
-        const kibanaClientTool = await KibanaClientTool.create()
+    await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
+  });
 
-        await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
+  it('can initialize KibanaClientTool traditional', async () => {
+    const kibanaClientTool = await KibanaClientTool.create({
+      options: {
+        apiSpecPath: kibanaOpenApiSpec,
+      },
     });
 
-    it("can initialize KibanaClientTool traditional", async () => {
+    await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
+  });
 
+  it('can initialize KibanaClientTool serverless', async () => {
+    const kibanaClientTool = await KibanaClientTool.create({
+      options: {
+        apiSpecPath: kibanaServerlessOpenApiSpec,
+      },
+    });
+
+    await expect(
+      kibanaClientTool.getTool({
+        assistantToolParams,
+      })
+    ).resolves.toBeDefined();
+  });
+
+  it('can not initialize KibanaClientTool if yaml file does not exist', async () => {
+    const promise = new Promise(async (resolve, reject) => {
+      try {
         const kibanaClientTool = await KibanaClientTool.create({
-            options: {
-                "apiSpecPath": kibanaOpenApiSpec,
-            }
-        })
+          options: {
+            apiSpecPath: 'fake-path',
+          },
+        });
 
-        await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
+        await kibanaClientTool.getTool({
+          assistantToolParams,
+        });
+        resolve(kibanaClientTool);
+      } catch (error) {
+        reject(error);
+      }
     });
 
-    it("can initialize KibanaClientTool serverless", async () => {
-
-        const kibanaClientTool = await KibanaClientTool.create({
-            options: {
-                "apiSpecPath": kibanaServerlessOpenApiSpec,
-            }
-        })
-
-        await expect(kibanaClientTool.getTool({
-            assistantToolParams
-        })).resolves.toBeDefined();
-    });
-
-    it("can not initialize KibanaClientTool if yaml file does not exist", async () => {
-        const promise = new Promise(async (resolve, reject) => {
-            try {
-                const kibanaClientTool = await KibanaClientTool.create({
-                    options: {
-                        "apiSpecPath": "fake-path",
-                    }
-                })
-
-                await kibanaClientTool.getTool({
-                    assistantToolParams
-                })
-                resolve(kibanaClientTool);
-            }
-            catch (error) {
-                reject(error);
-            }
-        })
-
-        await expect(promise).rejects.toThrow();
-    });
-})
+    await expect(promise).rejects.toThrow();
+  });
+});

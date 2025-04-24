@@ -10,6 +10,7 @@ import { memoize } from 'lodash';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { BuildFlavor } from '@kbn/config';
 import {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantPluginCoreSetupDependencies,
@@ -18,7 +19,6 @@ import {
 } from '../types';
 import { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
-import { BuildFlavor } from '@kbn/config';
 
 export interface IRequestContextFactory {
   create(

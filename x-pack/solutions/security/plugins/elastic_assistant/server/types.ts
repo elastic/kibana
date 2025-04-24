@@ -51,6 +51,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { BuildFlavor } from '@kbn/config';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import {
@@ -63,7 +64,6 @@ import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
-import { BuildFlavor } from '@kbn/config';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -286,9 +286,9 @@ export interface AssistantToolParams {
 
 /**
  * Helper method for working with AssistantToolParams.
- * 
+ *
  * e.g. if you want to use the `assistantContext` property, you can use this method to get the type of the property.
- * 
+ *
  * ```ts
  * export type MyNewTypeWithAssistantContext = AssistantToolParams & OmitUndefined<Pick<AssistantToolParams, 'assistantContext'>>
  * ```
@@ -296,4 +296,3 @@ export interface AssistantToolParams {
 export type RequiredDefined<T> = {
   [K in keyof T]-?: Exclude<T[K], undefined>;
 };
-

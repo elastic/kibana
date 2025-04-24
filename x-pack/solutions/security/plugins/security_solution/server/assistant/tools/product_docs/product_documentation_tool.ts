@@ -15,11 +15,11 @@ import {
 } from '@kbn/elastic-assistant-common';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/server';
+import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
-import { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 
-type ProductDocumentationToolParams = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'llmTasks' | 'connectorId'>>;
-
+type ProductDocumentationToolParams = AssistantToolParams &
+  RequiredDefined<Pick<AssistantToolParams, 'llmTasks' | 'connectorId'>>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called

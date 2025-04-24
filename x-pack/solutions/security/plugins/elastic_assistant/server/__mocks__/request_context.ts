@@ -108,7 +108,7 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
-    buildFlavor: "traditional",
+    buildFlavor: 'traditional',
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,

@@ -13,6 +13,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { BuildFlavor } from '@kbn/config';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -30,7 +31,6 @@ import { registerRoutes } from './routes/register_routes';
 import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
-import { BuildFlavor } from '@kbn/config';
 
 export class ElasticAssistantPlugin
   implements
