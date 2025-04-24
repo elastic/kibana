@@ -54,40 +54,44 @@ export async function runBulkDelete(
     .filter((result) => result.success === true)
     .map((result) => result.id);
 
-  await Promise.all([
-    scopedClusterClient.asCurrentUser.deleteByQuery({
-      index: SLI_DESTINATION_INDEX_PATTERN,
-      refresh: false,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          filter: {
-            terms: {
-              'slo.id': itemsDeletedSuccessfully,
+  try {
+    await Promise.all([
+      scopedClusterClient.asCurrentUser.deleteByQuery({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        refresh: false,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            filter: {
+              terms: {
+                'slo.id': itemsDeletedSuccessfully,
+              },
             },
           },
         },
-      },
-    }),
-    scopedClusterClient.asCurrentUser.deleteByQuery({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      refresh: false,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          filter: {
-            terms: {
-              'slo.id': itemsDeletedSuccessfully,
+      }),
+      scopedClusterClient.asCurrentUser.deleteByQuery({
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        refresh: false,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            filter: {
+              terms: {
+                'slo.id': itemsDeletedSuccessfully,
+              },
             },
           },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } catch (err) {
+    logger.debug(`Error scheduling tasks for data deletion: ${err}`);
+  }
 
   try {
     await rulesClient.bulkDeleteRules({
