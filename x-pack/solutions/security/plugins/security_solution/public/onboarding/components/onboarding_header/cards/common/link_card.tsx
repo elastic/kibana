@@ -19,7 +19,8 @@ import {
 import classNames from 'classnames';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 import { useCardStyles } from './link_card.styles';
-import { TELEMETRY_HEADER_CARD, OnboardingHeaderCardId } from '../../constants';
+import type { OnboardingHeaderCardId } from '../../constants';
+import { TELEMETRY_HEADER_CARD } from '../../constants';
 
 interface LinkCardProps {
   id: OnboardingHeaderCardId;
@@ -41,8 +42,6 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
       trackOnboardingLinkClick(`${TELEMETRY_HEADER_CARD}_${id}`);
       onClick?.();
     }, [id, onClick]);
-
-    const isVideoCard = id === OnboardingHeaderCardId.video;
 
     const panelTitleId = useGeneratedHtmlId();
 
@@ -77,7 +76,7 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
               <span data-test-subj="headerCardLink">{linkText}</span>
             </EuiText>
           </EuiFlexItem>
-          {!isVideoCard && (
+          {target === '_blank' && (
             <EuiFlexItem grow={false}>
               <EuiIcon size="s" type="popout" color="primary" />
             </EuiFlexItem>
