@@ -1216,7 +1216,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packageInfos = await getPackageInfoForPackagePolicies(
       [...packagePolicyUpdates, ...oldPackagePolicies],
-      soClient
+      soClient,
+      true
     );
     const allSecretsToDelete: PolicySecretReference[] = [];
 
@@ -2604,7 +2605,8 @@ export const packagePolicyService: PackagePolicyClient = new PackagePolicyClient
 
 async function getPackageInfoForPackagePolicies(
   packagePolicies: NewPackagePolicyWithId[],
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  ignoreMissing?: boolean
 ) {
   const pkgInfoMap = new Map<string, { name: string; version: string }>();
 
@@ -2619,14 +2621,20 @@ async function getPackageInfoForPackagePolicies(
   await pMap(pkgInfoMap.keys(), async (pkgKey) => {
     const pkgInfo = pkgInfoMap.get(pkgKey);
     if (pkgInfo) {
-      const pkgInfoData = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: pkgInfo.name,
-        pkgVersion: pkgInfo.version,
-        prerelease: true,
-      });
+      try {
+        const pkgInfoData = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: pkgInfo.name,
+          pkgVersion: pkgInfo.version,
+          prerelease: true,
+        });
 
-      resultMap.set(pkgKey, pkgInfoData);
+        resultMap.set(pkgKey, pkgInfoData);
+      } catch (error) {
+        if (!ignoreMissing) {
+          throw error;
+        }
+      }
     }
   });
 
