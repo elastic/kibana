@@ -13,6 +13,8 @@ import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../commo
 import { setupEnvironment } from '../helpers';
 import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
+const currentMinVersion = new SemVer(MIN_VERSION_TO_UPGRADE_TO_LATEST);
+
 describe('Overview Page', () => {
   let testBed: OverviewTestBed;
   beforeEach(async () => {
@@ -25,11 +27,16 @@ describe('Overview Page', () => {
       const { exists, find } = testBed;
 
       expect(exists('whatsNewLink')).toBe(true);
-      expect(find('whatsNewLink').text()).toContain('latest release');
+      expect(find('whatsNewLink').text()).toContain("What's new in version");
     });
 
-    test('Has a link for upgrade assistant in page header', () => {
-      const { exists } = testBed;
+    describe('current version can be upgrated to last one', () => {
+      beforeEach(async () => {
+        const versionMock = {
+          currentMajor: currentMinVersion.major,
+          currentMinor: currentMinVersion.minor,
+          currentPatch: currentMinVersion.patch,
+        };
 
         await act(async () => {
           testBed = await setupOverviewPage(setupEnvironment().httpSetup, {

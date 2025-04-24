@@ -20,6 +20,8 @@ export interface KibanaVersionContext {
   currentMajor: number;
   prevMajor: number;
   nextMajor: number;
+  currentMinor: number;
+  currentPatch: number;
 }
 
 export interface SetupDependencies {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UpdateIndexOperation } from '../../../common/update_index';
 import { getReindexWarnings } from '../reindexing/index_settings';
+import { getRollupJobByIndexName } from '../rollup_job';
 
 export interface UpdateIndexParams {
   esClient: ElasticsearchClient;
   index: string;
   operations: UpdateIndexOperation[];
-  log?: Logger;
+  log: Logger;
 }
 
 /**

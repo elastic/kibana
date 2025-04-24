@@ -25,6 +25,31 @@ describe('updateIndex', () => {
   const mockGetReindexWarnings = getReindexWarnings as jest.Mock;
   const mockLogger = loggingSystemMock.create().get();
   const mockClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+  mockClient.rollup.getRollupIndexCaps.mockResponse({
+    testIndex: {
+      rollup_jobs: [
+        {
+          job_id: 'testJob',
+          rollup_index: 'test_rollup_index',
+          index_pattern: 'test-*',
+          fields: {},
+        },
+      ],
+    },
+  });
+  mockClient.rollup.getJobs.mockResponse({
+    jobs: [
+      {
+        // @ts-ignore - mocking the rollup job doesnt require us to populate all this fields
+        config: {},
+        // @ts-ignore - mocking the rollup job doesnt require us to populate all this fields
+        stats: {},
+        status: {
+          job_state: 'stopped',
+        },
+      },
+    ],
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -198,74 +223,22 @@ describe('updateIndex', () => {
     });
   });
 
-  describe('unfreeze operation', () => {
-    it('should unfreeze the index', async () => {
-      mockClient.indices.unfreeze.mockResponseOnce(ackResponseMock);
-
-      await updateIndex({
-        esClient: mockClient,
-        index: 'testIndex',
-        operations: ['unfreeze'],
-        log: mockLogger,
-      });
-
-      expect(mockClient.indices.unfreeze).toHaveBeenCalledWith({
-        index: 'testIndex',
-      });
-    });
-
-    it('should throw an error if unfreeze is not acknowledged', async () => {
-      mockClient.indices.unfreeze.mockResponseOnce({
-        ...ackResponseMock,
-        acknowledged: false,
-      });
-
-      await expect(
-        updateIndex({
-          esClient: mockClient,
-          index: 'testIndex',
-          operations: ['unfreeze'],
-          log: mockLogger,
-        })
-      ).rejects.toThrow('Could not set apply unfreeze to testIndex.');
-    });
-
-    it('should not remove deprecated settings for unfreeze operation', async () => {
-      mockClient.indices.unfreeze.mockResponseOnce(ackResponseMock);
-
-      await updateIndex({
-        esClient: mockClient,
-        index: 'testIndex',
-        operations: ['unfreeze'],
-        log: mockLogger,
-      });
-
-      expect(mockClient.indices.get).not.toHaveBeenCalled();
-      expect(mockGetReindexWarnings).not.toHaveBeenCalled();
-      expect(mockClient.indices.putSettings).not.toHaveBeenCalled();
-    });
-  });
-
   describe('multiple operations', () => {
     it('should process all operations in order', async () => {
       mockClient.indices.addBlock.mockResponseOnce(ackResponseMock);
-      mockClient.indices.unfreeze.mockResponseOnce(ackResponseMock);
       mockClient.indices.get.mockResponseOnce({ testIndex: { settings: { index: {} } } });
       mockGetReindexWarnings.mockReturnValueOnce([]);
 
       await updateIndex({
         esClient: mockClient,
         index: 'testIndex',
-        operations: ['blockWrite', 'unfreeze'],
+        operations: ['blockWrite'],
         log: mockLogger,
       });
 
       expect(mockClient.indices.addBlock).toHaveBeenCalledWith({
         index: 'testIndex',
         block: 'write',
-      });
-      expect(mockClient.indices.unfreeze).toHaveBeenCalledWith({
-        index: 'testIndex',
       });
     });
   });
