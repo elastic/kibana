@@ -52,13 +52,15 @@ const getAttachments = ({
     const timestampField = dataView.timeFieldName;
     const query = api.query$.getValue() as Query | undefined;
     const filters = api.filters$.getValue() || [];
+    const parentFilters = api.parentApi?.filters$.getValue() || [];
+    const appliedFilters = [...filters, ...parentFilters];
 
     return [
       getSavedSearchCaseAttachment({
         index: indexPattern,
         timeRange: appliedTimeRange,
         timestampField,
-        filters: filters.length ? filters : undefined,
+        filters: appliedFilters.length ? appliedFilters : undefined,
         query,
       }),
     ];
