@@ -2050,8 +2050,6 @@
       "@kbn/unified-field-list-examples-plugin/*": ["examples/unified_field_list_examples/*"],
       "@kbn/unified-histogram": ["src/platform/packages/shared/kbn-unified-histogram"],
       "@kbn/unified-histogram/*": ["src/platform/packages/shared/kbn-unified-histogram/*"],
-      "@kbn/unified-histogram-plugin": ["src/platform/plugins/shared/unified_histogram"],
-      "@kbn/unified-histogram-plugin/*": ["src/platform/plugins/shared/unified_histogram/*"],
       "@kbn/unified-search-plugin": ["src/platform/plugins/shared/unified_search"],
       "@kbn/unified-search-plugin/*": ["src/platform/plugins/shared/unified_search/*"],
       "@kbn/unified-tabs": ["src/platform/packages/shared/kbn-unified-tabs"],

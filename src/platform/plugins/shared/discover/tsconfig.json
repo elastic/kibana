@@ -36,7 +36,6 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/unified-histogram-plugin",
     "@kbn/analytics",
     "@kbn/saved-objects-management-plugin",
     "@kbn/lens-plugin",
