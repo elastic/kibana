@@ -6,26 +6,59 @@
  */
 
 import {
-  AttackDiscoveryCreateProps,
-  AttackDiscoveryUpdateProps,
-  AttackDiscoveryResponse,
+  type AttackDiscoveryAlert,
+  type AttackDiscoveryCreateProps,
+  type AttackDiscoveryUpdateProps,
+  type AttackDiscoveryResponse,
+  type CreateAttackDiscoveryAlertsParams,
+  type FindAttackDiscoveryAlertsParams,
+  type AttackDiscoveryFindResponse,
+  type GetAttackDiscoveryGenerationsResponse,
+  type PostAttackDiscoveryGenerationsDismissResponse,
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
 } from '@kbn/elastic-assistant-common';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { findAllAttackDiscoveries } from './find_all_attack_discoveries/find_all_attack_discoveries';
-import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_connector_id/find_attack_discovery_by_connector_id';
-import { updateAttackDiscovery } from './update_attack_discovery/update_attack_discovery';
-import { createAttackDiscovery } from './create_attack_discovery/create_attack_discovery';
-import { getAttackDiscovery } from './get_attack_discovery/get_attack_discovery';
+import type { Logger } from '@kbn/core/server';
+
 import {
   AIAssistantDataClient,
   AIAssistantDataClientParams,
 } from '../../../ai_assistant_data_clients';
+import { findAllAttackDiscoveries } from './find_all_attack_discoveries/find_all_attack_discoveries';
+import { combineFindAttackDiscoveryFilters } from './combine_find_attack_discovery_filters';
+import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_connector_id/find_attack_discovery_by_connector_id';
+import { updateAttackDiscovery } from './update_attack_discovery/update_attack_discovery';
+import { createAttackDiscovery } from './create_attack_discovery/create_attack_discovery';
+import { createAttackDiscoveryAlerts } from './create_attack_discovery_alerts';
+import { getIndexTemplateAndPattern } from '../../data_stream/helpers';
+import { getAttackDiscovery } from './get_attack_discovery/get_attack_discovery';
+import { getAttackDiscoveryGenerations } from './get_attack_discovery_generations';
+import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_generation_by_id_query';
+import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_generations_query';
+import { getCombinedFilter } from './get_combined_filter';
+import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
+import { AttackDiscoveryAlertDocument } from '../schedules/types';
+import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
+import { IIndexPatternString } from '../../../types';
 
-type AttackDiscoveryDataClientParams = AIAssistantDataClientParams;
+const FIRST_PAGE = 1; // CAUTION: sever-side API uses a 1-based page index convention (for consistency with similar existing APIs)
+const DEFAULT_PER_PAGE = 10;
+
+type AttackDiscoveryDataClientParams = AIAssistantDataClientParams & {
+  attackDiscoveryAlertsIndexPatternsResourceName: string;
+};
 
 export class AttackDiscoveryDataClient extends AIAssistantDataClient {
+  private attackDiscoveryAlertsIndexTemplateAndPattern: IIndexPatternString;
+
   constructor(public readonly options: AttackDiscoveryDataClientParams) {
     super(options);
+
+    this.attackDiscoveryAlertsIndexTemplateAndPattern = getIndexTemplateAndPattern(
+      this.options.attackDiscoveryAlertsIndexPatternsResourceName,
+      this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
+    );
   }
 
   /**
@@ -75,6 +108,177 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       user: authenticatedUser,
       attackDiscoveryCreate,
     });
+  };
+
+  public createAttackDiscoveryAlerts = async ({
+    authenticatedUser,
+    createAttackDiscoveryAlertsParams,
+  }: {
+    authenticatedUser: AuthenticatedUser;
+    createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
+  }): Promise<AttackDiscoveryAlert[]> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    return createAttackDiscoveryAlerts({
+      attackDiscoveryAlertsIndex: this.attackDiscoveryAlertsIndexTemplateAndPattern.alias,
+      authenticatedUser,
+      createAttackDiscoveryAlertsParams,
+      esClient,
+      logger: this.options.logger,
+      spaceId: this.spaceId,
+    });
+  };
+
+  public findAttackDiscoveryAlerts = async ({
+    authenticatedUser,
+    findAttackDiscoveryAlertsParams,
+    logger,
+  }: {
+    authenticatedUser: AuthenticatedUser;
+    findAttackDiscoveryAlertsParams: FindAttackDiscoveryAlertsParams;
+    logger: Logger;
+  }): Promise<AttackDiscoveryFindResponse> => {
+    const aggs = getFindAttackDiscoveryAlertsAggregation();
+
+    const {
+      alertIds,
+      connectorNames,
+      end,
+      ids,
+      search,
+      shared,
+      sortField = '@timestamp',
+      sortOrder = 'desc',
+      start,
+      status,
+      page = FIRST_PAGE,
+      perPage = DEFAULT_PER_PAGE,
+    } = findAttackDiscoveryAlertsParams;
+
+    const filter = combineFindAttackDiscoveryFilters({
+      alertIds,
+      connectorNames,
+      end,
+      ids,
+      search,
+      start,
+      status,
+    });
+
+    const combinedFilter = getCombinedFilter({
+      authenticatedUser,
+      filter,
+      shared,
+    });
+
+    const index = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-*`;
+
+    const result = await this.findDocuments<AttackDiscoveryAlertDocument>({
+      aggs,
+      filter: combinedFilter,
+      index,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+    });
+
+    const {
+      connectorNames: alertConnectorNames,
+      data,
+      uniqueAlertIdsCount,
+    } = transformSearchResponseToAlerts({
+      logger,
+      response: result.data,
+    });
+
+    return {
+      connector_names: alertConnectorNames,
+      data,
+      page: result.page,
+      perPage: result.perPage,
+      total: result.total,
+      unique_alert_ids_count: uniqueAlertIdsCount,
+    };
+  };
+
+  public getAttackDiscoveryGenerations = async ({
+    authenticatedUser,
+    eventLogIndex,
+    getAttackDiscoveryGenerationsParams,
+    logger,
+    spaceId,
+  }: {
+    authenticatedUser: AuthenticatedUser;
+    eventLogIndex: string;
+    getAttackDiscoveryGenerationsParams: {
+      size: number;
+      start?: string;
+      end?: string;
+    };
+    logger: Logger;
+    spaceId: string;
+  }): Promise<GetAttackDiscoveryGenerationsResponse> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const { size, start, end } = getAttackDiscoveryGenerationsParams;
+    const generationsQuery = getAttackDiscoveryGenerationsQuery({
+      authenticatedUser,
+      end,
+      eventLogIndex,
+      size,
+      spaceId,
+      start,
+    });
+
+    return getAttackDiscoveryGenerations({
+      authenticatedUser,
+      esClient,
+      eventLogIndex,
+      generationsQuery,
+      getAttackDiscoveryGenerationsParams,
+      logger,
+      spaceId,
+    });
+  };
+
+  public getAttackDiscoveryGenerationById = async ({
+    authenticatedUser,
+    eventLogIndex,
+    executionUuid,
+    logger,
+    spaceId,
+  }: {
+    authenticatedUser: AuthenticatedUser;
+    eventLogIndex: string;
+    executionUuid: string;
+    logger: Logger;
+    spaceId: string;
+  }): Promise<PostAttackDiscoveryGenerationsDismissResponse> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const generationByIdQuery = getAttackDiscoveryGenerationByIdQuery({
+      authenticatedUser,
+      eventLogIndex,
+      executionUuid,
+      spaceId,
+    });
+
+    const result = await getAttackDiscoveryGenerations({
+      authenticatedUser,
+      esClient,
+      eventLogIndex,
+      generationsQuery: generationByIdQuery,
+      getAttackDiscoveryGenerationsParams: { size: 1 },
+      logger,
+      spaceId,
+    });
+
+    if (result?.generations[0] == null) {
+      throw new Error(`Generation with execution_uuid ${executionUuid} not found`);
+    }
+
+    return result?.generations[0];
   };
 
   /**
