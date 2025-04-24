@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import type { RenderChildrenType } from '../types';
+import type { IntegrationCardMetadata, RenderChildrenType } from '../types';
 import { useIntegrationCardList } from '../hooks/use_integration_card_list';
 import { IntegrationsCardGridTabsComponent } from './integration_card_grid_tabs_component';
 
-export const DEFAULT_CHECK_COMPLETE_METADATA = {
+export const DEFAULT_CHECK_COMPLETE_METADATA: IntegrationCardMetadata = {
   installedIntegrationsCount: 0,
   isAgentRequired: false,
   installedIntegrations: [],
@@ -27,7 +27,7 @@ export const IntegrationsCardGridTabs: RenderChildrenType = ({
 
   const list = useIntegrationCardList({
     integrationsList: allowedIntegrations,
-    featuredCardIds: selectedTabResult.selectedTab?.featuredCardIds,
+    featuredCardNames: selectedTabResult.selectedTab?.featuredCardNames,
     installedIntegrations,
   });
 

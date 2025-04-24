@@ -7,15 +7,26 @@
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 
+export interface InstalledIntegrationItem {
+  dataStream: string[];
+  name: string;
+  title: string;
+  status: string;
+}
+
+export interface InstalledIntegrations {
+  items: InstalledIntegrationItem[];
+}
+
 export interface IntegrationCardMetadata {
   installedIntegrationsCount: number;
   isAgentRequired: boolean;
-  installedIntegrations: [];
+  installedIntegrations?: InstalledIntegrationItem[];
 }
 
 export interface Tab {
   category: string;
-  featuredCardIds?: Array<IntegrationCardItem['id']>;
+  featuredCardNames?: Array<IntegrationCardItem['id']>;
   iconType?: string;
   id: IntegrationTabId;
   label: string;
@@ -52,7 +63,7 @@ export type RenderChildrenType = React.FC<{
   allowedIntegrations: IntegrationCardItem[];
   availablePackagesResult: AvailablePackagesResult;
   checkCompleteMetadata?: IntegrationCardMetadata;
-  featuredCardIds?: string[];
+  featuredCardNames?: string[];
   selectedTabResult: UseSelectedTabReturn;
   topCalloutRenderer?: TopCalloutRenderer;
 }>;

@@ -26,7 +26,7 @@ export const AvailableIntegrationsComponent: React.FC<{
   topCalloutRenderer,
 }) => {
   const { availablePackagesResult, allowedIntegrations } = useFilterCards({
-    featuredCardIds: selectedTabResult.selectedTab?.featuredCardIds,
+    featuredCardNames: selectedTabResult.selectedTab?.featuredCardNames,
     useAvailablePackages,
     prereleaseIntegrationsEnabled,
   });

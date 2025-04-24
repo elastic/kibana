@@ -44,7 +44,7 @@ describe('useIntegrationCardList', () => {
     jest.clearAllMocks();
   });
 
-  it('returns filtered integration cards when featuredCardIds are not provided', () => {
+  it('returns filtered integration cards when featuredCardNames are not provided', () => {
     const mockFilteredCards = {
       featuredCards: {},
       integrationCards: mockIntegrationsList,
@@ -59,8 +59,8 @@ describe('useIntegrationCardList', () => {
     expect(result.current).toEqual(mockFilteredCards.integrationCards);
   });
 
-  it('returns featured cards when featuredCardIds are provided', () => {
-    const featuredCardIds = ['epr:endpoint'];
+  it('returns featured cards when featuredCardNames are provided', () => {
+    const featuredCardNames = ['epr:endpoint'];
     const mockFilteredCards = {
       featuredCards: {
         'epr:endpoint': mockIntegrationsList[0],
@@ -71,7 +71,7 @@ describe('useIntegrationCardList', () => {
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
-        featuredCardIds,
+        featuredCardNames,
       })
     );
 

@@ -22,10 +22,14 @@ import type { TrackLinkClick } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../utils/integrations';
 import { useIntegrationContext } from './integration_context';
+import type { InstalledIntegrationItem } from '../types';
 
-const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCardIds: string[]) => {
+const extractFeaturedCards = (
+  filteredCards: IntegrationCardItem[],
+  featuredCardNames: string[]
+) => {
   return filteredCards.reduce<IntegrationCardItem[]>((acc, card) => {
-    if (featuredCardIds.includes(card.id)) {
+    if (featuredCardNames.includes(card.name)) {
       acc.push(card);
     }
     return acc;
@@ -33,19 +37,19 @@ const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCard
 };
 
 const getFilteredCards = ({
-  featuredCardIds,
+  featuredCardNames,
   getAppUrl,
   integrationsList,
   navigateTo,
   installedIntegrations,
   trackLinkClick,
 }: {
-  featuredCardIds?: string[];
+  featuredCardNames?: string[];
   getAppUrl: GetAppUrl;
   integrationsList: IntegrationCardItem[];
   navigateTo: NavigateTo;
   trackLinkClick?: TrackLinkClick;
-  installedIntegrations: [];
+  installedIntegrations: InstalledIntegrationItem[];
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
     addSecuritySpecificProps({
@@ -56,10 +60,10 @@ const getFilteredCards = ({
       trackLinkClick,
     })
   );
-  if (!featuredCardIds) {
+  if (!featuredCardNames) {
     return { featuredCards: [], integrationCards: securityIntegrationsList };
   }
-  const featuredCards = extractFeaturedCards(securityIntegrationsList, featuredCardIds);
+  const featuredCards = extractFeaturedCards(securityIntegrationsList, featuredCardNames);
   return {
     featuredCards,
     integrationCards: securityIntegrationsList,
@@ -76,7 +80,7 @@ export const addSecuritySpecificProps = ({
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
-  installedIntegrations: IntegrationCardItem[];
+  installedIntegrations: InstalledIntegrationItem[];
   trackLinkClick?: TrackLinkClick;
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
@@ -88,7 +92,7 @@ export const addSecuritySpecificProps = ({
       : card.url;
 
   const isInstalled = installedIntegrations?.some(
-    (installedList) => installedList.name.toLowerCase() === card.name.toLowerCase()
+    (installedList) => installedList.name === card.name
   );
   return {
     ...card,
@@ -117,12 +121,12 @@ export const addSecuritySpecificProps = ({
 
 export const useIntegrationCardList = ({
   integrationsList,
-  featuredCardIds,
-  installedIntegrations,
+  featuredCardNames,
+  installedIntegrations = [],
 }: {
   integrationsList: IntegrationCardItem[];
-  featuredCardIds?: string[] | undefined;
-  installedIntegrations: [];
+  featuredCardNames?: string[] | undefined;
+  installedIntegrations?: InstalledIntegrationItem[];
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
 
@@ -135,21 +139,21 @@ export const useIntegrationCardList = ({
         navigateTo,
         getAppUrl,
         integrationsList,
-        featuredCardIds,
+        featuredCardNames,
         trackLinkClick,
-        installedIntegrations: installedIntegrations?.items ?? [],
+        installedIntegrations,
       }),
     [
       navigateTo,
       getAppUrl,
       integrationsList,
-      featuredCardIds,
+      featuredCardNames,
       trackLinkClick,
       installedIntegrations,
     ]
   );
 
-  if (featuredCardIds && featuredCardIds.length > 0) {
+  if (featuredCardNames && featuredCardNames.length > 0) {
     return featuredCards;
   }
   return integrationCards ?? [];

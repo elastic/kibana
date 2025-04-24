@@ -10,11 +10,11 @@ import { useMemo } from 'react';
 
 export const useFilterCards = ({
   useAvailablePackages,
-  featuredCardIds,
+  featuredCardNames,
   prereleaseIntegrationsEnabled,
 }: {
   useAvailablePackages: AvailablePackagesHookType;
-  featuredCardIds?: string[];
+  featuredCardNames?: string[];
   prereleaseIntegrationsEnabled: boolean;
 }) => {
   const {
@@ -38,12 +38,11 @@ export const useFilterCards = ({
         setSelectedSubCategory,
       },
       allowedIntegrations: filteredCards.filter(
-        (card) =>
-          (featuredCardIds?.includes(card.name) || featuredCardIds?.includes(card.id)) ?? true
+        (card) => featuredCardNames?.includes(card.name) ?? true
       ),
     }),
     [
-      featuredCardIds,
+      featuredCardNames,
       filteredCards,
       isLoading,
       searchTerm,

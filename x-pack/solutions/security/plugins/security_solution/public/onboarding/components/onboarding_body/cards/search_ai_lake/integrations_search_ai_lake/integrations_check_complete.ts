@@ -20,7 +20,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
 > = async (services: StartServices) => {
   const { isComplete, installedPackages } = await getIntegrationList(
     services,
-    INTEGRATION_TABS[0].featuredCardIds
+    INTEGRATION_TABS[0].featuredCardNames
   );
 
   const { isAgentRequired } = await getAgentsData(services, isComplete);

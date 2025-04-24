@@ -17,9 +17,9 @@ export const INTEGRATION_TABS: Tab[] = [
     overflow: 'hidden',
     showSearchTools: false,
     // Fleet has a default sorting for integrations by category that Security Solution does not want to apply
-    // so we need to disable the sorting for the recommended tab to allow static ordering according to the featuredCardIds
+    // so we need to disable the sorting for the recommended tab to allow static ordering according to the featuredCardNames
     sortByFeaturedIntegrations: false,
-    featuredCardIds: AI_FOR_SOC_INTEGRATIONS,
+    featuredCardNames: AI_FOR_SOC_INTEGRATIONS,
     height: `${INTEGRATION_CARD_HEIGHT * 1.8}px`,
   },
 ];

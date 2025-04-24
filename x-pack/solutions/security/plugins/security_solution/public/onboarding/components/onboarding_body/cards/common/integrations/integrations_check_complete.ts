@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { GetPackagesResponse, IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { EPM_API_ROUTES, installationStatuses } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { AGENT_INDEX } from './constants';
 import type { StartServices } from '../../../../../../types';
+import type { InstalledIntegrations } from '../../../../../../common/lib/integrations/types';
 
 export const getCompleteBadgeText = (installedCount: number) =>
   i18n.translate('xpack.securitySolution.onboarding.integrationsCard.badge.completeText', {
@@ -28,14 +29,14 @@ export const getIntegrationList = async (
   availableIntegrations?: Array<IntegrationCardItem['id']>
 ) => {
   const installedPackageData = await services.http
-    .get<GetPackagesResponse>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
+    .get<InstalledIntegrations>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
       version: '2023-10-31',
       query: {
         showOnlyActiveDataStreams: true,
       },
     })
     .catch((err: Error) => {
-      const emptyItems: GetPackagesResponse['items'] = [];
+      const emptyItems: InstalledIntegrations['items'] = [];
       services.notifications.toasts.addError(err, {
         title: i18n.translate(
           'xpack.securitySolution.onboarding.integrationsCard.checkComplete.fetchIntegrations.errorTitle',
