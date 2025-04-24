@@ -317,7 +317,7 @@ describe('getNormalizedDataStreams', () => {
     latestVersion: '1.3.0',
     keepPoliciesUpToDate: false,
     status: 'not_installed',
-  }
+  };
   const expectedInputPackageDataStream: RegistryDataStream = {
     type: 'logs',
     dataset: 'log.logs',
@@ -344,10 +344,12 @@ describe('getNormalizedDataStreams', () => {
     expect(getNormalizedDataStreams(inputPkg)).toEqual([expectedInputPackageDataStream]);
   });
   it('should use user-defined data stream type in input package', () => {
-    expect(getNormalizedDataStreams(inputPkg, undefined, 'metrics')).toEqual([{
-      ...expectedInputPackageDataStream,
-      type: 'metrics',
-    }]);
+    expect(getNormalizedDataStreams(inputPkg, undefined, 'metrics')).toEqual([
+      {
+        ...expectedInputPackageDataStream,
+        type: 'metrics',
+      },
+    ]);
   });
 });
 

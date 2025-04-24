@@ -29,7 +29,10 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../../../../../../../../../common/constants';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+} from '../../../../../../../../../common/constants';
 
 import { useConfig, sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
@@ -103,7 +106,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
-    const customDataStreamTypeVarValue = customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
+    const customDataStreamTypeVarValue =
+      customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
@@ -394,7 +398,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                     [DATA_STREAM_TYPE_VAR_NAME]: {
                                       type: 'string',
                                       value: type,
-                                    }
+                                    },
                                   },
                                 });
                               }}

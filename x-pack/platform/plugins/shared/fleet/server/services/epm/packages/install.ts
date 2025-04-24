@@ -1304,7 +1304,9 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (pkgInfo.type !== 'input') return;
 
   const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
-  const dataStreamType = packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value || packagePolicy.inputs[0].streams[0].data_stream.type;
+  const dataStreamType =
+    packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+    packagePolicy.inputs[0].streams[0].data_stream.type;
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
