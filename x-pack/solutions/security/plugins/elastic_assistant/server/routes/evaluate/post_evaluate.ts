@@ -437,6 +437,7 @@ export const postEvaluateRoute = (
                 llmType,
                 isOssModel,
                 graph: getDefaultAssistantGraph({
+                  contentReferencesStore,
                   agentRunnable,
                   dataClients,
                   createLlmInstance,
