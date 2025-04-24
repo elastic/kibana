@@ -30,7 +30,6 @@ import { setFieldFormats } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { ReportingCore } from '..';
 
 import type { ReportingInternalSetup, ReportingInternalStart } from '../core';
@@ -88,7 +87,6 @@ export const createMockPluginStart = async (
     securityService: coreStartMock.security, // we need authc from core.security start
     logger,
     screenshotting: createMockScreenshottingStart(),
-    notifications: notificationsMock.createStart(),
     ...startMock, // allows to override with test instances
   };
 };

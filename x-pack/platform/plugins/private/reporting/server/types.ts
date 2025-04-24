@@ -32,7 +32,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
 /**
  * Plugin Setup Contract
@@ -64,7 +63,6 @@ export interface ReportingStartDeps {
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
-  notifications: NotificationsPluginStart;
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
 }
