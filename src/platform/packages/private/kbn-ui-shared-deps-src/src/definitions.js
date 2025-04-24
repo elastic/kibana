@@ -52,10 +52,20 @@ const externals = {
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
+  'react-use': '__kbnSharedDeps__.ReactUse',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
+  'fp-ts/Option': '__kbnSharedDeps__.FpTs.option',
+  'fp-ts/pipeable': '__kbnSharedDeps__.FpTs.pipeable',
+  'fp-ts/TaskEither': '__kbnSharedDeps__.FpTs.taskEither',
+  'fp-ts/Either': '__kbnSharedDeps__.FpTs.either',
+  'fp-ts/function': '__kbnSharedDeps__.FpTs.function',
+  'fp-ts/Task': '__kbnSharedDeps__.FpTs.task',
+  'fp-ts/Set': '__kbnSharedDeps__.FpTs.set',
+  'fp-ts/Ord': '__kbnSharedDeps__.FpTs.ord',
+  'fp-ts/Array': '__kbnSharedDeps__.FpTs.array',
   'io-ts': '__kbnSharedDeps__.IoTs',
   'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTsReporter',
   'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTsPathReporter',
@@ -66,6 +76,29 @@ const externals = {
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  // cache some used methods of the react-use library
+  ...[
+    'useAsync',
+    'useAsyncFn',
+    'useDebounce',
+    'useDeepCompareEffect',
+    'useEffectOnce',
+    'useEvent',
+    'useLatest',
+    'useList',
+    'useLocalStorage',
+    'useMount',
+    'useMountedState',
+    'usePrevious',
+    'useSessionStorage',
+    'useTimeoutFn',
+    'useToggle',
+    'useUnmount',
+    'useUpdateEffect',
+  ].reduce((memo, subset) => {
+    memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
+    return memo;
+  }, {}),
 
   /**
    * big deps which are locked to a single version
@@ -113,6 +146,7 @@ const externals = {
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
+  '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

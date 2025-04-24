@@ -66,7 +66,7 @@ describe('FORK', () => {
     it('when unsupported command', () => {
       const text = `FROM kibana_ecommerce_data
       | FORK
-          (EVAL bytes > 1)`;
+          (DROP bytes)`;
 
       const { errors } = parse(text);
 
