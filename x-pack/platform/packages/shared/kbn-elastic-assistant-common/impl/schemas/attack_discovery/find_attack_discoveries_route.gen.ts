@@ -26,6 +26,10 @@ export const AttackDiscoveryFindSortField = z.literal('@timestamp');
 export type AttackDiscoveryFindRequestQuery = z.infer<typeof AttackDiscoveryFindRequestQuery>;
 export const AttackDiscoveryFindRequestQuery = z.object({
   /**
+   * filter by alert ids within attack discovery
+   */
+  alert_ids: ArrayFromString(z.string()).optional(),
+  /**
    * filter by connector names
    */
   connector_names: ArrayFromString(z.string()).optional(),

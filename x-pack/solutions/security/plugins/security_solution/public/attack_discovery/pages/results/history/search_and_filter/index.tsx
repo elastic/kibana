@@ -60,7 +60,7 @@ interface Props {
     React.SetStateAction<Array<EuiSelectableOption<ConnectorFilterOptionData>>>
   >;
   setEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setFilterByAlertIds: React.Dispatch<React.SetStateAction<string[]>>;
+  setFilterByAlertIds: (ids: string[]) => void;
   setQuery: React.Dispatch<React.SetStateAction<string | undefined>>;
   setShared: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setStart: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -152,6 +152,11 @@ const SearchAndFilterComponent: React.FC<Props> = ({
     [localOnRefresh]
   );
 
+  const removeAlertIdFromFilter = useCallback(
+    (id: string) => setFilterByAlertIds(filterByAlertIds.filter((alertId) => alertId !== id)),
+    [filterByAlertIds, setFilterByAlertIds]
+  );
+
   return (
     <>
       <EuiFlexGroup
@@ -236,9 +241,7 @@ const SearchAndFilterComponent: React.FC<Props> = ({
                   color="hollow"
                   iconSide="right"
                   iconType="cross"
-                  iconOnClick={() =>
-                    setFilterByAlertIds((prev) => prev.filter((alertId) => alertId !== id))
-                  }
+                  iconOnClick={() => removeAlertIdFromFilter(id)}
                   iconOnClickAriaLabel={i18n.CLEAR_FILTER_ID(id)}
                 >
                   {`_id: ${id}`}

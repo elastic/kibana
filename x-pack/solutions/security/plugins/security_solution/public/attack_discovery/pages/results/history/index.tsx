@@ -66,8 +66,7 @@ const HistoryComponent: React.FC<Props> = ({
 }) => {
   const { assistantAvailability, http } = useAssistantContext();
 
-  // initialize filter by alert ids from the URL:
-  const [filterByAlertIds, setFilterByAlertIds] = useState<string[]>(useIdsFromUrl());
+  const { ids: filterByAlertIds, setIdsUrl: setFilterByAlertIds } = useIdsFromUrl();
 
   // history time selection:
   const [historyStart, setHistoryStart] = useLocalStorage<string>(
