@@ -8,6 +8,7 @@
 import { Client, Example } from 'langsmith';
 import type { Logger } from '@kbn/core/server';
 import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
+import { isEmpty } from 'lodash';
 
 /**
  * Fetches a dataset from LangSmith. Note that `client` will use env vars unless langSmithApiKey is specified
@@ -54,7 +55,7 @@ export const fetchLangSmithDatasets = async ({
   langSmithApiKey?: string;
 }): Promise<string[]> => {
   try {
-    const client = new Client({ apiKey: langSmithApiKey });
+    const client = new Client(!isEmpty(langSmithApiKey) ? { apiKey: langSmithApiKey } : undefined);
     const datasets = [];
     for await (const dataset of client.listDatasets()) {
       datasets.push(dataset);
