@@ -154,7 +154,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
             />
           );
       }
-    }, [connectors, currentTab, dataViews, defaultConnector]);
+    }, [connectors, currentTab, dataViews, defaultConnector, modelEvaluatorEnabled]);
     return (
       <EuiFlexGroup
         data-test-subj="SearchAILakeConfigurationsSettingsManagement"
