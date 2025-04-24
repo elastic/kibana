@@ -30,13 +30,24 @@ export const KIBANA_CLIENT_TOOL: AssistantTool = {
     sourceRegister: APP_UI_ID,
     isSupported: (params: AssistantToolParams): params is KibanaClientToolParams => {
         const { createLlmInstance, assistantContext } = params;
+
         return createLlmInstance != null && assistantContext != null && assistantContext.getRegisteredFeatures('securitySolutionUI').kibanaClientToolEnabled;
     },
     async getTool(params: AssistantToolParams) {
         if (!this.isSupported(params)) return null;
-
         const kibanaClientToolParams = params as KibanaClientToolParams;
-        const kibanaClientTool = await getKibanaClientTool();
+        const { buildFlavor } = kibanaClientToolParams.assistantContext;
+        const flavouredApiSpecPath = KibanaClientTool.getKibanaOpenApiSpec(buildFlavor)
+
+        if (!flavouredApiSpecPath) {
+            return null;
+        }
+
+        const kibanaClientTool = await getKibanaClientTool({
+            options: {
+                apiSpecPath: flavouredApiSpecPath
+            }
+        });
 
         return kibanaClientTool.getTool({
             assistantToolParams: kibanaClientToolParams,

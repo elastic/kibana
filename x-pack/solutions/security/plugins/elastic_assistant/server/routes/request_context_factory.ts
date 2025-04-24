@@ -18,6 +18,7 @@ import {
 } from '../types';
 import { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
+import { BuildFlavor } from '@kbn/config';
 
 export interface IRequestContextFactory {
   create(
@@ -31,16 +32,19 @@ interface ConstructorOptions {
   core: ElasticAssistantPluginCoreSetupDependencies;
   plugins: ElasticAssistantPluginSetupDependencies;
   kibanaVersion: string;
+  buildFlavor: BuildFlavor;
   assistantService: AIAssistantService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
   private readonly logger: Logger;
   private readonly assistantService: AIAssistantService;
+  private readonly buildFlavor: BuildFlavor;
 
   constructor(private readonly options: ConstructorOptions) {
     this.logger = options.logger;
     this.assistantService = options.assistantService;
+    this.buildFlavor = options.buildFlavor;
   }
 
   public async create(
@@ -79,9 +83,9 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-
     return {
       core: coreContext,
+      buildFlavor: this.buildFlavor,
 
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),

@@ -63,6 +63,7 @@ import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
+import { BuildFlavor } from '@kbn/config';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -141,6 +142,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  buildFlavor: BuildFlavor;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;

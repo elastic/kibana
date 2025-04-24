@@ -11,6 +11,7 @@ import path from 'path';
 import { KibanaClientToolParams } from "./kibana_client_tool";
 import Oas from "oas";
 import { parse } from 'yaml';
+import { BuildFlavor } from "@kbn/config";
 
 // TODO: Handle serverless case
 export const kibanaServerlessOpenApiSpec = path.join(__dirname, '../../../../../../../../../oas_docs/output/kibana.serverless.yaml');
@@ -58,6 +59,16 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         });
 
         this.options = options;
+    }
+
+    static getKibanaOpenApiSpec(buildFlavor: BuildFlavor) {
+        if (buildFlavor === 'serverless') {
+            return kibanaServerlessOpenApiSpec;
+        }
+        if (buildFlavor === 'traditional') {
+            return kibanaOpenApiSpec;
+        }
+        return undefined
     }
 
     static async create(args?: {

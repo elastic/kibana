@@ -30,6 +30,7 @@ import { registerRoutes } from './routes/register_routes';
 import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
+import { BuildFlavor } from '@kbn/config';
 
 export class ElasticAssistantPlugin
   implements
@@ -46,11 +47,13 @@ export class ElasticAssistantPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private mlTrainedModelsProvider?: MlPluginSetup['trainedModelsProvider'];
   private getElserId?: () => Promise<string>;
+  private readonly buildFlavor: BuildFlavor;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
   }
 
   public setup(
@@ -78,6 +81,7 @@ export class ElasticAssistantPlugin
       core,
       plugins,
       kibanaVersion: this.kibanaVersion,
+      buildFlavor: this.buildFlavor,
       assistantService: this.assistantService,
     });
 
