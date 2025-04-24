@@ -36,6 +36,7 @@ const responseData: ListEntitiesResponse = {
       entity: {
         name: `Entity Name ${index}`,
         source: 'test-index',
+        type: 'user',
       },
     }),
     10
@@ -126,7 +127,7 @@ describe('EntitiesList', () => {
 
     await waitFor(() => {
       const firstPageButton = screen.getByTestId('pagination-button-0');
-      expect(firstPageButton).toHaveAttribute('aria-current', 'true');
+      expect(firstPageButton).toHaveAttribute('aria-current', 'page');
     });
   });
 

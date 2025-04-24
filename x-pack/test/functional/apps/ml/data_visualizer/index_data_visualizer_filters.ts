@@ -50,8 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} navigates to ML`);
-      await ml.navigation.navigateToMlViaAppsMenu();
-      await ml.navigation.navigateToDataVisualizer();
+      await ml.navigation.navigateToDataVisualizerFromAppsMenu();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
@@ -88,7 +87,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it(`retains pinned filters to other plugins`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} navigates to ML`);
-      await ml.navigation.navigateToDataVisualizer();
+      await ml.navigation.navigateToMlViaAppsMenu();
+      await ml.navigation.navigateToArea(
+        '~mlMainTab & ~dataVisualizer',
+        'mlPageDataVisualizerSelector'
+      );
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`

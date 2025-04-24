@@ -6,15 +6,15 @@
  */
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
-  getSLOPipelineId,
-  getSLOSummaryPipelineId,
-  getSLOSummaryTransformId,
-  getSLOTransformId,
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  getWildcardPipelineId,
 } from '../../common/constants';
+import { SLODefinition } from '../domain/models';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -24,7 +24,6 @@ export class DeleteSLO {
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi
   ) {}
@@ -32,53 +31,65 @@ export class DeleteSLO {
   public async execute(sloId: string): Promise<void> {
     const slo = await this.repository.findById(sloId);
 
-    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-    await this.summaryTransformManager.stop(summaryTransformId);
-    await this.summaryTransformManager.uninstall(summaryTransformId);
+    await Promise.all([this.deleteSummaryTransform(slo), this.deleteRollupTransform(slo)]);
 
+    await retryTransientEsErrors(() =>
+      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+        { id: getWildcardPipelineId(slo.id, slo.revision) },
+        { ignore: [404] }
+      )
+    );
+
+    await Promise.all([
+      this.deleteRollupData(slo.id),
+      this.deleteSummaryData(slo.id),
+      this.deleteAssociatedRules(slo.id),
+      this.repository.deleteById(slo.id),
+    ]);
+  }
+
+  private async deleteRollupTransform(slo: SLODefinition) {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.stop(rollupTransformId);
     await this.transformManager.uninstall(rollupTransformId);
+  }
 
-    await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      )
-    );
-
-    await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      )
-    );
-
-    await this.deleteRollupData(slo.id);
-    await this.deleteSummaryData(slo.id);
-    await this.deleteAssociatedRules(slo.id);
-    await this.repository.deleteById(slo.id);
+  private async deleteSummaryTransform(slo: SLODefinition) {
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+    await this.summaryTransformManager.uninstall(summaryTransformId);
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
-        match: {
-          'slo.id': sloId,
+        bool: {
+          filter: {
+            term: {
+              'slo.id': sloId,
+            },
+          },
         },
       },
     });
   }
 
   private async deleteSummaryData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
-        match: {
-          'slo.id': sloId,
+        bool: {
+          filter: {
+            term: {
+              'slo.id': sloId,
+            },
+          },
         },
       },
     });

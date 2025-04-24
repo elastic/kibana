@@ -58,11 +58,13 @@ RUNTIME_DEPS = [
   "@npm//react-router-dom",
   "@npm//react-router-dom-v5-compat",
   "@npm//react-router",
+  "@npm//react-use",
   "@npm//react",
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//tslib",
   "@npm//uuid",
+  "@npm//fp-ts",
   "@npm//io-ts",
   "@npm//@reduxjs/toolkit",
   "@npm//redux",
@@ -76,7 +78,6 @@ webpack_cli(
   data = RUNTIME_DEPS + SRCS + [
     "//:.browserslistrc",
     ":webpack.config.js",
-
     "@npm//webpack",
     "@npm//clean-webpack-plugin",
     "@npm//mini-css-extract-plugin",

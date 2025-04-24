@@ -8,8 +8,8 @@
 import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantPluginCoreSetupDependencies,
@@ -22,7 +22,9 @@ import { appContextService } from '../services/app_context';
 export interface IRequestContextFactory {
   create(
     context: RequestHandlerContext,
-    request: KibanaRequest
+    request: KibanaRequest,
+    eventLogIndex: string,
+    eventLogger: IEventLogger
   ): Promise<ElasticAssistantApiRequestHandlerContext>;
 }
 
@@ -45,7 +47,9 @@ export class RequestContextFactory implements IRequestContextFactory {
 
   public async create(
     context: Omit<ElasticAssistantRequestHandlerContext, 'elasticAssistant'>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    eventLogIndex: string,
+    eventLogger: IEventLogger
   ): Promise<ElasticAssistantApiRequestHandlerContext> {
     const { options } = this;
     const { core, plugins } = options;
@@ -78,6 +82,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     };
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
     return {
       core: coreContext,
@@ -85,7 +90,9 @@ export class RequestContextFactory implements IRequestContextFactory {
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,
-
+      eventLogIndex,
+      /** for writing to the event log */
+      eventLogger,
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
       getSpaceId,
@@ -104,7 +111,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       savedObjectsClient,
       telemetry: core.analytics,
 
-      // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
+      // Note: elserInferenceId is used here to enable setting up the KB using a different ELSER model, which
       // is necessary for testing purposes (`pt_tiny_elser`).
       getAIAssistantKnowledgeBaseDataClient: memoize(async (params) => {
         const currentUser = await getCurrentUser();
@@ -120,14 +127,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           licensing: context.licensing,
           currentUser,
-          modelIdOverride: params?.modelIdOverride,
+          elserInferenceId: params?.elserInferenceId,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
           // uses internal user to interact with ML API
-          trainedModelsProvider: plugins.ml.trainedModelsProvider(
-            {} as KibanaRequest,
-            coreStart.savedObjects.createInternalRepository()
-          ),
+          getTrainedModelsProvider: () =>
+            plugins.ml.trainedModelsProvider(
+              {} as KibanaRequest,
+              coreStart.savedObjects.createInternalRepository()
+            ),
         });
       }),
 
@@ -138,6 +146,12 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
+        });
+      }),
+
+      getAttackDiscoverySchedulingDataClient: memoize(async () => {
+        return this.assistantService.createAttackDiscoverySchedulingDataClient({
+          rulesClient,
         });
       }),
 
@@ -154,6 +168,16 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAIAssistantPromptsDataClient: memoize(async () => {
         const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
+        });
+      }),
+
+      getAlertSummaryDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createAlertSummaryDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
           logger: this.logger,

@@ -14,7 +14,7 @@ import { AssetInventoryFilters } from '../components/filters/asset_inventory_fil
 import { AssetInventoryBarChart } from '../components/asset_inventory_bar_chart';
 import { AssetInventoryTableSection } from '../components/asset_inventory_table_section';
 import { AssetInventoryTitle } from '../components/asset_inventory_title';
-import { useFetchChartData } from '../hooks/use_fetch_chart_data';
+import { useFetchChartData } from '../hooks/use_fetch_chart_data/use_fetch_chart_data';
 import {
   useAssetInventoryURLState,
   type AssetsBaseURLQuery,
@@ -59,7 +59,7 @@ export const AllAssets = () => {
         <AssetInventoryBarChart
           isLoading={isLoadingChartData}
           isFetching={isFetchingChartData}
-          entities={!!chartData && chartData.length > 0 ? chartData : []}
+          assetInventoryChartData={!!chartData && chartData.length > 0 ? chartData : []}
         />
         <AssetInventoryTableSection state={state} />
       </EuiPageTemplate.Section>

@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { langchainToChatEvents } from './convert_langchain_events';
 export { conversationEventsToMessages } from './events_to_messages';
+export { extractTextContent, messageFromLangchain } from './from_langchain_messages';
+export { extractCitations } from './extract_citations';

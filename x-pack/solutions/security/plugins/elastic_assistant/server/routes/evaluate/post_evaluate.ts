@@ -39,7 +39,7 @@ import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
-import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
+import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -53,16 +53,14 @@ import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
-export const postEvaluateRoute = (
-  router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
-) => {
+export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
@@ -184,7 +182,18 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs, defendInsightsGraphs } = getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } =
+            getGraphsFromNames(graphNames);
+
+          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvaluations({
+            esClient,
+            logger,
+          });
+
+          if (assistantGraphs?.length) {
+            await prepareIndicesForAssistantGraph.cleanup();
+            await prepareIndicesForAssistantGraph.setup();
+          }
 
           if (defendInsightsGraphs.length > 0) {
             const connectorsWithPrompts = await Promise.all(
@@ -299,6 +308,7 @@ export const postEvaluateRoute = (
                     pluginId: 'security_ai_assistant',
                   },
                 });
+
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
@@ -339,6 +349,7 @@ export const postEvaluateRoute = (
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
+                assistantContext,
                 esClient,
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
@@ -355,6 +366,7 @@ export const postEvaluateRoute = (
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+                createLlmInstance,
               };
 
               const tools: StructuredTool[] = (
@@ -471,7 +483,7 @@ export const postEvaluateRoute = (
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
-              maxConcurrency: 5,
+              maxConcurrency: 3,
             })
               .then((output) => {
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
