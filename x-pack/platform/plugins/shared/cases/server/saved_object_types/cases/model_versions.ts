@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { casesSchemaV1, casesSchemaV2 } from './schemas';
+import { casesSchemaV1, casesSchemaV2, casesSchemaV3 } from './schemas';
 
 /**
  * Adds custom fields to the cases SO.
@@ -84,5 +84,33 @@ export const modelVersion2: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: casesSchemaV2.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+/**
+ * Adds timing metrics to the cases SO.
+ */
+export const modelVersion3: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        in_progress_at: {
+          type: 'date',
+        },
+        time_to_acknowledge: {
+          type: 'unsigned_long',
+        },
+        time_to_investigate: {
+          type: 'unsigned_long',
+        },
+        time_to_resolve: {
+          type: 'unsigned_long',
+        },
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: casesSchemaV3.extends({}, { unknowns: 'ignore' }),
   },
 };

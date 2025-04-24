@@ -398,6 +398,64 @@ export const getClosedInfoForUpdate = ({
   }
 };
 
+export const getTimingMetricsForUpdate = ({
+  status,
+  createdAt,
+  inProgressAt,
+  updatedAt,
+}: {
+  status?: CaseStatuses;
+  createdAt: CaseAttributes['created_at'];
+  inProgressAt: CaseAttributes['in_progress_at'];
+  updatedAt: string;
+}):
+  | Partial<
+      Pick<
+        CaseAttributes,
+        'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve' | 'in_progress_at'
+      >
+    >
+  | undefined => {
+  try {
+    const createdAtMillis = new Date(createdAt).getTime();
+    const updatedAtMillis = new Date(updatedAt).getTime();
+    const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
+
+    if (status) {
+      if (status === CaseStatuses['in-progress']) {
+        if (
+          !isNaN(createdAtMillis) &&
+          !isNaN(updatedAtMillis) &&
+          updatedAtMillis >= createdAtMillis
+        ) {
+          return {
+            in_progress_at: updatedAt,
+            time_to_acknowledge: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
+          };
+        }
+      }
+      if (status === CaseStatuses.closed) {
+        if (
+          !isNaN(createdAtMillis) &&
+          !isNaN(updatedAtMillis) &&
+          inProgressAtMillis != null &&
+          !isNaN(inProgressAtMillis) &&
+          updatedAtMillis >= createdAtMillis &&
+          inProgressAtMillis >= createdAtMillis &&
+          updatedAtMillis >= inProgressAtMillis
+        ) {
+          return {
+            time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000),
+            time_to_resolve: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
+          };
+        }
+      }
+    }
+  } catch (err) {
+    // Silence date errors
+  }
+};
+
 export const getDurationInSeconds = ({
   closedAt,
   createdAt,

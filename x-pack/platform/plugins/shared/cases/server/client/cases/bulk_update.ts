@@ -44,6 +44,7 @@ import {
   fillMissingCustomFields,
   getClosedInfoForUpdate,
   getDurationForUpdate,
+  getTimingMetricsForUpdate,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -655,6 +656,12 @@ const createPatchCasesPayload = ({
             status: trimmedCaseAttributes.status,
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
+          }),
+          ...getTimingMetricsForUpdate({
+            status: trimmedCaseAttributes.status,
+            createdAt: originalCase.attributes.created_at,
+            inProgressAt: originalCase.attributes.in_progress_at,
+            updatedAt: updatedDt,
           }),
           updated_at: updatedDt,
           updated_by: user,

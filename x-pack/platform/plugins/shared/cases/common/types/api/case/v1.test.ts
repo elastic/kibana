@@ -48,6 +48,7 @@ const basicCase: Case = {
   owner: 'cases',
   closed_at: null,
   closed_by: null,
+  in_progress_at: null,
   id: 'basic-case-id',
   comments: [
     {
@@ -134,6 +135,9 @@ const basicCase: Case = {
       description: null,
     },
   ],
+  time_to_acknowledge: null,
+  time_to_investigate: null,
+  time_to_resolve: null,
 };
 
 describe('CasePostRequestRt', () => {
