@@ -6,7 +6,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
@@ -116,8 +116,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   );
 
   return (
-    <ReactEmbeddableRenderer<
-      AnomalySwimLaneEmbeddableState,
+    <EmbeddableRenderer<
       AnomalySwimLaneEmbeddableState,
       AnomalySwimLaneEmbeddableApi
     >
