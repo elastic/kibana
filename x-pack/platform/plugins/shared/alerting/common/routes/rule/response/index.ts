@@ -30,6 +30,7 @@ export {
   notifyWhenSchema as notifyWhenSchemaV1,
   scheduleIdsSchema as scheduleIdsSchemaV1,
   alertDelaySchema as alertDelaySchemaV1,
+  artifactsSchema as artifactsSchemaV1,
 } from './schemas/v1';
 
 export type {

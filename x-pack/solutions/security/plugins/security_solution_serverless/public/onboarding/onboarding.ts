@@ -7,12 +7,17 @@
 
 import { getCloudUrl } from '../navigation/util';
 import type { Services } from '../common/services';
+import { ProductLine } from '../../common/product';
 
 export const setOnboardingSettings = (services: Services) => {
   const { securitySolution, cloud } = services;
+  const projectId = cloud.serverless?.projectId;
 
   securitySolution.setOnboardingSettings({
     userUrl: getCloudUrl('usersAndRoles', cloud),
+    projectUrl: projectId
+      ? `${getCloudUrl('projects', cloud)}${`${ProductLine.security}/${projectId}`}`
+      : undefined,
     isAgentlessAvailable: true,
   });
 };
