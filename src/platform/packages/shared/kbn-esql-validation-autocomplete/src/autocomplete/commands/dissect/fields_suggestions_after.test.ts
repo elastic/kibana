@@ -6,61 +6,137 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { type ESQLAstCommand } from '@kbn/esql-ast';
+import type { ESQLRealField } from '../../../validation/types';
+import { extractDissectColumnNames, fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-import { extractDissectColumnNames } from './fields_suggestions_after';
+describe('fieldsSuggestionsAfterDissect', () => {
+  // Test cases for dissect patterns
+  describe('extractDissectColumnNames', () => {
+    it('should extract column names from dissect patterns', () => {
+      const pattern1 = '%{key1}-%{key2}-%{key3}-%{key4}-%{bytes}';
+      const columns1 = extractDissectColumnNames(pattern1);
+      expect(columns1).toStrictEqual(['key1', 'key2', 'key3', 'key4', 'bytes']);
 
-describe('extractDissectColumnNames', () => {
-  it('should extract column names from dissect patterns', () => {
-    const pattern1 = '%{key1}-%{key2}-%{key3}-%{key4}-%{bytes}';
-    const columns1 = extractDissectColumnNames(pattern1);
-    expect(columns1).toStrictEqual(['key1', 'key2', 'key3', 'key4', 'bytes']);
+      const pattern2 = '%{user.id}-%{user.name}-%{user.email}';
+      const columns2 = extractDissectColumnNames(pattern2);
+      expect(columns2).toStrictEqual(['user.id', 'user.name', 'user.email']);
 
-    const pattern2 = '%{user.id}-%{user.name}-%{user.email}';
-    const columns2 = extractDissectColumnNames(pattern2);
-    expect(columns2).toStrictEqual(['user.id', 'user.name', 'user.email']);
+      const pattern3 = 'prefix-%{field1}-%{field2}-suffix';
+      const columns3 = extractDissectColumnNames(pattern3);
+      expect(columns3).toStrictEqual(['field1', 'field2']);
 
-    const pattern3 = 'prefix-%{field1}-%{field2}-suffix';
-    const columns3 = extractDissectColumnNames(pattern3);
-    expect(columns3).toStrictEqual(['field1', 'field2']);
+      const pattern4 = 'No columns here';
+      const columns4 = extractDissectColumnNames(pattern4);
+      expect(columns4).toStrictEqual([]);
 
-    const pattern4 = 'No columns here';
-    const columns4 = extractDissectColumnNames(pattern4);
-    expect(columns4).toStrictEqual([]);
+      const pattern5 = '%{}-%{}-%{field}'; // empty key names
+      const columns5 = extractDissectColumnNames(pattern5);
+      expect(columns5).toStrictEqual(['field']);
 
-    const pattern5 = '%{}-%{}-%{field}'; // empty key names
-    const columns5 = extractDissectColumnNames(pattern5);
-    expect(columns5).toStrictEqual(['field']);
+      const pattern6 = '%{?ecs}{?version}/%{message}';
+      const columns6 = extractDissectColumnNames(pattern6);
+      expect(columns6).toStrictEqual(['ecs', 'message']);
 
-    const pattern6 = '%{?ecs}{?version}/%{message}';
-    const columns6 = extractDissectColumnNames(pattern6);
-    expect(columns6).toStrictEqual(['ecs', 'message']);
+      const pattern7 = '%{fieldA}###%{fieldB}###%{fieldC}';
+      const columns7 = extractDissectColumnNames(pattern7);
+      expect(columns7).toStrictEqual(['fieldA', 'fieldB', 'fieldC']);
 
-    const pattern7 = '%{fieldA}###%{fieldB}###%{fieldC}';
-    const columns7 = extractDissectColumnNames(pattern7);
-    expect(columns7).toStrictEqual(['fieldA', 'fieldB', 'fieldC']);
+      const pattern9 = '%%{field1}%%{field2}'; // Separator is '%'
+      const columns9 = extractDissectColumnNames(pattern9);
+      expect(columns9).toStrictEqual(['field1', 'field2']);
 
-    const pattern9 = '%%{field1}%%{field2}'; // Separator is '%'
-    const columns9 = extractDissectColumnNames(pattern9);
-    expect(columns9).toStrictEqual(['field1', 'field2']);
+      const pattern10 = '%{firstWord}-%{secondWord}';
+      const columns10 = extractDissectColumnNames(pattern10);
+      expect(columns10).toStrictEqual(['firstWord', 'secondWord']);
 
-    const pattern10 = '%{firstWord}-%{secondWord}';
-    const columns10 = extractDissectColumnNames(pattern10);
-    expect(columns10).toStrictEqual(['firstWord', 'secondWord']);
+      const pattern11 = '"""%{date} - %{msg} - %{ip}"""';
+      const columns11 = extractDissectColumnNames(pattern11);
+      expect(columns11).toStrictEqual(['date', 'msg', 'ip']);
 
-    const pattern11 = '"""%{date} - %{msg} - %{ip}"""';
-    const columns11 = extractDissectColumnNames(pattern11);
-    expect(columns11).toStrictEqual(['date', 'msg', 'ip']);
+      const pattern12 = '"""%{ts->} %{level}"""';
+      const columns12 = extractDissectColumnNames(pattern12);
+      expect(columns12).toStrictEqual(['ts', 'level']);
 
-    const pattern12 = '"""%{ts->} %{level}"""';
-    const columns12 = extractDissectColumnNames(pattern12);
-    expect(columns12).toStrictEqual(['ts', 'level']);
+      const pattern13 = '"""%{+name} %{+name} %{+name} %{+name}"""';
+      const columns13 = extractDissectColumnNames(pattern13);
+      expect(columns13).toStrictEqual(['name']);
 
-    const pattern13 = '"""%{+name} %{+name} %{+name} %{+name}"""';
-    const columns13 = extractDissectColumnNames(pattern13);
-    expect(columns13).toStrictEqual(['name']);
+      const pattern14 = '"""%{clientip} %{?ident} %{?auth} %{@timestamp}"""';
+      const columns14 = extractDissectColumnNames(pattern14);
+      expect(columns14).toStrictEqual(['clientip', 'ident', 'auth', '@timestamp']);
+    });
+  });
 
-    const pattern14 = '"""%{clientip} %{?ident} %{?auth} %{@timestamp}"""';
-    const columns14 = extractDissectColumnNames(pattern14);
-    expect(columns14).toStrictEqual(['clientip', 'ident', 'auth', '@timestamp']);
+  describe('fieldsSuggestionsAfter', () => {
+    it('should return the correct fields after the command', () => {
+      const dissectCommand = {
+        name: 'dissect',
+        args: [
+          {
+            args: [
+              {
+                name: 'field1',
+                location: {
+                  min: 39,
+                  max: 43,
+                },
+                text: 'field1',
+                incomplete: false,
+                type: 'identifier',
+              },
+            ],
+            location: {
+              min: 39,
+              max: 43,
+            },
+            text: 'field1',
+            incomplete: false,
+            parts: ['field1'],
+            quoted: false,
+            name: 'field1',
+            type: 'column',
+          },
+          {
+            name: '"%{firstWord}"',
+            location: {
+              min: 45,
+              max: 58,
+            },
+            text: '"%{firstWord}"',
+            incomplete: false,
+            type: 'literal',
+            literalType: 'keyword',
+            value: '"%{firstWord}"',
+            valueUnquoted: '%{firstWord}',
+          },
+        ],
+        location: {
+          min: 31,
+          max: 58,
+        },
+        text: 'DISSECTagent"%{firstWord}"',
+        incomplete: false,
+        type: 'command',
+      } as unknown as ESQLAstCommand;
+      const previousCommandFields = [
+        { name: 'field1', type: 'keyword' },
+        { name: 'field2', type: 'double' },
+      ] as ESQLRealField[];
+
+      const userDefinedColumns = [] as ESQLRealField[];
+
+      const result = fieldsSuggestionsAfter(
+        dissectCommand,
+        previousCommandFields,
+        userDefinedColumns
+      );
+
+      expect(result).toEqual([
+        { name: 'field1', type: 'keyword' },
+        { name: 'field2', type: 'double' },
+        { name: 'firstWord', type: 'keyword' },
+      ]);
+    });
   });
 });
