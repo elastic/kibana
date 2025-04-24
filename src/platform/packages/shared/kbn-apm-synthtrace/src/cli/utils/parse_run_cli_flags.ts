@@ -13,7 +13,7 @@ import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { RunCliFlags } from '../run_synthtrace';
 
-function getParsedFile(flags: RunCliFlags) {
+function getParsedFiles(flags: RunCliFlags) {
   const { _: parsedFiles } = flags;
 
   if (!parsedFiles.length) {
@@ -44,7 +44,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
   if (target?.includes('.kb.')) {
     throw new Error(`Target URL seems to be a Kibana URL, please provide Elasticsearch URL`);
   }
-  const parsedFiles = getParsedFile(flags);
+  const parsedFiles = getParsedFiles(flags);
 
   let parsedLogLevel = verbose ? LogLevel.verbose : debug ? LogLevel.debug : LogLevel.info;
 
