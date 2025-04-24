@@ -8851,10 +8851,10 @@
   resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.18.0.tgz#5fed5f1d0900b2535878db18a78295bbaebb997b"
   integrity sha512-uP8nqEGBS58s3iWXx6d8vnJ6ZVt3DACJL4PWADOAuwIS4xXpID91783e9f6zQ0i1ijQpj3yx+3ZuCB2LfQMUMA==
 
-"@openfeature/web-sdk@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.4.1.tgz#69f194bf658ea77095d5e40ad37b5ded6bd63e86"
-  integrity sha512-MgM55G/Ps8dNDsT75Yh6TYbp8XUVk0TdqSGSuo+6D9s4GyDzYHZHkcepp+j76Vvl4WwZPobdhADocUmUGskL1w==
+"@openfeature/web-sdk@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.5.0.tgz#23ed7acc67ff8f67c3d46f686193f19889b8a482"
+  integrity sha512-AK9A4X6vRKQf/OvCue1LKM6thSDqbx/Sf3dHBTZ6p7DfpIKsD8mzCTgMhb5jukVlqwdKMlewU/rlYTYqqfnnTw==
 
 "@opentelemetry/api-logs@0.53.0":
   version "0.53.0"
@@ -23981,10 +23981,10 @@ msgpackr@^1.9.9:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.7.3:
-  version "2.7.3"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.7.3.tgz#5ad569fae7c7cdb8be2eeba3d041c185600b25a0"
-  integrity sha512-+mycXv8l2fEAjFZ5sjrtjJDmm2ceKGjrNbBr1durRg6VkU9fNUE/gsmQ51hWbHqs+l35W1iM+ZsmOD9Fd6lspw==
+msw@~2.7.4:
+  version "2.7.5"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.7.5.tgz#8e73e58ac84d490e819d30b2ad8ce4cb3f9b7f94"
+  integrity sha512-00MyTlY3TJutBa5kiU+jWiz2z5pNJDYHn2TgPkGkh92kMmNH43RqvMXd8y/7HxNn8RjzUbvZWYZjcS36fdb6sw==
   dependencies:
     "@bundled-es-modules/cookie" "^2.0.1"
     "@bundled-es-modules/statuses" "^1.0.1"

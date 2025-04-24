@@ -12,6 +12,9 @@ import React from 'react';
 import { InfoPopoverBody } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { AVERAGE_TIME } from '../countdown/translations';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
+
+jest.mock('../../use_kibana_feature_flags');
 
 describe('InfoPopoverBody', () => {
   const connectorIntervals: GenerationInterval[] = [
@@ -28,6 +31,14 @@ describe('InfoPopoverBody', () => {
       durationMs: 255163,
     },
   ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: false,
+    });
+  });
 
   it('renders the expected average time', () => {
     render(
