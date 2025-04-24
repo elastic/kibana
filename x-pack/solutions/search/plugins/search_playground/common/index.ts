@@ -21,4 +21,10 @@ export const DEFAULT_PAGINATION: Pagination = {
   size: 10,
   total: 0,
 };
-export const ContextModelLimitError = 'Context exceeds the model limit';
+
+export const ContextModelLimitError = i18n.translate(
+  'xpack.searchPlayground.error.contextLimitError',
+  {
+    defaultMessage: 'Context exceeds the model limit',
+  }
+);
