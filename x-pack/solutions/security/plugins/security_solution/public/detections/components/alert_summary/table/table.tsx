@@ -75,7 +75,7 @@ export const columns: EuiDataGridProps['columns'] = [
   },
 ];
 
-export const ACTION_COLUMN_WIDTH = 98; // px
+export const ACTION_COLUMN_WIDTH = 72; // px
 export const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 export const RULE_TYPE_IDS = [ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID];
 export const ROW_HEIGHTS_OPTIONS = { defaultHeight: 40 };
