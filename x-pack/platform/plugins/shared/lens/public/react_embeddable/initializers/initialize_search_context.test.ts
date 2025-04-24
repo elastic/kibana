@@ -13,13 +13,13 @@ function setupSearchContextApi(runtimeOverrides?: Partial<LensRuntimeState>) {
   const runtimeState = getLensRuntimeStateMock(runtimeOverrides);
   const internalApiMock = getLensInternalApiMock();
   const services = makeEmbeddableServices();
-  const { api } = initializeSearchContext(runtimeState, internalApiMock, {}, services);
-  return { api, internalApi: internalApiMock };
+  const { api, cleanup } = initializeSearchContext(runtimeState, internalApiMock, {}, services);
+  return { api, cleanup, internalApi: internalApiMock };
 }
 
 describe('Context API', () => {
   it('should update the context query and filters when the corresponding attributes change', async () => {
-    const { api, internalApi } = setupSearchContextApi();
+    const { api, cleanup, internalApi } = setupSearchContextApi();
     internalApi.updateAttributes({
       ...internalApi.attributes$.getValue(),
       state: {
@@ -30,5 +30,7 @@ describe('Context API', () => {
     });
     expect(api.query$.getValue()).toEqual(internalApi.attributes$.getValue().state.query);
     expect(api.filters$.getValue()).toEqual(internalApi.attributes$.getValue().state.filters);
+
+    cleanup();
   });
 });
