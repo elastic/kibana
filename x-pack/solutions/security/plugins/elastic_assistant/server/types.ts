@@ -281,3 +281,17 @@ export interface AssistantToolParams {
     | ActionsClientChatVertexAI
     | ActionsClientChatOpenAI;
 }
+
+/**
+ * Helper method for working with AssistantToolParams.
+ * 
+ * e.g. if you want to use the `assistantContext` property, you can use this method to get the type of the property.
+ * 
+ * ```ts
+ * export type MyNewTypeWithAssistantContext = AssistantToolParams & OmitUndefined<Pick<AssistantToolParams, 'assistantContext'>>
+ * ```
+ */
+export type RequiredDefined<T> = {
+  [K in keyof T]-?: Exclude<T[K], undefined>;
+};
+

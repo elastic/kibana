@@ -79,10 +79,9 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     }
 
     protected async getToolForOperation({ operation, assistantToolParams }: RuntimeOptions & { operation: Operation }) {
-
         return tool(async (input) => {
 
-            const { request } = assistantToolParams
+            const { request, assistantContext } = assistantToolParams
             const { origin } = request.rewrittenUrl || request.url;
 
             const serializedQuery = Object.entries(input.query ?? {}).map(([key, value]) => {
@@ -93,9 +92,9 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
 
             const params = new URLSearchParams(serializedQuery);
             const pathname = parseTemplate(operation.path).expand(input.path)
+            const pathnameWithBasePath = path.posix.join(assistantContext.getServerBasePath(), pathname);
 
-            // TODO: Handle the case where there is a kibana base url. Get baseUrl from coreStart
-            const url = new URL(pathname, origin);
+            const url = new URL(pathnameWithBasePath, origin);
             url.search = params.toString()
 
             const headers = pickBy(request.headers, (value, key) => {
@@ -118,8 +117,6 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
             schema: this.getParametersAsZodSchema({
                 operation
             }),
-            verbose: true,
-            verboseParsingErrors: true
         })
     }
 

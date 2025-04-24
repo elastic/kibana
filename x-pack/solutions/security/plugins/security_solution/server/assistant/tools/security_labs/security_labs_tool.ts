@@ -12,6 +12,9 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { knowledgeBaseReference, contentReferenceString } from '@kbn/elastic-assistant-common';
 import { APP_UI_ID } from '../../../../common';
+import { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
+
+type SecurityLabsToolParams = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'kbDataClient'>>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -22,18 +25,18 @@ const toolDetails = {
   id: 'security-labs-knowledge-base-tool',
   name: 'SecurityLabsKnowledgeBaseTool',
 };
+
 export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
+  isSupported: (params: AssistantToolParams): params is SecurityLabsToolParams => {
     const { kbDataClient, isEnabledKnowledgeBase } = params;
     return isEnabledKnowledgeBase && kbDataClient != null;
   },
   async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { kbDataClient, contentReferencesStore } = params as AssistantToolParams;
-    if (kbDataClient == null) return null;
+    const { kbDataClient, contentReferencesStore } = params as SecurityLabsToolParams;
 
     return tool(
       async (input) => {

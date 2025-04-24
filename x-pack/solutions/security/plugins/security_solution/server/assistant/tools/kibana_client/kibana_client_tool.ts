@@ -6,18 +6,13 @@
  */
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
-import { ActionsClientChatBedrockConverse, ActionsClientChatVertexAI, ActionsClientChatOpenAI } from '@kbn/langchain/server';
 import { KibanaClientTool } from './kibana_client_open_api';
 import { memoize } from 'lodash';
+import { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 
-export interface KibanaClientToolParams extends AssistantToolParams {
-    createLlmInstance: () =>
-        | ActionsClientChatBedrockConverse
-        | ActionsClientChatVertexAI
-        | ActionsClientChatOpenAI;
-}
+export type KibanaClientToolParams = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'createLlmInstance' | 'assistantContext'>>
 
-const getKibanaClientTool = memoize(KibanaClientTool.create, (args)=>{
+const getKibanaClientTool = memoize(KibanaClientTool.create, (args) => {
     return args?.options?.apiSpecPath
 })
 
