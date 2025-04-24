@@ -21,6 +21,7 @@ import {
   uninstallProductDoc,
   createProductDoc,
 } from '../../utils/product_doc_base';
+import { products, ProductDoc } from '../product_docs/products';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -183,12 +184,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('should validate the structure and content of the retrieved document', () => {
           const document = parsedContent.documents[0];
+          const expectedDocument = products.find(
+            (product: ProductDoc) => product.productName === 'kibana'
+          );
           expect(document).to.not.be(undefined);
           expect(document).to.eql({
-            title: 'Lens',
-            url: 'https://www.elastic.co/docs/explore-analyze/visualize/lens',
-            content:
-              '## Lens\nTo create a visualization, drag the data fields you want to visualize to the workspace, then Lens uses visualization best practices to apply the fields and create a visualization that best displays the data.\n\nWith Lens, you can:\n\n- Create area, line, and bar charts with layers to display multiple indices and chart types.\n- Change the aggregation function to change the data in the visualization.\n- Create custom tables.\n- Perform math on aggregations using Formula.\n- Use time shifts to compare the data in two time intervals, such as month over month.\n- Add annotations and reference lines.',
+            title: expectedDocument?.content.content_title,
+            url: expectedDocument?.content.url,
+            content: expectedDocument?.content.content_body?.text,
             summarized: false,
           });
         });

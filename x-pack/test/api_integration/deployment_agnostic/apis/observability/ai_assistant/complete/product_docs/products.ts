@@ -5,7 +5,59 @@
  * 2.0.
  */
 
-export const products = [
+export interface ProductDoc {
+  productName: string;
+  content: {
+    content_title?: string;
+    content_body?: {
+      text: string;
+      inference?: {
+        inference_id: string;
+        model_settings: {
+          task_type: string;
+        };
+        chunks: Array<{
+          text: string;
+          embeddings: Record<string, number>;
+        }>;
+      };
+    };
+    root_type?: string;
+    ai_subtitle?: string;
+    ai_summary?: {
+      text: string;
+      inference?: {
+        inference_id: string;
+        model_settings: {
+          task_type: string;
+        };
+        chunks: Array<{
+          text: string;
+          embeddings: Record<string, number>;
+        }>;
+      };
+    };
+    ai_tags?: string[];
+    product_name?: string;
+    version?: string;
+    slug?: string;
+    url?: string;
+    ai_questions_answered?: {
+      text: string[];
+      inference?: {
+        inference_id: string;
+        model_settings: {
+          task_type: string;
+        };
+        chunks: Array<{
+          text: string;
+          embeddings: Record<string, number>;
+        }>;
+      };
+    };
+  };
+}
+export const products: ProductDoc[] = [
   {
     productName: 'elasticsearch',
     content: {},
