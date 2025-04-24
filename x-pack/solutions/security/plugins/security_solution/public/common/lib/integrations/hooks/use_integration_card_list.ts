@@ -18,7 +18,6 @@ import {
   TELEMETRY_INTEGRATION_CARD,
 } from '../constants';
 import type { GetAppUrl, NavigateTo } from '../../kibana';
-import { useFetchInstalledIntegrations } from './use_installed_integrations';
 import type { TrackLinkClick } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../utils/integrations';
@@ -119,12 +118,13 @@ export const addSecuritySpecificProps = ({
 export const useIntegrationCardList = ({
   integrationsList,
   featuredCardIds,
+  installedIntegrations,
 }: {
   integrationsList: IntegrationCardItem[];
   featuredCardIds?: string[] | undefined;
+  installedIntegrations: [];
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
-  const { data: installedIntegrations } = useFetchInstalledIntegrations();
 
   const {
     telemetry: { trackLinkClick },

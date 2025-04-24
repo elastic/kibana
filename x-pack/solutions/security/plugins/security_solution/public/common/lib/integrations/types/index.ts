@@ -10,6 +10,7 @@ import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 export interface IntegrationCardMetadata {
   installedIntegrationsCount: number;
   isAgentRequired: boolean;
+  installedIntegrations: [];
 }
 
 export interface Tab {

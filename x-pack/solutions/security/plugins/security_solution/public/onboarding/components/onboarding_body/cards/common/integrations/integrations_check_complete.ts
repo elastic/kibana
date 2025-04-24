@@ -30,6 +30,9 @@ export const getIntegrationList = async (
   const installedPackageData = await services.http
     .get<GetPackagesResponse>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
       version: '2023-10-31',
+      query: {
+        showOnlyActiveDataStreams: true,
+      },
     })
     .catch((err: Error) => {
       const emptyItems: GetPackagesResponse['items'] = [];
