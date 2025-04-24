@@ -28,7 +28,9 @@ interface Pipeline {
 }
 
 export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
-  constructor(options: { client: Client; logger: Logger } & LogsSynthtraceEsClientOptions) {
+  constructor(
+    private readonly options: { client: Client; logger: Logger } & LogsSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
       pipeline: logsPipeline(),
@@ -172,6 +174,10 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
 
   getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
     return logsPipeline({ includeSerialization });
+  }
+
+  clone(): this {
+    return new LogsSynthtraceEsClient(this.options) as this;
   }
 }
 

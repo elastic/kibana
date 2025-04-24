@@ -19,7 +19,9 @@ import { getSerializeTransform } from '../shared/get_serialize_transform';
 interface StreamsDocument {}
 
 export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument> {
-  constructor(options: Required<Omit<SynthtraceEsClientOptions, 'pipeline'>, 'kibana'>) {
+  constructor(
+    private readonly options: Required<Omit<SynthtraceEsClientOptions, 'pipeline'>, 'kibana'>
+  ) {
     super({
       ...options,
       pipeline: streamsPipeline(),
@@ -79,6 +81,10 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
 
   async clearESCache(): Promise<void> {
     await this.client.indices.clearCache();
+  }
+
+  clone(): this {
+    return new StreamsSynthtraceClient(this.options) as this;
   }
 }
 

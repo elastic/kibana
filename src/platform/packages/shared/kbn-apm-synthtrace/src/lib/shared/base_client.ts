@@ -32,7 +32,7 @@ export interface SynthtraceEsClientOptions {
 
 type MaybeArray<T> = T | T[];
 
-export class SynthtraceEsClient<TFields extends Fields> {
+export abstract class SynthtraceEsClient<TFields extends Fields> {
   protected readonly client: Client;
   protected readonly kibana?: KibanaClient;
   protected readonly logger: Logger;
@@ -142,8 +142,8 @@ export class SynthtraceEsClient<TFields extends Fields> {
     await this.client.helpers.bulk(
       {
         concurrency: this.concurrency,
-        refresh: manualRefreshAllowed ? false : 'wait_for',
-        refreshOnCompletion: false,
+        refresh: false,
+        refreshOnCompletion: !manualRefreshAllowed,
         flushBytes: 250000,
         datasource: stream,
         filter_path: 'errors,items.*.error,items.*.status',
@@ -206,4 +206,6 @@ export class SynthtraceEsClient<TFields extends Fields> {
 
     return !this.serverless;
   }
+
+  abstract clone(): this;
 }

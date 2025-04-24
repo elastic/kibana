@@ -33,7 +33,9 @@ export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOpt
 export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOtelFields> {
   public readonly version: string;
 
-  constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
+  constructor(
+    private readonly options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
       pipeline: apmPipeline(options.logger, options.version),
@@ -109,5 +111,9 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
         return this.getDefaultPipeline(options);
       }
     }
+  }
+
+  clone(): this {
+    return new ApmSynthtraceEsClient(this.options) as this;
   }
 }

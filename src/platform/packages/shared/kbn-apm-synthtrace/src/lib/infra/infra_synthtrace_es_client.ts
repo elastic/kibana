@@ -22,7 +22,9 @@ interface Pipeline {
 }
 
 export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
-  constructor(options: { client: Client; logger: Logger } & InfraSynthtraceEsClientOptions) {
+  constructor(
+    private readonly options: { client: Client; logger: Logger } & InfraSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
       pipeline: infraPipeline(),
@@ -43,6 +45,10 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
     } = { includeSerialization: true }
   ) {
     return infraPipeline({ includeSerialization });
+  }
+
+  clone(): this {
+    return new InfraSynthtraceEsClient(this.options) as this;
   }
 }
 

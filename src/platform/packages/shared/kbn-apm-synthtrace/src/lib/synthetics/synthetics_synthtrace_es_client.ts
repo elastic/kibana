@@ -18,12 +18,21 @@ import { getRoutingTransform } from '../shared/data_stream_get_routing_transform
 export type SyntheticsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
 export class SyntheticsSynthtraceEsClient extends SynthtraceEsClient<SyntheticsMonitorDocument> {
-  constructor(options: { client: Client; logger: Logger } & SyntheticsSynthtraceEsClientOptions) {
+  constructor(
+    private readonly options: {
+      client: Client;
+      logger: Logger;
+    } & SyntheticsSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
       pipeline: syntheticsPipeline(),
     });
     this.dataStreams = ['synthetics-*-*'];
+  }
+
+  clone(): this {
+    return new SyntheticsSynthtraceEsClient(this.options) as this;
   }
 }
 

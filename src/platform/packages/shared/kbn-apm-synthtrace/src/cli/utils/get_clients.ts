@@ -15,7 +15,7 @@ import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtra
 import { EntitiesSynthtraceKibanaClient } from '../../lib/entities/entities_synthtrace_kibana_client';
 import { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_client';
 import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
-import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
+import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../lib/shared/base_client';
 import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
@@ -88,4 +88,14 @@ export async function getClients({
     entitiesKibanaClient,
     esClient: options.client,
   };
+}
+
+export function cloneClients(clients: SynthtraceClients): SynthtraceClients {
+  return Object.entries(clients).reduce((acc, [key, client]) => {
+    if (client) {
+      acc[key as keyof SynthtraceClients] =
+        client instanceof SynthtraceEsClient ? client.clone() : client;
+    }
+    return acc;
+  }, {} as SynthtraceClients);
 }

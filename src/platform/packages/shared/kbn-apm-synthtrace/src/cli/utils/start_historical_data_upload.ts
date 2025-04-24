@@ -19,6 +19,7 @@ import { WorkerData } from './synthtrace_worker';
 import { getScenario } from './get_scenario';
 import { StreamManager } from './stream_manager';
 import { indexHistoricalData } from './index_historical_data';
+import { cloneClients } from './get_clients';
 
 export async function startHistoricalDataUpload({
   runOptions,
@@ -31,29 +32,47 @@ export async function startHistoricalDataUpload({
 }) {
   const { logger, clients } = await bootstrap(runOptions);
 
-  const file = runOptions.file;
+  const files = runOptions.files;
 
-  const scenario = await logger.perf('get_scenario', async () => {
-    const fn = await getScenario({ file, logger });
-    return fn({
-      ...runOptions,
-      logger,
-      from,
-      to,
-    });
-  });
+  const scenarios = await logger.perf('get_scenario', async () =>
+    Promise.all(
+      files.map(async (file) => {
+        const fn = await getScenario({ file, logger });
+        const scenario = await fn({
+          ...runOptions,
+          logger,
+          from,
+          to,
+        });
+
+        return { file, scenario };
+      })
+    )
+  );
+
+  const clientsByFile = new Map(scenarios.map(({ file }) => [file, cloneClients(clients)]));
 
   const teardown = once(async () => {
-    if (scenario.teardown) {
-      await scenario.teardown(clients);
-    }
+    await Promise.all(
+      scenarios.map(({ scenario, file }) => {
+        const scenarioClients = clientsByFile.get(file);
+        if (scenario.teardown && scenarioClients) {
+          return scenario.teardown(scenarioClients);
+        }
+      })
+    );
   });
 
   const streamManager = new StreamManager(logger, teardown);
 
-  if (scenario.bootstrap) {
-    await scenario.bootstrap(clients);
-  }
+  await Promise.all(
+    scenarios.map(({ scenario, file }) => {
+      const scenarioClients = clientsByFile.get(file);
+      if (scenario.bootstrap && scenarioClients) {
+        return scenario.bootstrap(scenarioClients);
+      }
+    })
+  );
 
   const cores = cpus().length;
 
@@ -167,7 +186,7 @@ export async function startHistoricalDataUpload({
           indexHistoricalData({
             bucketFrom: intervals[0].bucketFrom,
             bucketTo: intervals[0].bucketTo,
-            clients,
+            clientsByFile,
             logger,
             runOptions,
             workerId: 'i',

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray } from 'lodash';
 import { memoryUsage } from 'process';
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { Logger } from '../../lib/utils/create_logger';
@@ -22,14 +21,16 @@ export async function indexHistoricalData({
   runOptions,
   workerId,
   logger,
-  clients,
+  clientsByFile,
   from,
   to,
   streamManager,
-}: WorkerData & { logger: Logger; clients: SynthtraceClients; streamManager: StreamManager }) {
-  const file = runOptions.file;
-
-  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
+}: WorkerData & {
+  logger: Logger;
+  clientsByFile: Map<string, SynthtraceClients>;
+  streamManager: StreamManager;
+}) {
+  const files = runOptions.files;
 
   logger.info(
     `Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()} (pid: ${
@@ -37,17 +38,36 @@ export async function indexHistoricalData({
     })`
   );
 
-  const { generate } = await scenario({ ...runOptions, logger, from, to });
+  const scenarios = await logger.perf('get_scenario', async () => {
+    return Promise.all(
+      files.map(async (file) => {
+        const fn = await getScenario({ file, logger });
+        const scenario = await fn({
+          ...runOptions,
+          logger,
+          from,
+          to,
+        });
+
+        const scenarioClients = clientsByFile.get(file);
+        if (!scenarioClients) {
+          throw new Error(`No clients found for file: ${file}`);
+        }
+
+        return { scenario, scenarioClients };
+      })
+    );
+  });
 
   logger.debug('Generating scenario');
 
-  const generatorsAndClients = castArray(
-    logger.perf('generate_scenario', () =>
-      generate({
+  const generatorsAndClients = logger.perf('generate_scenario', () =>
+    scenarios.flatMap(({ scenario, scenarioClients }) => {
+      return scenario.generate({
         range: timerange(bucketFrom, bucketTo, logger),
-        clients,
-      })
-    )
+        clients: scenarioClients,
+      });
+    })
   );
 
   logger.debug('Indexing scenario');

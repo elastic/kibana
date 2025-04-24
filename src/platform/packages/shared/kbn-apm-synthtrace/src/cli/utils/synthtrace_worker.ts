@@ -13,6 +13,7 @@ import { indexHistoricalData } from './index_historical_data';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
 import { StreamManager } from './stream_manager';
+import { cloneClients } from './get_clients';
 
 export interface WorkerData {
   from: number;
@@ -26,6 +27,7 @@ export interface WorkerData {
 const { bucketFrom, bucketTo, runOptions, workerId, from, to } = workerData as WorkerData;
 
 async function start() {
+  const files = runOptions.files;
   const logger = loggerProxy;
 
   const streamManager = new StreamManager(logger);
@@ -36,10 +38,12 @@ async function start() {
     clean: false,
   });
 
+  const clientsByFile = new Map(files.map((file) => [file, cloneClients(clients)]));
+
   await indexHistoricalData({
     bucketFrom,
     bucketTo,
-    clients,
+    clientsByFile,
     logger,
     runOptions,
     workerId,

@@ -8,12 +8,13 @@
  */
 
 import { timerange } from '@kbn/apm-synthtrace-client';
-import { castArray, once } from 'lodash';
+import { once } from 'lodash';
 import { memoryUsage } from 'process';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
 import { StreamManager } from './stream_manager';
+import { cloneClients } from './get_clients';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -24,16 +25,25 @@ export async function startLiveDataUpload({
   from: number;
   to: number;
 }) {
-  const file = runOptions.file;
+  const files = runOptions.files;
 
   const { logger, clients } = await bootstrap(runOptions);
 
-  const scenario = await getScenario({ file, logger });
-  const {
-    generate,
-    bootstrap: scenarioBootstrap,
-    teardown: scenarioTearDown,
-  } = await scenario({ ...runOptions, logger, from, to });
+  const scenarios = await Promise.all(
+    files.map(async (file) => {
+      const fn = await getScenario({ file, logger });
+      const scenario = await fn({
+        ...runOptions,
+        logger,
+        from,
+        to,
+      });
+
+      const scenarioClients = cloneClients(clients);
+
+      return { scenario, scenarioClients };
+    })
+  );
 
   function startPeriodicPerfLogging() {
     let cpuUsage = process.cpuUsage();
@@ -52,18 +62,26 @@ export async function startLiveDataUpload({
   const intervalId = startPeriodicPerfLogging();
 
   const teardown = once(async () => {
-    if (scenarioTearDown) {
-      await scenarioTearDown(clients);
-    }
+    await Promise.all(
+      scenarios.map(({ scenario, scenarioClients }) => {
+        if (scenario.teardown) {
+          return scenario.teardown(scenarioClients);
+        }
+      })
+    );
 
     clearInterval(intervalId);
   });
 
   const streamManager = new StreamManager(logger, teardown);
 
-  if (scenarioBootstrap) {
-    await scenarioBootstrap(clients);
-  }
+  await Promise.all(
+    scenarios.map(({ scenario, scenarioClients }) => {
+      if (scenario.bootstrap) {
+        return scenario.bootstrap(scenarioClients);
+      }
+    })
+  );
 
   const bucketSizeInMs = runOptions.liveBucketSize;
   let requestedUntil = from;
@@ -87,12 +105,12 @@ export async function startLiveDataUpload({
         ).toISOString()} in ${bucketCount} bucket(s)`
       );
 
-      const generatorsAndClients = castArray(
-        generate({
+      const generatorsAndClients = scenarios.flatMap(({ scenario, scenarioClients }) => {
+        return scenario.generate({
           range: timerange(rangeStart, rangeEnd, logger),
-          clients,
-        })
-      );
+          clients: scenarioClients,
+        });
+      });
 
       await Promise.all(
         generatorsAndClients.map(async ({ generator, client }) => {

@@ -22,7 +22,9 @@ interface Pipeline {
 }
 
 export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityFields> {
-  constructor(options: { client: Client; logger: Logger } & EntitiesSynthtraceEsClientOptions) {
+  constructor(
+    private readonly options: { client: Client; logger: Logger } & EntitiesSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
       pipeline: entitiesPipeline(),
@@ -32,6 +34,9 @@ export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityFields>
 
   getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
     return entitiesPipeline({ includeSerialization });
+  }
+  clone(): this {
+    return new EntitiesSynthtraceEsClient(this.options) as this;
   }
 }
 
