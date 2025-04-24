@@ -123,7 +123,7 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share', 'save']);
+    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'export', 'share', 'save']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
@@ -137,7 +137,7 @@ describe('Discover topnav component', () => {
     );
     const topNavMenu = component.find(TopNavMenu).props();
     const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
-    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share']);
+    expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'export', 'share']);
   });
 
   describe('top nav customization', () => {

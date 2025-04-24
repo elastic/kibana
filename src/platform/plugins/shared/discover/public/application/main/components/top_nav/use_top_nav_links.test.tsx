@@ -101,6 +101,15 @@ describe('useTopNavLinks', () => {
           "testId": "discoverOpenButton",
         },
         Object {
+          "description": "Export Discover session",
+          "iconOnly": true,
+          "iconType": "download",
+          "id": "export",
+          "label": "Export",
+          "run": [Function],
+          "testId": "exportTopNavButton",
+        },
+        Object {
           "description": "Share Discover session",
           "iconOnly": true,
           "iconType": "share",
@@ -175,6 +184,15 @@ describe('useTopNavLinks', () => {
           "label": "Open session",
           "run": [Function],
           "testId": "discoverOpenButton",
+        },
+        Object {
+          "description": "Export Discover session",
+          "iconOnly": true,
+          "iconType": "download",
+          "id": "export",
+          "label": "Export",
+          "run": [Function],
+          "testId": "exportTopNavButton",
         },
         Object {
           "description": "Share Discover session",
