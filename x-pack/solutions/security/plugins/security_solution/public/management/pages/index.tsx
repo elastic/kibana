@@ -11,8 +11,8 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { withSecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { NotesContainer } from './notes';
 import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
@@ -37,6 +37,7 @@ import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
+import { NotesManagementContainer } from '../../notes/routes';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -77,13 +78,6 @@ const ResponseActionsTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.responseActionsHistory}>
     <ResponseActionsContainer />
     <SpyRoute pageName={SecurityPageName.responseActionsHistory} />
-  </TrackApplicationView>
-);
-
-const NotesTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.notes}>
-    <NotesContainer />
-    <SpyRoute pageName={SecurityPageName.notes} />
   </TrackApplicationView>
 );
 
@@ -163,7 +157,16 @@ export const ManagementContainer = memo(() => {
       />
 
       {!securitySolutionNotesDisabled && (
-        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesTelemetry} />
+        <Route
+          path={MANAGEMENT_ROUTING_NOTES_PATH}
+          component={withSecurityRoutePageWrapper(
+            NotesManagementContainer,
+            SecurityPageName.notes,
+            {
+              redirectOnMissing: true,
+            }
+          )}
+        />
       )}
 
       {canReadEndpointList && (

@@ -19,7 +19,7 @@ const NotesManagementWrapper = () => (
   </PluginTemplateWrapper>
 );
 
-const NotesManagementContainer: React.FC = React.memo(() => {
+export const NotesManagementContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route path={NOTES_PATH} exact component={NotesManagementWrapper} />
