@@ -291,7 +291,7 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
     { cloud, spaces }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
@@ -371,6 +371,7 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
+        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,
