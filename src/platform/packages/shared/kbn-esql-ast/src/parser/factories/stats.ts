@@ -48,6 +48,8 @@ export const createStatsCommand = (ctx: StatsCommandContext, src: string): ESQLC
     const fields = ctx.aggFields();
 
     for (const fieldCtx of fields.aggField_list()) {
+      if (fieldCtx.getText() === '') continue;
+
       const node = createAggField(fieldCtx);
 
       command.args.push(node);

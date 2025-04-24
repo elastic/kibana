@@ -30,16 +30,16 @@ export function registerSearchRoute(
     .post({
       path: `${SEARCH_API_BASE_URL}/{strategy}/{id?}`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -128,16 +128,16 @@ export function registerSearchRoute(
     .delete({
       path: '/internal/search/{strategy}/{id}',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
 import { of } from 'rxjs';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCollapsibleNavBeta,
   EuiCollapsibleNavBetaProps,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeader,
   EuiHeaderSection,
   EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type {
@@ -94,7 +98,6 @@ const NavigationWrapper: FC<Props & Omit<Partial<EuiCollapsibleNavBetaProps>, 'c
 const generalLayoutNavTree: NavigationTreeDefinitionUI = {
   id: 'es',
   body: [
-    // My custom project
     {
       id: 'example_project',
       path: '',
@@ -108,6 +111,8 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           title: 'Item 01',
           href: '/app/kibana',
           icon: 'iInCircle',
+          isExternalLink: true,
+          withBadge: true,
         },
         {
           id: 'item02',
@@ -128,28 +133,38 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               icon: 'iInCircle',
               renderAs: 'panelOpener',
               children: [
-                // FIXME: group mixed with items causes crash
-                // {
-                //   id: 'sub1',
-                //   path: '',
-                //   title: 'Item 11',
-                //   href: '/app/kibana',
-                //   icon: 'iInCircle',
-                // },
-                // {
-                //   id: 'sub2',
-                //   path: '',
-                //   title: 'Item 12',
-                //   href: '/app/kibana',
-                //   icon: 'iInCircle',
-                // },
-                // {
-                //   id: 'sub3',
-                //   path: '',
-                //   title: 'Item 13',
-                //   href: '/app/kibana',
-                //   icon: 'iInCircle',
-                // },
+                {
+                  id: 'sub0',
+                  path: '',
+                  title: 'This text is not shown',
+                  renderItem: () => (
+                    <>
+                      <p>This panel contains a mix of ungrouped items and grouped items</p>
+                      <EuiSpacer />
+                    </>
+                  ),
+                },
+                {
+                  id: 'sub1',
+                  path: '',
+                  title: 'Item 11',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+                {
+                  id: 'sub2',
+                  path: '',
+                  title: 'Item 12',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+                {
+                  id: 'sub3',
+                  path: '',
+                  title: 'Item 13',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
                 {
                   id: 'child-section1',
                   path: '',
@@ -161,6 +176,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                       title: 'Item 14',
                       href: '/app/kibana',
                       icon: 'iInCircle',
+                      withBadge: true,
                     },
                     {
                       id: 'sub2',
@@ -189,6 +205,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                       title: 'Item 17',
                       href: '/app/kibana',
                       icon: 'iInCircle',
+                      isExternalLink: true,
                     },
                     {
                       id: 'sub2',
@@ -212,18 +229,26 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   title: 'Item 19',
                   icon: 'iInCircle',
                   renderAs: 'accordion',
+                  withBadge: true,
                   children: [
                     {
                       id: 'sub1',
                       path: '',
                       title: 'Item-Beta',
                       href: '/app/kibana',
+                      withBadge: true,
                     },
                     {
                       id: 'sub2',
                       path: '',
                       title: 'Item-Labs',
                       href: '/app/kibana',
+                      withBadge: true,
+                      isExternalLink: true,
+                      badgeOptions: {
+                        icon: 'bell',
+                        tooltip: 'This is a tooltip',
+                      },
                     },
                   ],
                 },
@@ -233,6 +258,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   path: '',
                   icon: 'iInCircle',
                   renderAs: 'accordion',
+                  defaultIsCollapsed: false,
                   children: [
                     {
                       id: 'sub1',
@@ -265,10 +291,11 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
             },
             {
               id: 'item05',
-              title: 'Item 05',
+              title: 'Item 05, with custom',
               path: '',
               icon: 'iInCircle',
               renderAs: 'panelOpener',
+              withBadge: true,
               children: [
                 {
                   id: 'sub1',
@@ -276,6 +303,31 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   title: 'Item 23',
                   href: '/app/kibana',
                   icon: 'iInCircle',
+                },
+                {
+                  id: 'spacer1',
+                  path: '',
+                  title: 'This text is not shown.',
+                  renderItem: () => {
+                    return <EuiSpacer />;
+                  },
+                },
+                {
+                  id: 'callout1',
+                  path: '',
+                  title: 'This text is not shown.',
+                  renderItem: () => {
+                    return (
+                      <EuiCallOut title="Check it out" iconType="cluster">
+                        <EuiFlexGroup justifyContent="spaceAround" direction="column">
+                          <EuiFlexItem>
+                            <p>Choose an integration to start</p>
+                            <EuiButton>Browse integrations</EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiCallOut>
+                    );
+                  },
                 },
               ],
             },
@@ -361,20 +413,22 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           path: '',
           renderAs: 'accordion',
           icon: 'iInCircle',
+          withBadge: true,
           children: [
             {
               id: 'item-beta',
               path: '',
               title: 'Item-Beta',
               href: '/app/kibana',
-              withBadge: true, // FIXME: show "beta" badge in circle
+              withBadge: true,
+              isExternalLink: true,
             },
             {
               id: 'item-labs',
               path: '',
               title: 'Item-Labs',
               href: '/app/kibana',
-              withBadge: true, // FIXME: show "beaker" badge
+              withBadge: true,
             },
             {
               id: 'item27',
@@ -398,81 +452,95 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
   ],
   footer: [
     {
-      id: 'footer-section5',
-      title: 'Parent item, closed',
+      id: 'example_project_footer',
       path: '',
-      renderAs: 'accordion',
-      icon: 'iInCircle',
       children: [
         {
-          id: 'item29',
-          path: '',
-          title: 'Item 29',
-          href: '/app/kibana',
-          icon: 'iInCircle',
-        },
-        {
-          id: 'item30',
-          path: '',
-          title: 'Item 30',
-          href: '/app/kibana',
-          icon: 'iInCircle',
-        },
-        {
-          id: 'item31',
-          path: '',
-          title: 'Item 31',
-          href: '/app/kibana',
-          icon: 'iInCircle',
-        },
-        {
-          id: 'sub-accordion',
-          icon: 'iInCircle',
-          title: 'Sub-Accordion',
+          id: 'footer-section5',
+          title: 'Parent item, closed',
           path: '',
           renderAs: 'accordion',
+          spaceBefore: null,
+          icon: 'iInCircle',
           children: [
             {
-              id: 'sub1',
+              id: 'item29',
               path: '',
-              title: 'Item 32',
+              title: 'Item 29',
               href: '/app/kibana',
               icon: 'iInCircle',
             },
+            {
+              id: 'item30',
+              path: '',
+              title: 'Item 30',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item31',
+              path: '',
+              title: 'Item 31',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'sub-accordion',
+              icon: 'iInCircle',
+              title: 'Sub-Accordion',
+              path: '',
+              renderAs: 'accordion',
+              children: [
+                {
+                  id: 'sub1',
+                  path: '',
+                  title: 'Item 32',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+              ],
+            },
           ],
         },
-      ],
-    },
-    { id: 'item10', path: '', title: 'Item 10', icon: 'iInCircle', href: '/app/kibana' },
-    {
-      id: 'footer-section6',
-      title: 'Parent item, opened',
-      path: '',
-      renderAs: 'accordion',
-      icon: 'iInCircle',
-      defaultIsCollapsed: false,
-      children: [
         {
-          id: 'item33',
+          id: 'item10',
           path: '',
-          title: 'Item 33',
-          href: '/app/kibana',
+          title: 'Item 10',
           icon: 'iInCircle',
+          href: '/app/kibana',
         },
         {
-          id: 'item34',
+          id: 'footer-section6',
+          title: 'Parent item, opened',
           path: '',
-          title: 'Item 34',
-          href: '/app/kibana',
+          renderAs: 'accordion',
+          spaceBefore: null,
           icon: 'iInCircle',
-        },
-        {
-          id: 'item35',
-          path: '',
-          title: 'Item 35',
-          href: '/app/kibana',
-          icon: 'iInCircle',
-          openInNewTab: true, // FIXME: show "popout" icon aligned to the right
+          defaultIsCollapsed: false,
+          children: [
+            {
+              id: 'item33',
+              path: '',
+              title: 'Item 33',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item34',
+              path: '',
+              title: 'Item 34',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item35',
+              path: '',
+              title: 'Item 35',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+              openInNewTab: true,
+            },
+          ],
         },
       ],
     },

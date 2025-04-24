@@ -14,3 +14,4 @@
     - assert_kibana_available
     - assert_kibana_log
     - assert_kibana_data
+    - assert_chat_plugin

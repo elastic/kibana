@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabPreview } from './tab_preview';
+export { TabPreview, type TabPreviewProps } from './tab_preview';

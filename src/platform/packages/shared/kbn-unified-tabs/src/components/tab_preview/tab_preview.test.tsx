@@ -10,15 +10,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TabPreview } from './tab_preview';
-import type { TabPreviewData, TabItem } from '../../types';
-import { TabStatus } from '../../types';
-
-const tabPreviewData: TabPreviewData = {
-  query: {
-    esql: 'SELECT * FROM table',
-  },
-  status: TabStatus.SUCCESS,
-};
+import type { TabItem } from '../../types';
+import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 
 const tabItem: TabItem = {
   id: 'test-id',
@@ -35,7 +28,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        tabPreviewData={tabPreviewData}
+        getPreviewData={getPreviewDataMock}
         tabItem={tabItem}
         stopPreviewOnHover={false}
         previewDelay={0}
@@ -63,7 +56,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={true}
         setShowPreview={setShowPreview}
-        tabPreviewData={tabPreviewData}
+        getPreviewData={getPreviewDataMock}
         tabItem={tabItem}
         stopPreviewOnHover={false}
       >
@@ -90,7 +83,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        tabPreviewData={tabPreviewData}
+        getPreviewData={getPreviewDataMock}
         tabItem={tabItem}
         stopPreviewOnHover={true}
       >

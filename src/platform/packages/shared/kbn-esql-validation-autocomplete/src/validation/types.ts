@@ -24,6 +24,7 @@ export interface ESQLRealField {
   name: string;
   type: FieldType;
   isEcs?: boolean;
+  hasConflict?: boolean;
   metadata?: {
     description?: string;
   };
@@ -121,7 +122,7 @@ export interface ValidationErrors {
   };
   unsupportedColumnTypeForCommand: {
     message: string;
-    type: { command: string; type: string; typeCount: number; givenType: string; column: string };
+    type: { command: string; type: string; givenType: string; column: string };
   };
   unknownDissectKeyword: {
     message: string;
@@ -210,6 +211,10 @@ export interface ValidationErrors {
   invalidJoinIndex: {
     message: string;
     type: { identifier: string };
+  };
+  tooManyForks: {
+    message: string;
+    type: {};
   };
 }
 

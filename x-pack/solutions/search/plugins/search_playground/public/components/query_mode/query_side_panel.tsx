@@ -12,39 +12,60 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useWatch } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm, ChatFormFields } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { createQuery } from '../../utils/create_query';
 import { SearchQuery } from './search_query';
 import { QueryFieldsPanel } from './query_fields_panel';
+import { ChatPrompt } from './chat_prompt';
+import { EditContextPanel } from '../edit_context/edit_context_panel';
 
 export interface QuerySidePanelProps {
   executeQuery: () => void;
+  executeQueryDisabled: boolean;
+  isLoading: boolean;
+  pageMode: PlaygroundPageMode;
 }
 
-export const QuerySidePanel = ({ executeQuery }: QuerySidePanelProps) => {
+export const QuerySidePanel = ({
+  pageMode,
+  executeQuery,
+  executeQueryDisabled,
+  isLoading,
+}: QuerySidePanelProps) => {
   const usageTracker = useUsageTracker();
   const { fields } = useSourceIndicesFields();
-  const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
-    name: ChatFormFields.sourceFields,
+  const sourceFields = useWatch<PlaygroundForm, PlaygroundFormFields.sourceFields>({
+    name: PlaygroundFormFields.sourceFields,
   });
   const {
     field: { onChange: queryFieldsOnChange, value: queryFields },
-  } = useController<ChatForm, ChatFormFields.queryFields>({
-    name: ChatFormFields.queryFields,
+  } = useController<PlaygroundForm, PlaygroundFormFields.queryFields>({
+    name: PlaygroundFormFields.queryFields,
   });
   const {
     field: { onChange: elasticsearchQueryChange },
-  } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
-    name: ChatFormFields.elasticsearchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.elasticsearchQuery>({
+    name: PlaygroundFormFields.elasticsearchQuery,
+  });
+  const {
+    field: { onChange: userElasticsearchQueryChange },
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
+    name: PlaygroundFormFields.userElasticsearchQuery,
+  });
+  const {
+    field: { value: userElasticsearchQueryValidations },
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
+    name: PlaygroundFormFields.userElasticsearchQueryValidations,
   });
 
   const handleSearch = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
+      if (executeQueryDisabled) return;
       executeQuery();
     },
-    [executeQuery]
+    [executeQuery, executeQueryDisabled]
   );
   const updateFields = useCallback(
     (index: string, fieldName: string, checked: boolean) => {
@@ -54,10 +75,21 @@ export const QuerySidePanel = ({ executeQuery }: QuerySidePanelProps) => {
       const updatedQueryFields = { ...queryFields, [index]: currentIndexFields };
 
       queryFieldsOnChange(updatedQueryFields);
-      elasticsearchQueryChange(createQuery(updatedQueryFields, sourceFields, fields));
+      const updatedQuery = createQuery(updatedQueryFields, sourceFields, fields);
+      elasticsearchQueryChange(updatedQuery);
+      // ensure the userQuery is cleared so it doesn't diverge from the generated query.
+      userElasticsearchQueryChange(null);
       usageTracker?.count(AnalyticsEvents.queryFieldsUpdated, currentIndexFields.length);
     },
-    [elasticsearchQueryChange, fields, queryFields, queryFieldsOnChange, sourceFields, usageTracker]
+    [
+      elasticsearchQueryChange,
+      userElasticsearchQueryChange,
+      fields,
+      queryFields,
+      queryFieldsOnChange,
+      sourceFields,
+      usageTracker,
+    ]
   );
 
   return (
@@ -65,15 +97,26 @@ export const QuerySidePanel = ({ executeQuery }: QuerySidePanelProps) => {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiText>
           <h5>
-            <FormattedMessage
-              id="xpack.searchPlayground.viewQuery.sideBar.query.title"
-              defaultMessage="Query"
-            />
+            {pageMode === PlaygroundPageMode.Search ? (
+              <FormattedMessage
+                id="xpack.searchPlayground.viewQuery.sideBar.query.title"
+                defaultMessage="Query"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.searchPlayground.viewQuery.sideBar.prompt.title"
+                defaultMessage="Question"
+              />
+            )}
           </h5>
         </EuiText>
         <EuiPanel grow={false} hasShadow={false} hasBorder>
           <EuiForm component="form" onSubmit={handleSearch}>
-            <SearchQuery />
+            {pageMode === PlaygroundPageMode.Search ? (
+              <SearchQuery isLoading={isLoading} />
+            ) : (
+              <ChatPrompt isLoading={isLoading} />
+            )}
           </EuiForm>
         </EuiPanel>
         <EuiText>
@@ -91,9 +134,23 @@ export const QuerySidePanel = ({ executeQuery }: QuerySidePanelProps) => {
               indexFields={group}
               updateFields={updateFields}
               queryFields={queryFields}
+              customizedQuery={userElasticsearchQueryValidations?.isUserCustomized ?? false}
             />
           </EuiFlexItem>
         ))}
+        {pageMode === PlaygroundPageMode.Chat && (
+          <>
+            <EuiText>
+              <h5>
+                <FormattedMessage
+                  id="xpack.searchPlayground.viewQuery.sideBar.context.title"
+                  defaultMessage="Context"
+                />
+              </h5>
+            </EuiText>
+            <EditContextPanel />
+          </>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

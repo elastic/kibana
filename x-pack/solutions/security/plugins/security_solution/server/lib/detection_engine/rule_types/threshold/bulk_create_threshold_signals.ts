@@ -7,31 +7,25 @@
 
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
 import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from './utils';
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdBucket } from './types';
-import type { SecuritySharedParams } from '../types';
+import type { ThresholdCompositeBucket } from './types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import { createEnrichEventsFunction } from '../utils/enrichments';
-import { wrapHits } from '../factories';
+import { bulkCreate, wrapHits } from '../factories';
 
 interface BulkCreateThresholdSignalsParams {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  buckets: ThresholdBucket[];
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  buckets: ThresholdCompositeBucket[];
+  services: SecurityRuleServices;
   startedAt: Date;
 }
 
 export const transformBucketIntoHit = (
-  bucket: ThresholdBucket,
+  bucket: ThresholdCompositeBucket,
   inputIndex: string,
   startedAt: Date,
   from: Date,
@@ -71,7 +65,7 @@ export const transformBucketIntoHit = (
 };
 
 export const getTransformedHits = (
-  buckets: ThresholdBucket[],
+  buckets: ThresholdCompositeBucket[],
   inputIndex: string,
   startedAt: Date,
   from: Date,
@@ -98,12 +92,9 @@ export const bulkCreateThresholdSignals = async ({
     ruleParams.ruleId
   );
 
-  return sharedParams.bulkCreate(
-    wrapHits(sharedParams, ecsResults, buildReasonMessageForThresholdAlert),
-    undefined,
-    createEnrichEventsFunction({
-      services,
-      logger: sharedParams.ruleExecutionLogger,
-    })
-  );
+  return bulkCreate({
+    wrappedAlerts: wrapHits(sharedParams, ecsResults, buildReasonMessageForThresholdAlert),
+    sharedParams,
+    services,
+  });
 };

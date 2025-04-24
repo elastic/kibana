@@ -162,7 +162,10 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     options?: TransportRequestOptions
   ): Promise<TResponse | TransportResult<TResponse, TContext>> {
     // Wrap ES|QL requests with an abort signal
-    if (params.method === 'POST' && params.path === '/_query') {
+    if (
+      (params.method === 'POST' && ['/_query', '/_query/async'].includes(params.path)) ||
+      (params.method === 'GET' && params.path.startsWith('/_query/async'))
+    ) {
       let requestOptions: TransportRequestOptions = {};
       try {
         requestOptions = options ?? {};
@@ -253,7 +256,7 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
             requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
           }`
       );
-      const result = (await originalEqlSearch.call(opts.esClient, params, {
+      const result = (await originalEqlSearch.call(opts.esClient.eql, params, {
         ...searchOptions,
         ...(requestTimeout
           ? {

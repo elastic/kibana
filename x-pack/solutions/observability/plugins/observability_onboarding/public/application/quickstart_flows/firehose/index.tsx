@@ -34,6 +34,7 @@ import { ObservabilityOnboardingAppServices } from '../../..';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { ExistingDataCallout } from './existing_data_callout';
 import { usePopulatedAWSIndexList } from './use_populated_aws_index_list';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 const OPTIONS = [
   {
@@ -55,6 +56,12 @@ const OPTIONS = [
 ];
 
 export function FirehosePanel() {
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.firehose', {
+      defaultMessage: 'AWS Firehose',
+    }),
+  });
+
   const [selectedOptionId, setSelectedOptionId] = useState<CreateStackOption>(
     CreateStackOption.AWS_CONSOLE_UI
   );

@@ -91,7 +91,7 @@ describe('recallAndScore', () => {
   describe('when no documents are recalled', () => {
     let result: {
       relevantDocuments?: RecalledSuggestion[];
-      scores?: Array<{ id: string; score: number }>;
+      llmScores?: Array<{ id: string; llmScore: number }>;
       suggestions: RecalledSuggestion[];
     };
 
@@ -111,7 +111,7 @@ describe('recallAndScore', () => {
     });
 
     it('returns empty suggestions', async () => {
-      expect(result).toEqual({ relevantDocuments: [], scores: [], suggestions: [] });
+      expect(result).toEqual({ relevantDocuments: [], llmScores: [], suggestions: [] });
     });
 
     it('invokes recall with user prompt and screen context', async () => {
@@ -129,7 +129,7 @@ describe('recallAndScore', () => {
   });
 
   it('handles errors when scoring fails', async () => {
-    mockRecall.mockResolvedValue([{ id: 'doc1', text: 'Hello world', score: 0.5 }]);
+    mockRecall.mockResolvedValue([{ id: 'doc1', text: 'Hello world', esScore: 0.5 }]);
     (scoreSuggestions as jest.Mock).mockRejectedValue(new Error('Scoring failed'));
 
     const result = await recallAndScore({
@@ -152,10 +152,10 @@ describe('recallAndScore', () => {
   });
 
   it('calls scoreSuggestions with correct arguments', async () => {
-    const recalledDocs = [{ id: 'doc1', text: 'Hello world', score: 0.8 }];
+    const recalledDocs = [{ id: 'doc1', text: 'Hello world', esScore: 0.8 }];
     mockRecall.mockResolvedValue(recalledDocs);
     (scoreSuggestions as jest.Mock).mockResolvedValue({
-      scores: [{ id: 'doc1', score: 7 }],
+      llmScores: [{ id: 'doc1', llmScore: 7 }],
       relevantDocuments: recalledDocs,
     });
 
@@ -184,10 +184,10 @@ describe('recallAndScore', () => {
 
   it('handles the normal conversation flow correctly', async () => {
     mockRecall.mockResolvedValue([
-      { id: 'fav_color', text: 'My favourite color is blue.', score: 0.9 },
+      { id: 'fav_color', text: 'My favourite color is blue.', esScore: 0.9 },
     ]);
     (scoreSuggestions as jest.Mock).mockResolvedValue({
-      scores: [{ id: 'fav_color', score: 7 }],
+      llmScores: [{ id: 'fav_color', llmScore: 7 }],
       relevantDocuments: [{ id: 'fav_color', text: 'My favourite color is blue.' }],
     });
 
@@ -211,10 +211,10 @@ describe('recallAndScore', () => {
 
   it('handles contextual insights conversation flow correctly', async () => {
     mockRecall.mockResolvedValue([
-      { id: 'alert_cause', text: 'The alert was triggered due to high CPU usage.', score: 0.85 },
+      { id: 'alert_cause', text: 'The alert was triggered due to high CPU usage.', esScore: 0.85 },
     ]);
     (scoreSuggestions as jest.Mock).mockResolvedValue({
-      scores: [{ id: 'alert_cause', score: 6 }],
+      llmScores: [{ id: 'alert_cause', llmScore: 6 }],
       relevantDocuments: [
         { id: 'alert_cause', text: 'The alert was triggered due to high CPU usage.' },
       ],
@@ -239,10 +239,10 @@ describe('recallAndScore', () => {
   });
 
   it('reports analytics with the correct structure', async () => {
-    const recalledDocs = [{ id: 'doc1', text: 'Hello world', score: 0.8 }];
+    const recalledDocs = [{ id: 'doc1', text: 'Hello world', esScore: 0.8 }];
     mockRecall.mockResolvedValue(recalledDocs);
     (scoreSuggestions as jest.Mock).mockResolvedValue({
-      scores: [{ id: 'doc1', score: 7 }],
+      llmScores: [{ id: 'doc1', llmScore: 7 }],
       relevantDocuments: recalledDocs,
     });
 
@@ -259,7 +259,7 @@ describe('recallAndScore', () => {
 
     expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
       recallRankingEventType,
-      expect.objectContaining({ scoredDocuments: [{ elserScore: 0.8, llmScore: 7 }] })
+      expect.objectContaining({ scoredDocuments: [{ esScore: 0.8, llmScore: 7 }] })
     );
   });
 });

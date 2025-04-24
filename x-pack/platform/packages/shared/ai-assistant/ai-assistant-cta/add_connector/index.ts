@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { AddConnector, type AddConnectorProps } from './add_connector';
+export {
+  AddConnector,
+  type AddConnectorProps,
+  DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON,
+} from './add_connector';

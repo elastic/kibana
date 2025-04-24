@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstMetricsCommand, ESQLMessage } from '@kbn/esql-ast';
+import { ESQLAstTimeseriesCommand, ESQLMessage } from '@kbn/esql-ast';
 import { ESQLFunction } from '@kbn/esql-ast/src/types';
 import {
   isAggFunction,
@@ -19,19 +19,19 @@ import { isFunctionItem, isLiteralItem } from '../../../..';
 import { validateSources } from '../../validation';
 
 /**
- * Validates the METRICS source command:
+ * Validates the TIMESERIES source command:
  *
- *     METRICS <sources>
+ *     TS <sources>
  */
 export const validate = (
-  command: ESQLAstMetricsCommand,
+  command: ESQLAstTimeseriesCommand,
   references: ReferenceMaps
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
   const { sources } = command;
 
-  // METRICS <sources> ...
-  messages.push(...validateSources(command, sources, references));
+  // TS <sources> ...
+  messages.push(...validateSources(sources, references));
 
   return messages;
 };

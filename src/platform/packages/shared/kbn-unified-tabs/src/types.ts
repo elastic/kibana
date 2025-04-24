@@ -15,13 +15,6 @@ export interface TabItem {
   label: string;
 }
 
-export interface TabMenuItemWithClick {
-  'data-test-subj': string;
-  name: string;
-  label: string;
-  onClick: () => void;
-}
-
 export interface TabsSizeConfig {
   isScrollable: boolean;
   regularTabMaxWidth: number;
@@ -40,6 +33,20 @@ export enum TabStatus {
 export interface TabPreviewData {
   query: AggregateQuery | Query;
   status: TabStatus;
+}
+
+export enum TabMenuItemName {
+  enterRenamingMode = 'enterRenamingMode',
+  duplicate = 'duplicate',
+  closeOtherTabs = 'closeOtherTabs',
+  closeTabsToTheRight = 'closeTabsToTheRight',
+}
+
+export interface TabMenuItemWithClick {
+  'data-test-subj': string;
+  name: TabMenuItemName | string;
+  label: string;
+  onClick: (() => void) | null; // `null` can be overridden inside tab menu
 }
 
 export type TabMenuItem = TabMenuItemWithClick | 'divider';

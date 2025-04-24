@@ -16,12 +16,12 @@ import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
 import { RulePreview, REASONABLE_INVOCATION_COUNT } from '.';
 import { usePreviewRoute } from './use_preview_route';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../common/types';
 import {
   getStepScheduleDefaultValue,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 jest.mock('../../../../common/lib/kibana');

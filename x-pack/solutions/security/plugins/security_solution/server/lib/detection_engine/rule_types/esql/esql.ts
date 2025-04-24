@@ -6,11 +6,6 @@
  */
 
 import { performance } from 'perf_hooks';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
 
@@ -24,16 +19,13 @@ import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
-import { createEnrichEventsFunction } from '../utils/enrichments';
 import { rowToDocument, mergeEsqlResultInSource, getMvExpandUsage } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { CreateRuleOptions, SecuritySharedParams, SignalSource } from '../types';
-import { logEsqlRequest } from '../utils/logged_requests';
+import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
-import * as i18n from '../translations';
 
 import {
   addToSearchAfterReturn,
@@ -45,23 +37,27 @@ import {
 } from '../utils/utils';
 import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
-import type { ExperimentalFeatures } from '../../../../../common';
+import {
+  alertSuppressionTypeGuard,
+  getIsAlertSuppressionActive,
+} from '../utils/get_is_alert_suppression_active';
+import { bulkCreate } from '../factories';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const esqlExecutor = async ({
   sharedParams,
   services,
   state,
-  experimentalFeatures,
   licensing,
   scheduleNotificationResponseActionsService,
+  ruleExecutionTimeout,
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   state: Record<string, unknown>;
-  experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
+  ruleExecutionTimeout?: string;
 }) => {
   const {
     completeRule,
@@ -71,7 +67,6 @@ export const esqlExecutor = async ({
     exceptionFilter,
     unprocessedExceptions,
     ruleExecutionLogger,
-    bulkCreate,
   } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
@@ -104,15 +99,9 @@ export const esqlExecutor = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
+          ruleExecutionTimeout,
         });
         const esqlQueryString = { drop_null_columns: true };
-
-        if (isLoggedRequestsEnabled) {
-          loggedRequests.push({
-            request: logEsqlRequest(esqlRequest, esqlQueryString),
-            description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
-          });
-        }
 
         ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -126,14 +115,13 @@ export const esqlExecutor = async ({
           esClient: services.scopedClusterClient.asCurrentUser,
           requestBody: esqlRequest,
           requestQueryParams: esqlQueryString,
+          shouldStopExecution: services.shouldStopExecution,
+          ruleExecutionLogger,
+          loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
         });
 
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
-
-        if (isLoggedRequestsEnabled && loggedRequests[0]) {
-          loggedRequests[0].duration = Math.round(esqlSearchDuration);
-        }
 
         ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
 
@@ -179,7 +167,10 @@ export const esqlExecutor = async ({
           };
         });
 
-        if (isAlertSuppressionActive) {
+        if (
+          isAlertSuppressionActive &&
+          alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
+        ) {
           const wrapSuppressedHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
             wrapSuppressedEsqlAlerts({
               sharedParams,
@@ -195,7 +186,6 @@ export const esqlExecutor = async ({
             services,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
-            experimentalFeatures,
             buildReasonMessage: buildReasonMessageForEsqlAlert,
             mergeSourceAndFields: true,
             // passing 1 here since ES|QL does not support pagination
@@ -218,15 +208,12 @@ export const esqlExecutor = async ({
             expandedFields,
           });
 
-          const enrichAlerts = createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          });
-          const bulkCreateResult = await bulkCreate(
+          const bulkCreateResult = await bulkCreate({
             wrappedAlerts,
-            tuple.maxSignals - result.createdSignalsCount,
-            enrichAlerts
-          );
+            services,
+            sharedParams,
+            maxAlerts: tuple.maxSignals - result.createdSignalsCount,
+          });
 
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
           ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);

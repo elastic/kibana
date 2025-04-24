@@ -26,6 +26,12 @@ export const createNavigationTree = ({
         breadcrumbStatus: 'hidden',
         children: [
           {
+            title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+              defaultMessage: 'Overview',
+            }),
+            link: 'observability-overview',
+          },
+          {
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
               defaultMessage: 'Discover',
             }),
@@ -72,6 +78,17 @@ export const createNavigationTree = ({
             ? [
                 {
                   link: 'streams' as const,
+                  withBadge: true,
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate(
+                      'xpack.serverlessObservability.nav.streamsBadgeTooltip',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    ),
+                  },
                 },
               ]
             : []),
@@ -165,16 +182,7 @@ export const createNavigationTree = ({
                     link: 'ml:overview',
                   },
                   {
-                    link: 'ml:notifications',
-                  },
-                  {
-                    link: 'ml:memoryUsage',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.machineLearning.memoryUsage',
-                      {
-                        defaultMessage: 'Memory usage',
-                      }
-                    ),
+                    link: 'ml:dataVisualizer',
                   },
                 ],
               },
@@ -186,25 +194,10 @@ export const createNavigationTree = ({
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
-                    link: 'ml:anomalyDetection',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.anomaly_detection.jobs',
-                      {
-                        defaultMessage: 'Jobs',
-                      }
-                    ),
-                  },
-                  {
                     link: 'ml:anomalyExplorer',
                   },
                   {
                     link: 'ml:singleMetricViewer',
-                  },
-                  {
-                    link: 'ml:settings',
-                  },
-                  {
-                    link: 'ml:suppliedConfigurations',
                   },
                 ],
               },
@@ -216,73 +209,10 @@ export const createNavigationTree = ({
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
-                    link: 'ml:dataFrameAnalytics',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.data_frame_analytics.jobs',
-                      {
-                        defaultMessage: 'Jobs',
-                      }
-                    ),
-                  },
-                  {
                     link: 'ml:resultExplorer',
                   },
                   {
                     link: 'ml:analyticsMap',
-                  },
-                ],
-              },
-              {
-                id: 'category-model_management',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.model_management', {
-                  defaultMessage: 'Model management',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:nodesOverview',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.model_management.trainedModels',
-                      {
-                        defaultMessage: 'Trained models',
-                      }
-                    ),
-                  },
-                ],
-              },
-              {
-                id: 'category-data_visualizer',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.data_visualizer', {
-                  defaultMessage: 'Data visualizer',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:fileUpload',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.data_visualizer.file_data_visualizer',
-                      {
-                        defaultMessage: 'File data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:indexDataVisualizer',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.data_visualizer.data_view_data_visualizer',
-                      {
-                        defaultMessage: 'Data view data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:dataDrift',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.data_visualizer.data_drift',
-                      {
-                        defaultMessage: 'Data drift',
-                      }
-                    ),
                   },
                 ],
               },
@@ -376,6 +306,7 @@ export const createNavigationTree = ({
                   { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+                  { link: 'management:content_connectors', breadcrumbStatus: 'hidden' },
                 ],
               },
               {
@@ -393,6 +324,16 @@ export const createNavigationTree = ({
                 children: [
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
                   { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
+                ],
+              },
+              {
+                title: 'Machine Learning',
+                children: [
+                  { link: 'management:overview' },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
+                  { link: 'management:trained_models' },
+                  { link: 'management:supplied_configurations' },
                 ],
               },
               {

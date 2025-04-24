@@ -1156,61 +1156,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.loadRuleTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "loadRuleTypes",
-        "description": [],
-        "signature": [
-          "({ http }: { http: ",
-          "HttpSetup",
-          "; }) => Promise<",
-          {
-            "pluginId": "@kbn/triggers-actions-ui-types",
-            "scope": "common",
-            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
-            "section": "def-common.RuleType",
-            "text": "RuleType"
-          },
-          "<string, string>[]>"
-        ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.loadRuleTypes.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ http }",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "triggersActionsUi",
-                "id": "def-public.loadRuleTypes.$1.http",
-                "type": "Object",
-                "tags": [],
-                "label": "http",
-                "description": [],
-                "signature": [
-                  "HttpSetup"
-                ],
-                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/lib/rule_api/rule_types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.MustacheTextFieldWrapper",
         "type": "Function",
         "tags": [],
@@ -1666,55 +1611,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.useLoadRuleTypesQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "useLoadRuleTypesQuery",
-        "description": [],
-        "signature": [
-          "({ filteredRuleTypes, enabled, }: UseLoadRuleTypesQueryProps) => { ruleTypesState: { initialLoad: boolean; isLoading: boolean; data: ",
-          {
-            "pluginId": "@kbn/triggers-actions-ui-types",
-            "scope": "common",
-            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
-            "section": "def-common.RuleTypeIndex",
-            "text": "RuleTypeIndex"
-          },
-          "; error: unknown; }; hasAnyAuthorizedRuleType: boolean; authorizedRuleTypes: ",
-          {
-            "pluginId": "@kbn/triggers-actions-ui-types",
-            "scope": "common",
-            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
-            "section": "def-common.RuleType",
-            "text": "RuleType"
-          },
-          "<string, string>[]; authorizedToReadAnyRules: boolean; authorizedToCreateAnyRules: boolean; isSuccess: boolean; }"
-        ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/hooks/use_load_rule_types_query.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.useLoadRuleTypesQuery.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  filteredRuleTypes,\n  enabled = true,\n}",
-            "description": [],
-            "signature": [
-              "UseLoadRuleTypesQueryProps"
-            ],
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/hooks/use_load_rule_types_query.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -4046,7 +3942,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,
@@ -4087,20 +3983,6 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
-            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleType.hasFieldsForAAD",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasFieldsForAAD",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4495,7 +4377,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],

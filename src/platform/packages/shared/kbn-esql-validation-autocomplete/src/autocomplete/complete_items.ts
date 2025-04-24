@@ -9,8 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ItemKind, SuggestionRawDefinition } from './types';
-import { operatorsDefinitions } from '../definitions/all_operators';
-import { getOperatorSuggestion, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
 import { buildDocumentation } from './documentation_util';
@@ -21,11 +20,6 @@ const techPreviewLabel = i18n.translate(
     defaultMessage: `Technical Preview`,
   }
 );
-
-export function getAssignmentDefinitionCompletitionItem() {
-  const assignFn = operatorsDefinitions.find(({ name }) => name === '=')!;
-  return getOperatorSuggestion(assignFn);
-}
 
 export const getCommandAutocompleteDefinitions = (
   commands: Array<CommandDefinition<string>>
@@ -39,9 +33,7 @@ export const getCommandAutocompleteDefinitions = (
 
     const commandDefinition = getCommandDefinition(command.name);
     const label = commandDefinition.name.toUpperCase();
-    const text = commandDefinition.signature.params.length
-      ? `${commandDefinition.name.toUpperCase()} $0`
-      : commandDefinition.name.toUpperCase();
+    const text = `${commandDefinition.name.toUpperCase()} `;
     const types: CommandTypeDefinition[] = command.types ?? [
       {
         name: '',
@@ -57,7 +49,6 @@ export const getCommandAutocompleteDefinitions = (
       const suggestion: SuggestionRawDefinition = {
         label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
         text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
-        asSnippet: true,
         kind: 'Method',
         detail,
         documentation: {

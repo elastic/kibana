@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Observable, BehaviorSubject } from 'rxjs';
-import { Logger, ServiceStatusLevels, CoreStatus, IClusterClient } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { Logger, CoreStatus, IClusterClient } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { TASK_MANAGER_INDEX } from '../constants';
 
 export interface GetElasticsearchAndSOAvailabilityOpts {

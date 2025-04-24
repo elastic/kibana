@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, memo, useCallback } from 'react';
-import { EuiForm, euiBreakpoint, useEuiTheme } from '@elastic/eui';
+import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
@@ -257,12 +257,12 @@ export function LayerPanels(
 
   return (
     <EuiForm
-      className="eui-yScroll"
       css={css`
         .lnsApp & {
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
             calc(400px + ${euiTheme.size.base});
           margin-left: -400px;
+          ${useEuiOverflowScroll('y')}
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};
             margin-left: 0;

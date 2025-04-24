@@ -8,9 +8,12 @@
 import { PackageNotFoundError } from '../../errors';
 import { outputService } from '../../services';
 
+import { installCustomAsset } from './custom_assets';
+
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
 jest.mock('../../services');
+jest.mock('./custom_assets');
 
 const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
 
@@ -21,6 +24,7 @@ describe('syncIntegrationsOnRemote', () => {
   let searchMock: jest.Mock;
   let packageClientMock: any;
   let loggerMock: any;
+  let soClientMock: any;
 
   beforeEach(() => {
     getIndicesMock = jest.fn();
@@ -49,6 +53,10 @@ describe('syncIntegrationsOnRemote', () => {
       warn: jest.fn(),
       info: jest.fn(),
     };
+    (installCustomAsset as jest.Mock).mockClear();
+    soClientMock = {
+      update: jest.fn(),
+    };
   });
 
   it('should throw error if multiple synced integrations ccr indices exist', async () => {
@@ -58,7 +66,7 @@ describe('syncIntegrationsOnRemote', () => {
     });
 
     await expect(
-      syncIntegrationsOnRemote(esClientMock, {} as any, {} as any, abortController, loggerMock)
+      syncIntegrationsOnRemote(esClientMock, soClientMock, {} as any, abortController, loggerMock)
     ).rejects.toThrowError(
       'Not supported to sync multiple indices with prefix fleet-synced-integrations-ccr-*'
     );
@@ -88,6 +96,24 @@ describe('syncIntegrationsOnRemote', () => {
                   updated_at: '2021-01-01T00:00:00.000Z',
                 },
               ],
+              custom_assets: {
+                'component_template:logs-system.auth@custom': {
+                  is_deleted: false,
+                  name: 'logs-system.auth@custom',
+                  package_name: 'system',
+                  package_version: '0.1.0',
+                  template: {},
+                  type: 'component_template',
+                },
+                'ingest_pipeline:logs-system.auth@custom': {
+                  is_deleted: false,
+                  name: 'logs-system.auth@custom',
+                  package_name: 'system',
+                  package_version: '0.1.0',
+                  pipeline: {},
+                  type: 'ingest_pipeline',
+                },
+              },
             },
           },
         ],
@@ -103,7 +129,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -131,7 +157,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -162,7 +188,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -204,7 +230,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -239,7 +265,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -287,7 +313,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -332,7 +358,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -368,7 +394,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -396,12 +422,36 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
     );
 
     expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+  });
+
+  it('should install custom assets', async () => {
+    getIndicesMock.mockResolvedValue({
+      'fleet-synced-integrations-ccr-remote1': {},
+    });
+    searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+    packageClientMock.getInstallation.mockImplementation(() => ({
+      install_status: 'installed',
+      version: '2.2.0',
+    }));
+    packageClientMock.installPackage.mockResolvedValue({
+      status: 'installed',
+    });
+
+    await syncIntegrationsOnRemote(
+      esClientMock,
+      soClientMock,
+      packageClientMock,
+      abortController,
+      loggerMock
+    );
+
+    expect(installCustomAsset).toHaveBeenCalledTimes(2);
   });
 });

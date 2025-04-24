@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.total).to.be(100);
-      expect(response.body.items[0].id).to.be('test-dashboard-0');
+      expect(response.body.items[0].id).to.be('test-dashboard-00');
       expect(response.body.items.length).to.be(20);
     });
 

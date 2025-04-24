@@ -8,7 +8,50 @@
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { StreamDefinition, isGroupStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { estypes } from '@elastic/elasticsearch';
+import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
+import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
+
+export interface ListStreamDetail {
+  stream: StreamDefinition;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
+  data_stream?: estypes.IndicesDataStream;
+}
+
+export const listStreamsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams',
+  options: {
+    access: 'internal',
+  },
+  params: z.object({}),
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
+    const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
+    const streams = await streamsClient.listStreamsWithDataStreamExistence();
+    const dataStreams = await scopedClusterClient.asCurrentUser.indices.getDataStream({
+      name: streams.filter((stream) => stream.data_stream_exists).map((stream) => stream.name),
+    });
+
+    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, stream) => {
+      const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
+      acc.push({
+        stream,
+        effective_lifecycle: getDataStreamLifecycle(match ?? null),
+        data_stream: match,
+      });
+      return acc;
+    }, []);
+
+    return { streams: enrichedStreams };
+  },
+});
 
 export interface StreamDetailsResponse {
   details: {
@@ -46,6 +89,7 @@ export const streamDetailRoute = createServerRoute({
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
       index: indexPattern,
       track_total_hits: true,
+      ignore_unavailable: true,
       query: {
         range: {
           '@timestamp': {
@@ -103,6 +147,7 @@ export const resolveIndexRoute = createServerRoute({
 });
 
 export const internalCrudRoutes = {
+  ...listStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
 };

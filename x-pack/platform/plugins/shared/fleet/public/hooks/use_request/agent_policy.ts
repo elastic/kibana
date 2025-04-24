@@ -184,6 +184,9 @@ export const sendCreateAgentPolicy = (
   });
 };
 
+/**
+ * @deprecated use sendUpdateAgentPolicyForRq instead
+ */
 export const sendUpdateAgentPolicy = (
   agentPolicyId: string,
   body: UpdateAgentPolicyRequest['body']

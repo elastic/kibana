@@ -22,6 +22,8 @@ export type FileID = string;
 
 /**
  * Frame type
+ * These frame types need to match with the constants defined in
+ * https://github.com/open-telemetry/opentelemetry-ebpf-profiler/blob/main/libpf/frametype.go
  */
 export enum FrameType {
   Unsymbolized = 0,
@@ -35,6 +37,7 @@ export enum FrameType {
   JavaScript,
   PHPJIT,
   DotNET,
+  Go,
   ErrorFlag = 0x80,
   Error = 0xff,
 
@@ -57,6 +60,7 @@ const frameTypeDescriptions = {
   [FrameType.JavaScript]: 'JavaScript',
   [FrameType.PHPJIT]: 'PHP JIT',
   [FrameType.DotNET]: '.NET',
+  [FrameType.Go]: 'Go',
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
   [FrameType.Root]: 'Root',

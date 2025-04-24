@@ -9,14 +9,9 @@ import expect from '@kbn/expect';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { Spaces, Superuser } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getEventLog,
-  getTestRuleData,
-  TaskManagerDoc,
-  ObjectRemover,
-} from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../common/lib';
+import { getUrlPrefix, getEventLog, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {
@@ -264,7 +259,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             notify_when: 'onActiveAlert',
             throttle: null,
             params: {
-              index: '.kibana-alerting-test-data',
+              index: 'kibana-alerting-test-data',
               reference: 'test',
             },
             actions: [
