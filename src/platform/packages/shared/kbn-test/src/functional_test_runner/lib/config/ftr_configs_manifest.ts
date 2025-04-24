@@ -43,6 +43,7 @@ const getAllFtrConfigsManifests = () => {
 export const getAllFtrConfigsAndManifests = () => {
   const manifestPaths = getAllFtrConfigsManifests();
   const allFtrConfigs: string[] = [];
+  const ftrConfigEntries = new Map<string, string[]>();
 
   for (const manifestRelPath of manifestPaths.all) {
     const manifest = JsYaml.load(
@@ -59,8 +60,19 @@ export const getAllFtrConfigsAndManifests = () => {
         return Path.resolve(REPO_ROOT, rel);
       });
 
+    for (const config of ftrConfigsInManifest) {
+      if (!ftrConfigEntries.has(config)) {
+        ftrConfigEntries.set(config, []);
+      }
+      ftrConfigEntries.get(config)!.push(manifestRelPath);
+    }
+
     allFtrConfigs.push(...ftrConfigsInManifest);
   }
 
-  return { allFtrConfigs, manifestPaths };
+  const duplicateEntries = Array.from(ftrConfigEntries.entries()).filter(
+    ([, paths]) => paths.length > 1
+  );
+
+  return { allFtrConfigs, manifestPaths, duplicateEntries };
 };

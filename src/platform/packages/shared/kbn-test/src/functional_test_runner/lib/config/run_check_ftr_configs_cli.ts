@@ -29,6 +29,20 @@ const IGNORED_PATHS = [
 export async function runCheckFtrConfigsCli() {
   run(
     async ({ log }) => {
+      const { allFtrConfigs, manifestPaths, duplicateEntries } = getAllFtrConfigsAndManifests();
+
+      if (duplicateEntries.length > 0) {
+        const errorMessage = duplicateEntries
+          .map(
+            ([config, paths]) =>
+              `Config path: ${Path.relative(REPO_ROOT, config)}\nFound in manifests:\n${paths.join(
+                '\n'
+              )}`
+          )
+          .join('\n\n');
+        throw createFailError(`Duplicate FTR config entries found:\n\n${errorMessage}`);
+      }
+
       const { stdout } = await execa('git', [
         'ls-tree',
         '--full-tree',
@@ -132,8 +146,6 @@ export async function runCheckFtrConfigsCli() {
       if (loadingConfigs.length) {
         log.info(`${loadingConfigs.length} files were loaded as FTR configs for validation`);
       }
-
-      const { allFtrConfigs, manifestPaths } = getAllFtrConfigsAndManifests();
 
       const invalid = possibleConfigs.filter((path) => !allFtrConfigs.includes(path));
       if (invalid.length) {
