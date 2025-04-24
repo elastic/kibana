@@ -3,3 +3,4 @@ knowledge_base/snapshot_kb_8.10/
 
 # Ignore all zip files
 complete/product_docs/*.zip
+complete/product_docs/index.xml

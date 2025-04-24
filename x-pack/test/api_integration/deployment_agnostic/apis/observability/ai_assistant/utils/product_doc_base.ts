@@ -14,8 +14,8 @@ import type SuperTest from 'supertest';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import fs from 'fs';
-import { LOCAL_PRODUCT_DOC_PATH } from '../../../../default_configs/stateful.config.base';
 import { products } from '../complete/product_docs/products';
+import { LOCAL_PRODUCT_DOC_PATH } from '../../../../default_configs/common_paths';
 
 export async function installProductDoc(supertest: SuperTest.Agent) {
   return supertest

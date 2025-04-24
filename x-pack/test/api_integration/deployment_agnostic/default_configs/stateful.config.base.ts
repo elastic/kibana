@@ -25,6 +25,7 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
 import { DeploymentAgnosticCommonServices, services } from '../services';
+import { AI_ASSISTANT_SNAPSHOT_REPO_PATH, LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   esServerArgs?: string[];
@@ -34,16 +35,6 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
 }
-
-export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
-  REPO_ROOT,
-  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshots/'
-);
-
-export const LOCAL_PRODUCT_DOC_PATH = path.resolve(
-  REPO_ROOT,
-  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/complete/product_docs'
-);
 
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
