@@ -2745,7 +2745,7 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 
 # Root package.json file
-/package.json @elastic/kibana-security
+/package.json @elastic/kibana-security @kibanamachine
 
 # OpenAPI spec files
 oas_docs/.spectral.yaml                       @elastic/platform-docs
