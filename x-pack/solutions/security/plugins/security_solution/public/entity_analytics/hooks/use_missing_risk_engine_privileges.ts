@@ -66,7 +66,7 @@ export const useMissingRiskEnginePrivileges = (
       hasAllRequiredPrivileges: false,
       missingPrivileges: {
         indexPrivileges,
-        clusterPrivileges: readonly ? { enable: ['N/A'], run: ['N/A'] } : clusterPrivileges, // cluster privileges are not required for readonly
+        clusterPrivileges: readonly ? { enable: [], run: [] } : clusterPrivileges, // cluster privileges are not required for readonly
       },
     };
   }, [isLoading, privilegesResponse, readonly]);

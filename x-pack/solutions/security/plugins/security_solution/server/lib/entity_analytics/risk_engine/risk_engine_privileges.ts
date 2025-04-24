@@ -79,7 +79,7 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
     : i18n.translate(
         'xpack.securitySolution.entityAnalytics.riskEngine.missingClusterRunPrivilege',
         {
-          defaultMessage: 'Missing cluster privileges to run risk score engine: {privileges}.',
+          defaultMessage: 'Missing cluster privileges to run the risk engine: {privileges}.',
           values: {
             privileges: clusterPrivileges.run.join(', '),
           },
@@ -91,7 +91,7 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
     : i18n.translate(
         'xpack.securitySolution.entityAnalytics.riskEngine.missingClusterEnablePrivilege',
         {
-          defaultMessage: 'Missing cluster privileges to enable risk score engine: {privileges}.',
+          defaultMessage: 'Missing cluster privileges to enable the risk engine: {privileges}.',
           values: {
             privileges: clusterPrivileges.enable.join(', '),
           },
@@ -115,13 +115,13 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
  * @param handler - The route handler to wrap
  **/
 export const withRiskEnginePrivilegeCheck = <P, Q, B>(
+  privilegeType: 'run' | 'enable' = 'enable',
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
   handler: (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
-  ) => Promise<IKibanaResponse>,
-  privilegeType: 'run' | 'enable' = 'enable'
+  ) => Promise<IKibanaResponse>
 ) => {
   return async (
     context: SecuritySolutionRequestHandlerContext,

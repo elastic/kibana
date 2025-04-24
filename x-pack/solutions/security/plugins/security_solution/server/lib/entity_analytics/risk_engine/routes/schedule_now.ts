@@ -35,48 +35,44 @@ export const riskEngineScheduleNowRoute = (
     })
     .addVersion(
       { version: API_VERSIONS.public.v1, validate: {} },
-      withRiskEnginePrivilegeCheck(
-        getStartServices,
-        async (context, request, response) => {
-          const securitySolution = await context.securitySolution;
+      withRiskEnginePrivilegeCheck('run', getStartServices, async (context, request, response) => {
+        const securitySolution = await context.securitySolution;
 
-          securitySolution.getAuditLogger()?.log({
-            message: 'User attempted to schedule the risk engine.',
-            event: {
-              action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
-              category: AUDIT_CATEGORY.DATABASE,
-              type: AUDIT_TYPE.CHANGE,
-              outcome: AUDIT_OUTCOME.UNKNOWN,
-            },
+        securitySolution.getAuditLogger()?.log({
+          message: 'User attempted to schedule the risk engine.',
+          event: {
+            action: RiskEngineAuditActions.RISK_ENGINE_SCHEDULE_NOW,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.CHANGE,
+            outcome: AUDIT_OUTCOME.UNKNOWN,
+          },
+        });
+
+        const siemResponse = buildSiemResponse(response);
+        const [_, { taskManager }] = await getStartServices();
+
+        const riskEngineClient = securitySolution.getRiskEngineDataClient();
+
+        if (!taskManager) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: TASK_MANAGER_UNAVAILABLE_ERROR,
           });
+        }
 
-          const siemResponse = buildSiemResponse(response);
-          const [_, { taskManager }] = await getStartServices();
+        try {
+          await riskEngineClient.scheduleNow({ taskManager });
+          const body: RiskEngineScheduleNowResponse = { success: true };
+          return response.ok({ body });
+        } catch (e) {
+          const error = transformError(e);
 
-          const riskEngineClient = securitySolution.getRiskEngineDataClient();
-
-          if (!taskManager) {
-            return siemResponse.error({
-              statusCode: 400,
-              body: TASK_MANAGER_UNAVAILABLE_ERROR,
-            });
-          }
-
-          try {
-            await riskEngineClient.scheduleNow({ taskManager });
-            const body: RiskEngineScheduleNowResponse = { success: true };
-            return response.ok({ body });
-          } catch (e) {
-            const error = transformError(e);
-
-            return siemResponse.error({
-              statusCode: error.statusCode,
-              body: { message: error.message, full_error: JSON.stringify(e) },
-              bypassErrorFormat: true,
-            });
-          }
-        },
-        'run'
-      )
+          return siemResponse.error({
+            statusCode: error.statusCode,
+            body: { message: error.message, full_error: JSON.stringify(e) },
+            bypassErrorFormat: true,
+          });
+        }
+      })
     );
 };
