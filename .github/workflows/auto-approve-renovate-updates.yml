@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       startsWith(github.event.pull_request.head.ref, 'renovate') &&
-      github.actor == 'renovate[bot]'
+      github.actor == 'elastic-renovate-prod[bot]'
     permissions:
       pull-requests: write
     steps:
