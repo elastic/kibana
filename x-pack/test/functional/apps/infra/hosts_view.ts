@@ -204,7 +204,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const find = getService('find');
-  const kibanaServer = getService('kibanaServer');
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -222,53 +221,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   // Helpers
-
-  const loginWithReadOnlyUser = async () => {
-    await security.role.create('global_hosts_read_privileges_role', {
-      elasticsearch: {
-        indices: [
-          { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
-          { names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] },
-        ],
-      },
-      kibana: [
-        {
-          feature: {
-            infrastructure: ['read'],
-            apm: ['read'],
-            advancedSettings: ['read'],
-            streams: ['read'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    });
-
-    await security.user.create('global_hosts_read_privileges_user', {
-      password: 'global_hosts_read_privileges_user-password',
-      roles: ['global_hosts_read_privileges_role'],
-      full_name: 'test user',
-    });
-
-    await pageObjects.security.forceLogout();
-
-    await pageObjects.security.login(
-      'global_hosts_read_privileges_user',
-      'global_hosts_read_privileges_user-password',
-      {
-        expectSpaceSelector: false,
-      }
-    );
-  };
-
-  const logoutAndDeleteReadOnlyUser = async () => {
-    await pageObjects.security.forceLogout();
-    await Promise.all([
-      security.role.delete('global_hosts_read_privileges_role'),
-      security.user.delete('global_hosts_read_privileges_user'),
-    ]);
-  };
-
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to hosts view', timeout, async () => {
       await browser.goBack();
