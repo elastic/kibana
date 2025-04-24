@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { useLocation } from 'react-router-dom';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { AttackDiscoveryWidget } from '.';
 import { useAssistantContext } from '../../assistant_context';
 import { useFindAttackDiscoveries } from './use_find_attack_discoveries';
@@ -20,7 +22,13 @@ jest.mock('../../assistant_context', () => ({
 jest.mock('./use_find_attack_discoveries', () => ({
   useFindAttackDiscoveries: jest.fn(),
 }));
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
+}));
+jest.mock('react-router-dom-v5-compat');
 const mockData = {
+  id: '123',
   alertIds: ['alert-id-xyz789'],
   detailsMarkdown: `
 * Suspicious process \`process.name\`:\`rundll32.exe\` launched by \`process.parent.name\`:\`winword.exe\` on \`host.name\`:\`finance-ws-03\`.
@@ -34,21 +42,27 @@ const mockData = {
 describe('AttackDiscoveryWidget', () => {
   const mockNavigateToApp = jest.fn();
   const mockHttp = {};
-  const mockToasts = {};
 
+  const searchParamsSetMock = jest.fn();
+  const setSearchParamsMock = jest.fn();
+  const searchParamsMock = { set: searchParamsSetMock };
   beforeEach(() => {
     jest.clearAllMocks();
 
     (useAssistantContext as jest.Mock).mockReturnValue({
       http: mockHttp,
-      toasts: mockToasts,
+      assistantAvailability: {
+        isAssistantEnabled: true,
+      },
       navigateToApp: mockNavigateToApp,
     });
+
+    (useSearchParams as jest.Mock).mockReturnValue([searchParamsMock, setSearchParamsMock]);
   });
 
   it('renders loading spinner when data is being fetched', () => {
     (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      isFetching: true,
+      isLoading: true,
       data: null,
     });
 
@@ -59,7 +73,7 @@ describe('AttackDiscoveryWidget', () => {
 
   it('renders no results message when no data is available', () => {
     (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      isFetching: false,
+      isLoading: false,
       data: null,
     });
 
@@ -70,8 +84,8 @@ describe('AttackDiscoveryWidget', () => {
 
   it('renders attack discovery details when data is available', () => {
     (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: mockData,
+      isLoading: false,
+      data: { data: [mockData] },
     });
 
     render(<AttackDiscoveryWidget id={'123'} />);
@@ -82,8 +96,8 @@ describe('AttackDiscoveryWidget', () => {
 
   it('navigates to attack discovery page when "View Details" button is clicked', () => {
     (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: mockData,
+      isLoading: false,
+      data: { data: [mockData] },
     });
 
     render(<AttackDiscoveryWidget id={'123'} />);
@@ -91,7 +105,27 @@ describe('AttackDiscoveryWidget', () => {
     fireEvent.click(screen.getByTestId('attackDiscoveryViewDetails'));
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('security', {
-      path: 'attack_discovery',
+      path: 'attack_discovery?id=123',
     });
+    expect(searchParamsSetMock).not.toHaveBeenCalled();
+    expect(setSearchParamsMock).not.toHaveBeenCalled();
+  });
+
+  it('when already on attack discovery, when "View Details" button is clicked sets search params', () => {
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: { data: [mockData] },
+    });
+    (useLocation as jest.Mock).mockReturnValue({
+      pathname: '/attack_discovery',
+    });
+
+    render(<AttackDiscoveryWidget id={'123'} />);
+
+    fireEvent.click(screen.getByTestId('attackDiscoveryViewDetails'));
+
+    expect(searchParamsSetMock).toHaveBeenCalledWith('id', '123');
+    expect(setSearchParamsMock).toHaveBeenCalledWith(searchParamsMock);
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 });
