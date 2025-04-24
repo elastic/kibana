@@ -8,13 +8,12 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
-import type { AlertDeleteScheduleQuery } from '@kbn/alerting-plugin/common/routes/alert_delete';
+import type { AlertDeleteParams } from '@kbn/alerting-types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 export interface PostAlertDeleteScheduleParams {
   services: { http: HttpStart };
-  requestBody: SnakeToCamelCase<AlertDeleteScheduleQuery>;
+  requestBody: AlertDeleteParams;
 }
 export const postAlertDeleteSchedule = async ({
   services: { http },
