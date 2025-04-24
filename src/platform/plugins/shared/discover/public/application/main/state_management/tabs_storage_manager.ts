@@ -157,11 +157,13 @@ export const createTabsStorageManager = ({
   };
 
   const toRecentlyClosedTabStateInStorage = (
-    tabState: RecentlyClosedTabState
+    tabState: RecentlyClosedTabState,
+    getAppState: (tabId: string) => DiscoverAppState | undefined
   ): RecentlyClosedTabStateInLocalStorage => {
-    // runtime state is not available for closed tabs, so we need to use the cached one
-    const getAppState = (tabId: string) => tabsInStorageCache.get(tabId)?.appState;
-    const state = toTabStateInStorage(tabState, getAppState);
+    // runtime state might not be available for closed tabs, so we need to use the cached one
+    const getAppStateForClosedTab = (tabId: string) =>
+      getAppState(tabId) || tabsInStorageCache.get(tabId)?.appState;
+    const state = toTabStateInStorage(tabState, getAppStateForClosedTab);
     return {
       ...state,
       closedAt: tabState.closedAt,
@@ -242,7 +244,7 @@ export const createTabsStorageManager = ({
       return tabStateInStorage;
     });
     const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) => {
-      const tabStateInStorage = toRecentlyClosedTabStateInStorage(tab);
+      const tabStateInStorage = toRecentlyClosedTabStateInStorage(tab, getAppState);
       keptTabIds[tab.id] = true;
       return tabStateInStorage;
     });

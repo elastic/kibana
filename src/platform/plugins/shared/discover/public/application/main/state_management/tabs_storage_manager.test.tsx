@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { omit } from 'lodash';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import {
@@ -21,13 +22,30 @@ import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
 
+const mockGetAppState = (tabId: string) => {
+  if (tabId === 'tab1') {
+    return {
+      columns: ['a', 'b'],
+    };
+  }
+
+  if (tabId === 'tab2') {
+    return {
+      columns: ['c', 'd'],
+    };
+  }
+
+  if (tabId.startsWith('closedTab')) {
+    return {
+      columns: ['e', 'f'],
+    };
+  }
+};
+
 const mockTab1: TabState = {
+  ...defaultTabState,
   id: 'tab1',
   label: 'Tab 1',
-  ...defaultTabState,
-  lastPersistedAppState: {
-    columns: ['a', 'b'],
-  },
   lastPersistedGlobalState: {
     timeRange: { from: '2025-04-16T14:07:55.127Z', to: '2025-04-16T14:12:55.127Z' },
     filters: [],
@@ -36,12 +54,9 @@ const mockTab1: TabState = {
 };
 
 const mockTab2: TabState = {
+  ...defaultTabState,
   id: 'tab2',
   label: 'Tab 2',
-  ...defaultTabState,
-  lastPersistedAppState: {
-    columns: ['c', 'd'],
-  },
   lastPersistedGlobalState: {
     timeRange: { from: '2025-04-17T03:07:55.127Z', to: '2025-04-17T03:12:55.127Z' },
     filters: [],
@@ -50,12 +65,9 @@ const mockTab2: TabState = {
 };
 
 const mockRecentlyClosedTab: RecentlyClosedTabState = {
+  ...defaultTabState,
   id: 'closedTab1',
   label: 'Closed tab 1',
-  ...defaultTabState,
-  lastPersistedAppState: {
-    columns: ['e', 'f'],
-  },
   lastPersistedGlobalState: {
     timeRange: { from: '2025-04-07T03:07:55.127Z', to: '2025-04-07T03:12:55.127Z' },
     filters: [],
@@ -96,7 +108,7 @@ describe('TabsStorageManager', () => {
   const toStoredTab = (tab: TabState | RecentlyClosedTabState) => ({
     id: tab.id,
     label: tab.label,
-    appState: tab.lastPersistedAppState,
+    appState: mockGetAppState(tab.id),
     globalState: tab.lastPersistedGlobalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
   });
@@ -125,7 +137,7 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [mockRecentlyClosedTab],
     };
 
-    await tabsStorageManager.persistLocally(props);
+    await tabsStorageManager.persistLocally(props, mockGetAppState);
 
     expect(urlStateStorage.set).toHaveBeenCalledWith(TABS_STATE_URL_KEY, { tabId: 'tab1' });
     expect(storage.set).toHaveBeenCalledWith(
@@ -200,7 +212,7 @@ describe('TabsStorageManager', () => {
 
     const props: TabsInternalStatePayload = {
       groupId: 'group3',
-      allTabs: [mockRecentlyClosedTab, mockRecentlyClosedTab2],
+      allTabs: [omit(mockRecentlyClosedTab, 'closedAt'), omit(mockRecentlyClosedTab2, 'closedAt')],
       selectedTabId: mockRecentlyClosedTab2.id,
       recentlyClosedTabs: [
         { ...mockTab1, closedAt: newClosedAt },
@@ -318,10 +330,11 @@ describe('TabsStorageManager', () => {
     jest.spyOn(storage, 'set');
 
     const updatedTabState = {
-      ...mockTab1,
-      lastPersistedAppState: {
-        ...mockTab1.lastPersistedAppState,
+      appState: {
         columns: ['a', 'b', 'c'],
+      },
+      globalState: {
+        refreshInterval: { pause: false, value: 300 },
       },
     };
 
@@ -332,7 +345,13 @@ describe('TabsStorageManager', () => {
       JSON.stringify({
         userId: mockUserId,
         spaceId: mockSpaceId,
-        openTabs: [toStoredTab(updatedTabState), toStoredTab(mockTab2)],
+        openTabs: [
+          {
+            ...toStoredTab(mockTab1),
+            ...updatedTabState,
+          },
+          toStoredTab(mockTab2),
+        ],
         closedTabs: [toStoredTab(mockRecentlyClosedTab)],
       })
     );

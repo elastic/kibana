@@ -72,7 +72,7 @@ function getStateContainer({
           from: '2020-05-14T11:05:13.590',
           to: '2020-05-14T11:20:13.590',
         },
-        ...(searchSessionId && { searchSessionId }),
+        searchSessionId,
       },
     })
   );
