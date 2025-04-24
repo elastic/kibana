@@ -9,7 +9,7 @@ import * as Rx from 'rxjs';
 import { ProductTier } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
-import { createAiNavigationTree } from './ai_navigation_tree';
+import { createAiNavigationTree } from './ai_navigation/ai_navigation_tree';
 import { createNavigationTree } from './navigation_tree';
 
 export const registerSolutionNavigation = async (

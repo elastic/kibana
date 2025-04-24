@@ -9,7 +9,7 @@ import type { ProductLine, ProductTier } from '../../common/product';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { registerSolutionNavigation } from './navigation';
 import { createNavigationTree } from './navigation_tree';
-import { createAiNavigationTree } from './ai_navigation_tree';
+import { createAiNavigationTree } from './ai_navigation/ai_navigation_tree';
 
 jest.mock('./navigation_tree');
 jest.mock('./ai_navigation_tree');
