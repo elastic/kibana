@@ -17,8 +17,9 @@ import {
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
+import type { KillOrSuspendProcessRequestBody } from '../../../../../../common/endpoint/types';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
-import type { NormalizedExternalConnectorClient } from '../../..';
+import type { NormalizedExternalConnectorClient, ResponseActionsClientMethods } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
 
@@ -314,7 +315,30 @@ const createConstructorOptionsMock = (): SentinelOneActionsClientOptionsMock => 
   };
 };
 
+const createKillProcessOptionsMock = (
+  overrides: Partial<KillOrSuspendProcessRequestBody> = {}
+): KillOrSuspendProcessRequestBody => {
+  return responseActionsClientMock.createKillProcessOptions({
+    // @ts-expect-error
+    parameters: { process_name: 'foo' },
+    ...overrides,
+  });
+};
+
+const getOptionsForResponseActionMethodMockOverride = (method: ResponseActionsClientMethods) => {
+  if (method === 'killProcess') {
+    return createKillProcessOptionsMock();
+  }
+
+  return responseActionsClientMock.getOptionsForResponseActionMethod(method);
+};
+
 export const sentinelOneMock = {
+  ...responseActionsClientMock,
+
+  createKillProcessOptions: createKillProcessOptionsMock,
+  getOptionsForResponseActionMethod: getOptionsForResponseActionMethodMockOverride,
+
   createGetAgentsResponse: createSentinelOneGetAgentsApiResponseMock,
   createSentinelOneAgentDetails: createSentinelOneAgentDetailsMock,
   createConnectorActionsClient: createConnectorActionsClientMock,

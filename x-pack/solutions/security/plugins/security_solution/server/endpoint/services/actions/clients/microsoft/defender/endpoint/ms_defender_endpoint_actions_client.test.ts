@@ -302,6 +302,10 @@ describe('MS Defender response actions client', () => {
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 
+    afterEach(() => {
+      getActionDetailsByIdMock.mockReset();
+    });
+
     it('should write action request doc with agent policy info when space awareness is enabled', async () => {
       await msClientMock.isolate(responseActionsClientMock.createIsolateOptions());
 

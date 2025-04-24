@@ -338,6 +338,10 @@ describe('CrowdstrikeActionsClient class', () => {
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 
+    afterEach(() => {
+      getActionDetailsByIdMock.mockReset();
+    });
+
     it('should write action request doc with policy info', async () => {
       await crowdstrikeActionsClient.release(createCrowdstrikeIsolationOptions());
 

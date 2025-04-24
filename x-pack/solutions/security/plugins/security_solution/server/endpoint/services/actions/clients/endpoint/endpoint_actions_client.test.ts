@@ -548,6 +548,10 @@ describe('EndpointActionsClient', () => {
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 
+    afterEach(() => {
+      getActionDetailsByIdMock.mockReset();
+    });
+
     it('should write action request with agent policy info when space awareness is enabled', async () => {
       await endpointActionsClient.isolate(
         responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
