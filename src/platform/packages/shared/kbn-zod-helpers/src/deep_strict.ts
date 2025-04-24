@@ -25,39 +25,36 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
   return keys;
 }
 
-export class DeepStrictSchema<
-  Output,
-  Def extends z.ZodTypeDef,
-  Input extends Output
-> extends z.ZodType<Output, Def, Input> {
-  constructor(private readonly schema: z.Schema<Output, Def, Input>) {
-    super(schema._def);
-  }
-
-  _parse(input: z.ParseInput): z.ParseReturnType<Output> {
-    const next = this.schema._parse(input) as z.SyncParseReturnType<Output>;
-    if (!z.isValid(next)) {
-      return next;
-    }
-
-    const allInputKeys = Array.from(getFlattenedKeys(input.data).values());
-    const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>).values());
-
-    const excessKeys = difference(allInputKeys, allOutputKeys);
-
-    if (excessKeys.length) {
-      input.parent.common.issues.push({
-        code: ZodIssueCode.unrecognized_keys,
-        keys: excessKeys,
-        message: `Excess keys are not allowed`,
-        path: input.path,
-      });
-      return z.INVALID;
-    }
+function parseStrict<TSchema extends z.Schema>(
+  source: z.Schema,
+  input: z.ParseInput
+): z.ParseReturnType<z.output<TSchema>> {
+  const next = source._parse(input);
+  if (!z.isValid(next)) {
     return next;
   }
+
+  const allInputKeys = Array.from(getFlattenedKeys(input.data).values());
+  const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>).values());
+
+  const excessKeys = difference(allInputKeys, allOutputKeys);
+
+  if (excessKeys.length) {
+    input.parent.common.issues.push({
+      code: ZodIssueCode.unrecognized_keys,
+      keys: excessKeys,
+      message: `Excess keys are not allowed`,
+      path: input.path,
+    });
+    return z.INVALID;
+  }
+  return next;
 }
 
 export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
-  return new DeepStrictSchema<z.output<TSchema>, TSchema['_def'], z.input<TSchema>>(schema);
+  return new Proxy(schema, {
+    apply: (target, thisArg, args) => {
+      return parseStrict(schema, args[0]);
+    },
+  });
 }
