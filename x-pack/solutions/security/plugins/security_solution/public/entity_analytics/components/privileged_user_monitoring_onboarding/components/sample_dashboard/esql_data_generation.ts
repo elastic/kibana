@@ -17,7 +17,7 @@ export const getBucketTimeRange = () => ({
 });
 
 const generateRandomDate = (from: Moment, to: Moment) => {
-  // Generate a moment js date between the two given dates
+  // Generate a date between the two given moment js dates
   const randomDate = from
     .clone()
     .add(Math.random() * (to.valueOf() - from.valueOf()), 'milliseconds');
