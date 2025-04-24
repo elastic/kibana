@@ -18,7 +18,7 @@ const investigationsAppLink: LinkItem = {
   id: SecurityPageName.investigations,
   title: i18n.INVESTIGATIONS_TITLE,
   path: INVESTIGATIONS_PATH,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
   hideTimeline: true,
   skipUrlState: true,
   links: [], // timeline and note links are added via the methods below
