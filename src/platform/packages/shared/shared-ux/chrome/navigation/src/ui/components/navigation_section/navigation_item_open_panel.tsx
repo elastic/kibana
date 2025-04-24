@@ -74,6 +74,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
             ? euiTheme.colors.backgroundLightPrimary
             : euiTheme.colors.backgroundBaseInteractiveHover};
         }
+        &.hasIcon {
+          margin-left: -2px;
+        }
       `,
     flexGroup: ({ euiTheme }: Theme) => css`
       gap: calc(${euiTheme.size.s} / 1.5);
@@ -87,6 +90,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       iconType="arrowRight"
       size="s"
       fullWidth
+      className={icon ? 'hasIcon' : undefined}
       css={styles.button}
       data-test-subj={dataTestSubj}
     >

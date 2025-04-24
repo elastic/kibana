@@ -592,6 +592,10 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     .euiAccordion__childWrapper {
       transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
     }
+
+    &:only-child .euiCollapsibleNavItem__icon {
+      transform: scale(1.33);
+    }
   `;
 
   if (!items) {
