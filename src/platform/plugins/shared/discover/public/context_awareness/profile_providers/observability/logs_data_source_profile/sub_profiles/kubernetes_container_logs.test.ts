@@ -51,6 +51,7 @@ describe('createKubernetesContainerLogsDataSourceProfileProvider', () => {
       context: { category: DataSourceCategory.Logs },
     });
     expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
+      breakdownField: 'log.level',
       columns: [
         { name: 'timestamp', width: 212 },
         { name: 'log.level', width: 150 },
