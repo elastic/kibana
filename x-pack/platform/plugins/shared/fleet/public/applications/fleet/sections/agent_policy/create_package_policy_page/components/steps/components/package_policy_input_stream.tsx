@@ -29,7 +29,7 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useQuery } from '@tanstack/react-query';
 
-import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
+import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import { useConfig, sendGetDataStreams, useStartServices } from '../../../../../../../../hooks';
 
@@ -101,6 +101,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
+
+    const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
+    const customDataStreamTypeVarValue = customDataStreamTypeVar?.value || packagePolicyInputStream.data_stream.type || 'logs';
 
     const { exists: indexTemplateExists, isLoading: isLoadingIndexTemplate } =
       useIndexTemplateExists(
@@ -369,7 +372,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             <EuiRadioGroup
                               data-test-subj="packagePolicyDataStreamType"
                               disabled={isEditPage}
-                              idSelected={packagePolicyInputStream.data_stream.type || 'logs'}
+                              idSelected={customDataStreamTypeVarValue}
                               options={[
                                 {
                                   id: 'logs',
@@ -386,9 +389,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               ]}
                               onChange={(type: string) => {
                                 updatePackagePolicyInputStream({
-                                  data_stream: {
-                                    ...packagePolicyInputStream.data_stream,
-                                    type,
+                                  vars: {
+                                    ...packagePolicyInputStream.vars,
+                                    [DATA_STREAM_TYPE_VAR_NAME]: {
+                                      type: 'string',
+                                      value: type,
+                                    }
                                   },
                                 });
                               }}
