@@ -16,6 +16,8 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
+  type AnyAction,
+  type Dispatch,
   createListenerMiddleware,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -278,7 +280,12 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
-export type InternalStateDispatch = InternalStateStore['dispatch'];
+export type InternalStateDispatch = ThunkDispatch<
+  DiscoverInternalState,
+  InternalStateThunkDependencies,
+  AnyAction
+> &
+  Dispatch<AnyAction>;
 
 type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,

@@ -46,7 +46,7 @@ function getStateContainer({
   searchSessionId,
 }: {
   savedSearch?: SavedSearch;
-  searchSessionId?: string | null;
+  searchSessionId?: string;
 }) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
@@ -125,7 +125,10 @@ const mountComponent = async ({
     totalHits$,
   };
 
-  const stateContainer = getStateContainer({ savedSearch, searchSessionId });
+  const stateContainer = getStateContainer({
+    savedSearch,
+    searchSessionId: searchSessionId || undefined,
+  });
   stateContainer.dataState.data$ = savedSearchData$;
   stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
