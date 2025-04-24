@@ -21,7 +21,6 @@ import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
 
-// TODO: Handle serverless case
 export const kibanaServerlessOpenApiSpec = path.join(
   __dirname,
   '../../../../../../../../../oas_docs/output/kibana.serverless.yaml'
