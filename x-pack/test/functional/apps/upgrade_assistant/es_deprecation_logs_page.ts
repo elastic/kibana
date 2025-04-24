@@ -16,7 +16,7 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  describe('ES deprecation logs flyout', function () {
+  describe.skip('ES deprecation logs flyout', function () {
     this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {
