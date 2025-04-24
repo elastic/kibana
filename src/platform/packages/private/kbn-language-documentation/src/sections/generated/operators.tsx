@@ -37,7 +37,7 @@ export const functions = {
             {
               defaultMessage: `
   ### ADD \`+\`
-  Add two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Add two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
   `,
               description:
@@ -64,7 +64,7 @@ export const functions = {
             {
               defaultMessage: `
   ### CAST \`::\`
-  The \`::\` operator provides a convenient alternative syntax to the TO_<type> [conversion functions](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/functions-operators/type-conversion-functions).
+  The \`::\` operator provides a convenient alternative syntax to the TO_<type> [conversion functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/type-conversion-functions).
 
   \`\`\`esql
   ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
@@ -94,9 +94,9 @@ export const functions = {
             {
               defaultMessage: `
   ### DIVIDE \`/\`
-  Divide one number by another. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Divide one number by another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
-  Note: Division of two integer types will yield an integer result, rounding towards 0. If you need floating point division, [\`Cast (::)\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/functions-operators/operators#esql-cast-operator) one of the arguments to a \`DOUBLE\`.
+  Note: Division of two integer types will yield an integer result, rounding towards 0. If you need floating point division, [\`Cast (::)\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/operators#esql-cast-operator) one of the arguments to a \`DOUBLE\`.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -122,9 +122,9 @@ export const functions = {
             {
               defaultMessage: `
   ### EQUALS \`==\`
-  Check if two fields are equal. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Check if two fields are equal. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
-  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/doc-values).
+  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/doc-values).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -150,9 +150,9 @@ export const functions = {
             {
               defaultMessage: `
   ### GREATER THAN \`>\`
-  Check if one field is greater than another. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Check if one field is greater than another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
-  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/doc-values).
+  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/doc-values).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -178,9 +178,9 @@ export const functions = {
             {
               defaultMessage: `
   ### GREATER THAN OR EQUAL \`>=\`
-  Check if one field is greater than or equal to another. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Check if one field is greater than or equal to another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
-  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/doc-values).
+  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/doc-values).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -300,9 +300,9 @@ export const functions = {
             {
               defaultMessage: `
   ### LESS THAN \`<\`
-  Check if one field is less than another. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Check if one field is less than another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
-  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/doc-values).
+  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/doc-values).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -328,9 +328,9 @@ export const functions = {
             {
               defaultMessage: `
   ### LESS THAN OR EQUAL \`<=\`
-  Check if one field is less than or equal to another. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Check if one field is less than or equal to another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
-  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/doc-values).
+  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/doc-values).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -396,13 +396,13 @@ export const functions = {
             {
               defaultMessage: `
   ### MATCH OPERATOR \`:\`
-  Use the match operator (\`:\`) to perform a [match query](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-match-query) on the specified field.
+  Use the match operator (\`:\`) to perform a [match query](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query) on the specified field.
   Using \`:\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
 
-  The match operator is equivalent to the [match function](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/functions-operators/aggregation-functions#esql-match).
+  The match operator is equivalent to the [match function](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-match).
 
-  For using the function syntax, or adding [match query parameters](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-match-query#match-field-params), you can use the
-  [match function](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/functions-operators/aggregation-functions#esql-match).
+  For using the function syntax, or adding [match query parameters](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-match-query#match-field-params), you can use the
+  [match function](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-match).
 
   \`:\` returns true if the provided query matches the row.
 
@@ -435,7 +435,7 @@ export const functions = {
             {
               defaultMessage: `
   ### MODULO \`%\`
-  Divide one number by another and return the remainder. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Divide one number by another and return the remainder. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
   `,
               description:
@@ -462,7 +462,7 @@ export const functions = {
             {
               defaultMessage: `
   ### MULTIPLY \`*\`
-  Multiply two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Multiply two numbers together. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
   `,
               description:
@@ -516,9 +516,9 @@ export const functions = {
             {
               defaultMessage: `
   ### NOT EQUALS \`!=\`
-  Check if two fields are unequal. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Check if two fields are unequal. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
-  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/doc-values).
+  Note: This is pushed to the underlying search index if one side of the comparison is constant and the other side is a field in the index that has both an [mapping-index](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-index) and [doc-values](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/doc-values).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -545,7 +545,7 @@ export const functions = {
               defaultMessage: `
   ### RLIKE
   Use \`RLIKE\` to filter data based on string patterns using using
-  [regular expressions](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/regexp-syntax). \`RLIKE\` usually acts on a field placed on
+  [regular expressions](https://www.elastic.co/docs/reference/query-languages/query-dsl/regexp-syntax). \`RLIKE\` usually acts on a field placed on
   the left-hand side of the operator, but it can also act on a constant (literal)
   expression. The right-hand side of the operator represents the pattern.
 
@@ -579,7 +579,7 @@ export const functions = {
             {
               defaultMessage: `
   ### SUBTRACT \`-\`
-  Subtract one number from another. If either field is [multivalued](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
+  Subtract one number from another. If either field is [multivalued](https://www.elastic.co/docs/reference/query-languages/esql/esql-multivalued-fields) then the result is \`null\`.
 
   `,
               description:
