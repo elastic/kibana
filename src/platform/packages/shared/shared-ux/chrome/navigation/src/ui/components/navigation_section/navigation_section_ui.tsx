@@ -588,13 +588,15 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
 
   const navItemStyles = ({ euiTheme }: Theme) => css`
     background-color: ${props.isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
-
     .euiAccordion__childWrapper {
       transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
     }
-
     &:only-child .euiCollapsibleNavItem__icon {
       transform: scale(1.33);
+    }
+    .euiAccordion__children .euiCollapsibleNavItem__items {
+      padding-inline-start: ${euiTheme.size.m};
+      margin-inline-start: ${euiTheme.size.m};
     }
   `;
 
