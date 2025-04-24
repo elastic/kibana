@@ -30,7 +30,7 @@ interface SuggestionsSelectProps {
 
 export type { SuggestionsSelectProps };
 
-export const SuggestionsSelect = React.memo(function SuggestionsSelect({
+export function SuggestionsSelect({
   customOptions,
   customOptionText,
   defaultValue,
@@ -127,4 +127,4 @@ export const SuggestionsSelect = React.memo(function SuggestionsSelect({
       prepend={prepend}
     />
   );
-});
+}

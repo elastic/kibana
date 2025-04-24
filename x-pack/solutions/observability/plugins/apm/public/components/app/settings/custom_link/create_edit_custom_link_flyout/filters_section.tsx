@@ -16,23 +16,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
 import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 import { SuggestionsSelect } from '../../../../shared/suggestions_select';
 
-export const FiltersSection = React.memo(function FiltersSection({
+export function FiltersSection({
   filters,
   onChangeFilters,
 }: {
   filters: Filter[];
   onChangeFilters: (filters: Filter[]) => void;
 }) {
-  const onChangeFilter = (key: Filter['key'], value: Filter['value'], idx: number) => {
-    const newFilters = [...filters];
-    newFilters[idx] = { key, value };
-    onChangeFilters(newFilters);
-  };
+  const onChangeFilter = useCallback(
+    (key: Filter['key'], value: Filter['value'], idx: number) => {
+      const newFilters = [...filters];
+      newFilters[idx] = { key, value };
+      onChangeFilters(newFilters);
+    },
+    [filters, onChangeFilters]
+  );
 
   const start = useMemo(() => moment().subtract(24, 'h').toISOString(), []);
   const end = useMemo(() => moment().toISOString(), []);
@@ -149,7 +152,7 @@ export const FiltersSection = React.memo(function FiltersSection({
       />
     </>
   );
-});
+}
 
 function AddFilterButton({ onClick, isDisabled }: { onClick: () => void; isDisabled: boolean }) {
   return (
