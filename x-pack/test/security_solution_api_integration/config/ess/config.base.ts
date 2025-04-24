@@ -17,7 +17,11 @@ interface CreateTestConfigOptions {
   license: string;
   ssl?: boolean;
   services?: any;
+  // Used to enable searchable snapshots locally which is necessary to run tests on the frozen data tier
+  // see https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/searchable-snapshots
   esSnapshotStorageConfig?: { size: `${number}GB`; path: string };
+  // How often index lifecycle management checks for indices that meet policy criteria. Defaults to 10m.
+  // See https://www.elastic.co/docs/reference/elasticsearch/configuration-reference/index-lifecycle-management-settings
   ilmPollInterval?: `${number}${'s' | 'm'}`;
 }
 // test.not-enabled is specifically not enabled
