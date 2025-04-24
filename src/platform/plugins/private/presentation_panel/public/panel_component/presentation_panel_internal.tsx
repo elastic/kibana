@@ -11,6 +11,7 @@ import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elas
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
+  PublishesTitle,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
@@ -72,7 +73,7 @@ export const PresentationPanelInternal = <
     api?.defaultTitle$,
     api?.defaultDescription$,
     viewModeSubject,
-    api?.parentApi?.hideTitle$
+    (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
   );
   const viewMode = rawViewMode ?? 'view';
 
