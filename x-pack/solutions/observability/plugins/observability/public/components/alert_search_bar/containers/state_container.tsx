@@ -42,7 +42,6 @@ const DEFAULT_STATE: AlertSearchBarContainerState = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
-  filters: [],
 };
 
 const transitions: AlertSearchBarStateTransitions = {
