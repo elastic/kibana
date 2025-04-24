@@ -6,7 +6,6 @@
  */
 
 import { SERVICE_ENVIRONMENT } from '@kbn/apm-types';
-import { isEmpty } from 'lodash';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
@@ -23,7 +22,7 @@ export function useEnvironmentSelect({
 
   const { data, status: searchStatus } = useFetcher(
     (callApmApi) => {
-      return isEmpty(debouncedSearchValue)
+      return debouncedSearchValue.trim() === ''
         ? Promise.resolve({ terms: [] })
         : callApmApi('GET /internal/apm/suggestions', {
             params: {
