@@ -88,7 +88,7 @@ export interface IndexedHostsResponse
   policyResponseIndex: string;
 }
 
-const buildIndexHostsResponse = (): IndexedHostsResponse => {
+export const buildIndexHostsResponse = (): IndexedHostsResponse => {
   return {
     hosts: [],
     agents: [],
@@ -418,7 +418,7 @@ interface IndexEndpointHostForPolicyOptions {
    */
   agentPolicyId?: string;
   overrides?: DeepPartial<HostMetadataInterface>;
-  logger: ToolingLog;
+  logger?: ToolingLog;
 }
 /**
  * Indexes a new Endpoint host for a given policy (Endpoint integration policy).
@@ -464,7 +464,12 @@ export const indexEndpointHostForPolicy = async ({
 
   logger.verbose(`Agent policy:\n${JSON.stringify(agentPolicy, null, 2)}`);
 
+  const timestamp = Date.now() - 3.6e6; // Subtract 1 hour
+  // hostMetadataDoc['@timestamp'] = timestamp;
+  // hostMetadataDoc.event.created = timestamp;
+
   const docOverrides: DeepPartial<HostMetadataInterface> = {
+    '@timestamp': timestamp,
     Endpoint: {
       policy: {
         applied: {
@@ -494,6 +499,8 @@ export const indexEndpointHostForPolicy = async ({
     )}`
   );
 
+  await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
+
   // Create the Fleet agent
   const indexedFleetAgent = await indexFleetAgentForHost(
     esClient,
@@ -509,8 +516,6 @@ export const indexEndpointHostForPolicy = async ({
   logger.info(`New fleet agent indexed [${indexedFleetAgent.agents[0]?.agent?.id}]`);
   logger.verbose(JSON.stringify(indexedFleetAgent.agents, null, 2));
 
-  await stopMetadataTransforms(esClient, integrationPolicy.package?.version ?? '');
-  hostMetadataDoc['@timestamp'] = new Date().getTime();
   await esClient
     .index({
       index: METADATA_DATASTREAM,

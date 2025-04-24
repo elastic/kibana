@@ -6,10 +6,13 @@
  */
 
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
-import { indexEndpointHostForPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_hosts';
+import {
+  buildIndexHostsResponse,
+  deleteIndexedEndpointHosts,
+  IndexedHostsResponse,
+  indexEndpointHostForPolicy,
+} from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_hosts';
 import { mergeAndAppendArrays } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
-import { HostMetadataInterface } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableFleetServerIfNecessary } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_server';
 import { updateAgentPolicy } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
@@ -36,36 +39,24 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
-    interface IndexedData {
-      agentPolicies: AgentPolicy[];
-      integrationPolicies: PackagePolicy[];
-      hostMetadata: HostMetadataInterface[];
-      agents: Agent[];
-      cleanup(): Promise<void>;
-    }
-
     const setupData = async (): Promise<{
       /** data is set up so that it is only accessible from space one */
-      spaceOne: IndexedData;
+      spaceOne: IndexedHostsResponse;
       /** data is set up so that it is only accessible from space two */
-      spaceTwo: IndexedData;
+      spaceTwo: IndexedHostsResponse;
       /** data is set up so that it includes agents from both spaces */
-      shared: IndexedData;
+      shared: IndexedHostsResponse;
       cleanup: () => Promise<void>;
     }> => {
+      const spaceOneKbnClient = endpointTestResources.getScopedKbnClient(spaceOneId);
       const spaceTwoKbnClient = endpointTestResources.getScopedKbnClient(spaceTwoId);
       const endpointPackage = await policyTestResources.getEndpointPackage();
 
-      const indexDataIntoSpace = async (spaceId: string, name: string): Promise<IndexedData> => {
-        const spaceData: IndexedData = {
-          agents: [],
-          integrationPolicies: [],
-          hostMetadata: [],
-          agentPolicies: [],
-          cleanup: async (): Promise<void> => {
-            // Implement
-          },
-        };
+      const indexDataIntoSpace = async (
+        spaceId: string,
+        name: string
+      ): Promise<IndexedHostsResponse & { cleanup(): Promise<void> }> => {
+        const spaceData: IndexedHostsResponse = buildIndexHostsResponse();
         const kbnClient = endpointTestResources.getScopedKbnClient(spaceId);
         await enableFleetServerIfNecessary(esClient, false, kbnClient, log);
 
@@ -79,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
           [spaceId]
         );
 
-        Object.assign(spaceData, policies);
+        mergeAndAppendArrays(spaceData, policies);
 
         // Index fleet agent and endpoint host metadata
         const host = await indexEndpointHostForPolicy({
@@ -95,12 +86,34 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
 
-        spaceData.hostMetadata = host.hosts as HostMetadataInterface[];
-        spaceData.agents = host.agents as Agent[];
-
+        mergeAndAppendArrays(spaceData, host);
         log.info(`Data for space [${spaceId}] loaded`);
 
-        return spaceData;
+        return {
+          ...spaceData,
+          cleanup: async (): Promise<void> => {
+            return deleteIndexedEndpointHosts(esClient, kbnClient, spaceData)
+              .then((cleanupResponse) => {
+                log.info(`Indexed test data for space [${spaceId}] was deleted`);
+                log.verbose(
+                  `Space [${spaceId}] data cleanup response:\n${JSON.stringify(
+                    cleanupResponse,
+                    null,
+                    2
+                  )}`
+                );
+              })
+              .catch((e) => {
+                log.error(
+                  `Indexed data cleanup for space [${spaceId}] failed:\n${JSON.stringify(
+                    e,
+                    null,
+                    2
+                  )}`
+                );
+              });
+          },
+        };
       };
 
       const spaceOne = await indexDataIntoSpace(spaceOneId, '1 - NOT SHARED');
@@ -109,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Make sure the shared policy is shared with space two
       await updateAgentPolicy(
-        endpointTestResources.getScopedKbnClient(spaceOneId),
+        spaceOneKbnClient,
         shared.agentPolicies[0].id,
         { space_ids: [spaceOneId, spaceTwoId] },
         true
@@ -137,9 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
       mergeAndAppendArrays(spaceTwo, spaceTwoSharedEndpointHost);
 
       const cleanup = async (): Promise<void> => {
-        await Promise.all([
-          // FIXME:PT implement
-        ]);
+        await Promise.all([spaceOne.cleanup(), spaceTwo.cleanup(), shared.cleanup()]);
       };
 
       return {
