@@ -7,11 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Rx from 'rxjs';
+import {
+  BehaviorSubject,
+  filter,
+  share,
+  mergeMap,
+  merge,
+  bufferToggle,
+  windowToggle,
+  tap,
+  type Observable,
+} from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import {
+  NotificationCoordinator,
+  NotificationCoordinatorState,
+} from '@kbn/core-notifications-browser';
 
 export class Coordinator {
-  private readonly coordinationLock$ = new Rx.BehaviorSubject<{
+  private readonly coordinationLock$ = new BehaviorSubject<{
     locked: boolean;
     controller: string | null;
   }>({
@@ -54,24 +68,29 @@ export class Coordinator {
    */
   public optInToCoordination<T extends Array<{ id: string }>>(
     registrar: string,
-    $: Rx.Observable<T>,
-    cond: Parameters<typeof Rx.filter<ReturnType<Coordinator['coordinationLock$']['getValue']>>>[0]
+    $: Observable<T>,
+    cond: Parameters<typeof filter<NotificationCoordinatorState>>[0]
   ) {
-    const on$ = this.coordinationLock$.pipe(Rx.filter((...args) => cond(...args)));
-    const off$ = this.coordinationLock$.pipe(Rx.filter((...args) => !cond(...args)));
-    const multicast$ = $.pipe(Rx.share());
+    // signal used to determine when to emit values from the source observable based on the provided opt-in condition
+    const on$ = this.coordinationLock$.pipe(filter((...args) => cond(...args)));
+    // signal used to determine when to buffer values from the source observable based on the provided opt-in condition
+    const off$ = this.coordinationLock$.pipe(filter((...args) => !cond(...args)));
+    const multicast$ = $.pipe(share());
 
-    return Rx.merge(
-      multicast$.pipe(Rx.bufferToggle(off$, () => on$)),
-      multicast$.pipe(Rx.windowToggle(on$, () => off$))
+    return merge(
+      multicast$.pipe(bufferToggle(off$, () => on$)),
+      multicast$.pipe(windowToggle(on$, () => off$))
     ).pipe(
-      Rx.mergeMap((x) => x),
-      Rx.tap((value) => {
+      mergeMap((x) => x),
+      tap((value) => {
         const lock = this.coordinationLock$.getValue();
-
+        // if the source has values to emit and the lock is not owned, acquire a lock for said source,
+        // precisely because of this approach acquiring a lock, is solely based on availability.
         if (value.length && !lock.locked) {
           this.acquireLock(registrar);
         } else if (!value.length && lock.controller === registrar) {
+          // here we handle the scenario where the source observable has been emptied out,
+          // in such event if the lock is still held by the registrar we release it
           this.releaseLock(registrar);
         }
       })
@@ -79,7 +98,10 @@ export class Coordinator {
   }
 }
 
-export function notificationCoordinator(this: Coordinator, registrar: string) {
+export function notificationCoordinator(
+  this: Coordinator,
+  registrar: string
+): ReturnType<NotificationCoordinator> {
   return {
     optInToCoordination: <T extends Array<{ id: string }>>(
       ...args: Parameters<typeof this.optInToCoordination<T>> extends [infer Head, ...infer Tail]
@@ -89,12 +111,10 @@ export function notificationCoordinator(this: Coordinator, registrar: string) {
       this.optInToCoordination.apply<
         Coordinator,
         Parameters<typeof this.optInToCoordination<T>>,
-        Rx.Observable<T>
+        Observable<T>
       >(this, [registrar, ...args]),
     acquireLock: this.acquireLock.bind(this, registrar),
     releaseLock: this.releaseLock.bind(this, registrar),
     lock$: this.lock$,
   };
 }
-
-export type NotificationCoordinatorPublicImpl = OmitThisParameter<typeof notificationCoordinator>;

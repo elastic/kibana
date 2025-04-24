@@ -25,6 +25,9 @@ export type ToastsStart = IToasts;
 export interface NotificationsSetup {
   /** {@link ToastsSetup} */
   toasts: ToastsSetup;
+  /**
+   * {@link NotificationCoordinator}
+   */
   coordinator: NotificationCoordinator;
 }
 
