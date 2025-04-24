@@ -102,7 +102,17 @@ export async function readSignificantEvents(
   });
 
   if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
-    return [];
+    return queryLinks.map((queryLink) => ({
+      id: queryLink.query.id,
+      title: queryLink.query.title,
+      kql: queryLink.query.kql,
+      occurrences: [],
+      change_points: {
+        type: {
+          stationary: { p_value: 0, change_point: 0 },
+        },
+      },
+    }));
   }
 
   const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
@@ -123,7 +133,22 @@ export async function readSignificantEvents(
         : [],
       change_points: changePoints,
     };
-  }) satisfies SignificantEventsGetResponse;
+  });
 
-  return significantEvents;
+  const foundSignificantEventsIds = significantEvents.map((event) => event.id);
+  const notFoundSignificantEvents = queryLinks
+    .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
+    .map((queryLink) => ({
+      id: queryLink.query.id,
+      title: queryLink.query.title,
+      kql: queryLink.query.kql,
+      occurrences: [],
+      change_points: {
+        type: {
+          stationary: { p_value: 0, change_point: 0 },
+        },
+      },
+    }));
+
+  return [...significantEvents, ...notFoundSignificantEvents];
 }
