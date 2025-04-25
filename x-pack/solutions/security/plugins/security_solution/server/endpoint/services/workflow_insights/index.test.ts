@@ -315,7 +315,7 @@ describe('SecurityWorkflowInsightsService', () => {
       });
     });
 
-    it('should not index the doc if remediation exists', async () => {
+    it('should mark insight as remediated if remediation exists', async () => {
       await securityWorkflowInsightsService.start({
         esClient,
         registerDefendInsightsCallback: jest.fn(),
@@ -330,8 +330,17 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(remediationExistsMock).toHaveBeenCalledTimes(1);
 
       // two since it calls fetch as well
-      expect(isInitializedSpy).toHaveBeenCalledTimes(1);
-      expect(esClient.index).toHaveBeenCalledTimes(0);
+      expect(isInitializedSpy).toHaveBeenCalledTimes(2);
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            action: expect.objectContaining({
+              type: ActionType.Remediated,
+            }),
+          }),
+        })
+      );
     });
 
     it('should call update instead if insight already exists', async () => {
