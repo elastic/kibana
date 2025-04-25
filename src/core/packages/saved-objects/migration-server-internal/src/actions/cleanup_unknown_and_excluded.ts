@@ -21,7 +21,7 @@ import {
 } from './check_for_unknown_docs';
 import { isTypeof } from '.';
 import { CalculatedExcludeFilter, calculateExcludeFilters } from './calculate_exclude_filters';
-import { deleteByQuery, DeleteByQueryResponse } from './delete_by_query';
+import { deleteByQuery } from './delete_by_query';
 
 /** @internal */
 export interface CleanupUnknownAndExcludedParams {
@@ -49,8 +49,6 @@ export interface CleanupStarted {
 export interface CleanupNotNeeded {
   type: 'cleanup_not_needed';
 }
-
-type DeleteCleanupResult = CleanupNotNeeded | DeleteByQueryResponse;
 
 /**
  * Cleans up unknown and excluded types from the specified index.
@@ -99,7 +97,9 @@ export const cleanupUnknownAndExcluded = ({
 
     // actively delete unwanted documents
     TaskEither.chainW(
-      (excludeFiltersRes): TaskEither.TaskEither<RetryableEsClientError, DeleteCleanupResult> => {
+      (
+        excludeFiltersRes
+      ): TaskEither.TaskEither<RetryableEsClientError, CleanupStarted | CleanupNotNeeded> => {
         errorsByType = excludeFiltersRes.errorsByType;
 
         // we must delete everything that matches:
@@ -123,32 +123,24 @@ export const cleanupUnknownAndExcluded = ({
           },
         };
 
-        return deleteByQuery({
-          client,
-          indexName,
-          query: deleteQuery,
-          // we want to delete as many docs as we can in the current attempt
-          conflicts: 'proceed',
-          // instead of forcing refresh after each delete attempt,
-          // we opt for a delayRetry mechanism when conflicts appear,
-          // letting the periodic refresh kick in
-          refresh: false,
-        });
+        return pipe(
+          deleteByQuery({
+            client,
+            indexName,
+            query: deleteQuery,
+            conflicts: 'proceed',
+            refresh: false,
+          }),
+          TaskEither.chainEitherKW((res) => {
+            return Either.right({
+              type: 'cleanup_started' as const,
+              taskId: res.taskId,
+              unknownDocs,
+              errorsByType,
+            });
+          })
+        );
       }
-    ),
-
-    // map response output
-    TaskEither.chainEitherKW((res): Either.Either<never, CleanupStarted | CleanupNotNeeded> => {
-      if (res.type === 'delete_by_query_response') {
-        return Either.right({
-          type: 'cleanup_started' as const,
-          taskId: res.taskId,
-          unknownDocs,
-          errorsByType,
-        });
-      } else {
-        return Either.right(res);
-      }
-    })
+    )
   );
 };

@@ -42,12 +42,12 @@ import {
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
-  buildRemoveAliasActions,
   MigrationType,
   increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
+  getPrepareCompatibleMigrationStateProperties,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -561,25 +561,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else {
         // cleanup_not_needed, let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
-        const source = stateP.sourceIndex.value;
         return {
           ...stateP,
           logs,
           controlState: 'PREPARE_COMPATIBLE_MIGRATION',
-          targetIndexMappings: mergeMappingMeta(
-            stateP.targetIndexMappings,
-            stateP.sourceIndexMappings.value
-          ),
-          preTransformDocsActions: [
-            // Point the version alias to the source index. This let's other Kibana
-            // instances know that a migration for the current version is "done"
-            // even though we may be waiting for document transformations to finish.
-            { add: { index: source!, alias: stateP.versionAlias } },
-            ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-              stateP.currentAlias,
-              stateP.versionAlias,
-            ]),
-          ],
+          ...getPrepareCompatibleMigrationStateProperties(stateP),
         };
       }
     } else {
@@ -603,27 +589,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const source = stateP.sourceIndex.value;
       return {
         ...stateP,
         logs,
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
         mustRefresh:
           stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
-        targetIndexMappings: mergeMappingMeta(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings.value
-        ),
-        preTransformDocsActions: [
-          // Point the version alias to the source index. This let's other Kibana
-          // instances know that a migration for the current version is "done"
-          // even though we may be waiting for document transformations to finish.
-          { add: { index: source!, alias: stateP.versionAlias } },
-          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-            stateP.currentAlias,
-            stateP.versionAlias,
-          ]),
-        ],
+        ...getPrepareCompatibleMigrationStateProperties(stateP),
       };
     } else {
       if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
