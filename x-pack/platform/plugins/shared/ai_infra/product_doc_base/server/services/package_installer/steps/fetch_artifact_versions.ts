@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { DocumentationProduct, parseArtifactName, type ProductName } from '@kbn/product-doc-common';
+import * as fs from 'fs';
 import fetch from 'node-fetch';
+import Path from 'path';
+import { URL } from 'url';
 import { parseString } from 'xml2js';
-import { type ProductName, DocumentationProduct, parseArtifactName } from '@kbn/product-doc-common';
+import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
 
 type ArtifactAvailableVersions = Record<ProductName, string[]>;
 
@@ -16,8 +20,17 @@ export const fetchArtifactVersions = async ({
 }: {
   artifactRepositoryUrl: string;
 }): Promise<ArtifactAvailableVersions> => {
-  const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
-  const xml = await res.text();
+  const parsedUrl = new URL(artifactRepositoryUrl);
+
+  let xml: string;
+  if (parsedUrl.protocol === 'file:') {
+    const file = await fetchLocalFile(parsedUrl);
+    xml = file.toString();
+  } else {
+    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
+    xml = await res.text();
+  }
+
   return new Promise((resolve, reject) => {
     parseString(xml, (err, result: ListBucketResponse) => {
       if (err) {
@@ -49,6 +62,21 @@ export const fetchArtifactVersions = async ({
     });
   });
 };
+
+function fetchLocalFile(parsedUrl: URL): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const normalizedPath = resolveLocalArtifactsPath(parsedUrl);
+    const xmlFilePath = Path.join(normalizedPath, 'index.xml');
+
+    fs.readFile(xmlFilePath, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
 
 interface ListBucketResponse {
   ListBucketResult: {

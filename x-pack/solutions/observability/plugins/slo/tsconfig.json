@@ -105,6 +105,7 @@
     "@kbn/security-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/server-route-repository-utils",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/apm-sources-access-plugin",
   ]
 }

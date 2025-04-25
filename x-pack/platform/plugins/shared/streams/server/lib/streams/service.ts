@@ -29,7 +29,8 @@ export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, Stream
 export class StreamsService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly isDev: boolean
   ) {}
 
   async getClientWithRequest({
@@ -57,8 +58,9 @@ export class StreamsService {
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
-      isServerless,
       request,
+      isServerless,
+      isDev: this.isDev,
     });
   }
 }

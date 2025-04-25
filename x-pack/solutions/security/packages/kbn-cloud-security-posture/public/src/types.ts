@@ -13,7 +13,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ToastsStart } from '@kbn/core/public';
+import { HttpSetup, ToastsStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -22,7 +22,7 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { CspFinding } from '@kbn/cloud-security-posture-common';
+import { CspFinding, RuleResponse } from '@kbn/cloud-security-posture-common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
@@ -88,4 +88,20 @@ export interface FindingMisconfigurationFlyoutProps extends Record<string, unkno
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';
   params: FindingMisconfigurationFlyoutProps;
+}
+export interface FindingsMisconfigurationFlyoutHeaderProps {
+  finding: CspFinding;
+}
+
+export interface FindingsMisconfigurationFlyoutContentProps {
+  finding: CspFinding;
+}
+
+export interface FindingMisconfigurationFlyoutFooterProps {
+  createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
+}
+
+export interface FindingMisconfigurationFlyoutContentProps {
+  finding: CspFinding;
+  createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
 }
