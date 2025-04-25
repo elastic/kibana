@@ -53,7 +53,12 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
 
           <EuiHorizontalRule margin="l" />
 
-          <EuiFormRow label="Upload Data" fullWidth>
+          <EuiFormRow
+            label={i18n.translate('xpack.dataVisualizer.file.aboutPanel.uploadDataLabel', {
+              defaultMessage: 'Upload data',
+            })}
+            fullWidth
+          >
             <EuiFilePicker
               id="filePicker"
               fullWidth
