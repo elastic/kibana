@@ -180,6 +180,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await attackDiscoveryScheduleExecutor({ logger: mockLogger, options });
 
+    const { id, ...restDiscovery } = mockAttackDiscoveries[0];
     expect(services.alertsClient.report).toHaveBeenCalledWith({
       id: expect.anything(),
       actionGroup: 'default',
@@ -230,6 +231,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
       },
+      context: { attack: restDiscovery },
     });
   });
 });

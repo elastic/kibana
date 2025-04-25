@@ -25,6 +25,8 @@ import type {
   MicrosoftDefenderEndpointMachineAction,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
+import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 
 jest.mock('../../../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../../../action_details_by_id');
@@ -232,7 +234,7 @@ describe('MS Defender response actions client', () => {
         expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
-            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
             completed_at: expect.any(String),
             data: { command: 'isolate' },
             input_type: 'microsoft_defender_endpoint',
@@ -267,7 +269,7 @@ describe('MS Defender response actions client', () => {
           const expectedResult: LogsEndpointActionResponse = {
             '@timestamp': expect.any(String),
             EndpointActions: {
-              action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
+              action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
               completed_at: expect.any(String),
               data: { command: 'isolate' },
               input_type: 'microsoft_defender_endpoint',
@@ -286,6 +288,75 @@ describe('MS Defender response actions client', () => {
 
           expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
         }
+      );
+    });
+  });
+
+  describe('and space awareness is enabled', () => {
+    beforeEach(() => {
+      // @ts-expect-error assign to readonly property
+      clientConstructorOptionsMock.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
+    });
+
+    it('should write action request doc with agent policy info when space awareness is enabled', async () => {
+      await msClientMock.isolate(responseActionsClientMock.createIsolateOptions());
+
+      expect(clientConstructorOptionsMock.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            agent: {
+              id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: '6f12b025-fcb0-4db4-99e5-4927e3502bb8',
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+                },
+              ],
+            },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should search for MS defender agent using correct index names', async () => {
+      await expect(
+        msClientMock.isolate(responseActionsClientMock.createIsolateOptions())
+      ).resolves.toBeTruthy();
+
+      expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith({
+        _source: false,
+        collapse: {
+          field: 'cloud.instance.id',
+          inner_hits: {
+            _source: ['agent', 'cloud.instance.id', 'event.created'],
+            name: 'most_recent',
+            size: 1,
+            sort: [{ 'event.created': 'desc' }],
+          },
+        },
+        ignore_unavailable: true,
+        index: ['logs-microsoft_defender_endpoint.log-default'], // << Important: should NOT contain a index pattern
+        query: {
+          bool: { filter: [{ terms: { 'cloud.instance.id': ['1-2-3'] } }] },
+        },
+      });
+    });
+
+    it('should error is unable to find MS agent in ingested data', async () => {
+      applyEsClientSearchMock({
+        esClientMock: clientConstructorOptionsMock.esClient,
+        index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+        response: MicrosoftDefenderDataGenerator.toEsSearchResponse([]),
+      });
+
+      await expect(
+        msClientMock.isolate(responseActionsClientMock.createIsolateOptions())
+      ).rejects.toThrow(
+        'Unable to find Elastic agent IDs for Microsoft Defender agent ids: [1-2-3]'
       );
     });
   });
