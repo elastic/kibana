@@ -9,8 +9,8 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import React, { memo } from 'react';
-import { MiniAttackChain } from './mini_attack_chain';
-import * as i18n from './translations';
+import { MiniAttackChain } from '../../../../attack_discovery/pages/results/attack_discovery_panel/panel_header/summary_actions/mini_attack_chain';
+import * as i18n from '../../constants/translations';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

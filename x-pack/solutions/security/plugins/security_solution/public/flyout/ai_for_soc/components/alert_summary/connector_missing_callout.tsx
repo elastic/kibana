@@ -7,8 +7,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { useAssistantContext } from '../../..';
-import * as i18n from '../translations';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import * as i18n from '../../constants/translations';
 
 interface Props {
   canSeeAdvancedSettings: boolean;

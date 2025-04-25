@@ -10,16 +10,15 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { AttackDiscoveryWidget } from '.';
-import { useAssistantContext } from '../../assistant_context';
-import { useFindAttackDiscoveries } from './use_find_attack_discoveries';
-import * as i18n from './translations';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 
 // Mock the custom hooks
-jest.mock('../../assistant_context', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
 
-jest.mock('./use_find_attack_discoveries', () => ({
+jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
   useFindAttackDiscoveries: jest.fn(),
 }));
 jest.mock('react-router-dom', () => ({
@@ -79,7 +78,7 @@ describe('AttackDiscoveryWidget', () => {
 
     render(<AttackDiscoveryWidget id={'123'} />);
 
-    expect(screen.getByText(i18n.NO_RESULTS)).toBeInTheDocument();
+    expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 
   it('renders attack discovery details when data is available', () => {

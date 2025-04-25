@@ -16,12 +16,12 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
-import { useSearchParams } from 'react-router-dom-v5-compat';
-import { useAssistantContext } from '../../assistant_context';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useIdsFromUrl } from '../../../../attack_discovery/pages/results/history/use_ids_from_url';
+import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { AttackDiscoveryDetails } from './attack_discovery_details';
-import { useFindAttackDiscoveries } from './use_find_attack_discoveries';
 import * as i18n from './translations';
 
 interface Props {
@@ -33,7 +33,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const { pathname } = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { setIdsUrl } = useIdsFromUrl();
 
   const { isLoading, data } = useFindAttackDiscoveries({
     alertIds: [id],
@@ -44,15 +44,14 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
   const handleNavigateToAttackDiscovery = useCallback(
     (attackDiscoveryId: string) => {
       if (pathname.includes('attack_discovery')) {
-        searchParams.set('id', attackDiscoveryId);
-        setSearchParams(searchParams);
+        setIdsUrl([attackDiscoveryId]);
       } else {
         navigateToApp('security', {
           path: `attack_discovery?id=${attackDiscoveryId}`,
         });
       }
     },
-    [pathname, searchParams, setSearchParams, navigateToApp]
+    [pathname, setIdsUrl, navigateToApp]
   );
   useEffect(() => {
     if (data != null && data.data.length > 0) {
@@ -101,7 +100,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
           hasBorder
         >
           <EuiPanel color="subdued" hasBorder={true}>
-            <EuiText size="s">
+            <EuiText size="s" data-test-subj="no-results">
               <p>{i18n.NO_RESULTS}</p>
             </EuiText>
           </EuiPanel>
