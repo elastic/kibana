@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AI_FOR_SOC_INTEGRATIONS } from '../../../../../../../common/constants';
 import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../../common/lib/integrations/components/integration_card_grid_tabs';
 import type { IntegrationCardMetadata } from '../../../../../../common/lib/integrations/types';
 import type { StartServices } from '../../../../../../types';
@@ -13,13 +14,12 @@ import {
   getCompleteBadgeText,
   getInstalledIntegrationList,
 } from '../../common/integrations/integrations_check_complete_helpers';
-import { INTEGRATION_TABS } from './integration_tabs_configs';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
   const { isComplete, installedPackages: installedIntegrations } =
-    await getInstalledIntegrationList(services, INTEGRATION_TABS[0].featuredCardIds);
+    await getInstalledIntegrationList(services, AI_FOR_SOC_INTEGRATIONS);
 
   const installedIntegrationsCount = installedIntegrations.length;
 
