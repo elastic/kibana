@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { GroupStreamDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -16,132 +17,39 @@ import { createStreams } from './helpers/create_streams';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const esClient = getService('es');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  // An anticipated use case is that a user will want to flush a tree of streams from a config file
-  describe('GroupStreamDefinition', () => {
-    describe('CRUD API Operations', () => {
-      before(async () => {
-        apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-        await enableStreams(apiClient);
-        await createStreams(apiClient);
-      });
+  describe('GroupStream', () => {
+    before(async () => {
+      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      await enableStreams(apiClient);
+      await createStreams(apiClient);
+    });
 
-      after(async () => {
-        await disableStreams(apiClient);
-        await esClient.indices.deleteDataStream({ name: 'metrics-test-test' });
-      });
+    after(async () => {
+      await disableStreams(apiClient);
+    });
 
-      it('successfully creates a GroupStream', async () => {
+    describe('CRUD', () => {
+      it('successfully creates a group stream', async () => {
         await apiClient
           .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group' },
               body: {
                 stream: {
-                  group: {
-                    members: ['logs', 'logs.test2', 'logs'],
-                  },
+                  group: createGroupStreamDefinition(['logs']),
                 },
                 dashboards: [],
                 queries: [],
               },
-            },
-          })
-          .expect(200)
-          .then((response) => expect(response.body.acknowledged).to.eql(true));
-      });
-
-      it('successfully creates a second GroupStream', async () => {
-        await apiClient
-          .fetch('PUT /api/streams/{name} 2023-10-31', {
-            params: {
-              path: { name: 'test-group-too' },
-              body: {
-                stream: {
-                  group: {
-                    members: ['logs.test2'],
-                  },
-                },
-                dashboards: [],
-                queries: [],
-              },
-            },
-          })
-          .expect(200)
-          .then((response) => expect(response.body.acknowledged).to.eql(true));
-      });
-
-      it('unsuccessfully updates a GroupStream with an uknown stream', async () => {
-        await apiClient
-          .fetch('PUT /api/streams/{name} 2023-10-31', {
-            params: {
-              path: { name: 'test-group' },
-              body: {
-                stream: {
-                  group: {
-                    members: ['logs', 'non-existent-stream'],
-                  },
-                },
-                dashboards: [],
-                queries: [],
-              },
-            },
-          })
-          .expect(400);
-      });
-
-      it('unsuccessfully updates a GroupStream with an itself as a member', async () => {
-        await apiClient
-          .fetch('PUT /api/streams/{name} 2023-10-31', {
-            params: {
-              path: { name: 'test-group' },
-              body: {
-                stream: {
-                  group: {
-                    members: ['logs', 'test-group'],
-                  },
-                },
-                dashboards: [],
-                queries: [],
-              },
-            },
-          })
-          .expect(400);
-      });
-
-      it('unsuccessfully updates a GroupStream with a forbidden member', async () => {
-        await apiClient
-          .fetch('PUT /api/streams/{name} 2023-10-31', {
-            params: {
-              path: { name: 'test-group' },
-              body: {
-                stream: {
-                  group: {
-                    members: ['logs', 'test-group-too'],
-                  },
-                },
-                dashboards: [],
-                queries: [],
-              },
-            },
-          })
-          .expect(400);
-      });
-
-      it('successfully deletes a GroupStream', async () => {
-        await apiClient
-          .fetch('DELETE /api/streams/{name} 2023-10-31', {
-            params: {
-              path: { name: 'test-group-too' },
             },
           })
           .expect(200);
       });
 
-      it('successfully reads a GroupStream', async () => {
+      it('successfully reads a group stream', async () => {
         const response = await apiClient
           .fetch('GET /api/streams/{name} 2023-10-31', {
             params: {
@@ -149,69 +57,127 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           })
           .expect(200);
+
         expect(response.body).to.eql({
           stream: {
             name: 'test-group',
-            group: {
-              members: ['logs', 'logs.test2'],
-            },
+            group: createGroupStreamDefinition(['logs']),
           },
           dashboards: [],
           queries: [],
         });
       });
 
-      it('successfully upserts a GroupStream from _group', async () => {
-        const response = await apiClient
-          .fetch('PUT /api/streams/{name}/_group 2023-10-31', {
+      it('successfully updates a group stream', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
-              path: { name: 'test-group-3' },
+              path: { name: 'test-group' },
               body: {
-                group: {
-                  members: ['logs.test2'],
+                stream: {
+                  group: createGroupStreamDefinition(['logs.test']),
                 },
+                dashboards: [],
+                queries: [],
               },
             },
           })
           .expect(200);
-        expect(response.body).to.eql({
-          acknowledged: true,
-          result: 'created',
-        });
-      });
 
-      it('successfully reads a GroupStream from _group', async () => {
         const response = await apiClient
-          .fetch('GET /api/streams/{name}/_group 2023-10-31', {
+          .fetch('GET /api/streams/{name} 2023-10-31', {
             params: {
-              path: { name: 'test-group-3' },
+              path: { name: 'test-group' },
             },
           })
           .expect(200);
+
         expect(response.body).to.eql({
-          group: {
-            members: ['logs.test2'],
+          stream: {
+            name: 'test-group',
+            group: createGroupStreamDefinition(['logs.test']),
           },
+          dashboards: [],
+          queries: [],
         });
       });
 
-      it('successfully lists a GroupStream', async () => {
-        const response = await apiClient.fetch('GET /api/streams 2023-10-31').expect(200);
-        expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
-        expect(response.body.streams.some((stream) => stream.name === 'test-group-3')).to.eql(true);
+      it('successfully deletes a group stream', async () => {
+        await apiClient
+          .fetch('DELETE /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'test-group' },
+            },
+          })
+          .expect(200);
       });
+    });
 
-      it('unsuccessfully creates a group stream with the same name as a unwired stream', async () => {
-        await esClient.index({ index: 'metrics-test-test', document: { '@timestamp': '2025' } });
+    describe('validations', () => {
+      it('allows group streams to reference group streams', async () => {
         await apiClient
           .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
-              path: { name: 'metrics-test-test' },
+              path: { name: 'test-group' },
               body: {
                 stream: {
-                  group: {
-                    members: ['logs'],
-                  },
+                  group: createGroupStreamDefinition(['logs', 'logs.test']),
+                },
+                dashboards: [],
+                queries: [],
+              },
+            },
+          })
+          .expect(200);
+
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'dependent-group' },
+              body: {
+                stream: {
+                  group: createGroupStreamDefinition(['test-group']),
+                },
+                dashboards: [],
+                queries: [],
+              },
+            },
+          })
+          .expect(200);
+      });
+
+      it('cannot be deleted if another group stream depends on it', async () => {
+        await apiClient
+          .fetch('DELETE /api/streams/{name} 2023-10-31', {
+            params: {
+              path: {
+                name: 'test-group',
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('stops related streams from being deleted', async () => {
+        await apiClient
+          .fetch('DELETE /api/streams/{name} 2023-10-31', {
+            params: {
+              path: {
+                name: 'logs.test',
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('cannot create a group stream with itself as a member', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'test-group' },
+              body: {
+                stream: {
+                  group: createGroupStreamDefinition(['test-group']),
                 },
                 dashboards: [],
                 queries: [],
@@ -221,16 +187,48 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(400);
       });
 
-      it('unsuccessfully creates a group stream prefixed with logs', async () => {
+      it('cannot create a group stream with an unknown member', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'test-group' },
+              body: {
+                stream: {
+                  group: createGroupStreamDefinition(['non-existent-stream']),
+                },
+                dashboards: [],
+                queries: [],
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('cannot create a group stream with duplicated relationships', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'test-group' },
+              body: {
+                stream: {
+                  group: createGroupStreamDefinition(['logs', 'logs']),
+                },
+                dashboards: [],
+                queries: [],
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('cannot create a group stream prefixed with logs.', async () => {
         await apiClient
           .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'logs.group' },
               body: {
                 stream: {
-                  group: {
-                    members: ['logs'],
-                  },
+                  group: createGroupStreamDefinition(['logs']),
                 },
                 dashboards: [],
                 queries: [],
@@ -240,5 +238,57 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(400);
       });
     });
+
+    describe('_group endpoint', () => {
+      it('successfully upserts', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name}/_group 2023-10-31', {
+            params: {
+              path: { name: 'test-group' },
+              body: {
+                group: createGroupStreamDefinition(['logs.test2']),
+              },
+            },
+          })
+          .expect(200);
+      });
+
+      it('successfully reads', async () => {
+        const response = await apiClient
+          .fetch('GET /api/streams/{name}/_group 2023-10-31', {
+            params: {
+              path: { name: 'test-group' },
+            },
+          })
+          .expect(200);
+
+        expect(response.body).to.eql({
+          group: createGroupStreamDefinition(['logs.test2']),
+        });
+      });
+    });
+
+    describe('when listing streams', () => {
+      it('should be included in the streams list', async () => {
+        const response = await apiClient.fetch('GET /api/streams 2023-10-31').expect(200);
+        expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
+      });
+    });
   });
+}
+
+function createGroupStreamDefinition(members: string[]) {
+  return {
+    category: 'test',
+    owner: 'test_user',
+    tier: 1,
+    tags: [],
+    relationships: members.map((name) => ({
+      name,
+      type: 'member',
+    })),
+    documentation_links: [],
+    repository_links: [],
+    runbook_links: [],
+  } as GroupStreamDefinition['group'];
 }

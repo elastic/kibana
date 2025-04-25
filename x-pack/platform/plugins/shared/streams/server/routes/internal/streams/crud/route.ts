@@ -83,7 +83,7 @@ export const streamDetailRoute = createServerRoute({
     const streamEntity = await streamsClient.getStream(params.path.name);
 
     const indexPattern = isGroupStreamDefinition(streamEntity)
-      ? streamEntity.group.members.join(',')
+      ? streamEntity.group.relationships.map((relationship) => relationship.name).join(',')
       : streamEntity.name;
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({

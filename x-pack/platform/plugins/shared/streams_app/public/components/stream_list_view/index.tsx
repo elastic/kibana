@@ -7,12 +7,86 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBetaBadge } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiBetaBadge,
+  EuiButton,
+  EuiFlexItem,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useAbortController } from '@kbn/react-hooks';
+import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { NotificationsStart } from '@kbn/core/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
 import { StreamsEmptyPrompt } from './empty_prompt';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
+
+function GroupStreamCreationFlyout({
+  client,
+  notifications,
+}: {
+  client: StreamsRepositoryClient;
+  notifications: NotificationsStart;
+}) {
+  const { signal } = useAbortController();
+
+  function createGroupStream() {
+    client
+      .fetch('PUT /api/streams/{name} 2023-10-31', {
+        params: {
+          path: {
+            name: 'my-group',
+          },
+          body: {
+            stream: {
+              group: {
+                description: 'A group stream for Kibana',
+                category: 'service',
+                owner: 'Milton',
+                tier: 1,
+                tags: ['observability'],
+                runbook_links: ['https://github.com/elastic/kibana'],
+                documentation_links: ['https://github.com/elastic/kibana'],
+                repository_links: ['https://github.com/elastic/kibana'],
+                relationships: [
+                  {
+                    name: 'logs',
+                    type: 'member',
+                    filter: '*',
+                  },
+                ],
+              },
+            },
+            dashboards: ['977e9ce4-03bc-48fd-9cd2-25c2a1ac2c71'],
+            queries: [],
+          },
+        },
+        signal,
+      })
+      .catch((error) => {
+        notifications.toasts.addError(error, {
+          title: 'Failed to create group stream',
+        });
+      });
+  }
+
+  return (
+    <React.Fragment>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Create group</EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <EuiButton onClick={createGroupStream}>Create</EuiButton>
+      </EuiModalBody>
+    </React.Fragment>
+  );
+}
 
 export function StreamListView() {
   const {
@@ -21,6 +95,7 @@ export function StreamListView() {
         streams: { streamsRepositoryClient },
       },
     },
+    core,
   } = useKibana();
 
   const streamsListFetch = useStreamsAppFetch(
@@ -33,26 +108,49 @@ export function StreamListView() {
     [streamsRepositoryClient]
   );
 
+  function openGroupStreamCreationFlyout() {
+    core.overlays.openFlyout(
+      toMountPoint(
+        <GroupStreamCreationFlyout
+          client={streamsRepositoryClient}
+          notifications={core.notifications}
+        />,
+        core
+      ),
+      { size: 's' }
+    );
+  }
+
   return (
     <>
       <StreamsAppPageTemplate.Header
         bottomBorder="extended"
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
-              defaultMessage: 'Streams',
-            })}
-            <EuiBetaBadge
-              label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                defaultMessage: 'Technical Preview',
-              })}
-              tooltipContent={i18n.translate('xpack.streams.streamsListView.betaBadgeDescription', {
-                defaultMessage:
-                  'This functionality is experimental and not supported. It may change or be removed at any time.',
-              })}
-              alignment="middle"
-              size="s"
-            />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center" gutterSize="m">
+                {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
+                  defaultMessage: 'Streams',
+                })}
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
+                    defaultMessage: 'Technical Preview',
+                  })}
+                  tooltipContent={i18n.translate(
+                    'xpack.streams.streamsListView.betaBadgeDescription',
+                    {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }
+                  )}
+                  alignment="middle"
+                  size="s"
+                />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={openGroupStreamCreationFlyout}>Create group stream</EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
       />
