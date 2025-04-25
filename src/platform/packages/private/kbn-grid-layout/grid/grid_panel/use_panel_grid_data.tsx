@@ -10,8 +10,9 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
-import { GridLayoutData, GridPanelData, GridRowData } from '../types';
+import { GridPanelData, GridRowData } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { OrderedLayout } from '../use_ordered_grid_layout';
 import { isGridDataEqual } from '../utils/equality_checks';
 
 export const useGridPanelState = ({
@@ -24,10 +25,10 @@ export const useGridPanelState = ({
 
   const panel$ = useMemo(() => {
     const panelSubject = new BehaviorSubject(
-      getPanelState(gridLayoutStateManager.gridLayout$.getValue(), panelId)
+      getPanelState(gridLayoutStateManager.orderedSections$.getValue(), panelId)
     );
 
-    const subscription = gridLayoutStateManager.gridLayout$
+    const subscription = gridLayoutStateManager.orderedSections$
       .pipe(
         map((layout) => getPanelState(layout, panelId)),
         distinctUntilChanged(
@@ -43,7 +44,7 @@ export const useGridPanelState = ({
     };
 
     return panelSubject;
-  }, [gridLayoutStateManager.gridLayout$, panelId]);
+  }, [gridLayoutStateManager.orderedSections$, panelId]);
 
   useEffect(() => {
     return () => {
@@ -54,16 +55,12 @@ export const useGridPanelState = ({
   return panel$;
 };
 
-const getPanelState = (layout: GridLayoutData, panelId: string) => {
+const getPanelState = (layout: OrderedLayout, panelId: string) => {
   const flattenedPanels: { [id: string]: GridPanelData & { rowId: string } } = {};
-  Object.values(layout).forEach((widget) => {
-    if (widget.type === 'panel') {
-      flattenedPanels[widget.id] = { ...widget, rowId: 'main' };
-    } else {
-      Object.values((widget as GridRowData).panels).forEach((panel) => {
-        flattenedPanels[panel.id] = { ...panel, rowId: widget.id };
-      });
-    }
+  Object.values(layout).forEach((section) => {
+    Object.values((section as GridRowData).panels).forEach((panel) => {
+      flattenedPanels[panel.id] = { ...panel, rowId: section.id };
+    });
   });
   return flattenedPanels[panelId];
 };

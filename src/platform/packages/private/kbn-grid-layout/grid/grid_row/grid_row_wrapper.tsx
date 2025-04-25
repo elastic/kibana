@@ -15,9 +15,11 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export interface GridRowProps {
   rowId: string;
+  start: string;
+  end: string;
 }
 
-export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
+export const GridRowWrapper = React.memo(({ rowId, start, end }: GridRowProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   useEffect(() => {
@@ -35,8 +37,10 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
         // .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe((interactionEvent) => {
           const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
+          console.log(rowId);
           if (!rowRef) return;
           const targetRow = interactionEvent?.targetRow;
+          console.log({ rowId, targetRow });
           if (rowId === targetRow && interactionEvent) {
             rowRef.classList.add('kbnGridRow--targeted');
           } else {
@@ -62,8 +66,8 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
         return css`
           grid-column-start: 1;
           grid-column-end: -1;
-          grid-row-start: gridRow-${rowId}; // first grid row in this row of panels
-          grid-row-end: end-${rowId};
+          grid-row-start: ${start}; // first grid row in this row of panels
+          grid-row-end: ${end};
         `;
       }}
     />

@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import { createContext, useContext } from 'react';
 import { GridLayoutStateManager } from './types';
+import { OrderedLayout } from './use_ordered_grid_layout';
 
 export interface GridLayoutContextType<UseCustomDragHandle extends boolean = boolean> {
-  gridLayoutStateManager: GridLayoutStateManager;
+  gridLayoutStateManager: GridLayoutStateManager & {
+    orderedSections$: BehaviorSubject<OrderedLayout>;
+  };
   useCustomDragHandle: UseCustomDragHandle;
   renderPanelContents: (
     panelId: string,

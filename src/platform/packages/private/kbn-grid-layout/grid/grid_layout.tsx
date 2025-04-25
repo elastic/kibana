@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -32,6 +33,7 @@ import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_cont
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { getMainLayoutInOrder, getPanelKeysInOrder } from './utils/resolve_grid_row';
+import { useOrderedSections } from './use_ordered_grid_layout';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -61,6 +63,7 @@ export const GridLayout = ({
     accessMode,
   });
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
+  const orderedSections$ = useOrderedSections(gridLayoutStateManager);
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -108,46 +111,53 @@ export const GridLayout = ({
   // }, [onLayoutChange]);
 
   useEffect(() => {
-    /**
-     * This subscription ensures that rows get re-rendered when their orders change
-     */
-    const elementsInOrderSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(
-        map((currentLayout) => {
-          const currentElementsInOrder: GridLayoutElementsInOrder = [];
-          const widgets = getMainLayoutInOrder(currentLayout);
-          widgets.forEach(({ type, id }) => {
-            if (type === 'section') {
-              const currentRow = currentLayout[id] as GridRowData;
-              currentElementsInOrder.push({ type: 'header', id });
-              if (!currentRow.isCollapsed) {
-                const panelIds = getPanelKeysInOrder(currentRow.panels);
-                panelIds.forEach((panelId) => {
-                  currentElementsInOrder.push({
-                    type: 'panel',
-                    id: panelId,
-                    rowId: id,
-                  });
-                });
-                currentElementsInOrder.push({ type: 'wrapper', id });
-              }
-              currentElementsInOrder.push({ type: 'footer', id });
-            } else {
-              currentElementsInOrder.push({
-                type: 'panel',
-                id,
-                rowId: `main`,
-              });
-            }
+    const renderSubscription = orderedSections$.subscribe((sections) => {
+      const currentElementsInOrder: GridLayoutElementsInOrder = [];
+      let gridRowTemplateString = '';
+
+      Object.values(sections).forEach((section) => {
+        const { id } = section;
+        gridRowTemplateString += `[gridRow-main start-${id}] `;
+        if (!section.isMainSection) {
+          /** Header */
+          currentElementsInOrder.push({ type: 'header', id });
+          gridRowTemplateString += `auto `;
+        }
+
+        /** Panels */
+        const startingRow = section.isMainSection ? section.row - 1 : 0;
+        if (!section.isCollapsed) {
+          let maxRow = -Infinity;
+          Object.values((section as GridRowData).panels).forEach((panel) => {
+            maxRow = Math.max(maxRow, panel.row + panel.height - startingRow);
+            currentElementsInOrder.push({
+              type: 'panel',
+              id: panel.id,
+            });
           });
-          return currentElementsInOrder;
-        }),
-        distinctUntilChanged(deepEqual)
-      )
-      .subscribe((currentElementsInOrder: GridLayoutElementsInOrder) => {
-        console.log(currentElementsInOrder);
-        setElementsInOrder(currentElementsInOrder);
+          gridRowTemplateString += `repeat(${maxRow}, [${
+            section.isMainSection ? 'gridRow-main ' : ''
+          } gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
+          currentElementsInOrder.push({
+            type: 'wrapper',
+            id,
+            start: `gridRow-${id} 1`,
+            end: `end-${id}`,
+          });
+        }
+
+        if (!section.isMainSection) {
+          /** Footer */
+          currentElementsInOrder.push({ type: 'footer', id });
+          gridRowTemplateString += `auto `;
+        }
+        gridRowTemplateString += `[end-${section.id}] `;
       });
+      console.log(gridRowTemplateString, currentElementsInOrder);
+      setElementsInOrder(currentElementsInOrder);
+      gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
+      if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
+    });
 
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
@@ -172,48 +182,9 @@ export const GridLayout = ({
       }
     });
 
-    const mainSectionGridStyleSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(distinctUntilChanged(isLayoutEqual))
-      .subscribe((currentLayout) => {
-        if (!layoutRef.current) return;
-        const widgets = getMainLayoutInOrder(currentLayout);
-
-        let gridRowTemplateString = '';
-        for (let i = 0; i < widgets.length; i++) {
-          const { type, id } = widgets[i];
-
-          if (type === 'panel') {
-            let maxRow = -Infinity;
-            const startingRow = (currentLayout[id] as GridPanelData).row;
-            while (widgets[i].type === 'panel') {
-              const currentPanel = currentLayout[widgets[i].id] as GridPanelData;
-              maxRow = Math.max(maxRow, currentPanel.row + currentPanel.height - startingRow);
-              i++;
-            }
-            gridRowTemplateString += `repeat(${maxRow}, [gridRow-main] calc(var(--kbnGridRowHeight) * 1px)) `;
-            i--;
-          } else {
-            // section
-            const currentRow = currentLayout[id] as GridRowData;
-            gridRowTemplateString += `[gridRow-main start-${id}] auto `; // header
-            if (!currentRow.isCollapsed) {
-              const panels = Object.values(currentRow.panels);
-              const maxRow =
-                panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
-              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
-            }
-            gridRowTemplateString += `auto [end-${id}] `; // footer
-          }
-        }
-        gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
-
-        layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
-      });
-
     return () => {
-      elementsInOrderSubscription.unsubscribe();
+      renderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
-      mainSectionGridStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -223,9 +194,9 @@ export const GridLayout = ({
       ({
         renderPanelContents,
         useCustomDragHandle,
-        gridLayoutStateManager,
+        gridLayoutStateManager: { ...gridLayoutStateManager, orderedSections$ },
       } as GridLayoutContextType),
-    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
+    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager, orderedSections$]
   );
 
   return (
@@ -252,7 +223,14 @@ export const GridLayout = ({
               case 'panel':
                 return <GridPanel key={element.id} panelId={element.id} />;
               case 'wrapper':
-                return <GridRowWrapper key={`${element.id}--wrapper`} rowId={element.id} />;
+                return (
+                  <GridRowWrapper
+                    key={`${element.id}--wrapper`}
+                    rowId={element.id}
+                    start={element.start}
+                    end={element.end}
+                  />
+                );
               case 'footer':
                 return <GridRowFooter key={`${element.id}--footer`} rowId={element.id} />;
             }

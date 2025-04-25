@@ -59,7 +59,7 @@ export const moveAction = (
     return;
   }
   // console.log(interactionEvent.targetRow);
-  const targetRowIsMain = interactionEvent.targetRow === 'main';
+  const targetRowIsMain = interactionEvent.targetRow.includes('main');
   const currentPanelData: GridPanelData = targetRowIsMain
     ? (currentLayout[interactionEvent.id] as GridPanelData)
     : (currentLayout[interactionEvent.targetRow] as GridRowData).panels[interactionEvent.id];
@@ -94,7 +94,7 @@ export const moveAction = (
 
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries({ ...gridRowElements, main: gridLayoutElement }).forEach(([id, row]) => {
+    Object.entries(gridRowElements).forEach(([id, row]) => {
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
       const overlap =
@@ -119,7 +119,7 @@ export const moveAction = (
   }
 
   // calculate the requested grid position
-  const targetedGridRow = targetRowIsMain ? gridLayoutElement : gridRowElements[targetRowId];
+  const targetedGridRow = gridRowElements[targetRowId];
   const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
   const targetedGridLeft = targetedGridRowRect?.left ?? 0;
   const targetedGridTop = targetedGridRowRect?.top ?? 0;
@@ -129,7 +129,7 @@ export const moveAction = (
   const localXCoordinate = isResize
     ? previewRect.right - targetedGridLeft
     : previewRect.left - targetedGridLeft;
-  let localYCoordinate = isResize
+  const localYCoordinate = isResize
     ? previewRect.bottom - targetedGridTop
     : previewRect.top - targetedGridTop;
 
@@ -138,16 +138,6 @@ export const moveAction = (
     maxColumn
   );
 
-  if (targetRowIsMain) {
-    Object.entries(gridRowElements).forEach(([id, row]) => {
-      if (!row) return;
-      const { top, height } = row.getBoundingClientRect();
-      if (top <= previewRect.top) {
-        localYCoordinate -= height;
-        localYCoordinate += rowHeight;
-      }
-    });
-  }
   const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
 
   const requestedPanelData = { ...currentPanelData };
@@ -181,7 +171,7 @@ export const moveAction = (
     }
 
     // resolve destination grid
-    if (targetRowId === 'main') {
+    if (targetRowId.includes('main')) {
       nextLayout = resolveMainGrid(nextLayout, requestedPanelData);
     } else {
       const destinationGrid = nextLayout[targetRowId] as GridRowData;
@@ -191,7 +181,7 @@ export const moveAction = (
 
     // resolve origin grid
     if (hasChangedGridRow) {
-      if (lastRowId === 'main') {
+      if (lastRowId.includes('main')) {
         nextLayout = resolveMainGrid(nextLayout);
       } else {
         const originGrid = nextLayout[lastRowId] as GridRowData;

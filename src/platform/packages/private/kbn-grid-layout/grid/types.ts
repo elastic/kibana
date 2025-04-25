@@ -38,8 +38,11 @@ export type GridLayoutWidget =
   | (GridRowData & { type: 'section' });
 
 export type GridLayoutElementsInOrder = Array<
-  | { type: 'header' | 'wrapper' | 'footer'; id: string }
-  | { type: 'panel'; id: string; rowId: string }
+  | {
+      type: 'header' | 'footer' | 'panel';
+      id: string;
+    }
+  | { type: 'wrapper'; id: string; start: string; end: string }
 >;
 
 export interface GridLayoutData {
