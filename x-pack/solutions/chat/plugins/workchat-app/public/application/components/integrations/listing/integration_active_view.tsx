@@ -40,8 +40,6 @@ import { useAgentList } from '../../../hooks/use_agent_list';
 import { integrationLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
 import { useIntegrationList } from '../../../hooks/use_integration_list';
-import PlugSvg from '../../../../assets/plug.svg';
-
 export const IntegrationActiveView: React.FC = () => {
   const { agents } = useAgentList();
   const { integrations, isLoading } = useIntegrationList();
@@ -282,7 +280,7 @@ export const IntegrationActiveView: React.FC = () => {
             <EuiPanel>
               <EuiFlexItem grow={false}>
                 <span role="img" aria-label="plug emoji" className={plugStyle}>
-                  <EuiIcon size="xxl" type={PlugSvg} />
+                  <EuiIcon size="xxl" type="plugs" />
                 </span>
               </EuiFlexItem>
               <EuiEmptyPrompt
