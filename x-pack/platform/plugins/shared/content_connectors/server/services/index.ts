@@ -300,6 +300,7 @@ export class AgentlessConnectorsInfraService {
 
       const listAgentsResponse = await this.agentService.asInternalUser.listAgents({
         kuery: `fleet-agents.policy_id:${policyId}`,
+        showAgentless: true,
         showInactive: false,
       });
 

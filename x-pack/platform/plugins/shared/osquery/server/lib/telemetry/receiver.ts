@@ -109,6 +109,7 @@ export class TelemetryReceiver {
 
     return this.agentClient?.listAgents({
       perPage: this.max_records,
+      showAgentless: true,
       showInactive: true,
       sortField: 'enrolled_at',
       sortOrder: 'desc',
