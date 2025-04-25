@@ -743,7 +743,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             new Map([
               ['execute', { equal: 15 }],
               ['active-instance', { equal: 12 }],
-              ['new-instance', { equal: 5 }],
+              ['new-instance', { equal: 3 }],
               ['recovered-instance', { equal: 2 }],
             ])
           );
@@ -853,7 +853,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             new Map([
               ['execute', { equal: 15 }],
               ['active-instance', { equal: 12 }],
-              ['new-instance', { equal: 5 }],
+              ['new-instance', { equal: 3 }],
               ['recovered-instance', { equal: 2 }],
             ])
           );
@@ -952,7 +952,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             new Map([
               ['execute', { equal: 14 }],
               ['active-instance', { equal: 10 }],
-              ['new-instance', { equal: 5 }],
+              ['new-instance', { equal: 3 }],
               ['recovered-instance', { equal: 3 }],
             ])
           );
@@ -1062,7 +1062,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             new Map([
               ['execute', { equal: 14 }],
               ['active-instance', { equal: 10 }],
-              ['new-instance', { equal: 5 }],
+              ['new-instance', { equal: 3 }],
               ['recovered-instance', { equal: 3 }],
             ])
           );

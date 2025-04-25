@@ -112,7 +112,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "3": Object {
           "meta": Object {
-            "activeCount": 0,
+            "activeCount": 1,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -137,7 +137,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "3": Object {
           "meta": Object {
-            "activeCount": 0,
+            "activeCount": 1,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
