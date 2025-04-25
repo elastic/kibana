@@ -6,12 +6,13 @@
  */
 
 import { PieLayerState, PieVisualizationState } from '../../../../../common/types';
-import { FormBasedPersistedState } from '../../../../datasources/form_based/types';
 import {
   DeprecatedColorMappingConfig,
   convertToRawColorMappings,
   isDeprecatedColorMapping,
+  getColumnMetaFn,
 } from '../../../../runtime_state/converters/raw_color_mappings';
+import { GeneralDatasourceStates } from '../../../../state_management';
 
 /** @deprecated */
 interface DeprecatedColorMappingLayer extends Omit<PieLayerState, 'colorMapping'> {
@@ -28,9 +29,10 @@ export interface DeprecatedColorMappingPieVisualizationState
   layers: Array<DeprecatedColorMappingLayer | PieLayerState>;
 }
 
-export const convertToRawColorMappingsFn =
-  (datasourceState?: FormBasedPersistedState) =>
-  (
+export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+  const getColumnMeta = getColumnMetaFn(datasourceStates);
+
+  return (
     state: DeprecatedColorMappingPieVisualizationState | PieVisualizationState
   ): PieVisualizationState => {
     const hasDeprecatedColorMappings = state.layers.some((layer) => {
@@ -45,13 +47,11 @@ export const convertToRawColorMappingsFn =
         (layer.colorMapping?.assignments || layer.colorMapping?.specialAssignments)
       ) {
         const [accessor] = layer.primaryGroups;
-        const column = accessor
-          ? datasourceState?.layers?.[layer.layerId]?.columns?.[accessor]
-          : null;
+        const columnMeta = accessor ? getColumnMeta?.(layer.layerId, accessor) : null;
 
         return {
           ...layer,
-          colorMapping: convertToRawColorMappings(layer.colorMapping, column),
+          colorMapping: convertToRawColorMappings(layer.colorMapping, columnMeta),
         } satisfies PieLayerState;
       }
 
@@ -63,3 +63,4 @@ export const convertToRawColorMappingsFn =
       layers: convertedLayers,
     } satisfies PieVisualizationState;
   };
+};

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FormBasedPersistedState } from '../../../../datasources/form_based/types';
 import {
   DeprecatedColorMappingConfig,
   convertToRawColorMappings,
+  getColumnMetaFn,
 } from '../../../../runtime_state/converters/raw_color_mappings';
 import { isDeprecatedColorMapping } from '../../../../runtime_state/converters/raw_color_mappings/converter';
+import { GeneralDatasourceStates } from '../../../../state_management';
 import { TagcloudState } from '../../types';
 
 /**
@@ -22,21 +23,21 @@ export interface DeprecatedColorMappingTagcloudState extends Omit<TagcloudState,
   colorMapping: DeprecatedColorMappingConfig;
 }
 
-export const convertToRawColorMappingsFn =
-  (datasourceState?: FormBasedPersistedState) =>
-  (state: DeprecatedColorMappingTagcloudState | TagcloudState): TagcloudState => {
+export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+  const getColumnMeta = getColumnMetaFn(datasourceStates);
+
+  return (state: DeprecatedColorMappingTagcloudState | TagcloudState): TagcloudState => {
     const hasDeprecatedColorMapping = state.colorMapping
       ? isDeprecatedColorMapping(state.colorMapping)
       : false;
 
     if (!hasDeprecatedColorMapping) return state as TagcloudState;
 
-    const columnMeta = state.tagAccessor
-      ? datasourceState?.layers?.[state.layerId]?.columns?.[state.tagAccessor]
-      : null;
+    const columnMeta = state.tagAccessor ? getColumnMeta?.(state.layerId, state.tagAccessor) : null;
 
     return {
       ...state,
       colorMapping: state.colorMapping && convertToRawColorMappings(state.colorMapping, columnMeta),
     } satisfies TagcloudState;
   };
+};

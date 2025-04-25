@@ -60,11 +60,10 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import type { DataViewsState } from './state_management/types';
+import type { DataViewsState, GeneralDatasourceStates } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { LensDocument } from './persistence/saved_object_store';
 import { TableInspectorAdapter } from './editor_frame_service/types';
-import { FormBasedPersistedState } from './datasources/form_based/types';
 
 export type StartServices = Pick<
   CoreStart,
@@ -1075,13 +1074,13 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
       addNewLayer: () => string,
       nonPersistedState?: T,
       mainPalette?: SuggestionRequest['mainPalette'],
-      datasourceState?: FormBasedPersistedState
+      datasourceStates?: GeneralDatasourceStates
     ): T;
     (
       addNewLayer: () => string,
       persistedState: P,
       mainPalette?: SuggestionRequest['mainPalette'],
-      datasourceState?: FormBasedPersistedState,
+      datasourceStates?: GeneralDatasourceStates,
       annotationGroups?: AnnotationGroups,
       references?: SavedObjectReference[]
     ): T;
@@ -1358,10 +1357,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   isEqual?: (
     state1: P,
     references1: SavedObjectReference[],
-    datasourceState1: FormBasedPersistedState | undefined,
+    datasourceStates1: GeneralDatasourceStates | undefined,
     state2: P,
     references2: SavedObjectReference[],
-    datasourceState2: FormBasedPersistedState | undefined,
+    datasourceStates2: GeneralDatasourceStates | undefined,
     annotationGroups: AnnotationGroups
   ) => boolean;
 

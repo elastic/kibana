@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FormBasedPersistedState } from '../../../../datasources/form_based/types';
+import { GeneralDatasourceStates } from '../../../../state_management';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
 
-export const getRuntimeConverters = (datasourceState?: FormBasedPersistedState) => [
-  convertToRawColorMappingsFn(datasourceState),
+export const getRuntimeConverters = (datasourceStates?: GeneralDatasourceStates) => [
+  convertToRawColorMappingsFn(datasourceStates),
 ];

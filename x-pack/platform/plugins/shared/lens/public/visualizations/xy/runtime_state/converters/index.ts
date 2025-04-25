@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FormBasedPersistedState } from '../../../../datasources/form_based/types';
+import { GeneralDatasourceStates } from '../../../../state_management';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
 
-export const getRuntimeConverters = (datasourceState?: FormBasedPersistedState) => [
+export const getRuntimeConverters = (datasourceStates?: GeneralDatasourceStates) => [
   convertToLegendStats,
-  convertToRawColorMappingsFn(datasourceState),
+  convertToRawColorMappingsFn(datasourceStates),
 ];

@@ -166,8 +166,8 @@ export const getPieVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state, mainPalette, datasourceState) {
-    if (state) return convertToRuntimeState(state, datasourceState);
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
 
     return {
       shape: PieChartTypes.DONUT,
@@ -181,8 +181,8 @@ export const getPieVisualization = ({
     };
   },
 
-  convertToRuntimeState(state, datasourceState) {
-    return convertToRuntimeState(state, datasourceState);
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   getMainPalette: (state) => {
@@ -693,9 +693,9 @@ export const getPieVisualization = ({
     return [...errors, ...warningMessages];
   },
 
-  isEqual(state1, references1, datasourceState1, state2, references2, datasourceState2) {
-    const convertedState1 = convertToRuntimeState(state1, datasourceState1);
-    const convertedState2 = convertToRuntimeState(state2, datasourceState2);
+  isEqual(state1, references1, datasourceStates1, state2, references2, datasourceStates2) {
+    const convertedState1 = convertToRuntimeState(state1, datasourceStates1);
+    const convertedState2 = convertToRuntimeState(state2, datasourceStates2);
     return deepEqual(convertedState1, convertedState2);
   },
 

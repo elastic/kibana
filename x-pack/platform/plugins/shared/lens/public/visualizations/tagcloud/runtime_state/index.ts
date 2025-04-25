@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FormBasedPersistedState } from '../../../datasources/form_based/types';
+import { GeneralDatasourceStates } from '../../../state_management';
 import { TagcloudState } from '../types';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: TagcloudState,
-  datasourceState?: FormBasedPersistedState
+  datasourceStates?: GeneralDatasourceStates
 ): TagcloudState {
-  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
 }

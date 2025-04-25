@@ -39,7 +39,6 @@ import type { DatasourceState, DatasourceStates, VisualizationState } from '../.
 import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 import { getDatasourceLayers } from '../../state_management/utils';
-import { FormBasedPersistedState } from '../../datasources/form_based/types';
 
 // there are 2 ways of coloring, the color mapping where the user can map specific colors to
 // specific terms, and the palette assignment where the colors are assinged automatically
@@ -313,9 +312,7 @@ export function initializeVisualization({
         () => '',
         visualizationState.state,
         COLORING_METHOD,
-        'formBased' in datasourceStates && datasourceStates.formBased.state
-          ? (datasourceStates.formBased.state as FormBasedPersistedState)
-          : undefined,
+        datasourceStates,
         // initialize a new visualization with the color mapping off
         annotationGroups,
         references

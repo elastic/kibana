@@ -6,12 +6,13 @@
  */
 
 import { ColumnState } from '../../../../../common/expressions';
-import { FormBasedPersistedState } from '../../../../datasources/form_based/types';
 import {
   DeprecatedColorMappingConfig,
   convertToRawColorMappings,
+  getColumnMetaFn,
   isDeprecatedColorMapping,
 } from '../../../../runtime_state/converters/raw_color_mappings';
+import { GeneralDatasourceStates } from '../../../../state_management';
 import { DatatableVisualizationState } from '../../visualization';
 
 /** @deprecated */
@@ -28,9 +29,10 @@ export interface DeprecatedColorMappingsState extends Omit<DatatableVisualizatio
   columns: Array<DeprecatedColorMappingColumn | ColumnState>;
 }
 
-export const convertToRawColorMappingsFn =
-  (datasourceState?: FormBasedPersistedState) =>
-  (
+export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+  const getColumnMeta = getColumnMetaFn(datasourceStates);
+
+  return (
     state: DeprecatedColorMappingsState | DatatableVisualizationState
   ): DatatableVisualizationState => {
     const hasDeprecatedColorMappings = state.columns.some((column) => {
@@ -41,7 +43,7 @@ export const convertToRawColorMappingsFn =
 
     const convertedColumns = state.columns.map((column) => {
       if (column.colorMapping?.assignments || column.colorMapping?.specialAssignments) {
-        const columnMeta = datasourceState?.layers?.[state.layerId]?.columns?.[column.columnId];
+        const columnMeta = getColumnMeta?.(state.layerId, column.columnId);
 
         return {
           ...column,
@@ -57,3 +59,4 @@ export const convertToRawColorMappingsFn =
       columns: convertedColumns,
     };
   };
+};

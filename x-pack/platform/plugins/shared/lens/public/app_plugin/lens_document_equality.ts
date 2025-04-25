@@ -45,10 +45,10 @@ export const isLensEqual = (
           return isEqualFromVis(
             doc1.state.visualization,
             doc1.references,
-            doc1.state.datasourceStates?.formBased,
+            doc1.state.datasourceStates,
             doc2.state.visualization,
             doc2.references,
-            doc2.state.datasourceStates?.formBased,
+            doc2.state.datasourceStates,
             annotationGroups
           );
         } catch (err) {

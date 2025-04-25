@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { XYDataLayerConfig, XYState } from '../../types';
-import { FormBasedPersistedState } from '../../../../datasources/form_based/types';
 import {
   DeprecatedColorMappingConfig,
   convertToRawColorMappings,
+  getColumnMetaFn,
   isDeprecatedColorMapping,
 } from '../../../../runtime_state/converters/raw_color_mappings';
+import { GeneralDatasourceStates } from '../../../../state_management';
+import { XYDataLayerConfig, XYState } from '../../types';
 
 /** @deprecated */
 interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapping'> {
@@ -27,9 +28,10 @@ export interface DeprecatedColorMappingsState extends Omit<XYState, 'layers'> {
   layers: Array<DeprecatedColorMappingLayer | XYDataLayerConfig>;
 }
 
-export const convertToRawColorMappingsFn =
-  (datasourceState?: FormBasedPersistedState) =>
-  (state: DeprecatedColorMappingsState | XYState): XYState => {
+export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+  const getColumnMeta = getColumnMetaFn(datasourceStates);
+
+  return (state: DeprecatedColorMappingsState | XYState): XYState => {
     const hasDeprecatedColorMappings = state.layers.some((layer) => {
       return layer.layerType === 'data' && isDeprecatedColorMapping(layer.colorMapping);
     });
@@ -42,13 +44,11 @@ export const convertToRawColorMappingsFn =
         (layer.colorMapping?.assignments || layer.colorMapping?.specialAssignments)
       ) {
         const accessor = layer.splitAccessor;
-        const column = accessor
-          ? datasourceState?.layers?.[layer.layerId]?.columns?.[accessor]
-          : null;
+        const columnMeta = accessor ? getColumnMeta?.(layer.layerId, accessor) : null;
 
         return {
           ...layer,
-          colorMapping: convertToRawColorMappings(layer.colorMapping, column),
+          colorMapping: convertToRawColorMappings(layer.colorMapping, columnMeta),
         } satisfies XYDataLayerConfig;
       }
 
@@ -60,3 +60,4 @@ export const convertToRawColorMappingsFn =
       layers: convertedLayers,
     };
   };
+};

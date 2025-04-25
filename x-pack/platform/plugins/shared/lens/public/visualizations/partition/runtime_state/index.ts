@@ -6,13 +6,13 @@
  */
 
 import { PieVisualizationState } from '../../../../common/types';
-import { FormBasedPersistedState } from '../../../datasources/form_based/types';
+import { GeneralDatasourceStates } from '../../../state_management';
 
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: PieVisualizationState,
-  datasourceState?: FormBasedPersistedState
+  datasourceStates?: GeneralDatasourceStates
 ): PieVisualizationState {
-  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
 }

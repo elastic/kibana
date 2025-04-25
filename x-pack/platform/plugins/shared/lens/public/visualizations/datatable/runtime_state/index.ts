@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FormBasedPersistedState } from '../../../datasources/form_based/types';
+import { GeneralDatasourceStates } from '../../../state_management';
 import { DatatableVisualizationState } from '../datatable_visualization';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: DatatableVisualizationState,
-  datasourceState?: FormBasedPersistedState
+  datasourceStates?: GeneralDatasourceStates
 ): DatatableVisualizationState {
-  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
 }

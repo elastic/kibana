@@ -8,20 +8,20 @@
 import { ColorMapping } from '@kbn/coloring';
 import { MultiFieldKey, RangeKey, SerializedValue } from '@kbn/data-plugin/common';
 import { DeprecatedColorMappingConfig } from './types';
-import { GenericIndexPatternColumn } from '../../../async_services';
+import { ColumnMeta } from './utils';
 
 /**
  * Converts old stringified colorMapping configs to new raw value configs
  */
 export function convertToRawColorMappings(
   colorMapping: DeprecatedColorMappingConfig | ColorMapping.Config,
-  column?: Partial<GenericIndexPatternColumn> | null
+  columnMeta?: ColumnMeta | null
 ): ColorMapping.Config {
   return {
     ...colorMapping,
     assignments: colorMapping.assignments.map((oldAssignment) => {
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
-      return convertColorMappingAssignment(oldAssignment, column);
+      return convertColorMappingAssignment(oldAssignment, columnMeta);
     }),
     specialAssignments: colorMapping.specialAssignments.map((oldAssignment) => {
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
@@ -36,12 +36,12 @@ export function convertToRawColorMappings(
 
 function convertColorMappingAssignment(
   oldAssignment: DeprecatedColorMappingConfig['assignments'][number],
-  column?: Partial<GenericIndexPatternColumn> | null
+  columnMeta?: ColumnMeta | null
 ): ColorMapping.Assignment {
   return {
     color: oldAssignment.color,
     touched: oldAssignment.touched,
-    rules: convertColorMappingRule(oldAssignment.rule, column),
+    rules: convertColorMappingRule(oldAssignment.rule, columnMeta),
   };
 }
 
@@ -49,14 +49,14 @@ const NO_VALUE = Symbol('no-value');
 
 function convertColorMappingRule(
   rule: DeprecatedColorMappingConfig['assignments'][number]['rule'],
-  column?: Partial<GenericIndexPatternColumn> | null
+  columnMeta?: ColumnMeta | null
 ): ColorMapping.ColorRule[] {
   switch (rule.type) {
     case 'auto':
       return [];
     case 'matchExactly':
       return rule.values.map((value) => {
-        const rawValue = convertToRawValue(value, column);
+        const rawValue = convertToRawValue(value, columnMeta);
 
         if (rawValue !== NO_VALUE) {
           return {
@@ -89,11 +89,6 @@ function convertColorMappingRule(
   }
 }
 
-const getParentFormatId = (column: Partial<GenericIndexPatternColumn>) =>
-  'params' in column
-    ? (column.params as { parentFormat?: { id?: string } })?.parentFormat?.id
-    : undefined;
-
 /**
  * Attempts to convert the previously stringified raw values into their raw/serialized form
  *
@@ -101,25 +96,21 @@ const getParentFormatId = (column: Partial<GenericIndexPatternColumn>) =>
  */
 function convertToRawValue(
   value: string | string[],
-  column?: Partial<GenericIndexPatternColumn> | null
+  columnMeta?: ColumnMeta | null
 ): SerializedValue | symbol {
-  if (!column) return NO_VALUE;
-
-  const type = getParentFormatId(column);
+  if (!columnMeta) return NO_VALUE;
 
   // all array values are multi-term
-  if (type === 'multi_terms' || Array.isArray(value)) {
+  if (columnMeta.fieldType === 'multi_terms' || Array.isArray(value)) {
     if (typeof value === 'string') return NO_VALUE; // cannot assume this as multi-field
     return new MultiFieldKey({ key: value }).serialize();
   }
 
-  if (type === 'range') {
+  if (columnMeta.fieldType === 'range') {
     return RangeKey.isRangeKeyString(value) ? RangeKey.fromString(value).serialize() : NO_VALUE;
   }
 
-  const { dataType } = column;
-
-  switch (dataType) {
+  switch (columnMeta.dataType) {
     case 'boolean':
       if (value === '__other__' || value === 'true' || value === 'false') return value; // bool could have __other__ as a string
       if (value === '0' || value === '1') return Number(value);

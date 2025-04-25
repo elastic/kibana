@@ -301,13 +301,13 @@ export const getXyVisualization = ({
     addNewLayer,
     state,
     mainPalette?,
-    datasourceState?,
+    datasourceStates?,
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
     if (state) {
       const convertedState = convertPersistedState(state, annotationGroups, references);
-      return convertToRuntimeState(convertedState, datasourceState);
+      return convertToRuntimeState(convertedState, datasourceStates);
     }
     return {
       title: 'Empty XY chart',
@@ -330,8 +330,8 @@ export const getXyVisualization = ({
     };
   },
 
-  convertToRuntimeState(state, datasourceState) {
-    return convertToRuntimeState(state, datasourceState);
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   getLayerType(layerId, state) {
@@ -1104,16 +1104,16 @@ export const getXyVisualization = ({
   isEqual(
     state1,
     references1,
-    datasourceState1,
+    datasourceStates1,
     state2,
     references2,
-    datasourceState2,
+    datasourceStates2,
     annotationGroups
   ) {
     const convertedState1 = convertPersistedState(state1, annotationGroups, references1);
-    const injected1 = convertToRuntimeState(convertedState1, datasourceState1);
+    const injected1 = convertToRuntimeState(convertedState1, datasourceStates1);
     const convertedState2 = convertPersistedState(state2, annotationGroups, references2);
-    const injected2 = convertToRuntimeState(convertedState2, datasourceState2);
+    const injected2 = convertToRuntimeState(convertedState2, datasourceStates2);
     return isEqual(injected1, injected2);
   },
 
