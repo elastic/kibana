@@ -161,7 +161,6 @@ export const eqlExecutor = async ({
       } else if (sequences) {
         if (
           isAlertSuppressionActive &&
-          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
         ) {
           await bulkCreateSuppressedSequencesInMemory({
