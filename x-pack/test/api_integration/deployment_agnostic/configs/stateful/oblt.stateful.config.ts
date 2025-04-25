@@ -12,4 +12,7 @@ export default createStatefulTestConfig({
   junit: {
     reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',
   },
+  globals: {
+    Uint8Array: Uint8Array,
+  },
 });
