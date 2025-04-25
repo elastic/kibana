@@ -37,6 +37,7 @@ import { SloEnableConfirmationModal } from '../../../components/slo/enable_confi
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
 import { useUrlSearchState } from './hooks/use_url_search_state';
+import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 
 export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
@@ -63,12 +64,16 @@ export function SloManagementTable() {
   const [sloToEnable, setSloToEnable] = useState<SLODefinitionResponse | undefined>(undefined);
   const [sloToDisable, setSloToDisable] = useState<SLODefinitionResponse | undefined>(undefined);
 
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
-  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
-  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: deleteSlo } = useDeleteSlo();
+  const { mutate: resetSlo } = useResetSlo();
+  const { mutate: enableSlo } = useEnableSlo();
+  const { mutate: disableSlo } = useDisableSlo();
 
   const handleDeleteConfirm = () => {
-    setSloToDelete(undefined);
+    if (sloToDelete) {
+      deleteSlo({ id: sloToDelete.id, name: sloToDelete.name });
+      setSloToDelete(undefined);
+    }
   };
 
   const handleDeleteCancel = () => {
@@ -310,6 +315,7 @@ export function SloManagementTable() {
           loading={isLoading}
         />
       </EuiPanel>
+
       {sloToDelete ? (
         <SloDeleteModal
           slo={sloToDelete}
@@ -323,7 +329,6 @@ export function SloManagementTable() {
           slo={sloToReset}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
         />
       ) : null}
 
@@ -332,7 +337,6 @@ export function SloManagementTable() {
           slo={sloToEnable}
           onCancel={handleEnableCancel}
           onConfirm={handleEnableConfirm}
-          isLoading={isEnableLoading}
         />
       ) : null}
 
@@ -341,7 +345,6 @@ export function SloManagementTable() {
           slo={sloToDisable}
           onCancel={handleDisableCancel}
           onConfirm={handleDisableConfirm}
-          isLoading={isDisableLoading}
         />
       ) : null}
     </>
