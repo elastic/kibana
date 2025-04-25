@@ -7,12 +7,19 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { EuiText } from '@elastic/eui';
 import { formatDuration } from '../../../../../../utils/formatting';
 import { selectOverviewTrends } from '../../../../../../state';
 import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 
-export const MonitorsDuration = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+export const MonitorsDuration = ({
+  monitor,
+  onClickDuration,
+}: {
+  monitor: OverviewStatusMetaData;
+  onClickDuration?: () => void;
+}) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const duration = trendData === 'loading' || !trendData?.median ? 0 : trendData.median;
-  return <div>{formatDuration(duration)}</div>;
+  return <EuiText onClick={onClickDuration}>{formatDuration(duration)}</EuiText>;
 };

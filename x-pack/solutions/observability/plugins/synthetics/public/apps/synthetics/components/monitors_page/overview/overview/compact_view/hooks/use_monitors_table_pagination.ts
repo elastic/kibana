@@ -31,7 +31,7 @@ export const useMonitorsTablePagination = ({
   totalItems: OverviewStatusMetaData[];
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   const onTableChange = ({ page }: Criteria<OverviewStatusMetaData>) => {
     if (page) {

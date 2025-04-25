@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiBasicTable, EuiTableRowProps } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
 import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { useOverviewStatus } from '../../../../hooks/use_overview_status';
 import { FlyoutParamProps } from '../../types';
@@ -27,6 +28,33 @@ export const MonitorsTable = ({
     totalItems: items,
   });
 
+  const dispatch = useDispatch();
+
+  const getRowProps = useCallback(
+    (monitor: OverviewStatusMetaData): EuiTableRowProps => {
+      const { configId, locationLabel, locationId, spaceId } = monitor;
+      return {
+        onClick: (e) => {
+          if (
+            Array.from((e.target as HTMLElement).classList).some((className) =>
+              className.includes('euiTableCellContent')
+            )
+          ) {
+            dispatch(
+              setFlyoutConfigCallback({
+                configId,
+                id: configId,
+                location: locationLabel,
+                locationId,
+                spaceId,
+              })
+            );
+          }
+        },
+      };
+    },
+    [dispatch, setFlyoutConfigCallback]
+  );
   const loading = !status || !loaded;
 
   return (
@@ -36,6 +64,7 @@ export const MonitorsTable = ({
       loading={loading}
       pagination={pagination}
       onChange={onTableChange}
+      rowProps={getRowProps}
     />
   );
 };

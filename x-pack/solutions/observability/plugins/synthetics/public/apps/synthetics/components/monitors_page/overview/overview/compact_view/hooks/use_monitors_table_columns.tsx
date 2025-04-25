@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
@@ -79,20 +79,10 @@ export const useMonitorsTableColumns = ({
       {
         field: 'name',
         name: NAME,
-        render: (name: OverviewStatusMetaData['name'], monitor) => (
-          <EuiLink data-test-subj="syntheticsColumnsLink" onClick={() => openFlyout(monitor)}>
-            {name}
-          </EuiLink>
-        ),
       },
       {
         field: 'locationLabel',
         name: LOCATIONS,
-        render: (locationLabel: OverviewStatusMetaData['locationLabel'], monitor) => (
-          <EuiLink data-test-subj="syntheticsColumnsLink" onClick={() => openFlyout(monitor)}>
-            {locationLabel}
-          </EuiLink>
-        ),
       },
       {
         field: 'type',
@@ -114,7 +104,9 @@ export const useMonitorsTableColumns = ({
       },
       {
         name: DURATION,
-        render: (monitor: OverviewStatusMetaData) => <MonitorsDuration monitor={monitor} />,
+        render: (monitor: OverviewStatusMetaData) => (
+          <MonitorsDuration monitor={monitor} onClickDuration={() => openFlyout(monitor)} />
+        ),
       },
       {
         name: ACTIONS,
