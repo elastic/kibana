@@ -270,7 +270,7 @@ export const getCloudDefaultAwsCredentialConfig = ({
     credentialsType = DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   } else if (showCloudConnectors && isAgentless) {
     credentialsType = DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE;
-  } else if (hasCloudFormationTemplate) {
+  } else if (hasCloudFormationTemplate && !isAgentless) {
     credentialsType = DEFAULT_AWS_CREDENTIALS_TYPE;
   } else {
     credentialsType = DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
@@ -288,7 +288,7 @@ export const getCloudDefaultAwsCredentialConfig = ({
     },
     ...(showCloudConnectors && {
       'aws.supports_cloud_connectors': {
-        value: isAgentless,
+        value: showCloudConnectors,
         type: 'bool',
       },
     }),

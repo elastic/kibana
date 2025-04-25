@@ -773,13 +773,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const inputVars = getPostureInputHiddenVars(
           inputType,
           packageInfo,
-          setupTechnology,
+          inputType === CLOUDBEAT_AWS ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED,
           showCloudConnectors
         );
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [setupTechnology, packageInfo, newPolicy, updatePolicy, showCloudConnectors]
+      [packageInfo, newPolicy, updatePolicy, showCloudConnectors]
     );
 
     // search for non null fields of the validation?.vars object
@@ -825,19 +825,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+      setIntegrationToEnable?.(input.policy_template);
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading, input.policy_template, isEditPage]);
-
-    useEffect(() => {
-      if (isEditPage) {
-        return;
-      }
-
-      setEnabledPolicyInput(input.type);
-      setIntegrationToEnable?.(input.policy_template);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setupTechnology]);
+    }, [isLoading, input.policy_template, isEditPage, setupTechnology]);
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
@@ -997,6 +988,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             showLimitationsMessage={!isServerless}
             disabled={isEditPage}
             setupTechnology={setupTechnology}
+            isAgentless={!!newPolicy?.supports_agentless}
             onSetupTechnologyChange={(value) => {
               updateSetupTechnology(value);
               updatePolicy(
@@ -1028,8 +1020,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           setupTechnology={setupTechnology}
           isEditPage={isEditPage}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
-          // temp to show cloud connectors
-          showCloudConnectors={true}
+          showCloudConnectors={showCloudConnectors}
         />
         <EuiSpacer />
       </>

@@ -237,7 +237,6 @@ export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connecto
   },
 });
 
-// TODO: create cloud setup access config
 export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
   AwsOptions,
   'assume_role' | 'cloud_formation' | 'shared_credentials'

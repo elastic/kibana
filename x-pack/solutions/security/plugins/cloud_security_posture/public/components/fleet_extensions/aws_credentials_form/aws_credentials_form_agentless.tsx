@@ -289,16 +289,17 @@ export const AwsCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const cloudFormationSettings = {
-    [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-      accordianTitleLink: <EuiLink>Steps to Generate AWS Account Credentials</EuiLink>,
-      templateUrl: automationCredentialTemplate,
-    },
-    [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
-      accordianTitleLink: <EuiLink>Steps to Generate Cloud Connection</EuiLink>,
-      templateUrl: cloudConnectorRemoteRoleTemplate,
-    },
-  };
+  const cloudFormationSettings: Record<string, { accordianTitleLink: any; templateUrl?: string }> =
+    {
+      [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
+        accordianTitleLink: <EuiLink>Steps to Generate AWS Account Credentials</EuiLink>,
+        templateUrl: automationCredentialTemplate,
+      },
+      [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
+        accordianTitleLink: <EuiLink>Steps to Generate Cloud Connection</EuiLink>,
+        templateUrl: cloudConnectorRemoteRoleTemplate,
+      },
+    };
 
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
 
