@@ -1,17 +1,14 @@
 # Observability Project config
 
-## Disable plugins
-xpack.search.enabled: false
-xpack.cloudSecurityPosture.enabled: false
-xpack.infra.enabled: true
-xpack.uptime.enabled: true
-xpack.securitySolution.enabled: false
-xpack.searchNotebooks.enabled: false
-xpack.searchPlayground.enabled: false
-xpack.searchInferenceEndpoints.enabled: false
-xpack.searchIndices.enabled: false
-xpack.searchSynonyms.enabled: false
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'observability']
 
+## Enabled plugins
+xpack.infra.enabled: true
+
+# Disabled Observability plugins
+xpack.ux.enabled: false
+xpack.legacy_uptime.enabled: false
 
 ## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -189,9 +186,6 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Profiling integrations
     'profiler_agent',
-
-    # Search connectors
-    'elastic_connectors',
   ]
 
 ## Required for force installation of integration packages

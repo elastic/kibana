@@ -136,6 +136,7 @@ enabled:
   - x-pack/test/alerting_api_integration/security_and_spaces/group3/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group4/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group5/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group6/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
@@ -158,23 +159,20 @@ enabled:
   - x-pack/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/test/api_integration/apis/kibana/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
-  - x-pack/test/api_integration/apis/logs_ui/config.ts
   - x-pack/test/api_integration/apis/logstash/config.ts
   - x-pack/test/api_integration/apis/management/config.ts
   - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/test/api_integration/apis/maps/config.ts
-  - x-pack/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/test/api_integration/apis/ml/config.ts
   - x-pack/test/api_integration/apis/monitoring/config.ts
   - x-pack/test/api_integration/apis/monitoring_collection/config.ts
-  - x-pack/test/api_integration/apis/osquery/config.ts
   - x-pack/test/api_integration/apis/search/config.ts
   - x-pack/test/api_integration/apis/searchprofiler/config.ts
+  - x-pack/test/api_integration/apis/search_playground/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
   - x-pack/test/api_integration/apis/stats/config.ts
   - x-pack/test/api_integration/apis/status/config.ts
-  - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
   - x-pack/test/api_integration/apis/transform/config.ts
   - x-pack/test/api_integration/apis/upgrade_assistant/config.ts
@@ -226,7 +224,9 @@ enabled:
   - x-pack/test/functional/apps/dashboard/group3/config.ts
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
-  - x-pack/test/functional/apps/discover/config.ts
+  - x-pack/test/functional/apps/discover/group1/config.ts
+  - x-pack/test/functional/apps/discover/group2/config.ts
+  - x-pack/test/functional/apps/discover/group3/config.ts
   - x-pack/test/functional/apps/graph/config.ts
   - x-pack/test/functional/apps/grok_debugger/config.ts
   - x-pack/test/functional/apps/home/config.ts
