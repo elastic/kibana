@@ -16,18 +16,17 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiBadge,
-  EuiTextColor,
   EuiButtonIcon,
   useEuiTheme,
   euiDragDropReorder,
 } from '@elastic/eui';
-import {
-  QueryRulesQueryRule,
-  QueryRulesQueryRuleCriteria,
-} from '@elastic/elasticsearch/lib/api/types';
+import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { DroppableContainer } from '../styles';
+import { QueryRuleDraggableListHeader } from './query_rule_draggable_list_header';
+import { QueryRuleDraggableListItemActionTypeBadge } from './query_rule_draggable_item_action_type_badge';
+import { QueryRuleDraggableItemCriteriaDisplay } from './query_rule_draggable_item_criteria_display';
 
 export interface QueryRuleDraggableListProps {
   rules: QueryRulesQueryRule[];
@@ -37,65 +36,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   rules,
   onReorder,
 }) => {
-  const {
-    euiTheme: { colors, size, base },
-  } = useEuiTheme();
-  const DOC_COUNT_COLUMN_SIZING = {
-    columnMinWidth: base * 10,
-    actionMinWidth: base * 5,
-    docCountMinWidth: base * 4,
-    docTextMinWidth: size.l,
-    headerpaddingLeft: base * 3.5,
-  };
-  const criteriaDisplay = (criteria: QueryRulesQueryRuleCriteria) => (
-    <EuiText size="s">
-      <EuiBadge>{criteria.metadata}</EuiBadge>&nbsp;
-      <EuiTextColor color={colors.textPrimary}>{criteria.type}</EuiTextColor>&nbsp;
-      {criteria.values?.join(', ')}
-    </EuiText>
-  );
-  const actionIcon = (queryRule: QueryRulesQueryRule) => (
-    <EuiFlexGroup
-      responsive={false}
-      alignItems="center"
-      gutterSize="m"
-      justifyContent="center"
-      css={{ minWidth: DOC_COUNT_COLUMN_SIZING.columnMinWidth }}
-    >
-      <EuiFlexItem grow={false}>
-        <div css={{ minWidth: DOC_COUNT_COLUMN_SIZING.actionMinWidth, textAlign: 'end' }}>
-          <EuiBadge iconType={queryRule.type === 'exclude' ? 'eyeClosed' : 'pinFilled'}>
-            {queryRule.type === 'exclude' ? (
-              <FormattedMessage
-                id="xpack.search.queryRulesetDetail.draggableList.excludeLabel"
-                defaultMessage="Exclude"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.search.queryRulesetDetail.draggableList.pinLabel"
-                defaultMessage="Pin"
-              />
-            )}
-          </EuiBadge>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={{
-          minWidth: DOC_COUNT_COLUMN_SIZING.docCountMinWidth,
-        }}
-      >
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="documents" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ minWidth: DOC_COUNT_COLUMN_SIZING.docTextMinWidth }}>
-            {queryRule.actions.docs?.length ?? 0}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiDragDropContext
@@ -107,60 +48,11 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
       }}
     >
       <>
-        <EuiFlexGroup
-          css={{
-            padding: `0 ${base * 2.25}px 0 ${base * 3.5}px`,
-          }}
-        >
-          <EuiFlexItem grow={7}>
-            <EuiText size="xs">
-              <b>
-                <FormattedMessage
-                  id="xpack.search.queryRulesetDetail.draggableList.ruleConditionsLabel"
-                  defaultMessage="Rule Conditions"
-                />
-              </b>
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="center"
-              gutterSize="m"
-              responsive={false}
-              css={{ minWidth: DOC_COUNT_COLUMN_SIZING.columnMinWidth }}
-            >
-              <EuiFlexItem grow={false} css={{ minWidth: size.xl, textAlign: 'end' }}>
-                <EuiText size="xs">
-                  <b>
-                    <FormattedMessage
-                      id="xpack.search.queryRulesetDetail.draggableList.actionLabel"
-                      defaultMessage="Action"
-                    />
-                  </b>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                css={{ minWidth: DOC_COUNT_COLUMN_SIZING.docCountMinWidth }}
-              >
-                <EuiText size="xs">
-                  <b>
-                    <FormattedMessage
-                      id="xpack.search.queryRulesetDetail.draggableList.documentCountLabel"
-                      defaultMessage="Document Count"
-                    />
-                  </b>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <QueryRuleDraggableListHeader />
         <EuiDroppable
           droppableId="queryRuleListDropabble"
           spacing="m"
-          css={{ backgroundColor: colors.backgroundBaseSubdued }}
+          css={DroppableContainer(euiTheme)}
           data-test-subj="searchQueryRulesDroppable"
         >
           {rules.map((queryRule, index) => (
@@ -194,7 +86,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
                               <>
                                 {queryRule.criteria.slice(0, 3).map((criteria, criteriaIndex) => (
                                   <EuiFlexItem key={criteria.type + criteriaIndex} grow={false}>
-                                    {criteriaDisplay(criteria)}
+                                    <QueryRuleDraggableItemCriteriaDisplay criteria={criteria} />
                                   </EuiFlexItem>
                                 ))}
                                 {queryRule.criteria.length > 3 && (
@@ -211,12 +103,16 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
                               </>
                             ) : (
                               <EuiFlexItem grow={false}>
-                                {criteriaDisplay(queryRule.criteria)}
+                                <QueryRuleDraggableItemCriteriaDisplay
+                                  criteria={queryRule.criteria}
+                                />
                               </EuiFlexItem>
                             )}
                           </EuiFlexGroup>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={1}>{actionIcon(queryRule)}</EuiFlexItem>
+                        <EuiFlexItem grow={1}>
+                          <QueryRuleDraggableListItemActionTypeBadge queryRule={queryRule} />
+                        </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
                             aria-label={i18n.translate(

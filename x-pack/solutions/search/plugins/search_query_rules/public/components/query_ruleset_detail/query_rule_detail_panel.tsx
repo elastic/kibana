@@ -10,7 +10,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
-import { QueryRuleDraggableList } from './query_rule_draggable_list';
+import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
 
 interface QueryRuleDetailPanelProps {
   rules: QueryRulesQueryRule[];
@@ -41,21 +41,12 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rule
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText>
-                    {rules.length > 1 ? (
-                      <FormattedMessage
-                        id="xpack.queryRules.queryRulesetDetail.ruleCountPlural"
-                        defaultMessage="{ruleCount} rules"
-                        values={{ ruleCount: rules.length }}
-                        data-test-subj="queryRulesetDetailRuleCount"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.queryRules.queryRulesetDetail.ruleCountSingular"
-                        defaultMessage="{ruleCount} rule"
-                        values={{ ruleCount: rules.length }}
-                        data-test-subj="queryRulesetDetailRuleCount"
-                      />
-                    )}
+                    <FormattedMessage
+                      id="xpack.queryRules.queryRulesetDetail.ruleCount"
+                      defaultMessage="{ruleCount, plural, one {# rule} other {# rules}}"
+                      values={{ ruleCount: rules.length }}
+                      data-test-subj="queryRulesetDetailRuleCount"
+                    />
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
