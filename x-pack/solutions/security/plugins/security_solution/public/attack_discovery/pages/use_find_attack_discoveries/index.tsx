@@ -13,7 +13,7 @@ import type {
   RefetchOptions,
   RefetchQueryFilters,
 } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
 
 interface Props {
@@ -113,7 +113,10 @@ export const useFindAttackDiscoveries = ({
   );
 
   const getNextPageParam = useCallback((lastPage: AttackDiscoveryFindResponse) => {
-    const totalPages = Math.max(DEFAULT_PAGE, Math.ceil(lastPage.total / lastPage.perPage));
+    const totalPages = Math.max(
+      DEFAULT_PAGE,
+      Math.ceil(lastPage.total / (lastPage.per_page ?? DEFAULT_PER_PAGE))
+    );
 
     if (totalPages === lastPage.page) {
       return;
@@ -164,4 +167,19 @@ export const useFindAttackDiscoveries = ({
     refetch,
     status: queryStatus,
   };
+};
+
+/**
+ * We use this hook to invalidate the attack discovery generations cache.
+ *
+ * @returns A attack discovery schedule cache invalidation callback
+ */
+export const useInvalidateFindAttackDiscoveries = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(() => {
+    queryClient.invalidateQueries(['GET', ATTACK_DISCOVERY_FIND], {
+      refetchType: 'all',
+    });
+  }, [queryClient]);
 };

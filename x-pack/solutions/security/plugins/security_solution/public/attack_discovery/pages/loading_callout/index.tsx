@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../../common/lib/kibana';
@@ -169,7 +169,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
 
   const { mutateAsync: dismissAttackDiscoveryGeneration } = useDismissAttackDiscoveryGeneration();
 
-  const [isDismissing, setIsDismissing] = React.useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
 
   const dismissGeneration = useCallback(async () => {
     try {

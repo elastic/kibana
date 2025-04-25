@@ -30,7 +30,6 @@ import { SearchAndFilter } from './search_and_filter';
 import { ACKNOWLEDGED, CLOSED, OPEN } from './search_and_filter/translations';
 import { Summary } from '../summary';
 import * as i18n from './translations';
-import type { ConnectorFilterOptionData } from './types';
 import { useDismissAttackDiscoveryGeneration } from '../../use_dismiss_attack_discovery_generations';
 import { useIdsFromUrl } from './use_ids_from_url';
 import { useFindAttackDiscoveries } from '../../use_find_attack_discoveries';
@@ -38,8 +37,8 @@ import { useGetAttackDiscoveryGenerations } from '../../use_get_attack_discovery
 
 const DEFAULT_HISTORY_END = 'now';
 const DEFAULT_HISTORY_START = 'now-24h';
-
 const DEFAULT_PER_PAGE = 10;
+const GET_ATTACK_DISCOVERY_GENERATIONS_SIZE = 50; // fetch up to 50 generations, with no filter by status
 const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50];
 
 const EMPTY_ATTACK_DISCOVERY_ALERTS: AttackDiscoveryAlert[] = [];
@@ -96,6 +95,7 @@ const HistoryComponent: React.FC<Props> = ({
     const oneBasedPageIndex = zeroBasedPageIndex + 1; // convert to one-based for API
 
     setPage(oneBasedPageIndex);
+    setSelectedAttackDiscoveries({});
   }, []);
 
   const setIsSelected = useCallback(
@@ -110,6 +110,7 @@ const HistoryComponent: React.FC<Props> = ({
   const onChangeItemsPerPage = useCallback((pageSize: number) => {
     setPage(FIRST_PAGE);
     setPerPage(pageSize); // convert to zero-based for pagination component
+    setSelectedAttackDiscoveries({});
   }, []);
 
   const [statusItems, setStatusItems] = useState<EuiSelectableOption[]>([
@@ -124,20 +125,13 @@ const HistoryComponent: React.FC<Props> = ({
       .map((item) => item.label.toLowerCase());
   }, [statusItems]);
 
-  const [connectorFilterItems, setConnectorFilterItems] = useState<
-    Array<EuiSelectableOption<ConnectorFilterOptionData>>
-  >([]);
-
-  const selectedConnectorNames: string[] = useMemo(
-    () => connectorFilterItems.filter((item) => item.checked).map((item) => item.label),
-    [connectorFilterItems]
-  );
+  const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
 
   const {
     cancelRequest: cancelFindAttackDiscoveriesRequest,
     data,
     isLoading,
-    refetch,
+    refetch: refetchFindAttackDiscoveries,
   } = useFindAttackDiscoveries({
     connectorNames: selectedConnectorNames,
     end: historyEnd,
@@ -151,8 +145,6 @@ const HistoryComponent: React.FC<Props> = ({
     start: historyStart,
     status: selectedAlertWorkflowStatus,
   });
-
-  const GET_ATTACK_DISCOVERY_GENERATIONS_SIZE = 50; // fetch up to 50 generations, with no filter by status
 
   const {
     cancelRequest: cancelGetAttackDiscoveryGenerations,
@@ -178,7 +170,6 @@ const HistoryComponent: React.FC<Props> = ({
     return () => {
       clearInterval(intervalId);
       cancelGetAttackDiscoveryGenerations();
-
       cancelFindAttackDiscoveriesRequest();
     };
   }, [cancelFindAttackDiscoveriesRequest, cancelGetAttackDiscoveryGenerations, refetchGenerations]);
@@ -186,33 +177,44 @@ const HistoryComponent: React.FC<Props> = ({
   const pageCount = useMemo(() => Math.ceil((data?.total ?? 0) / perPage), [data, perPage]);
 
   const { mutateAsync: dismissAttackDiscoveryGeneration } = useDismissAttackDiscoveryGeneration();
-  const onRefresh = useCallback(() => {
-    refetch();
+  const onRefresh = useCallback(async () => {
+    refetchFindAttackDiscoveries();
 
     // Dismiss all successful generations
     // TODO: make this a bulk update:
-    generationsData?.generations
-      .filter(({ status }) => status === 'succeeded')
-      .forEach(({ execution_uuid: executionUuid }) => {
-        dismissAttackDiscoveryGeneration({ executionUuid }); // don't wait for this to finish
-      });
-  }, [dismissAttackDiscoveryGeneration, generationsData?.generations, refetch]);
+    if (generationsData?.generations) {
+      const dismissPromises = generationsData.generations
+        .filter(({ status }) => status === 'succeeded')
+        .map(({ execution_uuid: executionUuid }) =>
+          dismissAttackDiscoveryGeneration({ executionUuid })
+        );
+
+      await Promise.all(dismissPromises);
+    }
+
+    setSelectedAttackDiscoveries({});
+  }, [
+    dismissAttackDiscoveryGeneration,
+    generationsData?.generations,
+    refetchFindAttackDiscoveries,
+  ]);
 
   return (
     <>
       <SearchAndFilter
         aiConnectors={aiConnectors}
-        connectorFilterItems={connectorFilterItems}
         connectorNames={connectorNames}
         end={historyEnd}
         filterByAlertIds={filterByAlertIds}
         isLoading={isLoading}
         onRefresh={onRefresh}
         query={query}
-        setConnectorFilterItems={setConnectorFilterItems}
         setEnd={setHistoryEnd}
         setFilterByAlertIds={setFilterByAlertIds}
+        selectedConnectorNames={selectedConnectorNames}
         setQuery={setQuery}
+        setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+        setSelectedConnectorNames={setSelectedConnectorNames}
         setShared={setShared}
         setStart={setHistoryStart}
         setStatusItems={setStatusItems}
@@ -229,6 +231,7 @@ const HistoryComponent: React.FC<Props> = ({
         isLoading={isLoading}
         lastUpdated={null}
         onToggleShowAnonymized={onToggleShowAnonymized}
+        refetchFindAttackDiscoveries={refetchFindAttackDiscoveries}
         selectedAttackDiscoveries={selectedAttackDiscoveries}
         selectedConnectorAttackDiscoveries={data?.data ?? EMPTY_ATTACK_DISCOVERY_ALERTS}
         setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
@@ -269,6 +272,7 @@ const HistoryComponent: React.FC<Props> = ({
                 replacements={attackDiscovery.replacements ?? EMPTY_REPLACEMENTS}
                 setIsSelected={setIsSelected}
                 isSelected={selectedAttackDiscoveries[attackDiscovery.id]}
+                setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
                 showAnonymized={showAnonymized}
               />
               <EuiSpacer size="m" />

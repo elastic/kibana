@@ -26,20 +26,26 @@ import { useViewInAiAssistant } from '../attack_discovery_panel/view_in_ai_assis
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
+import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
+import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
   buttonText?: string;
   buttonSize?: 's' | 'xs';
+  refetchFindAttackDiscoveries?: () => void;
   replacements?: Replacements;
+  setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
 const TakeActionComponent: React.FC<Props> = ({
   attackDiscoveries,
   buttonSize = 's',
   buttonText,
+  refetchFindAttackDiscoveries,
   replacements,
+  setSelectedAttackDiscoveries,
 }) => {
   const {
     services: { cases },
@@ -86,8 +92,72 @@ const TakeActionComponent: React.FC<Props> = ({
     [attackDiscoveries]
   );
 
+  const attackDiscoveryIds: string[] = useMemo(
+    () =>
+      attackDiscoveries.flatMap((attackDiscovery) =>
+        attackDiscovery.id != null ? [attackDiscovery.id] : []
+      ),
+    [attackDiscoveries]
+  );
+
+  const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
+
   // click handlers for the popover actions:
-  const onClickAddToNewCase = useCallback(() => {
+  const onClickMarkAsAcknowledged = useCallback(async () => {
+    closePopover();
+
+    await attackDiscoveryBulk({
+      ids: attackDiscoveryIds,
+      kibanaAlertWorkflowStatus: 'acknowledged',
+    });
+
+    setSelectedAttackDiscoveries({});
+    refetchFindAttackDiscoveries?.();
+  }, [
+    closePopover,
+    attackDiscoveryBulk,
+    attackDiscoveryIds,
+    setSelectedAttackDiscoveries,
+    refetchFindAttackDiscoveries,
+  ]);
+
+  const onClickMarkAsClosed = useCallback(async () => {
+    closePopover();
+
+    await attackDiscoveryBulk({
+      ids: attackDiscoveryIds,
+      kibanaAlertWorkflowStatus: 'closed',
+    });
+
+    refetchFindAttackDiscoveries?.();
+    setSelectedAttackDiscoveries({});
+  }, [
+    closePopover,
+    attackDiscoveryBulk,
+    attackDiscoveryIds,
+    refetchFindAttackDiscoveries,
+    setSelectedAttackDiscoveries,
+  ]);
+
+  const onClickMarkAsOpen = useCallback(async () => {
+    closePopover();
+
+    await attackDiscoveryBulk({
+      ids: attackDiscoveryIds,
+      kibanaAlertWorkflowStatus: 'open',
+    });
+
+    setSelectedAttackDiscoveries({});
+    refetchFindAttackDiscoveries?.();
+  }, [
+    closePopover,
+    attackDiscoveryBulk,
+    attackDiscoveryIds,
+    setSelectedAttackDiscoveries,
+    refetchFindAttackDiscoveries,
+  ]);
+
+  const onClickAddToNewCase = useCallback(async () => {
     closePopover();
 
     onAddToNewCase({
@@ -95,7 +165,16 @@ const TakeActionComponent: React.FC<Props> = ({
       markdownComments: [markdown],
       replacements,
     });
-  }, [closePopover, onAddToNewCase, alertIds, markdown, replacements]);
+
+    await refetchFindAttackDiscoveries?.();
+  }, [
+    closePopover,
+    onAddToNewCase,
+    alertIds,
+    markdown,
+    replacements,
+    refetchFindAttackDiscoveries,
+  ]);
 
   const onClickAddToExistingCase = useCallback(() => {
     closePopover();
@@ -178,31 +257,64 @@ const TakeActionComponent: React.FC<Props> = ({
     ]
   );
 
-  const allItems = useMemo(
-    () =>
-      attackDiscoveryAlertsEnabled
-        ? [
-            <EuiContextMenuItem
-              data-test-subj="markAsAcknowledged"
-              disabled={true}
-              key="markAsAcknowledged"
-              onClick={() => {}}
-            >
-              {i18n.MARK_AS_ACKNOWLEDGED}
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              data-test-subj="markAsClosed"
-              disabled={true}
-              key="markAsClosed"
-              onClick={() => {}}
-            >
-              {i18n.MARK_AS_CLOSED}
-            </EuiContextMenuItem>,
-            ...items,
-          ]
-        : items,
-    [attackDiscoveryAlertsEnabled, items]
-  );
+  const allItems = useMemo(() => {
+    if (!attackDiscoveryAlertsEnabled) {
+      return items;
+    }
+
+    const isSingleAttackDiscovery = attackDiscoveries.length === 1;
+    const firstAttackDiscovery = isSingleAttackDiscovery ? attackDiscoveries[0] : null;
+    const isAlert = firstAttackDiscovery && isAttackDiscoveryAlert(firstAttackDiscovery);
+
+    const isOpen = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'open';
+    const isAcknowledged = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'acknowledged';
+    const isClosed = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'closed';
+
+    const markAsOpenItem = !isOpen
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="markAsOpen"
+            key="markAsOpen"
+            onClick={onClickMarkAsOpen}
+          >
+            {i18n.MARK_AS_OPEN}
+          </EuiContextMenuItem>,
+        ]
+      : [];
+
+    const markAsAcknowledgedItem = !isAcknowledged
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="markAsAcknowledged"
+            key="markAsAcknowledged"
+            onClick={onClickMarkAsAcknowledged}
+          >
+            {i18n.MARK_AS_ACKNOWLEDGED}
+          </EuiContextMenuItem>,
+        ]
+      : [];
+
+    const markAsClosedItem = !isClosed
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="markAsClosed"
+            key="markAsClosed"
+            onClick={onClickMarkAsClosed}
+          >
+            {i18n.MARK_AS_CLOSED}
+          </EuiContextMenuItem>,
+        ]
+      : [];
+
+    return [...markAsOpenItem, ...markAsAcknowledgedItem, ...markAsClosedItem, ...items].flat();
+  }, [
+    attackDiscoveries,
+    attackDiscoveryAlertsEnabled,
+    items,
+    onClickMarkAsAcknowledged,
+    onClickMarkAsClosed,
+    onClickMarkAsOpen,
+  ]);
 
   return (
     <EuiPopover

@@ -15,7 +15,6 @@ import {
   type AttackDiscoveryFindResponse,
   type GetAttackDiscoveryGenerationsResponse,
   type PostAttackDiscoveryGenerationsDismissResponse,
-  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
 } from '@kbn/elastic-assistant-common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { AuthenticatedUser } from '@kbn/core-security-common';
@@ -41,6 +40,8 @@ import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_disco
 import { AttackDiscoveryAlertDocument } from '../schedules/types';
 import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
 import { IIndexPatternString } from '../../../types';
+import { getScheduledAndAdHocIndexPattern } from './get_scheduled_and_ad_hoc_index_pattern';
+import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
 
 const FIRST_PAGE = 1; // CAUTION: sever-side API uses a 1-based page index convention (for consistency with similar existing APIs)
 const DEFAULT_PER_PAGE = 10;
@@ -171,7 +172,8 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       shared,
     });
 
-    const index = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-*`;
+    const spaceId = this.spaceId;
+    const index = getScheduledAndAdHocIndexPattern(spaceId);
 
     const result = await this.findDocuments<AttackDiscoveryAlertDocument>({
       aggs,
@@ -196,7 +198,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       connector_names: alertConnectorNames,
       data,
       page: result.page,
-      perPage: result.perPage,
+      per_page: result.perPage,
       total: result.total,
       unique_alert_ids_count: uniqueAlertIdsCount,
     };
@@ -240,6 +242,87 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       logger,
       spaceId,
     });
+  };
+
+  public bulkUpdateAttackDiscoveryAlerts = async ({
+    authenticatedUser,
+    ids,
+    kibanaAlertWorkflowStatus,
+    logger,
+    visibility,
+  }: {
+    authenticatedUser: AuthenticatedUser;
+    ids: string[];
+    kibanaAlertWorkflowStatus?: 'acknowledged' | 'closed' | 'open';
+    logger: Logger;
+    visibility?: 'not_shared' | 'shared';
+  }): Promise<AttackDiscoveryAlert[]> => {
+    const PER_PAGE = 1000;
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const indexPattern = getScheduledAndAdHocIndexPattern(this.spaceId);
+
+    if (ids.length === 0) {
+      logger.debug(
+        () =>
+          `No Attack discovery alerts to update for index ${indexPattern} in bulkUpdateAttackDiscoveryAlerts`
+      );
+
+      return [];
+    }
+
+    try {
+      logger.debug(
+        () =>
+          `Updating Attack discovery alerts in index ${indexPattern} with alert ids: ${ids.join(
+            ', '
+          )}`
+      );
+
+      const updateByQuery = getUpdateAttackDiscoveryAlertsQuery({
+        authenticatedUser,
+        ids,
+        indexPattern,
+        kibanaAlertWorkflowStatus,
+        visibility,
+      });
+
+      const updateResponse = await esClient.updateByQuery(updateByQuery);
+
+      if (updateResponse.failures != null && updateResponse.failures.length > 0) {
+        const errorDetails = updateResponse.failures.flatMap((failure) => {
+          const error = failure?.cause;
+
+          if (error == null) {
+            return [];
+          }
+
+          const id = failure.id != null ? ` id: ${failure.id}` : '';
+          const details = `\nError updating attack discovery alert${id} ${error}`;
+          return [details];
+        });
+
+        const allErrorDetails = errorDetails.join(', ');
+        throw new Error(`Failed to update attack discovery alerts ${allErrorDetails}`);
+      }
+
+      const alertsResult = await this.findAttackDiscoveryAlerts({
+        authenticatedUser,
+        findAttackDiscoveryAlertsParams: {
+          ids,
+          page: FIRST_PAGE,
+          perPage: PER_PAGE,
+          sortField: '@timestamp',
+        },
+        logger,
+      });
+
+      return alertsResult.data;
+    } catch (err) {
+      logger.error(`Error updating Attack discovery alerts: ${err} for ids: ${ids.join(', ')}`);
+      throw err;
+    }
   };
 
   public getAttackDiscoveryGenerationById = async ({

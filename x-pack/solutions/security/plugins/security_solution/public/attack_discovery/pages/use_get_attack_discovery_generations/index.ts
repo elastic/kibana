@@ -93,7 +93,7 @@ export const useInvalidateGetAttackDiscoveryGenerations = () => {
 
   return useCallback(() => {
     queryClient.invalidateQueries(['GET', ATTACK_DISCOVERY_GENERATIONS], {
-      refetchType: 'active',
+      refetchType: 'all',
     });
   }, [queryClient]);
 };
