@@ -36,6 +36,7 @@ import {
   KibanaSavedObjectsSLORepository,
 } from './services';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
+import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
@@ -142,7 +143,7 @@ export class SLOPlugin
 
     registerSloUsageCollector(plugins.usageCollection);
 
-    const routeHandlerPlugins = mapValues(plugins, (value, key) => {
+    const mappedPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
         start: () =>
@@ -156,7 +157,7 @@ export class SLOPlugin
       core,
       dependencies: {
         corePlugins: core,
-        plugins: routeHandlerPlugins,
+        plugins: mappedPlugins,
         config: {
           isServerless: this.isServerless,
         },
@@ -233,6 +234,12 @@ export class SLOPlugin
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
       config: this.config,
+    });
+
+    new BulkDeleteTask({
+      core,
+      plugins: mappedPlugins,
+      logFactory: this.initContext.logger,
     });
 
     return {};

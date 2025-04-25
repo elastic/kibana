@@ -43,7 +43,7 @@ export const VISIBILITY = i18n.translate(
 );
 
 export const VISIBLE_TO_YOUR_TEAM = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge..visibleToYourTeamLabel',
+  'xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibleToYourTeamLabel',
   {
     defaultMessage: 'Visible to your team',
   }
