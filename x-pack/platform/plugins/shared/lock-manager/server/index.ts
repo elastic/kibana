@@ -9,4 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { LockAcquisitionError } from './lock_manager_client';
 export { LockManagerService } from './lock_manager_service';
 
-export async function plugin(initializerContext: PluginInitializerContext) {}
+export async function plugin(context: PluginInitializerContext) {
+  const { LockManagerPlugin } = await import('./plugin');
+  return new LockManagerPlugin(context);
+}
