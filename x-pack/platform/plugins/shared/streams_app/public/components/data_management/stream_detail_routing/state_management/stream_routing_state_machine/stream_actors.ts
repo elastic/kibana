@@ -114,6 +114,7 @@ export const createStreamSuccessNofitier =
       title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
         defaultMessage: 'Stream saved',
       }),
+      toastLifeTimeMs: 3000,
     });
   };
 
