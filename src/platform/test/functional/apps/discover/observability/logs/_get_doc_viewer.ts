@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover']);
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
+  const dataViews = getService('dataViews');
   const synthtrace = getService('logSynthtraceEsClient');
   const queryBar = getService('queryBar');
 
@@ -47,6 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToActualUrl('discover', undefined, {
         ensureCurrentUrl: false,
       });
+
+      // Required as some other test switches data view to metric-*
+      await dataViews.switchTo('All logs');
 
       await queryBar.setQuery('error.stack_trace : * and _ignored : *');
       await queryBar.submitQuery();

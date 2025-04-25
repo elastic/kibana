@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
+  const dataViews = getService('dataViews');
   const synthtrace = getService('svlLogsSynthtraceClient');
   const queryBar = getService('queryBar');
 
@@ -48,6 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ensureCurrentUrl: false,
       });
 
+      // Required as some other test switches data view to metric-*
+      await dataViews.switchTo('All logs');
+
       await queryBar.setQuery('error.stack_trace : * and _ignored : *');
       await queryBar.submitQuery();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -55,6 +59,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await synthtrace.clean();
+    });
+
+    afterEach(async () => {
+      await dataGrid.closeFlyout();
     });
 
     describe('renders docViewer', () => {
@@ -82,8 +90,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(isStacktraceAccordionExpanded).to.equal('false');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should open the flyout with stacktrace accordion open and quality issues accordion closed when stacktrace icon is clicked', async () => {
@@ -109,8 +115,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(isStacktraceAccordionExpanded).to.equal('true');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should open the flyout with stacktrace accordion close and quality issues accordion open when quality issues icon is clicked', async () => {
@@ -136,8 +140,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(isStacktraceAccordionExpanded).to.equal('false');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should toggle to quality issue accordion when 1st stacktrace and then quality issue control is clicked for the same row', async () => {
@@ -170,8 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Expect toggle to have happened
         expect(stacktraceAccordionState2).to.equal('false');
         expect(qualityIssuesAccordionState2).to.equal('true');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should toggle to quality issue accordion when 1st stacktrace and then quality issue control is clicked for different row', async () => {
@@ -204,8 +204,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Expect toggle to have happened
         expect(stacktraceAccordionState2).to.equal('false');
         expect(qualityIssuesAccordionState2).to.equal('true');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should toggle to stacktrace accordion when 1st quality issue and then stacktrace control is clicked for the same row', async () => {
@@ -237,8 +235,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Expect toggle to have happened
         expect(stacktraceAccordionState2).to.equal('true');
         expect(qualityIssuesAccordionState2).to.equal('false');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should toggle to stacktrace accordion when 1st quality issue and then stacktrace control is clicked for different row', async () => {
@@ -270,8 +266,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Expect toggle to have happened
         expect(stacktraceAccordionState2).to.equal('true');
         expect(qualityIssuesAccordionState2).to.equal('false');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should switch tab to logs overview and open quality issues accordion, when user clicks on quality issue control of same row and flyout is already open with some other tab', async () => {
@@ -293,8 +287,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(qualityIssuesAccordionState).to.equal('true');
         expect(stacktraceAccordionState).to.equal('false');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should switch tab to logs overview and open quality issues accordion, when user clicks on quality issue control of different row and flyout is already open with some other tab', async () => {
@@ -316,8 +308,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(qualityIssuesAccordionState).to.equal('true');
         expect(stacktraceAccordionState).to.equal('false');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should switch tab to logs overview and open stacktrace accordion, when user clicks on stacktrace control of same row and flyout is already open with some other tab', async () => {
@@ -339,8 +329,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(qualityIssuesAccordionState).to.equal('false');
         expect(stacktraceAccordionState).to.equal('true');
-
-        await dataGrid.closeFlyout();
       });
 
       it('should switch tab to logs overview and open stacktrace accordion, when user clicks on stacktrace control of different row and flyout is already open with some other tab', async () => {
@@ -362,8 +350,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(qualityIssuesAccordionState).to.equal('false');
         expect(stacktraceAccordionState).to.equal('true');
-
-        await dataGrid.closeFlyout();
       });
     });
   });

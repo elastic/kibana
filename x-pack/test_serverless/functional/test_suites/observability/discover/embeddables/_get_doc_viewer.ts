@@ -59,6 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ensureCurrentUrl: false,
       });
 
+      // Required as some other test switches data view to metric-*
+      await dataViews.switchTo('All logs');
+
       await queryBar.setQuery(searchQuery);
       await queryBar.submitQuery();
       await PageObjects.discover.waitUntilSearchingHasFinished();
