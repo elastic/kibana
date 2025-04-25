@@ -35,7 +35,7 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { errorCountParamsSchema } from '@kbn/response-ops-rule-params/error_count';
-import { unflattenObject } from '@kbn/alerting-rule-utils';
+import { unflattenObject } from '@kbn/object-utils';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,

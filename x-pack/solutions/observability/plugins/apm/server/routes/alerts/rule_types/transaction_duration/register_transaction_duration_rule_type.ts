@@ -36,7 +36,7 @@ import {
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
-import { unflattenObject } from '@kbn/alerting-rule-utils';
+import { unflattenObject } from '@kbn/object-utils';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';

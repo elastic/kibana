@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/alerts-as-data-utils",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/object-utils"
   ]
 }

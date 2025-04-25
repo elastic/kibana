@@ -14,7 +14,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { Alert } from '@kbn/alerts-as-data-utils';
-import { flattenObject, unflattenObject } from '@kbn/alerting-rule-utils';
+import { flattenObject, unflattenObject } from '@kbn/object-utils';
 import { ObservabilityConfig } from '../../..';
 import { AlertExecutionDetails } from './types';
 
@@ -171,7 +171,7 @@ export const getContextForRecoveredAlerts = <
 >(
   alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {
-  const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
+  const alert = alertHitSource ? unflattenObject<AdditionalContext>(alertHitSource) : undefined;
 
   return {
     cloud: alert?.[ALERT_CONTEXT_CLOUD],

@@ -21,7 +21,7 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
-import { unflattenObject } from '@kbn/alerting-rule-utils/src/group_by_object_utils';
+import { unflattenObject } from '@kbn/object-utils';
 import type { EsQueryRuleActionContext } from './action_context';
 import { addMessages, getContextConditionsDescription } from './action_context';
 import type {

@@ -5,42 +5,14 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import { Group, FieldsObject } from './types';
-
-export const unflattenObject = <T extends object = FieldsObject>(object: object): T =>
-  Object.entries(object).reduce((acc, [key, value]) => {
-    set(acc, key, value);
-    return acc;
-  }, {} as T);
-
-export const flattenObject = (obj: FieldsObject, prefix: string = ''): FieldsObject =>
-  Object.keys(obj).reduce<FieldsObject>((acc, key) => {
-    const nextValue = obj[key];
-
-    if (nextValue) {
-      if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
-        const dotSuffix = '.';
-        if (Object.keys(nextValue).length > 0) {
-          return {
-            ...acc,
-            ...flattenObject(nextValue, `${prefix}${key}${dotSuffix}`),
-          };
-        }
-      }
-
-      const fullPath = `${prefix}${key}`;
-      acc[fullPath] = nextValue;
-    }
-
-    return acc;
-  }, {});
+import { unflattenObject } from '@kbn/object-utils';
+import { Group } from './types';
 
 export const getGroupByObject = (
   groupBy: string | string[] | undefined,
   groupValueSet: Set<string>
-): Record<string, object> => {
-  const groupKeyValueMappingsObject: Record<string, object> = {};
+): Record<string, unknown> => {
+  const groupKeyValueMappingsObject: Record<string, unknown> = {};
   if (groupBy) {
     groupValueSet.forEach((groupValueStr) => {
       const groupValueArray = groupValueStr.split(',');
