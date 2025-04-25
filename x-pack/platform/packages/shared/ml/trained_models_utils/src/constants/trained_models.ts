@@ -198,8 +198,6 @@ export interface ModelDefinition {
   techPreview?: boolean;
 }
 
-export const ELASTIC_HOSTED_MODEL_IDS = Object.keys(ELASTIC_MODEL_DEFINITIONS);
-
 export type ModelDefinitionResponse = ModelDefinition & {
   /**
    * Complete model id, e.g. .elser_model_2_linux-x86_64
