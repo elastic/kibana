@@ -24,6 +24,39 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
+const panelOpenerStyles = {
+  button: ({ euiTheme }: Theme) =>
+    css`
+      color: inherit;
+      font-weight: inherit;
+      transform: none !important; /* don't translateY 1px */
+      padding-inline: calc(${euiTheme.size.xs} * 2);
+      background-color: inherit;
+
+      &:hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+
+      &.isActive {
+        background-color: ${euiTheme.colors.backgroundLightPrimary};
+        &:hover {
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+      }
+
+      &.isExpanded {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+
+      &.hasIcon {
+        margin-left: -2px;
+      }
+    `,
+  flexGroup: ({ euiTheme }: Theme) => css`
+    gap: calc(${euiTheme.size.s} / 1.5);
+  `,
+};
+
 export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props) => {
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { title, deepLink, icon, withBadge, badgeOptions } = item;
@@ -56,32 +89,6 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     [togglePanel]
   );
 
-  const styles = {
-    button: ({ euiTheme }: Theme) =>
-      css`
-        color: inherit;
-        font-weight: inherit;
-        transform: none !important; /* don't translateY 1px */
-        padding-inline: calc(${euiTheme.size.xs} * 2);
-        background-color: ${isActive
-          ? euiTheme.colors.backgroundLightPrimary
-          : isExpanded
-          ? euiTheme.colors.backgroundBaseInteractiveHover
-          : 'transparent'};
-
-        &:hover {
-          background-color: ${isActive
-            ? euiTheme.colors.backgroundLightPrimary
-            : euiTheme.colors.backgroundBaseInteractiveHover};
-        }
-        &.hasIcon {
-          margin-left: -2px;
-        }
-      `,
-    flexGroup: ({ euiTheme }: Theme) => css`
-      gap: calc(${euiTheme.size.s} / 1.5);
-    `,
-  };
   return (
     <EuiButton
       onClick={onLinkClick}
@@ -90,11 +97,14 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       iconType="arrowRight"
       size="s"
       fullWidth
-      className={icon ? 'hasIcon' : undefined}
-      css={styles.button}
+      className={classNames([
+        icon ? 'hasIcon' : undefined,
+        isActive ? 'isActive' : isExpanded ? 'isExpanded' : undefined,
+      ])}
+      css={panelOpenerStyles.button}
       data-test-subj={dataTestSubj}
     >
-      <EuiFlexGroup gutterSize="none" alignItems="center" css={styles.flexGroup}>
+      <EuiFlexGroup gutterSize="none" alignItems="center" css={panelOpenerStyles.flexGroup}>
         {icon && (
           <EuiFlexItem grow={false}>
             <EuiIcon type={icon} />

@@ -21,6 +21,30 @@ interface Props {
   item: ChromeProjectNavigationNode;
 }
 
+const panelNavStyles = ({ euiTheme }: Theme) => css`
+  background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  &:focus-within {
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  }
+  &:hover {
+    background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+  }
+
+  &.isSelected {
+    background-color: ${euiTheme.colors.backgroundLightPrimary};
+    &:focus-within {
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    }
+    &:hover {
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    }
+  }
+
+  & svg[class*='EuiExternalLinkIcon'] {
+    margin-left: auto;
+  }
+`;
+
 export const PanelNavItem: FC<Props> = ({ item }) => {
   const { navigateToUrl } = useServices();
   const { activeNodes } = useNavigation();
@@ -48,32 +72,14 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
     return activePath === item.path;
   });
 
-  const styles = ({ euiTheme }: Theme) => css`
-    background-color: ${isSelected
-      ? euiTheme.colors.backgroundLightPrimary
-      : euiTheme.colors.backgroundBaseSubdued};
-    &:focus-within {
-      background-color: ${isSelected
-        ? euiTheme.colors.backgroundLightPrimary
-        : euiTheme.colors.backgroundBaseSubdued};
-    }
-    &:hover {
-      background-color: ${isSelected
-        ? euiTheme.colors.backgroundLightPrimary
-        : euiTheme.colors.backgroundBaseInteractiveHover};
-    }
-    & svg[class*='EuiExternalLinkIcon'] {
-      margin-left: auto;
-    }
-  `;
-
   return (
     <EuiListGroupItem
       key={id}
       label={<SubItemTitle item={item} />}
       wrapText
       size="s"
-      css={styles}
+      css={panelNavStyles}
+      className={isSelected ? 'isSelected' : undefined}
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}
       iconType={icon}

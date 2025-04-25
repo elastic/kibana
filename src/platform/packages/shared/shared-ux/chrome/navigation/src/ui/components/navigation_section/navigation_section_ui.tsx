@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   type EuiCollapsibleNavItemProps,
   type EuiCollapsibleNavSubItemProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
@@ -35,6 +36,56 @@ import {
 import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../../types';
 import { PanelContext, usePanel } from '../panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
+
+const sectionStyles = {
+  blockTitle: ({ euiTheme }: Theme) => ({
+    paddingBlock: euiTheme.size.xs,
+    paddingInline: euiTheme.size.s,
+  }),
+  euiCollapsibleNavItem: ({ euiTheme }: Theme) => css`
+    .euiAccordion__childWrapper {
+      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
+    }
+    &:only-child .euiCollapsibleNavItem__icon {
+      transform: scale(1.33);
+    }
+    .euiAccordion__children .euiCollapsibleNavItem__items {
+      padding-inline-start: ${euiTheme.size.m};
+      margin-inline-start: ${euiTheme.size.m};
+    }
+  `,
+  euiCollapsibleNavSubItem: ({ euiTheme }: Theme) => css`
+    &.euiLink,
+    .euiAccordion__triggerWrapper,
+    .euiAccordion__triggerWrapper:hover,
+    .euiAccordion__triggerWrapper:focus-within,
+    .euiCollapsibleNavLink,
+    .euiCollapsibleNavLink:hover,
+    .euiCollapsibleNavLink:focus-within {
+      &:hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    }
+
+    &.isSelected {
+      &.euiLink,
+      .euiAccordion__triggerWrapper,
+      .euiAccordion__triggerWrapper:hover,
+      .euiAccordion__triggerWrapper:focus-within,
+      .euiCollapsibleNavLink,
+      .euiCollapsibleNavLink:hover,
+      .euiCollapsibleNavLink:focus-within {
+        &:hover {
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+      }
+    }
+
+    .euiAccordion__childWrapper {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    }
+  `,
+};
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
@@ -151,26 +202,21 @@ const isEuiCollapsibleNavItemProps = (
   return true;
 };
 
-const renderBlockTitle: (
-  navNode: ChromeProjectNavigationNode
-) => Required<EuiCollapsibleNavSubItemProps>['renderItem'] = (navNode) => () => {
+const BlockTitle: React.FC<{ navNode: ChromeProjectNavigationNode }> = ({ navNode }) => {
+  const { euiTheme } = useEuiTheme();
   const { title, spaceBefore } = navNode;
   const dataTestSubj = getTestSubj(navNode);
   return (
-    <EuiTitle
-      size="xxxs"
-      className="eui-textTruncate"
-      data-test-subj={dataTestSubj}
-      css={({ euiTheme }) => {
-        return {
-          marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined,
-          paddingBlock: euiTheme.size.xs,
-          paddingInline: euiTheme.size.s,
-        };
-      }}
-    >
-      <div>{title}</div>
-    </EuiTitle>
+    <div style={{ marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined }}>
+      <EuiTitle
+        size="xxxs"
+        className="eui-textTruncate"
+        data-test-subj={dataTestSubj}
+        css={sectionStyles.blockTitle}
+      >
+        <div>{title}</div>
+      </EuiTitle>
+    </div>
   );
 };
 
@@ -183,7 +229,7 @@ const renderGroup = (
 
   if (!!navGroup.title) {
     itemPrepend = {
-      renderItem: renderBlockTitle(navGroup),
+      renderItem: () => <BlockTitle navNode={navGroup} />,
     };
   } else if (spaceBefore) {
     itemPrepend = {
@@ -422,36 +468,14 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
-  const styles = ({ euiTheme }: Theme) => css`
-    &.euiLink,
-    .euiAccordion__triggerWrapper,
-    .euiAccordion__triggerWrapper:hover,
-    .euiAccordion__triggerWrapper:focus-within,
-    .euiCollapsibleNavLink,
-    .euiCollapsibleNavLink:hover,
-    .euiCollapsibleNavLink:focus-within {
-      background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : undefined};
-
-      &:hover {
-        background-color: ${isSelected
-          ? undefined
-          : euiTheme.colors.backgroundBaseInteractiveHover};
-      }
-    }
-
-    .euiAccordion__childWrapper {
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-    }
-  `;
-
   // Render as a link or an accordion
-  const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
+  const items: EuiCollapsibleNavSubItemPropsEnhanced[] = [
     {
       id,
       path,
       isSelected,
       onClick,
-      css: styles,
+      css: sectionStyles.euiCollapsibleNavSubItem,
       icon: navNode.icon,
       // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
       title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
@@ -484,6 +508,7 @@ interface Props {
 }
 
 export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode }) => {
+  const { euiTheme } = useEuiTheme();
   const { activeNodes } = useNavigation();
   const { navigateToUrl, eventTracker, basePath, isSideNavCollapsed } = useServices();
   const [items, setItems] = useState<EuiCollapsibleNavSubItemProps[] | undefined>();
@@ -586,33 +611,25 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     return null;
   }
 
-  const navItemStyles = ({ euiTheme }: Theme) => css`
-    background-color: ${props.isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
-    .euiAccordion__childWrapper {
-      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
-    }
-    &:only-child .euiCollapsibleNavItem__icon {
-      transform: scale(1.33);
-    }
-    .euiAccordion__children .euiCollapsibleNavItem__items {
-      padding-inline-start: ${euiTheme.size.m};
-      margin-inline-start: ${euiTheme.size.m};
-    }
-  `;
-
-  if (!items) {
-    return <EuiCollapsibleNavItem {...props} css={navItemStyles} />;
-  }
-
   // Item type ExclusiveUnion - accordions should not contain links
   const { href, linkProps, ...rest } = props;
 
   return (
-    <EuiCollapsibleNavItem
-      {...rest}
-      css={navItemStyles}
-      items={items}
-      accordionProps={getAccordionProps(navNode.path)}
-    />
+    <div
+      style={{
+        backgroundColor: props.isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit',
+      }}
+    >
+      {items ? (
+        <EuiCollapsibleNavItem
+          {...rest}
+          css={sectionStyles.euiCollapsibleNavItem}
+          items={items}
+          accordionProps={getAccordionProps(navNode.path)}
+        />
+      ) : (
+        <EuiCollapsibleNavItem {...props} css={sectionStyles.euiCollapsibleNavItem} />
+      )}
+    </div>
   );
 });
