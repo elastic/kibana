@@ -291,7 +291,7 @@ export class StatusRuleExecutor {
             statusConfig,
           });
 
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation,
             alertId,
             monitorSummary,
@@ -319,7 +319,7 @@ export class StatusRuleExecutor {
           const monitorSummary = this.getUngroupedDownSummary({
             statusConfigs: configs,
           });
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation: configId,
             alertId,
             monitorSummary,
