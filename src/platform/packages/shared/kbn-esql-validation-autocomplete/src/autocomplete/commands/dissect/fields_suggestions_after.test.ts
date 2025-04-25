@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { type ESQLAstCommand } from '@kbn/esql-ast';
+import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { extractDissectColumnNames, fieldsSuggestionsAfter } from './fields_suggestions_after';
 
@@ -70,55 +70,6 @@ describe('fieldsSuggestionsAfterDissect', () => {
 
   describe('fieldsSuggestionsAfter', () => {
     it('should return the correct fields after the command', () => {
-      const dissectCommand = {
-        name: 'dissect',
-        args: [
-          {
-            args: [
-              {
-                name: 'field1',
-                location: {
-                  min: 39,
-                  max: 43,
-                },
-                text: 'field1',
-                incomplete: false,
-                type: 'identifier',
-              },
-            ],
-            location: {
-              min: 39,
-              max: 43,
-            },
-            text: 'field1',
-            incomplete: false,
-            parts: ['field1'],
-            quoted: false,
-            name: 'field1',
-            type: 'column',
-          },
-          {
-            name: '"%{firstWord}"',
-            location: {
-              min: 45,
-              max: 58,
-            },
-            text: '"%{firstWord}"',
-            incomplete: false,
-            type: 'literal',
-            literalType: 'keyword',
-            value: '"%{firstWord}"',
-            valueUnquoted: '%{firstWord}',
-          },
-        ],
-        location: {
-          min: 31,
-          max: 58,
-        },
-        text: 'DISSECTagent"%{firstWord}"',
-        incomplete: false,
-        type: 'command',
-      } as unknown as ESQLAstCommand;
       const previousCommandFields = [
         { name: 'field1', type: 'keyword' },
         { name: 'field2', type: 'double' },
@@ -127,7 +78,7 @@ describe('fieldsSuggestionsAfterDissect', () => {
       const userDefinedColumns = [] as ESQLRealField[];
 
       const result = fieldsSuggestionsAfter(
-        dissectCommand,
+        synth.cmd`DISSECT agent "%{firstWord}"`,
         previousCommandFields,
         userDefinedColumns
       );

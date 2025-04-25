@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { type ESQLAstCommand } from '@kbn/esql-ast';
+import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { extractSemanticsFromGrok, fieldsSuggestionsAfter } from './fields_suggestions_after';
 
@@ -29,55 +29,6 @@ describe('fieldsSuggestionsAfterGrok', () => {
   });
   describe('fieldsSuggestionsAfter', () => {
     it('should return the correct fields after the command', () => {
-      const grokCommand = {
-        name: 'grok',
-        args: [
-          {
-            args: [
-              {
-                name: 'agent',
-                location: {
-                  min: 61,
-                  max: 65,
-                },
-                text: 'agent',
-                incomplete: false,
-                type: 'identifier',
-              },
-            ],
-            location: {
-              min: 61,
-              max: 65,
-            },
-            text: 'agent',
-            incomplete: false,
-            parts: ['agent'],
-            quoted: false,
-            name: 'agent',
-            type: 'column',
-          },
-          {
-            name: '"%{WORD:firstWord}"',
-            location: {
-              min: 67,
-              max: 85,
-            },
-            text: '"%{WORD:firstWord}"',
-            incomplete: false,
-            type: 'literal',
-            literalType: 'keyword',
-            value: '"%{WORD:firstWord}"',
-            valueUnquoted: '%{WORD:firstWord}',
-          },
-        ],
-        location: {
-          min: 56,
-          max: 85,
-        },
-        text: 'GROKagent"%{WORD:firstWord}"',
-        incomplete: false,
-        type: 'command',
-      } as unknown as ESQLAstCommand;
       const previousCommandFields = [
         { name: 'field1', type: 'keyword' },
         { name: 'field2', type: 'double' },
@@ -85,7 +36,11 @@ describe('fieldsSuggestionsAfterGrok', () => {
 
       const userDefinedColumns = [] as ESQLRealField[];
 
-      const result = fieldsSuggestionsAfter(grokCommand, previousCommandFields, userDefinedColumns);
+      const result = fieldsSuggestionsAfter(
+        synth.cmd`GROK agent "%{WORD:firstWord}"`,
+        previousCommandFields,
+        userDefinedColumns
+      );
 
       expect(result).toEqual([
         { name: 'field1', type: 'keyword' },

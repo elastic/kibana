@@ -6,48 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { type ESQLAstCommand } from '@kbn/esql-ast';
+import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
 describe('fieldsSuggestionsAfterFork', () => {
   it('should return the correct fields after the command', () => {
-    const fork = {
-      name: 'fork',
-      args: [
-        {
-          args: [
-            {
-              name: 'field1',
-              location: {
-                min: 36,
-                max: 40,
-              },
-              text: 'field1',
-              incomplete: false,
-              type: 'identifier',
-            },
-          ],
-          location: {
-            min: 36,
-            max: 40,
-          },
-          text: 'field1',
-          incomplete: false,
-          parts: ['field1'],
-          quoted: false,
-          name: 'field1',
-          type: 'column',
-        },
-      ],
-      location: {
-        min: 31,
-        max: 40,
-      },
-      text: 'FORKfield1',
-      incomplete: false,
-      type: 'command',
-    } as unknown as ESQLAstCommand;
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
@@ -55,7 +19,11 @@ describe('fieldsSuggestionsAfterFork', () => {
 
     const userDefinedColumns = [] as ESQLRealField[];
 
-    const result = fieldsSuggestionsAfter(fork, previousCommandFields, userDefinedColumns);
+    const result = fieldsSuggestionsAfter(
+      synth.cmd`FORK (LIMIT 10 ) (LIMIT 1000 ) `,
+      previousCommandFields,
+      userDefinedColumns
+    );
 
     expect(result).toEqual([
       { name: 'field1', type: 'keyword' },
