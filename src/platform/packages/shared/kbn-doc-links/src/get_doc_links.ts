@@ -41,7 +41,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
   const SEARCH_UI_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/search-ui/current/`;
-  const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
   const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
   const isServerless = buildFlavor === 'serverless';
@@ -130,9 +129,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiSearchDoc: `${ESRE_DOCS}`,
       aiSearchHelp: `${ESRE_DOCS}help.html`,
       apiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
-      behavioralAnalytics: `https://www.elastic.co/guide/en/elasticsearch/reference/8.18/behavioral-analytics-overview.html`,
-      behavioralAnalyticsCORS: `https://www.elastic.co/guide/en/elasticsearch/reference/8.18/behavioral-analytics-cors.html`,
-      behavioralAnalyticsEvents: `https://www.elastic.co/guide/en/elasticsearch/reference/8.18/behavioral-analytics-event.html`,
+      behavioralAnalytics: `${ELASTICSEARCH_DOCS}behavioral-analytics-overview.html`,
+      behavioralAnalyticsCORS: `${ELASTICSEARCH_DOCS}behavioral-analytics-cors.html`,
+      behavioralAnalyticsEvents: `${ELASTICSEARCH_DOCS}behavioral-analytics-event.html`,
       buildConnector: `${ELASTIC_DOCS}reference/search-connectors/self-managed-connectors`,
       bulkApi: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-bulk`
