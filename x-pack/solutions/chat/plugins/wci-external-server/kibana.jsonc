@@ -1,7 +1,10 @@
 {
   "type": "plugin",
   "id": "@kbn/wci-external-server",
-  "owner": "@elastic/search-kibana",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+   ],
   "group": "chat",
   "visibility": "private",
   "description": "WorkChat External Server Integration plugin",
