@@ -31,6 +31,8 @@ import { getCommonTimeRanges } from '../../../settings_flyout/alert_selection/he
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { VisibilityFilter } from './visibility_filter';
+import { useInvalidateGetAttackDiscoveryGenerations } from '../../../use_get_attack_discovery_generations';
+import { useInvalidateFindAttackDiscoveries } from '../../../use_find_attack_discoveries';
 
 const updateButtonProps: EuiSuperUpdateButtonProps = {
   fill: false,
@@ -92,6 +94,8 @@ const SearchAndFilterComponent: React.FC<Props> = ({
   start,
   statusItems,
 }) => {
+  const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { euiTheme } = useEuiTheme();
 
   // Users accumulate an "unsubmitted" query as they type in the search bar,
@@ -124,8 +128,17 @@ const SearchAndFilterComponent: React.FC<Props> = ({
 
       setStart(startDate);
       setEnd(endDate);
+      invalidateFindAttackDiscoveries();
+      invalidateGetAttackDiscoveryGenerations();
     },
-    [setEnd, setQuery, setStart, unSubmittedQuery]
+    [
+      invalidateFindAttackDiscoveries,
+      invalidateGetAttackDiscoveryGenerations,
+      setEnd,
+      setQuery,
+      setStart,
+      unSubmittedQuery,
+    ]
   );
 
   /**
@@ -141,7 +154,16 @@ const SearchAndFilterComponent: React.FC<Props> = ({
     setQuery(unSubmittedQuery);
     setSelectedAttackDiscoveries({});
     onRefresh();
-  }, [onRefresh, setQuery, setSelectedAttackDiscoveries, unSubmittedQuery]);
+    invalidateFindAttackDiscoveries();
+    invalidateGetAttackDiscoveryGenerations();
+  }, [
+    invalidateFindAttackDiscoveries,
+    invalidateGetAttackDiscoveryGenerations,
+    onRefresh,
+    setQuery,
+    setSelectedAttackDiscoveries,
+    unSubmittedQuery,
+  ]);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -153,8 +175,11 @@ const SearchAndFilterComponent: React.FC<Props> = ({
   );
 
   const removeAlertIdFromFilter = useCallback(
-    (id: string) => setFilterByAlertIds(filterByAlertIds.filter((alertId) => alertId !== id)),
-    [filterByAlertIds, setFilterByAlertIds]
+    (id: string) => {
+      setFilterByAlertIds(filterByAlertIds.filter((alertId) => alertId !== id));
+      invalidateFindAttackDiscoveries();
+    },
+    [filterByAlertIds, invalidateFindAttackDiscoveries, setFilterByAlertIds]
   );
 
   return (

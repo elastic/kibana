@@ -204,6 +204,16 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     };
   };
 
+  public async refreshEventLogIndex(eventLogIndex: string): Promise<void> {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    await esClient.indices.refresh({
+      allow_no_indices: true,
+      ignore_unavailable: true,
+      index: eventLogIndex,
+    });
+  }
+
   public getAttackDiscoveryGenerations = async ({
     authenticatedUser,
     eventLogIndex,
@@ -289,6 +299,12 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       });
 
       const updateResponse = await esClient.updateByQuery(updateByQuery);
+
+      await esClient.indices.refresh({
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        index: indexPattern,
+      });
 
       if (updateResponse.failures != null && updateResponse.failures.length > 0) {
         const errorDetails = updateResponse.failures.flatMap((failure) => {

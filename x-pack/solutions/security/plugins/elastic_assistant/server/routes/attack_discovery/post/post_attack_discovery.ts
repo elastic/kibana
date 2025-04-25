@@ -75,6 +75,7 @@ export const postAttackDiscoveryRoute = (
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const { featureFlags } = await context.core;
+        const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
 
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
@@ -162,7 +163,9 @@ export const postAttackDiscoveryRoute = (
             attackDiscoveryAlertsEnabled,
             authenticatedUser,
             connectorId,
+            dataClient,
             eventLogger,
+            eventLogIndex,
             executionUuid,
             loadingMessage,
             message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} started`,
@@ -198,9 +201,11 @@ export const postAttackDiscoveryRoute = (
                   attackDiscoveryAlertsEnabled,
                   authenticatedUser,
                   connectorId,
+                  dataClient,
                   duration: durationNanoseconds,
                   end,
                   eventLogger,
+                  eventLogIndex,
                   executionUuid,
                   message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} succeeded`,
                   newAlerts: result.attackDiscoveries?.length ?? 0,
@@ -214,9 +219,11 @@ export const postAttackDiscoveryRoute = (
                   attackDiscoveryAlertsEnabled,
                   authenticatedUser,
                   connectorId,
+                  dataClient,
                   duration: durationNanoseconds,
                   end,
                   eventLogger,
+                  eventLogIndex,
                   executionUuid,
                   message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} failed: ${result.error?.message}`,
                   outcome: 'failure',
@@ -238,9 +245,11 @@ export const postAttackDiscoveryRoute = (
                 attackDiscoveryAlertsEnabled,
                 authenticatedUser,
                 connectorId,
+                dataClient,
                 duration: durationNanoseconds,
                 end,
                 eventLogger,
+                eventLogIndex,
                 executionUuid,
                 message: `Attack discovery generation ${executionUuid} for user ${authenticatedUser.username} failed: ${error.message}`,
                 outcome: 'failure',

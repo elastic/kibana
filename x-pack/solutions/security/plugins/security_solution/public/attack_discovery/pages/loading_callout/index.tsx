@@ -178,7 +178,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
         await dismissAttackDiscoveryGeneration({ executionUuid });
         refetchGenerations?.(); // force a refresh of the generations list
       }
-    } catch {
+    } finally {
       setIsDismissing(false);
     }
   }, [dismissAttackDiscoveryGeneration, executionUuid, refetchGenerations]);

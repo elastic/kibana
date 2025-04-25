@@ -45,19 +45,20 @@ export const conversationsDataClientMock: {
 };
 
 const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => ({
-  getAttackDiscovery: jest.fn(),
   bulkUpdateAttackDiscoveryAlerts: jest.fn(),
   createAttackDiscovery: jest.fn(),
   createAttackDiscoveryAlerts: jest.fn(),
   findAllAttackDiscoveries: jest.fn(),
+  getAttackDiscovery: jest.fn(),
   findAttackDiscoveryAlerts: jest.fn(),
+  findDocuments: jest.fn(),
   findAttackDiscoveryByConnectorId: jest.fn(),
   getAttackDiscoveryGenerations: jest.fn(),
   getAttackDiscoveryGenerationById: jest.fn(),
-  updateAttackDiscovery: jest.fn(),
   getReader: jest.fn(),
   getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
-  findDocuments: jest.fn(),
+  refreshEventLogIndex: jest.fn(),
+  updateAttackDiscovery: jest.fn(),
 });
 
 export const attackDiscoveryDataClientMock: {

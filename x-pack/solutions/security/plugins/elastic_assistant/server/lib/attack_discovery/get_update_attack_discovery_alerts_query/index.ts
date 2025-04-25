@@ -26,6 +26,7 @@ export const getUpdateAttackDiscoveryAlertsQuery = ({
 }): estypes.UpdateByQueryRequest => ({
   allow_no_indices: true,
   conflicts: 'proceed',
+  ignore_unavailable: true,
   index: [indexPattern],
   query: {
     ids: {

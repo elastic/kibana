@@ -25,6 +25,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { getDescription } from './get_description';
 import * as i18n from '../translations';
 import type { ConnectorFilterOptionData } from '../../types';
+import { useInvalidateFindAttackDiscoveries } from '../../../../use_find_attack_discoveries';
 
 const LIST_PROPS = {
   isVirtualized: false,
@@ -46,6 +47,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
   selectedConnectorNames,
   setSelectedConnectorNames,
 }) => {
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -171,8 +173,9 @@ const ConnectorFilterComponent: React.FC<Props> = ({
         .map((option) => option.label);
 
       setSelectedConnectorNames(newSelectedConnectorNames);
+      invalidateFindAttackDiscoveries();
     },
-    [setSelectedConnectorNames]
+    [invalidateFindAttackDiscoveries, setSelectedConnectorNames]
   );
 
   return (

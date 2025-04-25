@@ -76,8 +76,8 @@ export const useFindAttackDiscoveries = ({
   }, []);
 
   const queryFn = useCallback(
-    async ({ pageParam }: { pageParam?: PageParam }) => {
-      return http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
+    async ({ pageParam }: { pageParam?: PageParam }) =>
+      http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
         method: 'GET',
         version: API_VERSIONS.internal.v1,
         query: {
@@ -94,8 +94,7 @@ export const useFindAttackDiscoveries = ({
           status,
         },
         signal: abortController.current.signal,
-      });
-    },
+      }),
     [
       connectorNames,
       end,
