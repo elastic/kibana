@@ -114,7 +114,7 @@ export const cleanupUnknownAndExcluded = ({
         if (shouldClauses.length === 0) {
           return TaskEither.right({
             type: 'cleanup_not_needed' as const,
-          } as CleanupNotNeeded);
+          });
         }
 
         const deleteQuery: QueryDslQueryContainer = {
