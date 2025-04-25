@@ -15,13 +15,7 @@ import {
   createEsDocument,
 } from '../../../../../spaces_only/tests/alerting/create_test_data';
 import type { Space } from '../../../../../common/types';
-import {
-  GlobalReadAtSpace1,
-  Space1,
-  Space1AllAtSpace1,
-  SuperuserAtSpace1,
-  UserAtSpaceScenarios,
-} from '../../../../scenarios';
+import { Space1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
 import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
