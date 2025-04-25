@@ -12,30 +12,30 @@ import type { OnboardingCardCheckComplete } from '../../../../types';
 import {
   getAgentsData,
   getCompleteBadgeText,
-  getIntegrationList,
-} from '../common/integrations/integrations_check_complete';
+  getInstalledIntegrationList,
+} from '../common/integrations/integrations_check_complete_helpers';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
-  const { isComplete, installedPackages } = await getIntegrationList(services);
+  const { isComplete, installedPackages: installedIntegrations } =
+    await getInstalledIntegrationList(services);
 
   const { isAgentRequired } = await getAgentsData(services, isComplete);
 
   if (!isComplete) {
     return {
       isComplete,
-      metadata: DEFAULT_CHECK_COMPLETE_METADATA,
+      metadata: { ...DEFAULT_CHECK_COMPLETE_METADATA, isAgentRequired },
     };
   }
 
   return {
     isComplete,
-    completeBadgeText: getCompleteBadgeText(installedPackages.length),
+    completeBadgeText: getCompleteBadgeText(installedIntegrations.length),
     metadata: {
-      installedIntegrationsCount: installedPackages.length,
       isAgentRequired,
-      installedIntegrations: installedPackages,
+      installedIntegrations,
     },
   };
 };

@@ -7,6 +7,7 @@
 import { useMemo } from 'react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
+import type { InstalledPackage } from '@kbn/fleet-plugin/common/types';
 import { useNavigation } from '../../kibana';
 import { APP_INTEGRATIONS_PATH, ONBOARDING_PATH } from '../../../../../common/constants';
 
@@ -22,14 +23,10 @@ import type { TrackLinkClick } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../utils/integrations';
 import { useIntegrationContext } from './integration_context';
-import type { InstalledIntegrationItem } from '../types';
 
-const extractFeaturedCards = (
-  filteredCards: IntegrationCardItem[],
-  featuredCardNames: string[]
-) => {
+const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCardIds: string[]) => {
   return filteredCards.reduce<IntegrationCardItem[]>((acc, card) => {
-    if (featuredCardNames.includes(card.name)) {
+    if (featuredCardIds.includes(card.id)) {
       acc.push(card);
     }
     return acc;
@@ -37,19 +34,19 @@ const extractFeaturedCards = (
 };
 
 const getFilteredCards = ({
-  featuredCardNames,
+  featuredCardIds,
   getAppUrl,
   integrationsList,
   navigateTo,
   installedIntegrations,
   trackLinkClick,
 }: {
-  featuredCardNames?: string[];
+  featuredCardIds?: string[];
   getAppUrl: GetAppUrl;
   integrationsList: IntegrationCardItem[];
   navigateTo: NavigateTo;
   trackLinkClick?: TrackLinkClick;
-  installedIntegrations: InstalledIntegrationItem[];
+  installedIntegrations: InstalledPackage[];
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
     addSecuritySpecificProps({
@@ -60,10 +57,10 @@ const getFilteredCards = ({
       trackLinkClick,
     })
   );
-  if (!featuredCardNames) {
+  if (!featuredCardIds) {
     return { featuredCards: [], integrationCards: securityIntegrationsList };
   }
-  const featuredCards = extractFeaturedCards(securityIntegrationsList, featuredCardNames);
+  const featuredCards = extractFeaturedCards(securityIntegrationsList, featuredCardIds);
   return {
     featuredCards,
     integrationCards: securityIntegrationsList,
@@ -80,7 +77,7 @@ export const addSecuritySpecificProps = ({
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
-  installedIntegrations: InstalledIntegrationItem[];
+  installedIntegrations: InstalledPackage[];
   trackLinkClick?: TrackLinkClick;
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
@@ -121,12 +118,12 @@ export const addSecuritySpecificProps = ({
 
 export const useIntegrationCardList = ({
   integrationsList,
-  featuredCardNames,
+  featuredCardIds,
   installedIntegrations = [],
 }: {
   integrationsList: IntegrationCardItem[];
-  featuredCardNames?: string[] | undefined;
-  installedIntegrations?: InstalledIntegrationItem[];
+  featuredCardIds?: string[] | undefined;
+  installedIntegrations?: InstalledPackage[];
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
 
@@ -139,7 +136,7 @@ export const useIntegrationCardList = ({
         navigateTo,
         getAppUrl,
         integrationsList,
-        featuredCardNames,
+        featuredCardIds,
         trackLinkClick,
         installedIntegrations,
       }),
@@ -147,13 +144,13 @@ export const useIntegrationCardList = ({
       navigateTo,
       getAppUrl,
       integrationsList,
-      featuredCardNames,
+      featuredCardIds,
       trackLinkClick,
       installedIntegrations,
     ]
   );
 
-  if (featuredCardNames && featuredCardNames.length > 0) {
+  if (featuredCardIds && featuredCardIds.length > 0) {
     return featuredCards;
   }
   return integrationCards ?? [];

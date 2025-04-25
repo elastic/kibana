@@ -14,8 +14,11 @@ import { css } from '@emotion/css';
 import { installationStatuses } from '../../../../../../common/constants';
 import type { EpmPackageInstallStatus } from '../../../../../../common/types';
 
-const installedLabel = i18n.translate('xpack.fleet.packageCard.installedLabel', {
-  defaultMessage: 'Installed',
+/**
+ * "Active" here means that the package is installed AND their data streams Exist
+ **/
+const installedLabel = i18n.translate('xpack.fleet.packageCard.activeLabel', {
+  defaultMessage: 'Active',
 });
 
 const installStatusMapToColor: Record<

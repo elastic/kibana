@@ -33,11 +33,11 @@ import { useIntegrationContext } from '../hooks/integration_context';
 
 export interface IntegrationsCardGridTabsProps {
   installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+  isAgentRequired?: boolean;
   availablePackagesResult: AvailablePackagesResult;
   topCalloutRenderer?: React.FC<{
     installedIntegrationsCount: number;
-    isAgentRequired: boolean;
+    isAgentRequired?: boolean;
     selectedTabId: IntegrationTabId;
   }>;
   integrationList: IntegrationCardItem[];

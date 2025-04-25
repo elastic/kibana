@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { installationStatuses } from '@kbn/fleet-plugin/public';
-import type { StartServices } from '../../../../../../types';
-
 import { lastValueFrom } from 'rxjs';
-import { checkIntegrationsCardComplete } from '../../integrations/integrations_check_complete';
+import { checkIntegrationsCardComplete } from './integrations_check_complete';
+import type { StartServices } from '../../../../../../types';
 
 jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
@@ -55,8 +54,7 @@ describe('checkIntegrationsCardComplete', () => {
     expect(result).toEqual({
       isComplete: false,
       metadata: {
-        installedIntegrationsCount: 0,
-        isAgentRequired: false,
+        installedIntegrations: [],
       },
     });
   });
@@ -78,13 +76,16 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '1 integration added',
       metadata: {
-        installedIntegrationsCount: 1,
-        isAgentRequired: true,
+        installedIntegrations: [
+          {
+            status: installationStatuses.Installed,
+          },
+        ],
       },
     });
   });
 
-  it('returns isComplete as true and isAgentRequired as false when both packages and agent data are available', async () => {
+  it('returns isComplete as true when packages are available', async () => {
     mockHttpGet.mockResolvedValue({
       items: [
         { status: installationStatuses.Installed },
@@ -104,8 +105,10 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '2 integrations added',
       metadata: {
-        installedIntegrationsCount: 2,
-        isAgentRequired: false,
+        installedIntegrations: [
+          { status: installationStatuses.Installed },
+          { status: installationStatuses.InstallFailed },
+        ],
       },
     });
   });
@@ -122,29 +125,7 @@ describe('checkIntegrationsCardComplete', () => {
     expect(res).toEqual({
       isComplete: false,
       metadata: {
-        installedIntegrationsCount: 0,
-        isAgentRequired: false,
-      },
-    });
-  });
-
-  it('renders an error toast when fetching agents data fails', async () => {
-    const err = new Error('Failed to fetch agents data');
-    mockLastValueFrom.mockRejectedValue(err);
-
-    const res = await checkIntegrationsCardComplete(mockService);
-
-    expect(mockService.notifications.toasts.addError).toHaveBeenCalledWith(
-      new Error('Failed to fetch agents data'),
-      {
-        title: 'Error fetching agents data',
-      }
-    );
-    expect(res).toEqual({
-      isComplete: false,
-      metadata: {
-        installedIntegrationsCount: 0,
-        isAgentRequired: false,
+        installedIntegrations: [],
       },
     });
   });

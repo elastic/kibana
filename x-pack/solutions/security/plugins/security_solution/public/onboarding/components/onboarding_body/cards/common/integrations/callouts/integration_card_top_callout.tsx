@@ -19,14 +19,14 @@ export const useShowInstalledCallout = ({
   isAgentRequired,
 }: {
   installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+  isAgentRequired?: boolean;
 }) => {
   return installedIntegrationsCount > 0 || isAgentRequired;
 };
 
 export const IntegrationCardTopCalloutComponent: React.FC<{
   installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+  isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
 }> = ({ installedIntegrationsCount, isAgentRequired, selectedTabId }) => {
   const { isAgentlessAvailable$ } = useOnboardingService();

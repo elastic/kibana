@@ -11,7 +11,7 @@ import { ManageIntegrationsCallout } from './manage_integrations_callout';
 
 export const InstalledIntegrationsCalloutComponent: React.FC<{
   installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+  isAgentRequired?: boolean;
 }> = ({ installedIntegrationsCount, isAgentRequired }) => {
   if (!installedIntegrationsCount) {
     return null;

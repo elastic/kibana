@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { mockTrackLinkClick } from './__mocks__/mocks';
+import type { InstalledPackage } from '@kbn/fleet-plugin/common/types';
 
 jest.mock('./integration_context');
 
@@ -23,7 +24,7 @@ describe('useIntegrationCardList', () => {
   const mockIntegrationsList = [
     {
       id: 'epr:endpoint',
-      name: 'Security Integration',
+      name: 'endpoint',
       description: 'Integration for security monitoring',
       categories: ['security'],
       icons: [{ src: 'icon_url', type: 'image' }],
@@ -40,11 +41,25 @@ describe('useIntegrationCardList', () => {
     },
   ];
 
+  const mockInstalledIntegrations: InstalledPackage[] = [
+    {
+      name: 'endpoint',
+      version: '1.0.0',
+      status: 'installed',
+      dataStreams: [
+        {
+          name: 'endpoint',
+          title: 'Endpoint Data Stream',
+        },
+      ],
+    },
+  ];
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns filtered integration cards when featuredCardNames are not provided', () => {
+  it('returns filtered integration cards when featuredCardIds are not provided', () => {
     const mockFilteredCards = {
       featuredCards: {},
       integrationCards: mockIntegrationsList,
@@ -53,17 +68,18 @@ describe('useIntegrationCardList', () => {
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
+        installedIntegrations: mockInstalledIntegrations,
       })
     );
 
     expect(result.current).toEqual(mockFilteredCards.integrationCards);
   });
 
-  it('returns featured cards when featuredCardNames are provided', () => {
-    const featuredCardNames = ['epr:endpoint'];
+  it('returns featured cards when featuredCardIds are provided', () => {
+    const featuredCardIds = ['epr:endpoint'];
     const mockFilteredCards = {
       featuredCards: {
-        'epr:endpoint': mockIntegrationsList[0],
+        endpoint: mockIntegrationsList[0],
       },
       integrationCards: mockIntegrationsList,
     };
@@ -71,11 +87,33 @@ describe('useIntegrationCardList', () => {
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
-        featuredCardNames,
+        featuredCardIds,
+        installedIntegrations: mockInstalledIntegrations,
       })
     );
 
-    expect(result.current).toEqual([mockFilteredCards.featuredCards['epr:endpoint']]);
+    expect(result.current).toEqual([mockFilteredCards.featuredCards.endpoint]);
+  });
+
+  it('does not show installation status if no installed integrations are provided', () => {
+    const featuredCardIds = ['epr:endpoint'];
+    const mockFilteredCards = {
+      featuredCards: {
+        endpoint: mockIntegrationsList[0],
+      },
+      integrationCards: mockIntegrationsList,
+    };
+
+    const { result } = renderHook(() =>
+      useIntegrationCardList({
+        integrationsList: mockIntegrationsList,
+        featuredCardIds,
+      })
+    );
+
+    expect(result.current).toEqual([
+      { ...mockFilteredCards.featuredCards.endpoint, showInstallationStatus: false },
+    ]);
   });
 
   it('tracks integration card click', () => {

@@ -5,42 +5,36 @@
  * 2.0.
  */
 
+import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../../common/lib/integrations/components/integration_card_grid_tabs';
 import type { IntegrationCardMetadata } from '../../../../../../common/lib/integrations/types';
 import type { StartServices } from '../../../../../../types';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import {
   getCompleteBadgeText,
-  getAgentsData,
-  getIntegrationList,
-} from '../../common/integrations/integrations_check_complete';
+  getInstalledIntegrationList,
+} from '../../common/integrations/integrations_check_complete_helpers';
 import { INTEGRATION_TABS } from './integration_tabs_configs';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
-  const { isComplete, installedPackages } = await getIntegrationList(
-    services,
-    INTEGRATION_TABS[0].featuredCardNames
-  );
+  const { isComplete, installedPackages: installedIntegrations } =
+    await getInstalledIntegrationList(services, INTEGRATION_TABS[0].featuredCardIds);
 
-  const { isAgentRequired } = await getAgentsData(services, isComplete);
+  const installedIntegrationsCount = installedIntegrations.length;
 
   if (!isComplete) {
     return {
       isComplete,
-      metadata: {
-        installedIntegrationsCount: 0,
-        isAgentRequired: false,
-      },
+      metadata: { ...DEFAULT_CHECK_COMPLETE_METADATA },
     };
   }
 
   return {
     isComplete,
-    completeBadgeText: getCompleteBadgeText(installedPackages.length),
+    completeBadgeText: getCompleteBadgeText(installedIntegrationsCount),
     metadata: {
-      installedIntegrationsCount: installedPackages.length,
-      isAgentRequired,
+      installedIntegrations,
     },
   };
 };

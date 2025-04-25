@@ -9,9 +9,9 @@ import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { EPM_API_ROUTES, installationStatuses } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import { AGENT_INDEX } from './constants';
 import type { StartServices } from '../../../../../../types';
-import type { InstalledIntegrations } from '../../../../../../common/lib/integrations/types';
 
 export const getCompleteBadgeText = (installedCount: number) =>
   i18n.translate('xpack.securitySolution.onboarding.integrationsCard.badge.completeText', {
@@ -19,24 +19,24 @@ export const getCompleteBadgeText = (installedCount: number) =>
     values: { count: installedCount },
   });
 
-export const getIntegrationList = async (
+export const getInstalledIntegrationList = async (
   services: StartServices,
   /**
    * The list of available integrations to check against.
    * If provided, only installed integrations that are in this list will be considered complete.
    * If not provided, all installed integrations will be considered complete.
    */
-  availableIntegrations?: Array<IntegrationCardItem['id']>
+  availableIntegrationNames?: Array<IntegrationCardItem['name']>
 ) => {
   const installedPackageData = await services.http
-    .get<InstalledIntegrations>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
+    .get<GetInstalledPackagesResponse>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
       version: '2023-10-31',
       query: {
         showOnlyActiveDataStreams: true,
       },
     })
     .catch((err: Error) => {
-      const emptyItems: InstalledIntegrations['items'] = [];
+      const emptyItems: GetInstalledPackagesResponse['items'] = [];
       services.notifications.toasts.addError(err, {
         title: i18n.translate(
           'xpack.securitySolution.onboarding.integrationsCard.checkComplete.fetchIntegrations.errorTitle',
@@ -48,13 +48,15 @@ export const getIntegrationList = async (
       return { items: emptyItems };
     });
 
-  const installedPackages = installedPackageData?.items?.filter((pkg) => {
+  const installedPackages = installedPackageData?.items?.filter((installedPkg) => {
     const isInstalled =
-      pkg.status === installationStatuses.Installed ||
-      pkg.status === installationStatuses.InstallFailed;
-    return availableIntegrations
+      installedPkg.status === installationStatuses.Installed ||
+      installedPkg.status === installationStatuses.InstallFailed;
+    return availableIntegrationNames
       ? isInstalled &&
-          availableIntegrations.some((availableIntegration) => availableIntegration === pkg.name)
+          availableIntegrationNames.some(
+            (availableIntegration) => availableIntegration === installedPkg.name
+          )
       : isInstalled;
   });
   const isComplete = installedPackages && installedPackages.length > 0;

@@ -35,8 +35,8 @@ const IntegrationsCardGridTabs: RenderChildrenType = ({
     showCompressedInstallationStatus: true,
     returnPath: ONBOARDING_PATH,
   });
-  const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
-
+  const { installedIntegrations, isAgentRequired } = checkCompleteMetadata;
+  const installedIntegrationsCount = installedIntegrations?.length ?? 0;
   return (
     <IntegrationsCardGridTabsComponent
       isAgentRequired={isAgentRequired}

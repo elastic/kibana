@@ -19,7 +19,7 @@ export interface EnhancedCardOptions {
   returnPath?: string;
 }
 
-const FEATURED_INTEGRATION_SORT_ORDER = [
+export const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:splunk',
   'epr:google_secops',
   'epr:microsoft_sentinel',

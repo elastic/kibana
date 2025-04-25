@@ -5,28 +5,17 @@
  * 2.0.
  */
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 
-export interface InstalledIntegrationItem {
-  dataStream: string[];
-  name: string;
-  title: string;
-  status: string;
-}
-
-export interface InstalledIntegrations {
-  items: InstalledIntegrationItem[];
-}
-
 export interface IntegrationCardMetadata {
-  installedIntegrationsCount: number;
-  isAgentRequired: boolean;
-  installedIntegrations?: InstalledIntegrationItem[];
+  isAgentRequired?: boolean;
+  installedIntegrations: GetInstalledPackagesResponse['items'];
 }
 
 export interface Tab {
   category: string;
-  featuredCardNames?: Array<IntegrationCardItem['id']>;
+  featuredCardIds?: Array<IntegrationCardItem['id']>;
   iconType?: string;
   id: IntegrationTabId;
   label: string;
@@ -50,7 +39,7 @@ export enum IntegrationTabId {
 
 export type TopCalloutRenderer = React.FC<{
   installedIntegrationsCount: number;
-  isAgentRequired: boolean;
+  isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
 }>;
 
@@ -63,7 +52,7 @@ export type RenderChildrenType = React.FC<{
   allowedIntegrations: IntegrationCardItem[];
   availablePackagesResult: AvailablePackagesResult;
   checkCompleteMetadata?: IntegrationCardMetadata;
-  featuredCardNames?: string[];
+  featuredCardIds?: string[];
   selectedTabResult: UseSelectedTabReturn;
   topCalloutRenderer?: TopCalloutRenderer;
 }>;
