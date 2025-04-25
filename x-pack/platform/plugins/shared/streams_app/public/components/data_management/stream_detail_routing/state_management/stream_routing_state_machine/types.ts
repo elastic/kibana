@@ -12,11 +12,11 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { RoutingDefinitionWithUIAttributes } from '../../types';
 
 export interface StreamRoutingServiceDependencies {
+  forkSuccessNofitier: (streamName: string) => void;
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
   core: CoreStart;
   data: DataPublicPluginStart;
-  forkSuccessNofitier: (streamName: string) => void;
 }
 
 export interface StreamRoutingInput {

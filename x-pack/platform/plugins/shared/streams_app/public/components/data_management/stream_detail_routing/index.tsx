@@ -62,16 +62,15 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
 
 export function StreamDetailRoutingImpl() {
   const { appParams, core } = useKibana();
-  // const routingAppState = useRoutingState({ definition, toasts: core.notifications.toasts });
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+
   const definition = routingSnapshot.context.definition;
 
   const shouldDisplayBottomBar =
-    routingSnapshot.matches({
-      ready: { displayingRoutingRules: { reorderingRules: 'reordering' } },
-    }) && routingSnapshot.can({ type: 'routingRule.save' });
+    routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
+    routingSnapshot.can({ type: 'routingRule.save' });
 
   const {
     dependencies: {
@@ -164,11 +163,12 @@ export function StreamDetailRoutingImpl() {
         {shouldDisplayBottomBar && (
           <EuiFlexItem grow={false}>
             <ManagementBottomBar
+              confirmButtonText={i18n.translate('xpack.streams.streamDetailRouting.change', {
+                defaultMessage: 'Change routing',
+              })}
               onCancel={cancelChanges}
               onConfirm={saveChanges}
-              isLoading={routingSnapshot.matches({
-                ready: { displayingRoutingRules: { reorderingRules: 'updatingStream' } },
-              })}
+              isLoading={routingSnapshot.matches({ ready: { reorderingRules: 'updatingStream' } })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
             />

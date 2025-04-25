@@ -16,5 +16,13 @@ export const selectCurrentRule = createSelector(
     (context: StreamRoutingContext) => context.routing,
     (context: StreamRoutingContext) => context.currentRuleId,
   ],
-  (routing, currentRuleId) => routing.find((rule) => rule.id === currentRuleId)
+  (routing, currentRuleId) => {
+    const currentRoutingRule = routing.find((rule) => rule.id === currentRuleId);
+
+    if (!currentRoutingRule) {
+      throw new Error('Current routing rule not found');
+    }
+
+    return currentRoutingRule;
+  }
 );

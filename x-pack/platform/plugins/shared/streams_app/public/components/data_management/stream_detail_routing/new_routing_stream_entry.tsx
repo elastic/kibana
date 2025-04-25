@@ -14,7 +14,7 @@ import {
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { selectCurrentRule } from './state_management/stream_routing_state_machine/selectors';
+import { selectCurrentRule } from './state_management/stream_routing_state_machine';
 
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -27,10 +27,6 @@ export function NewRoutingStreamEntry() {
       panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, []);
-
-  if (!currentRule) {
-    return null;
-  }
 
   return (
     <div ref={panelRef}>

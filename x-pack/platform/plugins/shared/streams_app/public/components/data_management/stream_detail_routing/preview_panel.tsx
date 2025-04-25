@@ -17,13 +17,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isEmpty } from 'lodash';
+import { useDebounced } from '../../../util/use_debounce';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
 import { PreviewTable } from '../preview_table';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewMatches } from './preview_matches';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
-import { selectCurrentRule } from './state_management/stream_routing_state_machine/selectors';
+import { selectCurrentRule } from './state_management/stream_routing_state_machine';
 import { AssetImage } from '../../asset_image';
 
 export function PreviewPanel() {
@@ -35,15 +36,15 @@ export function PreviewPanel() {
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
 
-  const isIdle = routingSnapshot.matches({ ready: { displayingRoutingRules: 'idle' } });
-  const isEditingRule = routingSnapshot.matches({
-    ready: { displayingRoutingRules: 'editingRule' },
-  });
-  const isCreatingNewRule = routingSnapshot.matches({
-    ready: { displayingRoutingRules: 'creatingNewRule' },
-  });
-  const condition = isCreatingNewRule ? selectCurrentRule(routingSnapshot.context)?.if : undefined;
+  const isIdle = routingSnapshot.matches({ ready: 'idle' });
+  const isCreatingNewRule = routingSnapshot.matches({ ready: 'creatingNewRule' });
+  const isEditingRule = routingSnapshot.matches({ ready: 'editingRule' });
+  const isReorideringRules = routingSnapshot.matches({ ready: 'reorderingRules' });
+
+  const condition = isCreatingNewRule ? selectCurrentRule(routingSnapshot.context).if : undefined;
   const definition = routingSnapshot.context.definition;
+
+  const debouncedCondition = useDebounced(condition, 300);
 
   const {
     timeRange,
@@ -60,7 +61,7 @@ export function PreviewPanel() {
     isLoadingDocumentCounts,
     documentCountsError,
   } = useAsyncSample({
-    condition,
+    condition: debouncedCondition,
     start: start?.valueOf(),
     end: end?.valueOf(),
     size: 100,
@@ -91,7 +92,7 @@ export function PreviewPanel() {
         )}
       />
     );
-  } else if (isEditingRule) {
+  } else if (isEditingRule || isReorideringRules) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage />}
@@ -99,14 +100,26 @@ export function PreviewPanel() {
         title={
           <h2>
             {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
-              defaultMessage: 'Preview is not available while editing streams',
+              defaultMessage: 'Preview is not available while editing or reordering streams',
             })}
           </h2>
         }
-        body={i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
-          defaultMessage:
-            'You will find here the result from the conditions you have made once you save the changes',
-        })}
+        body={
+          <>
+            <p>
+              {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
+                defaultMessage:
+                  'You will find here the result from the conditions you have made once you save the changes',
+              })}
+            </p>
+            <p>
+              {i18n.translate('xpack.streams.streamDetail.preview.editPreviewReorderingWarning', {
+                defaultMessage:
+                  'Additionally, you will not be able to edit existing streams while reordering them, you should save or cancel your changes first.',
+              })}
+            </p>
+          </>
+        }
       />
     );
   } else if (isCreatingNewRule && isLoadingDocuments && !hasDocuments) {

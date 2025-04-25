@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './selectors';
 export * from './use_stream_routing';
 export * from './types';

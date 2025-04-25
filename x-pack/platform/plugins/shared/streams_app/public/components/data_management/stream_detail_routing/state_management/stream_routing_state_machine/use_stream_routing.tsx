@@ -40,9 +40,7 @@ export const useStreamRoutingEvents = () => {
       },
       removeRule: async () => {
         service.send({ type: 'routingRule.remove' });
-        await waitFor(service, (snapshot) =>
-          snapshot.matches({ ready: { displayingRoutingRules: 'idle' } })
-        );
+        await waitFor(service, (snapshot) => snapshot.matches({ ready: 'idle' }));
       },
       reorderRules: (routing: RoutingDefinitionWithUIAttributes[]) => {
         service.send({ type: 'routingRule.reorder', routing });
