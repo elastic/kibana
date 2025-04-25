@@ -1,6 +1,9 @@
-name: Dependency Health Score
+name: Evaluate Dependency Health Score
 on:
   pull_request:
+    types: [opened, reopened]
+    branches:
+      - 'main'
     paths:
       - '**/package.json'
 
@@ -13,7 +16,7 @@ jobs:
       github.actor != 'elastic-renovate-prod[bot]'
     steps:
     - name: Checkout kibana-operations
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       with:
         repository: 'elastic/kibana-operations'
         ref: main
