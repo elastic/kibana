@@ -6,6 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import Boom from '@hapi/boom';
 import { alertDeleteScheduleQuerySchemaV1 } from '../../../../../common/routes/alert_delete';
 import type { ILicenseState } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
@@ -39,10 +41,22 @@ export const alertDeleteScheduleRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
-        const alertDeletionClient = alertingContext.getAlertDeletionClient();
-        const rulesClient = await alertingContext.getRulesClient();
-
         const { spaceIds, ...settings } = transformRequestToAlertDeleteScheduleV1(req.body);
+
+        if (spaceIds && spaceIds.length > 0) {
+          const hasRequiredPrivilegeGranted =
+            await alertingContext.hasRequiredPrivilegeGrantedInAllSpaces({
+              request: req,
+              spaceIds,
+              requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
+            });
+
+          if (!hasRequiredPrivilegeGranted) {
+            throw Boom.forbidden(
+              'Insufficient privileges to delete alerts in the specified spaces'
+            );
+          }
+        }
 
         if (!settings.isActiveAlertDeleteEnabled && !settings.isInactiveAlertDeleteEnabled) {
           return res.badRequest({
@@ -54,11 +68,15 @@ export const alertDeleteScheduleRoute = (
         }
 
         try {
-          await alertDeletionClient.scheduleTask(
-            req,
-            settings,
-            spaceIds || [rulesClient.getSpaceId() || 'default']
-          );
+          await alertingContext
+            .getAlertDeletionClient()
+            .scheduleTask(
+              req,
+              settings,
+              spaceIds || [
+                (await alertingContext.getRulesClient()).getSpaceId() || DEFAULT_SPACE_ID,
+              ]
+            );
           return res.noContent();
         } catch (error) {
           return res.customError({

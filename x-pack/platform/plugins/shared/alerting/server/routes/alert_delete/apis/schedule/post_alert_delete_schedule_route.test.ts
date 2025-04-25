@@ -10,6 +10,7 @@ import { alertDeleteScheduleRoute } from './post_alert_delete_schedule_route';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { alertDeletionClientMock } from '../../../../alert_deletion/alert_deletion_client.mock';
 import { rulesClientMock } from '../../../../rules_client.mock';
+import { API_PRIVILEGES } from '../../../../../common';
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -23,10 +24,11 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-const alertDeletionClient = alertDeletionClientMock.create();
-const rulesClient = rulesClientMock.create();
-
 describe('alertDeleteScheduleRoute', () => {
+  const alertDeletionClient = alertDeletionClientMock.create();
+  const rulesClient = rulesClientMock.create();
+  const hasRequiredPrivilegeGrantedInAllSpacesMock = jest.fn();
+
   it('registers the route without public access', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -110,5 +112,93 @@ describe('alertDeleteScheduleRoute', () => {
         message: 'active_alert_delete_threshold or inactive_alert_delete_threshold must be set',
       },
     });
+  });
+
+  it('throws forbidden error if required privileges are not granted in all spaces', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    alertDeleteScheduleRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    hasRequiredPrivilegeGrantedInAllSpacesMock.mockResolvedValueOnce(false);
+
+    const [context, req, res] = mockHandlerArguments(
+      {
+        alertDeletionClient,
+        rulesClient,
+        hasRequiredPrivilegeGrantedInAllSpaces: hasRequiredPrivilegeGrantedInAllSpacesMock,
+      },
+      {
+        body: {
+          space_ids: ['space1', 'space2'],
+          active_alert_delete_threshold: 100,
+          inactive_alert_delete_threshold: 100,
+        },
+      },
+      ['forbidden']
+    );
+
+    await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Insufficient privileges to delete alerts in the specified spaces"`
+    );
+
+    expect(hasRequiredPrivilegeGrantedInAllSpacesMock).toHaveBeenCalledWith({
+      request: req,
+      spaceIds: ['space1', 'space2'],
+      requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
+    });
+  });
+
+  it('does not throw error if required privileges are granted in all spaces', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    alertDeleteScheduleRoute(router, licenseState);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    hasRequiredPrivilegeGrantedInAllSpacesMock.mockResolvedValueOnce(true);
+    (alertDeletionClient.scheduleTask as jest.Mock).mockResolvedValueOnce(undefined);
+
+    const [context, req, res] = mockHandlerArguments(
+      {
+        alertDeletionClient,
+        rulesClient,
+        hasRequiredPrivilegeGrantedInAllSpaces: hasRequiredPrivilegeGrantedInAllSpacesMock,
+      },
+      {
+        body: {
+          space_ids: ['space1', 'space2'],
+          active_alert_delete_threshold: 100,
+          inactive_alert_delete_threshold: 100,
+          category_ids: ['management'],
+        },
+      },
+      ['noContent']
+    );
+
+    await handler(context, req, res);
+
+    expect(hasRequiredPrivilegeGrantedInAllSpacesMock).toHaveBeenCalledWith({
+      request: req,
+      spaceIds: ['space1', 'space2'],
+      requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
+    });
+
+    expect(alertDeletionClient.scheduleTask).toHaveBeenCalledWith(
+      req,
+      {
+        isActiveAlertDeleteEnabled: true,
+        isInactiveAlertDeleteEnabled: true,
+        activeAlertDeleteThreshold: 100,
+        inactiveAlertDeleteThreshold: 100,
+        categoryIds: ['management'],
+      },
+      ['space1', 'space2']
+    );
+
+    expect(res.noContent).toHaveBeenCalled();
   });
 });

@@ -11,6 +11,7 @@ import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import type { HasPrivilegesResponseApplication } from '@kbn/security-plugin-types-server';
 import type { RulesClientMock } from '../rules_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import type { RulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
@@ -34,6 +35,7 @@ export function mockHandlerArguments(
     getFrameworkHealth,
     areApiKeysEnabled,
     alertDeletionClient,
+    hasRequiredPrivilegeGrantedInAllSpaces,
   }: {
     rulesClient?: RulesClientMock;
     actionsClient?: ActionsClientMock;
@@ -44,6 +46,9 @@ export function mockHandlerArguments(
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
     alertDeletionClient?: AlertDeletionClientMock;
+    hasRequiredPrivilegeGrantedInAllSpaces?: (
+      args: HasPrivilegesResponseApplication
+    ) => Promise<boolean>;
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -75,6 +80,11 @@ export function mockHandlerArguments(
         getAlertDeletionClient() {
           return alertDeletionClient || alertDeletionClientMock.create();
         },
+        hasRequiredPrivilegeGrantedInAllSpaces: hasRequiredPrivilegeGrantedInAllSpaces
+          ? hasRequiredPrivilegeGrantedInAllSpaces
+          : () => {
+              return Promise.resolve(true);
+            },
       },
       actions: {
         getActionsClient() {
