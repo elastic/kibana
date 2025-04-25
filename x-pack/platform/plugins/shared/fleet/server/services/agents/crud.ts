@@ -243,12 +243,13 @@ export async function getAgentsByKuery(
     filters.push(kuery);
   }
 
+  // Hides agents enrolled in agentless policies by excluding the first 1000 agentless policy IDs
+  // from the search. This limitation is to avoid hitting the `max_clause_count` limit.
+  // In the future, we should hopefully be able to filter agentless agents using metadata:
+  // https://github.com/elastic/elastic-agent/issues/7946
   if (showAgentless === false) {
-    const internalSoClientWithoutSpaceExtension =
-      appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const agentlessPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
-      spaceId: '*',
-      perPage: SO_SEARCH_LIMIT,
+    const agentlessPolicies = await agentPolicyService.list(soClient, {
+      perPage: 1000,
       kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
     });
     if (agentlessPolicies.items.length > 0) {

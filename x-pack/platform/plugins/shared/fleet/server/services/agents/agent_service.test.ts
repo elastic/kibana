@@ -230,6 +230,7 @@ function expectApisToCallServicesSuccessfully(
       agentClient.listAgents({ showAgentless: true, showInactive: true })
     ).resolves.toEqual('getAgentsByKuery success');
     expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, mockSoClient, {
+      showAgentless: true,
       showInactive: true,
       spaceId,
     });

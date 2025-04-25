@@ -309,8 +309,13 @@ async function createSetupSideEffects(
   await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
 
-  logger.debug('Backfilling package policy supports_agentless field');
-  await backfillPackagePolicySupportsAgentless(esClient);
+  let backfillPackagePolicySupportsAgentlessError;
+  try {
+    logger.debug('Backfilling package policy supports_agentless field');
+    await backfillPackagePolicySupportsAgentless(esClient);
+  } catch (error) {
+    backfillPackagePolicySupportsAgentlessError = { error };
+  }
 
   let ensureCorrectAgentlessSettingsIdsError;
   try {
@@ -329,6 +334,9 @@ async function createSetupSideEffects(
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(backfillPackagePolicySupportsAgentlessError
+      ? [backfillPackagePolicySupportsAgentlessError]
+      : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
   ];
 
