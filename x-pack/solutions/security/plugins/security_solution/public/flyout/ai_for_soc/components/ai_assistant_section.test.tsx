@@ -18,7 +18,7 @@ import { TestProviders } from '../../../common/mock';
 jest.mock('../context');
 
 describe('AIAssistantSection', () => {
-  it('should render the switch in the unchecked state by default', () => {
+  it('should the AI assistant section', () => {
     (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
       eventId: 'eventId',
       getFieldsData: jest.fn(),
