@@ -358,10 +358,8 @@ export const dataStreamMigrationServiceFactory = ({
               const timestampResponse = await esClient.search({
                 index,
                 size: 0,
-                body: {
-                  aggs: {
-                    oldest_incompatible_doc: { min: { field: '@timestamp' } },
-                  },
+                aggs: {
+                  oldest_incompatible_doc: { min: { field: '@timestamp' } },
                 },
               });
 

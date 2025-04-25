@@ -74,26 +74,24 @@ export async function getRecentEsDeprecationLogs(
   try {
     const searchResponse = await dataClient.asCurrentUser.search({
       index: DEPRECATION_LOGS_INDEX,
-      body: {
-        query: {
-          bool: {
-            must: {
-              range: {
-                '@timestamp': {
-                  gte: from.toISOString(),
-                  lte: now.toISOString(),
-                },
-              },
-            },
-            must_not: {
-              terms: {
-                [DEPRECATION_LOGS_ORIGIN_FIELD]: [...APPS_WITH_DEPRECATION_LOGS],
+      query: {
+        bool: {
+          must: {
+            range: {
+              '@timestamp': {
+                gte: from.toISOString(),
+                lte: now.toISOString(),
               },
             },
           },
+          must_not: {
+            terms: {
+              [DEPRECATION_LOGS_ORIGIN_FIELD]: [...APPS_WITH_DEPRECATION_LOGS],
+            },
+          },
         },
-        sort: [{ '@timestamp': { order: 'desc' } }],
       },
+      sort: [{ '@timestamp': { order: 'desc' } }],
     });
 
     const logs = searchResponse.hits.hits.map((hit) => hit._source);
