@@ -13,7 +13,7 @@ import {
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
 import {
@@ -30,7 +30,7 @@ export const sampleStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -110,7 +110,7 @@ export const unmanagedAssetDetailsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

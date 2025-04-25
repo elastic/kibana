@@ -7,7 +7,7 @@
 
 import { conditionSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 
@@ -23,7 +23,7 @@ export const forkStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.write],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -57,7 +57,7 @@ export const resyncStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.write],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -75,7 +75,7 @@ export const getStreamsStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {

@@ -13,7 +13,9 @@ import {
   isUnwiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
+import { useKibana } from './use_kibana';
 
 export interface StreamDetailContextProviderProps {
   name: string;
@@ -34,6 +36,15 @@ export function StreamDetailContextProvider({
   children,
 }: React.PropsWithChildren<StreamDetailContextProviderProps>) {
   const {
+    core: {
+      application: {
+        capabilities: {
+          streams: { [STREAMS_UI_PRIVILEGES.manage]: canManage },
+        },
+      },
+    },
+  } = useKibana();
+  const {
     value: definition,
     loading,
     refresh,
@@ -50,13 +61,21 @@ export function StreamDetailContextProvider({
         })
         .then((response) => {
           if (isWiredStreamGetResponse(response) || isUnwiredStreamGetResponse(response)) {
-            return response;
+            return {
+              ...response,
+              privileges: {
+                ...response.privileges,
+                // restrict the manage privilege by the Elasticsearch-level data-stream specific privilege and the Kibana-level UI privilege
+                // the UI should only enable manage features if the user has privileges on both levels for the current stream
+                manage: response.privileges.manage && canManage,
+              },
+            };
           }
 
           throw new Error('Stream detail only supports IngestStreams.');
         });
     },
-    [streamsRepositoryClient, name]
+    [streamsRepositoryClient, name, canManage]
   );
 
   const context = React.useMemo(

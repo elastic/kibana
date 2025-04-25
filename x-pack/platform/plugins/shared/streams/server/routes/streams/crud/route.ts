@@ -13,7 +13,7 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { badData } from '@hapi/boom';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
@@ -30,7 +30,7 @@ export const readStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -64,7 +64,7 @@ export const listStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -89,7 +89,7 @@ export const editStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -125,7 +125,7 @@ export const deleteStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

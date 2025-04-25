@@ -10,7 +10,7 @@ import { StreamDefinition, isGroupStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { estypes } from '@elastic/elasticsearch';
 import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
@@ -28,7 +28,7 @@ export const listStreamsRoute = createServerRoute({
   params: z.object({}),
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
@@ -65,7 +65,7 @@ export const streamDetailRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -115,7 +115,7 @@ export const resolveIndexRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

@@ -7,7 +7,7 @@
 
 import { isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { ilmPhases } from '../../../../lib/streams/lifecycle/ilm_phases';
 import { getEffectiveLifecycle } from '../../../../lib/streams/lifecycle/get_effective_lifecycle';
@@ -20,7 +20,7 @@ const lifecycleStatsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -61,7 +61,7 @@ const lifecycleIlmExplainRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

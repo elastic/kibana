@@ -29,7 +29,7 @@ import { AssetService } from './lib/streams/assets/asset_service';
 import { RouteHandlerScopedClients } from './routes/types';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
-import { STREAMS_FEATURE_PRIVILEGES } from '../common/constants';
+import { STREAMS_API_PRIVILEGES, STREAMS_UI_PRIVILEGES } from '../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -92,12 +92,8 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          api: [
-            STREAMS_FEATURE_PRIVILEGES.assets,
-            STREAMS_FEATURE_PRIVILEGES.read,
-            STREAMS_FEATURE_PRIVILEGES.write,
-          ],
-          ui: [STREAMS_FEATURE_PRIVILEGES.show, STREAMS_FEATURE_PRIVILEGES.assets],
+          api: [STREAMS_API_PRIVILEGES.read, STREAMS_API_PRIVILEGES.manage],
+          ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
         },
         read: {
           app: ['streams'],
@@ -105,8 +101,8 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          api: [STREAMS_FEATURE_PRIVILEGES.read],
-          ui: [STREAMS_FEATURE_PRIVILEGES.show],
+          api: [STREAMS_API_PRIVILEGES.read],
+          ui: [STREAMS_UI_PRIVILEGES.show],
         },
       },
     });

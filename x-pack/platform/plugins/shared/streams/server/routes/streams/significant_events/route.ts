@@ -8,7 +8,7 @@
 import { badRequest } from '@hapi/boom';
 import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { readSignificantEvents } from './read_significant_events';
 
@@ -29,7 +29,7 @@ export const readSignificantEventsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ params, request, getScopedClients }): Promise<SignificantEventsGetResponse> => {

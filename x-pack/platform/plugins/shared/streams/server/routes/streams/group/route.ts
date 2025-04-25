@@ -13,7 +13,7 @@ import {
   GroupStreamUpsertRequest,
   isGroupStreamDefinition,
 } from '@kbn/streams-schema';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
 import { QueryAsset } from '../../../../common/assets';
@@ -30,7 +30,7 @@ const readGroupRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -65,7 +65,7 @@ const upsertGroupRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.write],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

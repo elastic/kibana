@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { conflict } from '@hapi/boom';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
 import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -25,7 +25,7 @@ export const enableStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.write],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<EnableStreamsResponse> => {
@@ -59,7 +59,7 @@ export const disableStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets, STREAMS_FEATURE_PRIVILEGES.write],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {

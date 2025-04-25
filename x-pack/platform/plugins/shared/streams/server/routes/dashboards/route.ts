@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
-import { STREAMS_FEATURE_PRIVILEGES } from '../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
@@ -67,7 +67,7 @@ const listDashboardsRoute = createServerRoute({
   }),
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
@@ -103,7 +103,7 @@ const linkDashboardRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -144,7 +144,7 @@ const unlinkDashboardRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -180,7 +180,7 @@ const suggestDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -237,7 +237,7 @@ const bulkDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
