@@ -22,3 +22,10 @@ export const CONFIRM_DELETE_WARNING = i18n.translate(
       'Deleting an active endpoint will cause operations targeting associated semantic_text fields and inference pipelines to fail.',
   }
 );
+
+export const DELETE_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint',
+  {
+    defaultMessage: 'Delete endpoint',
+  }
+);

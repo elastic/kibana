@@ -7,6 +7,8 @@
 
 import {
   AppMountParameters,
+  AppStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -14,6 +16,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { BehaviorSubject } from 'rxjs';
 import {
   AllDatasetsLocatorDefinition,
   ObservabilityLogsExplorerLocators,
@@ -35,6 +38,7 @@ export class ObservabilityLogsExplorerPlugin
 {
   private config: ObservabilityLogsExplorerConfig;
   private locators?: ObservabilityLogsExplorerLocators;
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<ObservabilityLogsExplorerConfig>) {
     this.config = context.config.get();
@@ -56,6 +60,7 @@ export class ObservabilityLogsExplorerPlugin
         ? ['globalSearch', 'sideNav']
         : ['globalSearch'],
       keywords: ['logs', 'log', 'explorer', 'logs explorer'],
+      updater$: this.appStateUpdater,
       mount: async (appMountParams: ObservabilityLogsExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
         const { renderObservabilityLogsExplorer } = await import(
@@ -123,7 +128,16 @@ export class ObservabilityLogsExplorerPlugin
     };
   }
 
-  public start(_core: CoreStart, _pluginsStart: ObservabilityLogsExplorerStartDeps) {
+  public start(core: CoreStart, _pluginsStart: ObservabilityLogsExplorerStartDeps) {
+    const { discover, fleet, logs } = core.application.capabilities;
+
+    if (!(discover?.show && fleet?.read && logs?.show)) {
+      this.appStateUpdater.next(() => ({
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      }));
+    }
+
     return {};
   }
 }

@@ -58,7 +58,7 @@ const renderHighlightedFieldsCell = (values: string[], field: string) =>
 describe('<HighlightedFieldsCell />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render a basic cell', () => {
@@ -99,7 +99,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should open host preview when click on host when feature flag is on', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name');
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
@@ -114,7 +114,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should open user preview when click on user when feature flag is on', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name');
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();

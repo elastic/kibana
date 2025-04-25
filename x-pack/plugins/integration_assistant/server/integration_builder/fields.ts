@@ -15,12 +15,13 @@ export function createFieldMapping(
   specificDataStreamDir: string,
   docs: object[]
 ): void {
-  createBaseFields(specificDataStreamDir, packageName, dataStreamName);
-  createCustomFields(specificDataStreamDir, docs);
+  const dataStreamFieldsDir = `${specificDataStreamDir}/fields`;
+  createBaseFields(dataStreamFieldsDir, packageName, dataStreamName);
+  createCustomFields(dataStreamFieldsDir, docs);
 }
 
 function createBaseFields(
-  specificDataStreamDir: string,
+  dataStreamFieldsDir: string,
   packageName: string,
   dataStreamName: string
 ): void {
@@ -30,11 +31,11 @@ function createBaseFields(
     dataset: datasetName,
   });
 
-  createSync(`${specificDataStreamDir}/base-fields.yml`, baseFields);
+  createSync(`${dataStreamFieldsDir}/base-fields.yml`, baseFields);
 }
 
-function createCustomFields(specificDataStreamDir: string, pipelineResults: object[]): void {
+function createCustomFields(dataStreamFieldsDir: string, pipelineResults: object[]): void {
   const mergedResults = mergeSamples(pipelineResults);
   const fieldKeys = generateFields(mergedResults);
-  createSync(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);
+  createSync(`${dataStreamFieldsDir}/fields.yml`, fieldKeys);
 }

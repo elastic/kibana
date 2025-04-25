@@ -26,6 +26,7 @@ import type {
   VersionedRouter,
   RouteRegistrar,
 } from '@kbn/core-http-server';
+import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
@@ -73,9 +74,9 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   if (route.validate !== false) {
     const validation = getRequestValidation(route.validate);
     Object.entries(validation).forEach(([key, schema]) => {
-      if (!(isConfigSchema(schema) || typeof schema === 'function')) {
+      if (!(isConfigSchema(schema) || isZod(schema) || typeof schema === 'function')) {
         throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
+          `Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [${key}].`
         );
       }
     });

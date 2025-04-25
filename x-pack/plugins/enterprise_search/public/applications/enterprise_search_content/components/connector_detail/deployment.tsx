@@ -119,9 +119,9 @@ export const ConnectorDeployment: React.FC = () => {
                   ),
                   status: selectedDeploymentMethod === null ? 'incomplete' : 'complete',
                   title: i18n.translate(
-                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.runConnectorService.title',
+                    'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.chooseDeployment.title',
                     {
-                      defaultMessage: 'Run connector service',
+                      defaultMessage: 'Choose your deployment method',
                     }
                   ),
                   titleSize: 'xs',
@@ -131,27 +131,20 @@ export const ConnectorDeployment: React.FC = () => {
                     <>
                       <EuiSpacer size="s" />
                       <EuiText size="s">
-                        {selectedDeploymentMethod === 'source' ? (
-                          <FormattedMessage
-                            id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.source"
-                            defaultMessage="When you generate a configuration, Elastic will create an index, an API key and a Connector ID. You'll need to add this information to the {configYaml} file for your connector. Alternatively use an existing index and API key. "
-                            values={{
-                              configYaml: (
-                                <EuiCode>
-                                  {i18n.translate(
-                                    'xpack.enterpriseSearch.connectorConfiguration.configymlCodeBlockLabel',
-                                    { defaultMessage: 'config.yml' }
-                                  )}
-                                </EuiCode>
-                              ),
-                            }}
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.docker"
-                            defaultMessage="When you generate a configuration, Elastic will create an index, an API key and a Connector ID. Alternatively use an existing index and API key."
-                          />
-                        )}
+                        <FormattedMessage
+                          id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.source"
+                          defaultMessage="Generate a connector configuration with the attached index and a new API key. This information will be added to the {configYaml} file of your connector. Alternatively use an existing API key. "
+                          values={{
+                            configYaml: (
+                              <EuiCode>
+                                {i18n.translate(
+                                  'xpack.enterpriseSearch.connectorConfiguration.configymlCodeBlockLabel',
+                                  { defaultMessage: 'config.yml' }
+                                )}
+                              </EuiCode>
+                            ),
+                          }}
+                        />
                       </EuiText>
 
                       <EuiSpacer />
@@ -235,7 +228,7 @@ export const ConnectorDeployment: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.title',
                     {
-                      defaultMessage: 'Waiting for your connector',
+                      defaultMessage: 'Waiting for your connector to check in',
                     }
                   ),
                   titleSize: 'xs',

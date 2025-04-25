@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { RouteMethod } from '@kbn/core-http-server';
 import { OpenAPIV3 } from 'openapi-types';
-import { buildGlobalTags, prepareRoutes } from './util';
+import {
+  buildGlobalTags,
+  getXsrfHeaderForMethod,
+  mergeResponseContent,
+  prepareRoutes,
+} from './util';
 import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
@@ -157,5 +163,69 @@ describe('prepareRoutes', () => {
     },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
     expect(prepareRoutes(input, filters)).toEqual(output);
+  });
+});
+
+describe('mergeResponseContent', () => {
+  it('returns an empty object if no content is provided', () => {
+    expect(mergeResponseContent(undefined, undefined)).toEqual({});
+    expect(mergeResponseContent({}, {})).toEqual({});
+  });
+
+  it('merges content objects', () => {
+    expect(
+      mergeResponseContent(
+        {
+          ['application/json+v1']: { encoding: {} },
+        },
+        {
+          ['application/json+v1']: { example: 'overridden' },
+          ['application/json+v2']: {},
+        }
+      )
+    ).toEqual({
+      content: {
+        ['application/json+v1']: { example: 'overridden' },
+        ['application/json+v2']: {},
+      },
+    });
+  });
+});
+
+describe('getXsrfHeaderForMethod', () => {
+  const headerParam = () => [
+    {
+      description: 'A required header to protect against CSRF attacks',
+      in: 'header',
+      name: 'kbn-xsrf',
+      required: true,
+      schema: {
+        example: 'true',
+        type: 'string',
+      },
+    },
+  ];
+  test.each([
+    { method: 'get', expected: [] },
+    { method: 'options', expected: [] },
+    { method: 'put', expected: headerParam() },
+    { method: 'post', expected: headerParam() },
+    { method: 'patch', expected: headerParam() },
+    { method: 'delete', expected: headerParam() },
+    { method: 'everything-else', expected: headerParam() },
+
+    { method: 'get, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'option, xsrfRequired: falses', options: { xsrfRequired: false }, expected: [] },
+    { method: 'put, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'post, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'patch, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    { method: 'delete, xsrfRequired: false', options: { xsrfRequired: false }, expected: [] },
+    {
+      method: 'everything-else, xsrfRequired: false',
+      options: { xsrfRequired: false },
+      expected: [],
+    },
+  ])('$method', ({ method, options, expected }) => {
+    expect(getXsrfHeaderForMethod(method as RouteMethod, options)).toEqual(expected);
   });
 });

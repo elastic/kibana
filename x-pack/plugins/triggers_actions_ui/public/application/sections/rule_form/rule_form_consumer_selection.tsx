@@ -81,6 +81,7 @@ const SINGLE_SELECTION = { asPlainText: true };
 
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
   const { consumers, errors, onChange, selectedConsumer, initialSelectedConsumer } = props;
+  // @ts-expect-error upgrade typescript v5.1.6
   const isInvalid = errors?.consumer?.length > 0;
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {

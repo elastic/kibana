@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TagAttributes } from '../../../common/types';
+import type { TagAttributes } from '../../../common/types';
 import {
-  TagValidation,
+  type TagValidation,
   validateTagColor,
   validateTagName,
   validateTagDescription,

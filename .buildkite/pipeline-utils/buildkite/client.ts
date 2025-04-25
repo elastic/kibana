@@ -8,7 +8,10 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { execSync, ExecSyncOptions } from 'child_process';
+
+// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { dump } from 'js-yaml';
+
 import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
@@ -282,7 +285,7 @@ export class BuildkiteClient {
         hasRetries = true;
         const isPreemptionFailure =
           job.state === 'failed' &&
-          job.agent?.meta_data?.some((el) => ['spot=true', 'gcp:preemptible=true'].includes(el)) &&
+          job.agent_query_rules?.includes('preemptible=true') &&
           job.exit_status === -1;
 
         if (!isPreemptionFailure) {

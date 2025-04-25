@@ -7,7 +7,7 @@ parameters:
 post:
   summary: Reassign agent
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK
@@ -34,7 +34,7 @@ post:
 put:
   summary: Reassign agent
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK

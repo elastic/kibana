@@ -10,10 +10,15 @@ import type { OpenAPIV3 } from 'openapi-types';
 import { KnownParameters, OpenAPIConverter } from '../type';
 
 import { kbnConfigSchemaConverter } from './kbn_config_schema';
+import { zodConverter } from './zod';
 import { catchAllConverter } from './catch_all';
 
 export class OasConverter {
-  readonly #converters: OpenAPIConverter[] = [kbnConfigSchemaConverter, catchAllConverter];
+  readonly #converters: OpenAPIConverter[] = [
+    kbnConfigSchemaConverter,
+    zodConverter,
+    catchAllConverter,
+  ];
   readonly #sharedSchemas = new Map<string, OpenAPIV3.SchemaObject>();
 
   #getConverter(schema: unknown) {

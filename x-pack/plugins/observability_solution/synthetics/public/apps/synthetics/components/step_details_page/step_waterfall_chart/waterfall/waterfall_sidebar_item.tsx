@@ -7,14 +7,14 @@
 
 import React, { RefObject, useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { SidebarItem } from '../../common/network_data/types';
+import { WaterfallNetworkItem } from '../../common/network_data/types';
 import { MiddleTruncatedText } from './middle_truncated_text';
 import { SideBarItemHighlighter } from './styles';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from './translations';
 import { OnSidebarClick } from './waterfall_flyout/use_flyout';
 
 interface SidebarItemProps {
-  item: SidebarItem;
+  item: WaterfallNetworkItem;
   renderFilterScreenReaderText?: boolean;
   onClick?: OnSidebarClick;
   highestIndex: number;
@@ -44,13 +44,11 @@ export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
     return is400 || is500 || isSpecific300;
   };
 
-  const text = item.url;
-
   const ariaLabel = `${
     isHighlighted && renderFilterScreenReaderText
       ? `${SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL} `
       : ''
-  }${text}`;
+  }${url}`;
 
   return (
     <SideBarItemHighlighter
@@ -62,7 +60,6 @@ export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
             <MiddleTruncatedText
               index={offsetIndex}
-              text={text}
               url={url}
               ariaLabel={ariaLabel}
               onClick={handleSidebarClick}
@@ -76,7 +73,6 @@ export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
           <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
             <MiddleTruncatedText
               index={offsetIndex}
-              text={text}
               url={url}
               ariaLabel={ariaLabel}
               onClick={handleSidebarClick}

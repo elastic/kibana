@@ -35,7 +35,8 @@ export const registerBulkCreateRoute = (
       path: '/_bulk_create',
       options: {
         access,
-        description: `Create saved objects`,
+        summary: `Create saved objects`,
+        deprecated: true,
       },
       validate: {
         query: schema.object({

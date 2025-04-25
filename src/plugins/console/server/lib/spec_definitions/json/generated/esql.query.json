@@ -5,7 +5,16 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "format": "",
+      "format": [
+        "csv",
+        "json",
+        "tsv",
+        "txt",
+        "yaml",
+        "cbor",
+        "smile",
+        "arrow"
+      ],
       "delimiter": ""
     },
     "methods": [

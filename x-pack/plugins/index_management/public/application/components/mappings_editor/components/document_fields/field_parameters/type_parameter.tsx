@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiComboBox, EuiText, EuiLink } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../services/documentation';
@@ -24,13 +24,15 @@ interface Props {
   isMultiField?: boolean | null;
   showDocLink?: boolean;
   isSemanticTextEnabled?: boolean;
+  fieldTypeInputRef?: React.MutableRefObject<HTMLInputElement | null>;
 }
 
 export const TypeParameter = ({
   isMultiField,
   isRootLevelField,
   showDocLink = false,
-  isSemanticTextEnabled = false,
+  isSemanticTextEnabled = true,
+  fieldTypeInputRef,
 }: Props) => {
   const fieldTypeOptions = useMemo(() => {
     let options = isMultiField
@@ -79,7 +81,9 @@ export const TypeParameter = ({
                     )}
                   </EuiLink>
                 </EuiText>
-              ) : null
+              ) : (
+                <EuiSpacer size="m" />
+              )
             }
           >
             <EuiComboBox
@@ -95,6 +99,9 @@ export const TypeParameter = ({
               onChange={typeField.setValue}
               isClearable={false}
               data-test-subj="fieldType"
+              inputRef={(input) => {
+                if (fieldTypeInputRef) fieldTypeInputRef.current = input;
+              }}
             />
           </EuiFormRow>
         );

@@ -95,7 +95,6 @@
     "@kbn/securitysolution-exception-list-components",
     "@kbn/rison",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/saved-objects-tagging-plugin",
     "@kbn/securitysolution-hook-utils",
     "@kbn/test-jest-helpers",
     "@kbn/safer-lodash-set",
@@ -210,5 +209,6 @@
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/integration-assistant-plugin",
+    "@kbn/avc-banner",
   ]
 }

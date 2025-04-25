@@ -48,37 +48,32 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
   const visController = useRef<VislibVisController | null>(null);
   const skipRenderComplete = useRef<boolean>(true);
 
-  const renderComplete = useMemo(
-    () => () => {
-      const usageCollection = getUsageCollectionStart();
-      const containerType = extractContainerType(handlers.getExecutionContext());
+  const renderComplete = useCallback(() => {
+    if (skipRenderComplete.current) {
+      return;
+    }
+    const usageCollection = getUsageCollectionStart();
+    const containerType = extractContainerType(handlers.getExecutionContext());
 
-      if (usageCollection && containerType) {
-        usageCollection.reportUiCounter(
-          containerType,
-          METRIC_TYPE.COUNT,
-          `render_agg_based_${visConfig!.type}`
-        );
-      }
-      handlers.done();
-    },
-    [handlers, visConfig]
-  );
+    if (usageCollection && containerType) {
+      usageCollection.reportUiCounter(
+        containerType,
+        METRIC_TYPE.COUNT,
+        `render_agg_based_${visConfig!.type}`
+      );
+    }
+    handlers.done();
+    skipRenderComplete.current = true;
+  }, [handlers, visConfig]);
 
   const renderChart = useMemo(
     () =>
       debounce(() => {
         if (visController.current) {
-          visController.current.render(
-            visData,
-            visConfig,
-            handlers,
-            skipRenderComplete.current ? undefined : renderComplete
-          );
+          visController.current.render(visData, visConfig, handlers, renderComplete);
         }
-        skipRenderComplete.current = true;
       }, 100),
-    [handlers, renderComplete, skipRenderComplete, visConfig, visData]
+    [handlers, renderComplete, visConfig, visData]
   );
 
   const onResize: EuiResizeObserverProps['onResize'] = useCallback(() => {

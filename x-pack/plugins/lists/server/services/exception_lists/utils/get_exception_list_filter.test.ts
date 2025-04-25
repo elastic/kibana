@@ -22,7 +22,7 @@ describe('getExceptionListFilter', () => {
       savedObjectTypes: ['exception-list-agnostic'],
     });
     expect(filter).toEqual(
-      '(exception-list-agnostic.attributes.list_type: list) AND exception-list-agnostic.attributes.name: "Sample Endpoint Exception List"'
+      '(exception-list-agnostic.attributes.list_type: list) AND (exception-list-agnostic.attributes.name: "Sample Endpoint Exception List")'
     );
   });
 
@@ -40,7 +40,7 @@ describe('getExceptionListFilter', () => {
       savedObjectTypes: ['exception-list'],
     });
     expect(filter).toEqual(
-      '(exception-list.attributes.list_type: list) AND exception-list.attributes.name: "Sample Endpoint Exception List"'
+      '(exception-list.attributes.list_type: list) AND (exception-list.attributes.name: "Sample Endpoint Exception List")'
     );
   });
 
@@ -56,11 +56,12 @@ describe('getExceptionListFilter', () => {
 
   test('it should create a filter that searches for both agnostic and single lists with additional filters if searching for both single and agnostic lists', () => {
     const filter = getExceptionListFilter({
-      filter: 'exception-list-agnostic.attributes.name: "Sample Endpoint Exception List"',
+      filter:
+        'exception-list-agnostic.attributes.name: "Sample Endpoint Exception List" OR exception-list.attributes.name: "Sample Rule Exception List"',
       savedObjectTypes: ['exception-list-agnostic', 'exception-list'],
     });
     expect(filter).toEqual(
-      '(exception-list-agnostic.attributes.list_type: list OR exception-list.attributes.list_type: list) AND exception-list-agnostic.attributes.name: "Sample Endpoint Exception List"'
+      '(exception-list-agnostic.attributes.list_type: list OR exception-list.attributes.list_type: list) AND (exception-list-agnostic.attributes.name: "Sample Endpoint Exception List" OR exception-list.attributes.name: "Sample Rule Exception List")'
     );
   });
 });

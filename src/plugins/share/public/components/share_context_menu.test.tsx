@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ShareMenuItem } from '../types';
+import { ShareMenuItemLegacy } from '../types';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -39,7 +39,7 @@ test('should disable the share URL when set', () => {
 });
 
 describe('shareContextMenuExtensions', () => {
-  const shareContextMenuItems: ShareMenuItem[] = [
+  const shareContextMenuItems: ShareMenuItemLegacy[] = [
     {
       panel: {
         id: '1',

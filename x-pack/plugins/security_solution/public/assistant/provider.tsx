@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { parse } from '@kbn/datemath';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -128,7 +128,7 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
     notifications.toasts
   );
   if (bulkResult && bulkResult.success) {
-    return true;
+    return bulkResult.attributes.results.created;
   }
 };
 
@@ -176,6 +176,8 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
   ]);
 
+  const [basePromptsLoaded, setBasePromptsLoaded] = useState(false);
+
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
       if (
@@ -183,15 +185,20 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
         assistantAvailability.isAssistantEnabled &&
         assistantAvailability.hasAssistantPrivilege
       ) {
-        const res = await getPrompts({
-          http,
-          toasts: notifications.toasts,
-        });
+        try {
+          const res = await getPrompts({
+            http,
+            toasts: notifications.toasts,
+          });
 
-        if (res.total === 0) {
-          await createBasePrompts(notifications, http);
-        }
+          if (res.total === 0) {
+            await createBasePrompts(notifications, http);
+          }
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
+
+      setBasePromptsLoaded(true);
     });
     createSecurityPrompts();
   }, [
@@ -205,6 +212,9 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
+  // Because our conversations need an assigned system prompt at create time,
+  // we want to make sure the prompts are there before creating the first conversation
+  // however if there is an error fetching the prompts, we don't want to block the app
 
   return (
     <ElasticAssistantProvider
@@ -224,7 +234,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
     >
-      {children}
+      {basePromptsLoaded ? children : null}
     </ElasticAssistantProvider>
   );
 };

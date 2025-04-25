@@ -1,7 +1,7 @@
 post:
   summary: Generate Logstash API key
   tags:
-    - Outputs
+    - Fleet outputs
   responses:
     '200':
       description: OK

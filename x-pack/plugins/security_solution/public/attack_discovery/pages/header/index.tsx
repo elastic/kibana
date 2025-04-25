@@ -38,7 +38,6 @@ const HeaderComponent: React.FC<Props> = ({
   onCancel,
   stats,
 }) => {
-  const isFlyoutMode = false; // always false for attack discovery
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { euiTheme } = useEuiTheme();
   const disabled = !hasAssistantPrivilege || connectorId == null;
@@ -85,7 +84,6 @@ const HeaderComponent: React.FC<Props> = ({
       {connectorsAreConfigured && (
         <EuiFlexItem grow={false}>
           <ConnectorSelectorInline
-            isFlyoutMode={isFlyoutMode}
             onConnectorSelected={noop}
             onConnectorIdSelected={onConnectorIdSelected}
             selectedConnectorId={connectorId}

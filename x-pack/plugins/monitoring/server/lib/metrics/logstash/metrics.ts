@@ -6,23 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  LARGE_ABBREVIATED,
+  LARGE_BYTES,
+  LARGE_FLOAT,
+  SMALL_BYTES,
+} from '../../../../common/formatting';
 import { QuotaMetric } from '../classes';
 import {
-  LogstashEventsRateClusterMetric,
   LogstashEventsLatencyClusterMetric,
-  LogstashEventsRateMetric,
   LogstashEventsLatencyMetric,
+  LogstashEventsRateClusterMetric,
+  LogstashEventsRateMetric,
   LogstashMetric,
+  LogstashPipelineNodeCountMetric,
   LogstashPipelineQueueSizeMetric,
   LogstashPipelineThroughputMetric,
-  LogstashPipelineNodeCountMetric,
 } from './classes';
-import {
-  LARGE_FLOAT,
-  LARGE_BYTES,
-  SMALL_BYTES,
-  LARGE_ABBREVIATED,
-} from '../../../../common/formatting';
 
 const instanceSystemLoadTitle = i18n.translate(
   'xpack.monitoring.metrics.logstash.systemLoadTitle',
@@ -451,6 +451,7 @@ export const metrics = {
   logstash_cluster_pipeline_nodes_count: new LogstashPipelineNodeCountMetric({
     field: 'logstash_stats.logstash.uuid',
     label: pipelineNodeCountLabel,
+    mbField: 'logstash.node.stats.logstash.uuid',
     description: pipelineNodeCountDescription,
     format: LARGE_FLOAT,
     units: '',
@@ -459,6 +460,7 @@ export const metrics = {
     uuidField: 'logstash_stats.logstash.uuid', // TODO: add comment explaining why
     field: 'logstash_stats.logstash.uuid',
     label: pipelineNodeCountLabel,
+    mbField: 'logstash.node.stats.logstash.uuid',
     description: pipelineNodeCountDescription,
     format: LARGE_FLOAT,
     units: '',

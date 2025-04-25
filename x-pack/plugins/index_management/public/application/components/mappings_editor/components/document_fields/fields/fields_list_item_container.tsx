@@ -18,6 +18,7 @@ interface Props {
   state: State;
   setPreviousState?: (state: State) => void;
   isAddingFields?: boolean;
+  pendingFieldsRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const FieldsListItemContainer = ({
@@ -27,6 +28,7 @@ export const FieldsListItemContainer = ({
   state,
   setPreviousState,
   isAddingFields,
+  pendingFieldsRef,
 }: Props) => {
   const dispatch = useDispatch();
   const listElement = useRef<HTMLLIElement | null>(null);
@@ -110,6 +112,7 @@ export const FieldsListItemContainer = ({
       toggleExpand={toggleExpand}
       state={state}
       isAddingFields={isAddingFields}
+      pendingFieldsRef={pendingFieldsRef}
     />
   );
 };

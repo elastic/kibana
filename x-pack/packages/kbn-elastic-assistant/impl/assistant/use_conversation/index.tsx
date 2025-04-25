@@ -33,7 +33,6 @@ interface CreateConversationProps {
   messages?: ClientMessage[];
   conversationIds?: string[];
   apiConfig?: Conversation['apiConfig'];
-  isFlyoutMode: boolean;
 }
 
 interface SetApiConfigProps {
@@ -46,7 +45,7 @@ interface UpdateConversationTitleProps {
   updatedTitle: string;
 }
 
-interface UseConversation {
+export interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
@@ -126,19 +125,17 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversationId, and optionally add messages
    */
   const getDefaultConversation = useCallback(
-    ({ cTitle, messages, isFlyoutMode }: CreateConversationProps): Conversation => {
+    ({ cTitle, messages }: CreateConversationProps): Conversation => {
       const newConversation: Conversation =
         cTitle === i18n.WELCOME_CONVERSATION_TITLE
-          ? {
-              ...WELCOME_CONVERSATION,
-              messages: !isFlyoutMode ? WELCOME_CONVERSATION.messages : [],
-            }
+          ? WELCOME_CONVERSATION
           : {
               ...DEFAULT_CONVERSATION_STATE,
               id: '',
               title: cTitle,
               messages: messages != null ? messages : [],
             };
+
       return newConversation;
     },
     []

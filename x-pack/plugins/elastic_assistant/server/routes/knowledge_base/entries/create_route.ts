@@ -49,15 +49,13 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           logger.debug(`Creating KB Entry:\n${JSON.stringify(request.body)}`);
@@ -67,9 +65,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
               pageContent: request.body.text,
             },
           ];
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient(
-            false
-          );
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const createResponse = await kbDataClient?.addKnowledgeBaseDocuments({ documents });
 
           if (createResponse == null) {

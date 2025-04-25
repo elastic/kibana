@@ -87,6 +87,7 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
     errorConnectingMessage: [
       props.errorConnectingMessage || '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onConnectionError: (_, { errorConnectingMessage }) => errorConnectingMessage,
       },
     ],
@@ -94,12 +95,14 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
     httpInterceptors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setHttpInterceptors: (_, { httpInterceptors }) => httpInterceptors,
       },
     ],
     readOnlyMode: [
       props.readOnlyMode || false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setReadOnlyMode: (_, { readOnlyMode }) => readOnlyMode,
       },
     ],

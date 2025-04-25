@@ -8,7 +8,7 @@
 import React, { type FC } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiTabbedContent } from '@elastic/eui';
+import { useEuiTheme, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { stringHash } from '@kbn/ml-string-hash';
@@ -30,6 +30,7 @@ interface Props {
 }
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
+  const { euiTheme } = useEuiTheme();
   const tabId = stringHash(item.id);
 
   const tabs = [
@@ -112,7 +113,8 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       onTabClick={() => {}}
       expand={false}
       css={css`
-        width: 100%;
+        margin-left: -${euiTheme.size.xl};
+        width: calce(100% + ${euiTheme.size.xl});
 
         .euiTable {
           background-color: transparent;

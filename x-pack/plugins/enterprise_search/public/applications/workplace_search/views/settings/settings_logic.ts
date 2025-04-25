@@ -119,22 +119,29 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     connectors: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onInitializeConnectors: (_, connectors) => sortByName(connectors),
       },
     ],
     orgNameInputValue: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, { organizationName }) => organizationName,
+        // @ts-expect-error upgrade typescript v5.1.6
         onOrgNameInputChange: (_, orgNameInputValue) => orgNameInputValue,
+        // @ts-expect-error upgrade typescript v5.1.6
         setUpdatedName: (_, organizationName) => organizationName,
       },
     ],
     oauthApplication: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, { oauthApplication }) => oauthApplication,
+        // @ts-expect-error upgrade typescript v5.1.6
         setOauthApplication: (_, oauthApplication) => oauthApplication,
+        // @ts-expect-error upgrade typescript v5.1.6
         setUpdatedOauthApplication: (_, oauthApplication) => oauthApplication,
       },
     ],
@@ -149,7 +156,9 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     logo: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, { logo }) => logo,
+        // @ts-expect-error upgrade typescript v5.1.6
         setLogo: (_, logo) => logo,
         resetOrgLogo: () => null,
       },
@@ -157,6 +166,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     stagedLogo: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setStagedLogo: (_, stagedLogo) => stagedLogo,
         resetOrgLogo: () => null,
         setLogo: () => null,
@@ -165,7 +175,9 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     icon: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerProps: (_, { icon }) => icon,
+        // @ts-expect-error upgrade typescript v5.1.6
         setIcon: (_, icon) => icon,
         resetOrgIcon: () => null,
       },
@@ -173,6 +185,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     stagedIcon: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setStagedIcon: (_, stagedIcon) => stagedIcon,
         resetOrgIcon: () => null,
         setIcon: () => null,

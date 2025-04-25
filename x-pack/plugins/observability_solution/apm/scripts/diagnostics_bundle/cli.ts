@@ -164,7 +164,12 @@ async function getHostnameWithBasePath(kibanaHostname?: string) {
   const parsedHostName = parseHostName(kibanaHostname);
 
   try {
-    await axios.get(parsedHostName, { maxRedirects: 0 });
+    await axios.get(parsedHostName, {
+      maxRedirects: 0,
+      headers: {
+        'x-elastic-internal-origin': 'Kibana',
+      },
+    });
   } catch (e) {
     if (isAxiosError(e) && e.response?.status === 302) {
       const location = e.response?.headers?.location ?? '';

@@ -30,8 +30,6 @@ include::{kibana-root}/docs/observability/index.asciidoc[]
 
 include::{kibana-root}/docs/playground/index.asciidoc[]
 
-include::{kibana-root}/docs/apm/index.asciidoc[]
-
 include::{kibana-root}/docs/siem/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
@@ -49,4 +47,3 @@ include::api.asciidoc[]
 include::plugins.asciidoc[]
 
 include::troubleshooting/index.asciidoc[]
-

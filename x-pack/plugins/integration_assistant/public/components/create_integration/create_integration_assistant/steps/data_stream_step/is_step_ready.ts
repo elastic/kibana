@@ -12,5 +12,5 @@ export const isDataStreamStepReady = ({ integrationSettings }: State) =>
       integrationSettings?.dataStreamTitle &&
       integrationSettings?.dataStreamDescription &&
       integrationSettings?.dataStreamName &&
-      integrationSettings?.logsSampleParsed
+      integrationSettings?.logSamples
   );

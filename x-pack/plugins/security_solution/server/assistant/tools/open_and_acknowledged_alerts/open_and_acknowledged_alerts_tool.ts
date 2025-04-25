@@ -22,7 +22,7 @@ export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams
 }
 
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION =
-  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. Input should be an empty object. The output is an array of the latest n open and acknowledged alerts.';
+  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.';
 
 /**
  * Returns a tool for querying open and acknowledged alerts, or null if the

@@ -7,6 +7,7 @@
 
 import {
   AnalyticsServiceSetup,
+  type AuthenticatedUser,
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
@@ -28,9 +29,9 @@ import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
-import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
-import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
+import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE } from './knowledge_base/constants';
 import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
@@ -275,57 +276,10 @@ export interface NonLangChainExecuteParams {
   response: KibanaResponseFactory;
   telemetry: AnalyticsServiceSetup;
 }
-export const nonLangChainExecute = async ({
-  messages,
-  abortSignal,
-  actionTypeId,
-  connectorId,
-  logger,
-  actionsClient,
-  onLlmResponse,
-  response,
-  request,
-  telemetry,
-}: NonLangChainExecuteParams) => {
-  logger.debug('Executing via actions framework directly');
-  const result = await executeAction({
-    abortSignal,
-    onLlmResponse,
-    actionsClient,
-    connectorId,
-    actionTypeId,
-    params: {
-      subAction: request.body.subAction,
-      subActionParams: {
-        model: request.body.model,
-        messages,
-        ...(actionTypeId === '.gen-ai'
-          ? { n: 1, stop: null, temperature: 0.2 }
-          : { temperature: 0, stopSequences: [] }),
-      },
-    },
-    logger,
-  });
-
-  telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-    actionTypeId,
-    isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
-    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
-    model: request.body.model,
-    assistantStreamingEnabled: request.body.subAction !== 'invokeAI',
-  });
-  return response.ok({
-    body: result,
-    ...(request.body.subAction === 'invokeAI'
-      ? { headers: { 'content-type': 'application/json' } }
-      : {}),
-  });
-};
 
 export interface LangChainExecuteParams {
   messages: Array<Pick<Message, 'content' | 'role'>>;
   replacements: Replacements;
-  isEnabledKnowledgeBase: boolean;
   isStream?: boolean;
   onNewReplacements: (newReplacements: Replacements) => void;
   abortSignal: AbortSignal;
@@ -353,7 +307,6 @@ export const langChainExecute = async ({
   messages,
   replacements,
   onNewReplacements,
-  isEnabledKnowledgeBase,
   abortSignal,
   telemetry,
   actionTypeId,
@@ -369,10 +322,6 @@ export const langChainExecute = async ({
   responseLanguage,
   isStream = true,
 }: LangChainExecuteParams) => {
-  // TODO: Add `traceId` to actions request when calling via langchain
-  logger.debug(
-    `Executing via langchain, isEnabledKnowledgeBase: ${isEnabledKnowledgeBase}, isEnabledRAGAlerts: ${request.body.isEnabledRAGAlerts}`
-  );
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
     request,
@@ -397,19 +346,13 @@ export const langChainExecute = async ({
   const conversationsDataClient = await assistantContext.getAIAssistantConversationsDataClient();
 
   // Create an ElasticsearchStore for KB interactions
-  // Setup with kbDataClient if `assistantKnowledgeBaseByDefault` FF is enabled
-  const enableKnowledgeBaseByDefault =
-    assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
-  const kbDataClient = enableKnowledgeBaseByDefault
-    ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
-    : undefined;
-  const kbIndex =
-    enableKnowledgeBaseByDefault && kbDataClient != null
-      ? kbDataClient.indexTemplateAndPattern.alias
-      : KNOWLEDGE_BASE_INDEX_PATTERN;
+  const kbDataClient =
+    (await assistantContext.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+  const bedrockChatEnabled =
+    assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
   const esStore = new ElasticsearchStore(
     esClient,
-    kbIndex,
+    kbDataClient?.indexTemplateAndPattern?.alias ?? '',
     logger,
     telemetry,
     elserId,
@@ -429,7 +372,7 @@ export const langChainExecute = async ({
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     actionsClient,
-    isEnabledKnowledgeBase,
+    bedrockChatEnabled,
     assistantTools,
     conversationId,
     connectorId,
@@ -455,96 +398,64 @@ export const langChainExecute = async ({
     },
   };
 
-  // New code path for LangGraph implementation, behind `assistantKnowledgeBaseByDefault` FF
-  let result: StreamResponseWithHeaders | StaticReturnType;
-  if (enableKnowledgeBaseByDefault && request.body.isEnabledKnowledgeBase) {
-    result = await callAssistantGraph(executorParams);
-  } else {
-    result = await callAgentExecutor(executorParams);
-  }
+  const result: StreamResponseWithHeaders | StaticReturnType = await callAssistantGraph(
+    executorParams
+  );
+
+  const { esqlExists, isModelDeployed } = await getIsKnowledgeBaseEnabled(kbDataClient);
 
   telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
     actionTypeId,
-    isEnabledKnowledgeBase,
-    isEnabledRAGAlerts: request.body.isEnabledRAGAlerts ?? true,
     model: request.body.model,
     // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
     // tracked here: https://github.com/elastic/security-team/issues/7363
     assistantStreamingEnabled: isStream && actionTypeId === '.gen-ai',
+    isEnabledKnowledgeBase: isModelDeployed && esqlExists,
   });
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
 };
 
-export interface CreateOrUpdateConversationWithParams {
-  logger: Logger;
+export interface CreateConversationWithParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   replacements: Replacements;
   conversationId?: string;
   promptId?: string;
   actionTypeId: string;
   connectorId: string;
-  actionsClient: PublicMethodsOf<ActionsClient>;
   newMessages?: Array<Pick<Message, 'content' | 'role'>>;
   model?: string;
-  responseLanguage?: string;
 }
-export const createOrUpdateConversationWithUserInput = async ({
-  logger,
+export const createConversationWithUserInput = async ({
   conversationsDataClient,
   replacements,
   conversationId,
   actionTypeId,
   promptId,
   connectorId,
-  actionsClient,
   newMessages,
   model,
-  responseLanguage,
-}: CreateOrUpdateConversationWithParams) => {
+}: CreateConversationWithParams) => {
   if (!conversationId) {
     if (newMessages && newMessages.length > 0) {
-      const title = await generateTitleForNewChatConversation({
-        message: newMessages[0],
-        actionsClient,
-        actionTypeId,
-        connectorId,
-        logger,
-        model,
-        responseLanguage,
-      });
-      if (title) {
-        return conversationsDataClient.createConversation({
-          conversation: {
-            title,
-            messages: newMessages.map((m) => ({
-              content: m.content,
-              role: m.role,
-              timestamp: new Date().toISOString(),
-            })),
-            replacements,
-            apiConfig: {
-              connectorId,
-              actionTypeId,
-              model,
-              defaultSystemPromptId: promptId,
-            },
+      return conversationsDataClient.createConversation({
+        conversation: {
+          title: NEW_CHAT,
+          messages: newMessages.map((m) => ({
+            content: m.content,
+            role: m.role,
+            timestamp: new Date().toISOString(),
+          })),
+          replacements,
+          apiConfig: {
+            connectorId,
+            actionTypeId,
+            model,
+            defaultSystemPromptId: promptId,
           },
-        });
-      }
+        },
+      });
     }
-    return;
   }
-  return updateConversationWithUserInput({
-    actionsClient,
-    actionTypeId,
-    connectorId,
-    conversationId,
-    conversationsDataClient,
-    logger,
-    replacements,
-    newMessages,
-    model,
-  });
 };
 
 export interface UpdateConversationWithParams {
@@ -617,55 +528,66 @@ export const updateConversationWithUserInput = async ({
 };
 
 interface PerformChecksParams {
-  authenticatedUser?: boolean;
   capability?: AssistantFeatureKey;
   context: AwaitedProperties<
     Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
   >;
-  license?: boolean;
   request: KibanaRequest;
   response: KibanaResponseFactory;
 }
 
 /**
- * Helper to perform checks for authenticated user, capability, and license. Perform all or one
- * of the checks by providing relevant optional params. Check order is license, authenticated user,
- * then capability.
+ * Helper to perform checks for authenticated user, license, and optionally capability.
+ * Check order is license, authenticated user, then capability.
  *
- * @param authenticatedUser - Whether to check for an authenticated user
+ * Returns either a successful check with an AuthenticatedUser or
+ * an unsuccessful check with an error IKibanaResponse.
+ *
  * @param capability - Specific capability to check if enabled, e.g. `assistantModelEvaluation`
  * @param context - Route context
- * @param license - Whether to check for a valid license
  * @param request - Route KibanaRequest
  * @param response - Route KibanaResponseFactory
+ * @returns PerformChecks
  */
+
+type PerformChecks =
+  | {
+      isSuccess: true;
+      currentUser: AuthenticatedUser;
+    }
+  | {
+      isSuccess: false;
+      response: IKibanaResponse;
+    };
 export const performChecks = ({
-  authenticatedUser,
   capability,
   context,
-  license,
   request,
   response,
-}: PerformChecksParams): IKibanaResponse | undefined => {
+}: PerformChecksParams): PerformChecks => {
   const assistantResponse = buildResponse(response);
 
-  if (license) {
-    if (!hasAIAssistantLicense(context.licensing.license)) {
-      return response.forbidden({
+  if (!hasAIAssistantLicense(context.licensing.license)) {
+    return {
+      isSuccess: false,
+      response: response.forbidden({
         body: {
           message: UPGRADE_LICENSE_MESSAGE,
         },
-      });
-    }
+      }),
+    };
   }
 
-  if (authenticatedUser) {
-    if (context.elasticAssistant.getCurrentUser() == null) {
-      return assistantResponse.error({
+  const currentUser = context.elasticAssistant.getCurrentUser();
+
+  if (currentUser == null) {
+    return {
+      isSuccess: false,
+      response: assistantResponse.error({
         body: `Authenticated user not found`,
         statusCode: 401,
-      });
-    }
+      }),
+    };
   }
 
   if (capability) {
@@ -675,9 +597,50 @@ export const performChecks = ({
     });
     const registeredFeatures = context.elasticAssistant.getRegisteredFeatures(pluginName);
     if (!registeredFeatures[capability]) {
-      return response.notFound();
+      return {
+        isSuccess: false,
+        response: response.notFound(),
+      };
     }
   }
 
-  return undefined;
+  return {
+    isSuccess: true,
+    currentUser,
+  };
+};
+
+/**
+ * Telemetry function to determine whether knowledge base has been installed
+ * @param kbDataClient
+ */
+export const getIsKnowledgeBaseEnabled = async (
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient | null
+): Promise<{
+  esqlExists: boolean;
+  isModelDeployed: boolean;
+}> => {
+  let esqlExists = false;
+  let isModelDeployed = false;
+  if (kbDataClient != null) {
+    try {
+      isModelDeployed = await kbDataClient.isModelDeployed();
+      if (isModelDeployed) {
+        esqlExists =
+          (
+            await kbDataClient.getKnowledgeBaseDocuments({
+              query: ESQL_DOCS_LOADED_QUERY,
+              required: true,
+            })
+          ).length > 0;
+      }
+    } catch (e) {
+      /* if telemetry related requests fail, fallback to default values */
+    }
+  }
+
+  return {
+    esqlExists,
+    isModelDeployed,
+  };
 };

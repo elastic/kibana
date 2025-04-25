@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  InferenceAPIConfigResponse,
+  ELASTIC_MODEL_DEFINITIONS,
+} from '@kbn/ml-trained-models-utils';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
 import { ServiceProviderKeys } from '../../types';
 import { ModelBadge } from './model_badge';
 import * as i18n from './translations';
@@ -18,18 +21,18 @@ export interface EndpointInfoProps {
 
 export const EndpointInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
-      <EuiFlexItem grow={false}>
-        <strong>{endpoint.model_id}</strong>
+    <EuiFlexGroup gutterSize="xs" direction="column">
+      <EuiFlexItem>
+        <strong>{endpoint.inference_id}</strong>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem css={{ textWrap: 'wrap' }}>
         <EndpointModelInfo endpoint={endpoint} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
+const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => {
   const serviceSettings = endpoint.service_settings;
   const modelId =
     'model_id' in serviceSettings
@@ -38,19 +41,27 @@ export const EndpointModelInfo: React.FC<EndpointInfoProps> = ({ endpoint }) => 
       ? serviceSettings.model
       : undefined;
 
+  const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
+
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      {modelId && (
-        <EuiFlexItem grow={false}>
-          <ModelBadge model={modelId} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiText color="subdued" size="xs">
-          {endpointModelAtrributes(endpoint)}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiText color="subdued" size="xs">
+        {modelId && <ModelBadge model={modelId} />}
+        {isEligibleForMITBadge ? (
+          <EuiBadge
+            color="hollow"
+            iconType="popout"
+            iconSide="right"
+            href={ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl ?? ''}
+            target="_blank"
+            data-test-subj={'mit-license-badge'}
+          >
+            {i18n.MIT_LICENSE}
+          </EuiBadge>
+        ) : null}{' '}
+        {endpointModelAtrributes(endpoint)}
+      </EuiText>
+    </>
   );
 };
 
@@ -73,6 +84,8 @@ function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
       return mistralAttributes(endpoint);
     case ServiceProviderKeys.googleaistudio:
       return googleAIStudioAttributes(endpoint);
+    case ServiceProviderKeys.amazonbedrock:
+      return amazonBedrockAttributes(endpoint);
     default:
       return null;
   }
@@ -118,7 +131,7 @@ function openAIAttributes(endpoint: InferenceAPIConfigResponse) {
 
 function azureOpenAIStudioAttributes(endpoint: InferenceAPIConfigResponse) {
   const serviceSettings = endpoint.service_settings;
-  const provider = 'provider' in serviceSettings ? serviceSettings.provider : undefined;
+  const provider = 'provider' in serviceSettings ? serviceSettings?.provider : undefined;
   const endpointType =
     'endpoint_type' in serviceSettings ? serviceSettings.endpoint_type : undefined;
   const target = 'target' in serviceSettings ? serviceSettings.target : undefined;
@@ -150,6 +163,18 @@ function mistralAttributes(endpoint: InferenceAPIConfigResponse) {
     maxInputTokens && `max_input_tokens: ${maxInputTokens}`,
     rateLimit && `rate_limit: ${rateLimit}`,
   ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+function amazonBedrockAttributes(endpoint: InferenceAPIConfigResponse) {
+  const serviceSettings = endpoint.service_settings;
+
+  const region = 'region' in serviceSettings ? serviceSettings.region : undefined;
+  const provider =
+    'provider' in serviceSettings ? serviceSettings.provider.toLocaleLowerCase() : undefined;
+
+  return [region && `region: ${region}`, provider && `provider: ${provider}`]
     .filter(Boolean)
     .join(', ');
 }

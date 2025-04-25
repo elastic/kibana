@@ -81,15 +81,13 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       telemetry: core.analytics,
 
-      // Note: Due to plugin lifecycle and feature flag registration timing, we need to pass in the feature flag here
-      // Remove `initializeKnowledgeBase` once 'assistantKnowledgeBaseByDefault' feature flag is removed
-      getAIAssistantKnowledgeBaseDataClient: memoize((initializeKnowledgeBase = false) => {
+      getAIAssistantKnowledgeBaseDataClient: memoize(() => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantKnowledgeBaseDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          initializeKnowledgeBase,
         });
       }),
 
@@ -97,6 +95,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAttackDiscoveryDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -106,6 +105,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -115,6 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantAnonymizationFieldsDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });
@@ -124,6 +125,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantConversationsDataClient({
           spaceId: getSpaceId(),
+          licensing: context.licensing,
           logger: this.logger,
           currentUser,
         });

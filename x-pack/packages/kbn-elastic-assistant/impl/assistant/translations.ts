@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CLEAR_CHAT = i18n.translate('xpack.elasticAssistant.assistant.clearChat', {
-  defaultMessage: 'Clear chat',
-});
-
 export const DEFAULT_ASSISTANT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.defaultAssistantTitle',
   {
@@ -25,13 +21,6 @@ export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.s
 export const API_ERROR = i18n.translate('xpack.elasticAssistant.assistant.apiErrorTitle', {
   defaultMessage: 'An error occurred sending your message.',
 });
-
-export const TOOLTIP_ARIA_LABEL = i18n.translate(
-  'xpack.elasticAssistant.documentationLinks.ariaLabel',
-  {
-    defaultMessage: 'Click to open Elastic Assistant documentation in a new tab',
-  }
-);
 
 export const DOCUMENTATION = i18n.translate(
   'xpack.elasticAssistant.documentationLinks.documentation',

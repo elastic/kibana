@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiConfirmModal,
@@ -13,16 +13,14 @@ import {
   EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import {
-  PromptResponse,
-  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
-import { CANCEL, DELETE } from '../../settings/translations';
+import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/translations';
 import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import {
@@ -31,31 +29,58 @@ import {
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useAssistantContext } from '../../../assistant_context';
+import {
+  DEFAULT_CONVERSATIONS,
+  useSettingsUpdater,
+} from '../../settings/use_settings_updater/use_settings_updater';
+import { useFetchPrompts } from '../../api';
 
-interface Props {
-  handleSave: (shouldRefetchConversation?: boolean) => void;
-  onCancelClick: () => void;
-  onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
-  quickPromptSettings: PromptResponse[];
-  resetSettings?: () => void;
-  selectedQuickPrompt: PromptResponse | undefined;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
-  promptsBulkActions: PromptsPerformBulkActionRequestBody;
-  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
-}
+const QuickPromptSettingsManagementComponent = () => {
+  const { nameSpace, basePromptContexts, toasts } = useAssistantContext();
 
-const QuickPromptSettingsManagementComponent = ({
-  handleSave,
-  onCancelClick,
-  onSelectedQuickPromptChange,
-  quickPromptSettings,
-  resetSettings,
-  selectedQuickPrompt,
-  setUpdatedQuickPromptSettings,
-  promptsBulkActions,
-  setPromptsBulkActions,
-}: Props) => {
-  const { nameSpace, basePromptContexts } = useAssistantContext();
+  const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
+
+  const {
+    promptsBulkActions,
+    quickPromptSettings,
+    resetSettings,
+    saveSettings,
+    setPromptsBulkActions,
+    setUpdatedQuickPromptSettings,
+  } = useSettingsUpdater(
+    DEFAULT_CONVERSATIONS, // Quick Prompt settings do not require conversations
+    allPrompts,
+    false, // Quick Prompt settings do not require conversations
+    promptsLoaded
+  );
+
+  // Quick Prompt Selection State
+  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
+  const onSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
+    setSelectedQuickPrompt(quickPrompt);
+  }, []);
+
+  useEffect(() => {
+    if (selectedQuickPrompt != null) {
+      setSelectedQuickPrompt(quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name));
+    }
+  }, [quickPromptSettings, selectedQuickPrompt]);
+
+  const handleSave = useCallback(
+    async (param?: { callback?: () => void }) => {
+      await saveSettings();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      param?.callback?.();
+    },
+    [saveSettings, toasts]
+  );
+
+  const onCancelClick = useCallback(() => {
+    resetSettings();
+  }, [resetSettings]);
 
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<PromptResponse | null>();
@@ -96,9 +121,9 @@ const QuickPromptSettingsManagementComponent = ({
   }, [closeConfirmModal, onCancelClick]);
 
   const onDeleteConfirmed = useCallback(() => {
-    handleSave();
+    handleSave({ callback: refetchPrompts });
     closeConfirmModal();
-  }, [closeConfirmModal, handleSave]);
+  }, [closeConfirmModal, handleSave, refetchPrompts]);
 
   const onCreate = useCallback(() => {
     onSelectedQuickPromptChange();
@@ -112,13 +137,14 @@ const QuickPromptSettingsManagementComponent = ({
   }, [closeFlyout, onSelectedQuickPromptChange, onCancelClick]);
 
   const onSaveConfirmed = useCallback(() => {
-    handleSave();
+    handleSave({ callback: refetchPrompts });
     onSelectedQuickPromptChange();
     closeFlyout();
-  }, [closeFlyout, handleSave, onSelectedQuickPromptChange]);
+  }, [closeFlyout, handleSave, onSelectedQuickPromptChange, refetchPrompts]);
 
   const { getColumns } = useQuickPromptTable();
   const columns = getColumns({
+    isActionsDisabled: !promptsLoaded,
     basePromptContexts,
     onEditActionClicked,
     onDeleteActionClicked,
@@ -141,9 +167,12 @@ const QuickPromptSettingsManagementComponent = ({
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate}>
+            <EuiText size="m">{i18n.QUICK_PROMPTS_DESCRIPTION}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={!promptsLoaded}>
               {i18n.QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>
@@ -163,6 +192,7 @@ const QuickPromptSettingsManagementComponent = ({
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
+        saveButtonDisabled={selectedQuickPrompt?.name == null || selectedQuickPrompt?.name === ''}
       >
         <QuickPromptSettingsEditor
           onSelectedQuickPromptChange={onSelectedQuickPromptChange}

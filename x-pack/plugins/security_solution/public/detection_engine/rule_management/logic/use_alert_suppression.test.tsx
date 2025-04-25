@@ -6,18 +6,20 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_experimental_features';
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {
-  beforeEach(() => {
-    jest
-      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-      .mockReturnValue(false);
-  });
-
   (
-    ['new_terms', 'threat_match', 'saved_query', 'query', 'threshold', 'eql', 'esql'] as Type[]
+    [
+      'new_terms',
+      'threat_match',
+      'saved_query',
+      'query',
+      'threshold',
+      'eql',
+      'esql',
+      'machine_learning',
+    ] as Type[]
   ).forEach((ruleType) => {
     it(`should return the isSuppressionEnabled true for ${ruleType} rule type that exists in SUPPRESSIBLE_ALERT_RULES`, () => {
       const { result } = renderHook(() => useAlertSuppression(ruleType));
@@ -35,23 +37,5 @@ describe('useAlertSuppression', () => {
     const { result } = renderHook(() => useAlertSuppression('OTHER_RULE_TYPE' as Type));
 
     expect(result.current.isSuppressionEnabled).toBe(false);
-  });
-
-  describe('ML rules', () => {
-    it('is true if the feature flag is enabled', () => {
-      jest
-        .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-        .mockReset()
-        .mockReturnValue(true);
-      const { result } = renderHook(() => useAlertSuppression('machine_learning'));
-
-      expect(result.current.isSuppressionEnabled).toBe(true);
-    });
-
-    it('is false if the feature flag is disabled', () => {
-      const { result } = renderHook(() => useAlertSuppression('machine_learning'));
-
-      expect(result.current.isSuppressionEnabled).toBe(false);
-    });
   });
 });

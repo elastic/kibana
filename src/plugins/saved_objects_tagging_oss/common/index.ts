@@ -9,6 +9,7 @@
 export type {
   Tag,
   TagAttributes,
+  CreateTagOptions,
   GetAllTagsOptions,
   ITagsClient,
   TagWithOptionalId,

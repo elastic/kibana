@@ -47,8 +47,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./settings'));
     loadTestFile(require.resolve('./details_view'));
-    loadTestFile(require.resolve('./external_connections'));
-    loadTestFile(require.resolve('./custom_fields'));
   });
 }

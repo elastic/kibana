@@ -13,7 +13,7 @@ export const operators = ['and', 'or', 'not'];
 
 export const removeKqlVariablesUsingRegex = (expression: string) => {
   const myRegexp =
-    /(\s+)*(and|or|not){0,1}(\s+)*([\w\.\-\[\]]+)\s*:\s*"(\$[\w\.\-\(\)\[\]]+\$)"(\s+)*(and|or|not){0,1}(\s+)*/g;
+    /(\s*)(and|or|not){0,1}(\s*)([\w\.\-\[\]]+)\s*:\s*"(\$[\w\.\-\(\)\[\]]+\$)"(\s*)(and|or|not){0,1}(\s*)/g;
   return expression.replace(myRegexp, replacer);
 };
 

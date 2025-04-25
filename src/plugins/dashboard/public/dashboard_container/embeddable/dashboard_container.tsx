@@ -784,7 +784,7 @@ export class DashboardContainer
         return;
       }
 
-      panelRef.scrollIntoView({ block: 'center' });
+      panelRef.scrollIntoView({ block: 'nearest' });
     });
   };
 
@@ -835,7 +835,9 @@ export class DashboardContainer
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
     return {
       rawState,
-      references,
+      // references from old installations may not be prefixed with panel id
+      // fall back to passing all references in these cases to preserve backwards compatability
+      references: references.length > 0 ? references : this.savedObjectReferences,
     };
   };
 

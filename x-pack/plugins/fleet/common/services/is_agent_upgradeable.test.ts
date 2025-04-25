@@ -245,6 +245,65 @@ describe('Fleet - isAgentUpgradeableToVersion', () => {
       isAgentUpgradeableToVersion(getAgent({ version: '7.9.0', upgradeable: true }), '7.9.0')
     ).toBe(false);
   });
+
+  describe('+build versions', () => {
+    it('returns true with target version of a +build version on the same patch', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.9.0+build202408011234'
+        )
+      ).toBe(true);
+    });
+    it('returns true with target version of a +build version on a newer patch', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.9.1+build202408011234'
+        )
+      ).toBe(true);
+    });
+    it('returns true with target version of a +build version on a newer minor', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.10.0+build202408011234'
+        )
+      ).toBe(true);
+    });
+    it('returns true with current version on a +build version', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0+build202408011234', upgradeable: true }),
+          '7.9.1'
+        )
+      ).toBe(true);
+    });
+    it('returns true when upgrade build is newer than current build', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '8.12.0+build202408011234', upgradeable: true }),
+          '8.12.0+build202408061235'
+        )
+      ).toBe(true);
+    });
+    it('returns false when upgrade build is older than current build', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '8.12.0+build202408061234' }),
+          '8.12.0+build202408011234'
+        )
+      ).toBe(false);
+    });
+    it('returns false with target version of a +build version on an older patch', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.8.9+build202408011234'
+        )
+      ).toBe(false);
+    });
+  });
 });
 
 describe('Fleet - getNotUpgradeableMessage', () => {

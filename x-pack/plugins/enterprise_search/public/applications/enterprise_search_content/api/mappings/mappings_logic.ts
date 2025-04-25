@@ -25,6 +25,6 @@ export const getMappings = async ({ indexName }: GetMappingsArgs) => {
 };
 
 export const mappingsWithPropsApiLogic = (indexName: string) =>
-  createApiLogic(['mappings_api_logic', indexName], getMappings);
+  createApiLogic(['mappings_api_logic_with_props', indexName], getMappings);
 
 export const MappingsApiLogic = createApiLogic(['mappings_api_logic'], getMappings);

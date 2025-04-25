@@ -1,7 +1,7 @@
 get:
   summary: Get incoming agent data
   tags:
-    - Agent status
+    - Elastic Agent status
   responses:
     '200':
       description: OK

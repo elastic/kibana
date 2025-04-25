@@ -31,7 +31,7 @@ Here is an example of a DELETE request to delete a private location:
 
 [source,sh]
 --------------------------------------------------
-DELETE /api/private-locations/<location_id>
+DELETE /api/synthetics/private-locations/<location_id>
 --------------------------------------------------
 
 The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.

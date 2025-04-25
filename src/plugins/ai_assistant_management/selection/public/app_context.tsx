@@ -9,6 +9,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
+import type { BuildFlavor } from '@kbn/config';
 import type { StartDependencies } from './plugin';
 
 interface ContextValue extends StartDependencies {
@@ -16,6 +17,8 @@ interface ContextValue extends StartDependencies {
 
   capabilities: CoreStart['application']['capabilities'];
   navigateToApp: CoreStart['application']['navigateToApp'];
+  kibanaBranch: string;
+  buildFlavor: BuildFlavor;
 }
 
 const AppContext = createContext<ContextValue>(null as any);

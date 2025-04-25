@@ -183,6 +183,7 @@ export const SynchronizationLogic = kea<
     setIndexingRules: (indexingRules: EditableIndexingRule[]) => indexingRules,
     setIndexingRule: (rule: EditableIndexingRule) => rule,
   },
+  // @ts-expect-error upgrade typescript v5.1.6
   reducers: ({ props }) => ({
     hasUnsavedIndexingRulesChanges: [
       false,
@@ -198,12 +199,14 @@ export const SynchronizationLogic = kea<
     navigatingBetweenTabs: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setNavigatingBetweenTabs: (_, navigatingBetweenTabs) => navigatingBetweenTabs,
       },
     ],
     thumbnailsChecked: [
       props.contentSource.indexing.features.thumbnails.enabled,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setThumbnailsChecked: (_, thumbnailsChecked) => thumbnailsChecked,
         resetSyncSettings: () => props.contentSource.indexing.features.thumbnails.enabled,
       },
@@ -211,6 +214,7 @@ export const SynchronizationLogic = kea<
     contentExtractionChecked: [
       props.contentSource.indexing.features.contentExtraction.enabled,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setContentExtractionChecked: (_, contentExtractionChecked) => contentExtractionChecked,
         resetSyncSettings: () => props.contentSource.indexing.features.contentExtraction.enabled,
       },
@@ -218,6 +222,7 @@ export const SynchronizationLogic = kea<
     cachedSchedule: [
       stripScheduleSeconds(props.contentSource.indexing.schedule),
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerSchedule: (_, schedule) => schedule,
       },
     ],
@@ -225,7 +230,9 @@ export const SynchronizationLogic = kea<
       stripScheduleSeconds(props.contentSource.indexing.schedule),
       {
         resetSyncSettings: () => stripScheduleSeconds(props.contentSource.indexing.schedule),
+        // @ts-expect-error upgrade typescript v5.1.6
         setServerSchedule: (_, schedule) => schedule,
+        // @ts-expect-error upgrade typescript v5.1.6
         setSyncFrequency: (state, { type, value, unit }) => {
           let currentValue;
           const schedule = cloneDeep(state);
@@ -254,6 +261,7 @@ export const SynchronizationLogic = kea<
 
           return schedule;
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         addBlockedWindow: (state) => {
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows || [];
@@ -261,6 +269,7 @@ export const SynchronizationLogic = kea<
           schedule.blockedWindows = blockedWindows;
           return schedule;
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         removeBlockedWindow: (state, index) => {
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows;
@@ -272,10 +281,12 @@ export const SynchronizationLogic = kea<
           }
           return schedule;
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         setBlockedTimeWindow: (state, { index, prop, value }) => {
           const schedule = cloneDeep(state);
           const blockedWindows = schedule.blockedWindows;
           const blockedWindow = blockedWindows![index] as BlockedWindowMap;
+          // @ts-expect-error upgrade typescript v5.1.6
           blockedWindow[prop] = value;
           (blockedWindows![index] as BlockedWindowMap) = blockedWindow;
           schedule.blockedWindows = blockedWindows;
@@ -291,18 +302,22 @@ export const SynchronizationLogic = kea<
         value: isIncludeRule(rule) ? rule.include : rule.exclude,
       })),
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addIndexingRule: (indexingRules, rule) => [
           ...indexingRules,
           {
             ...rule,
             // make sure that we get a unique number, in case of multiple deletions and additions
             id: indexingRules.reduce(
+              // @ts-expect-error upgrade typescript v5.1.6
               (prev, curr) => (curr.id >= prev ? curr.id + 1 : prev),
               indexingRules.length
             ),
           },
         ],
+        // @ts-expect-error upgrade typescript v5.1.6
         deleteIndexingRule: (indexingRules, rule) =>
+          // @ts-expect-error upgrade typescript v5.1.6
           indexingRules.filter((currentRule) => currentRule.id !== rule.id),
         resetSyncSettings: () =>
           (props.contentSource.indexing.rules as IndexingRule[]).map((rule, index) => ({
@@ -311,9 +326,13 @@ export const SynchronizationLogic = kea<
             valueType: isIncludeRule(rule) ? 'include' : 'exclude',
             value: isIncludeRule(rule) ? rule.include : rule.exclude,
           })),
+        // @ts-expect-error upgrade typescript v5.1.6
         setIndexingRules: (_, indexingRules) =>
+          // @ts-expect-error upgrade typescript v5.1.6
           indexingRules.map((val, index) => ({ ...val, id: index })),
+        // @ts-expect-error upgrade typescript v5.1.6
         setIndexingRule: (state, rule) =>
+          // @ts-expect-error upgrade typescript v5.1.6
           state.map((currentRule) => (currentRule.id === rule.id ? rule : currentRule)),
       },
     ],

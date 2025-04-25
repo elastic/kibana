@@ -19,7 +19,6 @@ properties:
   type: 
     description: The type of comment.
     type: string
-    examples:
-      - alert
+    example: alert
     enum:
       - alert

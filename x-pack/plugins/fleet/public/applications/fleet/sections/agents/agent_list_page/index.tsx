@@ -8,6 +8,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
+import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+
 import type { Agent } from '../../../types';
 
 import {
@@ -167,10 +169,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortField(sort!.field);
     setSortOrder(sort!.direction);
   };
-
-  const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
-  }, [selectedStatus]);
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =
@@ -352,7 +350,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUpgrade(undefined);
               refreshAgents();
             }}
-            isUpdating={Boolean(agentToUpgrade.upgrade_started_at && !agentToUpgrade.upgraded_at)}
+            isUpdating={isStuckInUpdating(agentToUpgrade)}
           />
         </EuiPortal>
       )}
@@ -435,7 +433,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
-        showInactive={showInactive}
         totalAgents={nAgentsInTable}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}

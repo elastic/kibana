@@ -170,10 +170,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const getUrlFromShare = async () => {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
-      const sharedUrl = await PageObjects.share.getSharedUrl();
+      const snapshotUrl = await PageObjects.share.getSnapshotUrl();
       await PageObjects.share.closeShareModal();
-      log.debug(`sharedUrl: ${sharedUrl}`);
-      return sharedUrl;
+      return snapshotUrl;
     };
 
     const hardRefresh = async (newUrl: string) => {

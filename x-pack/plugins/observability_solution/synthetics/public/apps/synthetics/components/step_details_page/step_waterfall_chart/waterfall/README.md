@@ -6,7 +6,7 @@ The waterfall chart component aims to be agnostic in it's approach, so that a va
 
 ## Requirements for usage
 
-The waterfall chart component asssumes that the consumer is making use of `KibanaReactContext`, and as such things like `useKibana` can be called. 
+The waterfall chart component asssumes that the consumer is making use of `KibanaReactContext`, and as such things like `useKibana` can be called.
 
 Consumers are also expected to be using the `<EuiThemeProvider />` so that the waterfall chart can apply styled-component styles based on the EUI theme.
 
@@ -24,13 +24,13 @@ This section aims to cover some things that are non-standard.
 
 By default the formatting of tooltip values is very basic, but for a waterfall chart there needs to be a great deal of flexibility to represent whatever breakdown you're trying to show.
 
-As such a custom tooltip component is used. This custom component would usually only have access to some basic props that pertain to the values of the hovered bar. The waterfall chart component extends this by making us of a waterfall chart context. 
+As such a custom tooltip component is used. This custom component would usually only have access to some basic props that pertain to the values of the hovered bar. The waterfall chart component extends this by making us of a waterfall chart context.
 
-The custom tooltip component can use the context to access the full set of chart data, find the relevant items (those with the same `x` value) and call a custom `renderTooltipItem` for each item, `renderTooltipItem` will be passed `item.config.tooltipProps`. Every consumer can choose what they use for their `tooltipProps`. 
+The custom tooltip component can use the context to access the full set of chart data, find the relevant items (those with the same `x` value) and call a custom `renderTooltipItem` for each item, `renderTooltipItem` will be passed `item.config.tooltipProps`. Every consumer can choose what they use for their `tooltipProps`.
 
 Some consumers might need colours, some might need iconography and so on. The waterfall chart doesn't make assumptions, and will render out the React content returned by `renderTooltipItem`.
 
-IMPORTANT: `renderTooltipItem` is provided via context and not as a direct prop due to the fact the custom tooltip component would usually only have access to the props provided directly to it from Elastic Charts. 
+IMPORTANT: `renderTooltipItem` is provided via context and not as a direct prop due to the fact the custom tooltip component would usually only have access to the props provided directly to it from Elastic Charts.
 
 ### Colours
 
@@ -90,7 +90,7 @@ A legend is optional.
 Pulling all of this together, things look like this (for a specific solution):
 
 ```
-const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
+const renderSidebarItem: RenderItem<WaterfallNetworkItem> = (item, index) => {
   return <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />;
 };
 
@@ -119,5 +119,3 @@ const renderLegendItem: RenderItem<LegendItem> = (item) => {
 ```
 
 A solution could easily forego a sidebar and legend for a more minimalistic view, e.g. maybe a mini waterfall within a table column.
-
-

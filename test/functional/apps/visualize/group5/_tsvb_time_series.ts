@@ -145,8 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(actualCountMin).to.be('3 hours');
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/182136
-        describe.skip('Dark mode', () => {
+        describe('Dark mode', () => {
           before(async () => {
             await kibanaServer.uiSettings.update({
               'theme:darkMode': true,
@@ -156,7 +155,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it(`viz should have light class when background color is white`, async () => {
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setBackgroundColor('#FFFFFF');
-
             await retry.try(async () => {
               expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
             });

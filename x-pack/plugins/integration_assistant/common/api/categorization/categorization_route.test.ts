@@ -6,7 +6,7 @@
  */
 
 import { expectParseSuccess } from '@kbn/zod-helpers';
-import { CategorizationRequestBody } from './categorization_route';
+import { CategorizationRequestBody } from './categorization_route.gen';
 import { getCategorizationRequestMock } from '../model/api_test.mock';
 
 describe('Categorization request schema', () => {

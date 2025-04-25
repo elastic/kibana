@@ -61,16 +61,31 @@ The username for HTTP basic authentication.
 [[servicenow-sir-action-configuration]]
 === Test connectors
 
-You can test connectors with the <<execute-connector-api,run connector API>> or
-as you're creating or editing the connector in {kib}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-sir-params-test.png[{sn-sir} params test]
+image::management/connectors/images/servicenow-sir-params-test.png[{sn-sir} params test, width=75%]
 
 {sn-sir} actions have the following configuration properties.
 
 Additional comments::
 Additional information for the client, such as how to troubleshoot the issue.
+Additional fields::
+An object that contains custom field identifiers and their values.
+These fields must exist in the Elastic ServiceNow application and must be specified in JSON format.
++
+--
+For example:
+[source,sh]
+----
+{
+    "u_cmdb_ci": "host-a",
+    "u_company": "My company",
+    "u_assignment_group": "Testing"
+}
+----
+Note that the default source field names in the Elastic ServiceNow application are prefixed with "u_".
+--
 Category::
 The category of the incident.
 Correlation display::

@@ -6,8 +6,6 @@
  */
 
 export interface KnowledgeBaseConfig {
-  isEnabledRAGAlerts: boolean;
-  isEnabledKnowledgeBase: boolean;
   latestAlerts: number;
 }
 

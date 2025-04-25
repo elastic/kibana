@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import os from 'os';
-import { ChromiumArchivePaths, download as baseDownload, install as baseInstall } from './browsers';
+import { ChromiumArchivePaths } from '@kbn/screenshotting-server';
+import { download as baseDownload, install as baseInstall } from './browsers';
 
 const paths = new ChromiumArchivePaths();
-
-export const getChromiumPackage = () => {
-  const platform = process.platform;
-  const architecture = os.arch();
-
-  const chromiumPackageInfo = paths.find(process.platform, architecture);
-  if (!chromiumPackageInfo) {
-    throw new Error(`Unsupported platform: ${platform}-${architecture}`);
-  }
-  return chromiumPackageInfo;
-};
 
 export const download = baseDownload.bind(undefined, paths);
 export const install = baseInstall.bind(undefined, paths);

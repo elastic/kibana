@@ -59,7 +59,7 @@ export function EmptyDashboards({ actions }: Props) {
             </ul>
             <p>
               {i18n.translate('xpack.apm.serviceDashboards.emptyBody.getStarted', {
-                defaultMessage: 'To get started, add your dashaboard',
+                defaultMessage: 'To get started, add your dashboard',
               })}
             </p>
           </>

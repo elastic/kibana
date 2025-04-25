@@ -204,6 +204,26 @@ describe('Helpers', () => {
         ])
       ).toBeTruthy();
     });
+
+    test('it returns true if there are entries joined with an OR that have a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?', field: '', operator: 'included' }],
+          },
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?*', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+    });
+
     test('it returns false if there are no exception entries with a wildcard and the wrong operator', () => {
       expect(
         hasWrongOperatorWithWildcard([
@@ -218,6 +238,26 @@ describe('Helpers', () => {
           },
         ])
       ).toBeFalsy();
+    });
+
+    test('it returns true if there are nested entries with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              { type: 'match', value: 'nowildcard', field: '', operator: 'excluded' },
+              {
+                field: '',
+                type: 'nested',
+                entries: [{ type: 'match', value: 'wildcard?', field: '', operator: 'excluded' }],
+              },
+            ],
+          },
+        ])
+      ).toBeTruthy();
     });
   });
 });

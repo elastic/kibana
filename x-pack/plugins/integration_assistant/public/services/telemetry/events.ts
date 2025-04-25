@@ -169,11 +169,14 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
         optional: false,
       },
     },
-    inputType: {
-      type: 'keyword',
-      _meta: {
-        description: 'The input type used for the integration',
-        optional: false,
+    inputTypes: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'The input type used for the integration',
+          optional: false,
+        },
       },
     },
     actionTypeId: {

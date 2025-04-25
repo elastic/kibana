@@ -12,5 +12,4 @@ schema:
     - status
     - severity
   default: createdAt
-  examples:
-    - updatedAt
+example: updatedAt

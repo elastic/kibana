@@ -241,8 +241,8 @@ describe('TableListView', () => {
       const updatedAtValues: Moment[] = [];
 
       const updatedHits = hits.map(({ id, attributes, references }, i) => {
-        const updatedAt = new Date(new Date().setDate(new Date().getDate() - (7 + i)));
-        updatedAtValues.push(moment(updatedAt));
+        const updatedAt = moment().subtract(7 + i, 'days');
+        updatedAtValues.push(updatedAt);
 
         return {
           id,

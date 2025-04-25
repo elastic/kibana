@@ -1,0 +1,9 @@
+schema:
+  type: string
+  enum:
+    - 2023-10-31
+  default: 2023-10-31
+in: header
+name: elastic-api-version
+description: In Elastic Serverless, indicates the version of the API to use.
+required: true

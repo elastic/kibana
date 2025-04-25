@@ -36,7 +36,10 @@ export const WorkplaceSearchGateLogic = kea<
     setParticipateInUXLabs: (participateInUXLabs) => ({ participateInUXLabs }),
   },
   connect: {
-    actions: [UpdateGatedFormDataApiLogic, ['makeRequest as submitGatedFormDataRequest']],
+    actions: [
+      UpdateGatedFormDataApiLogic,
+      ['makeRequest as submitGatedFormDataRequest', 'apiSuccess as submitGatedFormSuccess'],
+    ],
   },
   listeners: ({ actions, values }) => ({
     formSubmitRequest: () => {
@@ -49,6 +52,9 @@ export const WorkplaceSearchGateLogic = kea<
         });
       }
     },
+    submitGatedFormSuccess: () => {
+      window.location.reload();
+    },
   }),
   path: ['enterprise_search', 'workplace_search', 'gate_form'],
 
@@ -56,24 +62,28 @@ export const WorkplaceSearchGateLogic = kea<
     additionalFeedback: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setAdditionalFeedback: (_, { additionalFeedback }) => additionalFeedback ?? undefined,
       },
     ],
     feature: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFeature: (_, { feature }) => feature,
       },
     ],
     featuresOther: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFeaturesOther: (_, { featuresOther }) => featuresOther,
       },
     ],
     participateInUXLabs: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setParticipateInUXLabs: (_, { participateInUXLabs }) => participateInUXLabs,
       },
     ],

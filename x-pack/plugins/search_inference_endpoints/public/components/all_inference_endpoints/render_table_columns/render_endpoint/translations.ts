@@ -18,3 +18,10 @@ export const ALLOCATIONS = (numAllocations: number) =>
     defaultMessage: 'Allocations: {numAllocations}',
     values: { numAllocations },
   });
+
+export const MIT_LICENSE = i18n.translate(
+  'xpack.searchInferenceEndpoints.elasticsearch.mitLicense',
+  {
+    defaultMessage: 'License: MIT',
+  }
+);

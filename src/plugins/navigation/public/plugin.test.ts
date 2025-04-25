@@ -82,6 +82,30 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).not.toHaveBeenCalled();
     });
 
+    it('should not load the active space on non authenticated pages', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup({ featureOn });
+
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+      const activeSpace$ = of({ solution: 'es' } as Pick<Space, 'solution'>);
+      activeSpace$.pipe = jest.fn().mockReturnValue(activeSpace$);
+      activeSpace$.subscribe = jest.fn().mockReturnValue(activeSpace$);
+      spaces.getActiveSpace$ = jest.fn().mockReturnValue(activeSpace$);
+
+      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(activeSpace$.pipe).not.toHaveBeenCalled();
+      expect(activeSpace$.subscribe).not.toHaveBeenCalled();
+
+      // Test that the activeSpace$ observable is accessed when not an anonymous path
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
+      plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(activeSpace$.subscribe).toHaveBeenCalled();
+    });
+
     it('should return flag to indicate that the solution navigation is disabled', async () => {
       const { plugin, coreStart, unifiedSearch } = setup({ featureOn });
       const isEnabled = await firstValueFrom(

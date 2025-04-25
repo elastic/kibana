@@ -104,7 +104,7 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
-  private invalidSelectionsState: { [childId: string]: boolean };
+  private invalidSelectionsState: { [childId: string]: boolean } = {};
 
   public diffingSubscription: Subscription = new Subscription();
 
@@ -170,12 +170,12 @@ export class ControlGroupContainer extends Container<
 
     this.store = reduxEmbeddableTools.store;
 
-    this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
-      return { ...prev, [id]: false };
-    }, {});
-
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
+      this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+        return { ...prev, [id]: false };
+      }, {});
+
       this.recalculateDataViews();
       this.setupSubscriptions();
       const { filters, timeslice } = this.recalculateFilters();
@@ -324,7 +324,13 @@ export class ControlGroupContainer extends Container<
     this.subscriptions = new Subscription();
     this.initialized$.next(false);
     this.updateInput(newInput);
+
     this.untilAllChildrenReady().then(() => {
+      this.dispatch.setControlWithInvalidSelectionsId(undefined);
+      this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+        return { ...prev, [id]: false };
+      }, {});
+
       this.recalculateDataViews();
       const { filters, timeslice } = this.recalculateFilters();
       this.publishFilters({ filters, timeslice });

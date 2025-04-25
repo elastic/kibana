@@ -244,6 +244,7 @@ export const EsQueryExpression: React.FC<
         id="queryEditor"
         data-test-subj="queryJsonEditor"
         fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
         helpText={

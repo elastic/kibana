@@ -7,6 +7,7 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { InfraHttpError } from '../../../../types';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import {
   MetricsExplorerResponse,
@@ -30,7 +31,7 @@ export function useMetricsExplorerData({
 
   const { isLoading, data, error, refetch, fetchNextPage } = useInfiniteQuery<
     MetricsExplorerResponse,
-    Error
+    InfraHttpError
   >({
     queryKey: ['metricExplorer', options, fromTimestamp, toTimestamp],
     queryFn: async ({ signal, pageParam = { afterKey: null } }) => {
@@ -77,11 +78,12 @@ export function useMetricsExplorerData({
     getNextPageParam: (lastPage) => lastPage.pageInfo,
     enabled: enabled && !!fromTimestamp && !!toTimestamp && !!http && !!metricsView,
     refetchOnWindowFocus: false,
+    retry: false,
   });
 
   return {
     data,
-    error,
+    error: error?.body || error,
     fetchNextPage,
     isLoading,
     refetch,

@@ -158,7 +158,7 @@ describe('<HostDetails />', () => {
     mockUseHostDetails.mockReturnValue(mockHostDetailsResponse);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseHostsRelatedUsers.mockReturnValue(mockRelatedUsersResponse);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
   });
 
   it('should render host details correctly', () => {
@@ -168,7 +168,7 @@ describe('<HostDetails />', () => {
   });
 
   it('should render host name as clicable link when feature flag is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHostDetails(mockContextValue);
     expect(getByTestId(HOST_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
 
@@ -272,7 +272,7 @@ describe('<HostDetails />', () => {
     });
 
     it('should render user name as clicable link when feature flag is true', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       const { getAllByTestId } = renderHostDetails(mockContextValue);
       expect(getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID).length).toBe(1);
 

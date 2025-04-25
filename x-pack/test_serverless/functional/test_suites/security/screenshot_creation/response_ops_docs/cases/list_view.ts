@@ -75,13 +75,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await svlCommonScreenshots.takeScreenshot('cases-home-page', screenshotDirectories);
     });
 
-    it('case settings screenshot', async () => {
-      await navigateToCasesApp(getPageObject, getService, owner);
-      await testSubjects.click('configure-case-button');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      await svlCommonScreenshots.takeScreenshot('case-settings', screenshotDirectories);
-    });
-
     it('case detail screenshot', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'securitySolution',

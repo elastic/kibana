@@ -40,6 +40,7 @@ import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_co
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
+import { IndexError } from './index_error';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
@@ -239,6 +240,7 @@ export const SearchIndex: React.FC = () => {
         rightSideItems: getHeaderActions(index),
       }}
     >
+      <IndexError indexName={indexName} />
       <Content
         index={index}
         errorConnectingMessage={errorConnectingMessage}

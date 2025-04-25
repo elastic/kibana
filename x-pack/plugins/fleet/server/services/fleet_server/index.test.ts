@@ -45,6 +45,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
   afterEach(() => {
     appContextService.stop();
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();

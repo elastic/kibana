@@ -70,6 +70,11 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
      */
     loadTestFile(require.resolve('./cases/bulk_create_cases'));
 
+    /**
+     * Telemetry
+     */
+    loadTestFile(require.resolve('./telemetry'));
+
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
   });

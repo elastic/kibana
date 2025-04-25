@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiHealth, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 
 import {
   AGENT_STATUSES,
@@ -16,18 +16,11 @@ import {
 import type { SimplifiedAgentStatus } from '../../../../types';
 
 export const AgentStatusBadges: React.FC<{
-  showInactive?: boolean;
   agentStatus: { [k in SimplifiedAgentStatus]: number };
-}> = memo(({ agentStatus, showInactive }) => {
-  const agentStatuses = useMemo(() => {
-    return AGENT_STATUSES.filter((status) =>
-      showInactive ? true : status !== 'inactive' && status !== 'unenrolled'
-    );
-  }, [showInactive]);
-
+}> = memo(({ agentStatus }) => {
   return (
     <EuiFlexGroup gutterSize="m">
-      {agentStatuses.map((status) => (
+      {AGENT_STATUSES.map((status) => (
         <EuiFlexItem key={status} grow={false}>
           <AgentStatusBadge status={status} count={agentStatus[status] || 0} />
         </EuiFlexItem>

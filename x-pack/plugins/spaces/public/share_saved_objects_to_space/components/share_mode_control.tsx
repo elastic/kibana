@@ -174,7 +174,7 @@ export const ShareModeControl = (props: Props) => {
           onChange(updatedSpaceIds);
         }}
         legend={buttonGroupLegend}
-        color="success"
+        color="text"
         isFullWidth={true}
         isDisabled={!canShareToAllSpaces || isGlobalControlChangeProhibited}
       />

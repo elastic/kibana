@@ -57,6 +57,7 @@ export const DeleteDomainModalLogic = kea<
     domain: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         showModal: (_, { domain }) => domain,
       },
     ],

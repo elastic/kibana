@@ -69,16 +69,16 @@ export const populateInferenceServicesProvider = (client: IScopedClusterClient) 
 
     try {
       // Check if model is used by an inference service
-      const { models } = await esClient.transport.request<{
-        models: InferenceAPIConfigResponse[];
+      const { endpoints } = await esClient.transport.request<{
+        endpoints: InferenceAPIConfigResponse[];
       }>({
         method: 'GET',
         path: `/_inference/_all`,
       });
 
       const inferenceAPIMap = groupBy(
-        models,
-        (model) => model.service === 'elser' && model.service_settings.model_id
+        endpoints,
+        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
       );
 
       for (const model of trainedModels) {
@@ -671,7 +671,8 @@ export function trainedModelsRoutes(
         try {
           const { deploymentId, modelId } = request.params;
 
-          const results: Record<string, { success: boolean; error?: ErrorType }> = {};
+          const results: Record<string, { success: boolean; error?: ErrorType }> =
+            Object.create(null);
 
           for (const id of deploymentId.split(',')) {
             try {

@@ -17,7 +17,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
-
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
@@ -105,19 +105,21 @@ const Application = (props: SyntheticsAppProps) => {
                     <SyntheticsSettingsContextProvider {...props}>
                       <SyntheticsThemeContextProvider darkMode={darkMode}>
                         <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                          <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                            <RedirectAppLinks
-                              coreStart={{
-                                application: core.application,
-                              }}
-                            >
-                              <InspectorContextProvider>
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                                <TestNowModeFlyoutContainer />
-                              </InspectorContextProvider>
-                            </RedirectAppLinks>
-                          </div>
+                          <PerformanceContextProvider>
+                            <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                              <RedirectAppLinks
+                                coreStart={{
+                                  application: core.application,
+                                }}
+                              >
+                                <InspectorContextProvider>
+                                  <PageRouter />
+                                  <ActionMenu appMountParameters={appMountParameters} />
+                                  <TestNowModeFlyoutContainer />
+                                </InspectorContextProvider>
+                              </RedirectAppLinks>
+                            </div>
+                          </PerformanceContextProvider>
                         </SyntheticsStartupPluginsContextProvider>
                       </SyntheticsThemeContextProvider>
                     </SyntheticsSettingsContextProvider>

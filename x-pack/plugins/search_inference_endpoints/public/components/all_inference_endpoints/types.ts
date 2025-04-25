@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { DeploymentState, InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { TaskTypes } from '../../types';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
 export enum ServiceProviderKeys {
+  amazonbedrock = 'amazonbedrock',
   azureopenai = 'azureopenai',
   azureaistudio = 'azureaistudio',
   cohere = 'cohere',
@@ -18,13 +20,6 @@ export enum ServiceProviderKeys {
   hugging_face = 'hugging_face',
   mistral = 'mistral',
   openai = 'openai',
-}
-
-export enum TaskTypes {
-  completion = 'completion',
-  rerank = 'rerank',
-  sparse_embedding = 'sparse_embedding',
-  text_embedding = 'text_embedding',
 }
 
 export enum SortFieldInferenceEndpoint {
@@ -60,15 +55,8 @@ export interface EuiBasicTableSortTypes {
   field: string;
 }
 
-export enum DeploymentStatusEnum {
-  deployed = 'deployed',
-  notDeployed = 'not_deployed',
-  notDeployable = 'not_deployable',
-  notApplicable = 'not_applicable',
-}
-
 export interface InferenceEndpointUI {
-  deployment: DeploymentStatusEnum;
+  deployment: DeploymentState | undefined;
   endpoint: InferenceAPIConfigResponse;
   provider: string;
   type: string;

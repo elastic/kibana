@@ -6,7 +6,12 @@
  */
 
 import { RequestHandlerWrapper } from '@kbn/core-http-server';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
+
+function isKibanaServerError(error: any): error is KibanaServerError {
+  return error.statusCode && error.message;
+}
 
 export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) => (handler) => {
   return async (context, request, response) => {
@@ -14,6 +19,9 @@ export const errorHandler: (logger: Logger) => RequestHandlerWrapper = (logger) 
       return await handler(context, request, response);
     } catch (e) {
       logger.error(e);
+      if (isKibanaServerError(e)) {
+        return response.customError({ statusCode: e.statusCode, body: e.message });
+      }
       throw e;
     }
   };

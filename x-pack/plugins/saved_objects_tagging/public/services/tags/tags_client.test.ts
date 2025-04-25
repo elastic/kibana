@@ -6,10 +6,10 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { Tag } from '../../../common/types';
+import type { Tag } from '../../../common/types';
 import { createTag, createTagAttributes } from '../../../common/test_utils';
 import { tagsCacheMock } from './tags_cache.mock';
-import { TagsClient, FindTagsOptions } from './tags_client';
+import { TagsClient, type FindTagsOptions } from './tags_client';
 import { coreMock } from '@kbn/core/public/mocks';
 
 describe('TagsClient', () => {

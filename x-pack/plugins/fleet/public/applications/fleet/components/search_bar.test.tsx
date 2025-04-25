@@ -114,6 +114,7 @@ jest.mock('../hooks', () => {
               },
             },
           ]),
+          hasQuerySuggestions: jest.fn().mockReturnValue(true),
         },
         ui: {
           IndexPatternSelect: jest.fn(),

@@ -28,7 +28,7 @@ docker tag "$KIBANA_BASE_IMAGE" "$KIBANA_TEST_IMAGE"
 if  docker manifest inspect $KIBANA_TEST_IMAGE &> /dev/null; then
   echo "Cloud image already exists, skipping docker push"
 else
-  docker image push "$KIBANA_TEST_IMAGE"
+  docker_with_retry push "$KIBANA_TEST_IMAGE"
 fi
 
 echo "--- Create deployment"

@@ -23,7 +23,7 @@ export const esqlValidationErrorMessage = (message: string) =>
 export const ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.esqlValidation.missingMetadataOperatorInQueryError',
   {
-    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* [metadata _id, _version, _index].`,
+    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`,
   }
 );
 

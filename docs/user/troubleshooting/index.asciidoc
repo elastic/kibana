@@ -5,6 +5,8 @@
 
 * <<kibana-troubleshooting-kibana-server-logs, Using {kib} server logs>>
 * <<kibana-troubleshooting-trace-query, Trace {es} query to the origin in {kib}>>
+* <<kibana-diagnostic, Capture {kib} diagnostic>>
 
 include::using-server-logs.asciidoc[]
 include::trace-query.asciidoc[]
+include::diagnostic.asciidoc[]

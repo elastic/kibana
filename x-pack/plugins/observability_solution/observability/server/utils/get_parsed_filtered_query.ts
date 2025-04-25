@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import {
   BoolQuery,
   buildEsQuery,
+  EsQueryConfig,
   Filter,
   fromKueryExpression,
   toElasticsearchQuery,
@@ -23,27 +25,21 @@ export const getParsedFilterQuery: (filter: string | undefined) => Array<Record<
     const parsedQuery = toElasticsearchQuery(fromKueryExpression(filter));
     return [parsedQuery];
   } catch (error) {
-    return [];
+    throw Boom.badRequest(`Invalid filter query: ${error.message}`);
   }
 };
 
 export const getSearchConfigurationBoolQuery: (
   searchConfiguration: SearchConfigurationType,
-  additionalFilters: Filter[]
-) => { bool: BoolQuery } = (searchConfiguration, additionalFilters) => {
+  additionalFilters: Filter[],
+  esQueryConfig?: EsQueryConfig
+) => { bool: BoolQuery } = (searchConfiguration, additionalFilters, esQueryConfig) => {
   try {
     const searchConfigurationFilters = (searchConfiguration.filter as Filter[]) || [];
     const filters = [...additionalFilters, ...searchConfigurationFilters];
 
-    return buildEsQuery(undefined, searchConfiguration.query, filters, {});
+    return buildEsQuery(undefined, searchConfiguration.query, filters, esQueryConfig);
   } catch (error) {
-    return {
-      bool: {
-        must: [],
-        must_not: [],
-        filter: [],
-        should: [],
-      },
-    };
+    throw Boom.badRequest(`Invalid search query: ${error.message}`);
   }
 };

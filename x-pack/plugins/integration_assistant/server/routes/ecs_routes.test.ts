@@ -46,6 +46,7 @@ describe('registerEcsRoute', () => {
       dataStreamName: 'testStream',
       rawSamples: ['{"ei":0}'],
       connectorId: 'testConnector',
+      samplesFormat: { name: 'json', multiline: false },
     },
   });
 

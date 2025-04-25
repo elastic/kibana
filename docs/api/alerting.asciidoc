@@ -1,47 +1,4 @@
 [[alerting-apis]]
 == Alerting APIs
 
-The following APIs are available for Alerting.
-
-* <<create-rule-api, Create rule API>> to create a rule
-
-* <<update-rule-api, Update rule API>> to update the attributes for existing rules
-
-* <<get-rule-api, Get rule API>> to retrieve a single rule by ID
-
-* <<delete-rule-api, Delete rule API>> to permanently remove a rule
-
-* <<find-rules-api, Find rules API>> to retrieve a paginated set of rules by condition
-
-* <<list-rule-types-api, List rule types API>> to retrieve a list of rule types
-
-* <<enable-rule-api, Enable rule API>> to enable a single rule by ID
-
-* <<disable-rule-api, Disable rule API>> to disable a single rule by ID
-
-* <<mute-alert-api, Mute alert API>> to mute alert for a single rule by ID
-
-* <<unmute-alert-api, Unmute alert API>> to unmute alert for a single rule by ID
-
-* <<mute-all-alerts-api, Mute all alerts API>> to mute all alerts for a single rule by ID
-
-* <<unmute-all-alerts-api, Unmute all alerts API>> to unmute all alerts for a single rule by ID
-
-* <<get-alerting-framework-health-api, Get Alerting framework health API>> to retrieve the health of the Alerting framework
-
-For deprecated APIs, refer to <<alerts-api>>.
-
-include::alerting/create_rule.asciidoc[leveloffset=+1]
-include::alerting/delete_rule.asciidoc[leveloffset=+1]
-include::alerting/disable_rule.asciidoc[leveloffset=+1]
-include::alerting/enable_rule.asciidoc[leveloffset=+1]
-include::alerting/find_rules.asciidoc[leveloffset=+1]
-include::alerting/health.asciidoc[leveloffset=+1]
-include::alerting/get_rules.asciidoc[leveloffset=+1]
-include::alerting/list_rule_types.asciidoc[leveloffset=+1]
-include::alerting/update_rule.asciidoc[leveloffset=+1]
-include::alerting/mute_all_alerts.asciidoc[leveloffset=+1]
-include::alerting/mute_alert.asciidoc[leveloffset=+1]
-include::alerting/unmute_all_alerts.asciidoc[leveloffset=+1]
-include::alerting/unmute_alert.asciidoc[leveloffset=+1]
-include::alerting/legacy/index.asciidoc[]
+For the latest details, refer to {api-kibana}/group/endpoint-alerting[alerting APIs].

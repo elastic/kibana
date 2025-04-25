@@ -17,7 +17,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
-import { isIndexPatternsBulkEditAction, isInvestigationFieldsBulkEditAction } from './utils';
+import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -140,7 +140,6 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
-  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
@@ -169,16 +168,5 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
-  );
-
-  // check whether "custom highlighted fields" feature is enabled
-  await throwDryRunError(
-    () =>
-      invariant(
-        experimentalFeatures.bulkCustomHighlightedFieldsEnabled ||
-          !edit.some((action) => isInvestigationFieldsBulkEditAction(action.type)),
-        'Bulk custom highlighted fields action feature is disabled.'
-      ),
-    BulkActionsDryRunErrCode.INVESTIGATION_FIELDS_FEATURE
   );
 };

@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { CreateTagOptions, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common/types';
-import { TagSavedObject, TagAttributes, ITagsClient } from '../../../common/types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CreateTagOptions,
+  ITagsClient,
+  Tag,
+  TagAttributes,
+  TagSavedObject,
+} from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagValidationError } from './errors';
 import { validateTag } from './validate_tag';

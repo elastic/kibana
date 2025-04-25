@@ -301,8 +301,8 @@ export function isModelPlotEnabled(
       // 'partition' field values even though this is supported on the back-end.
       // If supplied, check both the by and partition entities are in the terms.
       const detector = job.analysis_config.detectors[detectorIndex];
-      const detectorHasPartitionField = detector.hasOwnProperty('partition_field_name');
-      const detectorHasByField = detector.hasOwnProperty('by_field_name');
+      const detectorHasPartitionField = Object.hasOwn(detector, 'partition_field_name');
+      const detectorHasByField = Object.hasOwn(detector, 'by_field_name');
       const terms = termsStr.split(',');
 
       if (detectorHasPartitionField) {

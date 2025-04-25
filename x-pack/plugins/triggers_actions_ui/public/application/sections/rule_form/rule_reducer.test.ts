@@ -240,4 +240,38 @@ describe('rule reducer', () => {
     );
     expect(updatedRule.rule.alertDelay?.active).toBe(10);
   });
+
+  test('if rule action alerts filter was toggled on, then off', () => {
+    initialRule.actions.push({
+      id: '',
+      actionTypeId: 'testId',
+      group: 'Rule',
+      params: {},
+      uuid: '123-456',
+    });
+    let updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setRuleActionAlertsFilter' },
+        payload: {
+          key: 'query',
+          value: 'hello',
+          index: 0,
+        },
+      }
+    );
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).alertsFilter).toBeDefined();
+    updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setRuleActionAlertsFilter' },
+        payload: {
+          key: 'query',
+          value: undefined,
+          index: 0,
+        },
+      }
+    );
+    expect((updatedRule.rule.actions[0] as SanitizedRuleAction).alertsFilter).toBeUndefined();
+  });
 });

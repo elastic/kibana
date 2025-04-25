@@ -39,15 +39,21 @@ export const createAlertTagsReducer =
     switch (action.type) {
       case 'addAlertTag': {
         const { value } = action;
-        state.tagsToAdd.add(value);
-        state.tagsToRemove.delete(value);
-        return state;
+        const newTagsToAdd = new Set(state.tagsToAdd);
+        newTagsToAdd.add(value);
+        const newTagsToRemove = new Set(state.tagsToRemove);
+        newTagsToRemove.delete(value);
+
+        return { ...state, tagsToAdd: newTagsToAdd, tagsToRemove: newTagsToRemove };
       }
       case 'removeAlertTag': {
         const { value } = action;
-        state.tagsToRemove.add(value);
-        state.tagsToAdd.delete(value);
-        return state;
+        const newTagsToRemove = new Set(state.tagsToRemove);
+        newTagsToRemove.add(value);
+        const newTagsToAdd = new Set(state.tagsToAdd);
+        newTagsToAdd.delete(value);
+
+        return { ...state, tagsToAdd: newTagsToAdd, tagsToRemove: newTagsToRemove };
       }
       case 'setSelectableAlertTags': {
         const { value } = action;

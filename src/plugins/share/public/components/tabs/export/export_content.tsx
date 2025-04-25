@@ -63,7 +63,7 @@ const ExportContentUi = ({
     helpText,
     renderCopyURLButton,
     generateExport,
-    absoluteUrl,
+    generateExportUrl,
     renderLayoutOptionSwitch,
   } = useMemo(() => {
     return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio)!;
@@ -123,7 +123,8 @@ const ExportContentUi = ({
   }, [usePrintLayout, renderLayoutOptionSwitch, handlePrintLayoutChange]);
 
   const showCopyURLButton = useCallback(() => {
-    if (renderCopyURLButton && publicAPIEnabled)
+    if (renderCopyURLButton && publicAPIEnabled) {
+      const absoluteUrl = generateExportUrl?.({ intl, optimizedForPrinting: usePrintLayout });
       return (
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} css={{ flexGrow: 0 }}>
           <EuiFlexItem grow={false}>
@@ -159,7 +160,8 @@ const ExportContentUi = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-  }, [absoluteUrl, renderCopyURLButton, publicAPIEnabled]);
+    }
+  }, [renderCopyURLButton, publicAPIEnabled, usePrintLayout, generateExportUrl, intl]);
 
   const renderGenerateReportButton = useCallback(() => {
     return (

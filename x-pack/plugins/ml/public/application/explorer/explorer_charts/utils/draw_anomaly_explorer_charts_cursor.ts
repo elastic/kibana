@@ -38,8 +38,8 @@ export function drawCursor(
     cursor &&
     cursor.type === 'Over' &&
     cursor.x !== null &&
-    cursor.x >= config.plotEarliest &&
-    cursor.x <= config.plotLatest
+    Number(cursor.x) >= config.plotEarliest &&
+    Number(cursor.x) <= config.plotLatest
       ? [cursor.x]
       : [];
 

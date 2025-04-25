@@ -35,7 +35,8 @@ export const registerBulkGetRoute = (
       path: '/_bulk_get',
       options: {
         access,
-        description: `Get saved objects`,
+        summary: `Get saved objects`,
+        deprecated: true,
       },
       validate: {
         body: schema.arrayOf(

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { HttpSetup, AnalyticsServiceStart } from '@kbn/core/public';
+import type { HttpSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
+import type {
   Tag,
   TagAttributes,
   GetAllTagsOptions,
   ITagsClient,
   TagWithRelations,
 } from '../../../common/types';
-import { ITagsChangeListener } from './tags_cache';
+import type { ITagsChangeListener } from './tags_cache';
 
 const BULK_DELETE_TAG_EVENT = 'bulkDeleteTag';
 const CREATE_TAG_EVENT = 'createTag';

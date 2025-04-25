@@ -1,0 +1,274 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`context predecessors function fetchPredecessors should perform multiple queries until the expected hit count is returned 1`] = `
+Array [
+  Array [
+    "index",
+    Object {
+      "fields": Object {
+        "getByName": [MockFunction] {
+          "calls": Array [
+            Array [
+              "@timestamp",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+      },
+      "id": "DATA_VIEW_ID",
+      "isTimeNanosBased": [Function],
+      "popularizeField": [Function],
+      "timeFieldName": "@timestamp",
+    },
+  ],
+  Array [
+    "filter",
+    Array [],
+  ],
+  Array [
+    "trackTotalHits",
+    false,
+  ],
+  Array [
+    "size",
+    3,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1972-09-27T00:00:00.000Z",
+                    "lte": "1972-09-28T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "test",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1972-09-27T00:00:00.000Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "asc",
+        },
+      },
+      Object {
+        "_doc": "asc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+  Array [
+    "size",
+    2,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1972-09-28T00:00:00.000Z",
+                    "lte": "1972-10-04T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "test",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1972-09-27T00:00:00.000Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "asc",
+        },
+      },
+      Object {
+        "_doc": "asc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+  Array [
+    "size",
+    2,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1972-10-04T00:00:00.000Z",
+                    "lte": "1972-10-27T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "test",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1972-09-27T00:00:00.000Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "asc",
+        },
+      },
+      Object {
+        "_doc": "asc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+  Array [
+    "size",
+    2,
+  ],
+  Array [
+    "query",
+    Object {
+      "language": "lucene",
+      "query": Object {
+        "bool": Object {
+          "must": Object {
+            "constant_score": Object {
+              "filter": Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "1972-10-27T00:00:00.000Z",
+                    "lte": "1973-09-27T00:00:00.000Z",
+                  },
+                },
+              },
+            },
+          },
+          "must_not": Object {
+            "ids": Object {
+              "values": Array [
+                "test",
+              ],
+            },
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "searchAfter",
+    Array [
+      "1972-09-27T00:00:00.000Z",
+      0,
+    ],
+  ],
+  Array [
+    "sort",
+    Array [
+      Object {
+        "@timestamp": Object {
+          "format": "strict_date_optional_time",
+          "order": "asc",
+        },
+      },
+      Object {
+        "_doc": "asc",
+      },
+    ],
+  ],
+  Array [
+    "version",
+    true,
+  ],
+]
+`;

@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { dataTableContextComplexMock } from '../../__mocks__/table_context';
+import {
+  dataTableContextComplexMock,
+  dataTableContextComplexRowsMock,
+} from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import {
   copyValueToClipboard,
@@ -22,7 +25,7 @@ const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
     convertValueToString({
-      rows: dataTableContextComplexMock.rows,
+      rows: dataTableContextComplexRowsMock,
       dataView: dataTableContextComplexMock.dataView,
       fieldFormats: servicesMock.fieldFormats,
       rowIndex,

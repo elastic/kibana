@@ -1,15 +1,8 @@
-[[esql-example-queries]]
-
-The following is an example ES|QL query:
-
-```
+//4. Detect masquerading attempts as native Windows binaries
+//MITRE Tactics: "Defense Evasion"
 from logs-*
-| where event.category == "file" and event.action == "creation"
-| stats filecount = count(file.name) by process.name,host.name
-| dissect process.name "%{process}.%{extension}"
-| eval proclength = length(process.name)
-| where proclength > 10
-| sort filecount,proclength desc
-| limit 10
-| keep host.name,process.name,filecount,process,extension,fullproc,proclength
-```
+| where event.type == "start" and event.action == "start" and host.os.name == "Windows" and not starts_with(process.executable, "C:\\Program Files\\WindowsApps\\") and not starts_with(process.executable, "C:\\Windows\\System32\\DriverStore\\") and process.name != "setup.exe"
+| keep process.name.caseless, process.executable.caseless, process.code_signature.subject_name, process.code_signature.trusted, process.code_signature.exists, host.id
+| eval system_bin = case(starts_with(process.executable.caseless, "c:\\windows\\system32") and starts_with(process.code_signature.subject_name, "Microsoft") and process.code_signature.trusted == true, process.name.caseless, null), non_system_bin = case(process.code_signature.exists == false or process.code_signature.trusted != true or not starts_with(process.code_signature.subject_name, "Microsoft"), process.name.caseless, null)
+| stats count_system_bin = count(system_bin), count_non_system_bin = count(non_system_bin) by process.name.caseless, host.id
+| where count_system_bin >= 1 and count_non_system_bin >= 1

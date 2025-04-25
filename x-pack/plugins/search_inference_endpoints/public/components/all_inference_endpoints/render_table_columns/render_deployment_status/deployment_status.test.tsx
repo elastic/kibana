@@ -8,20 +8,26 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { DeploymentStatus } from './deployment_status';
-import { DeploymentStatusEnum } from '../../types';
+import { DeploymentState } from '@kbn/ml-trained-models-utils';
 
 describe('DeploymentStatus component', () => {
-  it.each([[DeploymentStatusEnum.deployed, DeploymentStatusEnum.notDeployed]])(
-    'renders with %s status, expects %s color, and correct data-test-subj attribute',
-    (status) => {
-      render(<DeploymentStatus status={status} />);
-      const healthComponent = screen.getByTestId(`table-column-deployment-${status}`);
-      expect(healthComponent).toBeInTheDocument();
-    }
-  );
+  it('starting renders with warning status', () => {
+    render(<DeploymentStatus status={'starting' as DeploymentState} />);
+    const healthComponent = screen.getByTestId(`table-column-deployment-starting`);
+    expect(healthComponent).toBeInTheDocument();
+    expect(healthComponent).toHaveAttribute('color', 'warning');
+  });
+  it('stopping renders with danger status', () => {
+    render(<DeploymentStatus status={'stopping' as DeploymentState} />);
+    const healthComponent = screen.getByTestId(`table-column-deployment-stopping`);
+    expect(healthComponent).toBeInTheDocument();
+    expect(healthComponent).toHaveAttribute('color', 'danger');
+  });
 
-  it('does not render when status is notApplicable', () => {
-    const { container } = render(<DeploymentStatus status={DeploymentStatusEnum.notApplicable} />);
-    expect(container).toBeEmptyDOMElement();
+  it('started renders with success status', () => {
+    render(<DeploymentStatus status={'started' as DeploymentState} />);
+    const healthComponent = screen.getByTestId(`table-column-deployment-started`);
+    expect(healthComponent).toBeInTheDocument();
+    expect(healthComponent).toHaveAttribute('color', 'success');
   });
 });

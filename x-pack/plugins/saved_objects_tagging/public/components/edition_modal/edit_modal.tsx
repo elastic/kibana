@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useState, useCallback } from 'react';
+import React, { type FC, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import { first, lastValueFrom } from 'rxjs';
-import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
+import type { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { isServerValidationError } from '../../services/tags';
 import { CreateOrEditModal } from './create_or_edit_modal';
 import { validateTag } from './utils';

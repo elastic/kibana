@@ -15,6 +15,9 @@ from the user's browser, in case a firewall is blocking the connections from the
 [[telemetry-general-settings]]
 ==== General telemetry settings
 
+`telemetry.enabled`::
+Set to `false` to remove the telemetry configuration option from *Stack Management > {kib} > Advanced Settings > Global Settings > Usage collection*. *Default: `true`.*
+
 [[telemetry-optIn]] `telemetry.optIn`::
   Set to `false` to stop sending any telemetry data to Elastic. Reporting your
 cluster statistics helps us improve your user experience. *Default: `true`.* +

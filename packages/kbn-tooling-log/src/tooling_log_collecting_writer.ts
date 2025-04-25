@@ -26,16 +26,16 @@ export class ToolingLogCollectingWriter extends ToolingLogTextWriter {
   }
 
   /**
-   * Called by ToolingLog, extends messages with the source if message includes one.
+   * Called by ToolingLog, extends messages with the source and context if message include it.
    */
   write(msg: Message) {
-    if (msg.source) {
-      return super.write({
-        ...msg,
-        args: [`source[${msg.source}]`, ...msg.args],
-      });
-    }
+    const args = [
+      msg.source ? `source[${msg.source}]` : null,
+      msg.context ? `context[${msg.context}]` : null,
+    ]
+      .filter(Boolean)
+      .concat(msg.args);
 
-    return super.write(msg);
+    return super.write({ ...msg, args });
   }
 }

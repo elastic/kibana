@@ -14,6 +14,13 @@ export const MODEL_DEPLOYED = i18n.translate(
   }
 );
 
+export const MODEL_STARTING = i18n.translate(
+  'xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelStarting',
+  {
+    defaultMessage: 'Model starting',
+  }
+);
+
 export const MODEL_NOT_DEPLOYED = i18n.translate(
   'xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelNotDeployed',
   {
@@ -21,9 +28,9 @@ export const MODEL_NOT_DEPLOYED = i18n.translate(
   }
 );
 
-export const MODEL_FAILED_TO_BE_DEPLOYED = i18n.translate(
-  'xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelFailedToBeDeployed',
+export const MODEL_STOPPING = i18n.translate(
+  'xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelStopped',
   {
-    defaultMessage: 'Model can not be deployed',
+    defaultMessage: 'Model stopping',
   }
 );

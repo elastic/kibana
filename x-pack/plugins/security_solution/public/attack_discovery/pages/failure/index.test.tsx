@@ -50,4 +50,12 @@ describe('Failure', () => {
       expect(learnMoreLink).toHaveTextContent(LEARN_MORE);
     });
   });
+
+  describe('error text formatting', () => {
+    it('allows errors containing long strings of text, e.g. alert IDs, to wrap when necessary', () => {
+      const bodyText = screen.getByTestId('bodyText');
+
+      expect(bodyText).toHaveStyle('word-wrap: break-word');
+    });
+  });
 });

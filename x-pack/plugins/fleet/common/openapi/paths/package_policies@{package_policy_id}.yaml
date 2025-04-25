@@ -7,7 +7,7 @@ parameters:
 get:
   summary: Get package policy by ID
   tags:
-    - Package policies
+    - Fleet package policies
   responses:
     '200':
       description: OK
@@ -28,7 +28,7 @@ get:
 put:
   summary: Update package policy by ID
   tags:
-    - Package policies
+    - Fleet package policies
   operationId: update-package-policy
   requestBody:
     content:
@@ -58,7 +58,7 @@ put:
 delete:
   summary: Delete package policy by ID
   tags:
-    - Package policies
+    - Fleet package policies
   operationId: delete-package-policy
   responses:
     '200':

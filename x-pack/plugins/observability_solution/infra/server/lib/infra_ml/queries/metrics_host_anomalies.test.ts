@@ -20,6 +20,7 @@ describe('createMetricsHostAnomaliesQuery', () => {
     expect(
       createMetricsHostsAnomaliesQuery({
         jobIds,
+        // @ts-expect-error upgrade typescript v5.1.6
         anomalyThreshold,
         startTime,
         endTime,

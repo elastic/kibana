@@ -291,8 +291,8 @@ export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?:
   const downloadYaml = useMemo(
     () => () => {
       const link = document.createElement('a');
-      link.href = `data:text/json;charset=utf-8,${yaml}`;
-      link.download = `elastic-agent.yaml`;
+      link.href = `data:text/x-yaml;charset=utf-8,${yaml}`;
+      link.download = `elastic-agent.yml`;
       link.click();
     },
     [yaml]

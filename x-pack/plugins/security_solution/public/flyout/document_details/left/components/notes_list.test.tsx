@@ -19,6 +19,10 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../../com
 import { DELETE_NOTE_ERROR, FETCH_NOTES_ERROR, NO_NOTES, NotesList } from './notes_list';
 import { ReqStatus } from '../../../../notes/store/notes.slice';
 import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+
+jest.mock('../../../../common/components/user_privileges');
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 jest.mock('../../../../timelines/components/open_timeline/helpers');
 
@@ -46,6 +50,12 @@ const renderNotesList = () =>
   );
 
 describe('NotesList', () => {
+  beforeEach(() => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    });
+  });
+
   it('should render a note as a comment', () => {
     const { getByTestId, getByText } = renderNotesList();
     expect(getByTestId(`${NOTES_COMMENT_TEST_ID}-0`)).toBeInTheDocument();
@@ -208,6 +218,17 @@ describe('NotesList', () => {
     );
 
     expect(getByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`)).toHaveAttribute('disabled');
+  });
+
+  it('should not render a delete icon when the user does not have crud privileges', () => {
+    useUserPrivilegesMock.mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+    });
+    const { queryByTestId } = renderNotesList();
+
+    const deleteIcon = queryByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`);
+
+    expect(deleteIcon).not.toBeInTheDocument();
   });
 
   it('should render error toast if deleting a note fails', () => {

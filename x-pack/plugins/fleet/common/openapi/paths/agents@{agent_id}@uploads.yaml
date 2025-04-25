@@ -7,7 +7,7 @@ parameters:
 get:
   summary: List agent uploads
   tags:
-    - Agents
+    - Elastic Agents
   responses:
     '200':
       description: OK

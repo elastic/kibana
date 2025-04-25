@@ -43,7 +43,7 @@ const getAgentRule = (queueName: string = 'n2-4-spot') => {
     const additionalProps =
       {
         spot: { preemptible: true },
-        virt: { localSsdInterface: 'nvme', enableNestedVirtualization: true, localSsds: 1 },
+        virt: { enableNestedVirtualization: true },
       }[addition] || {};
 
     return {

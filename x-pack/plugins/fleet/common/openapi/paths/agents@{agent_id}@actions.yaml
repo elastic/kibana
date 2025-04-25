@@ -7,7 +7,7 @@ parameters:
 post:
   summary: Create agent action
   tags:
-    - Agent actions
+    - Elastic Agent actions
   responses:
     '200':
       description: OK

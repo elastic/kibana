@@ -18,7 +18,7 @@ describe('ConfirmDeleteEndpointModal', () => {
     render(<ConfirmDeleteEndpointModal onCancel={mockOnCancel} onConfirm={mockOnConfirm} />);
   });
 
-  it('renders the modal with correct texts', () => {
+  it('renders the modal with correct elements', () => {
     expect(screen.getByText(i18n.DELETE_TITLE)).toBeInTheDocument();
     expect(screen.getByText(i18n.CONFIRM_DELETE_WARNING)).toBeInTheDocument();
     expect(screen.getByText(i18n.CANCEL)).toBeInTheDocument();

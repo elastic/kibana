@@ -10,7 +10,7 @@ properties:
   config:
     $ref: 'config_properties_cases_webhook.yaml'
   connector_type_id:
-    description: The type of connector. 
+    description: The type of connector.
     type: string
     enum:
       - .cases-webhook

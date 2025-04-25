@@ -49,11 +49,6 @@ components:
     schema:
       type: boolean
     example: 'true'
- securitySchemes:
-  apiKeyAuth:
-    type: apiKey
-    in: header
-    name: ApiKey
  schemas:
     mlSyncResponseSuccess:
       type: boolean
@@ -171,5 +166,3 @@ components:
           "datafeedsAdded": {},
           "datafeedsRemoved": {}
         }
-security:
-  - apiKeyAuth: [ ]

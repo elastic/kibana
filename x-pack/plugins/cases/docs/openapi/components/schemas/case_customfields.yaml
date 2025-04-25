@@ -18,9 +18,8 @@ value:
     However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`.
     The value returned in the API and user interface in this case is `null`.
   oneOf:
-    - type:
-      - "string"
-      - "null"
+    - type: string
       minLength: 1
       maxLength: 160
+      nullable: true
     - type: boolean

@@ -1,7 +1,7 @@
 get:
   summary: List proxies
   tags:
-    - Proxies
+    - Fleet proxies
   responses:
     '200':
       description: OK
@@ -26,7 +26,7 @@ get:
 post:
   summary: Create proxy
   tags:
-    - Proxies
+    - Fleet proxies
   responses:
     '200':
       description: OK

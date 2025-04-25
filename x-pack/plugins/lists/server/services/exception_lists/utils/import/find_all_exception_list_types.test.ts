@@ -60,7 +60,7 @@ describe('find_all_exception_list_item_types', () => {
 
       expect(findExceptionList).toHaveBeenCalledWith({
         filter: 'exception-list-agnostic.attributes.list_id:(1)',
-        namespaceType: ['agnostic'],
+        namespaceType: ['single', 'agnostic'],
         page: undefined,
         perPage: 100,
         savedObjectsClient,
@@ -74,7 +74,7 @@ describe('find_all_exception_list_item_types', () => {
 
       expect(findExceptionList).toHaveBeenCalledWith({
         filter: 'exception-list.attributes.list_id:(1)',
-        namespaceType: ['single'],
+        namespaceType: ['single', 'agnostic'],
         page: undefined,
         perPage: 100,
         savedObjectsClient,

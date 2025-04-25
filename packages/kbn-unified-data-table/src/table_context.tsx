@@ -15,7 +15,7 @@ import type { ValueToStringConverter } from './types';
 export interface DataTableContext {
   expanded?: DataTableRecord | undefined;
   setExpanded?: (hit?: DataTableRecord) => void;
-  rows: DataTableRecord[];
+  getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
   dataView: DataView;
   isDarkMode: boolean;

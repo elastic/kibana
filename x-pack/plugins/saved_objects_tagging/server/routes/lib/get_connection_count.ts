@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptionsReference,
   SavedObject,
 } from '@kbn/core/server';
+import type { Tag, TagAttributes, TagWithRelations } from '../../../common/types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
-import { Tag, TagAttributes, TagWithRelations } from '../../../common/types';
 
 export const addConnectionCount = async (
   tags: Tag[],

@@ -307,8 +307,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                 onChange={onChange}
                 sorting={tableSorting}
               />
-              <FooterAction>
-                <EuiFlexItem>
+              <FooterAction justifyContent="space-between">
+                <EuiFlexItem grow={false}>
                   {itemsPerRow &&
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (

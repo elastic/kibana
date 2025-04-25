@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { IntegrationAssistantPlugin } from './plugin';
 export type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
 
-export function plugin() {
-  return new IntegrationAssistantPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new IntegrationAssistantPlugin(initializerContext);
 }

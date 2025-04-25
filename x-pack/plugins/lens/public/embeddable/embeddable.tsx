@@ -856,7 +856,7 @@ export class Embeddable
     this.updateInput({ attributes: attrs, savedObjectId });
   }
 
-  async openConfingPanel(
+  async openConfigPanel(
     startDependencies: LensPluginStartDependencies,
     isNewPanel?: boolean,
     deletePanel?: () => void

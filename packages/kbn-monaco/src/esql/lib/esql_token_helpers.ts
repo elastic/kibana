@@ -13,9 +13,7 @@ function nonNullable<T>(value: T | undefined): value is T {
   return value != null;
 }
 
-export function enrichTokensWithFunctionsMetadata(
-  tokens: monaco.languages.IToken[]
-): monaco.languages.IToken[] {
+export function addFunctionTokens(tokens: monaco.languages.IToken[]): monaco.languages.IToken[] {
   // need to trim spaces as "abs (arg)" is still valid as function
   const myTokensWithoutSpaces = tokens.filter(
     ({ scopes }) => scopes !== 'expr_ws' + ESQL_TOKEN_POSTFIX
@@ -33,4 +31,19 @@ export function enrichTokensWithFunctionsMetadata(
     }
   }
   return [...tokens];
+}
+
+export function addNullsOrder(tokens: monaco.languages.IToken[]): void {
+  const nullsIndex = tokens.findIndex((token) => token.scopes === 'nulls' + ESQL_TOKEN_POSTFIX);
+  if (
+    // did we find a "nulls"?
+    nullsIndex > -1 &&
+    // is the next non-whitespace token an order?
+    ['first' + ESQL_TOKEN_POSTFIX, 'last' + ESQL_TOKEN_POSTFIX].includes(
+      tokens[nullsIndex + 2]?.scopes
+    )
+  ) {
+    tokens[nullsIndex].scopes = 'nulls_order' + ESQL_TOKEN_POSTFIX;
+    tokens.splice(nullsIndex + 1, 2);
+  }
 }

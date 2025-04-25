@@ -10,7 +10,7 @@ import type {
   ITagsClient,
   TagAttributes,
   Tag as TagResponse,
-} from '@kbn/saved-objects-tagging-plugin/common';
+} from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { INTERNAL_TAGS_URL } from '../../../../common/constants';
 
 export interface Tag {

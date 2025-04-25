@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 import { generateCustomLogsYml } from './generate_custom_logs_yml';
 
 const baseMockConfig = {
@@ -46,7 +46,7 @@ describe('generateCustomLogsYml', () => {
   it('should return a yml configuration with customConfigurations', () => {
     const mockConfig = {
       ...baseMockConfig,
-      customConfigurations: dump({
+      customConfigurations: safeDump({
         ['agent.retry']: {
           enabled: true,
           retriesCount: 3,

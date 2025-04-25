@@ -35,9 +35,9 @@ function getArtifact(
     },
     mac: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
-        `cd elastic-agent-${kibanaVersion}-darwin-x86_64`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
+        `tar xzvf elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
+        `cd elastic-agent-${kibanaVersion}-darwin-aarch64`,
       ].join(`\n`),
     },
     windows: {
@@ -124,8 +124,8 @@ export function getInstallCommandForPlatform(
     linux: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     mac: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
-    deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
-    rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
+    deb: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
+    rpm: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     kubernetes: '',
     cloudFormation: '',
     googleCloudShell: '',

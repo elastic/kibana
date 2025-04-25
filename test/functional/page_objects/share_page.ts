@@ -95,4 +95,8 @@ export class SharePageObject extends FtrService {
 
     return (await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url'))!;
   }
+
+  async getSnapshotUrl(): Promise<string> {
+    return (await this.testSubjects.getAttribute('copyShareUrlButton', 'data-snapshot-url'))!;
+  }
 }

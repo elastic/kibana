@@ -34,6 +34,14 @@ const logsToHelpMapFactory = (docLinks: DocLinksServiceSetup) => ({
     defaultMessage: `Unable to use Chromium sandbox. This can be disabled at your own risk with 'xpack.screenshotting.browser.chromium.disableSandbox'. Please see {url}`,
     values: { url: docLinks.links.reporting.browserSandboxDependencies },
   }),
+
+  'Fontconfig error: Cannot load default config file': i18n.translate(
+    'xpack.reporting.diagnostic.fontconfigError',
+    {
+      defaultMessage: `The browser couldn't start properly due to missing system font dependencies. Please see {url}`,
+      values: { url: docLinks.links.reporting.browserSystemDependencies },
+    }
+  ),
 });
 
 const path = INTERNAL_ROUTES.DIAGNOSE.BROWSER;

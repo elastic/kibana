@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Observable, from, takeUntil } from 'rxjs';
-import { TagWithRelations } from '../../../common';
+import { TagWithRelations } from '../../../common/types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 import { ITagAssignmentService } from '../../services/assignments';
 import { ITagsCache } from '../../services/tags';
