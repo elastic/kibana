@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiCard, EuiImage, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiImage,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 import { useCardStyles } from './link_card.styles';
@@ -34,6 +43,8 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
       onClick?.();
     }, [id, onClick]);
 
+    const panelTitleId = useGeneratedHtmlId();
+
     return (
       <EuiCard
         className={cardClassName}
@@ -42,6 +53,7 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
         target={target}
         data-test-subj="data-ingestion-header-card"
         layout="horizontal"
+        aria-labelledby={panelTitleId}
         icon={
           <EuiImage
             data-test-subj="data-ingestion-header-card-icon"
@@ -50,16 +62,26 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
             size={64}
           />
         }
-        title={<span className="headerCardTitle">{title}</span>}
+        title={
+          <span id={panelTitleId} className="headerCardTitle">
+            {title}
+          </span>
+        }
         description={<EuiText size="xs">{description}</EuiText>}
       >
         <EuiSpacer size="s" />
-        <EuiText size="xs" className="headerCardLink">
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiLink data-test-subj="headerCardLink" href={href} onClick={onClick} target={target}>
-            {linkText}
-          </EuiLink>
-        </EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" className="headerCardLink" component="span">
+              <span data-test-subj="headerCardLink">{linkText}</span>
+            </EuiText>
+          </EuiFlexItem>
+          {target === '_blank' && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="s" type="popout" color="primary" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiCard>
     );
   }
