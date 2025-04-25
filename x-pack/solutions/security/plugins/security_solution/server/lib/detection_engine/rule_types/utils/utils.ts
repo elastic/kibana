@@ -248,6 +248,7 @@ export const checkForFrozenIndices = async ({
     // Use the original index patterns again instead of just the concrete names of the indices:
     // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
     index: inputIndices.join(','),
+    filter_path: 'indices.*.phase,indices.*.managed',
   });
 
   return partialIndices.filter((index) => {
