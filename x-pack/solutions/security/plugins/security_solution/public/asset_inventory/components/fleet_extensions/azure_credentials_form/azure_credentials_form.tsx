@@ -31,7 +31,7 @@ import { useAzureCredentialsForm } from './hooks';
 import { fieldIsInvalid, findVariableDef, getAssetPolicy } from '../utils';
 import { type AssetRadioOption, RadioGroup } from '../asset_boxed_radio_group';
 import {
-  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
 import type { NewPackagePolicyAssetInput } from '../types';
@@ -78,7 +78,7 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
   {
     id: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
     label: 'ARM Template',
-    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
+    testId: CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
     id: AZURE_SETUP_FORMAT.MANUAL,
@@ -88,7 +88,7 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
         defaultMessage: 'Manual',
       }
     ),
-    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
+    testId: CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
 

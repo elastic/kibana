@@ -38,6 +38,11 @@ import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
 import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/constants';
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
+import {
+  CAI_AWS_OPTION_TEST_SUBJ,
+  CAI_AZURE_OPTION_TEST_SUBJ,
+  CAI_GCP_OPTION_TEST_SUBJ,
+} from './test_subjects';
 
 export function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -286,7 +291,7 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
           }
         ),
         icon: 'logoAWS',
-        testId: 'caiAwsTestId',
+        testId: CAI_AWS_OPTION_TEST_SUBJ,
       },
       {
         type: CLOUDBEAT_GCP,
@@ -303,7 +308,7 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
           }
         ),
         icon: googleCloudLogo,
-        testId: 'caiGcpTestId',
+        testId: CAI_GCP_OPTION_TEST_SUBJ,
       },
       {
         type: CLOUDBEAT_AZURE,
@@ -320,7 +325,7 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
           }
         ),
         icon: 'logoAzure',
-        testId: 'caiAzureTestId',
+        testId: CAI_AZURE_OPTION_TEST_SUBJ,
       },
     ],
   },

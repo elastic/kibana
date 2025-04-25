@@ -49,7 +49,7 @@ export const getMockPackageInfoAssetInventoryAWS = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoAssetInfoGCP = () => {
+export const getMockPackageInfoAssetGCP = () => {
   return {
     name: 'cloud_asset_inventory',
     policy_templates: [
@@ -62,7 +62,14 @@ export const getMockPackageInfoAssetInfoGCP = () => {
             type: CLOUDBEAT_GCP,
             title: 'GCP',
             description: '',
-            vars: [{}],
+            vars: [
+              {
+                type: 'text',
+                name: 'cloud_shell_url',
+                default: 'https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=',
+                show_user: false,
+              },
+            ],
           },
         ],
       },
@@ -70,7 +77,7 @@ export const getMockPackageInfoAssetInfoGCP = () => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoAssetInfoAzure = () => {
+export const getMockPackageInfoAssetAzure = () => {
   return {
     name: 'cloud_asset_inventory',
     policy_templates: [
@@ -130,7 +137,7 @@ const getPolicyMock = (
     'azure.credentials.client_password': { type: 'text' },
   };
 
-  const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };
+  const dataStream = { type: 'logs', dataset: 'cloud_asset_inventory.asset_inventory' };
 
   return {
     ...mockPackagePolicy,
@@ -162,7 +169,7 @@ const getPolicyMock = (
       },
       {
         type: CLOUDBEAT_GCP,
-        policy_template: 'cspm',
+        policy_template: 'asset_inventory',
         enabled: type === CLOUDBEAT_GCP,
         streams: [
           {
@@ -174,7 +181,7 @@ const getPolicyMock = (
       },
       {
         type: CLOUDBEAT_AZURE,
-        policy_template: 'cspm',
+        policy_template: 'asset_inventory',
         enabled: type === CLOUDBEAT_AZURE,
         streams: [
           {
@@ -192,22 +199,40 @@ export const getPackageInfoMock = () => {
   return {
     data_streams: [
       {
-        dataset: 'cloud_security_posture.findings',
+        dataset: 'cloud_asset_inventory.asset_inventory',
         type: 'logs',
 
         package: 'cloud_security_posture',
-        path: 'findings',
+        path: 'asset_inventory',
         release: 'ga' as RegistryRelease,
 
-        title: 'Cloud Security Posture Findings',
+        title: 'Cloud Assets Inventory',
         streams: [
           {
             input: 'cloudbeat/asset_inventory_aws',
             template_path: 'aws.yml.hbs',
-            title: 'CIS AWS Benchmark',
+            title: 'AWS Asset Inventory',
             vars: [
               {
-                name: 'secret_access_key',
+                name: 'gcp.credentials.file',
+                title: 'Credentials File',
+                type: 'text' as RegistryVarType,
+              },
+            ],
+          },
+          {
+            input: 'cloudbeat/asset_inventory_gcp',
+            template_path: 'gcp.yml.hbs',
+            title: 'GCP Asset Inventory',
+            vars: [
+              {
+                name: 'aws.access_key_id',
+                title: 'Access Key ID',
+                secret: true,
+                type: 'text' as RegistryVarType,
+              },
+              {
+                name: 'aws.secret_access_key',
                 title: 'Secret Access Key',
                 secret: true,
                 type: 'text' as RegistryVarType,
@@ -217,7 +242,7 @@ export const getPackageInfoMock = () => {
           {
             input: 'cloudbeat/asset_inventory_azure',
             template_path: 'azure.yml.hbs',
-            title: 'CIS Azure Benchmark',
+            title: 'Azure Asset Inventory',
             vars: [
               {
                 multi: false,
@@ -251,18 +276,18 @@ export const getPackageInfoMock = () => {
         ],
       },
     ],
-    format_version: '3.0.0',
-    version: '1.9.0-preview109',
-    name: 'cloud_security_posture',
-    description: 'Identify & remediate configuration risks in your Cloud infrastructure',
+    format_version: '3.3.2',
+    version: '0.0.0',
+    name: 'cloud_asset_inventory',
+    description: 'Discover and Create Cloud Assets Inventory',
     owner: {
       github: 'elastic/cloud-security-posture',
       type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
     },
-    title: 'Security Posture Management',
-    latestVersion: '1.9.0',
+    title: 'Cloud Asset Inventory',
+    latestVersion: '0.0.0',
     assets: {
       kibana: {},
     },
-  };
+  } as PackageInfo;
 };

@@ -93,6 +93,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       const { cloud } = useKibana().services;
       const isServerless = !!cloud?.serverless.projectType;
       const input = getSelectedOption(newPolicy.inputs);
+
       // // const getIsSubscriptionValid = useIsSubscriptionStatusValid();
       // // const isSubscriptionValid = !!getIsSubscriptionValid.data;
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
@@ -149,7 +150,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
         // Only 1 enabled input is supported when all inputs are initially enabled.
         // Required for mount only to ensure a single input type is selected
         // This will remove errors in validationResults.vars
-        setEnabledPolicyInput(CLOUDBEAT_AWS);
+        setEnabledPolicyInput(input.type);
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [isLoading, input.policy_template, isEditPage]);
 
