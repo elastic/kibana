@@ -142,28 +142,29 @@ class SecurityWorkflowInsightsService {
   public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase | void> {
     await this.isInitialized;
 
-    const id = generateInsightId(insight);
+    const insightToCreate = { ...insight };
+    const id = generateInsightId(insightToCreate);
 
     const remediationExists = await checkIfRemediationExists({
-      insight,
+      insight: insightToCreate,
       exceptionListsClient: this.endpointContext.getExceptionListsClient(),
       endpointMetadataClient: this.endpointContext.getEndpointMetadataService(),
     });
 
     if (remediationExists) {
-      insight.action.type = ActionType.Remediated;
+      insightToCreate.action.type = ActionType.Remediated;
     }
 
     // if insight already exists, update instead
     const existingInsights = await this.fetch({ ids: [id] });
     if (existingInsights.length) {
-      return this.update(id, insight, existingInsights[0]._index);
+      return this.update(id, insightToCreate, existingInsights[0]._index);
     }
 
     return this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
       id,
-      document: insight,
+      document: insightToCreate,
       refresh: 'wait_for',
       op_type: 'create',
     });

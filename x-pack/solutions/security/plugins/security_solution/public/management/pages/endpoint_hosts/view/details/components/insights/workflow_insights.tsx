@@ -75,7 +75,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   useEffect(() => {
     setExpectedCount(null);
     setScanOngoing();
-  }, [endpointId]);
+  }, [endpointId, setExpectedCount, setScanOngoing]);
 
   useEffect(() => {
     const isInsightRunning = latestScan?.status === DefendInsightStatusEnum.running;
