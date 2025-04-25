@@ -31,7 +31,7 @@ export class PainlessLab {
     await this.editorOutputPane.waitFor({ state: 'visible' });
   }
 
-  async setCodeEditorValue(value: any, nthIndex?: any): Promise<void> {
+  async setCodeEditorValue(value: string, nthIndex?: number): Promise<void> {
     await this.page.evaluate(
       ({ editorIndex, codeEditorValue }: { editorIndex?: number; codeEditorValue: string }) => {
         const editor = (window.MonacoEnvironment as any)!.monaco!.editor;
