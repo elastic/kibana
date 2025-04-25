@@ -65,7 +65,7 @@ describe('ESQLControlApi', () => {
         esqlQuery: 'FROM foo | WHERE column = ?variable1',
         grow: undefined,
         selectedOptions: ['option1'],
-        title: undefined,
+        title: '',
         variableName: 'variable1',
         variableType: 'values',
         width: undefined,
