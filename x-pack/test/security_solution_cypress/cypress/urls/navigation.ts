@@ -24,7 +24,6 @@ export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard
 export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/configurations';
 
 export const RULES_URL = '/app/security/rules';
-export const RULES_LANDING_URL = '/app/security/rules/landing';
 export const RULES_COVERAGE_URL = '/app/security/rules_coverage_overview';
 
 export const HOSTS_URL = '/app/security/hosts/events';
