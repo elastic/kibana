@@ -544,6 +544,8 @@ function select_list() {
 
     IFS=', ' read -r -a custom_log_file_path_list_array <<<"$custom_log_file_path_list_string"
 
+    ensure_selection_is_not_empty
+
     echo -e "\nYou've selected these logs for ingestion:"
     for item in "${selected_known_integrations_array[@]}"; do
       printf "\e[32m•\e[0m %s\n" "$(known_integration_title "${item}")"
@@ -563,6 +565,15 @@ function select_list() {
   else
     selected_known_integrations_array=("${known_integrations_options[@]}")
     selected_unknown_log_file_pattern_array=("${unknown_logs_options[@]}")
+
+    ensure_selection_is_not_empty
+  fi
+}
+
+ensure_selection_is_not_empty() {
+  if [ ${#selected_known_integrations_array[@]} -eq 0 ] && [ ${#selected_unknown_log_file_pattern_array[@]} -eq 0 ] && [ ${#custom_log_file_path_list_array[@]} -eq 0 ]; then
+    update_step_progress "install-integrations" "danger" "No integrations or custom logs were selected for installation"
+    fail "No integrations or custom logs were selected for installation. You can run the script again if needed."
   fi
 }
 
