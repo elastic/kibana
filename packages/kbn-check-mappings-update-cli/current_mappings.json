@@ -3034,6 +3034,10 @@
       }
     }
   },
+  "scheduled_report": {
+    "dynamic": false,
+    "properties": {}
+  },
   "search": {
     "dynamic": false,
     "properties": {
