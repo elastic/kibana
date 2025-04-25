@@ -14,6 +14,7 @@ import { DataViewApiProvider } from './data_view_api';
 import { FleetAndAgentsProvider } from './fleet_and_agents';
 import { SpacesServiceProvider } from './spaces';
 import { SearchSecureProvider } from './search_secure';
+import { TransformProvider } from './transform';
 
 export const services = {
   ...kibanaApiIntegrationServices,
@@ -23,5 +24,6 @@ export const services = {
   fleetAndAgents: FleetAndAgentsProvider,
   secureSearch: SearchSecureProvider,
   spaces: SpacesServiceProvider,
+  transform: TransformProvider,
   usageAPI: UsageAPIProvider,
 };

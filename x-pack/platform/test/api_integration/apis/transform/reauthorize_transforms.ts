@@ -9,8 +9,8 @@ import { ReauthorizeTransformsRequestSchema } from '@kbn/transform-plugin/server
 import expect from '@kbn/expect';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
-import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
-import { USER } from '../../../functional/services/transform/security_common';
+import { getCommonRequestHeader } from '../../services/ml/common_api';
+import { USER } from '../../services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

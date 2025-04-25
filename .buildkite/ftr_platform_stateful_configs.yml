@@ -159,8 +159,6 @@ enabled:
   - x-pack/test/api_integration/apis/monitoring/config.ts
   - x-pack/test/api_integration/apis/search_playground/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
-  - x-pack/test/api_integration/apis/transform/config.ts
-  - x-pack/test/api_integration/apis/watcher/config.ts
   - x-pack/test/banners_functional/config.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
@@ -387,4 +385,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/stats/config.ts
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
+  - x-pack/platform/test/api_integration/apis/transform/config.ts
   - x-pack/platform/test/api_integration/apis/upgrade_assistant/config.ts
+  - x-pack/platform/test/api_integration/apis/watcher/config.ts

@@ -12,8 +12,8 @@ import type { StopTransformsRequestSchema } from '@kbn/transform-plugin/server/r
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
-import { USER } from '../../../functional/services/transform/security_common';
+import { getCommonRequestHeader } from '../../services/ml/common_api';
+import { USER } from '../../services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

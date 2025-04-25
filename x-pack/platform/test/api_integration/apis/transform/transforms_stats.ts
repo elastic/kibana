@@ -10,8 +10,8 @@ import expect from '@kbn/expect';
 import type { GetTransformsStatsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms_stats';
 import { TRANSFORM_STATE, type TransformState } from '@kbn/transform-plugin/common/constants';
 
-import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
-import { USER } from '../../../functional/services/transform/security_common';
+import { getCommonRequestHeader } from '../../services/ml/common_api';
+import { USER } from '../../services/transform/security_common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
