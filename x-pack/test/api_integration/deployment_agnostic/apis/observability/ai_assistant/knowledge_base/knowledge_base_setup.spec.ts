@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { TINY_ELSER, deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
+import { TINY_MODELS, deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
 import { restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
           params: {
             query: {
-              model_id: TINY_ELSER.id,
+              model_id: TINY_MODELS.ELSER,
             },
           },
         });
