@@ -8,7 +8,7 @@
  */
 
 import { Location } from '../../definitions/types';
-import { getNewVariableSuggestion } from '../factories';
+import { getNewUserDefinedColumnSuggestion } from '../factories';
 import { attachTriggerCommand, getFunctionSignaturesByReturnType, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -16,7 +16,7 @@ describe('autocomplete.suggest', () => {
     const functions = getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true });
     it('suggests functions and an assignment for new expressions', async () => {
       const { assertSuggestions } = await setup();
-      const expectedSuggestions = [getNewVariableSuggestion('var0'), ...functions];
+      const expectedSuggestions = [getNewUserDefinedColumnSuggestion('var0'), ...functions];
 
       await assertSuggestions('ROW /', expectedSuggestions);
       await assertSuggestions('ROW foo = "bar", /', expectedSuggestions);

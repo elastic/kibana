@@ -14,12 +14,12 @@ import type { SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
   getFunctionSuggestions,
-  getNewVariableSuggestion,
+  getNewUserDefinedColumnSuggestion,
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
 export async function suggest({
-  getSuggestedVariableName,
+  getSuggestedUserDefinedColumnName,
   command,
   innerText,
 }: CommandSuggestParams<'row'>): Promise<SuggestionRawDefinition[]> {
@@ -39,7 +39,7 @@ export async function suggest({
   // ROW /
   // ROW foo = "bar", /
   return [
-    getNewVariableSuggestion(getSuggestedVariableName()),
+    getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
     ...getFunctionSuggestions({ location: Location.ROW }),
   ];
 }

@@ -6758,7 +6758,7 @@ const mvMedianAbsoluteDeviationDefinition: FunctionDefinition = {
     'kbn-esql-validation-autocomplete.esql.definitions.mv_median_absolute_deviation',
     {
       defaultMessage:
-        'Converts a multivalued field into a single valued field containing the median absolute deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
+        'Converts a multivalued field into a single valued field containing the median absolute deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random userDefinedColumn `X`, the median absolute deviation is `median(|median(X) - X|)`.',
     }
   ),
   preview: false,

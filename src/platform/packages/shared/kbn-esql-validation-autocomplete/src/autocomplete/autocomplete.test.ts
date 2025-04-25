@@ -165,7 +165,7 @@ describe('autocomplete', () => {
         ]
       );
 
-      it('should not suggest already-used fields and variables', async () => {
+      it('should not suggest already-used fields and user defined columns', async () => {
         const { suggest: suggestTest } = await setup();
         const getSuggestions = async (query: string, opts?: SuggestOptions) =>
           (await suggestTest(query, opts)).map((value) => value.text);

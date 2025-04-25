@@ -87,7 +87,7 @@ describe('function validation', () => {
           await expectErrors('FROM a_index | EVAL TEST(integerField)', []);
           await expectErrors('FROM a_index | EVAL TEST(dateField)', []);
 
-          // variables
+          // userDefinedColumns
           await expectErrors('FROM a_index | EVAL var1 = 1 | EVAL TEST(var1)', []);
           await expectErrors('FROM a_index | EVAL var1 = NOW() | EVAL TEST(var1)', []);
 
@@ -123,7 +123,7 @@ describe('function validation', () => {
             'Argument of [test] must be [integer], found value [doubleField] type [double]',
           ]);
 
-          // variables
+          // userDefinedColumns
           await expectErrors('FROM a_index | EVAL var1 = 1. | EVAL TEST(var1)', [
             'Argument of [test] must be [integer], found value [var1] type [double]',
           ]);

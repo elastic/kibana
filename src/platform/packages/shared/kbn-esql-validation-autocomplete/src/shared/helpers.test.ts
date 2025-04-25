@@ -135,8 +135,8 @@ describe('getExpressionType', () => {
     );
   });
 
-  describe('fields and variables', () => {
-    it('detects the type of fields and variables which exist', () => {
+  describe('fields and userDefinedColumns', () => {
+    it('detects the type of fields and userDefinedColumns which exist', () => {
       expect(
         getExpressionType(
           getASTForExpression('fieldName'),
@@ -173,7 +173,7 @@ describe('getExpressionType', () => {
       ).toBe('long');
     });
 
-    it('handles fields and variables which do not exist', () => {
+    it('handles fields and userDefinedColumns which do not exist', () => {
       expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
         'unknown'
       );

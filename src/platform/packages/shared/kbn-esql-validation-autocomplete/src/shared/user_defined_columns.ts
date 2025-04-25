@@ -9,65 +9,77 @@
 
 import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
-import type { ESQLVariable, ESQLRealField } from '../validation/types';
+import type { ESQLUserDefinedColumn, ESQLRealField } from '../validation/types';
 import { EDITOR_MARKER } from './constants';
 import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
 
-function addToVariableOccurrences(variables: Map<string, ESQLVariable[]>, instance: ESQLVariable) {
-  if (!variables.has(instance.name)) {
-    variables.set(instance.name, []);
+function addToUserDefinedColumnOccurrences(
+  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
+  instance: ESQLUserDefinedColumn
+) {
+  if (!userDefinedColumns.has(instance.name)) {
+    userDefinedColumns.set(instance.name, []);
   }
-  const variablesOccurrencies = variables.get(instance.name)!;
-  variablesOccurrencies.push(instance);
+  const userDefinedColumnsOccurrencies = userDefinedColumns.get(instance.name)!;
+  userDefinedColumnsOccurrencies.push(instance);
 }
 
-function addToVariables(
+function addToUserDefinedColumns(
   oldArg: ESQLAstItem,
   newArg: ESQLAstItem,
   fields: Map<string, ESQLRealField>,
-  variables: Map<string, ESQLVariable[]>
+  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
   if (isColumnItem(oldArg) && isColumnItem(newArg)) {
-    const newVariable: ESQLVariable = {
+    const newUserDefinedColumn: ESQLUserDefinedColumn = {
       name: newArg.parts.join('.'),
       type: 'double' /* fallback to number */,
       location: newArg.location,
     };
     // Now workout the exact type
-    // it can be a rename of another variable as well
-    const oldRef = fields.get(oldArg.parts.join('.')) || variables.get(oldArg.parts.join('.'));
+    // it can be a rename of another userDefinedColumn as well
+    const oldRef =
+      fields.get(oldArg.parts.join('.')) || userDefinedColumns.get(oldArg.parts.join('.'));
     if (oldRef) {
-      addToVariableOccurrences(variables, newVariable);
-      newVariable.type = Array.isArray(oldRef) ? oldRef[0].type : oldRef.type;
+      addToUserDefinedColumnOccurrences(userDefinedColumns, newUserDefinedColumn);
+      newUserDefinedColumn.type = Array.isArray(oldRef) ? oldRef[0].type : oldRef.type;
     }
   }
 }
 
-export function excludeVariablesFromCurrentCommand(
+export function excludeUserDefinedColumnsFromCurrentCommand(
   commands: ESQLCommand[],
   currentCommand: ESQLCommand,
   fieldsMap: Map<string, ESQLRealField>,
   queryString: string
 ) {
-  const anyVariables = collectVariables(commands, fieldsMap, queryString);
-  const currentCommandVariables = collectVariables([currentCommand], fieldsMap, queryString);
-  const resultVariables = new Map<string, ESQLVariable[]>();
-  anyVariables.forEach((value, key) => {
-    if (!currentCommandVariables.has(key)) {
-      resultVariables.set(key, value);
+  const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, queryString);
+  const currentCommandUserDefinedColumns = collectUserDefinedColumns(
+    [currentCommand],
+    fieldsMap,
+    queryString
+  );
+  const resultUserDefinedColumns = new Map<string, ESQLUserDefinedColumn[]>();
+  anyUserDefinedColumns.forEach((value, key) => {
+    if (!currentCommandUserDefinedColumns.has(key)) {
+      resultUserDefinedColumns.set(key, value);
     }
   });
-  return resultVariables;
+  return resultUserDefinedColumns;
 }
 
-function addVariableFromAssignment(
+function addUserDefinedColumnFromAssignment(
   assignOperation: ESQLFunction,
-  variables: Map<string, ESQLVariable[]>,
+  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
   fields: Map<string, ESQLRealField>
 ) {
   if (isColumnItem(assignOperation.args[0])) {
-    const rightHandSideArgType = getExpressionType(assignOperation.args[1], fields, variables);
-    addToVariableOccurrences(variables, {
+    const rightHandSideArgType = getExpressionType(
+      assignOperation.args[1],
+      fields,
+      userDefinedColumns
+    );
+    addToUserDefinedColumnOccurrences(userDefinedColumns, {
       name: assignOperation.args[0].parts.join('.'),
       type: rightHandSideArgType /* fallback to number */,
       location: assignOperation.args[0].location,
@@ -75,10 +87,10 @@ function addVariableFromAssignment(
   }
 }
 
-function addVariableFromExpression(
+function addUserDefinedColumnFromExpression(
   expressionOperation: ESQLFunction,
   queryString: string,
-  variables: Map<string, ESQLVariable[]>,
+  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
   fields: Map<string, ESQLRealField>
 ) {
   if (!expressionOperation.text.includes(EDITOR_MARKER)) {
@@ -86,8 +98,8 @@ function addVariableFromExpression(
       expressionOperation.location.min,
       expressionOperation.location.max + 1
     );
-    const expressionType = getExpressionType(expressionOperation, fields, variables);
-    addToVariableOccurrences(variables, {
+    const expressionType = getExpressionType(expressionOperation, fields, userDefinedColumns);
+    addToUserDefinedColumnOccurrences(userDefinedColumns, {
       name: expressionText,
       type: expressionType,
       location: expressionOperation.location,
@@ -95,21 +107,21 @@ function addVariableFromExpression(
   }
 }
 
-export function collectVariables(
+export function collectUserDefinedColumns(
   ast: ESQLAst,
   fields: Map<string, ESQLRealField>,
   queryString: string
-): Map<string, ESQLVariable[]> {
-  const variables = new Map<string, ESQLVariable[]>();
+): Map<string, ESQLUserDefinedColumn[]> {
+  const userDefinedColumns = new Map<string, ESQLUserDefinedColumn[]>();
 
   const visitor = new Visitor()
     .on('visitLiteralExpression', (ctx) => {
-      // TODO - add these as variables
+      // TODO - add these as userDefinedColumns
     })
     .on('visitExpression', (_ctx) => {}) // required for the types :shrug:
     .on('visitRenameExpression', (ctx) => {
       const [oldArg, newArg] = ctx.node.args;
-      addToVariables(oldArg, newArg, fields, variables);
+      addToUserDefinedColumns(oldArg, newArg, fields, userDefinedColumns);
     })
     .on('visitFunctionCallExpression', (ctx) => {
       const node = ctx.node;
@@ -120,9 +132,9 @@ export function collectVariables(
       }
 
       if (node.name === '=') {
-        addVariableFromAssignment(node, variables, fields);
+        addUserDefinedColumnFromAssignment(node, userDefinedColumns, fields);
       } else {
-        addVariableFromExpression(node, queryString, variables, fields);
+        addUserDefinedColumnFromExpression(node, queryString, userDefinedColumns, fields);
       }
     })
     .on('visitCommandOption', (ctx) => {
@@ -134,7 +146,7 @@ export function collectVariables(
             const [newArg, oldArg] = assignFn?.args || [];
             // TODO why is oldArg an array?
             if (Array.isArray(oldArg)) {
-              addToVariables(oldArg[0], newArg, fields, variables);
+              addToUserDefinedColumns(oldArg[0], newArg, fields, userDefinedColumns);
             }
           }
         }
@@ -146,7 +158,7 @@ export function collectVariables(
         ret.push(...ctx.visitArgs());
       }
       if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
-        // BY and WITH can contain variables
+        // BY and WITH can contain userDefinedColumns
         ret.push(...ctx.visitOptions());
       }
       return ret;
@@ -155,5 +167,5 @@ export function collectVariables(
 
   visitor.visitQuery(ast);
 
-  return variables;
+  return userDefinedColumns;
 }

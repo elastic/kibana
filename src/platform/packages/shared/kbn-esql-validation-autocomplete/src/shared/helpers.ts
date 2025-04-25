@@ -44,7 +44,7 @@ import {
   FunctionDefinitionTypes,
   getLocationFromCommandOrOptionName,
 } from '../definitions/types';
-import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import type { ESQLRealField, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 import type { ReasonTypes } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
@@ -248,14 +248,14 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
 }
 
 /**
- * This function returns the variable or field matching a column
+ * This function returns the userDefinedColumn or field matching a column
  */
 export function getColumnForASTNode(
   node: ESQLColumn | ESQLIdentifier,
-  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
-): ESQLRealField | ESQLVariable | undefined {
+  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
+): ESQLRealField | ESQLUserDefinedColumn | undefined {
   const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
-  return getColumnByName(formatted, { fields, variables });
+  return getColumnByName(formatted, { fields, userDefinedColumns });
 }
 
 /**
@@ -271,14 +271,14 @@ export function unescapeColumnName(columnName: string) {
 }
 
 /**
- * This function returns the variable or field matching a column
+ * This function returns the userDefinedColumn or field matching a column
  */
 export function getColumnByName(
   columnName: string,
-  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
-): ESQLRealField | ESQLVariable | undefined {
+  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
+): ESQLRealField | ESQLUserDefinedColumn | undefined {
   const unescaped = unescapeColumnName(columnName);
-  return fields.get(unescaped) || variables.get(unescaped)?.[0];
+  return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
 }
 
 const ARRAY_REGEXP = /\[\]$/;
@@ -318,14 +318,14 @@ export function createMapFromList<T extends { name: string }>(arr: T[]): Map<str
   return arrMap;
 }
 
-export function areFieldAndVariableTypesCompatible(
+export function areFieldAndUserDefinedColumnTypesCompatible(
   fieldType: string | string[] | undefined,
-  variableType: string | string[]
+  userColumnType: string | string[]
 ) {
   if (fieldType == null) {
     return false;
   }
-  return fieldType === variableType;
+  return fieldType === userColumnType;
 }
 
 export function printFunctionSignature(arg: ESQLFunction): string {
@@ -542,9 +542,9 @@ function getWildcardPosition(name: string) {
 export function hasWildcard(name: string) {
   return /\*/.test(name);
 }
-export function isVariable(
-  column: ESQLRealField | ESQLVariable | undefined
-): column is ESQLVariable {
+export function isUserDefinedColumn(
+  column: ESQLRealField | ESQLUserDefinedColumn | undefined
+): column is ESQLUserDefinedColumn {
   return Boolean(column && 'location' in column);
 }
 
@@ -564,16 +564,18 @@ export const getQuotedColumnName = (node: ESQLColumn | ESQLIdentifier) =>
  */
 export function getColumnExists(
   node: ESQLColumn | ESQLIdentifier,
-  { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
+  { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
 ) {
   const columnName = node.type === 'identifier' ? node.name : node.parts.join('.');
-  if (fields.has(columnName) || variables.has(columnName)) {
+  if (fields.has(columnName) || userDefinedColumns.has(columnName)) {
     return true;
   }
 
   // TODO — I don't see this fuzzy searching in lookupColumn... should it be there?
   if (
-    Boolean(fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, variables.keys()))
+    Boolean(
+      fuzzySearch(columnName, fields.keys()) || fuzzySearch(columnName, userDefinedColumns.keys())
+    )
   ) {
     return true;
   }
@@ -806,7 +808,7 @@ export function getParamAtPosition(
 export function getExpressionType(
   root: ESQLAstItem | undefined,
   fields?: Map<string, ESQLRealField>,
-  variables?: Map<string, ESQLVariable[]>
+  userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
 ): SupportedDataType | 'unknown' {
   if (!root) {
     return 'unknown';
@@ -816,7 +818,7 @@ export function getExpressionType(
     if (root.length === 0) {
       return 'unknown';
     }
-    return getExpressionType(root[0], fields, variables);
+    return getExpressionType(root[0], fields, userDefinedColumns);
   }
 
   if (isLiteralItem(root) && root.literalType !== 'param') {
@@ -845,8 +847,8 @@ export function getExpressionType(
     }
   }
 
-  if (isColumnItem(root) && fields && variables) {
-    const column = getColumnForASTNode(root, { fields, variables });
+  if (isColumnItem(root) && fields && userDefinedColumns) {
+    const column = getColumnForASTNode(root, { fields, userDefinedColumns });
     if (!column) {
       return 'unknown';
     }
@@ -854,7 +856,7 @@ export function getExpressionType(
   }
 
   if (root.type === 'list') {
-    return getExpressionType(root.values[0], fields, variables);
+    return getExpressionType(root.values[0], fields, userDefinedColumns);
   }
 
   if (isFunctionItem(root)) {
@@ -886,9 +888,9 @@ export function getExpressionType(
        *
        * One problem with this is that if a false case is not provided, the return type
        * will be null, which we aren't detecting. But this is ok because we consider
-       * variables and fields to be nullable anyways and account for that during validation.
+       * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
-      return getExpressionType(root.args[root.args.length - 1], fields, variables);
+      return getExpressionType(root.args[root.args.length - 1], fields, userDefinedColumns);
     }
 
     const signaturesWithCorrectArity = getSignaturesWithMatchingArity(fnDefinition, root);
@@ -897,7 +899,7 @@ export function getExpressionType(
       return 'unknown';
     }
 
-    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, variables));
+    const argTypes = root.args.map((arg) => getExpressionType(arg, fields, userDefinedColumns));
 
     // When functions are passed null for any argument, they generally return null
     // This is a special case that is not reflected in our function definitions
