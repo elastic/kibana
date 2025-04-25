@@ -6,52 +6,75 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
+import type { AIConnector } from '@kbn/elastic-assistant';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type {
+  AttackDiscovery,
+  AttackDiscoveryStats,
+  GenerationInterval,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import React from 'react';
 
-import { AttackDiscoveryPanel } from './attack_discovery_panel';
+import { Current } from './current';
 import { EmptyStates } from './empty_states';
 import { showEmptyStates } from './empty_states/helpers/show_empty_states';
-import { getInitialIsOpen, showSummary } from '../helpers';
-import { Summary } from './summary';
+import { History } from './history';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface Props {
-  aiConnectorsCount: number | null; // null when connectors are not configured
+  aiConnectors: AIConnector[] | undefined;
   alertsContextCount: number | null; // null when unavailable for the current connector
   alertsCount: number;
+  approximateFutureTime: Date | null;
   attackDiscoveriesCount: number;
   connectorId: string | undefined;
+  connectorIntervals: GenerationInterval[];
+  end?: string | null;
   failureReason: string | null;
   isLoading: boolean;
   isLoadingPost: boolean;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  loadingConnectorId: string | null;
   onGenerate: () => Promise<void>;
   onToggleShowAnonymized: () => void;
   selectedConnectorAttackDiscoveries: AttackDiscovery[];
   selectedConnectorLastUpdated: Date | null;
   selectedConnectorReplacements: Replacements;
   showAnonymized: boolean;
+  start?: string | null;
+  stats: AttackDiscoveryStats | null;
 }
 
 const ResultsComponent: React.FC<Props> = ({
-  aiConnectorsCount,
+  aiConnectors,
   alertsContextCount,
   alertsCount,
+  approximateFutureTime,
   attackDiscoveriesCount,
   connectorId,
+  connectorIntervals,
+  end,
   failureReason,
   isLoading,
   isLoadingPost,
   localStorageAttackDiscoveryMaxAlerts,
+  loadingConnectorId,
   onGenerate,
   onToggleShowAnonymized,
   selectedConnectorAttackDiscoveries,
   selectedConnectorLastUpdated,
   selectedConnectorReplacements,
   showAnonymized,
+  start,
+  stats,
 }) => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
+  const aiConnectorsCount = aiConnectors?.length ?? null; // null when connectors are not configured
+
   if (
+    !attackDiscoveryAlertsEnabled &&
     showEmptyStates({
       aiConnectorsCount,
       alertsContextCount,
@@ -82,27 +105,43 @@ const ResultsComponent: React.FC<Props> = ({
 
   return (
     <>
-      {showSummary(attackDiscoveriesCount) && (
-        <Summary
+      {attackDiscoveryAlertsEnabled ? (
+        <>
+          <EuiSpacer size="s" />
+
+          <History
+            aiConnectors={aiConnectors}
+            localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+            onGenerate={onGenerate}
+            onToggleShowAnonymized={onToggleShowAnonymized}
+            showAnonymized={showAnonymized}
+          />
+        </>
+      ) : (
+        <Current
+          aiConnectorsCount={aiConnectorsCount}
+          alertsContextCount={alertsContextCount}
           alertsCount={alertsCount}
+          approximateFutureTime={approximateFutureTime}
           attackDiscoveriesCount={attackDiscoveriesCount}
-          lastUpdated={selectedConnectorLastUpdated}
+          connectorId={connectorId}
+          connectorIntervals={connectorIntervals}
+          end={end}
+          failureReason={failureReason}
+          isLoading={isLoading}
+          isLoadingPost={isLoadingPost}
+          loadingConnectorId={loadingConnectorId}
+          localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+          onGenerate={onGenerate}
           onToggleShowAnonymized={onToggleShowAnonymized}
+          selectedConnectorAttackDiscoveries={selectedConnectorAttackDiscoveries}
+          selectedConnectorLastUpdated={selectedConnectorLastUpdated}
+          selectedConnectorReplacements={selectedConnectorReplacements}
           showAnonymized={showAnonymized}
+          start={start}
+          stats={stats}
         />
       )}
-
-      {selectedConnectorAttackDiscoveries.map((attackDiscovery, i) => (
-        <React.Fragment key={attackDiscovery.id}>
-          <AttackDiscoveryPanel
-            attackDiscovery={attackDiscovery}
-            initialIsOpen={getInitialIsOpen(i)}
-            showAnonymized={showAnonymized}
-            replacements={selectedConnectorReplacements}
-          />
-          <EuiSpacer size="l" />
-        </React.Fragment>
-      ))}
     </>
   );
 };

@@ -23,7 +23,7 @@ RUN apk --no-cache add curl
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
-  {{#wolfi}}arch="$(apk --print-arch)" ; \ {{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"; \ {{/ubi}} && \
+  {{#ubuntu}}arch="$(dpkg --print-architecture)"{{/ubuntu}}{{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \
   curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$arch.tar.gz && \
@@ -48,12 +48,12 @@ RUN chmod -R g=u /usr/share/kibana
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
     TINI_BIN="" ; \
-    {{#wolfi}}arch="$(apk --print-arch)" ; \ {{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"; \ {{/ubi}}
+    {{#ubuntu}}arch="$(dpkg --print-architecture)"{{/ubuntu}}{{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} ; \
     case "$arch" in \
-        aarch64) \
+        {{#ubuntu}}arm64{{/ubuntu}}{{^ubuntu}}aarch64{{/ubuntu}}) \
             TINI_BIN='tini-arm64' ; \
             ;; \
-        x86_64) \
+        {{#ubuntu}}amd64{{/ubuntu}}{{^ubuntu}}x86_64{{/ubuntu}}) \
             TINI_BIN='tini-amd64' ; \
             ;; \
         *) echo >&2 "Unsupported architecture $arch" ; exit 1 ;; \
@@ -95,17 +95,11 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#ubuntu}}
-RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      apt-get update  && \
-      apt-get upgrade -y  && \
-      apt-get install -y --no-install-recommends \
-      fontconfig fonts-liberation libnss3 curl ca-certificates && \
+RUN export DEBIAN_FRONTEND=noninteractive && \
+      apt-get update && \
+      apt-get install -y --no-install-recommends fontconfig fonts-liberation libnss3 curl ca-certificates && \
       apt-get clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
+      rm -rf /var/lib/apt/lists/*
 {{/ubuntu}}
 {{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates

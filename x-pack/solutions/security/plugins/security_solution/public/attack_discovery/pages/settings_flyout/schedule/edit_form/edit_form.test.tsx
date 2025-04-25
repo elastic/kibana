@@ -76,12 +76,19 @@ const renderComponent = async () => {
   });
 };
 
+const getBooleanValueMock = jest.fn();
+
 describe('EditForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    getBooleanValueMock.mockReturnValue(true);
+
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: getBooleanValueMock,
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },

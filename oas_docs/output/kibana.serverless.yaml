@@ -952,6 +952,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -1619,6 +1633,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -1878,6 +1906,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -2555,6 +2597,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -2779,6 +2835,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -4038,6 +4108,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -44509,14 +44593,51 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - enum:
-                    - 'null'
-                  nullable: true
-                - not: {}
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                include:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        objects:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                      required:
+                        - objects
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        all:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - all
+                name:
+                  type: string
+                replaced_patterns:
+                  items:
+                    type: string
+                  type: array
+                version:
+                  type: string
+              required:
+                - name
+                - description
+                - version
+                - replaced_patterns
+                - include
       responses: {}
       summary: Export stream content
       tags:
@@ -44546,7 +44667,10 @@ paths:
               type: object
               properties:
                 content: {}
+                include:
+                  type: string
               required:
+                - include
                 - content
       responses: {}
       summary: Import content into a stream
@@ -45640,6 +45764,16 @@ paths:
           name: kqlQuery
           schema:
             type: string
+        - description: Size provided for cursor based pagination
+          example: 25
+          in: query
+          name: size
+          schema:
+            type: integer
+        - in: query
+          name: searchAfter
+          schema:
+            type: string
         - description: The page to use for pagination, must be greater or equal than 1
           example: 1
           in: query
@@ -46124,6 +46258,70 @@ paths:
       summary: Get the SLO definitions
       tags:
         - slo
+      x-beta: true
+  /s/{spaceId}/internal/observability/slos/_definitions:
+    get:
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getDefinitionsOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: Indicates if the API returns only outdated SLO or all SLO definitions
+          example: true
+          in: query
+          name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Filters the SLOs by name
+          example: my service availability
+          in: query
+          name: search
+          schema:
+            type: string
+        - description: The page to use for pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of SLOs returned by page
+          example: 100
+          in: query
+          name: perPage
+          schema:
+            default: 100
+            maximum: 1000
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Get the SLO definitions
+      tags:
+        - slo
+      x-beta: true
 components:
   examples:
     Data_views_create_data_view_request:
@@ -61989,6 +62187,25 @@ components:
           type: string
       title: FilterMeta
       type: object
+    SLOs_find_slo_definitions_response:
+      description: |
+        A paginated response of SLO definitions matching the query.
+      properties:
+        page:
+          example: 2
+          type: number
+        perPage:
+          example: 100
+          type: number
+        results:
+          items:
+            $ref: '#/components/schemas/SLOs_slo_definition_response'
+          type: array
+        total:
+          example: 123
+          type: number
+      title: Find SLO definitions response
+      type: object
     SLOs_find_slo_response:
       description: |
         A paginated response of SLOs matching the query.
@@ -62003,6 +62220,12 @@ components:
           items:
             $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           type: array
+        searchAfter:
+          type: string
+        size:
+          description: Size provided for cursor based pagination
+          example: 25
+          type: number
         total:
           example: 34
           type: number

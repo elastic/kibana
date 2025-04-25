@@ -119,6 +119,7 @@ src/platform/packages/shared/content-management/table_list_view_common @elastic/
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
+x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-program-team
 examples/controls_example @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/core @elastic/kibana-core
@@ -418,6 +419,7 @@ examples/embeddable_examples @elastic/kibana-presentation
 src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
+src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-security
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
@@ -970,6 +972,7 @@ packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/e
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
+x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
