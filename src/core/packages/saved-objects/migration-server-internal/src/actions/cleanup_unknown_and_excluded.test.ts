@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { checkForUnknownDocs, type DocumentIdAndType } from './check_for_unknown_docs';
 import { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';

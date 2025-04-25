@@ -804,6 +804,54 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.SearchAILakeConfigurationsSettingsManagement",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchAILakeConfigurationsSettingsManagement",
+        "description": [
+          "\nModal for overall Assistant Settings, including conversation settings, quick prompts, system prompts,\nanonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag."
+        ],
+        "signature": [
+          "React.FunctionComponent<Props>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/search_ai_lake_configurations_settings_management.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.SearchAILakeConfigurationsSettingsManagement.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.SearchAILakeConfigurationsSettingsManagement.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.SuggestedPrompts",
         "type": "Function",
         "tags": [],
@@ -1199,6 +1247,17 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.hasSearchAILakeConfigurations",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasSearchAILakeConfigurations",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.AssistantAvailability.isAssistantEnabled",
@@ -2538,6 +2597,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.CONVERSATIONS_TAB",
+        "type": "string",
+        "tags": [],
+        "label": "CONVERSATIONS_TAB",
+        "description": [],
+        "signature": [
+          "\"conversations\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/const.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.DEFAULT_ASSISTANT_NAMESPACE",
         "type": "string",
         "tags": [],
@@ -2686,6 +2760,51 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_END_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_END_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyEnd\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_QUERY_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_QUERY_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyQuery\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_START_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_START_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyStart\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.KNOWLEDGE_BASE_LOCAL_STORAGE_KEY",
         "type": "string",
         "tags": [],
@@ -2695,6 +2814,21 @@
           "\"knowledgeBase\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.ManagementSettingsTabs",
+        "type": "Type",
+        "tags": [],
+        "label": "ManagementSettingsTabs",
+        "description": [],
+        "signature": [
+          "\"connectors\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\" | \"anonymization\" | \"knowledge_base\" | \"evaluation\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

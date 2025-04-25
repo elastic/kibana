@@ -50,13 +50,31 @@ const service = new UrlService<BrowserShortUrlClientFactoryCreateParams, Browser
 });
 
 const mockShareContext: IShareContext = {
-  shareMenuItems: [],
-  allowEmbed: true,
+  shareMenuItems: [
+    {
+      shareType: 'link',
+      config: {
+        shortUrlService: service.shortUrls.get(null),
+      },
+    },
+    {
+      shareType: 'embed',
+      config: {
+        shortUrlService: service.shortUrls.get(null),
+        anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
+      },
+    },
+  ],
   allowShortUrl: true,
-  anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
-  urlService: service,
   theme: themeServiceMock.createStartContract(),
-  objectTypeMeta: { title: 'title' },
+  objectTypeMeta: {
+    title: 'title',
+    config: {
+      embed: {
+        disabled: false,
+      },
+    },
+  },
   objectType: 'type',
   sharingData: { title: 'title', url: 'url' },
   isDirty: false,
@@ -72,9 +90,22 @@ const PNG = 'PNG' as const;
 
 describe('Share modal tabs', () => {
   describe('link tab', () => {
-    it('should not render the link tab when the disableShareUrl prop is true', async () => {
+    it('should not render the link tab when it is configured as disabled', async () => {
+      const disabledLinkShareContext = {
+        ...mockShareContext,
+        objectTypeMeta: {
+          ...mockShareContext.objectTypeMeta,
+          config: {
+            ...mockShareContext.objectTypeMeta.config,
+            link: {
+              disabled: true,
+            },
+          },
+        },
+      };
+
       const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, disabledShareUrl: true }}>
+        <ShareMenuProvider shareContext={{ ...disabledLinkShareContext }}>
           <ShareMenuTabs />
         </ShareMenuProvider>
       );
@@ -84,33 +115,55 @@ describe('Share modal tabs', () => {
 
   describe('export tab', () => {
     it('should render export tab when there are share menu items that are not disabled', async () => {
-      const testItem = [
-        {
-          shareMenuItem: { name: 'test', disabled: false },
-          label: CSV,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
-        },
-      ];
+      const shareContextWithConfiguredExportItem: IShareContext = {
+        ...mockShareContext,
+        shareMenuItems: [
+          ...mockShareContext.shareMenuItems,
+          {
+            id: 'test-export',
+            shareType: 'integration',
+            groupId: 'export',
+            config: {
+              name: 'test',
+              disabled: false,
+              label: CSV,
+              generateExport: mockGenerateExport,
+              generateExportUrl: mockGenerateExportUrl,
+            },
+          },
+        ],
+      };
+
       const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItem }}>
+        <ShareMenuProvider shareContext={{ ...shareContextWithConfiguredExportItem }}>
           <ShareMenuTabs />
         </ShareMenuProvider>
       );
       expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
     });
-    it('should not render export tab when the license is disabled', async () => {
-      const testItems = [
-        {
-          shareMenuItem: { name: 'test', disabled: true },
-          label: CSV,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
-        },
-      ];
+
+    it('should not render export tab when it has only one item configured as disabled', async () => {
+      const shareContextWithConfiguredExportItem: IShareContext = {
+        ...mockShareContext,
+        shareMenuItems: [
+          ...mockShareContext.shareMenuItems,
+          {
+            id: 'test-export',
+            shareType: 'integration',
+            groupId: 'export',
+            config: {
+              name: 'test',
+              disabled: true,
+              label: CSV,
+              generateExport: mockGenerateExport,
+              generateExportUrl: mockGenerateExportUrl,
+            },
+          },
+        ],
+      };
 
       const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItems }}>
+        <ShareMenuProvider shareContext={{ ...shareContextWithConfiguredExportItem }}>
           <ShareMenuTabs />
         </ShareMenuProvider>
       );
@@ -119,22 +172,39 @@ describe('Share modal tabs', () => {
     });
 
     it('would render the export tab when there is at least one export type which is not disabled', async () => {
-      const testItem = [
-        {
-          shareMenuItem: { name: 'test', disabled: false },
-          label: CSV,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
-        },
-        {
-          shareMenuItem: { name: 'test', disabled: true },
-          label: PNG,
-          generateExport: mockGenerateExport,
-          generateExportUrl: mockGenerateExportUrl,
-        },
-      ];
+      const shareContextWithConfiguredExportItem: IShareContext = {
+        ...mockShareContext,
+        shareMenuItems: [
+          ...mockShareContext.shareMenuItems,
+          {
+            id: 'test-csv-export',
+            shareType: 'integration',
+            groupId: 'export',
+            config: {
+              name: 'test',
+              disabled: false,
+              label: CSV,
+              generateExport: mockGenerateExport,
+              generateExportUrl: mockGenerateExportUrl,
+            },
+          },
+          {
+            id: 'test-png-export',
+            shareType: 'integration',
+            groupId: 'export',
+            config: {
+              name: 'test',
+              disabled: true,
+              label: PNG,
+              generateExport: mockGenerateExport,
+              generateExportUrl: mockGenerateExportUrl,
+            },
+          },
+        ],
+      };
+
       const wrapper = mountWithIntl(
-        <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItem }}>
+        <ShareMenuProvider shareContext={{ ...shareContextWithConfiguredExportItem }}>
           <ShareMenuTabs />
         </ShareMenuProvider>
       );
