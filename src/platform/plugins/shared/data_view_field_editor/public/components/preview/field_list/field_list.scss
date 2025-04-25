@@ -29,12 +29,15 @@ $previewShowMoreHeight: 40px; /* [2] */
     }
 
     &__actionsBtn {
-      display: none;
+      opacity: 0;
+      pointer-events: none;
     }
 
     &--pinned .indexPatternFieldEditor__previewFieldList__item__actionsBtn,
-    &:hover .indexPatternFieldEditor__previewFieldList__item__actionsBtn {
-      display: block;
+    &:hover .indexPatternFieldEditor__previewFieldList__item__actionsBtn,
+    &:focus-within .indexPatternFieldEditor__previewFieldList__item__actionsBtn {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     &__value .euiToolTipAnchor {
