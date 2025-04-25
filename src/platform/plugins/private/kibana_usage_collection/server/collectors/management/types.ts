@@ -44,7 +44,6 @@ export interface UsageStats {
   'observability:apmEnableContinuousRollups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
-  'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;

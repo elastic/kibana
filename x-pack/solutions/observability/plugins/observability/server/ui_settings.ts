@@ -38,7 +38,6 @@ import {
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
   profilingAzureCostDiscountRate,
-  enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
@@ -235,21 +234,6 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     requiresPageReload: true,
     type: 'boolean',
-    solution: 'oblt',
-  },
-  [enableInfrastructureProfilingIntegration]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
-      defaultMessage: 'Universal Profiling integration in Infrastructure',
-    }),
-    value: true,
-    description: i18n.translate(
-      'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
-      {
-        defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
-      }
-    ),
-    schema: schema.boolean(),
     solution: 'oblt',
   },
   [enableInfrastructureAssetCustomDashboards]: {
