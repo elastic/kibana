@@ -202,6 +202,21 @@ export interface ReportApiJSON extends ReportSimple {
   index: string;
 }
 
+export type ScheduledReportApiJSON = Omit<
+  ReportSource,
+  'payload' | 'output' | 'attempts' | 'status'
+> & {
+  id: string;
+  schedule: {
+    rrule: {
+      freq: number;
+      interval: number;
+      tzid?: string;
+    };
+  };
+  payload: Omit<ReportSource['payload'], 'headers'>;
+};
+
 export interface LicenseCheckResults {
   enableLinks: boolean;
   showLinks: boolean;

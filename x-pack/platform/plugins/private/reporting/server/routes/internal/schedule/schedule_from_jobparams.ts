@@ -21,7 +21,6 @@ export function registerScheduleRoutesInternal(reporting: ReportingCore, logger:
   const kibanaAccessControlTags = ['generateReport'];
 
   const registerInternalPostScheduleEndpoint = () => {
-    console.log('3');
     const path = `${SCHEDULE_PREFIX}/{exportType}`;
     router.post(
       {
@@ -39,7 +38,6 @@ export function registerScheduleRoutesInternal(reporting: ReportingCore, logger:
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
-          console.log('1');
           const requestHandler = new ScheduleRequestHandler({
             reporting,
             user,
@@ -52,7 +50,6 @@ export function registerScheduleRoutesInternal(reporting: ReportingCore, logger:
           const jobParams = requestHandler.getJobParams();
           const schedule = requestHandler.getSchedule();
 
-          console.log('2');
           return await requestHandler.handleRequest({
             exportTypeId: req.params.exportType,
             jobParams,

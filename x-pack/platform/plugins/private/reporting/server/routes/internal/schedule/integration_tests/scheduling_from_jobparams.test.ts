@@ -16,11 +16,8 @@ import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 
 import { ReportingCore } from '../../../..';
-import { ReportingStore } from '../../../../lib';
-import { Report } from '../../../../lib/store';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
@@ -28,22 +25,26 @@ import {
   createMockReportingCore,
 } from '../../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../../types';
-import { EventTracker } from '../../../../usage';
-import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
+import { registerScheduleRoutesInternal } from '../schedule_from_jobparams';
+import { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
+};
+
+describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
-  let usageCounter: IUsageCounter;
-  let eventTracker: EventTracker;
   let httpSetup: SetupServerReturn['httpSetup'];
   let mockExportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
-  let store: ReportingStore;
+  let soClient: SavedObjectsClientContract;
 
-  const coreSetupMock = coreMock.createSetup();
   const mockConfigSchema = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
   });
@@ -93,26 +94,21 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
     );
 
     reportingCore = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-
-    usageCounter = {
-      domainId: 'abc123',
-      incrementCounter: jest.fn(),
-    };
-    jest.spyOn(reportingCore, 'getUsageCounter').mockReturnValue(usageCounter);
-
-    eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
-    jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
+    jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    });
 
     mockExportTypesRegistry = new ExportTypesRegistry();
     mockExportTypesRegistry.register(mockPdfExportType);
 
-    store = await reportingCore.getStore();
-    store.addReport = jest.fn().mockImplementation(async (opts) => {
-      return new Report({
-        ...opts,
-        _id: 'foo',
-        _index: 'foo-index',
-      });
+    soClient = await reportingCore.getSoClient(fakeRawRequest as unknown as KibanaRequest);
+    soClient.create = jest.fn().mockImplementation(async (_, opts) => {
+      return {
+        id: 'foo',
+        attributes: opts,
+        type: 'scheduled-report',
+      };
     });
   });
 
@@ -121,51 +117,43 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
   });
 
   it('returns 400 if there are no job params', async () => {
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(
-          '"A jobParams RISON string is required in the querystring or POST body"'
+          '"[request body]: expected a plain object value, but found [null] instead."'
         )
       );
   });
 
-  it('returns 400 if job params query is invalid', async () => {
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2?jobParams=foo:`)
-      .expect(400)
-      .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
-  });
-
   it('returns 400 if job params body is invalid', async () => {
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
-      .send({ jobParams: `foo:` })
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({ jobParams: `foo:`, schedule: { rrule: { freq: 1, interval: 2 } } })
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
   });
 
   it('returns 400 export type is invalid', async () => {
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/TonyHawksProSkater2`)
-      .send({ jobParams: rison.encode({ title: `abc` }) })
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/TonyHawksProSkater2`)
+      .send({
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        jobParams: rison.encode({ title: `abc` }),
+      })
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot('"Invalid export-type of TonyHawksProSkater2"')
@@ -173,54 +161,151 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
   });
 
   it('returns 400 on invalid browser timezone', async () => {
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
-      .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+      })
       .expect(400)
       .then(({ body }) =>
         expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
       );
   });
 
-  it('returns 500 if job handler throws an error', async () => {
-    store.addReport = jest.fn().mockRejectedValue('silly');
-
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
+  it('returns 400 on invalid rrule', async () => {
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
-      .send({ jobParams: rison.encode({ title: `abc` }) })
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
+        schedule: { rrule: { freq: 6, interval: 2 } },
+      })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+      );
+  });
+
+  it('returns 400 on invalid notification list', async () => {
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
+        schedule: { rrule: { freq: 6, interval: 2 } },
+        notification: {
+          email: {
+            to: 'single@email.com',
+          },
+        },
+      })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(
+          `"[request body.notification.email.to]: could not parse array value from json input"`
+        )
+      );
+  });
+
+  it('returns 403 on when no permanent encryption key', async () => {
+    jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: false,
+    });
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ title: `abc` }),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+      })
+      .expect(403)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(
+          `"Permanent encryption key must be set for scheduled reporting"`
+        )
+      );
+  });
+
+  it('returns 403 on when not sufficiently secure', async () => {
+    jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
+      isSufficientlySecure: false,
+      hasPermanentEncryptionKey: true,
+    });
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ title: `abc` }),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+      })
+      .expect(403)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(
+          `"Security and API keys must be enabled for scheduled reporting"`
+        )
+      );
+  });
+
+  it('returns 500 if job handler throws an error', async () => {
+    soClient.create = jest.fn().mockRejectedValue('silly');
+
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ title: `abc` }),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+      })
       .expect(500);
   });
 
   it(`returns 200 if job handler doesn't error`, async () => {
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
 
     await server.start();
 
     await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
       .send({
         jobParams: rison.encode({
           title: `abc`,
           layout: { id: 'test' },
           objectType: 'canvas workpad',
         }),
+        notification: {
+          email: {
+            to: ['single@email.com'],
+          },
+        },
+        schedule: { rrule: { freq: 1, interval: 2 } },
       })
       .expect(200)
       .then(({ body }) => {
         expect(body).toMatchObject({
           job: {
-            attempts: 0,
             created_by: 'Tom Riddle',
             id: 'foo',
-            index: 'foo-index',
             jobtype: 'printable_pdf_v2',
             payload: {
               forceNow: expect.any(String),
@@ -232,53 +317,9 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
               title: 'abc',
               version: '7.14.0',
             },
-            status: 'pending',
+            schedule: { rrule: { freq: 1, interval: 2 } },
           },
-          path: '/mock-server-basepath/api/reporting/jobs/download/foo',
         });
       });
-  });
-
-  describe('telemetry', () => {
-    it('increments generation api counter', async () => {
-      registerGenerationRoutesInternal(reportingCore, mockLogger);
-
-      await server.start();
-
-      await supertest(httpSetup.server.listener)
-        .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
-        .send({
-          jobParams: rison.encode({
-            title: `abc`,
-            layout: { id: 'test' },
-            objectType: 'canvas workpad',
-          }),
-        })
-        .expect(200);
-
-      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: `post /internal/reporting/generate/printablePdfV2`,
-        counterType: 'reportingApi',
-      });
-    });
-  });
-
-  it(`supports event tracking`, async () => {
-    registerGenerationRoutesInternal(reportingCore, mockLogger);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener)
-      .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
-      .send({
-        jobParams: rison.encode({
-          title: `abc`,
-          layout: { id: 'test' },
-          objectType: 'canvas workpad',
-        }),
-      });
-
-    expect(eventTracker.createReport).toHaveBeenCalledTimes(1);
   });
 });

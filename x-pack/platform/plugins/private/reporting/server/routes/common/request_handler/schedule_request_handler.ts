@@ -8,20 +8,26 @@
 import moment from 'moment';
 
 import { schema } from '@kbn/config-schema';
-import { PUBLIC_ROUTES } from '@kbn/reporting-common';
-import { rruleSchedule } from '@kbn/task-manager-plugin/server/saved_objects/schemas/rrule';
-import { Rrule } from '@kbn/task-manager-plugin/server/task';
+import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import { isEmpty } from 'lodash';
+import {
+  rawNotificationSchema,
+  rawScheduleSchema,
+} from '../../../saved_objects/scheduled_report/schemas/v1';
+import { ScheduledReportingJobResponse } from '../../../types';
+import {
+  RawSchedule,
+  RawScheduledReport,
+} from '../../../saved_objects/scheduled_report/schemas/latest';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { Report } from '../../../lib/store';
-import type { ScheduledReportingJobResponse } from '../../../types';
 import { RequestHandler, RequestParams } from './request_handler';
+import { transformRawScheduledReportToReport } from './lib';
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
-    schedule: schema.object({
-      rrule: rruleSchedule,
-    }),
+    schedule: rawScheduleSchema,
+    notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),
   query: schema.nullable(schema.object({})),
@@ -34,29 +40,30 @@ const validation = {
 export class ScheduleRequestHandler extends RequestHandler<
   (typeof validation)['params'],
   (typeof validation)['query'],
-  (typeof validation)['body']
+  (typeof validation)['body'],
+  ScheduledReportApiJSON
 > {
   public static getValidation() {
     return validation;
   }
 
-  public getSchedule(): Rrule {
-    let rruleDef: null | Rrule = null;
+  public getSchedule(): RawSchedule {
+    let rruleDef: null | RawSchedule['rrule'] = null;
     const req = this.opts.req;
     const res = this.opts.res;
 
     const { schedule } = req.body;
-    const { rrule } = schedule;
+    const { rrule } = schedule ?? {};
     rruleDef = rrule;
 
-    if (!rruleDef) {
+    if (isEmpty(rruleDef)) {
       throw res.customError({
         statusCode: 400,
         body: 'A RRULE schedule is required in the POST body',
       });
     }
 
-    return rruleDef;
+    return schedule;
   }
 
   public async enqueueJob(params: RequestParams) {
@@ -64,7 +71,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { reporting, logger, req, user } = this.opts;
 
     const soClient = await reporting.getSoClient(req);
-    const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
+    const { version, job, jobType } = await this.createJob(exportTypeId, jobParams);
 
     const payload = {
       ...job,
@@ -81,8 +88,9 @@ export class ScheduleRequestHandler extends RequestHandler<
       jobType,
       createdAt: moment.utc().toISOString(),
       createdBy: user ? user.username : false,
-      payload,
-      schedule,
+      title: job.title,
+      payload: Buffer.from(JSON.stringify(payload)).toString('base64'),
+      schedule: schedule!,
       migrationVersion: version,
       meta: {
         // telemetry fields
@@ -91,11 +99,14 @@ export class ScheduleRequestHandler extends RequestHandler<
         isDeprecated: job.isDeprecated,
       },
     };
-    console.log(`attributes ${JSON.stringify(attributes)}`);
 
     // Create a scheduled report saved object
-    const result = await soClient.create(SCHEDULED_REPORT_SAVED_OBJECT_TYPE, attributes, {});
-    logger.debug(`Successfully created scheduled report: ${result.id}`);
+    const report = await soClient.create<RawScheduledReport>(
+      SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+      attributes,
+      {}
+    );
+    logger.debug(`Successfully created scheduled report: ${report.id}`);
 
     // // Schedule the report with Task Manager
     // const task = await reporting.scheduleTask(req, report.toReportTaskJSON());
@@ -103,14 +114,12 @@ export class ScheduleRequestHandler extends RequestHandler<
     //   `Scheduled ${name} reporting task. Task ID: task:${task.id}. Report ID: ${result.id}`
     // );
 
-    // // 6. Log the action with event log
-    // // reporting.getEventLogger(report, task).logScheduleTask();
-    // return report;
+    return transformRawScheduledReportToReport(report);
   }
 
   public async handleRequest(params: RequestParams) {
     const { exportTypeId, jobParams } = params;
-    const { reporting, context, req, res, path } = this.opts;
+    const { reporting, res } = this.opts;
 
     const earlyResponse = await this.checkLicenseAndTimezone(
       exportTypeId,
@@ -133,27 +142,13 @@ export class ScheduleRequestHandler extends RequestHandler<
       });
     }
 
-    let report: Report | undefined;
+    let report: ScheduledReportApiJSON | undefined;
     try {
-      /* report = */ await this.enqueueJob(params);
-      const { basePath } = reporting.getServerInfo();
-      const publicDownloadPath = basePath + PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX;
-
-      // // return task manager's task information and the download URL
-      // const eventTracker = reporting.getEventTracker(
-      //   report._id,
-      //   exportTypeId,
-      //   jobParams.objectType
-      // );
-      // eventTracker?.createReport({
-      //   isDeprecated: Boolean(report.payload.isDeprecated),
-      //   isPublicApi: path.match(/internal/) === null,
-      // });
-
-      return res.ok</* ScheduledReportingJobResponse*/ {}>({
+      report = await this.enqueueJob(params);
+      return res.ok<ScheduledReportingJobResponse>({
         headers: { 'content-type': 'application/json' },
         body: {
-          // job: report.toApiJSON(),
+          job: report,
         },
       });
     } catch (err) {

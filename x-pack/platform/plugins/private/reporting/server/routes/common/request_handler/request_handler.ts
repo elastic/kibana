@@ -19,7 +19,7 @@ import type { BaseParams } from '@kbn/reporting-common/types';
 import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
-import { Rrule } from '@kbn/task-manager-plugin/server/task';
+import { RawSchedule } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { checkParamsVersion } from '../../../lib';
 import { type Counters } from '..';
 import type { ReportingCore } from '../../..';
@@ -54,7 +54,7 @@ interface ConstructorOpts<
 export interface RequestParams {
   exportTypeId: string;
   jobParams: BaseParams;
-  schedule?: Rrule;
+  schedule?: RawSchedule;
 }
 
 /**
@@ -64,7 +64,8 @@ export interface RequestParams {
 export abstract class RequestHandler<
   Params extends typeof ParamsValidation,
   Query extends typeof QueryValidation,
-  Body extends typeof BodyValidation
+  Body extends typeof BodyValidation,
+  Output extends Record<string, any>
 > {
   constructor(protected readonly opts: ConstructorOpts<Params, Query, Body>) {}
 
@@ -72,7 +73,7 @@ export abstract class RequestHandler<
     throw new Error('getValidation() must be implemented in a subclass');
   }
 
-  public abstract enqueueJob(params: RequestParams): Promise<void>;
+  public abstract enqueueJob(params: RequestParams): Promise<Output>;
 
   public abstract handleRequest(params: RequestParams): Promise<IKibanaResponse>;
 

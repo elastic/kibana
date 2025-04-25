@@ -212,7 +212,7 @@ describe('Handle request to generate', () => {
     });
   });
 
-  describe('handleGenerateRequest', () => {
+  describe('handleRequest', () => {
     test('disallows invalid export type', async () => {
       expect(
         await requestHandler.handleRequest({
@@ -247,13 +247,6 @@ describe('Handle request to generate', () => {
     });
 
     test('disallows invalid browser timezone', async () => {
-      (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
-        csv_searchsource: {
-          enableLinks: false,
-          message: `seeing this means the license isn't supported`,
-        },
-      }));
-
       expect(
         await requestHandler.handleRequest({
           exportTypeId: 'csv_searchsource',
@@ -264,7 +257,7 @@ describe('Handle request to generate', () => {
         })
       ).toMatchInlineSnapshot(`
         Object {
-          "body": "seeing this means the license isn't supported",
+          "body": "Invalid timezone \\"America/Amsterdam\\".",
         }
     `);
     });

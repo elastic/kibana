@@ -15,6 +15,7 @@ import {
   docLinksServiceMock,
   elasticsearchServiceMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   statusServiceMock,
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
@@ -39,7 +40,7 @@ export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
 ): ReportingInternalSetup => {
   return {
-    encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+    encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },
     router: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
@@ -55,6 +56,7 @@ export const createMockPluginSetup = (
 const coreSetupMock = coreMock.createSetup();
 const coreStartMock = coreMock.createStart();
 const logger = loggingSystemMock.createLogger();
+const savedObjectsClient = savedObjectsClientMock.create();
 
 const createMockReportingStore = async (config: ReportingConfigType) => {
   const mockConfigSchema = createMockConfigSchema(config);
@@ -70,7 +72,7 @@ export const createMockPluginStart = async (
   return {
     analytics: coreSetupMock.analytics,
     esClient: elasticsearchServiceMock.createClusterClient(),
-    savedObjects: { getScopedClient: jest.fn() },
+    savedObjects: { getScopedClient: jest.fn().mockReturnValue(savedObjectsClient) },
     uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),

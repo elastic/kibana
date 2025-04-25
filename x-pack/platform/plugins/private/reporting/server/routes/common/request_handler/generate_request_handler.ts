@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { getCounters } from '..';
-import { Report } from '../../../lib/store';
+import { Report, SavedReport } from '../../../lib/store';
 import type { ReportingJobResponse } from '../../../types';
 import { RequestHandler, RequestParams } from './request_handler';
 
@@ -25,7 +25,8 @@ const validation = {
 export class GenerateRequestHandler extends RequestHandler<
   (typeof validation)['params'],
   (typeof validation)['query'],
-  (typeof validation)['body']
+  (typeof validation)['body'],
+  SavedReport
 > {
   public static getValidation() {
     return validation;
