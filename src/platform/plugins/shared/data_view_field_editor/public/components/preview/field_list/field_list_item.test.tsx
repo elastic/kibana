@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { PreviewListItem } from './field_list_item';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useFieldPreviewContext } from '../field_preview_context';
@@ -29,6 +30,8 @@ const previewController = {
 type ComponentProps = React.ComponentProps<typeof PreviewListItem>;
 
 const setup = (props: Partial<ComponentProps>) => {
+  const user = userEvent.setup();
+
   mockUseFieldPreviewContext.mockReturnValue({
     controller: previewController,
   } as any);
@@ -47,7 +50,7 @@ const setup = (props: Partial<ComponentProps>) => {
     </IntlProvider>
   );
 
-  return { props: finalProps };
+  return { props: finalProps, user };
 };
 
 afterAll(() => {
@@ -75,14 +78,28 @@ describe('<PreviewListItem />', () => {
     });
 
     describe('when clicked', () => {
-      it('should call toggleIsPined', () => {
+      it('should call toggleIsPined', async () => {
         // When
         const toggleIsPinned = jest.fn();
-        const { props } = setup({ toggleIsPinned });
+        const { props, user } = setup({ toggleIsPinned });
 
         // Then
         const pinButton = screen.getByRole('button', { name: /pin field/i });
-        fireEvent.click(pinButton);
+        await user.click(pinButton);
+
+        expect(toggleIsPinned).toHaveBeenCalledWith(props.field.key);
+      });
+    });
+
+    describe('when the user tabs to the button and presses Enter', () => {
+      it('should call toggleIsPinned', async () => {
+        // When
+        const toggleIsPinned = jest.fn();
+        const { props, user } = setup({ toggleIsPinned });
+
+        // Then
+        await user.tab();
+        await user.keyboard('{enter}');
 
         expect(toggleIsPinned).toHaveBeenCalledWith(props.field.key);
       });
