@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { scalarFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/scalar_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/grouping_functions';
+import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete/src/definitions/generated/aggregation_functions';
+import type { FunctionDefinition } from '@kbn/esql-validation-autocomplete';
+import { memoize } from 'lodash';
+
 const STRING_DELIMITER_TOKENS = ['`', "'", '"'];
 const ESCAPE_TOKEN = '\\\\';
 
@@ -94,27 +100,51 @@ function removeColumnQuotesAndEscape(column: string) {
   return '`' + plainColumnIdentifier + '`';
 }
 
+const getFunctionDefinitionMap = memoize(() => {
+  const functionDefinitionMap = new Map<string, FunctionDefinition>();
+  const allFunctionDefinitions = [
+    ...scalarFunctionDefinitions,
+    ...aggFunctionDefinitions,
+    ...groupingFunctionDefinitions,
+  ];
+  allFunctionDefinitions.forEach((definition) => {
+    const functionName = definition.name.toLowerCase();
+    if (!functionDefinitionMap.has(functionName)) {
+      functionDefinitionMap.set(functionName, definition);
+    }
+  });
+  return functionDefinitionMap;
+});
+
 /**
- * Replaces quotes in function argument if present, e.g.
+ * Replaces quotes for fields in function argument if present.
  * @example
- * // Example 1: Without quotes
+ * Example 1: Without quotes
  * escapeColumnsInFunctions('MIN(total_bytes)'); // 'MIN(total_bytes)'
  *
  * @example
- * // Example 2: With quotes
+ * Example 2: With quotes
  * escapeColumnsInFunctions('MIN("Total Bytes")'); // 'MIN(`Total Bytes`)'
  */
 function escapeColumnsInFunctions(string: string): string {
   const regex = /([A-Za-z_]+)\s*\(([^()]*?)\)/g;
 
   return string.replace(regex, (match: string, functionName: string, args: string) => {
+    const functionDefinition = getFunctionDefinitionMap().get(functionName.toLowerCase());
+    if (!functionDefinition) {
+      // function definition not found, return the original match
+      return match;
+    }
+
     const escapedArgs = args.length
       ? args
           .split(',')
           .map((arg, index) => {
             const trimmedArg = arg.trim();
-            if (index > 0) {
-              // FIXME
+            // Only escape field names
+            const paramName = functionDefinition.signatures[0].params[index]?.name;
+            if (paramName !== 'field' && paramName !== 'number') {
+              // It should be just a field, but some functions like SUM and AVG have a "number" name 🤷‍♂️
               return trimmedArg;
             }
             // If the string is not wrapped in quotes, return it as is
