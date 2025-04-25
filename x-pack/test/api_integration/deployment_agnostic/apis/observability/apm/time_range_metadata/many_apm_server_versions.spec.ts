@@ -265,7 +265,7 @@ function generateTraceDataForService({
     );
 
   const apmPipeline = (base: Readable) => {
-    return synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(base);
+    return synthtrace.resolvePipelineType('default', { versionOverride: '8.5.0' })(base);
   };
 
   return synthtrace.index(events, isLegacy ? apmPipeline : undefined);
