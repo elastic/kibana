@@ -11,8 +11,8 @@ import { NoDataFound } from './no_data_found';
 import { renderWithTestProvider } from '../../test/test_provider';
 
 // Mocking components which implementation details are out of scope for this unit test
-jest.mock('../../../onboarding/components/onboarding_context', () => ({
-  OnboardingContextProvider: () => <div data-test-subj="onboarding-grid" />,
+jest.mock('../../../common/lib/integrations/hooks/integration_context', () => ({
+  IntegrationContextProvider: () => <div data-test-subj="integration-grid" />,
 }));
 
 jest.mock('../../../common/hooks/use_space_id');
@@ -40,6 +40,6 @@ describe('NoDataFound Component', () => {
       screen.getByRole('heading', { name: /connect sources to discover assets/i })
     ).toBeInTheDocument();
 
-    expect(screen.getByTestId('onboarding-grid')).toBeInTheDocument();
+    expect(screen.getByTestId('integration-grid')).toBeInTheDocument();
   });
 });
