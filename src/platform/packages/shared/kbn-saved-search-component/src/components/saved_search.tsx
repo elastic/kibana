@@ -199,10 +199,7 @@ const SavedSearchComponentTable: React.FC<
   );
 
   return (
-    <EmbeddableRenderer<
-      SearchEmbeddableSerializedState,
-      SearchEmbeddableApi
-    >
+    <EmbeddableRenderer<SearchEmbeddableSerializedState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}
