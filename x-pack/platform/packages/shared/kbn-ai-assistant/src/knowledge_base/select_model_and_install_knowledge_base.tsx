@@ -150,6 +150,7 @@ export function SelectModelAndInstallKnowledgeBase({
             options={superSelectOptions}
             valueOfSelected={selectedInferenceId}
             onChange={(value) => setSelectedInferenceId(value)}
+            disabled={isInstalling}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

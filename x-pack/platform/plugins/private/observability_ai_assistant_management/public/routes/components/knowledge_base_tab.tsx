@@ -219,7 +219,13 @@ export function KnowledgeBaseTab() {
     entries = [],
     isLoading,
     refetch,
-  } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
+  } = useGetKnowledgeBaseEntries({
+    query,
+    sortBy,
+    sortDirection,
+    kbState: knowledgeBase.status.value?.kbState,
+  });
+
   const categorizedEntries = categorizeEntries({ entries });
 
   const handleChangeSort = ({ sort }: Criteria<KnowledgeBaseEntryCategory>) => {
@@ -234,7 +240,7 @@ export function KnowledgeBaseTab() {
     setQuery(e?.currentTarget.value || '');
   };
 
-  if (knowledgeBase.status.loading) {
+  if (knowledgeBase.status.loading && !knowledgeBase.isInstalling) {
     return (
       <EuiFlexGroup alignItems="center" direction="column">
         <EuiFlexItem grow>

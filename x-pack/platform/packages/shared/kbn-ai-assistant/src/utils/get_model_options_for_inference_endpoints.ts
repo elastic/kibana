@@ -87,16 +87,21 @@ export const getModelOptionsForInferenceEndpoints = ({
   endpoints: InferenceAPIConfigResponse[];
 }): ModelOptionsData[] => {
   // TODO: add logic to show the EIS models if EIS is enabled, if not show the other models
-  return endpoints.map((endpoint) => {
-    const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id] || {
-      title: endpoint.inference_id,
-      description: '',
-    };
+  const preConfiguredEndpoints = endpoints
+    .map((endpoint) => {
+      const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id];
 
-    return {
-      key: endpoint.inference_id,
-      label: meta.title,
-      description: meta.description,
-    };
-  });
+      if (!meta) {
+        return undefined;
+      }
+
+      return {
+        key: endpoint.inference_id,
+        label: meta.title,
+        description: meta.description,
+      };
+    })
+    .filter(Boolean) as ModelOptionsData[];
+
+  return preConfiguredEndpoints;
 };
