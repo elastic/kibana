@@ -52,6 +52,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/alerting-rule-utils",
     "@kbn/response-ops-rule-params",
+    "@kbn/object-utils",
   ],
   "exclude": ["target/**/*"]
 }
