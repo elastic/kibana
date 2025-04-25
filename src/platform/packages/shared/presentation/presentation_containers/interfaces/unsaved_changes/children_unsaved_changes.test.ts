@@ -15,12 +15,12 @@ describe('childrenUnsavedChanges$', () => {
   const child1Api = {
     uuid: 'child1',
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-    resetUnsavedChanges: () => true,
+    resetUnsavedChanges: () => undefined,
   };
   const child2Api = {
     uuid: 'child2',
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-    resetUnsavedChanges: () => true,
+    resetUnsavedChanges: () => undefined,
   };
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const onFireMock = jest.fn();
@@ -118,7 +118,7 @@ describe('childrenUnsavedChanges$', () => {
       child3: {
         uuid: 'child3',
         hasUnsavedChanges$: new BehaviorSubject<boolean>(true),
-        resetUnsavedChanges: () => true,
+        resetUnsavedChanges: () => undefined,
       },
     });
 
