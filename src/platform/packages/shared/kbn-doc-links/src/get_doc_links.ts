@@ -127,8 +127,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
     },
     enterpriseSearch: {
-      aiSearchDoc: `https://www.elastic.co/guide/en/esre/current/`,
-      aiSearchHelp: `https://www.elastic.co/guide/en/esre/current/help.html`,
+      aiSearchDoc: `${ESRE_DOCS}`,
+      aiSearchHelp: `${ESRE_DOCS}help.html`,
       apiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
       behavioralAnalytics: `https://www.elastic.co/guide/en/elasticsearch/reference/8.18/behavioral-analytics-overview.html`,
       behavioralAnalyticsCORS: `https://www.elastic.co/guide/en/elasticsearch/reference/8.18/behavioral-analytics-cors.html`,
