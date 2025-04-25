@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type {
+  FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
+  FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+} from '@kbn/cloud-security-posture';
 
-export const MisconfigurationFindingsPanelKey: FindingsMisconfigurationPanelExpandableFlyoutProps['key'] =
+export const MisconfigurationFindingsPanelKey: FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview['id'] =
   'findings-misconfiguration-panel';
 
-export const MisconfigurationFindingsPreviewPanelKey: FindingsMisconfigurationPanelExpandableFlyoutProps['key'] =
+export const MisconfigurationFindingsPreviewPanelKey: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview['id'] =
   'findings-misconfiguration-panel-preview';

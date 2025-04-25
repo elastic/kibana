@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
-import type {
-  FindingMisconfigurationFlyoutContentProps,
-  FindingMisconfigurationFlyoutProps,
-} from '@kbn/cloud-security-posture';
+import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { i18n } from '@kbn/i18n';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
@@ -29,17 +25,11 @@ import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 
-export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'findings-misconfiguration-panel';
-  params: FindingMisconfigurationFlyoutProps;
-}
-
 export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
   isPreviewMode,
-  scopeId,
-}: FindingMisconfigurationFlyoutProps) => {
+}: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 
@@ -58,7 +48,7 @@ export const FindingsMisconfigurationPanel = ({
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
       <CspFlyout.Component ruleId={ruleId} resourceId={resourceId}>
-        {({ finding, createRuleFn }: FindingMisconfigurationFlyoutContentProps) => {
+        {({ finding, createRuleFn }) => {
           return (
             <>
               <FlyoutHeader>

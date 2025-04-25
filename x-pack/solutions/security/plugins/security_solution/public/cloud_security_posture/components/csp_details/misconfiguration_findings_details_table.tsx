@@ -21,6 +21,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { FindingsMisconfigurationPanelExpandableFlyoutPropsPreview } from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge, getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 
 import {
@@ -214,12 +215,14 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 METRIC_TYPE.CLICK,
                 NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
               );
-              openPreviewPanel({
+
+              const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = {
                 id: MisconfigurationFindingsPreviewPanelKey,
                 params: {
                   resourceId: finding.resource.id,
                   ruleId: finding.rule.id,
                   scopeId,
+                  isPreviewMode: true,
                   banner: {
                     title: i18n.translate(
                       'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
@@ -231,7 +234,9 @@ export const MisconfigurationFindingsDetailsTable = memo(
                     textColor: 'warning',
                   },
                 },
-              });
+              };
+
+              openPreviewPanel(previewPanelProps);
             }}
           />
         ),

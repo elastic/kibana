@@ -8,7 +8,10 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type {
+  FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
+  FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+} from '@kbn/cloud-security-posture';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
 import { AIForSOCDetailsProvider } from './ai_for_soc/context';
 import { AIForSOCPanel } from './ai_for_soc';
@@ -201,7 +204,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: MisconfigurationFindingsPanelKey,
     component: (props) => (
       <FindingsMisconfigurationPanel
-        {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
       />
     ),
   },
@@ -217,8 +220,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: MisconfigurationFindingsPreviewPanelKey,
     component: (props) => (
       <FindingsMisconfigurationPanel
-        {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
-        isPreviewMode
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
       />
     ),
   },
