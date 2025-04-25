@@ -10,7 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FETCH_STATUS, isPending } from '../../../enums';
+import { FETCH_STATUS, isPending } from '../../../..';
 
 export interface ChartContainerProps {
   hasData: boolean;

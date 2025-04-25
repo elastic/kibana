@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum FETCH_STATUS {
-  LOADING = 'loading',
-  SUCCESS = 'success',
-  FAILURE = 'failure',
-  NOT_INITIATED = 'not_initiated',
-}
+import { FETCH_STATUS } from '../..';
+
+export const isPending = (fetchStatus: FETCH_STATUS) =>
+  fetchStatus === FETCH_STATUS.LOADING || fetchStatus === FETCH_STATUS.NOT_INITIATED;

@@ -8,3 +8,4 @@
  */
 
 export * from './formatters';
+export * from './fetch_status';
