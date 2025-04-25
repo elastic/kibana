@@ -19,12 +19,12 @@ import {
   LockDocument,
   withLock,
   runSetupIndexAssetEveryTime,
-} from '../../../../../../../platform/plugins/shared/lock-manager/server/lock_manager_client';
+} from '@kbn/lock-manager/server/lock_manager_client';
 import {
   LOCKS_COMPONENT_TEMPLATE_NAME,
   LOCKS_CONCRETE_INDEX_NAME,
   LOCKS_INDEX_TEMPLATE_NAME,
-} from '../../../../../../../platform/plugins/shared/lock-manager/server/setup_lock_manager_index';
+} from '@kbn/lock-manager/server/setup_lock_manager_index';
 
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
