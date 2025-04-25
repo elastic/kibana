@@ -40,7 +40,12 @@ export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem 
     return '-';
   }
 
-  return <EuiLink href={link}> {dashboardsCount}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="installedIntegrationsDashboardsLink" href={link}>
+      {' '}
+      {dashboardsCount}
+    </EuiLink>
+  );
 };
 
 const getDashboardsCount = (installation: InstallationInfo, spaceId: string) => {

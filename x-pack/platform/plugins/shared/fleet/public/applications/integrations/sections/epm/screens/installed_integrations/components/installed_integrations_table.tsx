@@ -86,6 +86,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
         loading={isLoading}
         items={installedPackages}
         itemId="name"
+        rowProps={{ 'data-test-subj': 'installedIntegrationsTableRow' }}
         pagination={{
           pageIndex: pagination.pagination.currentPage - 1,
           totalItemCount: total,

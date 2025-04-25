@@ -16,6 +16,8 @@ import {
   AGENT_POLICY_NAME_LINK,
   FLYOUT_CLOSE_BTN_SEL,
   getIntegrationCard,
+  INSTALLED_INTEGRATIONS_DASHBOARDS_LINK,
+  INSTALLED_INTEGRATIONS_TABLE_ROW,
   INTEGRATION_NAME_LINK,
   LATEST_VERSION,
   PACKAGE_VERSION,
@@ -210,5 +212,30 @@ describe('Add Integration - Real API', () => {
     });
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
+  });
+});
+
+describe('Dashboards link for installed integration - Real API', () => {
+  const integration = 'apache';
+  const expectedIntegrationDashboard = '[Metrics Apache] Overview';
+  const unexpectedIntegrationDashboard = '[Elastic Agent]';
+  beforeEach(() => {
+    login();
+  });
+
+  it('should navigate to the dashboards list filtered by the integration name', () => {
+    setupIntegrations();
+    cy.getBySel(LOADING_SPINNER).should('not.exist');
+    cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Apache');
+    cy.getBySel(getIntegrationCard(integration)).click();
+    addIntegration();
+    cy.visit('/app/integrations/installed');
+    cy.getBySel(INSTALLED_INTEGRATIONS_TABLE_ROW)
+      .contains('Apache')
+      .parents('tr')
+      .find(`[data-test-subj="${INSTALLED_INTEGRATIONS_DASHBOARDS_LINK}"]`)
+      .click();
+    cy.contains(expectedIntegrationDashboard).should('exist');
+    cy.contains(unexpectedIntegrationDashboard).should('not.exist');
   });
 });

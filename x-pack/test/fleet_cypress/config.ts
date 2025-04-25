@@ -43,6 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'agentTamperProtectionEnabled',
           'subfeaturePrivileges',
+          'installedIntegrationsTabularUI',
         ])}`,
 
         `--logging.loggers=${JSON.stringify([
