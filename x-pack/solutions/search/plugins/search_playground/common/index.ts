@@ -28,3 +28,10 @@ export const ContextModelLimitError = i18n.translate(
     defaultMessage: 'Context exceeds the model limit',
   }
 );
+
+export enum ROUTE_VERSIONS {
+  v1 = '1',
+}
+
+export const PLAYGROUND_SAVED_OBJECT_TYPE = 'search_playground';
+
