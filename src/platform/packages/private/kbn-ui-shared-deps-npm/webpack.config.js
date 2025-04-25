@@ -39,7 +39,7 @@ module.exports = (_, argv) => {
         'buffer',
         'punycode',
         'util',
-        // 'url',
+        'url',
         'qs',
 
         /**
