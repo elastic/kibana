@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -31,6 +30,7 @@ import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useUrlSearchState } from './hooks/use_url_search_state';
+import { SloManagementBulkActions } from './slo_management_bulk_actions';
 import { SloManagementSearchBar } from './slo_management_search_bar';
 import type { Action } from './slo_management_table_wrapper';
 
@@ -246,25 +246,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     <EuiPanel hasBorder={true}>
       <SloManagementSearchBar onRefresh={refetch} />
       <EuiSpacer size="m" />
-
-      {!!selectedItems.length ? (
-        <EuiButtonEmpty
-          data-test-subj="sloSloManagementTableBulkDeleteButton"
-          onClick={() => {}}
-          size="xs"
-          css={{ blockSize: '0px' }}
-        >
-          {i18n.translate(
-            'xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel',
-            {
-              defaultMessage: 'Delete {count} SLOs',
-              values: {
-                count: selectedItems.length,
-              },
-            }
-          )}
-        </EuiButtonEmpty>
-      ) : (
+      {!selectedItems.length ? (
         <EuiText size="xs">
           {i18n.translate('xpack.slo.sloManagementTable.itemCount', {
             defaultMessage: 'Showing {count} of {total} SLOs',
@@ -274,6 +256,8 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
             },
           })}
         </EuiText>
+      ) : (
+        <SloManagementBulkActions items={selectedItems} />
       )}
       <EuiSpacer size="s" />
       <EuiBasicTable<SLODefinitionResponse>
