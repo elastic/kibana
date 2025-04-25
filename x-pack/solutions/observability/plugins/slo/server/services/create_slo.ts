@@ -64,7 +64,7 @@ export class CreateSLO {
 
     const rollbackOperations = [];
     const createPromise = this.repository.create(slo);
-    rollbackOperations.push(() => this.repository.deleteById(slo.id, true));
+    rollbackOperations.push(() => this.repository.deleteById(slo.id, { ignoreNotFound: true }));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
