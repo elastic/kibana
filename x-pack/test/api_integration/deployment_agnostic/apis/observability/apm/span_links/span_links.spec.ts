@@ -9,7 +9,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Readable } from 'stream';
 import { type ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import moment from 'moment';
-import { ApmSynthtracePipelineSchema, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 
@@ -21,14 +21,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = moment(baseTime).subtract(15, 'minutes');
   const end = moment(baseTime);
 
-  const scenarios: ApmSynthtracePipelines[] = [
-    ApmSynthtracePipelineSchema.Default,
-    ApmSynthtracePipelineSchema.ApmToOtel,
-  ];
+  const scenarios: ApmSynthtracePipelines[] = ['default', 'apmToOtel'];
 
   describe('Span Links', () => {
     scenarios.forEach((pipeline) => {
-      const isDefaultPipeline = pipeline === ApmSynthtracePipelineSchema.Default;
+      const isDefaultPipeline = pipeline === 'default';
 
       describe(`contains linked children - ${isDefaultPipeline ? 'elastic APM' : 'Otel'}`, () => {
         let ids: ReturnType<typeof generateSpanLinksData>['ids'];
@@ -40,15 +37,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           ids = spanLinksData.ids;
 
-          await apmSynthtraceEsClient.index(
-            [
-              Readable.from(spanLinksData.events.producerInternalOnly),
-              Readable.from(spanLinksData.events.producerExternalOnly),
-              Readable.from(spanLinksData.events.producerConsumer),
-              Readable.from(spanLinksData.events.producerMultiple),
-            ],
-            apmSynthtraceEsClient.getPipeline(pipeline)
-          );
+          apmSynthtraceEsClient.resolvePipelineType(pipeline);
+          await apmSynthtraceEsClient.index([
+            Readable.from(spanLinksData.events.producerInternalOnly),
+            Readable.from(spanLinksData.events.producerExternalOnly),
+            Readable.from(spanLinksData.events.producerConsumer),
+            Readable.from(spanLinksData.events.producerMultiple),
+          ]);
         });
 
         after(() => apmSynthtraceEsClient.clean());

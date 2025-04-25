@@ -10,13 +10,12 @@ import {
   type ApmOtelFields,
   type SynthtraceGenerator,
   type ApmSynthtracePipelines,
-  ApmSynthtracePipelineSchema,
 } from '@kbn/apm-synthtrace-client';
 
 export const synthtrace = {
   index: <TFields extends ApmFields | ApmOtelFields>(
     events: SynthtraceGenerator<TFields> | Array<Serializable<TFields>>,
-    pipeline: ApmSynthtracePipelines = ApmSynthtracePipelineSchema.Default
+    pipeline: ApmSynthtracePipelines = 'default'
   ) =>
     cy.task('synthtrace:index', {
       events: Array.from(events).flatMap((event) => event.serialize()),

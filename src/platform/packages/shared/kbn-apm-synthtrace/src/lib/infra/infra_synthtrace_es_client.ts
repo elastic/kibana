@@ -23,11 +23,15 @@ interface Pipeline {
 
 export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
   constructor(
-    private readonly options: { client: Client; logger: Logger } & InfraSynthtraceEsClientOptions
+    private readonly options: {
+      client: Client;
+      logger: Logger;
+      pipeline?: Pipeline;
+    } & InfraSynthtraceEsClientOptions
   ) {
     super({
       ...options,
-      pipeline: infraPipeline(),
+      pipeline: infraPipeline({ includeSerialization: options.pipeline?.includeSerialization }),
     });
     this.dataStreams = [
       'metrics-system*',
@@ -37,22 +41,12 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
     ];
   }
 
-  getDefaultPipeline(
-    {
-      includeSerialization,
-    }: {
-      includeSerialization?: boolean;
-    } = { includeSerialization: true }
-  ) {
-    return infraPipeline({ includeSerialization });
-  }
-
   clone(): this {
     return new InfraSynthtraceEsClient(this.options) as this;
   }
 }
 
-function infraPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
+function infraPipeline({ includeSerialization = true }: Pipeline) {
   return (base: Readable) => {
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
 

@@ -26,6 +26,11 @@ export enum ComponentTemplateName {
   TracesApmSampled = 'traces-apm.sampled@custom',
 }
 
+interface Pipeline {
+  includeSerialization?: boolean;
+  versionOverride?: string;
+}
+
 export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOptions, 'pipeline'> {
   version: string;
 }
@@ -34,11 +39,15 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
   public readonly version: string;
 
   constructor(
-    private readonly options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions
+    options: { client: Client; logger: Logger; pipeline?: Pipeline } & ApmSynthtraceEsClientOptions
   ) {
     super({
       ...options,
-      pipeline: apmPipeline(options.logger, options.version),
+      pipeline: apmPipeline(
+        options.logger,
+        options.pipeline?.versionOverride ?? options.version,
+        options.pipeline?.includeSerialization
+      ),
     });
     this.dataStreams = [
       'traces-apm*',
@@ -77,19 +86,7 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
     this.logger.info(`Updated component template: ${name}`);
   }
 
-  getDefaultPipeline(
-    {
-      includeSerialization,
-      versionOverride,
-    }: {
-      includeSerialization?: boolean;
-      versionOverride?: string;
-    } = { includeSerialization: true }
-  ) {
-    return apmPipeline(this.logger, versionOverride ?? this.version, includeSerialization);
-  }
-
-  getPipeline(
+  resolvePipelineType(
     pipeline: ApmSynthtracePipelines,
     options: {
       includeSerialization?: boolean;
@@ -108,12 +105,12 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
         );
       }
       default: {
-        return this.getDefaultPipeline(options);
+        return apmPipeline(
+          this.logger,
+          options.versionOverride ?? this.version,
+          options.includeSerialization
+        );
       }
     }
-  }
-
-  clone(): this {
-    return new ApmSynthtraceEsClient(this.options) as this;
   }
 }

@@ -15,11 +15,10 @@ import { Worker } from 'worker_threads';
 import { LogLevel } from '../../..';
 import { bootstrap } from './bootstrap';
 import { RunOptions } from './parse_run_cli_flags';
-import { WorkerData } from './synthtrace_worker';
+import { WorkerData } from './workers/historical_data/synthtrace_historical_data_worker';
 import { getScenario } from './get_scenario';
 import { StreamManager } from './stream_manager';
-import { indexHistoricalData } from './index_historical_data';
-import { cloneClients } from './get_clients';
+import { indexData } from './index_data';
 
 export async function startHistoricalDataUpload({
   runOptions,
@@ -38,26 +37,21 @@ export async function startHistoricalDataUpload({
     Promise.all(
       files.map(async (file) => {
         const fn = await getScenario({ file, logger });
-        const scenario = await fn({
+        return fn({
           ...runOptions,
           logger,
           from,
           to,
         });
-
-        return { file, scenario };
       })
     )
   );
 
-  const clientsByFile = new Map(scenarios.map(({ file }) => [file, cloneClients(clients)]));
-
   const teardown = once(async () => {
     await Promise.all(
-      scenarios.map(({ scenario, file }) => {
-        const scenarioClients = clientsByFile.get(file);
-        if (scenario.teardown && scenarioClients) {
-          return scenario.teardown(scenarioClients);
+      scenarios.map(async (scenario) => {
+        if (scenario.teardown) {
+          return scenario.teardown(clients);
         }
       })
     );
@@ -66,10 +60,9 @@ export async function startHistoricalDataUpload({
   const streamManager = new StreamManager(logger, teardown);
 
   await Promise.all(
-    scenarios.map(({ scenario, file }) => {
-      const scenarioClients = clientsByFile.get(file);
-      if (scenario.bootstrap && scenarioClients) {
-        return scenario.bootstrap(scenarioClients);
+    scenarios.map(async (scenario) => {
+      if (scenario.bootstrap) {
+        return scenario.bootstrap(clients);
       }
     })
   );
@@ -114,13 +107,16 @@ export async function startHistoricalDataUpload({
       workerIndex: index,
       bucketFrom: rangeStep(interval),
       bucketTo: rangeStep(interval + intervalSpan),
+      file: files[index % files.length],
     }));
 
   function runService({
+    file,
     bucketFrom,
     bucketTo,
     workerIndex,
   }: {
+    file: string;
     bucketFrom: Date;
     bucketTo: Date;
     workerIndex: number;
@@ -128,6 +124,7 @@ export async function startHistoricalDataUpload({
     return new Promise((resolve, reject) => {
       logger.debug(`Setting up Worker: ${workerIndex}`);
       const workerData: WorkerData = {
+        file,
         runOptions,
         bucketFrom,
         bucketTo,
@@ -135,7 +132,7 @@ export async function startHistoricalDataUpload({
         from,
         to,
       };
-      const worker = new Worker(Path.join(__dirname, './worker.js'), {
+      const worker = new Worker(Path.join(__dirname, './workers/historical_data/worker.js'), {
         workerData,
       });
 
@@ -182,19 +179,20 @@ export async function startHistoricalDataUpload({
       ? // just run in this process. it's hard to attach
         // a debugger to a worker_thread, see:
         // https://issues.chromium.org/issues/41461728
-        [
-          indexHistoricalData({
+        files.map((file) =>
+          indexData({
+            file,
             bucketFrom: intervals[0].bucketFrom,
             bucketTo: intervals[0].bucketTo,
-            clientsByFile,
+            clients,
             logger,
             runOptions,
             workerId: 'i',
             from,
             to,
             streamManager,
-          }),
-        ]
+          })
+        )
       : range(0, intervals.length).map((index) => runService(intervals[index]));
 
   await Promise.race(workerServices);

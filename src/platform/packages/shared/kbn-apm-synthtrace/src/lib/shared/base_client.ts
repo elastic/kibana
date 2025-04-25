@@ -14,7 +14,7 @@ import {
   SynthtraceESAction,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { castArray, isFunction } from 'lodash';
+import { castArray } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { Logger } from '../utils/create_logger';
@@ -41,7 +41,6 @@ export abstract class SynthtraceEsClient<TFields extends Fields> {
   private readonly refreshAfterIndex: boolean;
 
   private pipelineCallback: (base: Readable) => NodeJS.WritableStream;
-  private serverless?: boolean;
   protected dataStreams: string[] = [];
   protected indices: string[] = [];
 
@@ -101,7 +100,7 @@ export abstract class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async refresh() {
-    const allIndices = this.dataStreams.concat(this.indices);
+    const allIndices = this.getAllIndices();
     this.logger.info(`Refreshing "${allIndices.join(',')}"`);
 
     return this.client.indices.refresh({
@@ -112,7 +111,7 @@ export abstract class SynthtraceEsClient<TFields extends Fields> {
     });
   }
 
-  pipeline(cb: (base: Readable) => NodeJS.WritableStream) {
+  setPipeline(cb: (base: Readable) => NodeJS.WritableStream) {
     this.pipelineCallback = cb;
   }
 
@@ -122,28 +121,23 @@ export abstract class SynthtraceEsClient<TFields extends Fields> {
   ): Promise<void> {
     this.logger.debug(`Bulk indexing ${castArray(streamOrGenerator).length} stream(s)`);
 
-    const previousPipelineCallback = this.pipelineCallback;
-    if (isFunction(pipelineCallback)) {
-      this.pipeline(pipelineCallback);
-    }
+    const pipelineFn = pipelineCallback ?? this.pipelineCallback;
 
     const allStreams = castArray(streamOrGenerator).map((obj) => {
       const base = isGeneratorObject(obj) ? Readable.from(obj) : obj;
 
-      return this.pipelineCallback(base);
+      return pipelineFn(base);
     }) as Transform[];
 
     let count: number = 0;
 
     const stream = sequential(...allStreams);
 
-    const manualRefreshAllowed = this.refreshAfterIndex || (await this.manualRefreshAllowed());
-
     await this.client.helpers.bulk(
       {
         concurrency: this.concurrency,
         refresh: false,
-        refreshOnCompletion: !manualRefreshAllowed,
+        refreshOnCompletion: false,
         flushBytes: 250000,
         datasource: stream,
         filter_path: 'errors,items.*.error,items.*.status',
@@ -188,24 +182,12 @@ export abstract class SynthtraceEsClient<TFields extends Fields> {
 
     this.logger.info(`Produced ${count} events`);
 
-    // restore pipeline callback
-    if (pipelineCallback) {
-      this.pipeline(previousPipelineCallback);
-    }
-
     if (this.refreshAfterIndex) {
       await this.refresh();
     }
   }
 
-  async manualRefreshAllowed() {
-    if (this.serverless === undefined) {
-      const info = await this.client.info();
-      this.serverless = info.version.build_flavor === 'serverless';
-    }
-
-    return !this.serverless;
+  getAllIndices() {
+    return this.dataStreams.concat(this.indices);
   }
-
-  abstract clone(): this;
 }

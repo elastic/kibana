@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timerange } from '@kbn/apm-synthtrace-client';
+import Path from 'path';
 import { once } from 'lodash';
-import { memoryUsage } from 'process';
+import { Worker } from 'worker_threads';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
 import { StreamManager } from './stream_manager';
-import { cloneClients } from './get_clients';
+import { SynthtraceEsClient } from '../../lib/shared/base_client';
+import { WorkerData } from './workers/live_data/synthtrace_live_data_worker';
+import { LogLevel } from '../../lib/utils/create_logger';
+import { SynthtraceClients } from './get_clients';
+import { startPerformanceLogger } from './performance_logger';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -27,120 +31,146 @@ export async function startLiveDataUpload({
 }) {
   const files = runOptions.files;
 
+  const clientsPerIndices = new Map<string, string>();
+
   const { logger, clients } = await bootstrap(runOptions);
+
+  Object.entries(clients).forEach(([key, client]) => {
+    if (client instanceof SynthtraceEsClient) {
+      clientsPerIndices.set(client.getAllIndices().join(','), key);
+    }
+  });
 
   const scenarios = await Promise.all(
     files.map(async (file) => {
       const fn = await getScenario({ file, logger });
-      const scenario = await fn({
+      return fn({
         ...runOptions,
         logger,
         from,
         to,
       });
-
-      const scenarioClients = cloneClients(clients);
-
-      return { scenario, scenarioClients };
     })
   );
 
-  function startPeriodicPerfLogging() {
-    let cpuUsage = process.cpuUsage();
-
-    return setInterval(() => {
-      cpuUsage = process.cpuUsage(cpuUsage);
-      const mem = memoryUsage();
-      logger.debug(
-        `cpu time: (user: ${Math.round(cpuUsage.user / 1000)}mss, sys: ${Math.round(
-          cpuUsage.system / 1000
-        )}ms), memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`
-      );
-    }, 5000);
-  }
-
-  const intervalId = startPeriodicPerfLogging();
+  const stopPerformanceLogger = startPerformanceLogger({ logger });
 
   const teardown = once(async () => {
     await Promise.all(
-      scenarios.map(({ scenario, scenarioClients }) => {
+      scenarios.map((scenario) => {
         if (scenario.teardown) {
-          return scenario.teardown(scenarioClients);
+          return scenario.teardown(clients);
         }
       })
     );
 
-    clearInterval(intervalId);
+    stopPerformanceLogger();
   });
 
   const streamManager = new StreamManager(logger, teardown);
 
   await Promise.all(
-    scenarios.map(({ scenario, scenarioClients }) => {
+    scenarios.map((scenario) => {
       if (scenario.bootstrap) {
-        return scenario.bootstrap(scenarioClients);
+        return scenario.bootstrap(clients);
       }
     })
   );
 
   const bucketSizeInMs = runOptions.liveBucketSize;
-  let requestedUntil = from;
 
-  function mb(value: number): string {
-    return Math.round(value / 1024 ** 2).toString() + 'mb';
+  const workersWaitingRefresh = new Map<string, string>();
+
+  function refreshIndices() {
+    return Promise.all(
+      [...new Set(workersWaitingRefresh.values())].map(async (indices) => {
+        if (!indices) return;
+
+        const clientName = clientsPerIndices.get(indices);
+        const client = clientName && clients[clientName as keyof SynthtraceClients];
+
+        if (client instanceof SynthtraceEsClient) {
+          await client.refresh();
+        }
+      })
+    );
   }
 
-  async function uploadNextBatch() {
-    const now = Date.now();
-
-    if (now > requestedUntil) {
-      const bucketCount = Math.floor((now - requestedUntil) / bucketSizeInMs);
-
-      const rangeStart = requestedUntil;
-      const rangeEnd = rangeStart + bucketCount * bucketSizeInMs;
-
-      logger.info(
-        `Requesting ${new Date(rangeStart).toISOString()} to ${new Date(
-          rangeEnd
-        ).toISOString()} in ${bucketCount} bucket(s)`
-      );
-
-      const generatorsAndClients = scenarios.flatMap(({ scenario, scenarioClients }) => {
-        return scenario.generate({
-          range: timerange(rangeStart, rangeEnd, logger),
-          clients: scenarioClients,
-        });
+  function runService({ file, workerIndex }: { file: string; workerIndex: number }) {
+    return new Promise((resolve, reject) => {
+      logger.debug(`Setting up Worker: ${workerIndex}`);
+      const workerData: WorkerData = {
+        file,
+        runOptions,
+        bucketSizeInMs,
+        workerId: workerIndex.toString(),
+        from,
+        to,
+      };
+      const worker = new Worker(Path.join(__dirname, './workers/live_data/worker.js'), {
+        workerData,
       });
 
-      await Promise.all(
-        generatorsAndClients.map(async ({ generator, client }) => {
-          await streamManager.index(client, generator);
-        })
-      );
+      streamManager.trackWorker(worker);
 
-      logger.debug('Indexing completed');
+      worker.on('message', async (message) => {
+        if ('status' in message && message.status === 'done') {
+          const { workerId, indicesToRefresh }: { workerId: string; indicesToRefresh: string[] } =
+            message;
 
-      const refreshPromise = generatorsAndClients.map(async ({ client }) => {
-        const canRefresh = await client.manualRefreshAllowed();
-        if (canRefresh) {
-          return client.refresh();
+          if (!workersWaitingRefresh.has(workerId)) {
+            workersWaitingRefresh.set(workerId, indicesToRefresh.join(','));
+          }
+
+          if (workersWaitingRefresh.size === files.length) {
+            await refreshIndices();
+            logger.debug('Refreshing completed');
+
+            streamManager.trackedWorkers.forEach((trackedWorker) => {
+              trackedWorker.postMessage('continue');
+            });
+
+            workersWaitingRefresh.clear();
+          }
+        } else {
+          const [logLevel, msg]: [string, string] = message;
+          switch (logLevel) {
+            case LogLevel.debug:
+              logger.debug(msg);
+              return;
+            case LogLevel.info:
+              logger.info(msg);
+              return;
+            case LogLevel.verbose:
+              logger.verbose(msg);
+              return;
+            case LogLevel.warn:
+              logger.warning(msg);
+              return;
+            case LogLevel.error:
+              logger.error(msg);
+              return;
+            default:
+              logger.info(msg);
+          }
         }
       });
-
-      await Promise.all(refreshPromise);
-
-      logger.debug('Refreshing completed');
-
-      requestedUntil = rangeEnd;
-    }
+      worker.on('error', (message) => {
+        logger.error(message);
+        reject();
+      });
+      worker.on('exit', (code) => {
+        if (code === 2) reject(new Error(`Worker ${workerIndex} exited with error: ${code}`));
+        if (code === 1) {
+          logger.info(`Worker ${workerIndex} exited early because cancellation was requested`);
+        }
+        resolve(null);
+      });
+      worker.postMessage('start');
+    });
   }
 
-  do {
-    await uploadNextBatch();
-    await delay(bucketSizeInMs);
-  } while (true);
-}
+  const workerServices = files.map((file, index) => runService({ file, workerIndex: index }));
 
-async function delay(ms: number) {
-  return await new Promise((resolve) => setTimeout(resolve, ms));
+  await Promise.race(workerServices);
 }

@@ -51,7 +51,7 @@ const asyncNoop = async () => {};
 export class StreamManager {
   private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
   private readonly trackedGeneratorStreams: Writable[] = [];
-  private readonly trackedWorkers: Worker[] = [];
+  public readonly trackedWorkers: Worker[] = [];
 
   constructor(
     private readonly logger: ToolingLog,
@@ -143,12 +143,16 @@ export class StreamManager {
     let stream: PassThrough;
 
     if (this.clientStreams.has(client)) {
+      this.logger.debug('Reusing existing client stream');
       stream = this.clientStreams.get(client)!;
     } else {
+      this.logger.debug('Creating new client stream');
       stream = new PassThrough({ objectMode: true });
       this.clientStreams.set(client, stream);
+      this.logger.debug(`Creating new client stream 2 ${client}`);
       client.index(stream);
     }
+
     return stream;
   }
 

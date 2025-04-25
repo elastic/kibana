@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum ApmSynthtracePipelineSchema {
-  Default = 'default', // classic APM
-  Otel = 'otel', // OTel native through APM server
-  ApmToOtel = 'apmToOtel', // convert classic APM synthtrace scenario into OTel native (useful to run existing scenarios as OTel)
-}
-export type ApmSynthtracePipelines = `${ApmSynthtracePipelineSchema}`;
+/* eslint-disable @typescript-eslint/no-var-requires*/
+require('@babel/register')({
+  extensions: ['.ts', '.js'],
+  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
+});
+
+require('./synthtrace_live_data_worker');

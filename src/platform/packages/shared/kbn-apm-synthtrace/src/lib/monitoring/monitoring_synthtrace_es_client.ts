@@ -18,21 +18,12 @@ import { Logger } from '../utils/create_logger';
 export type MonitoringSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
 export class MonitoringSynthtraceEsClient extends SynthtraceEsClient<MonitoringDocument> {
-  constructor(
-    private readonly options: {
-      client: Client;
-      logger: Logger;
-    } & MonitoringSynthtraceEsClientOptions
-  ) {
+  constructor(options: { client: Client; logger: Logger } & MonitoringSynthtraceEsClientOptions) {
     super({
       ...options,
       pipeline: monitoringPipeline(),
     });
     this.dataStreams = ['.monitoring-*', 'metrics-*'];
-  }
-
-  clone(): this {
-    return new MonitoringSynthtraceEsClient(this.options) as this;
   }
 }
 
