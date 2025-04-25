@@ -24,6 +24,7 @@ import {
   mergeEsqlResultInSource,
   getMvExpandUsage,
   updateExcludedIds,
+  getSourceDocument,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -92,7 +93,7 @@ export const esqlExecutor = async ({
      * Since aggregating queries do not produce event ids, we will not exclude them.
      * All alerts for aggregating queries are unique anyway
      */
-    const excludedDocumentIds: string[] = [];
+    const excludedDocumentIds: Record<string, Set<string>> = {};
     let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
@@ -162,7 +163,7 @@ export const esqlExecutor = async ({
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
           const { _id, _version, _index, ...esqlResult } = document;
 
-          const sourceDocument = _id ? sourceDocuments[_id] : undefined;
+          const sourceDocument = getSourceDocument(sourceDocuments, _id, _index);
           // when mv_expand command present we must clone source, since the reference will be used multiple times
           const source = hasMvExpand ? cloneDeep(sourceDocument?._source) : sourceDocument?._source;
 
@@ -250,7 +251,7 @@ export const esqlExecutor = async ({
           excludedDocumentIds,
           hasMvExpand,
           sourceDocuments,
-          results: response,
+          results,
           isRuleAggregating,
         });
         iteration++;

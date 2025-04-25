@@ -23,7 +23,7 @@ export interface BuildEqlSearchRequestParams {
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverride | undefined;
   exceptionFilter: Filter | undefined;
-  excludedDocumentIds: string[];
+  excludedDocumentIds: Record<string, Set<string>>;
   ruleExecutionTimeout: string | undefined;
 }
 
@@ -63,9 +63,9 @@ export const buildEsqlSearchRequest = ({
     filter: {
       bool: {
         filter: requestFilter,
-        ...(excludedDocumentIds.length > 0
+        ...(Object.keys(excludedDocumentIds).length > 0
           ? {
-              must_not: { ids: { values: excludedDocumentIds } },
+              must_not: convertExternalIdsToDSL(excludedDocumentIds),
             }
           : {}),
       },
@@ -73,4 +73,38 @@ export const buildEsqlSearchRequest = ({
     wait_for_completion_timeout: '4m', // hard limit request timeout is 5m set by ES proxy and alerting framework. So, we should be fine to wait 4m for async query completion. If rule execution is shorter than 4m and query was not completed, it will be aborted.
     ...(ruleExecutionTimeout ? { keep_alive: ruleExecutionTimeout } : {}),
   };
+};
+
+const convertExternalIdsToDSL = (
+  excludedDocumentIds: Record<string, Set<string>>
+): estypes.QueryDslQueryContainer[] => {
+  const indices = Object.keys(excludedDocumentIds);
+  const queries: estypes.QueryDslQueryContainer[] = [];
+
+  for (const index of indices) {
+    const ids = excludedDocumentIds[index];
+
+    queries.push({
+      bool: {
+        filter: [
+          {
+            ids: {
+              values: [...ids],
+            },
+          },
+          ...(index
+            ? [
+                {
+                  term: {
+                    _index: index,
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+    });
+  }
+
+  return queries;
 };

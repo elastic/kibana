@@ -15,10 +15,10 @@ const fetchedDocumentMock: FetchedDocument = {
   _version: 1,
 };
 
-const sourceDocuments: Record<string, FetchedDocument> = {
-  id1: fetchedDocumentMock,
-  id2: fetchedDocumentMock,
-  id3: fetchedDocumentMock,
+const sourceDocuments: Record<string, FetchedDocument[]> = {
+  id1: [fetchedDocumentMock],
+  id2: [fetchedDocumentMock],
+  id3: [fetchedDocumentMock],
 };
 
 const results: EsqlTable = {
@@ -59,7 +59,7 @@ describe('updateExcludedIds', () => {
     const result = updateExcludedIds({
       excludedDocumentIds,
       hasMvExpand: true,
-      sourceDocuments: { id1: fetchedDocumentMock },
+      sourceDocuments: { id1: [fetchedDocumentMock] },
       results,
       isRuleAggregating: false,
     });
