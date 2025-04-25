@@ -159,6 +159,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getEntityStoreApiKeyManager,
 
+      getProductFeatureService: () => productFeaturesService,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,

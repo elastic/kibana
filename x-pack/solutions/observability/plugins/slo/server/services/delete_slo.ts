@@ -6,7 +6,7 @@
  */
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -14,94 +14,118 @@ import {
   getSLOTransformId,
   getWildcardPipelineId,
 } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
+
+interface Options {
+  skipDataDeletion: boolean;
+  skipRuleDeletion: boolean;
+}
 
 export class DeleteSLO {
   constructor(
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
-    private rulesClient: RulesClientApi
+    private rulesClient: RulesClientApi,
+    private abortController: AbortController = new AbortController()
   ) {}
 
-  public async execute(sloId: string): Promise<void> {
+  public async execute(
+    sloId: string,
+    options: Options = {
+      skipDataDeletion: false,
+      skipRuleDeletion: false,
+    }
+  ): Promise<void> {
     const slo = await this.repository.findById(sloId);
 
-    await Promise.all([this.deleteSummaryTransform(slo), this.deleteRollupTransform(slo)]);
-
-    await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getWildcardPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      )
-    );
+    // First delete the linked resources before deleting the data
+    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
 
     await Promise.all([
-      this.deleteRollupData(slo.id),
-      this.deleteSummaryData(slo.id),
-      this.deleteAssociatedRules(slo.id),
-      this.repository.deleteById(slo.id),
+      this.transformManager.uninstall(rollupTransformId),
+      this.summaryTransformManager.uninstall(summaryTransformId),
+      retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: getWildcardPipelineId(slo.id, slo.revision) },
+          { ignore: [404], signal: this.abortController.signal }
+        )
+      ),
+      this.repository.deleteById(slo.id, { ignoreNotFound: true }),
+    ]);
+
+    await Promise.all([
+      this.deleteRollupData(slo.id, options.skipDataDeletion),
+      this.deleteSummaryData(slo.id, options.skipDataDeletion),
+      this.deleteAssociatedRules(slo.id, options.skipRuleDeletion),
     ]);
   }
 
-  private async deleteRollupTransform(slo: SLODefinition) {
-    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.uninstall(rollupTransformId);
-  }
+  private async deleteRollupData(sloId: string, skip: boolean): Promise<void> {
+    if (skip) {
+      return;
+    }
 
-  private async deleteSummaryTransform(slo: SLODefinition) {
-    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-    await this.summaryTransformManager.uninstall(summaryTransformId);
-  }
-
-  private async deleteRollupData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
-      index: SLI_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'slo.id': sloId,
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery(
+      {
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            filter: {
+              term: {
+                'slo.id': sloId,
+              },
             },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
   }
 
-  private async deleteSummaryData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      refresh: true,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'slo.id': sloId,
+  private async deleteSummaryData(sloId: string, skip: boolean): Promise<void> {
+    if (skip) {
+      return;
+    }
+
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery(
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        refresh: false,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            filter: {
+              term: {
+                'slo.id': sloId,
+              },
             },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
   }
-  private async deleteAssociatedRules(sloId: string): Promise<void> {
+  private async deleteAssociatedRules(sloId: string, skip: boolean): Promise<void> {
+    if (skip) {
+      return;
+    }
+
     try {
       await this.rulesClient.bulkDeleteRules({
         filter: `alert.attributes.params.sloId:${sloId}`,
       });
     } catch (err) {
-      // no-op: bulkDeleteRules throws if no rules are found.
+      // no-op
     }
   }
 }
