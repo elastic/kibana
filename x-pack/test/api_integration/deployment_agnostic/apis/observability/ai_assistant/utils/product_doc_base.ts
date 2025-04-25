@@ -14,7 +14,8 @@ import type SuperTest from 'supertest';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import fs from 'fs';
-import { products } from '../complete/product_docs/products';
+import { DocumentationProduct } from '@kbn/product-doc-common/src/product';
+import { mockKibanaProductDoc } from '../complete/product_docs/products';
 import { LOCAL_PRODUCT_DOC_PATH } from '../../../../default_configs/common_paths';
 
 export async function installProductDoc(supertest: SuperTest.Agent) {
@@ -54,16 +55,22 @@ export async function createProductDoc(supertest: SuperTest.Agent) {
   const [versionMajor, versionMinor] = kibanaVersion.split('.');
 
   const artifacts: string[] = [];
-  for (const product of products) {
+  for (const productName of Object.values(DocumentationProduct)) {
     const zip = new AdmZip();
-    zip.addFile('content/content-1.ndjson', Buffer.from(JSON.stringify(product.content), 'utf8'));
+    zip.addFile(
+      'content/content-1.ndjson',
+      Buffer.from(
+        JSON.stringify(productName === DocumentationProduct.kibana ? mockKibanaProductDoc : {}),
+        'utf8'
+      )
+    );
     zip.addFile(
       'manifest.json',
       Buffer.from(
         JSON.stringify(
           {
             formatVersion: '1.0.0',
-            productName: product.productName,
+            productName,
             productVersion: `${versionMajor}.${versionMinor}`,
           },
           null,
@@ -125,7 +132,7 @@ export async function createProductDoc(supertest: SuperTest.Agent) {
     );
 
     // naming convention follow this pattern: kb-product-doc-{{productName}}-{{versionMajor}}.{{versionMinor}}.zip: https://github.com/elastic/kibana/blob/33993b7123bc0d6c85d9c42b15610cc0d5092281/docs/reference/
-    const folderName = `kb-product-doc-${product.productName}-${versionMajor}.${versionMinor}.zip`;
+    const folderName = `kb-product-doc-${productName}-${versionMajor}.${versionMinor}.zip`;
     artifacts.push(folderName);
     const outputZipPath = path.join(LOCAL_PRODUCT_DOC_PATH, folderName);
 

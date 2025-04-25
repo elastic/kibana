@@ -21,7 +21,7 @@ import {
   uninstallProductDoc,
   createProductDoc,
 } from '../../utils/product_doc_base';
-import { products, ProductDoc } from '../product_docs/products';
+import { mockKibanaProductDoc } from '../product_docs/products';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -184,14 +184,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('should validate the structure and content of the retrieved document', () => {
           const document = parsedContent.documents[0];
-          const expectedDocument = products.find(
-            (product: ProductDoc) => product.productName === 'kibana'
-          );
           expect(document).to.not.be(undefined);
           expect(document).to.eql({
-            title: expectedDocument?.content.content_title,
-            url: expectedDocument?.content.url,
-            content: expectedDocument?.content.content_body?.text,
+            title: mockKibanaProductDoc.content_title,
+            url: mockKibanaProductDoc.url,
+            content: mockKibanaProductDoc.content_body?.text,
             summarized: false,
           });
         });
