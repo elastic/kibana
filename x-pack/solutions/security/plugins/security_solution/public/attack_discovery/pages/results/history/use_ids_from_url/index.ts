@@ -8,14 +8,14 @@
 import { z } from '@kbn/zod';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 const schema = z.object({
   ids: z.string().array(),
 });
 
-export const useIdsFromUrl = (): string[] => {
-  const [searchParams] = useSearchParams();
+export const useIdsFromUrl = (): { ids: string[]; setIdsUrl: (ids: string[]) => void } => {
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const ids = useMemo(() => {
     try {
@@ -24,7 +24,10 @@ export const useIdsFromUrl = (): string[] => {
       }
 
       const parsed = schema.parse({
-        ids: searchParams.getAll('id').map((id) => decodeURIComponent(id.trim())),
+        ids: searchParams
+          .getAll('id')
+          .flatMap((id) => id.split(','))
+          .map((id) => decodeURIComponent(id.trim())),
       });
 
       return parsed.ids;
@@ -32,6 +35,17 @@ export const useIdsFromUrl = (): string[] => {
       return [];
     }
   }, [searchParams]);
+  const setIdsUrl = useCallback(
+    (newIds: string[]) => {
+      if (newIds.length) {
+        searchParams.set('id', newIds.join(','));
+      } else {
+        searchParams.delete('id');
+      }
+      setSearchParams(searchParams);
+    },
+    [searchParams, setSearchParams]
+  );
 
-  return ids;
+  return { ids, setIdsUrl };
 };
