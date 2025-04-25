@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useLocation } from 'react-router-dom';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
@@ -15,41 +16,53 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useAssistantContext } from '../../assistant_context';
 import { AttackDiscoveryDetails } from './attack_discovery_details';
-import { useFetchAttackDiscovery } from './use_fetch_attack_discovery';
+import { useFindAttackDiscoveries } from './use_find_attack_discoveries';
 import * as i18n from './translations';
 
 interface Props {
-  // TODO use alert id for attack discovery
-  id?: string;
+  id: string;
 }
 
 export const AttackDiscoveryWidget = memo(({ id }: Props) => {
-  const { http, toasts, navigateToApp } = useAssistantContext();
+  const { assistantAvailability, http, navigateToApp } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
-  // TODO fetch by alert id, not connector id. Waiting for Andrew's API updates
-  const connectorId = 'my-gpt4o-ai';
-  const { isFetching, data } = useFetchAttackDiscovery({ connectorId, http, toasts });
-  const [attackDiscovery, setAttackDiscovery] = useState<AttackDiscovery | null>(null);
+
+  const { pathname } = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const { isLoading, data } = useFindAttackDiscoveries({
+    alertIds: [id],
+    http,
+    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+  });
+  const [attackDiscovery, setAttackDiscovery] = useState<AttackDiscoveryAlert | null>(null);
   const handleNavigateToAttackDiscovery = useCallback(
-    () =>
-      navigateToApp('security', {
-        path: 'attack_discovery',
-      }),
-    [navigateToApp]
+    (attackDiscoveryId: string) => {
+      if (pathname.includes('attack_discovery')) {
+        searchParams.set('id', attackDiscoveryId);
+        setSearchParams(searchParams);
+      } else {
+        navigateToApp('security', {
+          path: `attack_discovery?id=${attackDiscoveryId}`,
+        });
+      }
+    },
+    [pathname, searchParams, setSearchParams, navigateToApp]
   );
   useEffect(() => {
-    if (data != null) {
-      setAttackDiscovery(data);
+    if (data != null && data.data.length > 0) {
+      setAttackDiscovery(data.data[0]);
     }
   }, [data]);
 
   return (
     <>
-      {isFetching ? (
+      {isLoading ? (
         <EuiLoadingSpinner />
       ) : attackDiscovery ? (
         <EuiPanel
@@ -71,7 +84,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
             iconSide="right"
             iconType="popout"
             data-test-subj="attackDiscoveryViewDetails"
-            onClick={handleNavigateToAttackDiscovery}
+            onClick={() => handleNavigateToAttackDiscovery(attackDiscovery.id)}
             css={css`
               padding: 0;
             `}
