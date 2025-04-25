@@ -37,7 +37,7 @@ const panelOpenerStyles = {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
       }
 
-      &.isActive {
+      &.isSelected {
         background-color: ${euiTheme.colors.backgroundLightPrimary};
         &:hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
@@ -62,12 +62,12 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
   const { title, deepLink, icon, withBadge, badgeOptions } = item;
   const { id, path } = item;
   const isExpanded = selectedNode?.path === path;
-  const isActive = isActiveFromUrl(item.path, activeNodes);
+  const isSelected = isActiveFromUrl(item.path, activeNodes);
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
-    [`nav-item-isActive`]: isActive || isExpanded,
+    [`nav-item-isActive`]: isSelected || isExpanded,
   });
 
   const togglePanel = useCallback(
@@ -99,7 +99,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       fullWidth
       className={classNames([
         icon ? 'hasIcon' : undefined,
-        isActive ? 'isActive' : isExpanded ? 'isExpanded' : undefined,
+        isSelected ? 'isSelected' : isExpanded ? 'isExpanded' : undefined,
       ])}
       css={panelOpenerStyles.button}
       data-test-subj={dataTestSubj}
