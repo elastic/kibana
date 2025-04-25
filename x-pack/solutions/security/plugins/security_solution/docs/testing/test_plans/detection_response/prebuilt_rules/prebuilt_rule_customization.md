@@ -65,6 +65,12 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
     - [**Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-in-a-mixture-of-prebuilt-and-custom-rules-under-an-insufficient-license)
     - [**Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**](#scenario-user-cant-edit-prebuilt-rules-via-bulk-edit-api-under-an-insufficient-license)
+  - [Reverting a rule to Elastic version](#reverting-a-rule-to-elastic-version)
+    - [**Scenario: User can revert customized prebuilt rule to current Elastic version**](#scenario-user-can-revert-customized-prebuilt-rule-to-current-elastic-version)
+    - [**Scenario: User can view diff between current and original Elastic rule versions in flyout**](#scenario-user-can-view-diff-between-current-and-original-elastic-rule-versions-in-flyout)
+    - [**Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**](#scenario-revert-prebuilt-rule-button-should-be-disabled-when-rules-base-version-is-missing)
+    - [**Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**](#scenario-revert-prebuilt-rule-button-shouldnt-appear-if-rule-is-non-customzied)
+    - [**Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rules-base-version-is-missing)
 
 ## Useful information
 
@@ -519,3 +525,15 @@ Then the response should only list the custom rules as updated
 And all prebuilt rules should be listed as not updated
 And for each prebuilt rule the response should contain a message that the action is not allowed under current license
 ```
+
+### Reverting a rule to Elastic version
+
+#### **Scenario: User can revert customized prebuilt rule to current Elastic version**
+
+#### **Scenario: User can view diff between current and original Elastic rule versions in flyout**
+
+#### **Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**
+
+#### **Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**
+
+#### **Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**
