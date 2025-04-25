@@ -21,6 +21,7 @@ import { User } from './fields/user';
 import { UserAgent } from './fields/user_agent';
 import { Faas } from './fields/faas';
 import { SpanLink } from './fields/span_links';
+import { Server } from './fields/server';
 
 interface Processor {
   name: 'transaction';
@@ -64,6 +65,7 @@ export interface TransactionRaw extends APMBaseDoc {
   ecs?: { version?: string };
   host?: Host;
   http?: Http;
+  server?: Server;
   kubernetes?: Kubernetes;
   process?: Process;
   service: Service;

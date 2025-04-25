@@ -84,11 +84,6 @@ export const DownloadCloudDependencies: Task = {
       await downloadBeat('filebeat', buildId);
     }
 
-    if (config.buildOptions.createDockerCloudFIPS) {
-      await downloadBeat('metricbeat', buildId, 'fips');
-      await downloadBeat('filebeat', buildId, 'fips');
-    }
-
     await writeManifest(manifestUrl, manifestJSON);
   },
 };

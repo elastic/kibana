@@ -39,7 +39,7 @@
     "@kbn/core-analytics-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/security-plugin-types-common",
+    "@kbn/core-security-server",
   ],
   "exclude": [
     "target/**/*",

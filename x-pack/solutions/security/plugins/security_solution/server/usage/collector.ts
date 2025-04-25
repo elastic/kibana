@@ -44,6 +44,19 @@ export const registerCollector: RegisterCollector = ({
     schema: {
       detectionMetrics: {
         detection_rules: {
+          spaces_usage: {
+            total: {
+              type: 'long',
+              _meta: { description: 'Total number of spaces where detection rules added' },
+            },
+            rules_in_spaces: {
+              type: 'array',
+              items: {
+                type: 'long',
+                _meta: { description: 'Number of rules is each space' },
+              },
+            },
+          },
           detection_rule_usage: {
             query: {
               enabled: { type: 'long', _meta: { description: 'Number of query rules enabled' } },

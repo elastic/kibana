@@ -89,5 +89,6 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/security-plugin-types-common",
     "@kbn/data-usage-plugin",
+    "@kbn/scout-info",
   ]
 }

@@ -4,36 +4,47 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
-% What needs to be done: Write from scratch
+## 9.0.0
 
-::::{dropdown} Now HTTP/2 is the default protocol when TLS is enabled and a deprecation warning appears if HTTP/2 is not enabled or TLS is not configured (9.0.0)
-:name: known-issue-204384
+::::{dropdown} Issue with follower indices during upgrade
+:name: ua-follower-indices
 
-**Details**<br> Starting from version 9.0.0, HTTP/2 is the default protocol when TLS is enabled. This ensures improved performance and security. However, if HTTP/2 is not enabled or TLS is not configured, a deprecation warning will be added.
+**Details**
 
-**Impact**<br> Systems that have TLS enabled but don’t specify a protocol will start using HTTP/2 in 9.0.0. Systems that use HTTP/1 or don’t have TLS configured will get a deprecation warning.
+In Upgrade Assistant, follower indices may be identified to be reindexed. However, this is not a valid migration path and will result in an error. Instead, the recommendation is to mark as read-only and unfollow the leader index. Cross-cluster replication on that index will not be possible.
 
-**Action**<br> Verify that TLS is properly configured by enabling it and providing valid certificates in the settings. Test your system to ensure that connections are established securely over HTTP/2.
+Find additional information in the [upgrade documentation](docs-content://deploy-manage/upgrade/prepare-to-upgrade.md#upgrade-ccr-data-streams).
 
-If your Kibana server is hosted behind a load balancer or reverse proxy we recommend testing your deployment configuration before upgrading to 9.0.
-
-View [#204384](https://github.com/elastic/kibana/pull/204384).
 ::::
 
+::::{dropdown} Unexpected deprecation warnings for APM indices during upgrade
+:name: known-issue-apm-upgrade-on-ech
 
-::::{dropdown} Search sessions disabled by default (9.0.0)
-:name: known-issue-206998
+**Details**
 
-**Details**<br> Starting from version 9.0.0, search sessions are disabled by default. To view, manage, and restore search sessions, the feature needs to be explicitly re-enabled.
+When upgrading an {{ech}} deployment to {{stack}} 9.0.0, you may see deprecation warnings for APM indices, even if you are not using APM.
 
-**Impact**<br> Search sessions will be disabled unless they are explicitly enabled in config.yml.
+If your deployment ever ran on {{stack}} 7.x, these APM indices have been created automatically at that time, even if you didn't use APM. In this case, these indices exist and are empty.
 
-**Action**<br> If you would like to continue using, managing, and restoring search sessions in 9.0, you’ll need to re-enable the feature in your kibana.yml configuration file. If not, no action is necessary.
+**Action**
 
-To re-enable search sessions, add the following in your config.yml:
+To proceed with the upgrade to 9.0.0, you must resolve all deprecation notices for indices beginning with the name `apm-7` by selecting **Mark as read-only** for each of them.
 
-```
-data.search.sessions.enabled: true
-```
+::::
+
+::::{dropdown} Upgrade Assistant - Rollup jobs need to be stopped before rollup indices are reindexed
+:name: known-issue-211850
+
+**Details**
+
+Rollup indices, like all indices, created in 7.x or earlier need to be reindexed in preparation for migration to 9.0. However, in addition to the normal reindex process the rollup job also needs to be accounted for. 
+
+**Action**
+
+Stop the rollup job before reindexing begins otherwise there may be a gap in rollup data. You can restart the job can after reindexing is complete.
+
+This needs to be performed manually until addressed in the upgrade assistant code.
+
+View [#211850](https://github.com/elastic/kibana/issues/211850).
 
 ::::

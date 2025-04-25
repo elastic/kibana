@@ -118,6 +118,30 @@ describe('publishing subject', () => {
       expect(renderCount).toBe(2);
     });
 
+    test('useBatchedPublishingSubjects should synchronously subscribe to observables to avoid race conditions', async () => {
+      function Component() {
+        const [value1] = useBatchedPublishingSubjects(subject1);
+
+        // synchronously emit new values for observables
+        // this will cause test to fail if subscriptions are not setup synchronously
+        incrementAll();
+
+        return (
+          <>
+            <span>{`value1: ${value1}`}</span>
+          </>
+        );
+      }
+      render(<Component />);
+      await waitFor(() => {
+        expect(
+          // If there is a race condition, then 'value1: 0' will be rendered
+          // because value1 will have the original value '0' instead of latest value
+          screen.getByText('value1: 1')
+        ).toBeInTheDocument();
+      });
+    });
+
     test('should batch state updates when using useBatchedOptionalPublishingSubjects', async () => {
       let renderCount = 0;
       function Component() {

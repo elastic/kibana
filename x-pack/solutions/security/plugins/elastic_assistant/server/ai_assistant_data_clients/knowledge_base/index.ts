@@ -90,7 +90,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
-  trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+  getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
   modelIdOverride: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
@@ -131,7 +131,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Installing ELSER model '${elserId}'...`);
 
     try {
-      await this.options.trainedModelsProvider.installElasticModel(elserId);
+      await this.options.getTrainedModelsProvider().installElasticModel(elserId);
     } catch (error) {
       this.options.logger.error(`Error installing ELSER model '${elserId}':\n${error}`);
     }
@@ -147,7 +147,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     this.options.logger.debug(`Checking if ELSER model '${elserId}' is installed...`);
 
     try {
-      const getResponse = await this.options.trainedModelsProvider.getTrainedModels({
+      const getResponse = await this.options.getTrainedModelsProvider().getTrainedModels({
         model_id: elserId,
         include: 'definition_status',
       });
@@ -209,7 +209,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       let getResponse;
       try {
-        getResponse = await this.options.trainedModelsProvider.getTrainedModelsStats({
+        getResponse = await this.options.getTrainedModelsProvider().getTrainedModelsStats({
           model_id: elserId,
         });
       } catch (e) {
@@ -250,7 +250,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       });
       this.options.logger.debug(`Dry run for ELSER model '${elserId}' successfully deployed!`);
 
-      await this.options.trainedModelsProvider.stopTrainedModelDeployment({
+      await this.options.getTrainedModelsProvider().stopTrainedModelDeployment({
         model_id: elserId,
         deployment_id: dryRunId.assignment.task_parameters.deployment_id,
       });
