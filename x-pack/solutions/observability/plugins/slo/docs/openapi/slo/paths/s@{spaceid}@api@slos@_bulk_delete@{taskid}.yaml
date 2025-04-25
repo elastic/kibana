@@ -1,0 +1,43 @@
+get:
+  summary: Retrieve the status of the bulk deletion
+  operationId: bulkDeleteStatusOp
+  description: >
+    Retrieve the status of the bulk deletion operation for SLOs. 
+    This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
+  tags:
+    - slo
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+    - name: taskId
+      in: path
+      description: The task id of the bulk delete operation
+      required: true
+      schema:
+        type: string
+        example: 8853df00-ae2e-11ed-90af-09bb6422b258
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/bulk_delete_status_response.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'

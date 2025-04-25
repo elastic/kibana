@@ -52,6 +52,7 @@ import type {
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
+  CustomIntegrationRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -65,6 +66,7 @@ import {
   getLimitedPackages,
   getBulkAssets,
   getTemplateInputs,
+  updateCustomIntegration,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
@@ -388,6 +390,31 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
     }
     throw error;
   }
+};
+export const updateCustomIntegrationHandler: FleetRequestHandler<
+  TypeOf<typeof CustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+
+  const { readMeData, categories } = request.body as TypeOf<
+    typeof CustomIntegrationRequestSchema.body
+  >;
+  const { pkgName } = request.params as unknown as TypeOf<
+    typeof CustomIntegrationRequestSchema.params
+  >;
+  const result = await updateCustomIntegration(esClient, soClient, pkgName, {
+    readMeData,
+    categories,
+  });
+
+  return response.ok({
+    body: {
+      id: pkgName,
+      result,
+    },
+  });
 };
 
 const bulkInstallServiceResponseToHttpEntry = (
