@@ -105,6 +105,21 @@
     "misc": [
       {
         "parentPluginId": "searchPlayground",
+        "id": "def-common.PLAYGROUND_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "PLAYGROUND_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"search_playground\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -140,6 +155,18 @@
         "signature": [
           "\"/app/search_playground\""
         ],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.ROUTE_VERSIONS",
+        "type": "string",
+        "tags": [],
+        "label": "ROUTE_VERSIONS",
+        "description": [],
         "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
