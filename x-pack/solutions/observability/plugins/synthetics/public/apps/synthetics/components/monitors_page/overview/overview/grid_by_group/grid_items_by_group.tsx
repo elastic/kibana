@@ -6,7 +6,7 @@
  */
 
 import { EuiFocusTrap, EuiOverlayMask, EuiPanel, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useRef, useState, FC, PropsWithChildren, useMemo } from 'react';
+import React, { useRef, useState, FC, PropsWithChildren } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
@@ -44,20 +44,6 @@ export const GridItemsByGroup = ({
   const { locations: allLocations } = useSelector(selectServiceLocationsState);
 
   const data = useFilters();
-
-  const monitorNames = useMemo(() => {
-    return groupField === 'name' && allConfigs
-      ? allConfigs.reduce((acc, el) => {
-          const elIndex = acc.findIndex((item) => item.label === el.name);
-          if (elIndex !== -1) {
-            acc[elIndex].count += 1;
-          } else {
-            acc.push({ label: el.name, count: 1 });
-          }
-          return acc;
-        }, [] as Array<{ label: string; count: number }>)
-      : [];
-  }, [allConfigs, groupField]);
 
   if (!data) {
     return <EuiLoadingSpinner />;
@@ -132,20 +118,6 @@ export const GridItemsByGroup = ({
             }
           ),
           items: allConfigs?.filter((monitor) => !Boolean(monitor.projectId)),
-        },
-      };
-      break;
-    case 'name':
-      selectedGroup = {
-        key: 'name',
-        items: monitorNames,
-        values: monitorNames,
-        otherValues: {
-          label: i18n.translate('xpack.synthetics.monitorsPage.overview.gridItemsByGroup.noNames', {
-            defaultMessage: 'Without any name',
-          }),
-          // All monitors should have a name. This array tracks monitors that are missing it, which helps identify potential issues
-          items: allConfigs?.filter((monitor) => !get(monitor, 'name')),
         },
       };
       break;

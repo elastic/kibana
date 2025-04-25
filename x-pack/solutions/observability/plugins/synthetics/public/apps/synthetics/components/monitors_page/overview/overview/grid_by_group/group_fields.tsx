@@ -75,18 +75,6 @@ export const GroupFields = () => {
       },
     },
     {
-      label: NAME_LABEL,
-      value: 'name',
-      checked: groupField === 'name',
-      defaultSortOrder: 'asc',
-      onClick: () => {
-        handleChange({
-          field: 'name',
-          order: groupOrder,
-        });
-      },
-    },
-    {
       label: LOCATION_LABEL,
       value: 'location.id',
       checked: groupField === 'locationId',
@@ -136,7 +124,7 @@ export const GroupFields = () => {
     },
   ];
 
-  const { asc, desc, label } = orderContentMapping[groupField];
+  const { asc, desc, label } = getOrderContent(groupField);
 
   const orderByOptions = [
     {
@@ -185,6 +173,41 @@ export const GroupFields = () => {
   );
 };
 
+const getOrderContent = (groupField: string) => {
+  switch (groupField) {
+    case 'locationId':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: LOCATION_LABEL,
+      };
+    case ConfigKey.MONITOR_TYPE:
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: MONITOR_TYPE_LABEL,
+      };
+    case ConfigKey.TAGS:
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: TAG_LABEL,
+      };
+    case ConfigKey.PROJECT_ID:
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: PROJECT_LABEL,
+      };
+    default:
+      return {
+        asc: ASCENDING_LABEL,
+        desc: DESCENDING_LABEL,
+        label: NONE_LABEL,
+      };
+  }
+};
+
 export const GROUP_TITLE = i18n.translate('xpack.synthetics.overview.groupPopover.group.title', {
   defaultMessage: 'Group by',
 });
@@ -221,10 +244,6 @@ const LOCATION_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.lo
   defaultMessage: 'Location',
 });
 
-const NAME_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.name.label', {
-  defaultMessage: 'Name',
-});
-
 const MONITOR_TYPE_LABEL = i18n.translate(
   'xpack.synthetics.overview.groupPopover.monitorType.label',
   {
@@ -239,15 +258,3 @@ const TAG_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.tag.lab
 const PROJECT_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.project.label', {
   defaultMessage: 'Project',
 });
-
-const orderContentMapping: Record<
-  GroupByState['field'],
-  { asc: string; desc: string; label: string }
-> = {
-  locationId: { asc: SORT_ALPHABETICAL_ASC, desc: SORT_ALPHABETICAL_DESC, label: LOCATION_LABEL },
-  name: { asc: SORT_ALPHABETICAL_ASC, desc: SORT_ALPHABETICAL_DESC, label: NAME_LABEL },
-  none: { asc: ASCENDING_LABEL, desc: DESCENDING_LABEL, label: NONE_LABEL },
-  project_id: { asc: SORT_ALPHABETICAL_ASC, desc: SORT_ALPHABETICAL_DESC, label: PROJECT_LABEL },
-  type: { asc: SORT_ALPHABETICAL_ASC, desc: SORT_ALPHABETICAL_DESC, label: MONITOR_TYPE_LABEL },
-  tags: { asc: SORT_ALPHABETICAL_ASC, desc: SORT_ALPHABETICAL_DESC, label: TAG_LABEL },
-};
