@@ -872,7 +872,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentLevelLogging: `${FLEET_DOCS}monitor-elastic-agent.html#change-logging-level`,
     },
     integrationDeveloper: {
-      upload: `${INTEGRATIONS_DEV_DOCS}upload-a-new-integration.html`,
+      upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/${ECS_VERSION}/index.html`,
@@ -969,9 +969,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apiKeyPrivileges: `${SERVERLESS_DOCS}api-keys.html#api-keys-restrict-privileges`,
     },
     synthetics: {
-      featureRoles: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-feature-roles.html`
-        : `${OBSERVABILITY_DOCS}synthetics-feature-roles.html`,
+      featureRoles: `${ELASTIC_DOCS}solutions/observability/synthetics/grant-access-to-secured-resources`,
     },
     telemetry: {
       settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
