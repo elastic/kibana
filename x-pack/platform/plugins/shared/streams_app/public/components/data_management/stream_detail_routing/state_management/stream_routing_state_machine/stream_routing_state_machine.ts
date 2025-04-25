@@ -218,7 +218,7 @@ export const streamRoutingMachine = setup({
                     },
                     onDone: {
                       target: '#displayingRoutingRules.idle',
-                      actions: [{ type: 'notifyStreamSuccess' }, { type: 'refreshDefinition' }],
+                      actions: [{ type: 'refreshDefinition' }],
                     },
                     onError: {
                       target: 'changing',
@@ -353,10 +353,11 @@ export const createStreamRoutingMachineImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
   core,
+  forkSuccessNofitier,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
-    forkStream: createForkStreamActor({ streamsRepositoryClient }),
+    forkStream: createForkStreamActor({ streamsRepositoryClient, forkSuccessNofitier }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
   },
   actions: {

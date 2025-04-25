@@ -31,19 +31,19 @@ export function NestedView({
         margin-top: -${euiTheme.size.xs}; //-4px
         padding-top: ${euiTheme.size.xs}; //4px
         position: relative;
-      `}
-    >
-      <div
-        className={css`
+
+        &::before {
+          content: '';
           border-bottom: ${euiTheme.border.thin};
           border-left: ${euiTheme.border.thin};
           position: absolute;
           top: 0;
           left: ${last ? '0px' : '-1px'};
           width: ${last ? '9px' : '10px'};
-          height: ${euiTheme.size.l}; //25px
-        `}
-      />
+          height: calc(50% + ${euiTheme.size.xs}); // Exactly half of the height of the panel
+        }
+      `}
+    >
       {children}
     </div>
   );

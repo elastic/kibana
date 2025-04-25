@@ -30,19 +30,6 @@ import {
 } from './state_management/stream_routing_state_machine';
 
 export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
-  // const {
-  //   routingAppState: {
-  //     childUnderEdit,
-  //     selectChildUnderEdit,
-  //     childStreams,
-  //     onChildStreamDragEnd,
-  //     onChildStreamDragStart,
-  //     draggingChildStream,
-  //     hasChildStreamsOrderChanged,
-  //   },
-  //   definition,
-  // } = useRoutingStateContext();
-
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
 
@@ -117,10 +104,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
         `}
       >
         <CurrentStreamEntry definition={definition} />
-        <EuiDragDropContext
-          onDragEnd={handlerItemDrag}
-          // onDragStart={onChildStreamDragStart}
-        >
+        <EuiDragDropContext onDragEnd={handlerItemDrag}>
           <EuiDroppable droppableId="routing_children_reordering" spacing="none">
             <EuiFlexGroup direction="column" gutterSize="xs">
               {routing.map((routingRule, pos) => (
@@ -133,10 +117,10 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                     customDragHandle={true}
                     spacing="none"
                   >
-                    {(provided) => (
+                    {(provided, snapshot) => (
                       <NestedView
                         last={pos === routing.length - 1}
-                        // isBeingDragged={draggingChildStream === routingRule.id}
+                        isBeingDragged={snapshot.isDragging}
                       >
                         {routingRule.isNew ? (
                           <NewRoutingStreamEntry />
@@ -154,36 +138,6 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                             routingRule={routingRule}
                           />
                         )}
-                        {/* <RoutingStreamEntry
-                          draggableProvided={provided}
-                          disableEditButton={
-                            hasChildStreamsOrderChanged || !definition.privileges.manage
-                          }
-                          child={
-                            !childUnderEdit?.isNew &&
-                            child.destination === childUnderEdit?.child.destination
-                              ? childUnderEdit.child
-                              : child
-                          }
-                          edit={
-                            !childUnderEdit?.isNew &&
-                            child.destination === childUnderEdit?.child.destination
-                          }
-                          onEditStateChange={() => {
-                            if (child.destination === childUnderEdit?.child.destination) {
-                              selectChildUnderEdit(undefined);
-                            } else {
-                              selectChildUnderEdit({ isNew: false, child });
-                            }
-                          }}
-                          onChildChange={(newChild) => {
-                            selectChildUnderEdit({
-                              isNew: false,
-                              child: newChild,
-                            });
-                          }}
-                          availableStreams={availableStreams}
-                        /> */}
                       </NestedView>
                     )}
                   </EuiDraggable>
@@ -192,11 +146,6 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
-        {/* {childUnderEdit?.isNew && (
-          <NestedView last>
-            <NewRoutingStreamEntry />
-          </NestedView>
-        )} */}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

@@ -60,22 +60,32 @@ export interface ForkStreamInput {
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
-}: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'>) {
-  return fromPromise<ForkStreamResponse, ForkStreamInput>(({ input, signal }) => {
-    return streamsRepositoryClient.fetch('POST /api/streams/{name}/_fork 2023-10-31', {
-      signal,
-      params: {
-        path: {
-          name: input.definition.stream.name,
-        },
-        body: {
-          if: input.if,
-          stream: {
-            name: input.destination,
+  forkSuccessNofitier,
+}: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
+  forkSuccessNofitier: (streamName: string) => void;
+}) {
+  return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
+    const response = await streamsRepositoryClient.fetch(
+      'POST /api/streams/{name}/_fork 2023-10-31',
+      {
+        signal,
+        params: {
+          path: {
+            name: input.definition.stream.name,
+          },
+          body: {
+            if: input.if,
+            stream: {
+              name: input.destination,
+            },
           },
         },
-      },
-    });
+      }
+    );
+
+    forkSuccessNofitier(input.destination);
+
+    return response;
   });
 }
 

@@ -70,18 +70,22 @@ export function RoutingStreamEntry({
       `}
     >
       <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
-        <EuiPanel
-          grow={false}
-          className="streamsDragHandle"
-          color="transparent"
-          paddingSize="s"
-          {...draggableProvided.dragHandleProps}
-          aria-label={i18n.translate('xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel', {
-            defaultMessage: 'Drag Handle',
-          })}
-        >
-          <EuiIcon type="grabOmnidirectional" />
-        </EuiPanel>
+        <EuiFlexItem grow={false}>
+          <EuiPanel
+            className="streamsDragHandle"
+            color="transparent"
+            paddingSize="s"
+            {...draggableProvided.dragHandleProps}
+            aria-label={i18n.translate(
+              'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
+              {
+                defaultMessage: 'Drag Handle',
+              }
+            )}
+          >
+            <EuiIcon type="grabOmnidirectional" />
+          </EuiPanel>
+        </EuiFlexItem>
         {isNeverCondition(routingRule.if) && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
@@ -109,7 +113,7 @@ export function RoutingStreamEntry({
         {childrenCount > 0 && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
-              defaultMessage: '{childrenCount, plural, one {# child} other {# childrenCount}}',
+              defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
               values: { childrenCount },
             })}
           </EuiBadge>

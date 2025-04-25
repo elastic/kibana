@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { Condition, WiredStreamGetResponse } from '@kbn/streams-schema';
+import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { RoutingDefinitionWithUIAttributes } from '../../types';
 
@@ -16,6 +16,7 @@ export interface StreamRoutingServiceDependencies {
   streamsRepositoryClient: StreamsRepositoryClient;
   core: CoreStart;
   data: DataPublicPluginStart;
+  forkSuccessNofitier: (streamName: string) => void;
 }
 
 export interface StreamRoutingInput {

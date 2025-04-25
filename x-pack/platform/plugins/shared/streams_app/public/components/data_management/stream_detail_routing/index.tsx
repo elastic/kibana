@@ -4,11 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiResizableContainer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiResizableContainer,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { ChildStreamList } from './child_stream_list';
@@ -19,6 +28,10 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { PreviewPanel } from './preview_panel';
+import {
+  StatefulStreamsAppRouter,
+  useStreamsAppRouter,
+} from '../../../hooks/use_streams_app_router';
 
 interface StreamDetailRoutingProps {
   definition: WiredStreamGetResponse;
@@ -26,6 +39,7 @@ interface StreamDetailRoutingProps {
 }
 
 export function StreamDetailRouting(props: StreamDetailRoutingProps) {
+  const router = useStreamsAppRouter();
   const { core, dependencies } = useKibana();
   const {
     data,
@@ -39,6 +53,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
       core={core}
       data={data}
       streamsRepositoryClient={streamsRepositoryClient}
+      forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
     >
       <StreamDetailRoutingImpl />
     </StreamRoutingContextProvider>
@@ -163,3 +178,34 @@ export function StreamDetailRoutingImpl() {
     </EuiFlexItem>
   );
 }
+
+const createForkSuccessNofitier =
+  ({ core, router }: { core: CoreStart; router: StatefulStreamsAppRouter }) =>
+  (streamName: string) =>
+    core.notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
+        defaultMessage: 'Stream saved',
+      }),
+      text: toMountPoint(
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
+              size="s"
+              target="_blank"
+              href={router.link('/{key}/management/{tab}', {
+                path: {
+                  key: streamName,
+                  tab: 'route',
+                },
+              })}
+            >
+              {i18n.translate('xpack.streams.streamDetailRouting.view', {
+                defaultMessage: 'Open stream in new tab',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>,
+        core
+      ),
+    });
