@@ -14,13 +14,11 @@ import {
   LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID,
   LandingPage,
 } from './landing_page';
-import { useAddIntegrationsUrl } from '../../../../common/hooks/use_add_integrations_url';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
-jest.mock('../../../../common/hooks/use_add_integrations_url');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../hooks/alert_summary/use_navigate_to_integrations_page');
 
 const packages: PackageListItem[] = [
   {
@@ -47,16 +45,8 @@ const packages: PackageListItem[] = [
 ];
 
 describe('<LandingPage />', () => {
-  beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: { application: { navigateToApp: jest.fn() } },
-    });
-  });
-
   it('should render all the components', () => {
-    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({
-      onClick: jest.fn(),
-    });
+    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
 
     const { getByTestId, queryByTestId } = render(<LandingPage packages={packages} />);
 
@@ -75,14 +65,12 @@ describe('<LandingPage />', () => {
   });
 
   it('should navigate to the fleet page when clicking on the more integrations button', () => {
-    const moreIntegrations = jest.fn();
-    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({
-      onClick: moreIntegrations,
-    });
+    const navigateToIntegrationsPage = jest.fn();
+    (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(navigateToIntegrationsPage);
 
     const { getByTestId } = render(<LandingPage packages={packages} />);
 
     getByTestId(LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID).click();
-    expect(moreIntegrations).toHaveBeenCalled();
+    expect(navigateToIntegrationsPage).toHaveBeenCalled();
   });
 });
