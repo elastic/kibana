@@ -1,7 +1,8 @@
 name: Evaluate Dependency Health Score
 on:
   pull_request:
-    types: [opened, reopened]
+    types:
+      - opened
     branches:
       - 'main'
     paths:
