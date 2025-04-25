@@ -20,7 +20,7 @@ describe('toContainerModule', () => {
     const iteratee = jest.fn().mockReturnValueOnce('1').mockReturnValueOnce('2');
     const module = toContainerModule(dictionary, iteratee);
 
-    container.load(module);
+    container.loadSync(module);
 
     expect(iteratee).toHaveBeenCalledTimes(2);
     expect(iteratee).toHaveBeenNthCalledWith(1, 'key1');

@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { Newable, ServiceIdentifier } from 'inversify';
 import type { App, AppMount, AppMountParameters } from '@kbn/core-application-browser';
 
 interface ApplicationDefinition<HistoryLocationState = unknown>
   extends Omit<App<HistoryLocationState>, 'mount'>,
-    interfaces.Newable<ApplicationHandler<HistoryLocationState>> {}
+    Newable<ApplicationHandler<HistoryLocationState>> {}
 
 interface ApplicationHandler<HistoryLocationState = unknown> {
   mount(): ReturnType<AppMount<HistoryLocationState>>;
 }
 
-export const Application: interfaces.ServiceIdentifier<
-  ApplicationDefinition & Exclude<interfaces.ServiceIdentifier<ApplicationHandler>, keyof any>
+export const Application: ServiceIdentifier<
+  ApplicationDefinition & Exclude<ServiceIdentifier<ApplicationHandler>, keyof any>
 > = Symbol.for('Application');
 
-export const ApplicationParameters: interfaces.ServiceIdentifier<AppMountParameters> =
+export const ApplicationParameters: ServiceIdentifier<AppMountParameters> =
   Symbol.for('ApplicationParameters');

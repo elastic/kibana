@@ -878,7 +878,6 @@
         "reflect-metadata",
         "type-detect",
         "utility-types",
-        "@redtea/react-inversify",
         "@types/fetch-mock",
         "@types/getos",
         "@types/json5",

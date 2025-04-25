@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule, type interfaces } from 'inversify';
+import { ContainerModule, type ServiceIdentifier } from 'inversify';
 import { Global } from '@kbn/core-di';
 import { Echo } from './echo';
 
 export type { Echo };
-export const EchoService = Symbol.for('EchoService') as interfaces.ServiceIdentifier<Echo>;
+export const EchoService = Symbol.for('EchoService') as ServiceIdentifier<Echo>;
 
-export const module = new ContainerModule((bind) => {
+export const module = new ContainerModule(({ bind }) => {
   bind(EchoService).to(Echo).inRequestScope();
   bind(Global).toConstantValue(EchoService);
 });

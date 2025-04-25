@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container, inject, injectable, type interfaces } from 'inversify';
+import { Container, inject, injectable } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Application, ApplicationParameters } from '@kbn/core-di-browser';
@@ -32,39 +32,48 @@ export class TestApplication {
 
 describe('application', () => {
   let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
-  let root: interfaces.Container;
-  let container: interfaces.Container;
+  let container: Container;
   let application: jest.Mocked<TCoreSetup['application']>;
+
+  function setup() {
+    container.get(OnSetup)(container);
+  }
 
   beforeEach(() => {
     injection = injectionServiceMock.createStartContract();
     application = { register: jest.fn() } as unknown as typeof application;
-    root = new Container();
-
     container = injection.getContainer();
-    container.parent = root;
-    root.load(applicationModule);
 
-    root.bind(CoreSetup('application')).toConstantValue(application);
+    container.loadSync(applicationModule);
+    container.bind(CoreSetup('application')).toConstantValue(application);
     container.bind(CoreStart('injection')).toConstantValue(injection);
     container.bind(TestApplication).toSelf().inRequestScope();
     container.bind(Application).toConstantValue(TestApplication);
   });
 
-  it('should register an application', () => {
-    root.get(OnSetup)(container);
+  describe('OnSetup', () => {
+    it('should register an application', () => {
+      setup();
 
-    expect(application.register).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: TestApplication.id,
-        title: TestApplication.title,
-        visibleIn: TestApplication.visibleIn,
-        mount: expect.any(Function),
-      })
-    );
+      expect(application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: TestApplication.id,
+          title: TestApplication.title,
+          visibleIn: TestApplication.visibleIn,
+          mount: expect.any(Function),
+        })
+      );
+    });
+
+    it('should not register an application if there are no corresponding bindings', () => {
+      container.unbindSync(Application);
+
+      expect(setup).not.toThrow();
+      expect(application.register).not.toHaveBeenCalled();
+    });
   });
 
-  describe('mount', () => {
+  describe('Application', () => {
     let fork: ReturnType<typeof injection.fork>;
     let mount: App['mount'];
     let mountSpy: jest.SpyInstance;
@@ -80,7 +89,7 @@ describe('application', () => {
       unmountSpy = jest.spyOn(TestApplication.prototype, 'unmount');
       unbindAllSpy = jest.spyOn(fork, 'unbindAll');
 
-      root.get(OnSetup)(container);
+      setup();
       [{ mount }] = application.register.mock.lastCall!;
     });
 

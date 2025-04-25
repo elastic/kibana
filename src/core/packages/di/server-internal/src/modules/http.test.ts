@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container, inject, injectable, type interfaces } from 'inversify';
+import { Container, inject, injectable } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
@@ -39,42 +39,57 @@ class TestRoute {
 
 describe('http', () => {
   let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
-  let root: interfaces.Container;
-  let container: interfaces.Container;
+  let container: Container;
   let http: jest.Mocked<TCoreSetup['http']>;
   let router: jest.Mocked<ReturnType<typeof http.createRouter>>;
+
+  function setup() {
+    container.get(OnSetup)(container);
+  }
 
   beforeEach(() => {
     jest.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
     router = { post: jest.fn() } as unknown as typeof router;
     http = { createRouter: jest.fn().mockReturnValue(router) } as unknown as typeof http;
-    root = new Container();
-
     container = injection.getContainer();
-    container.parent = root;
-    root.load(httpModule);
-
-    root.bind(CoreSetup('http')).toConstantValue(http);
+    container.loadSync(httpModule);
+    container.bind(CoreSetup('http')).toConstantValue(http);
     container.bind(CoreStart('injection')).toConstantValue(injection);
     container.bind(TestRoute).toSelf().inRequestScope();
     container.bind(Route).toConstantValue(TestRoute);
   });
 
   it('should create a router instance', () => {
-    expect(root.isBound(Router)).toBe(true);
-    expect(root.get(Router)).toBe(router);
+    expect(container.isBound(Router)).toBe(true);
+    expect(container.get(Router)).toBe(router);
     expect(http.createRouter).toHaveBeenCalled();
   });
 
+  it('should create a router instance only once', () => {
+    const fork = injection.fork();
+
+    expect(fork.get(Router)).toBe(router);
+    expect(fork.get(Router)).toBe(router);
+    expect(http.createRouter).toHaveBeenCalledTimes(1);
+  });
+
   it('should register a route', () => {
-    root.get(OnSetup)(container);
+    container.bind(Route).toConstantValue(TestRoute);
+    setup();
 
     expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
   });
 
+  it('should not register a route if there are no corresponding bindings ', () => {
+    container.unbindSync(Route);
+
+    expect(setup).not.toThrow();
+    expect(router.post).not.toHaveBeenCalled();
+  });
+
   it('should handle a request', async () => {
-    root.get(OnSetup)(container);
+    setup();
 
     const handleSpy = jest.spyOn(TestRoute.prototype, 'handle');
     expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
