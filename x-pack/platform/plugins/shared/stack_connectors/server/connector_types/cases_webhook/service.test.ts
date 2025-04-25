@@ -61,7 +61,6 @@ const secrets = {
   crt: null,
   key: null,
   pfx: null,
-  clientSecret: null,
 };
 const defaultSSLOverrides = {};
 const actionId = '1234';
@@ -79,7 +78,6 @@ const sslSecrets = {
   password: 'foobar',
   user: null,
   pfx: null,
-  clientSecret: null,
 };
 let connectorUsageCollector: ConnectorUsageCollector;
 

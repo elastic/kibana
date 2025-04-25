@@ -12,12 +12,7 @@ import { AuthType, SSLCertType } from './constants';
 
 export const authTypeSchema = schema.maybe(
   schema.oneOf(
-    [
-      schema.literal(AuthType.Basic),
-      schema.literal(AuthType.SSL),
-      schema.literal(AuthType.OAuth2),
-      schema.literal(null),
-    ],
+    [schema.literal(AuthType.Basic), schema.literal(AuthType.SSL), schema.literal(null)],
     {
       defaultValue: AuthType.Basic,
     }
