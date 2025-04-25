@@ -13,6 +13,6 @@ export default createStatefulTestConfig({
     reportName: 'Stateful Observability - Deployment-agnostic API Integration Tests',
   },
   globals: {
-    Uint8Array: Uint8Array,
+    Uint8Array,
   },
 });
