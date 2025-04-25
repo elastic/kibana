@@ -88,13 +88,14 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
 const Y_AXIS_MIN_DOMAIN = 0.5;
 const Y_AXIS_MIN_VALUE = 0.0001;
 
-export const replaceHistogramZerosWithMinimumDomainValue = (histogramItems: HistogramItem[]) =>
-  histogramItems.reduce((histogramItem, _, i) => {
-    if (histogramItem[i].doc_count === 0) {
-      histogramItem[i].doc_count = Y_AXIS_MIN_VALUE;
+export const replaceHistogramZerosWithMinimumDomainValue = (histogramItems: HistogramItem[]) => {
+  return histogramItems.map((item) => {
+    if (item.doc_count === 0) {
+      item.doc_count = Y_AXIS_MIN_VALUE;
     }
-    return histogramItem;
-  }, histogramItems);
+    return item;
+  });
+};
 
 // Create and call a duration formatter for every value since the durations for the
 // x axis might have a wide range of values e.g. from low milliseconds to large seconds.
