@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import { EuiButtonGroup, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   DEFAULT_OVERVIEW_VIEW,
   OverviewView,
@@ -50,11 +51,21 @@ export const ViewButtons = () => {
   const { view } = useSelector(selectOverviewState);
   const [urlParams, updateUrlParams] = useUrlParams();
 
-  const { view: initialView } = urlParams();
+  const { view: urlView } = urlParams();
+
+  const [localStorageView, setLocalStorageView] = useLocalStorage<OverviewView>(
+    'synthetics.overviewView',
+    urlView || view
+  );
 
   useEffect(() => {
-    if (initialView) {
-      dispatch(setOverviewViewAction(initialView));
+    // When the component mounts, check if there is a view in the URL first
+    if (urlView) {
+      dispatch(setOverviewViewAction(urlView));
+    } // If there is no view in the URL, check if there is a view in local storage that is not the default view
+    else if (localStorageView && localStorageView !== DEFAULT_OVERVIEW_VIEW) {
+      dispatch(setOverviewViewAction(localStorageView));
+      updateUrlParams({ view: localStorageView });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -69,6 +80,7 @@ export const ViewButtons = () => {
     }
     dispatch(setOverviewViewAction(id));
     updateUrlParams({ view: id === DEFAULT_OVERVIEW_VIEW ? undefined : id });
+    setLocalStorageView(id);
   };
 
   return (
