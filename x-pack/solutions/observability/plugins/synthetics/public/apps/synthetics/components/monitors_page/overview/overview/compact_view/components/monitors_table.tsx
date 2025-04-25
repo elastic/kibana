@@ -65,6 +65,7 @@ export const MonitorsTable = ({
       pagination={pagination}
       onChange={onTableChange}
       rowProps={getRowProps}
+      data-test-subj="syntheticsCompactViewTable"
     />
   );
 };
