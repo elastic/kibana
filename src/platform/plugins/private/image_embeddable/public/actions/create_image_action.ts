@@ -42,7 +42,7 @@ export const registerCreateImageAction = () => {
 
         canAddNewPanelParent.addNewPanel<ImageEmbeddableSerializedState>({
           panelType: IMAGE_EMBEDDABLE_TYPE,
-          initialState: { imageConfig },
+          serializedState: { rawState: { imageConfig } },
         });
       } catch {
         // swallow the rejection, since this just means the user closed without saving
