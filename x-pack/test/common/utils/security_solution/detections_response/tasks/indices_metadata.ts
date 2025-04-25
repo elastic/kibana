@@ -28,26 +28,32 @@ export const randomDatastream = async (
 ): Promise<string> => {
   const name = `${DS_PREFIX}-${Date.now()}`;
 
-  let settings = {};
+  const settings = {
+    index: {
+      mode: 'standard',
+    },
+  };
 
   if (opts.policyName) {
-    settings = {
-      ...settings,
-      'index.lifecycle.name': opts.policyName,
+    settings.index = {
+      ...settings.index,
+      lifecycle: {
+        name: opts.policyName,
+      },
     };
   }
 
   if (opts.defaultPipeline) {
-    settings = {
-      ...settings,
-      'index.default_pipeline': opts.defaultPipeline,
+    settings.index = {
+      ...settings.index,
+      default_pipeline: opts.defaultPipeline,
     };
   }
 
   if (opts.finalPipeline) {
-    settings = {
-      ...settings,
-      'index.final_pipeline': opts.finalPipeline,
+    settings.index = {
+      ...settings.index,
+      final_pipeline: opts.finalPipeline,
     };
   }
 
@@ -56,6 +62,11 @@ export const randomDatastream = async (
     data_stream: {},
     template: {
       settings,
+      mappings: {
+        _source: {
+          mode: 'stored',
+        },
+      },
     },
   };
 
