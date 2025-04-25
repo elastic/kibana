@@ -12,14 +12,8 @@ import {
   ActionsClientChatOpenAI,
 } from '@kbn/langchain/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
-import {
-  AgentRunnableSequence,
-  createOpenAIToolsAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { AgentRunnableSequence, createToolCallingAgent } from 'langchain/agents';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-
-export const TOOL_CALLING_LLM_TYPES = new Set(['bedrock', 'gemini']);
 
 export const agentRunnableFactory = async ({
   llm,
@@ -42,10 +36,6 @@ export const agentRunnableFactory = async ({
     streamRunnable: isStream,
     prompt,
   } as const;
-
-  if (isOpenAI || llmType === 'inference') {
-    return createOpenAIToolsAgent(params);
-  }
 
   return createToolCallingAgent(params);
 };

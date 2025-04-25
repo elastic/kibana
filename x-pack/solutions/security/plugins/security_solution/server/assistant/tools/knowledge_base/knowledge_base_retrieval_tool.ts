@@ -59,10 +59,7 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
         name: toolDetails.name,
         description: params.description || toolDetails.description,
         schema: z.object({
-          query: z
-            .string()
-            .min(5, { message: "'Must be 5 or more characters long" })
-            .describe(`Summary of items/things to search for in the knowledge base`),
+          query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
         }),
         tags: ['knowledge-base'],
       }

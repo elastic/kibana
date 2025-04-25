@@ -14,7 +14,7 @@ import { AgentExecutorParams, AssistantDataClients } from '../../executors/types
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
-import { createOpenAIToolsAgent, createToolCallingAgent } from 'langchain/agents';
+import { createToolCallingAgent } from 'langchain/agents';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
@@ -236,15 +236,14 @@ describe('callAssistantGraph', () => {
   });
 
   describe('agentRunnable', () => {
-    it('creates OpenAIToolsAgent for openai llmType', async () => {
+    it('creates createToolCallingAgent for openai llmType', async () => {
       const params = { ...defaultParams, llmType: 'openai' };
       await callAssistantGraph(params);
 
-      expect(createOpenAIToolsAgent).toHaveBeenCalled();
-      expect(createToolCallingAgent).not.toHaveBeenCalled();
+      expect(createToolCallingAgent).toHaveBeenCalled();
     });
 
-    it('creates OpenAIToolsAgent for inference llmType', async () => {
+    it('creates createToolCallingAgent for inference llmType', async () => {
       defaultParams.actionsClient.get = jest.fn().mockResolvedValue({
         config: {
           provider: 'elastic',
@@ -254,8 +253,7 @@ describe('callAssistantGraph', () => {
       const params = { ...defaultParams, llmType: 'inference' };
       await callAssistantGraph(params);
 
-      expect(createOpenAIToolsAgent).toHaveBeenCalled();
-      expect(createToolCallingAgent).not.toHaveBeenCalled();
+      expect(createToolCallingAgent).toHaveBeenCalled();
     });
 
     it('creates ToolCallingAgent for bedrock llmType', async () => {
@@ -263,7 +261,6 @@ describe('callAssistantGraph', () => {
       await callAssistantGraph(params);
 
       expect(createToolCallingAgent).toHaveBeenCalled();
-      expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
     });
 
     it('creates ToolCallingAgent for gemini llmType', async () => {
@@ -277,7 +274,6 @@ describe('callAssistantGraph', () => {
       await callAssistantGraph(params);
 
       expect(createToolCallingAgent).toHaveBeenCalled();
-      expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
     });
 
     it('creates ToolCallingAgent for oss model', async () => {
@@ -285,7 +281,6 @@ describe('callAssistantGraph', () => {
       await callAssistantGraph(params);
 
       expect(createToolCallingAgent).toHaveBeenCalled();
-      expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
     });
     it('does not calls resolveProviderAndModel when llmType === openai', async () => {
       const params = { ...defaultParams, llmType: 'openai' };

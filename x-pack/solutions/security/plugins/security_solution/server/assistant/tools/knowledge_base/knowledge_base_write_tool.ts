@@ -70,12 +70,8 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
         schema: z.object({
           name: z
             .string()
-            .min(5, { message: "'Must be 5 or more characters long" })
             .describe(`This is what the user will use to refer to the entry in the future.`),
-          query: z
-            .string()
-            .min(5, { message: "'Must be 5 or more characters long" })
-            .describe(`Summary of items/things to save in the knowledge base`),
+          query: z.string().describe(`Summary of items/things to save in the knowledge base`),
           required: z
             .boolean()
             .describe(

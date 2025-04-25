@@ -64,15 +64,12 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
         name: toolDetails.name,
         description: params.description || toolDetails.description,
         schema: z.object({
-          query: z
-            .string()
-            .min(5, { message: "'Must be 5 or more characters long" })
-            .describe(
-              `The query to use to retrieve documentation
+          query: z.string().describe(
+            `The query to use to retrieve documentation
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Security?"`
-            ),
+          ),
           product: z
             .enum(['kibana', 'elasticsearch', 'observability', 'security'])
             .describe(

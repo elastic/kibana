@@ -191,25 +191,24 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * @returns Promise<boolean> indicating whether the model is deployed
    */
   public isInferenceEndpointExists = async (inferenceEndpointId?: string): Promise<boolean> => {
-    const elserId = await this.options.getElserId();
     const inferenceId = inferenceEndpointId || (await this.getInferenceEndpointId());
 
     try {
       const esClient = await this.options.elasticsearchClientPromise;
 
-      const inferenceExists = !!(await esClient.inference.get({
+      const response = await esClient.inference.get({
         inference_id: inferenceId,
         task_type: 'sparse_embedding',
-      }));
+      });
 
-      if (!inferenceExists) {
+      if (!response.endpoints?.[0]?.service_settings?.model_id) {
         return false;
       }
 
       let getResponse;
       try {
         getResponse = await this.options.getTrainedModelsProvider().getTrainedModelsStats({
-          model_id: elserId,
+          model_id: response.endpoints?.[0]?.service_settings?.model_id,
         });
       } catch (e) {
         return false;
@@ -261,7 +260,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   private deleteInferenceEndpoint = async () => {
-    const elserId = await this.options.getElserId();
     const esClient = await this.options.elasticsearchClientPromise;
 
     try {
@@ -271,11 +269,11 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         force: true,
       });
       this.options.logger.debug(
-        `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
+        `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model`
       );
     } catch (error) {
       this.options.logger.error(
-        `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
+        `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model:\n${error}`
       );
     }
   };
