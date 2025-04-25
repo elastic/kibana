@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { OnboardingBanner as OnboardingAVCBanner } from './onboarding_banner';
+import { GenericFtrProviderContext } from '@kbn/test';
+
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
