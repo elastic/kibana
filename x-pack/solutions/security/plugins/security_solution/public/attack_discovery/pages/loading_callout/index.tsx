@@ -175,13 +175,18 @@ const LoadingCalloutComponent: React.FC<Props> = ({
     try {
       if (executionUuid != null) {
         setIsDismissing(true);
-        await dismissAttackDiscoveryGeneration({ executionUuid });
+        await dismissAttackDiscoveryGeneration({ attackDiscoveryAlertsEnabled, executionUuid });
         refetchGenerations?.(); // force a refresh of the generations list
       }
     } finally {
       setIsDismissing(false);
     }
-  }, [dismissAttackDiscoveryGeneration, executionUuid, refetchGenerations]);
+  }, [
+    attackDiscoveryAlertsEnabled,
+    dismissAttackDiscoveryGeneration,
+    executionUuid,
+    refetchGenerations,
+  ]);
 
   return (
     <div

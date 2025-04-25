@@ -16,10 +16,12 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { useInvalidateFindAttackDiscoveries } from '../use_find_attack_discoveries';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 export const ATTACK_DISCOVERY_BULK_MUTATION_KEY = ['POST', ATTACK_DISCOVERY_BULK];
 
 interface AttackDiscoveryBulkParams {
+  attackDiscoveryAlertsEnabled: boolean;
   ids: string[];
   kibanaAlertWorkflowStatus?: 'acknowledged' | 'closed' | 'open';
   visibility?: 'not_shared' | 'shared';
@@ -28,6 +30,7 @@ interface AttackDiscoveryBulkParams {
 }
 /** Disables the attack discovery schedule. */
 const attackDiscoveryBulk = async ({
+  attackDiscoveryAlertsEnabled,
   ids,
   kibanaAlertWorkflowStatus,
   signal,
@@ -41,6 +44,12 @@ const attackDiscoveryBulk = async ({
     },
   };
 
+  if (!attackDiscoveryAlertsEnabled) {
+    return {
+      data: [],
+    };
+  }
+
   return KibanaServices.get().http.post<PostAttackDiscoveryBulkResponse>(ATTACK_DISCOVERY_BULK, {
     body: JSON.stringify(body, null, 2),
     signal,
@@ -49,6 +58,7 @@ const attackDiscoveryBulk = async ({
 };
 
 export const useAttackDiscoveryBulk = () => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const { addError, addSuccess } = useAppToasts();
 
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
@@ -56,6 +66,7 @@ export const useAttackDiscoveryBulk = () => {
   return useMutation<PostAttackDiscoveryBulkResponse, Error, AttackDiscoveryBulkParams>(
     ({ ids, kibanaAlertWorkflowStatus, visibility }) =>
       attackDiscoveryBulk({
+        attackDiscoveryAlertsEnabled,
         ids,
         kibanaAlertWorkflowStatus,
         visibility,
@@ -63,11 +74,15 @@ export const useAttackDiscoveryBulk = () => {
     {
       mutationKey: ATTACK_DISCOVERY_BULK_MUTATION_KEY,
       onSuccess: () => {
-        invalidateFindAttackDiscoveries();
-        addSuccess(i18n.ATTACK_DISCOVERIES_SUCCESSFULLY_UPDATED);
+        if (attackDiscoveryAlertsEnabled) {
+          invalidateFindAttackDiscoveries();
+          addSuccess(i18n.ATTACK_DISCOVERIES_SUCCESSFULLY_UPDATED);
+        }
       },
       onError: (error) => {
-        addError(error, { title: i18n.ERROR_UPDATING_ATTACK_DISCOVERIES });
+        if (attackDiscoveryAlertsEnabled) {
+          addError(error, { title: i18n.ERROR_UPDATING_ATTACK_DISCOVERIES });
+        }
       },
     }
   );

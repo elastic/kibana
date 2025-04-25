@@ -15,6 +15,7 @@ import type {
 } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface Props {
   ids?: string[];
@@ -68,6 +69,7 @@ export const useFindAttackDiscoveries = ({
   sortField = '@timestamp',
   sortOrder = 'desc',
 }: Props): UseFindAttackDiscoveries => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -152,7 +154,7 @@ export const useFindAttackDiscoveries = ({
     ],
     queryFn,
     {
-      enabled: isAssistantEnabled,
+      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
       getNextPageParam,
       refetchOnWindowFocus,
     }

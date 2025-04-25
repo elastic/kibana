@@ -107,6 +107,7 @@ const TakeActionComponent: React.FC<Props> = ({
     closePopover();
 
     await attackDiscoveryBulk({
+      attackDiscoveryAlertsEnabled,
       ids: attackDiscoveryIds,
       kibanaAlertWorkflowStatus: 'acknowledged',
     });
@@ -114,17 +115,19 @@ const TakeActionComponent: React.FC<Props> = ({
     setSelectedAttackDiscoveries({});
     refetchFindAttackDiscoveries?.();
   }, [
-    closePopover,
+    attackDiscoveryAlertsEnabled,
     attackDiscoveryBulk,
     attackDiscoveryIds,
-    setSelectedAttackDiscoveries,
+    closePopover,
     refetchFindAttackDiscoveries,
+    setSelectedAttackDiscoveries,
   ]);
 
   const onClickMarkAsClosed = useCallback(async () => {
     closePopover();
 
     await attackDiscoveryBulk({
+      attackDiscoveryAlertsEnabled,
       ids: attackDiscoveryIds,
       kibanaAlertWorkflowStatus: 'closed',
     });
@@ -132,9 +135,10 @@ const TakeActionComponent: React.FC<Props> = ({
     refetchFindAttackDiscoveries?.();
     setSelectedAttackDiscoveries({});
   }, [
-    closePopover,
+    attackDiscoveryAlertsEnabled,
     attackDiscoveryBulk,
     attackDiscoveryIds,
+    closePopover,
     refetchFindAttackDiscoveries,
     setSelectedAttackDiscoveries,
   ]);
@@ -143,6 +147,7 @@ const TakeActionComponent: React.FC<Props> = ({
     closePopover();
 
     await attackDiscoveryBulk({
+      attackDiscoveryAlertsEnabled,
       ids: attackDiscoveryIds,
       kibanaAlertWorkflowStatus: 'open',
     });
@@ -150,11 +155,12 @@ const TakeActionComponent: React.FC<Props> = ({
     setSelectedAttackDiscoveries({});
     refetchFindAttackDiscoveries?.();
   }, [
-    closePopover,
+    attackDiscoveryAlertsEnabled,
     attackDiscoveryBulk,
     attackDiscoveryIds,
-    setSelectedAttackDiscoveries,
+    closePopover,
     refetchFindAttackDiscoveries,
+    setSelectedAttackDiscoveries,
   ]);
 
   const onClickAddToNewCase = useCallback(async () => {

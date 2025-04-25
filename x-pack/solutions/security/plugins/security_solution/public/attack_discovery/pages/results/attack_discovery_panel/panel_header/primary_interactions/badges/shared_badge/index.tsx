@@ -22,6 +22,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { useAttackDiscoveryBulk } from '../../../../../../use_attack_discovery_bulk';
 import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
+import { useKibanaFeatureFlags } from '../../../../../../use_kibana_feature_flags';
 import * as i18n from './translations';
 
 const LIST_PROPS = {
@@ -38,6 +39,7 @@ interface SharedBadgeOptionData {
 }
 
 const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onBadgeButtonClick = useCallback(() => {
@@ -149,12 +151,13 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         const visibility = newOptions[0].checked === 'on' ? 'not_shared' : 'shared';
 
         await attackDiscoveryBulk({
+          attackDiscoveryAlertsEnabled,
           ids: [attackDiscovery.id],
           visibility,
         });
       }
     },
-    [attackDiscovery, attackDiscoveryBulk]
+    [attackDiscovery, attackDiscoveryAlertsEnabled, attackDiscoveryBulk]
   );
 
   return (

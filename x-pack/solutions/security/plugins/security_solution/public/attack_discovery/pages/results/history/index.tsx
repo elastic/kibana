@@ -34,6 +34,7 @@ import { useDismissAttackDiscoveryGeneration } from '../../use_dismiss_attack_di
 import { useIdsFromUrl } from './use_ids_from_url';
 import { useFindAttackDiscoveries } from '../../use_find_attack_discoveries';
 import { useGetAttackDiscoveryGenerations } from '../../use_get_attack_discovery_generations';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 const DEFAULT_HISTORY_END = 'now';
 const DEFAULT_HISTORY_START = 'now-24h';
@@ -63,6 +64,7 @@ const HistoryComponent: React.FC<Props> = ({
   onToggleShowAnonymized,
   showAnonymized,
 }) => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const { assistantAvailability, http } = useAssistantContext();
 
   const { ids: filterByAlertIds, setIdsUrl: setFilterByAlertIds } = useIdsFromUrl();
@@ -178,6 +180,10 @@ const HistoryComponent: React.FC<Props> = ({
 
   const { mutateAsync: dismissAttackDiscoveryGeneration } = useDismissAttackDiscoveryGeneration();
   const onRefresh = useCallback(async () => {
+    if (!attackDiscoveryAlertsEnabled) {
+      return;
+    }
+
     refetchFindAttackDiscoveries();
 
     // Dismiss all successful generations
@@ -186,7 +192,7 @@ const HistoryComponent: React.FC<Props> = ({
       const dismissPromises = generationsData.generations
         .filter(({ status }) => status === 'succeeded')
         .map(({ execution_uuid: executionUuid }) =>
-          dismissAttackDiscoveryGeneration({ executionUuid })
+          dismissAttackDiscoveryGeneration({ attackDiscoveryAlertsEnabled, executionUuid })
         );
 
       await Promise.all(dismissPromises);
@@ -194,6 +200,7 @@ const HistoryComponent: React.FC<Props> = ({
 
     setSelectedAttackDiscoveries({});
   }, [
+    attackDiscoveryAlertsEnabled,
     dismissAttackDiscoveryGeneration,
     generationsData?.generations,
     refetchFindAttackDiscoveries,

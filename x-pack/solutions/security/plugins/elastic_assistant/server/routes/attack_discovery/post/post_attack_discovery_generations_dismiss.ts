@@ -94,6 +94,13 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
             false
           );
 
+          if (!attackDiscoveryAlertsEnabled) {
+            return resp.error({
+              body: `Attack discovery alerts feature is disabled`,
+              statusCode: 403,
+            });
+          }
+
           const previousGeneration = await dataClient.getAttackDiscoveryGenerationById({
             authenticatedUser: currentUser,
             eventLogIndex,
