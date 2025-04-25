@@ -29,16 +29,15 @@ export const buildESQLWithKQLQuery = (esql: string, kqlQuery: string | undefined
 };
 
 // Function copied from elasticsearch-8.x/lib/helpers
-export function esqlResponseToRecords<TDocument>(
+export function esqlResponseToRecords<TDocument extends Record<string, unknown>>(
   response: ESQLSearchResponse | undefined
 ): TDocument[] {
   if (!response) return [];
   const { columns, values } = response;
-  return values.map((row) => {
-    const doc: Partial<TDocument> = {};
+  return values.map<TDocument>((row) => {
+    const doc: Record<string, unknown> = {};
     row.forEach((cell, index) => {
       const { name } = columns[index];
-      // @ts-expect-error
       doc[name] = cell;
     });
     return doc as TDocument;
