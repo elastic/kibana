@@ -5230,14 +5230,6 @@
                 "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts"
               },
               {
-                "plugin": "@kbn/monaco",
-                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
-              },
-              {
-                "plugin": "@kbn/monaco",
-                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
-              },
-              {
                 "plugin": "@kbn/esql-utils",
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
               },
