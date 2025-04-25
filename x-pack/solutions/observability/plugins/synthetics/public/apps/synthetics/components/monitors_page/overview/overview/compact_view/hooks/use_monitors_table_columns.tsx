@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
@@ -29,18 +29,14 @@ export const useMonitorsTableColumns = ({
 }) => {
   const history = useHistory();
 
-  const onClickMonitorType = useCallback(
-    (type: MonitorTypeEnum) => {
-      history.push({
-        search: `monitorTypes=${encodeURIComponent(JSON.stringify([type]))}`,
-      });
-    },
-    [history]
-  );
+  const onClickMonitorFilter = useCallback(
+    (filterName: string, filterValue: string) => {
+      const searchParams = new URLSearchParams(history.location.search); // Get existing query params
+      searchParams.set(filterName, JSON.stringify([filterValue])); // Add or update the query param
 
-  const onClickMonitorTag = useCallback(
-    (tag: string) => {
-      history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
+      history.push({
+        search: searchParams.toString(), // Convert back to a query string
+      });
     },
     [history]
   );
@@ -81,25 +77,33 @@ export const useMonitorsTableColumns = ({
         name: NAME,
       },
       {
-        field: 'locationLabel',
-        name: LOCATIONS,
-      },
-      {
         field: 'type',
         name: TYPE,
         render: (type: OverviewStatusMetaData['type']) => (
           <MonitorTypeBadge
             monitorType={type}
             ariaLabel={getFilterForTypeMessage(type)}
-            onClick={() => onClickMonitorType(type as MonitorTypeEnum)}
+            onClick={() => onClickMonitorFilter('monitorTypes', type)}
           />
+        ),
+      },
+      {
+        field: 'locationLabel',
+        name: LOCATIONS,
+        render: (locationLabel: OverviewStatusMetaData['locationLabel']) => (
+          <EuiLink
+            data-test-subj="syntheticsCompactViewLocation"
+            onClick={() => onClickMonitorFilter('locations', locationLabel)}
+          >
+            {locationLabel}
+          </EuiLink>
         ),
       },
       {
         field: 'tags',
         name: TAGS,
         render: (tags: OverviewStatusMetaData['tags']) => (
-          <TagsList tags={tags} onClick={onClickMonitorTag} />
+          <TagsList tags={tags} onClick={(tag) => onClickMonitorFilter('tags', tag)} />
         ),
       },
       {
@@ -114,7 +118,7 @@ export const useMonitorsTableColumns = ({
         align: 'right',
       },
     ],
-    [onClickMonitorTag, onClickMonitorType, openFlyout]
+    [onClickMonitorFilter, openFlyout]
   );
 
   return {

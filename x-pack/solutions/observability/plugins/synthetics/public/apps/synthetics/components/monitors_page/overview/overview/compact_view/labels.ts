@@ -32,5 +32,5 @@ export const ACTIONS = i18n.translate('xpack.synthetics.overview.compactView.mon
 });
 
 export const DURATION = i18n.translate('xpack.synthetics.overview.compactView.monitorDuration', {
-  defaultMessage: 'Duration',
+  defaultMessage: 'Median duration',
 });
