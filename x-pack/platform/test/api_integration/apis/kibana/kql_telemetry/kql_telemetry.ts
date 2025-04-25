@@ -8,8 +8,9 @@
 import expect from '@kbn/expect';
 import { KQL_TELEMETRY_ROUTE_LATEST_VERSION } from '@kbn/data-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
 
