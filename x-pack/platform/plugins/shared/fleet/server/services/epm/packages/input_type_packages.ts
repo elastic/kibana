@@ -9,7 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 
 import type { NewPackagePolicy, PackageInfo } from '../../../types';
 import { DATASET_VAR_NAME } from '../../../../common/constants';
-import { PackagePolicyValidationError, PackageNotFoundError } from '../../../errors';
+import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
 
 import { dataStreamService } from '../..';
 
@@ -23,11 +23,11 @@ import { generateESIndexPatterns } from '../elasticsearch/template/template';
 
 import type { PackageInstallContext } from '../../../../common/types';
 
-import { getInstalledPackageWithAssets } from './get';
+import { getInstallation, getInstalledPackageWithAssets } from './get';
 
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
-import { removeInstallation } from './remove';
+import { cleanupAssets } from './remove';
 
 // install the assets needed for inputs type packages
 export async function installAssetsForInputPackagePolicy(opts: {
@@ -160,18 +160,20 @@ export async function removeAssetsForInputPackagePolicy(opts: {
   const { logger, packageInfo, esClient, soClient } = opts;
 
   if (packageInfo.type === 'input' && packageInfo.status === 'installed') {
-    logger.info(
-      `Removing assets for package '${packageInfo.name}-${packageInfo.version}' - package type: 'inputs'`
-    );
+    logger.info(`Removing assets for input package ${packageInfo.name}:${packageInfo.version}`);
     try {
-      await removeInstallation({
+      const installation = await getInstallation({
         savedObjectsClient: soClient,
-        pkgName: packageInfo!.name,
-        pkgVersion: packageInfo!.version,
-        esClient,
+        pkgName: packageInfo.name,
       });
+      if (!installation) {
+        throw new FleetError(`${packageInfo.name} is not installed`);
+      }
+      await cleanupAssets(installation, esClient, soClient);
     } catch (error) {
-      logger.error(`Uninstalling package: ${packageInfo!.name} failed`, { error });
+      logger.error(
+        `Failed to remove assets for input package ${packageInfo.name}:${packageInfo.version}: ${error.message}`
+      );
     }
   }
 }

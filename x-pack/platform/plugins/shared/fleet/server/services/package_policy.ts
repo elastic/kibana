@@ -1663,8 +1663,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await deleteSecrets({ esClient, soClient, ids: secretsToDelete });
     }
 
-    // if the integration it's an 'input' type,
-    // we need to remove the assets that were installed at the policy creation
     await pMap(
       packagePolicies,
       async (packagePolicy) => {
@@ -1674,13 +1672,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgVersion: packagePolicy.package?.version || '',
         });
 
+        // If input package and the package has no other policies, remove assets.
         if (packageInfo?.type === 'input') {
-          await removeAssetsForInputPackagePolicy({
-            packageInfo,
-            logger,
-            esClient,
-            soClient,
+          const packagePolicySO = await soClient.find<PackagePolicySOAttributes>({
+            type: savedObjectType,
+            filter: `${savedObjectType}.attributes.package.name:${escapeSearchQueryPhrase(
+              packageInfo.name
+            )}`,
+            perPage: SO_SEARCH_LIMIT,
           });
+          if (packagePolicySO.saved_objects.length === 0) {
+            await removeAssetsForInputPackagePolicy({
+              packageInfo,
+              logger,
+              esClient,
+              soClient,
+            });
+          }
         }
       },
       { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }

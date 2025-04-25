@@ -383,8 +383,8 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
   if (name && name !== '*') {
     try {
       await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
-    } catch {
-      throw new FleetError(`Error deleting index template ${name}`);
+    } catch (error) {
+      throw new FleetError(`Error deleting index template ${name}: ${error.message}`);
     }
   }
 }
@@ -395,7 +395,7 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
     try {
       await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
     } catch (error) {
-      throw new FleetError(`Error deleting component template ${name}`);
+      throw new FleetError(`Error deleting component template ${name}: ${error.message}`);
     }
   }
 }
@@ -486,6 +486,30 @@ export function cleanupTransforms(
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   return deleteTransforms(esClient, idsToDelete);
+}
+
+/**
+ * This function deletes assets for a given installation and updates the package SO accordingly.
+ *
+ * It is used to delete assets installed for input packages when they are no longer relevant,
+ * e.g. when a package policy is deleted and the package has no more policies.
+ */
+export async function cleanupAssets(
+  installation: Installation,
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+) {
+  await deleteAssets(installation, esClient);
+  await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, installation.name, {
+    installed_es: [],
+    installed_kibana: [],
+  });
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: installation.name,
+    name: installation.name,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 async function updateUninstallStatusToFailed(
