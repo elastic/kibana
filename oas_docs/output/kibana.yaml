@@ -24765,6 +24765,20 @@ paths:
           name: kqlQuery
           schema:
             type: string
+        - description: The page size to use for cursor-based pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: size
+          schema:
+            default: 1
+            type: integer
+        - description: The cursor to use for fetching the results from, when using a cursor-base pagination.
+          in: query
+          name: searchAfter
+          schema:
+            items:
+              type: string
+            type: array
         - description: The page to use for pagination, must be greater or equal than 1
           example: 1
           in: query
@@ -46356,6 +46370,12 @@ components:
           items:
             $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           type: array
+        searchAfter:
+          type: string
+        size:
+          description: Size provided for cursor based pagination
+          example: 25
+          type: number
         total:
           example: 34
           type: number

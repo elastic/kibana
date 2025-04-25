@@ -3,7 +3,7 @@
   "info": {
     "title": "SLOs",
     "description": "OpenAPI schema for SLOs endpoints",
-    "version": "1.0",
+    "version": "1.1",
     "contact": {
       "name": "Actionable Observability Team"
     },
@@ -130,6 +130,27 @@
               "type": "string"
             },
             "example": "slo.name:latency* and slo.tags : \"prod\""
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "The page size to use for cursor-based pagination, must be greater or equal than 1",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "searchAfter",
+            "in": "query",
+            "description": "The cursor to use for fetching the results from, when using a cursor-base pagination.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           },
           {
             "name": "page",
@@ -2071,6 +2092,14 @@
         "description": "A paginated response of SLOs matching the query.\n",
         "type": "object",
         "properties": {
+          "size": {
+            "type": "number",
+            "example": 25,
+            "description": "Size provided for cursor based pagination"
+          },
+          "searchAfter": {
+            "type": "string"
+          },
           "page": {
             "type": "number",
             "example": 1
