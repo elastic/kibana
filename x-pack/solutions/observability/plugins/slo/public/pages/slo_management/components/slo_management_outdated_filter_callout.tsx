@@ -7,7 +7,7 @@
 import { EuiCallOut, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useUrlSearchState } from './hooks/use_url_search_state';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
 
 export function SloOutdatedFilterCallout() {
   const { state, onStateChange } = useUrlSearchState();

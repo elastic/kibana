@@ -29,7 +29,7 @@ import { paths } from '../../../../common/locators/paths';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { useUrlSearchState } from './hooks/use_url_search_state';
+import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloManagementBulkActions } from './slo_management_bulk_actions';
 import { SloManagementSearchBar } from './slo_management_search_bar';
 import type { Action } from './slo_management_table_wrapper';

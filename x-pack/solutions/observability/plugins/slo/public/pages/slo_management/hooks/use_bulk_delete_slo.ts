@@ -9,8 +9,8 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { BulkDeleteResponse, SLODefinitionResponse } from '@kbn/slo-schema';
 import { useMutation } from '@tanstack/react-query';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useKibana } from '../../../hooks/use_kibana';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
