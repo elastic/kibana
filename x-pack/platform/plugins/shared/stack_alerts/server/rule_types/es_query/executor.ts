@@ -8,20 +8,20 @@
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
-import { getEcsGroups, getGroupByObject } from '@kbn/alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_URL,
-  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
+import { unflattenObject } from '@kbn/alerting-rule-utils/src/group_by_object_utils';
 import type { EsQueryRuleActionContext } from './action_context';
 import { addMessages, getContextConditionsDescription } from './action_context';
 import type {
@@ -125,10 +125,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     resultGroupSet.add(result.group);
   }
 
-  const groupingObject = getGroupByObject(params.termField, resultGroupSet);
-
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
+    const groupingObject = unflattenObject(result.groupingObject ?? {});
     const alertId = result.group;
     const value = result.value ?? result.count;
 
@@ -147,7 +146,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: result.hits,
       link,
       sourceFields: result.sourceFields,
-      grouping: groupingObject[result.group],
+      grouping: groupingObject,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -175,7 +174,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     alertsClient.report({
       id,
       actionGroup: ActionGroupId,
-      state: { latestTimestamp, dateStart, dateEnd },
+      state: { latestTimestamp, dateStart, dateEnd, grouping: groupingObject },
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
@@ -204,25 +203,10 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   const { getRecoveredAlerts } = alertsClient;
 
   const recoveredAlerts = getRecoveredAlerts() ?? [];
-  let groupingObjectForRecovered: Record<string, object> = {};
-
-  // extracing group by fields from kibana.alert.rule.params,
-  // since all recovered alert documents will have same group by fields,
-  // we are only checking first recovered alert document
-  if (recoveredAlerts.length > 0) {
-    const alertHit = recoveredAlerts[0].hit;
-    const ruleParams = alertHit?.[ALERT_RULE_PARAMETERS] as EsQueryRuleParams;
-    const groupByFields = ruleParams?.termField;
-
-    groupingObjectForRecovered = getGroupByObject(
-      groupByFields,
-      new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
-    );
-  }
 
   for (const recoveredAlert of recoveredAlerts) {
     const alertId = recoveredAlert.alert.getId();
-    const grouping = groupingObjectForRecovered[alertId];
+    const recoveredAlertState = recoveredAlert.alert.getState();
 
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
@@ -240,7 +224,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
       sourceFields: [],
-      grouping,
+      grouping: recoveredAlertState.grouping,
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,

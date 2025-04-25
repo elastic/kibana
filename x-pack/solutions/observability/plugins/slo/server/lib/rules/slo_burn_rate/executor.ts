@@ -10,7 +10,7 @@ import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alert
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getEcsGroups, getGroupByObject } from '@kbn/alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -111,8 +111,6 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       resultGroupSet.add(result.instanceId);
     }
 
-    const groupingObject = getGroupByObject(slo.groupBy, resultGroupSet);
-
     if (results.length > 0) {
       const alertLimit = alertsClient.getAlertLimitValue();
       let hasReachedLimit = false;
@@ -120,6 +118,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       for (const result of results) {
         const {
           instanceId,
+          groupings,
           shouldAlert,
           longWindowDuration,
           longWindowBurnRate,
@@ -174,6 +173,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             actionGroup,
             state: {
               alertState: AlertStates.ALERT,
+              grouping: groupings,
             },
             payload: {
               [ALERT_REASON]: reason,
@@ -206,7 +206,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             sloErrorBudgetRemaining: sloSummary?.errorBudgetRemaining ?? 1,
             sloErrorBudgetConsumed: sloSummary?.errorBudgetConsumed ?? 0,
             suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
-            grouping: groupingObject[instanceId],
+            grouping: groupings,
           };
 
           alertsClient.setAlertData({ id: alertId, context });
@@ -218,22 +218,6 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     }
 
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
-
-    let groupingObjectForRecovered: Record<string, object> = {};
-
-    // extracing group by fields from kibana.alert.group.field,
-    // since all recovered alert documents will have same group by fields,
-    // we are only checking first recovered alert document
-    if (recoveredAlerts.length > 0) {
-      const alertHit = recoveredAlerts[0].hit;
-      const alertGroupByFields = alertHit?.[ALERT_GROUP] as Group[];
-      const groupByFields = alertGroupByFields?.map((group) => group.field);
-
-      groupingObjectForRecovered = getGroupByObject(
-        groupByFields,
-        new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
-      );
-    }
 
     for (const recoveredAlert of recoveredAlerts) {
       const alertId = recoveredAlert.alert.getId();
@@ -247,7 +231,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         `/app/observability/slos/${slo.id}${urlQuery}`
       );
 
-      const grouping = groupingObjectForRecovered[alertId];
+      const recoveredAlertState = recoveredAlert.alert.getState();
 
       const context = {
         timestamp: startedAt.toISOString(),
@@ -256,7 +240,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         sloId: slo.id,
         sloName: slo.name,
         sloInstanceId: alertId,
-        grouping,
+        grouping: recoveredAlertState.grouping,
       };
 
       alertsClient.setAlertData({
