@@ -35,6 +35,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
+    // see details: https://github.com/elastic/kibana/issues/219091
+    this.tags(['failsOnMKI']);
     before(async () => {
       // delete existing index mappings to ensure we start from a clean state
       await deleteLockIndexAssets(es, log);
