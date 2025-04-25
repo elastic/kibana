@@ -8,28 +8,29 @@
  */
 
 import { castArray } from 'lodash';
-import { DataTableRecord, TransactionDocumentOverview, fieldConstants } from '../..';
+import type { DataTableRecord, TransactionDocumentOverview } from '../types';
+import { fieldConstants } from '..';
+
+const fields: Array<keyof TransactionDocumentOverview> = [
+  fieldConstants.TIMESTAMP_FIELD,
+  fieldConstants.PARENT_ID_FIELD,
+  fieldConstants.HTTP_RESPONSE_STATUS_CODE_FIELD,
+  fieldConstants.TRACE_ID_FIELD,
+  fieldConstants.SERVICE_NAME_FIELD,
+  fieldConstants.SERVICE_ENVIRONMENT_FIELD,
+  fieldConstants.AGENT_NAME_FIELD,
+  fieldConstants.TRANSACTION_ID_FIELD,
+  fieldConstants.TRANSACTION_TYPE_FIELD,
+  fieldConstants.TRANSACTION_NAME_FIELD,
+  fieldConstants.TRANSACTION_DURATION_FIELD,
+  fieldConstants.USER_AGENT_NAME_FIELD,
+  fieldConstants.USER_AGENT_VERSION_FIELD,
+  fieldConstants.PROCESSOR_EVENT_FIELD,
+];
 
 export function getTransactionDocumentOverview(doc: DataTableRecord): TransactionDocumentOverview {
   const formatField = <T extends keyof TransactionDocumentOverview>(field: T) =>
     castArray(doc.flattened[field])[0] as TransactionDocumentOverview[T];
-
-  const fields: Array<keyof TransactionDocumentOverview> = [
-    fieldConstants.TIMESTAMP_FIELD,
-    fieldConstants.PARENT_ID_FIELD,
-    fieldConstants.HTTP_RESPONSE_STATUS_CODE_FIELD,
-    fieldConstants.TRACE_ID_FIELD,
-    fieldConstants.SERVICE_NAME_FIELD,
-    fieldConstants.SERVICE_ENVIRONMENT_FIELD,
-    fieldConstants.AGENT_NAME_FIELD,
-    fieldConstants.TRANSACTION_ID_FIELD,
-    fieldConstants.TRANSACTION_TYPE_FIELD,
-    fieldConstants.TRANSACTION_NAME_FIELD,
-    fieldConstants.TRANSACTION_DURATION_FIELD,
-    fieldConstants.USER_AGENT_NAME_FIELD,
-    fieldConstants.USER_AGENT_VERSION_FIELD,
-    fieldConstants.PROCESSOR_EVENT_FIELD,
-  ];
 
   return fields.reduce((acc, field) => {
     acc[field] = formatField(field);
