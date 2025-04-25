@@ -1711,6 +1711,9 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/test/api_integration/services/es_supertest_without_auth.js @elastic/appex-qa
 /x-pack/test/api_integration/config.ts @elastic/appex-qa
+/x-pack/platform/test/api_integration/config.ts @elastic/appex-qa
+/x-pack/platform/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/platform/test/api_integration/services @elastic/appex-qa
 /x-pack/platform/test/api_integration/apis/kibana/config.ts @elastic/appex-qa
 /x-pack/test/tsconfig.json @elastic/appex-qa
 /x-pack/test/load @elastic/appex-qa
