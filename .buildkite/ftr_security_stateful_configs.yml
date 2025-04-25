@@ -4,7 +4,6 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.trial.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.ts
-  - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.trial.ts
   - x-pack/test/security_solution_endpoint/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
@@ -107,6 +106,7 @@ enabled:
   - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+  - x-pack/test/api_integration/apis/osquery/config.ts
   - x-pack/test/cloud_security_posture_api/config.ts
   - x-pack/test/cloud_security_posture_functional/config.ts
   - x-pack/test/cloud_security_posture_functional/config.agentless.ts
