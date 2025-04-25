@@ -12,31 +12,35 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
 import { PreviewTable } from '../preview_table';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { useRoutingState } from './hooks/routing_state';
-import { PreviewPanelIllustration } from './preview_panel_illustration';
 import { PreviewMatches } from './preview_matches';
+import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
+import { selectCurrentRule } from './state_management/stream_routing_state_machine/selectors';
+import { AssetImage } from '../../asset_image';
 
-export function PreviewPanel({
-  definition,
-  routingAppState,
-}: {
-  definition: WiredStreamGetResponse;
-  routingAppState: ReturnType<typeof useRoutingState>;
-}) {
+export function PreviewPanel() {
   const {
     dependencies: {
       start: { data },
     },
   } = useKibana();
+
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+
+  const isCreatingNewRule = routingSnapshot.matches({
+    ready: { displayingRoutingRules: 'creatingNewRule' },
+  });
+  const condition = isCreatingNewRule ? selectCurrentRule(routingSnapshot.context)?.if : undefined;
+  const definition = routingSnapshot.context.definition;
 
   const {
     timeRange,
@@ -53,9 +57,7 @@ export function PreviewPanel({
     isLoadingDocumentCounts,
     documentCountsError,
   } = useAsyncSample({
-    condition: routingAppState.debouncedChildUnderEdit?.isNew
-      ? routingAppState.debouncedChildUnderEdit.child.if
-      : undefined,
+    condition,
     start: start?.valueOf(),
     end: end?.valueOf(),
     size: 100,
@@ -64,96 +66,94 @@ export function PreviewPanel({
 
   let content;
 
-  if (!routingAppState.debouncedChildUnderEdit) {
+  if (routingSnapshot.matches({ ready: { displayingRoutingRules: 'idle' } })) {
     content = (
-      <PreviewPanelIllustration>
-        <>
-          <EuiText size="m" textAlign="center">
+      <EuiEmptyPrompt
+        icon={<AssetImage />}
+        titleSize="s"
+        title={
+          <h2>
             {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageEmpty', {
               defaultMessage: 'Your preview will appear here',
             })}
-          </EuiText>
-          <EuiText size="xs" textAlign="center">
-            {i18n.translate(
-              'xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription',
-              {
-                defaultMessage:
-                  'Create a new child stream to see what will be routed to it based on the conditions',
-              }
-            )}
-          </EuiText>
-        </>
-      </PreviewPanelIllustration>
+          </h2>
+        }
+        body={i18n.translate(
+          'xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription',
+          {
+            defaultMessage:
+              'Create a new child stream to see what will be routed to it based on the conditions',
+          }
+        )}
+      />
     );
-  }
-
-  if (routingAppState.debouncedChildUnderEdit && !routingAppState.debouncedChildUnderEdit.isNew) {
+  } else if (routingSnapshot.matches({ ready: { displayingRoutingRules: 'editingRule' } })) {
     content = (
-      <PreviewPanelIllustration>
-        <EuiText size="m" textAlign="center">
-          {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
-            defaultMessage: 'Preview is not available while editing streams',
-          })}
-        </EuiText>
-      </PreviewPanelIllustration>
+      <EuiEmptyPrompt
+        icon={<AssetImage />}
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessage', {
+              defaultMessage: 'Preview is not available while editing streams',
+            })}
+          </h2>
+        }
+        body={i18n.translate('xpack.streams.streamDetail.preview.editPreviewMessageBody', {
+          defaultMessage:
+            'You will find here the result from the conditions you have made once you save the changes',
+        })}
+      />
     );
-  }
-
-  if (
-    routingAppState.debouncedChildUnderEdit &&
-    routingAppState.debouncedChildUnderEdit.isNew &&
-    isLoadingDocuments
-  ) {
+  } else if (isCreatingNewRule && isLoadingDocuments) {
     content = (
-      <PreviewPanelIllustration>
-        <EuiText size="xs" textAlign="center">
-          <EuiLoadingSpinner size="s" />
-        </EuiText>
-      </PreviewPanelIllustration>
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewTitle', {
+              defaultMessage: 'Loading routing preview',
+            })}
+          </h2>
+        }
+        body={i18n.translate('xpack.streams.streamDetail.preview.loadingPreviewBody', {
+          defaultMessage:
+            'This may take a few moments depending on the complexity of the conditions and the amount of data',
+        })}
+      />
     );
-  }
-
-  if (
-    routingAppState.debouncedChildUnderEdit &&
-    routingAppState.debouncedChildUnderEdit.isNew &&
-    documents.length === 0
-  ) {
+  } else if (isCreatingNewRule && documentsError) {
     content = (
-      <PreviewPanelIllustration>
-        <EuiText size="xs" textAlign="center">
-          {i18n.translate('xpack.streams.streamDetail.preview.empty', {
-            defaultMessage: 'No documents to preview',
-          })}
-        </EuiText>
-      </PreviewPanelIllustration>
+      <EuiEmptyPrompt
+        icon={<AssetImage type="noResults" />}
+        color="danger"
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.streamDetail.preview.error', {
+              defaultMessage: 'Error loading preview',
+            })}
+          </h2>
+        }
+        body={documentsError.message}
+      />
     );
-  }
-
-  if (
-    routingAppState.debouncedChildUnderEdit &&
-    routingAppState.debouncedChildUnderEdit.isNew &&
-    documentsError
-  ) {
+  } else if (isCreatingNewRule && documents.length === 0) {
     content = (
-      <PreviewPanelIllustration>
-        <EuiFlexItem grow>
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiText color="danger">
-              {i18n.translate('xpack.streams.streamDetail.preview.error', {
-                defaultMessage: 'Error loading preview',
-              })}
-            </EuiText>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </PreviewPanelIllustration>
+      <EuiEmptyPrompt
+        icon={<AssetImage type="noResults" />}
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.streamDetail.preview.empty', {
+              defaultMessage: 'No documents to preview',
+            })}
+          </h2>
+        }
+      />
     );
-  }
-
-  if (
-    routingAppState.debouncedChildUnderEdit &&
-    routingAppState.debouncedChildUnderEdit.isNew &&
-    documents.length > 0
-  ) {
+  } else if (isCreatingNewRule && documents.length > 0) {
     content = (
       <EuiFlexItem grow>
         <EuiFlexGroup direction="column">
@@ -164,9 +164,7 @@ export function PreviewPanel({
               isLoading={isLoadingDocumentCounts}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <PreviewTable documents={documents ?? []} />
-          </EuiFlexItem>
+          <PreviewTable documents={documents ?? []} />
         </EuiFlexGroup>
       </EuiFlexItem>
     );

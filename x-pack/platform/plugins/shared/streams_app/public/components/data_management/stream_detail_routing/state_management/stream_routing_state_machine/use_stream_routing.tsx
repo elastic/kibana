@@ -8,11 +8,13 @@
 import React, { useEffect, useMemo } from 'react';
 import { createActorContext } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
+import { waitFor } from 'xstate5';
 import {
   streamRoutingMachine,
   createStreamRoutingMachineImplementations,
 } from './stream_routing_state_machine';
 import { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
+import { RoutingDefinitionWithUIAttributes } from '../../types';
 
 const consoleInspector = createConsoleInspector();
 
@@ -27,11 +29,32 @@ export const useStreamRoutingEvents = () => {
 
   return useMemo(
     () => ({
-      resetChanges: () => {
-        service.send({ type: 'stream.reset' });
+      cancelChanges: () => {
+        service.send({ type: 'routingRule.cancel' });
+      },
+      changeRule: (routingRule: Partial<RoutingDefinitionWithUIAttributes>) => {
+        service.send({ type: 'routingRule.change', routingRule });
+      },
+      createNewRule: () => {
+        service.send({ type: 'routingRule.create' });
+      },
+      removeRule: async () => {
+        service.send({ type: 'routingRule.remove' });
+        await waitFor(service, (snapshot) =>
+          snapshot.matches({ ready: { displayingRoutingRules: 'idle' } })
+        );
+      },
+      reorderRules: (routing: RoutingDefinitionWithUIAttributes[]) => {
+        service.send({ type: 'routingRule.reorder', routing });
+      },
+      editRule: (id: string) => {
+        service.send({ type: 'routingRule.edit', id });
+      },
+      forkStream: () => {
+        service.send({ type: 'routingRule.fork' });
       },
       saveChanges: () => {
-        service.send({ type: 'stream.update' });
+        service.send({ type: 'routingRule.save' });
       },
     }),
     [service]

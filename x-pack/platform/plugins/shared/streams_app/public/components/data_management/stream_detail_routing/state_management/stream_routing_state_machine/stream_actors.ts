@@ -6,7 +6,7 @@
  */
 
 import { Condition, RoutingDefinition, WiredStreamGetResponse } from '@kbn/streams-schema';
-import { ErrorActorEvent, fromCallback, fromPromise } from 'xstate5';
+import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
@@ -85,7 +85,7 @@ export function createForkStreamActor({
  */
 export type DeleteStreamResponse = APIReturnType<'DELETE /api/streams/{name} 2023-10-31'>;
 export interface DeleteStreamInput {
-  definition: WiredStreamGetResponse;
+  name: string;
 }
 
 export function createDeleteStreamActor({
@@ -96,7 +96,7 @@ export function createDeleteStreamActor({
       signal,
       params: {
         path: {
-          name: input.definition.stream.name,
+          name: input.name,
         },
       },
     });
@@ -126,5 +126,6 @@ export const createStreamFailureNofitier =
         defaultMessage: 'Failed to save',
       }),
       toastMessage: getFormattedError(event.error).message,
+      toastLifeTimeMs: 5000,
     });
   };

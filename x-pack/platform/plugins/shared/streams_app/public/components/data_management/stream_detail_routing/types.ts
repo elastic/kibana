@@ -9,4 +9,5 @@ import { RoutingDefinition } from '@kbn/streams-schema';
 
 export interface RoutingDefinitionWithUIAttributes extends RoutingDefinition {
   id: string;
+  isNew?: boolean;
 }

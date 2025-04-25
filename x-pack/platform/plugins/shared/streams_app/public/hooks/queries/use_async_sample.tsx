@@ -18,6 +18,7 @@ import useToggle from 'react-use/lib/useToggle';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { filter, switchMap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../use_kibana';
 import { emptyEqualsToAlways } from '../../util/condition';
 
@@ -36,9 +37,11 @@ export const useAsyncSample = (options: Options) => {
     },
   } = useKibana();
 
+  const controller = useAbortController();
+
   // Documents
   const [isLoadingDocuments, toggleIsLoadingDocuments] = useToggle(false);
-  const [documentsError, setDocumentsError] = useState();
+  const [documentsError, setDocumentsError] = useState<Error | undefined>();
   const [documents, setDocuments] = useState<SampleDocument[]>([]);
 
   // Document counts / percentage
@@ -68,12 +71,15 @@ export const useAsyncSample = (options: Options) => {
     toggleIsLoadingDocuments(true);
     setDocuments([]);
     const documentSubscription = data.search
-      .search({
-        params: {
-          index: options.streamDefinition.stream.name,
-          body: getDocumentsSearchBody(options, runtimeMappings, convertedCondition),
+      .search(
+        {
+          params: {
+            index: options.streamDefinition.stream.name,
+            body: getDocumentsSearchBody(options, runtimeMappings, convertedCondition),
+          },
         },
-      })
+        { abortSignal: controller.signal }
+      )
       .subscribe({
         next: (result) => {
           if (!isRunningResponse(result)) {
@@ -93,12 +99,15 @@ export const useAsyncSample = (options: Options) => {
     toggleIsLoadingDocumentCounts(true);
     setApproximateMatchingPercentage(undefined);
     const documentCountsSubscription = data.search
-      .search({
-        params: {
-          index: options.streamDefinition.stream.name,
-          body: getDocumentCountForSampleRateSearchBody(options),
+      .search(
+        {
+          params: {
+            index: options.streamDefinition.stream.name,
+            body: getDocumentCountForSampleRateSearchBody(options),
+          },
         },
-      })
+        { abortSignal: controller.signal }
+      )
       .pipe(
         filter((result) => !isRunningResponse(result)),
         switchMap((response) => {
@@ -111,17 +120,20 @@ export const useAsyncSample = (options: Options) => {
 
           const probability = calculateProbability(docCount);
 
-          return data.search.search({
-            params: {
-              index: options.streamDefinition.stream.name,
-              body: getDocumentCountsSearchBody(
-                options,
-                runtimeMappings,
-                probability,
-                convertedCondition
-              ),
+          return data.search.search(
+            {
+              params: {
+                index: options.streamDefinition.stream.name,
+                body: getDocumentCountsSearchBody(
+                  options,
+                  runtimeMappings,
+                  probability,
+                  convertedCondition
+                ),
+              },
             },
-          });
+            { abortSignal: controller.signal }
+          );
         })
       )
       .subscribe({
