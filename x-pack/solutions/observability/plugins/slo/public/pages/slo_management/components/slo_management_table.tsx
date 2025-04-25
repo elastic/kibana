@@ -13,6 +13,7 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -196,17 +197,9 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
         defaultMessage: 'State',
       }),
       render: (_: SLODefinitionResponse['enabled'], item: SLODefinitionResponse) => {
-        return (
-          <EuiBadge color="hollow">
-            {item.enabled
-              ? i18n.translate('xpack.slo.sloManagementTable.enabled.running', {
-                  defaultMessage: 'Running',
-                })
-              : i18n.translate('xpack.slo.sloManagementTable.enabled.running', {
-                  defaultMessage: 'Paused',
-                })}
-          </EuiBadge>
-        );
+        const color = item.enabled ? 'success' : 'danger';
+        const label = item.enabled ? 'Running' : 'Paused';
+        return <EuiHealth color={color}>{label}</EuiHealth>;
       },
     },
     {
