@@ -8,16 +8,15 @@
 import {
   EuiFlexItem,
   EuiFlexGroup,
-  EuiText,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiEmptyPrompt,
   EuiLoadingLogo,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/css';
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
 import { PreviewTable } from '../preview_table';
@@ -36,6 +35,10 @@ export function PreviewPanel() {
 
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
 
+  const isIdle = routingSnapshot.matches({ ready: { displayingRoutingRules: 'idle' } });
+  const isEditingRule = routingSnapshot.matches({
+    ready: { displayingRoutingRules: 'editingRule' },
+  });
   const isCreatingNewRule = routingSnapshot.matches({
     ready: { displayingRoutingRules: 'creatingNewRule' },
   });
@@ -64,9 +67,10 @@ export function PreviewPanel() {
     streamDefinition: definition,
   });
 
+  const hasDocuments = !isEmpty(documents);
   let content;
 
-  if (routingSnapshot.matches({ ready: { displayingRoutingRules: 'idle' } })) {
+  if (isIdle) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage />}
@@ -87,7 +91,7 @@ export function PreviewPanel() {
         )}
       />
     );
-  } else if (routingSnapshot.matches({ ready: { displayingRoutingRules: 'editingRule' } })) {
+  } else if (isEditingRule) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage />}
@@ -105,7 +109,7 @@ export function PreviewPanel() {
         })}
       />
     );
-  } else if (isCreatingNewRule && isLoadingDocuments) {
+  } else if (isCreatingNewRule && isLoadingDocuments && !hasDocuments) {
     content = (
       <EuiEmptyPrompt
         icon={<EuiLoadingLogo logo="logoLogging" size="xl" />}
@@ -139,7 +143,7 @@ export function PreviewPanel() {
         body={documentsError.message}
       />
     );
-  } else if (isCreatingNewRule && documents.length === 0) {
+  } else if (isCreatingNewRule && !hasDocuments) {
     content = (
       <EuiEmptyPrompt
         icon={<AssetImage type="noResults" />}
@@ -153,7 +157,7 @@ export function PreviewPanel() {
         }
       />
     );
-  } else if (isCreatingNewRule && documents.length > 0) {
+  } else if (isCreatingNewRule && hasDocuments) {
     content = (
       <EuiFlexItem grow>
         <EuiFlexGroup direction="column">
@@ -173,46 +177,35 @@ export function PreviewPanel() {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow>
-            <EuiText
-              size="s"
-              className={css`
-                font-weight: bold;
-              `}
-            >
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiIcon type="inspect" />
-                {i18n.translate('xpack.streams.streamDetail.preview.header', {
-                  defaultMessage: 'Data Preview',
-                })}
-                {isLoadingDocuments && <EuiLoadingSpinner size="s" />}
-              </EuiFlexGroup>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar
-              onQuerySubmit={({ dateRange }, isUpdate) => {
-                if (!isUpdate) {
-                  refresh();
-                  return;
-                }
-
-                if (dateRange) {
-                  setTimeRange({
-                    from: dateRange.from,
-                    to: dateRange?.to,
-                    mode: dateRange.mode,
-                  });
-                }
-              }}
-              onRefresh={() => {
+        {isLoadingDocuments && <EuiProgress size="xs" color="accent" position="absolute" />}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
+            <EuiIcon type="inspect" />
+            <strong>
+              {i18n.translate('xpack.streams.streamDetail.preview.header', {
+                defaultMessage: 'Data Preview',
+              })}
+            </strong>
+          </EuiFlexGroup>
+          <StreamsAppSearchBar
+            onQuerySubmit={({ dateRange }, isUpdate) => {
+              if (!isUpdate) {
                 refresh();
-              }}
-              dateRangeFrom={timeRange.from}
-              dateRangeTo={timeRange.to}
-            />
-          </EuiFlexItem>
+                return;
+              }
+
+              if (dateRange) {
+                setTimeRange({
+                  from: dateRange.from,
+                  to: dateRange?.to,
+                  mode: dateRange.mode,
+                });
+              }
+            }}
+            onRefresh={refresh}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="s" />

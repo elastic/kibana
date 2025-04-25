@@ -69,7 +69,6 @@ export const useAsyncSample = (options: Options) => {
 
     // Documents
     toggleIsLoadingDocuments(true);
-    setDocuments([]);
     const documentSubscription = data.search
       .search(
         {
@@ -87,7 +86,7 @@ export const useAsyncSample = (options: Options) => {
           }
 
           if (result.rawResponse.hits?.hits) {
-            setDocuments((prev) => result.rawResponse.hits.hits.map((hit) => hit._source));
+            setDocuments(result.rawResponse.hits.hits.map((hit) => hit._source));
           }
         },
         error: (e) => {
