@@ -9,9 +9,9 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import { createKbConcreteIndex } from '../startup_migrations/create_or_update_index_assets';
-import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
 export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant:kb_reindexing';

@@ -8,23 +8,24 @@
 import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
-import {
-  LockId,
-  LockManager,
-  LockDocument,
-  withLock,
-  runSetupIndexAssetEveryTime,
-} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
 import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import {
+  LockId,
+  LockManager,
+  LockDocument,
+  withLock,
+  runSetupIndexAssetEveryTime,
+} from '../../../../../../../platform/plugins/shared/lock-manager/server/lock_manager_client';
+import {
   LOCKS_COMPONENT_TEMPLATE_NAME,
   LOCKS_CONCRETE_INDEX_NAME,
   LOCKS_INDEX_TEMPLATE_NAME,
-} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/setup_lock_manager_index';
+} from '../../../../../../../platform/plugins/shared/lock-manager/server/setup_lock_manager_index';
+
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
