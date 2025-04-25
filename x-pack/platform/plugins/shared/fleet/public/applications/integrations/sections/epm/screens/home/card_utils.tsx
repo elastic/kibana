@@ -58,8 +58,11 @@ export interface IntegrationCardItem {
   name: string;
   onCardClick?: () => void;
   release?: IntegrationCardReleaseLabel;
+  showDescription?: boolean;
   showInstallationStatus?: boolean;
+  showCompressedInstallationStatus?: boolean;
   showLabels?: boolean;
+  showReleaseBadge?: boolean;
   title: string;
   // Security Solution uses this prop to determine how many lines the card title should be truncated
   titleLineClamp?: number;

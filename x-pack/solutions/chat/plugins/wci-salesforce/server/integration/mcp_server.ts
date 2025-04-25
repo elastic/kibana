@@ -9,7 +9,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createMcpServer as createServer, McpServerTool, toolResultFactory } from '@kbn/wci-server';
-import { getCases, getAccounts } from './tools';
+import { getCases, getAccounts, searchDocs, getById } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -59,21 +59,106 @@ export async function createMcpServer({
     priorityValues.length ? (priorityValues as [string, ...string[]]) : ['']
   );
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
+  const dataSources = ['support_case', 'account'];
+
+  const searchTool: McpServerTool = {
+    name: 'search',
+    description: 'Searches through Salesforce data sources using a semantic query',
+    schema: {
+      objects: z
+        .array(z.string())
+        .optional()
+        .describe(
+          `Return what type of Salesforce documents to search through. Can only be a out of these ${dataSources}`
+        ),
+      query: z
+        .string()
+        .describe(
+          'Return Salesforce documents that relate to this query to search content semantically'
+        ),
+      createdAfter: z
+        .string()
+        .optional()
+        .describe('Return documents created after this date (format: YYYY-MM-DD)'),
+      createdBefore: z
+        .string()
+        .optional()
+        .describe('Return documents created before this date (format: YYYY-MM-DD)'),
+      updatedAfter: z
+        .string()
+        .optional()
+        .describe('Return documents updated after this date (format: YYYY-MM-DD)'),
+      updatedBefore: z
+        .string()
+        .optional()
+        .describe('Return documents updated before this date (format: YYYY-MM-DD)'),
+    },
+    execute: async ({
+      objects,
+      query,
+      createdAfter,
+      createdBefore,
+      updatedAfter,
+      updatedBefore,
+    }) => {
+      try {
+        const content = await searchDocs({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          filters: {
+            query,
+            objects,
+            createdAfter,
+            createdBefore,
+            updatedAfter,
+            updatedBefore,
+          },
+        });
+
+        return toolResultFactory.contentList(content);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
+  const getTool: McpServerTool = {
+    name: 'get',
+    description: 'Retrieves a Salesforce document by id only. If there is no id use another tool',
+    schema: {
+      id: z.string().describe('id of document '),
+      dataSource: z
+        .string()
+        .describe(
+          `what Salesforce object type to search through. Supported object types ${dataSources}`
+        ),
+    },
+    execute: async ({ id, dataSource }) => {
+      try {
+        const content = await getById({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          dataSource,
+          id,
+        });
+
+        return toolResultFactory.contentList(content);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
 
   const getCasesTool: McpServerTool = {
     name: 'search_cases',
     description: 'Retrieves Salesforce support cases with flexible filtering options',
     schema: {
-      caseNumber: z
-        .array(z.string())
-        .optional()
-        .describe('Salesforce case number identifiers (preferred lookup method)'),
-      id: z
-        .array(z.string())
-        .optional()
-        .describe(
-          'Salesforce internal IDs of the support cases (use only when specifically requested)'
-        ),
+      caseNumber: z.array(z.string()).optional().describe('Salesforce case number identifiers'),
+      id: z.array(z.string()).optional().describe('Salesforce internal IDs of the support cases'),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
       sortField: z
         .string()
@@ -114,10 +199,6 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Return cases created before this date (format: YYYY-MM-DD)'),
-      semanticQuery: z
-        .string()
-        .optional()
-        .describe('Natural language query to search case content semantically'),
       updatedAfter: z
         .string()
         .optional()
@@ -149,7 +230,6 @@ export async function createMcpServer({
       caseNumber,
       createdAfter,
       createdBefore,
-      semanticQuery,
       status,
       updatedAfter,
       updatedBefore,
@@ -174,7 +254,6 @@ export async function createMcpServer({
             caseNumber,
             createdAfter,
             createdBefore,
-            semanticQuery,
             status,
             updatedAfter,
             updatedBefore,
@@ -187,7 +266,6 @@ export async function createMcpServer({
 
         logger.info(`Retrieved ${caseContent.length} support cases`);
 
-        logger.info(() => `Case content: ${JSON.stringify(caseContent)}`);
         return toolResultFactory.contentList(caseContent);
       } catch (e) {
         return toolResultFactory.error(`Error fetching cases: ${e.message}`);
@@ -266,7 +344,7 @@ export async function createMcpServer({
   return createServer({
     name: 'wci-salesforce',
     version: '1.0.0',
-    tools: [getCasesTool, getAccountsTool],
+    tools: [searchTool, getTool, getCasesTool, getAccountsTool],
   });
 }
 
@@ -328,7 +406,7 @@ async function getSortableFields(
       for (const [fieldName, fieldConfig] of Object.entries(properties)) {
         if (sortableFieldTypes.includes(fieldConfig.type)) {
           const sortableField = { field: fieldName, type: fieldConfig.type };
-          sortableFields.push(sortableField);
+          sortableFields.push(sortableField.field);
         }
       }
       return sortableFields;

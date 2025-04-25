@@ -27,9 +27,6 @@
     "@kbn/inference-common",
     "@kbn/wci-common",
     "@kbn/i18n",
-    "@kbn/user-profile-components",
-    "@kbn/ai-assistant-icon",
-    "@kbn/react-hooks",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/datemath",
     "@kbn/zod",
@@ -39,6 +36,7 @@
     "@kbn/wci-browser",
     "@kbn/features-plugin",
     "@kbn/wc-genai-utils",
+    "@kbn/workchat-framework-plugin",
   ],
   "exclude": [
     "target/**/*",

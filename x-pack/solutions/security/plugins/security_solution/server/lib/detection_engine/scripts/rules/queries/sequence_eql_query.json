@@ -6,7 +6,7 @@
   "enabled": true,
   "index": ["auditbeat*", "packetbeat*"],
   "interval": "30s",
-  "query": "sequence with maxspan=10m [any where agent.type == \"auditbeat\"] [any where event.category == \"network_traffic\"]",
+  "query": "sequence with maxspan=10m [any where agent.type == \"auditbeat\"] [any where event.category == \"network\"]",
   "meta": {
     "anything_you_want_ui_related_or_otherwise": {
       "as_deep_structured_as_you_need": {

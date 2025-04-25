@@ -185,7 +185,6 @@ export class EndpointAppContextService {
         this.setupDependencies.securitySolutionRequestContextFactory,
         alerting,
         licenseService,
-        exceptionListsClient,
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider
@@ -370,6 +369,7 @@ export class EndpointAppContextService {
       endpointService: this,
       esClient: this.startDependencies.esClient,
       username,
+      spaceId: DEFAULT_SPACE_ID,
       isAutomated: true,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),

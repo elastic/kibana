@@ -14,10 +14,8 @@ A server log connector writes an entry to the {{kib}} server log.
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../images/serverlog-connector.png
-:alt: Server log connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Server log connector](../images/serverlog-connector.png)
 
 
 ### Connector configuration [server-log-connector-configuration]
@@ -29,10 +27,8 @@ Server log connectors do not have any configuration properties other than a name
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../images/serverlog-params-test.png
-:alt: Server log connector test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Server log connector test](../images/serverlog-params-test.png)
 
 Server log connector actions contain a message and a log level, which defaults to `info`. Valid log level values are `trace`, `debug`, `info`, `warn`, `error`, and `fatal`.
 
