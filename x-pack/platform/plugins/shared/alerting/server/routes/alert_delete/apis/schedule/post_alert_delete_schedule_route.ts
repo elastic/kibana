@@ -73,9 +73,9 @@ export const alertDeleteScheduleRoute = (
             .scheduleTask(
               req,
               settings,
-              spaceIds || [
-                (await alertingContext.getRulesClient()).getSpaceId() || DEFAULT_SPACE_ID,
-              ]
+              spaceIds && spaceIds.length > 0
+                ? spaceIds
+                : [(await alertingContext.getRulesClient()).getSpaceId() || DEFAULT_SPACE_ID]
             );
           return res.noContent();
         } catch (error) {

@@ -11,8 +11,8 @@ import {
   type AlertDeleteCategoryIds,
 } from '../../../../../common/constants/alert_delete';
 import type {
-  AlertDeletePreviewQueryV1,
-  AlertDeleteScheduleQueryV1,
+  AlertDeletePreviewQuery,
+  AlertDeleteScheduleQuery,
 } from '../../../../../common/routes/alert_delete';
 
 const getCategoryIds = (input: AlertDeleteCategoryIds | AlertDeleteCategoryIds[] | undefined) => {
@@ -28,8 +28,8 @@ const getCategoryIds = (input: AlertDeleteCategoryIds | AlertDeleteCategoryIds[]
   return Array.isArray(input) ? input : [input];
 };
 
-const getSpaceIds = (input: string | string[] | undefined): string[] => {
-  if (!input) return ['default'];
+const getSpaceIds = (input: string | string[] | undefined): string[] | undefined => {
+  if (!input) return undefined;
   if (Array.isArray(input)) return input;
   return [input];
 };
@@ -38,7 +38,7 @@ export const transformRequestToAlertDeletePreview = ({
   active_alert_delete_threshold: activeAlertDeleteThreshold,
   inactive_alert_delete_threshold: inactiveAlertDeleteThreshold,
   category_ids: _categoryIds,
-}: AlertDeletePreviewQueryV1): RulesSettingsAlertDeleteProperties => {
+}: AlertDeletePreviewQuery): RulesSettingsAlertDeleteProperties => {
   return {
     isActiveAlertDeleteEnabled: Boolean(activeAlertDeleteThreshold),
     isInactiveAlertDeleteEnabled: Boolean(inactiveAlertDeleteThreshold),
@@ -53,7 +53,7 @@ export const transformRequestToAlertDeleteSchedule = ({
   inactive_alert_delete_threshold: inactiveAlertDeleteThreshold,
   category_ids: categoryIds,
   space_ids: spaceIds,
-}: AlertDeleteScheduleQueryV1): RulesSettingsAlertDeleteProperties & { spaceIds: string[] } => {
+}: AlertDeleteScheduleQuery): RulesSettingsAlertDeleteProperties => {
   return {
     isActiveAlertDeleteEnabled: Boolean(activeAlertDeleteThreshold),
     isInactiveAlertDeleteEnabled: Boolean(inactiveAlertDeleteThreshold),
