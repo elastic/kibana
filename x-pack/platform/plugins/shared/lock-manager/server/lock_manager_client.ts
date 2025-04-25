@@ -13,7 +13,7 @@ import prettyMilliseconds from 'pretty-ms';
 import { once } from 'lodash';
 import { duration } from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { LOCKS_CONCRETE_INDEX_NAME, setuplockManagerIndex } from './setup_lock_manager_index';
+import { LOCKS_CONCRETE_INDEX_NAME, setupLockManagerIndex } from './setup_lock_manager_index';
 
 export type LockId = string;
 export interface LockDocument {
@@ -38,9 +38,9 @@ export interface AcquireOptions {
 
 // The index assets should only be set up once
 // For testing purposes, we need to be able to set it up every time
-let runSetupIndexAssetOnce = once(setuplockManagerIndex);
+let runSetupIndexAssetOnce = once(setupLockManagerIndex);
 export function runSetupIndexAssetEveryTime() {
-  runSetupIndexAssetOnce = setuplockManagerIndex;
+  runSetupIndexAssetOnce = setupLockManagerIndex;
 }
 
 export class LockManager {

@@ -24,6 +24,7 @@ import {
   LOCKS_COMPONENT_TEMPLATE_NAME,
   LOCKS_CONCRETE_INDEX_NAME,
   LOCKS_INDEX_TEMPLATE_NAME,
+  setupLockManagerIndex,
 } from '@kbn/lock-manager-plugin/server/setup_lock_manager_index';
 
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -725,6 +726,40 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           const settingsAfter = await getSettings(es);
           expect(settingsAfter?.uuid).to.be(settingsBefore?.uuid);
+        });
+      });
+
+      describe('when settings up index assets', () => {
+        beforeEach(async () => {
+          await deleteLockIndexAssets(es, log);
+        });
+
+        it('can run in parallel', async () => {
+          try {
+            await Promise.all([
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+            ]);
+          } catch (error) {
+            expect().fail(`Parallel setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
+        });
+
+        it('can run in sequence', async () => {
+          try {
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+          } catch (error) {
+            expect().fail(`Sequential setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
         });
       });
     });

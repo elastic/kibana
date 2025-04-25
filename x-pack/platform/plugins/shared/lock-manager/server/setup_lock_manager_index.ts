@@ -98,14 +98,22 @@ export async function ensureTemplatesAndIndexCreated(
   }
 
   try {
-    await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
+    await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME });
     logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created successfully.`);
   } catch (error) {
-    logger.error(`Unable to create index ${LOCKS_CONCRETE_INDEX_NAME}: ${error.message}`);
+    const isIndexAlreadyExistsError =
+      error instanceof errors.ResponseError &&
+      error.body.error.type === 'resource_already_exists_exception';
+
+    if (isIndexAlreadyExistsError) {
+      logger.debug(`Index ${LOCKS_CONCRETE_INDEX_NAME} already exists. Skipping creation.`);
+    } else {
+      logger.error(`Unable to create index ${LOCKS_CONCRETE_INDEX_NAME}: ${error.message}`);
+    }
   }
 }
 
-export async function setuplockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
+export async function setupLockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
   await removeLockIndexWithIncorrectMappings(esClient, logger); // TODO: should be removed in the future (after 9.1). See https://github.com/elastic/kibana/issues/218944
   await ensureTemplatesAndIndexCreated(esClient, logger);
 }
