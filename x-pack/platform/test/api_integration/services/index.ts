@@ -11,13 +11,17 @@ import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 import { UsageAPIProvider } from './usage_api';
 import { IngestPipelinesProvider } from './ingest_pipelines';
 import { DataViewApiProvider } from './data_view_api';
-import { FleetAndAgents } from './fleet_and_agents';
+import { FleetAndAgentsProvider } from './fleet_and_agents';
+import { SpacesServiceProvider } from './spaces';
+import { SearchSecureProvider } from './search_secure';
 
 export const services = {
   ...kibanaApiIntegrationServices,
   dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-  usageAPI: UsageAPIProvider,
   ingestPipelines: IngestPipelinesProvider,
-  fleetAndAgents: FleetAndAgents,
+  fleetAndAgents: FleetAndAgentsProvider,
+  secureSearch: SearchSecureProvider,
+  spaces: SpacesServiceProvider,
+  usageAPI: UsageAPIProvider,
 };
