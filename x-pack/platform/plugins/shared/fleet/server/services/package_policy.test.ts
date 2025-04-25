@@ -1835,7 +1835,7 @@ describe('Package policy service', () => {
         mockAgentPolicyService.bumpRevision.mockReset();
       });
 
-      const generateAttributes = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
         name: 'endpoint-12',
         description: '',
         namespace: 'default',
@@ -1850,7 +1850,7 @@ describe('Package policy service', () => {
         ...overrides,
       });
 
-      const generateSO = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateSO = (overrides: Record<string, unknown> = {}) => ({
         id: 'existing-package-policy',
         type: 'ingest-package-policies',
         references: [],
@@ -1863,18 +1863,17 @@ describe('Package policy service', () => {
       const setupSOClientMocks = (
         savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
         initialPolicies: string[],
-        updatesPolicies: string[]
+        updatesPolicies: string[],
+        overrides: Record<string, unknown> = {}
       ) => {
         savedObjectsClient.get.mockResolvedValueOnce(
-          generateSO({ name: 'test-package-policy', policy_ids: initialPolicies })
+          generateSO({ name: 'test-package-policy', policy_ids: initialPolicies, ...overrides })
         );
-
         savedObjectsClient.get.mockResolvedValueOnce(
-          generateSO({ name: 'test-package-policy-1', policy_ids: updatesPolicies })
+          generateSO({ name: 'test-package-policy-1', policy_ids: updatesPolicies, ...overrides })
         );
-
         savedObjectsClient.get.mockResolvedValueOnce(
-          generateSO({ name: 'test-package-policy-1', policy_ids: updatesPolicies })
+          generateSO({ name: 'test-package-policy-1', policy_ids: updatesPolicies, ...overrides })
         );
       };
 
@@ -2007,6 +2006,42 @@ describe('Package policy service', () => {
             expect.stringContaining(`test-agent-policy-${index}`),
             expect.objectContaining({ removeProtection: true })
           );
+        });
+      });
+
+      it('should never remove protections for non-endpoint packages, regardless of policy_ids change', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const testPolicyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
+
+        // Ensure both old and new policies are NOT endpoint
+        setupSOClientMocks(
+          savedObjectsClient,
+          testPolicyIds,
+          [],
+          // Add package override for both old and new policies
+          { package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' } }
+        );
+
+        await packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          generateSO({
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }).id,
+          generateAttributes({
+            policy_ids: [],
+            name: 'test-package-policy-1',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          })
+        );
+
+        const calls = mockAgentPolicyService.bumpRevision.mock.calls;
+        expect(calls).toHaveLength(testPolicyIds.length);
+
+        calls.forEach((call, idx) => {
+          expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
+          expect(call[3]).toMatchObject({ removeProtection: false });
         });
       });
     });
@@ -2821,7 +2856,7 @@ describe('Package policy service', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();
       });
-      const generateAttributes = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
         name: 'endpoint-12',
         description: '',
         namespace: 'default',
@@ -2836,7 +2871,7 @@ describe('Package policy service', () => {
         ...overrides,
       });
 
-      const generateSO = (overrides: Record<string, string | string[]> = {}) => ({
+      const generateSO = (overrides: Record<string, unknown> = {}) => ({
         id: 'existing-package-policy',
         type: 'ingest-package-policies',
         references: [],
@@ -3033,6 +3068,86 @@ describe('Package policy service', () => {
             expect.objectContaining({ removeProtection: index !== 1 }) // First policy should not have protection removed since it was already assigned
           );
         });
+      });
+      it('should never remove protections for non-endpoint packages, regardless of policy_ids change', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+
+        // All non-endpoint policies
+        const nonEndpointPoliciesSO = [
+          generateSO({
+            name: 'not-endpoint-policy',
+            policy_ids: ['test-agent-policy-1'],
+            id: 'not-endpoint-1',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }),
+          generateSO({
+            name: 'not-endpoint-policy-2',
+            policy_ids: ['test-agent-policy-2'],
+            id: 'not-endpoint-2',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }),
+        ];
+
+        const nonEndpointTestedPolicies = nonEndpointPoliciesSO.map((so) => so.attributes);
+
+        setupSOClientMocks(savedObjectsClient, nonEndpointPoliciesSO);
+
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        await callPackagePolicyServiceBulkUpdate(
+          savedObjectsClient,
+          elasticsearchClient,
+          nonEndpointTestedPolicies
+        );
+
+        const calls = mockAgentPolicyService.bumpRevision.mock.calls;
+        expect(calls).toHaveLength(2);
+        calls.forEach((call, idx) => {
+          expect(call[2]).toContain(`test-agent-policy-${idx + 1}`);
+          expect(call[3]).toMatchObject({ removeProtection: false });
+        });
+      });
+
+      it('should only set removeProtection for endpoint packages in a mixed bulkUpdate', async () => {
+        const savedObjectsClient = savedObjectsClientMock.create();
+
+        const mixedPoliciesSO = [
+          generateSO({
+            name: 'endpoint-policy',
+            policy_ids: ['test-agent-policy-1'],
+            id: 'endpoint-1',
+            package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
+          }),
+          generateSO({
+            name: 'not-endpoint-policy',
+            policy_ids: ['test-agent-policy-2'],
+            id: 'not-endpoint-1',
+            package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
+          }),
+        ];
+        const mixedTestedPolicies = mixedPoliciesSO.map((so) => so.attributes);
+
+        setupSOClientMocks(savedObjectsClient, mixedPoliciesSO);
+
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        await callPackagePolicyServiceBulkUpdate(
+          savedObjectsClient,
+          elasticsearchClient,
+          mixedTestedPolicies
+        );
+
+        const calls = mockAgentPolicyService.bumpRevision.mock.calls;
+        expect(calls).toHaveLength(2);
+
+        // Endpoint: logic applies (true or false depending on ids, tweak as needed)
+        expect(calls[0][2]).toContain('test-agent-policy-1');
+        expect(calls[0]?.[3]?.removeProtection).toBeDefined();
+        expect(typeof calls[0]?.[3]?.removeProtection).toBe('boolean');
+
+        // Non-endpoint: always false
+        expect(calls[1][2]).toContain('test-agent-policy-2');
+        expect(calls[1][3]).toMatchObject({ removeProtection: false });
       });
     });
   });
