@@ -10,7 +10,7 @@ steps:
     steps:
       - command: |
           ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-            --message "Project deployments require a Github label, please add one or more of `ci:project-deploy-(elasticsearch|observability|security)` and trigger the job through the checkbox again." \
+            --message "Project deployments require a Github label, please add one or more of \`ci:project-deploy-(elasticsearch|observability|security)\` and trigger the job through the checkbox again." \
             --context "project-deploy-job" \
             --clear-previous
         label: Comment missing labels
