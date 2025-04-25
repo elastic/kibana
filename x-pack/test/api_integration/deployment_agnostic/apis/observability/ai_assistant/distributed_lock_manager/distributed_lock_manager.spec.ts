@@ -729,7 +729,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('when settings up index assets', () => {
+      describe('when setting up index assets', () => {
         beforeEach(async () => {
           await deleteLockIndexAssets(es, log);
         });
