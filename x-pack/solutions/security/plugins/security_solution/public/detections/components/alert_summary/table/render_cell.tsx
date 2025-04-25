@@ -13,9 +13,6 @@ import { BasicCellRenderer } from './basic_cell_renderer';
 import { KibanaAlertSeverityCellRenderer } from './kibana_alert_severity_cell_renderer';
 import { KibanaAlertRelatedIntegrationsCellRenderer } from './kibana_alert_related_integrations_cell_renderer';
 
-// guarantees that all cells will have their values vertically centered
-const styles = { display: 'flex', alignItems: 'center', height: '100%' };
-
 const DATETIME_SCHEMA = 'datetime';
 
 export type CellValueProps = Pick<
@@ -62,7 +59,7 @@ export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueP
     component = <BasicCellRenderer alert={alert} field={columnId} />;
   }
 
-  return <div style={styles}>{component}</div>;
+  return <>{component}</>;
 });
 
 CellValue.displayName = 'CellValue';
