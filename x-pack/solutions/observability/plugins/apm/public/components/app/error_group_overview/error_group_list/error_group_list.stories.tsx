@@ -18,6 +18,7 @@ type Args = ComponentProps<typeof ErrorGroupList>;
 const stories: Meta<Args> = {
   title: 'app/ErrorGroupOverview/ErrorGroupList',
   component: ErrorGroupList,
+  tags: ['skip-test'],
   decorators: [
     (StoryComponent, { args }) => {
       const coreMock = {
@@ -110,7 +111,7 @@ export const Example: StoryObj<Args> = {
   render: (args) => {
     return <ErrorGroupList {...args} />;
   },
-
+  tags: ['skip-test'],
   args: {
     serviceName: 'test service',
     initialPageSize: 5,

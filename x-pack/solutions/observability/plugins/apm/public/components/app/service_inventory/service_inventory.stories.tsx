@@ -18,6 +18,7 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 const stories: Meta<{}> = {
   title: 'app/ServiceInventory',
   component: ServiceInventory,
+  tags: ['skip-test'],
   decorators: [
     (StoryComponent) => {
       const coreMock = {

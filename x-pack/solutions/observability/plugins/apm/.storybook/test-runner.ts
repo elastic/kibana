@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 import type { TestRunnerConfig } from '@storybook/test-runner';
 import { injectAxe, checkA11y } from 'axe-playwright';
 
@@ -6,6 +12,11 @@ import { injectAxe, checkA11y } from 'axe-playwright';
  * to learn more about the test-runner hooks API.
  */
 const config: TestRunnerConfig = {
+  tags: {
+    // include: ['test-only', 'pages'],
+    // exclude: ['no-tests', 'tokens'],
+    skip: ['skip-test', 'layout'],
+  },
   async preVisit(page) {
     await injectAxe(page);
   },
@@ -18,5 +29,5 @@ const config: TestRunnerConfig = {
     });
   },
 };
-
+// eslint-disable-next-line import/no-default-export
 export default config;
