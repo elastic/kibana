@@ -10,8 +10,8 @@ import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-describe('fieldsSuggestionsAfterStats', () => {
-  it('should return the correct fields after the command with no grouping and user defined column', () => {
+describe('STATS', () => {
+  it('adds the user defined column, when no grouping is given', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
@@ -28,7 +28,7 @@ describe('fieldsSuggestionsAfterStats', () => {
     expect(result).toEqual([{ name: 'var0', type: 'double' }]);
   });
 
-  it('should return the correct fields after the command with no grouping and no user defined column', () => {
+  it('adds the escaped column, when no grouping is given', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
@@ -45,7 +45,7 @@ describe('fieldsSuggestionsAfterStats', () => {
     expect(result).toEqual([{ name: 'AVG(field2)', type: 'double' }]);
   });
 
-  it('should return the correct fields after the command with grouping and no user defined column', () => {
+  it('adds the escaped and grouping columns', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
@@ -65,7 +65,7 @@ describe('fieldsSuggestionsAfterStats', () => {
     ]);
   });
 
-  it('should return the correct fields after the command with grouping and user defined column', () => {
+  it('adds the user defined and grouping columns', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },

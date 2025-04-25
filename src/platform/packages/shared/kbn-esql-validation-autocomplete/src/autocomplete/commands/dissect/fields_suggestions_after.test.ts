@@ -10,7 +10,7 @@ import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { extractDissectColumnNames, fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-describe('fieldsSuggestionsAfterDissect', () => {
+describe('DISSECT', () => {
   // Test cases for dissect patterns
   describe('extractDissectColumnNames', () => {
     it('should extract column names from dissect patterns', () => {
@@ -69,7 +69,7 @@ describe('fieldsSuggestionsAfterDissect', () => {
   });
 
   describe('fieldsSuggestionsAfter', () => {
-    it('should return the correct fields after the command', () => {
+    it('adds the DISSECT pattern columns as fields', () => {
       const previousCommandFields = [
         { name: 'field1', type: 'keyword' },
         { name: 'field2', type: 'double' },

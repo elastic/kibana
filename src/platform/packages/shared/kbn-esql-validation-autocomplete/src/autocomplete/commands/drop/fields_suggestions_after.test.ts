@@ -10,8 +10,8 @@ import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-describe('fieldsSuggestionsAfterDrop', () => {
-  it('should return the correct fields after the command', () => {
+describe('DROP', () => {
+  it('removes the columns defined in the command', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },

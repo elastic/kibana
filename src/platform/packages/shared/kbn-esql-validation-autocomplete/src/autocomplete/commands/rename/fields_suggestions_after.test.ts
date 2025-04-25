@@ -10,8 +10,8 @@ import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-describe('fieldsSuggestionsAfterRename', () => {
-  it('should return the correct fields after the command', () => {
+describe('RENAME', () => {
+  it('renames the given columns with the new names', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },

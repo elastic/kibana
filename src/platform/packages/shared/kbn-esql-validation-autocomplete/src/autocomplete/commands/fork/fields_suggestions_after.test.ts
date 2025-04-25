@@ -10,8 +10,8 @@ import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-describe('fieldsSuggestionsAfterFork', () => {
-  it('should return the correct fields after the command', () => {
+describe('FORK', () => {
+  it('adds the _fork in the list of fields', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },

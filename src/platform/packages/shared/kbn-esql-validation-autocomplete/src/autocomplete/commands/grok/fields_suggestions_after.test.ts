@@ -10,7 +10,7 @@ import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { extractSemanticsFromGrok, fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-describe('fieldsSuggestionsAfterGrok', () => {
+describe('GROK', () => {
   // test the semantics extraction from grok patterns
   describe('extractSemanticsFromGrok', () => {
     it('should extract column names from grok patterns', () => {
@@ -28,7 +28,7 @@ describe('fieldsSuggestionsAfterGrok', () => {
     });
   });
   describe('fieldsSuggestionsAfter', () => {
-    it('should return the correct fields after the command', () => {
+    it('adds the GROK columns from the pattern in the list', () => {
       const previousCommandFields = [
         { name: 'field1', type: 'keyword' },
         { name: 'field2', type: 'double' },

@@ -10,8 +10,8 @@ import { synth } from '@kbn/esql-ast';
 import type { ESQLRealField } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
-describe('fieldsSuggestionsAfterChangePoint', () => {
-  it('should return the correct fields after the command without AS option', () => {
+describe('CHANGE_POINT', () => {
+  it('adds "type" and "pvalue" fields, when AS option not specified', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'count', type: 'double' },
@@ -33,7 +33,7 @@ describe('fieldsSuggestionsAfterChangePoint', () => {
     ]);
   });
 
-  it('should return the correct fields after the command with AS option', () => {
+  it('adds the given names as fields, when AS option is specified', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'count', type: 'double' },
