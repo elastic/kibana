@@ -13,17 +13,10 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { findFeature } from './helper';
 
-function findFeature(layer, callbackFn) {
-  for (let i = 0; i < layer.length; i++) {
-    const feature = layer.feature(i);
-    if (callbackFn(feature)) {
-      return feature;
-    }
-  }
-}
-
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('getGridTile', () => {

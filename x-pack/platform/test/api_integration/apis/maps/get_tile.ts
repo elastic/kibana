@@ -13,17 +13,10 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import { findFeature } from './helper';
 
-function findFeature(layer, callbackFn) {
-  for (let i = 0; i < layer.length; i++) {
-    const feature = layer.feature(i);
-    if (callbackFn(feature)) {
-      return feature;
-    }
-  }
-}
-
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('getTile', () => {
@@ -93,8 +86,8 @@ export default function ({ getService }) {
 
       // Verify ES document
 
-      const feature = findFeature(layer, (feature) => {
-        return feature.properties._id === 'AU_x3_BsGFA8no6Qjjug';
+      const feature = findFeature(layer, (feat: any) => {
+        return feat.properties._id === 'AU_x3_BsGFA8no6Qjjug';
       });
       expect(feature).not.to.be(undefined);
       expect(feature.type).to.be(1);
@@ -157,10 +150,10 @@ export default function ({ getService }) {
 
       // Verify ES document
 
-      const feature = findFeature(layer, (feature) => {
+      const feature = findFeature(layer, (feat: any) => {
         return (
-          feature.properties._id === 'AU_x3_BsGFA8no6Qjjug' &&
-          feature.properties._mvt_label_position === true
+          feat.properties._id === 'AU_x3_BsGFA8no6Qjjug' &&
+          feat.properties._mvt_label_position === true
         );
       });
       expect(feature).not.to.be(undefined);

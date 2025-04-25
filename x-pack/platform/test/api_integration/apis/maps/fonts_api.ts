@@ -12,8 +12,9 @@ import {
 } from '@kbn/core-http-common';
 import path from 'path';
 import { copyFile, rm } from 'fs/promises';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
 
