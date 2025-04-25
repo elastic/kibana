@@ -93,7 +93,7 @@ describe('AiAssistantSelectionPage', () => {
 
       it('renders the documentation links correctly', () => {
         renderComponent(testCapabilities);
-        const docLink =  screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink');
+        const docLink = screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink');
         expect(docLink).toBeInTheDocument();
         expect(docLink.getAttribute('href')).toContain('obs-ai-assistant');
       });
@@ -135,7 +135,7 @@ describe('AiAssistantSelectionPage', () => {
 
       it('renders the documentation links correctly', () => {
         renderComponent(testCapabilities);
-        const docLink =  screen.getByTestId('securityAiAssistantSelectionPageDocumentationLink');
+        const docLink = screen.getByTestId('securityAiAssistantSelectionPageDocumentationLink');
         expect(docLink).toBeInTheDocument();
         expect(docLink.getAttribute('href')).toContain('ai-assistant');
       });
