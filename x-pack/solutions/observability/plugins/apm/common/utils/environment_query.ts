@@ -14,12 +14,12 @@ export function environmentQuery(
   environment: string | undefined,
   field: string = SERVICE_ENVIRONMENT
 ): QueryDslQueryContainer[] {
-  if (!environment || environment === ENVIRONMENT_ALL.value) {
+  if (environment === ENVIRONMENT_ALL.value) {
     return [];
   }
 
-  if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-    return [{ bool: { must_not: { exists: { field } } } }];
+  if (!environment || environment === ENVIRONMENT_NOT_DEFINED.value) {
+    return [{ term: { [field]: ENVIRONMENT_NOT_DEFINED.value } }];
   }
 
   return [{ term: { [field]: environment } }];
