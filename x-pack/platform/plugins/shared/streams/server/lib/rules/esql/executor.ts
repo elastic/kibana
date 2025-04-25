@@ -18,7 +18,6 @@ import moment from 'moment';
 import objectHash from 'object-hash';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
-import { rowToDocument } from './lib/row_to_document';
 import { EsqlRuleInstanceState, EsqlRuleParams } from './types';
 
 export async function getRuleExecutor(
@@ -52,22 +51,18 @@ export async function getRuleExecutor(
     previousOriginalDocumentIds,
   });
 
-  const response = await executeEsqlRequest({
+  const results = await executeEsqlRequest({
     esClient: scopedClusterClient.asCurrentUser,
     requestBody: esqlRequest,
-    requestQueryParams: { drop_null_columns: true },
   });
 
-  const results = response.values.map((row) => rowToDocument(response.columns, row));
-
-  const alertIdToDocumentIdMap = new Map<string, string>();
-
+  const alertDocIdToDocumentIdMap = new Map<string, string>();
   const alerts = results.map((result) => {
-    const _id = objectHash([result._id, rule.id, spaceId]);
-    alertIdToDocumentIdMap.set(_id, result._id);
+    const alertDocId = objectHash([result._id, rule.id, spaceId]);
+    alertDocIdToDocumentIdMap.set(alertDocId, result._id);
 
     return {
-      _id,
+      _id: alertDocId,
       _source: result._source,
     };
   });
@@ -78,7 +73,9 @@ export async function getRuleExecutor(
     logger.debug(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
   }
 
-  const originalDocumentIds = createdAlerts.map((alert) => alertIdToDocumentIdMap.get(alert._id)!);
+  const originalDocumentIds = createdAlerts.map(
+    (alert) => alertDocIdToDocumentIdMap.get(alert._id)!
+  );
 
   return {
     state: {
