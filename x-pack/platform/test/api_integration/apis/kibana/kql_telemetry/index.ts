@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('stats', () => {
-    loadTestFile(require.resolve('./stats'));
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('KQL', () => {
+    loadTestFile(require.resolve('./kql_telemetry'));
   });
 }

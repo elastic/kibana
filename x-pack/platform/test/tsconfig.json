@@ -1,0 +1,29 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "cheerio",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-ftr-types"
+    ]
+  },
+  "include": [
+    "**/*",
+    "../../../typings/**/*",
+    "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "kbn_references": [
+    "@kbn/test-suites-src",
+    "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/features-plugin",
+    "@kbn/test",
+    "@kbn/expect",
+    "@kbn/core-http-common",
+    "@kbn/scout-info",
+    "@kbn/data-plugin",
+  ]
+}

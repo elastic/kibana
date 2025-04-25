@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const config = getService('config');
@@ -15,7 +16,7 @@ export default function ({ getService }) {
   describe('/api/stats', () => {
     describe('operational stats and usage stats', () => {
       // lazy check for uuid for test runs against preexisting services
-      function isUUID(uuid) {
+      function isUUID(uuid: string) {
         return typeof uuid === 'string' && uuid.length === 36;
       }
 
