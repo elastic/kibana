@@ -153,13 +153,13 @@ client = Elasticsearch(
     api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
 )
 
-query_object = ${JSON.stringify(queryObject, null, 4)}
+retriever_object = ${JSON.stringify(queryObject.retriever, null, 4)}
 
 search_response = client.search(
     index="${indexName}",
-    query=query_object,
+    retriever=retriever_object,
 )
-print(search_response)
+print(search_response['hits']['hits'])
 `;
 
 export const PythonSearchExample: SearchCodeDefinition = {

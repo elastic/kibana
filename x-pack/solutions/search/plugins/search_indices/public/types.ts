@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
@@ -117,7 +118,7 @@ export type IngestCodeSnippetFunction = (params: IngestCodeSnippetParameters) =>
 
 export interface SearchCodeSnippetParameters extends CodeSnippetParameters {
   indexName: string;
-  queryObject: {};
+  queryObject: { retriever: RetrieverContainer };
 }
 export type SearchCodeSnippetFunction = (params: SearchCodeSnippetParameters) => string;
 
