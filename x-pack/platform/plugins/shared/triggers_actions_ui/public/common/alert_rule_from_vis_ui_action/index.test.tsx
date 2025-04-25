@@ -203,9 +203,43 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | EVAL _count = \`COUNT(*)\`| RENAME \`PERCENTILE(owowo, 99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`meow bytes\`)\` as _count_meow_bytes 
+      | EVAL _count = \`COUNT(*)\`| RENAME \`PERCENTILE(owowo, 99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`)\` as _count_meow_bytes 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
       | WHERE _count >= 210 AND _percentile_owowo_99 >= 42.6 AND _count_meow_bytes >= 1312",
+          },
+          "searchType": "esqlQuery",
+          "timeField": "@timestamp",
+        },
+      }
+    `);
+  });
+
+  it('escapes string values with backlashes in them', () => {
+    action.execute({
+      embeddable: embeddableMock,
+      data: {
+        query:
+          'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY CATEGORIZE(message)',
+        thresholdValues: {
+          'COUNT(*)': 1,
+        },
+        splitValues: {
+          'CATEGORIZE(message)': [
+            '.*?GET .+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a',
+          ],
+        },
+      },
+    });
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
+      Object {
+        "params": Object {
+          "esqlQuery": Object {
+            "esql": "// Original ES|QL query derived from the visualization:
+      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY CATEGORIZE(message)
+      // Rename the following columns so they can be used as part of the alerting threshold:
+      | EVAL _count = \`COUNT(*)\`| RENAME \`CATEGORIZE(message)\` as _categorize_message 
+      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
+      | WHERE _categorize_message == \\".*?GET .+?HTTP/1\\\\\\\\.1.+?Mozilla/5\\\\\\\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\\\\\\\.0a\\" AND _count >= 1",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
