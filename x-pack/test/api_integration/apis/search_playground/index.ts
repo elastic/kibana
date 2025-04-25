@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { OnboardingBanner as OnboardingAVCBanner } from './onboarding_banner';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('search_playground apis', () => {
+    loadTestFile(require.resolve('./playgrounds'));
+  });
+}

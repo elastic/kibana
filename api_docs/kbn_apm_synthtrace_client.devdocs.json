@@ -2031,6 +2031,48 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.OtelInstance.appMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "appMetrics",
+            "description": [],
+            "signature": [
+              "(metrics: Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>) => ",
+              "OtelMetricset",
+              "<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmOtelFields",
+                "text": "ApmOtelFields"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.OtelInstance.appMetrics.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "metrics",
+                "description": [],
+                "signature": [
+                  "Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.process.cgroup.memory.mem.limit.bytes': number; 'system.process.cgroup.memory.mem.usage.bytes': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; 'application.launch.time': number; }>"
+                ],
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/apm/otel/otel_instance.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
             "id": "def-common.OtelInstance.error",
             "type": "Function",
             "tags": [],
