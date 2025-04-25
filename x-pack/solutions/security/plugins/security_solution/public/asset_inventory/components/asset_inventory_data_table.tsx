@@ -324,7 +324,6 @@ export const AssetInventoryDataTable = ({
   const externalAdditionalControls = (
     <AdditionalControls
       total={totalHits}
-      dataView={dataView}
       title={title}
       columns={currentColumns}
       onAddColumn={onAddColumn}
@@ -348,7 +347,7 @@ export const AssetInventoryDataTable = ({
         <EuiProgress
           size="xs"
           color="accent"
-          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          css={{ opacity: isFetchingGridData ? 1 : 0 }}
           className={styles.gridProgressBar}
         />
         {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (

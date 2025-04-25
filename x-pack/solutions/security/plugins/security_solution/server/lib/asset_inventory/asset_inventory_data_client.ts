@@ -13,6 +13,12 @@ import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analy
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
+import { installDataView } from './saved_objects/data_view';
+import {
+  ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+  ASSET_INVENTORY_DATA_VIEW_NAME,
+  ASSET_INVENTORY_INDEX_PATTERN,
+} from './constants';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
@@ -84,6 +90,15 @@ export class AssetInventoryDataClient {
       const entityStoreEnableResponse = await secSolutionContext
         .getEntityStoreDataClient()
         .enable(requestBodyOverrides);
+
+      await installDataView(
+        secSolutionContext.getSpaceId(),
+        secSolutionContext.getDataViewsService(),
+        ASSET_INVENTORY_DATA_VIEW_NAME,
+        ASSET_INVENTORY_INDEX_PATTERN,
+        ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+        logger
+      );
 
       logger.debug(`Enabled asset inventory`);
 
