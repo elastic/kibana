@@ -25,6 +25,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { Mappings } from '../../types';
 
 import { CodeBox } from '../code_box/code_box';
+import { useSearchCodeExamples } from '../../hooks/use_search_code_examples';
 
 export interface IndexSearchExampleProps {
   indexName: string;
@@ -32,7 +33,7 @@ export interface IndexSearchExampleProps {
   mappings?: Mappings;
 }
 
-export const IndexSearchExample = ({ indexName }: IndexSearchExampleProps) => {
+export const IndexSearchExample = ({ indexName, mappings }: IndexSearchExampleProps) => {
   const { share } = useKibana().services;
   const navigateToPlayground = useCallback(async () => {
     const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
@@ -40,9 +41,11 @@ export const IndexSearchExample = ({ indexName }: IndexSearchExampleProps) => {
       await playgroundLocator.navigate({ 'default-index': indexName });
     }
   }, [share, indexName]);
+  const codeExamples = useSearchCodeExamples(indexName, mappings);
+
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem grow={2}>
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
@@ -99,28 +102,11 @@ export const IndexSearchExample = ({ indexName }: IndexSearchExampleProps) => {
           </EuiButton>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={3}>
         <CodeBox
           data-test-subj="search-example-codebox"
-          options={[
-            {
-              language: {
-                id: 'python',
-                title: 'Python',
-                iconType: 'python.svg',
-              },
-              code: 'TODO',
-            },
-            {
-              language: {
-                id: 'javascript',
-                title: 'Javascript',
-                iconType: 'javascript.svg',
-              },
-              code: 'TODO',
-            },
-          ]}
-          consoleCode={`POST /${indexName}/_search`}
+          options={codeExamples.options}
+          consoleCode={codeExamples.console}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
