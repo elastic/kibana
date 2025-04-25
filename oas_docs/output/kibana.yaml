@@ -24902,6 +24902,48 @@ paths:
       summary: Create an SLO
       tags:
         - slo
+  /s/{spaceId}/api/observability/slos/_bulk_purge_rollup:
+    post:
+      description: |
+        The deletion occurs for the specified list of `sloId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: deleteRollupDataOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_purge_rollup_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_purge_rollup_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Batch delete rollup and summary data
+      tags:
+        - slo
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       description: |
@@ -46069,6 +46111,58 @@ components:
       example: occurrences
       title: Budgeting method
       type: string
+    SLOs_bulk_purge_rollup_request:
+      description: |
+        The bulk purge rollup data request takes a list of SLO ids and a purge policy, then deletes the rollup data according to the purge policy. This API can be used to remove the staled data of an instance SLO that no longer get updated.
+      properties:
+        list:
+          description: An array of slo ids
+          items:
+            description: The SLO Definition id
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+          type: array
+        purgePolicy:
+          description: Policy that dictates which SLI documents to purge based on age
+          oneOf:
+            - type: object
+              properties:
+                age:
+                  description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
+                  example: 7d
+                  type: string
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-age
+                  type: string
+            - type: object
+              properties:
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-time
+                  type: string
+                timestamp:
+                  description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+                  example: '2024-12-31T00:00:00.000Z'
+                  type: string
+          type: object
+      required:
+        - list
+        - purgePolicy
+      title: Bulk Purge Rollup data request
+      type: object
+    SLOs_bulk_purge_rollup_response:
+      description: |
+        The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+      properties:
+        taskId:
+          description: The task id of the purge operation
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          type: string
+      title: Bulk Purge Rollup data response
+      type: object
     SLOs_create_slo_request:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
