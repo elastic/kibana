@@ -42,7 +42,7 @@ import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { FlyoutParamProps } from './types';
 import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
-import { ViewButtons } from './view_buttons';
+import { ViewButtons } from './view_buttons/view_buttons';
 
 const ITEM_HEIGHT = 172;
 const ROW_COUNT = 4;

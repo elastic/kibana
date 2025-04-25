@@ -35,6 +35,7 @@ export const MonitorsTable = ({
       const { configId, locationLabel, locationId, spaceId } = monitor;
       return {
         onClick: (e) => {
+          // This is a workaround to prevent the flyout from opening when clicking on the action buttons
           if (
             Array.from((e.target as HTMLElement).classList).some((className) =>
               className.includes('euiTableCellContent')
@@ -55,13 +56,12 @@ export const MonitorsTable = ({
     },
     [dispatch, setFlyoutConfigCallback]
   );
-  const loading = !status || !loaded;
 
   return (
     <EuiBasicTable
       items={pageOfItems}
       columns={columns}
-      loading={loading}
+      loading={!status || !loaded}
       pagination={pagination}
       onChange={onTableChange}
       rowProps={getRowProps}

@@ -17,7 +17,7 @@ export const MonitorsDuration = ({
   onClickDuration,
 }: {
   monitor: OverviewStatusMetaData;
-  onClickDuration?: () => void;
+  onClickDuration: () => void;
 }) => {
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const duration = trendData === 'loading' || !trendData?.median ? 0 : trendData.median;
