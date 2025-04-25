@@ -667,12 +667,6 @@ export class TrainedModelsService {
           this.stopPolling();
           this.downloadStatusFetchInProgress = false;
 
-          this.uiInitiatedDownloads.forEach((modelId) => {
-            this.telemetryService.trackTrainedModelsModelDownload({
-              model_id: modelId,
-              result: 'failure',
-            });
-          });
           this.uiInitiatedDownloads.clear();
         },
       });
