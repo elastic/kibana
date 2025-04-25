@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IToasts } from '@kbn/core/public';
 import type { ImportRulesResponse } from '../../../../../common/api/detection_engine';
 import { getFailedConnectorsCount, showToast } from './utils';
 
@@ -28,12 +29,16 @@ export function mockImportResponse(
 }
 
 describe('showToast', () => {
-  it('displays success toast if rule import is successful', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
+  const toastsMock = {
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+  } as unknown as jest.Mocked<IToasts>;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('displays success toast if rule import is successful', () => {
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -47,11 +52,6 @@ describe('showToast', () => {
   });
 
   it('displays three success toasts if rules, action connectors and exception imports succeed', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -74,11 +74,6 @@ describe('showToast', () => {
   //
 
   it('displays error toast if import of a single rule fails', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: false,
@@ -106,11 +101,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of multiple rules fails with the same error', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: false,
@@ -145,11 +135,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of multiple rules fails with different errors', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: false,
@@ -183,11 +168,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of a single exception fails', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -215,11 +195,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of multiple exceptions fails with the same error', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -254,11 +229,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of multiple exceptions fails with different errors', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -295,11 +265,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of a single action connector fails', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -327,11 +292,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of a single action connector fails with a 403', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -359,11 +319,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of multiple action connectors fails with the same error', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -397,11 +352,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if import of multiple action connectors fails with different errors', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -436,11 +386,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if connector import error does not specify connector ID', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -467,11 +412,6 @@ describe('showToast', () => {
   });
 
   it('displays three error toasts if importing rules, action connectors and exceptions fail', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: false,
@@ -525,11 +465,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if connector error specifies multiple connector IDs within the "id" field', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,
@@ -569,11 +504,6 @@ describe('showToast', () => {
   });
 
   it('displays error toast if connector error specifies a single connector ID within the "id" field', () => {
-    const toastsMock = {
-      addError: jest.fn(),
-      addSuccess: jest.fn(),
-    };
-
     showToast({
       importResponse: mockImportResponse({
         success: true,

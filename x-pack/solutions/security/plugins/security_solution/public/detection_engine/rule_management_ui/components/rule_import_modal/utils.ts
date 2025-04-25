@@ -55,7 +55,7 @@ function showErrorToast({
   title: string;
   shortMessage: string;
   fullMessage: string;
-  toasts: { addError: IToasts['addError']; addSuccess: IToasts['addSuccess'] };
+  toasts: IToasts;
 }) {
   const error = new Error('Error details');
   error.stack = fullMessage;
@@ -70,7 +70,7 @@ export function showToast({
   toasts,
 }: {
   importResponse: ImportRulesResponse;
-  toasts: { addSuccess: IToasts['addSuccess']; addError: IToasts['addError'] };
+  toasts: IToasts;
 }) {
   if (importResponse.success_count > 0) {
     toasts.addSuccess(i18n.SUCCESSFULLY_IMPORTED_RULES(importResponse.success_count));
