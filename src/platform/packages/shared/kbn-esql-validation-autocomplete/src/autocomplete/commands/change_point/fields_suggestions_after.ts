@@ -14,29 +14,16 @@ export const fieldsSuggestionsAfter = (
   previousCommandFields: ESQLRealField[],
   userDefinedColumns: ESQLRealField[]
 ) => {
-  const columns: ESQLRealField[] = [];
   const { target } = command as ESQLAstChangePointCommand;
-  if (target) {
-    columns.push({
-      name: LeafPrinter.column(target.type),
+  previousCommandFields.push(
+    {
+      name: target ? LeafPrinter.column(target.type) : 'type',
       type: 'keyword' as const,
-    });
-    columns.push({
-      name: LeafPrinter.column(target.pvalue),
+    },
+    {
+      name: target ? LeafPrinter.column(target.pvalue) : 'pvalue',
       type: 'double' as const,
-    });
-  } else {
-    // If no AS clause is provided, use the default column names
-    columns.push(
-      {
-        name: 'type',
-        type: 'keyword' as const,
-      },
-      {
-        name: 'pvalue',
-        type: 'double' as const,
-      }
-    );
-  }
-  return [...previousCommandFields, ...columns];
+    }
+  );
+  return previousCommandFields;
 };
