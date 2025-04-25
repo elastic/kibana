@@ -10,7 +10,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
-import { LockAcquisitionError } from '@kbn/lock-manager';
+import { LockAcquisitionError } from '@kbn/lock-manager/server';
 import { resourceNames } from '..';
 import {
   Instruction,
