@@ -1125,6 +1125,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     // Bump revision of all associated agent policies (old and new)
+    const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
     const associatedPolicyIds = new Set([...oldPackagePolicy.policy_ids, ...newPolicy.policy_ids]);
     logger.debug(`Bumping revision of associated agent policies ${associatedPolicyIds}`);
     const bumpPromises = [];
@@ -1133,10 +1134,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
       const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
-      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+      // Only apply removeProtection for endpoint packages
       const removeProtection =
-        (assignedInOldPolicy && !assignedInNewPolicy) ||
-        (!assignedInOldPolicy && assignedInNewPolicy);
+        isEndpointPolicy &&
+        ((assignedInOldPolicy && !assignedInNewPolicy) ||
+          (!assignedInOldPolicy && assignedInNewPolicy));
 
       bumpPromises.push(
         agentPolicyService.bumpRevision(soClient, esClient, policyId, {
