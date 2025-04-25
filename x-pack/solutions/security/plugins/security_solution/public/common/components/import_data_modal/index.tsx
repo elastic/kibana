@@ -24,7 +24,7 @@ import {
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import * as i18n from './translations';
 
-interface ImportDataModalProps {
+interface ImportDataModalProps<T> {
   isModalVisible: boolean;
   closeModal: () => void;
   title: string;
@@ -32,15 +32,12 @@ interface ImportDataModalProps {
   description: string;
   submitBtnText: string;
   errorMessage: (totalCount: number) => string;
-  // Having any as importData return type to make type inference work
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  importData: (arg: { fileToImport: File; signal: AbortSignal }) => Promise<any>;
-  // onImportComplete's parameter type is whatever importData returns
-  onImportComplete: (importResult: Awaited<ReturnType<ImportDataModalProps['importData']>>) => void;
+  importData: (arg: { fileToImport: File; signal: AbortSignal }) => Promise<T>;
+  onImportComplete: (importResult: T) => void;
   children?: React.ReactNode;
 }
 
-export const ImportDataModalComponent = ({
+export const ImportDataModalComponent = <T,>({
   isModalVisible,
   closeModal,
   title,
@@ -51,7 +48,7 @@ export const ImportDataModalComponent = ({
   importData,
   onImportComplete,
   children,
-}: ImportDataModalProps) => {
+}: ImportDataModalProps<T>) => {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [isImporting, setIsImporting] = useState(false);
 
@@ -142,6 +139,8 @@ export const ImportDataModalComponent = ({
 
 ImportDataModalComponent.displayName = 'ImportDataModalComponent';
 
-export const ImportDataModal = React.memo(ImportDataModalComponent);
+export const ImportDataModal = React.memo(
+  ImportDataModalComponent
+) as typeof ImportDataModalComponent;
 
 ImportDataModal.displayName = 'ImportDataModal';
