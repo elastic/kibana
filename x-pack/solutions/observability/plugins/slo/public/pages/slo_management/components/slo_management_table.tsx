@@ -17,11 +17,12 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiTableSelectionType,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
-import React from 'react';
+import React, { useState } from 'react';
 import { sloPaths } from '../../../../common';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
 import { paths } from '../../../../common/locators/paths';
@@ -42,6 +43,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     },
   } = useKibana();
 
+  const { data: permissions } = usePermissions();
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
     page: page + 1,
     perPage,
@@ -50,7 +52,16 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     includeOutdatedOnly,
   });
 
-  const { data: permissions } = usePermissions();
+  const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
+  const onSelectionChange = (items: SLODefinitionResponse[]) => {
+    setSelectedItems(items);
+  };
+
+  const selection: EuiTableSelectionType<SLODefinitionResponse> = {
+    onSelectionChange,
+    initialSelected: [],
+  };
+
   const actions: Array<DefaultItemAction<SLODefinitionResponse>> = [
     {
       type: 'icon',
@@ -245,9 +256,11 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
         items={data?.results ?? []}
         rowHeader="name"
         columns={columns}
+        itemId="id"
         pagination={pagination}
         onChange={onTableChange}
         loading={isLoading}
+        selection={selection}
       />
     </EuiPanel>
   );
