@@ -527,6 +527,10 @@ Object {
                       "breadcrumbStatus": "hidden",
                       "link": "management:data_usage",
                     },
+                    Object {
+                      "breadcrumbStatus": "hidden",
+                      "link": "management:content_connectors",
+                    },
                   ],
                   "title": "Data",
                 },
@@ -639,10 +643,6 @@ Object {
                     },
                   ],
                   "title": "Other",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "link": "management:content_connectors",
                 },
               ],
               "id": "stack_management",
@@ -803,6 +803,10 @@ Object {
                       "breadcrumbStatus": "hidden",
                       "link": "management:data_usage",
                     },
+                    Object {
+                      "breadcrumbStatus": "hidden",
+                      "link": "management:content_connectors",
+                    },
                   ],
                   "title": "Data",
                 },
@@ -915,10 +919,6 @@ Object {
                     },
                   ],
                   "title": "Other",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "link": "management:content_connectors",
                 },
               ],
               "id": "stack_management",
