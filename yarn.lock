@@ -2157,22 +2157,22 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-common@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.1.0.tgz#fa74c7f72b4ca69ff1f7a5cf45e55c979064ab73"
-  integrity sha512-2Pm9PeEr4QXjtL/YYM6faXbQ2Fm/mJXzV7QLBxUW8iHov70IHZy1e3xJOio0lI1IbO3S7t79EIS6J3/uNffJfA==
+"@elastic/eui-theme-common@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.2.0.tgz#570a988f58c24076c6f867475e70930769f3cff5"
+  integrity sha512-g2n38Uk4G9UqQU/wim+ZKWusWtO1bdudvDy/7+sdCYaxtgbINT5hhMHoU9M49D+7FJSsPuHn7gVfdYKMN9bTdQ==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@101.3.0-classic.0":
-  version "101.3.0-classic.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.3.0-classic.0.tgz#c7b0632b062257342210850a958d2e353e829026"
-  integrity sha512-REt71u2yfnVyXX3+2MWLk3VzBdHAbCeSiPcs5MHY6h4TQR1WsD8+qs9RGFFfvW9ZSXTtyimrwOjQFt6Ph64s2Q==
+"@elastic/eui@101.4.0-amsterdam.0":
+  version "101.4.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.4.0-amsterdam.0.tgz#27360ebeb71e86052f99f5e88814b197ae97558e"
+  integrity sha512-zhWSRQYFFk2lm6mycBnpX8SJOeNzKjYJ7XwTv9RFfRUR6MGe/GfUIjHGCAg52NDNUTcYPlLuPhJKcNtAMasEOQ==
   dependencies:
-    "@elastic/eui-theme-common" "0.1.0"
-    "@elastic/prismjs-esql" "^1.0.0"
+    "@elastic/eui-theme-common" "0.2.0"
+    "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -2235,10 +2235,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
 
-"@elastic/prismjs-esql@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.0.0.tgz#370c996536dcea8840f2c2288a97aca4982e13c5"
-  integrity sha512-kEQcj9wg7pUaFkW7m7zs0fz4cmg0kWUMQv6SyENXKvLGMecgDjNciEoN3CMg22PYURelbnhM7ii6nFv9hAr2NA==
+"@elastic/prismjs-esql@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.0.tgz#c7f84de21bb453831df7e8565be7430b1b078836"
+  integrity sha512-k2zZfCL4l+qCXfmc9jrnDdEWW2jDPFAHlCq1JAh3x7zWN6Eyc6ACn3oj9oy49xsuAO+BAhQ345uueL8K/3UIKg==
 
 "@elastic/react-search-ui-views@1.20.2", "@elastic/react-search-ui-views@^1.20.2":
   version "1.20.2"
@@ -5298,6 +5298,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/encrypted-saved-objects-shared@link:src/platform/packages/shared/kbn-encrypted-saved-objects-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/enterprise-search-plugin@link:x-pack/solutions/search/plugins/enterprise_search":
   version "0.0.0"
   uid ""
@@ -7503,6 +7507,10 @@
   uid ""
 
 "@kbn/synthetics-private-location@link:x-pack/packages/kbn-synthetics-private-location":
+  version "0.0.0"
+  uid ""
+
+"@kbn/task-manager-dependencies-plugin@link:x-pack/platform/plugins/private/task_manager_dependencies":
   version "0.0.0"
   uid ""
 
