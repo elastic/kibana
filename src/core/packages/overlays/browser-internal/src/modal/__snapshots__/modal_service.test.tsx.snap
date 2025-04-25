@@ -52,8 +52,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -87,8 +86,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -145,8 +143,7 @@ Array [
           }
         }
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
+        <OverlayMountWrapper
           mount={[Function]}
         />
       </EuiConfirmModal>
@@ -281,8 +278,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -322,8 +318,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -357,8 +352,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -398,8 +392,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -593,8 +586,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -634,8 +626,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -707,8 +698,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -748,8 +738,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -907,8 +896,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -948,8 +936,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -1021,8 +1008,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -1062,8 +1048,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -1226,8 +1211,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -1267,8 +1251,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -1340,8 +1323,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -1381,8 +1363,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -1484,8 +1465,7 @@ Array [
       <EuiModal
         onClose={[Function]}
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
+        <OverlayMountWrapper
           mount={[Function]}
         />
       </EuiModal>
@@ -1534,8 +1514,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -1575,8 +1554,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -1648,8 +1626,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -1689,8 +1666,7 @@ Array [
                           }
                         }
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiConfirmModal>
@@ -1855,8 +1831,7 @@ Array [
       <EuiModal
         onClose={[Function]}
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
+        <OverlayMountWrapper
           mount={[Function]}
         />
       </EuiModal>
@@ -1943,8 +1918,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -1978,8 +1952,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -2083,8 +2056,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -2118,8 +2090,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -2228,8 +2199,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -2263,8 +2233,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -2312,8 +2281,7 @@ Array [
       <EuiModal
         onClose={[Function]}
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
+        <OverlayMountWrapper
           mount={[Function]}
         />
       </EuiModal>
@@ -2362,8 +2330,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -2397,8 +2364,7 @@ Array [
                       <EuiModal
                         onClose={[Function]}
                       >
-                        <MountWrapper
-                          className="kbnOverlayMountWrapper"
+                        <OverlayMountWrapper
                           mount={[Function]}
                         />
                       </EuiModal>
@@ -2446,8 +2412,7 @@ Array [
       <EuiModal
         onClose={[Function]}
       >
-        <MountWrapper
-          className="kbnOverlayMountWrapper"
+        <OverlayMountWrapper
           mount={[Function]}
         />
       </EuiModal>
