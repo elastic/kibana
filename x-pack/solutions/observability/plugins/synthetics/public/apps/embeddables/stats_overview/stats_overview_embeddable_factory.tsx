@@ -38,12 +38,23 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'Synthetics Stats Overview',
   });
 
-export type OverviewEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState & {
-    filters: MonitorFilters;
-  };
+const DEFAULT_FILTERS: MonitorFilters = {
+  projects: [],
+  tags: [],
+  locations: [],
+  monitorIds: [],
+  monitorTypes: [],
+};
 
-export type StatsOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
+export interface OverviewStatsEmbeddableCustomState {
+  filters?: MonitorFilters;
+}
+
+export type OverviewStatsEmbeddableState = SerializedTitles &
+  DynamicActionsSerializedState &
+  OverviewStatsEmbeddableCustomState;
+
+export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasEditCapabilities &
@@ -87,13 +98,13 @@ export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
   const factory: ReactEmbeddableFactory<
-    OverviewEmbeddableState,
-    OverviewEmbeddableState,
+    OverviewStatsEmbeddableState,
+    OverviewStatsEmbeddableState,
     StatsOverviewApi
   > = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     deserializeState: (state) => {
-      return state.rawState as OverviewEmbeddableState;
+      return state.rawState as OverviewStatsEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid) => {
       const [coreStart, pluginStart] = await getStartServices();
@@ -138,7 +149,7 @@ export const getStatsOverviewEmbeddableFactory = (
                 coreStart,
                 pluginStart,
                 initialState: {
-                  filters: filters$.getValue(),
+                  filters: filters$.getValue() || DEFAULT_FILTERS,
                 },
                 title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
                   defaultMessage: 'Create monitor stats',
@@ -190,7 +201,7 @@ export const getStatsOverviewEmbeddableFactory = (
               }}
               data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
-              <StatsOverviewComponent reload$={reload$} filters={filters} />
+              <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
             </div>
           );
         },

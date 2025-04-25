@@ -24,17 +24,30 @@ import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import { OverviewView } from '../../synthetics/state';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {
     defaultMessage: 'Synthetics Monitors',
   });
 
-export type OverviewEmbeddableState = SerializedTitles & {
-  filters: MonitorFilters;
+const DEFAULT_FILTERS: MonitorFilters = {
+  projects: [],
+  tags: [],
+  locations: [],
+  monitorIds: [],
+  monitorTypes: [],
 };
 
-export type StatusOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
+export interface OverviewMonitorsEmbeddableCustomState {
+  filters?: MonitorFilters;
+  view: OverviewView;
+}
+
+export type OverviewMonitorsEmbeddableState = SerializedTitles &
+  OverviewMonitorsEmbeddableCustomState;
+
+export type StatusOverviewApi = DefaultEmbeddableApi<OverviewMonitorsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasEditCapabilities;
@@ -43,13 +56,13 @@ export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
   const factory: ReactEmbeddableFactory<
-    OverviewEmbeddableState,
-    OverviewEmbeddableState,
+    OverviewMonitorsEmbeddableState,
+    OverviewMonitorsEmbeddableState,
     StatusOverviewApi
   > = {
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
     deserializeState: (state) => {
-      return state.rawState as OverviewEmbeddableState;
+      return state.rawState as OverviewMonitorsEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi) => {
       const [coreStart, pluginStart] = await getStartServices();
@@ -58,6 +71,7 @@ export const getMonitorsEmbeddableFactory = (
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
       const filters$ = new BehaviorSubject(state.filters);
+      const view$ = new BehaviorSubject(state.view);
 
       const api = buildApi(
         {
@@ -73,6 +87,7 @@ export const getMonitorsEmbeddableFactory = (
               rawState: {
                 ...titleManager.serialize(),
                 filters: filters$.getValue(),
+                view: view$.getValue(),
               },
             };
           },
@@ -82,7 +97,7 @@ export const getMonitorsEmbeddableFactory = (
                 coreStart,
                 pluginStart,
                 initialState: {
-                  filters: filters$.getValue(),
+                  filters: filters$.getValue() || DEFAULT_FILTERS,
                 },
                 title: i18n.translate(
                   'xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.overview.title',
@@ -100,6 +115,7 @@ export const getMonitorsEmbeddableFactory = (
         {
           ...titleManager.comparators,
           filters: [filters$, (value) => filters$.next(value)],
+          view: [view$, (value) => view$.next(value)],
         }
       );
 
@@ -113,6 +129,7 @@ export const getMonitorsEmbeddableFactory = (
         api,
         Component: () => {
           const [filters] = useBatchedPublishingSubjects(filters$);
+          const [view] = useBatchedPublishingSubjects(view$);
 
           useEffect(() => {
             return () => {
@@ -128,7 +145,11 @@ export const getMonitorsEmbeddableFactory = (
               }}
               data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
-              <StatusGridComponent reload$={reload$} filters={filters} />
+              <StatusGridComponent
+                reload$={reload$}
+                filters={filters || DEFAULT_FILTERS}
+                view={view}
+              />
             </div>
           );
         },
