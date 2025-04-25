@@ -66,13 +66,11 @@ export async function createMaintenanceWindow(
 
   const id = SavedObjectsUtils.generateId();
   let expirationDate;
-  if (rRule.interval) {
+  if (rRule.interval || rRule.freq) {
     expirationDate = moment().utc().add(5, 'days').toISOString();
   } else {
     expirationDate = moment(rRule.dtstart).utc().add(duration, 'ms').toISOString();
   }
-
-  console.log('createMaintenanceWindow', { expirationDate, rRule, duration });
 
   const modificationMetadata = await getModificationMetadata();
 

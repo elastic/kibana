@@ -98,7 +98,16 @@ async function updateWithOCC(
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
-    const expirationDate = moment.utc().add(1, 'year').toISOString();
+    let expirationDate;
+    if (maintenanceWindow.rRule.interval || maintenanceWindow.rRule.freq) {
+      expirationDate = moment().utc().add(1, 'year').toISOString();
+    } else {
+      expirationDate = moment(maintenanceWindow.rRule.dtstart)
+        .utc()
+        .add(duration, 'ms')
+        .toISOString();
+    }
+
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
