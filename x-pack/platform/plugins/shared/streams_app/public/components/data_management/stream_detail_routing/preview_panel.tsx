@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import { useDebounced } from '../../../util/use_debounce';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
 import { PreviewTable } from '../preview_table';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
@@ -204,7 +203,7 @@ export function PreviewPanel() {
                 defaultMessage: 'Data Preview',
               })}
             </strong>
-          </EuiFlexGroup>            
+          </EuiFlexGroup>
           <StreamsAppSearchBar showDatePicker />
         </EuiFlexGroup>
       </EuiFlexItem>
