@@ -24902,6 +24902,91 @@ paths:
       summary: Create an SLO
       tags:
         - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete:
+    post:
+      description: |
+        Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the `GET /api/slo/_bulk_delete/{taskId}` endpoint.
+      operationId: bulkDeleteOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_delete_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Bulk delete SLO definitions and their associated summary and rollup data.
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}:
+    get:
+      description: |
+        Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
+      operationId: bulkDeleteStatusOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: The task id of the bulk delete operation
+          in: path
+          name: taskId
+          required: true
+          schema:
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_status_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Retrieve the status of the bulk deletion
+      tags:
+        - slo
   /s/{spaceId}/api/observability/slos/_bulk_purge_rollup:
     post:
       description: |
@@ -46111,6 +46196,62 @@ components:
       example: occurrences
       title: Budgeting method
       type: string
+    SLOs_bulk_delete_request:
+      description: |
+        The bulk delete SLO request takes a list of SLOs Definition id to delete.
+      properties:
+        list:
+          description: An array of SLO Definition id
+          items:
+            description: The SLO Definition id
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+          type: array
+      required:
+        - list
+      title: Bulk delete SLO request
+      type: object
+    SLOs_bulk_delete_response:
+      description: |
+        The bulk delete SLO response returns a taskId that can be used to poll for its status
+      properties:
+        taskId:
+          description: The taskId of the bulk delete operation
+          example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+          type: string
+      title: Bulk delete SLO response
+      type: object
+    SLOs_bulk_delete_status_response:
+      description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
+      properties:
+        error:
+          description: The error message if the bulk deletion operation failed
+          example: Task not found
+          type: string
+        isDone:
+          description: Indicates if the bulk deletion operation is completed
+          example: true
+          type: boolean
+        results:
+          description: The results of the bulk deletion operation, including the success status and any errors for each SLO
+          items:
+            type: object
+            properties:
+              error:
+                description: The error message if the deletion operation failed for this SLO
+                example: SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found
+                type: string
+              id:
+                description: The ID of the SLO that was deleted
+                example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+                type: string
+              success:
+                description: The result of the deletion operation for this SLO
+                example: true
+                type: boolean
+          type: array
+      title: The status of the bulk deletion
+      type: object
     SLOs_bulk_purge_rollup_request:
       description: |
         The bulk purge rollup data request takes a list of SLO ids and a purge policy, then deletes the rollup data according to the purge policy. This API can be used to remove the staled data of an instance SLO that no longer get updated.
