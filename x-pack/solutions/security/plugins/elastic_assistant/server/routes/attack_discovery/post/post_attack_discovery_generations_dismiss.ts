@@ -112,7 +112,7 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
           // event log details:
           const connectorId = previousGeneration.connector_id;
 
-          writeAttackDiscoveryEvent({
+          await writeAttackDiscoveryEvent({
             action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
             attackDiscoveryAlertsEnabled,
             authenticatedUser: currentUser,

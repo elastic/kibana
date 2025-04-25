@@ -158,7 +158,7 @@ export const postAttackDiscoveryRoute = (
             start: request.body.start,
           });
 
-          writeAttackDiscoveryEvent({
+          await writeAttackDiscoveryEvent({
             action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
             attackDiscoveryAlertsEnabled,
             authenticatedUser,
@@ -186,7 +186,7 @@ export const postAttackDiscoveryRoute = (
             savedObjectsClient,
             telemetry,
           })
-            .then((result) => {
+            .then(async (result) => {
               const end = new Date();
               const durationNanoseconds = getDurationNanoseconds({
                 end,
@@ -195,7 +195,7 @@ export const postAttackDiscoveryRoute = (
 
               // NOTE: the (legacy) implementation of generateAttackDiscoveries returns an "error" object when failures occur (instead of rejecting):
               if (result.error == null) {
-                writeAttackDiscoveryEvent({
+                await writeAttackDiscoveryEvent({
                   action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
                   alertsContextCount: result.anonymizedAlerts?.length,
                   attackDiscoveryAlertsEnabled,
@@ -213,7 +213,7 @@ export const postAttackDiscoveryRoute = (
                   spaceId,
                 });
               } else {
-                writeAttackDiscoveryEvent({
+                await writeAttackDiscoveryEvent({
                   action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
                   alertsContextCount: result.anonymizedAlerts?.length,
                   attackDiscoveryAlertsEnabled,
@@ -232,7 +232,7 @@ export const postAttackDiscoveryRoute = (
                 });
               }
             })
-            .catch((error) => {
+            .catch(async (error) => {
               // This is a fallback in case the promise is rejected (in a future implementation):
               const end = new Date();
               const durationNanoseconds = getDurationNanoseconds({
@@ -240,7 +240,7 @@ export const postAttackDiscoveryRoute = (
                 start: generatedStarted,
               });
 
-              writeAttackDiscoveryEvent({
+              await writeAttackDiscoveryEvent({
                 action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
                 attackDiscoveryAlertsEnabled,
                 authenticatedUser,
