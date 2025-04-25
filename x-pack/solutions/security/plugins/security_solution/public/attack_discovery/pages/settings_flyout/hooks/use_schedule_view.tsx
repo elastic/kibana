@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 
+import React, { useCallback, useMemo, useState } from 'react';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../common/lib/kibana';

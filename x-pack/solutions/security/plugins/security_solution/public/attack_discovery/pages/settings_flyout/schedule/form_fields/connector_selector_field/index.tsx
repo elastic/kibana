@@ -33,6 +33,7 @@ export const ConnectorSelectorField: React.FC<Props> = React.memo(
         data-test-subj="attackDiscoveryConnectorSelectorField"
       >
         <ConnectorSelectorInline
+          fullWidth={true}
           onConnectorSelected={noop}
           onConnectorIdSelected={onConnectorIdSelected}
           selectedConnectorId={connectorId}
