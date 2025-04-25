@@ -27,10 +27,10 @@ export function getColumnMetaFn(
       const column = layers[layerId]?.columns?.[columnId];
       return {
         fieldType:
-          'params' in column
+          column && 'params' in column
             ? (column.params as { parentFormat?: { id?: string } })?.parentFormat?.id
             : undefined,
-        dataType: column.dataType,
+        dataType: column?.dataType,
       };
     };
   }
