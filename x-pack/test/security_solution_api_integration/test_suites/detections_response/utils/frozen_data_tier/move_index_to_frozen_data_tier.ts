@@ -83,8 +83,12 @@ export const moveIndexToFrozenDataTier = async ({
   await retry.try(async () => {
     const response = await es.ilm.explainLifecycle({
       index,
+      filter_path: 'indices.*.phase,indices.*.step,indices.*.managed',
     });
-    expect(response.indices[newIndexName]).to.not.be(undefined);
+    const indexInfo = response.indices[newIndexName];
+    expect(indexInfo).to.not.be(undefined);
+    expect(indexInfo.managed && indexInfo.phase).to.be.equal('frozen');
+    expect(indexInfo.managed && indexInfo.step).to.be.equal('complete');
   });
 
   return {

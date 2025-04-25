@@ -134,22 +134,16 @@ export default ({ getService }: FtrProviderContext) => {
       it('should report that frozen indices were queried', async () => {
         await indexSampleData(index);
 
-        ruleId = await createTestRule(['test_idx*']);
-
         const { newIndexName, snapshotRepositoryName, ilmPolicyName } =
           await moveIndexToFrozenDataTier({ es, index, retry });
 
-        // schedule a rule run after moving the index to frozen
-        await supertest
-          .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
+        ruleId = await createTestRule(['test_idx*']);
 
         await retry.try(async () => {
           const response = await getRuleExecutionResult(ruleId);
           expect(response.statusCode).to.be.equal(200);
           const { total, events } = response.body;
-          expect(total).to.be.equal(2);
+          expect(total).to.be.equal(1);
           expect(events[0].status).to.be.equal('success');
           expect(events[0].frozen_indices_queried_count).to.be.equal(1);
         });
