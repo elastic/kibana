@@ -42,7 +42,7 @@ export const createAgentRunner = async ({
     });
   };
 
-  const agentGraph = await createAgentGraph({ agent, chatModel, session, logger });
+  const agentGraph = await createAgentGraph({ agent, chatModel, session, logger: logger.get("agent.graph") });
 
   return {
     run: async ({ previousEvents }): Promise<AgentRunResult> => {
@@ -72,9 +72,11 @@ export const createAgentRunner = async ({
 
       events$.subscribe({
         complete: () => {
+          logger.debug("Completed the event stream")
           closeSession();
         },
         error: () => {
+          logger.debug("Encountered error in the event stream")
           closeSession();
         },
       });

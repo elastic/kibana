@@ -27,6 +27,7 @@ import { stepDoneTool, stepDoneToolName } from './workflow_tools';
 export const createSearchAgentGraph = async ({
   chatModel,
   toolsProvider,
+  logger
 }: {
   chatModel: InferenceChatModel;
   toolsProvider: ToolsProvider;
@@ -60,6 +61,7 @@ export const createSearchAgentGraph = async ({
   });
 
   const createPlanning = async (state: typeof StateAnnotation.State) => {
+    logger.debug("Creating a plan")
     const response = await planningModel.invoke(getPlanningPrompt({ query: state.searchQuery }));
     return {
       planning: response.content,
@@ -75,6 +77,7 @@ export const createSearchAgentGraph = async ({
   });
 
   const agenticRetrieval = async (state: typeof StateAnnotation.State) => {
+    logger.info("Running retrieval")
     const response = await retrievalModel.invoke(
       getRetrievalPrompt({ plan: state.planning, messages: state.retrievalMessages })
     );
@@ -84,6 +87,7 @@ export const createSearchAgentGraph = async ({
   };
 
   const handleRetrievalTransition = async (state: typeof StateAnnotation.State) => {
+    logger.debug("Transitioning retrieval tools")
     const messages = state.retrievalMessages;
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
@@ -99,6 +103,7 @@ export const createSearchAgentGraph = async ({
   };
 
   const retrievalToolHandler = async (state: typeof StateAnnotation.State) => {
+    logger.debug("Handling retrieval outputs")
     const toolNodeResult = await retrievalToolNode.invoke(state.retrievalMessages);
     return {
       retrievalMessages: [...toolNodeResult],
@@ -108,6 +113,7 @@ export const createSearchAgentGraph = async ({
   // step 3: rate documents
 
   const processResults = async (state: typeof StateAnnotation.State) => {
+    logger.debug("Processing results")
     const toolResults = processSearchResults(state.retrievalMessages);
     return {
       parsedResults: toolResults.results,
@@ -128,6 +134,7 @@ export const createSearchAgentGraph = async ({
     });
 
   const rateResults = async (state: typeof StateAnnotation.State) => {
+    logger.debug("Rating results")
     const results = state.parsedResults;
     const query = state.searchQuery;
 
@@ -157,6 +164,7 @@ export const createSearchAgentGraph = async ({
   });
 
   const generateSummary = async (state: typeof StateAnnotation.State) => {
+    logger.debug("Generating a summary")
     const response = await summarizerModel.invoke(
       getSummarizerPrompt({
         query: state.searchQuery,

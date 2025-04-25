@@ -10,6 +10,7 @@ import type {
   CoreSetup,
   Plugin,
   PluginInitializerContext,
+  Logger,
   LoggerFactory,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
@@ -35,13 +36,14 @@ export class WorkChatAppPlugin
       WorkChatAppPluginStartDependencies
     >
 {
-  private readonly logger: LoggerFactory;
+  private readonly loggerFactory: LoggerFactory;
   private readonly config: WorkChatAppConfig;
   private readonly integrationRegistry = new IntegrationRegistry();
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {
-    this.logger = context.logger;
+    this.loggerFactory = context.logger;
+    AppLogger.setInstance(this.loggerFactory.get("workchat.app"))
     this.config = context.config.get<WorkChatAppConfig>();
   }
 
@@ -53,7 +55,7 @@ export class WorkChatAppPlugin
     registerRoutes({
       core,
       router,
-      logger: this.logger.get('routes'),
+      logger: this.loggerFactory.get('routes'),
       getServices: () => {
         if (!this.services) {
           throw new Error('getServices called before #start');
@@ -82,11 +84,22 @@ export class WorkChatAppPlugin
     this.services = createServices({
       core,
       config: this.config,
-      logger: this.logger,
+      loggerFactory: this.loggerFactory,
       pluginsDependencies,
       integrationRegistry: this.integrationRegistry,
     });
 
     return {};
+  }
+}
+
+export class AppLogger {
+  private static instance: Logger;
+
+  public static getInstance(): Logger {
+    return AppLogger.instance
+  }
+  public static setInstance(logger: Logger) {
+    AppLogger.instance = logger
   }
 }

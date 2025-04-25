@@ -84,7 +84,7 @@ const createSearchTool = async ({
     execute: async ({ query, ...filterValues }) => {
       logger.info(
         () =>
-          `Searching for "${query}" in index "${index} with filters: ${JSON.stringify(
+          `Searching for "${query}" in index "${index}" with filters: ${JSON.stringify(
             filterValues
           )}"`
       );

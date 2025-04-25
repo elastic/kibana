@@ -17,6 +17,7 @@ import {
   createAssistantMessage,
   type ToolCall,
 } from '../../../../common/conversation_events';
+import {AppLogger} from "@kbn/workchat-app/server/plugin";
 
 export const messageFromLangchain = (message: BaseMessage) => {
   if (isAIMessage(message)) {
@@ -36,6 +37,7 @@ export const messageFromLangchain = (message: BaseMessage) => {
 };
 
 const convertLangchainToolCall = (toolCall: LangchainToolCall): ToolCall => {
+  AppLogger.getInstance().debug(`Calling tool: ${toolCall.name} with args: ${JSON.stringify(toolCall.args)}`)
   return {
     toolCallId: toolCall.id!, // TODO: figure out a default, e.g {messageId}_{callIndex}
     toolName: toolCall.name,
