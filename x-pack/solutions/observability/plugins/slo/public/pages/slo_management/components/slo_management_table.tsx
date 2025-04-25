@@ -233,8 +233,8 @@ export function SloManagementTable() {
       name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {
         defaultMessage: 'Version',
       }),
-      render: (item: SLODefinitionResponse['version']) => {
-        return item < SLO_MODEL_VERSION ? (
+      render: (value: SLODefinitionResponse['version']) => {
+        return value < SLO_MODEL_VERSION ? (
           <EuiText size="s">
             {i18n.translate('xpack.slo.sloManagementTable.version.outdated', {
               defaultMessage: 'Outdated',
@@ -254,15 +254,34 @@ export function SloManagementTable() {
       name: i18n.translate('xpack.slo.sloManagementTable.columns.tagsLabel', {
         defaultMessage: 'Tags',
       }),
-      render: (item: SLODefinitionResponse['tags']) => {
+      render: (value: SLODefinitionResponse['tags']) => {
         return (
           <EuiFlexGroup gutterSize="xs" wrap responsive>
-            {item.map((tag) => (
+            {value.map((tag) => (
               <EuiFlexItem key={tag} grow={false}>
                 <EuiBadge>{tag}</EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
+        );
+      },
+    },
+    {
+      field: 'State',
+      name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
+        defaultMessage: 'State',
+      }),
+      render: (_: SLODefinitionResponse['enabled'], item: SLODefinitionResponse) => {
+        return (
+          <EuiBadge color="hollow">
+            {item.enabled
+              ? i18n.translate('xpack.slo.sloManagementTable.enabled.running', {
+                  defaultMessage: 'Running',
+                })
+              : i18n.translate('xpack.slo.sloManagementTable.enabled.running', {
+                  defaultMessage: 'Paused',
+                })}
+          </EuiBadge>
         );
       },
     },
