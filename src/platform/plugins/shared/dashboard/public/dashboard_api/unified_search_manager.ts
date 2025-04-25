@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
@@ -15,6 +16,7 @@ import {
   connectToQueryState,
   extractSearchSourceReferences,
   syncGlobalQueryStateWithUrl,
+  injectSearchSourceReferences,
 } from '@kbn/data-plugin/public';
 import {
   COMPARE_ALL_OPTIONS,
@@ -368,6 +370,19 @@ export function initializeUnifiedSearchManager(
         }
       },
       getState,
+      injectReferences: (dashboardState: DashboardState, references: Reference[]) => {
+        const searchSourceValues = injectSearchSourceReferences(
+          {
+            filter: dashboardState.filters,
+          },
+          references
+        );
+
+        return {
+          ...dashboardState,
+          filters: searchSourceValues.filter ?? dashboardState.filters,
+        };
+      },
     },
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();

@@ -180,7 +180,10 @@ export function getDashboardApi({
       });
 
       if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
+        unsavedChangesManager.internalApi.onSave(
+          saveResult.savedState,
+          saveResult.references ?? []
+        );
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
@@ -210,7 +213,7 @@ export function getDashboardApi({
         lastSavedId: savedObjectId$.value,
       });
 
-      unsavedChangesManager.internalApi.onSave(dashboardState);
+      unsavedChangesManager.internalApi.onSave(dashboardState, searchSourceReferences);
       references$.next(saveResult.references);
 
       return;
