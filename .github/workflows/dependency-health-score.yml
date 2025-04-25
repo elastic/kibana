@@ -1,4 +1,4 @@
-name: Dependency Review
+name: Dependency Health Score
 on:
   pull_request:
     paths:
@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.repository == 'elastic/kibana' &&
-      github.actor != 'renovate[bot]' &&
-      !startsWith(github.event.pull_request.head.ref, 'renovate')
+      github.actor != 'elastic-renovate-prod[bot]'
     steps:
     - name: Checkout kibana-operations
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
