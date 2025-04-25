@@ -91,6 +91,9 @@ export function initializeAlertRules(
                     defaultMessage: 'Elasticsearch query rule from visualization',
                   }),
                 }}
+                initialMetadata={{
+                  isManagementPage: false,
+                }}
                 onCancel={closeRuleForm}
                 onSubmit={closeRuleForm}
               />
