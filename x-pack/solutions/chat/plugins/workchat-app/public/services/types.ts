@@ -10,6 +10,7 @@ import type { ConversationService } from './conversation/conversation_service';
 import type { AgentService } from './agent/agent_service';
 import type { IntegrationService } from './integration/integration_service';
 import type { IntegrationRegistry } from './integration/integration_registry';
+
 export interface WorkChatServices {
   chatService: ChatService;
   conversationService: ConversationService;
