@@ -26,8 +26,8 @@ import { CspEvaluationBadge, getMisconfigurationStatusColor } from '@kbn/cloud-s
 
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
-  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
-  NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT,
+  NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT,
+  NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -213,7 +213,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             onClick={() => {
               uiMetricService.trackUiMetric(
                 METRIC_TYPE.CLICK,
-                NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+                NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
               );
 
               const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = {
@@ -282,7 +282,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             onClick={() => {
               uiMetricService.trackUiMetric(
                 METRIC_TYPE.CLICK,
-                NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
+                NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT
               );
             }}
           >

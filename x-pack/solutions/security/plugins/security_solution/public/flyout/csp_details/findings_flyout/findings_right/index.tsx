@@ -14,7 +14,7 @@ import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   uiMetricService,
-  NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT,
+  NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
@@ -82,7 +82,7 @@ export const FindingsMisconfigurationPanel = ({
                         onClick={() => {
                           uiMetricService.trackUiMetric(
                             METRIC_TYPE.CLICK,
-                            NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+                            NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
                           );
                         }}
                       >
@@ -98,12 +98,10 @@ export const FindingsMisconfigurationPanel = ({
               <FlyoutBody>
                 <CspFlyout.Body finding={finding} />
               </FlyoutBody>
-              {!isPreviewMode ? (
+              {!isPreviewMode && (
                 <EuiFlyoutFooter>
                   <CspFlyout.Footer createRuleFn={createRuleFn} />
                 </EuiFlyoutFooter>
-              ) : (
-                <></>
               )}
             </>
           );
