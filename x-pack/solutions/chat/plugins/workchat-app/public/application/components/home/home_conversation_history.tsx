@@ -28,8 +28,8 @@ import { appPaths } from '../../app_paths';
 
 export const HomeConversationHistorySection: React.FC<{}> = () => {
   const { navigateToWorkchatUrl } = useNavigation();
-  const { agents } = useAgentList();
-  const { conversations } = useConversationList({});
+  const { agents, isLoading: isAgentsLoading } = useAgentList();
+  const { conversations, isLoading: isConversationHistoryLoading } = useConversationList({});
 
   const agentMap = useMemo<Record<string, Agent>>(() => {
     return agents.reduce<Record<string, Agent>>((map, agent) => {
@@ -41,6 +41,10 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
   const conversationGroups = useMemo(() => {
     return sortAndGroupConversations(sliceRecentConversations(conversations, 10));
   }, [conversations]);
+
+  if (isAgentsLoading || isConversationHistoryLoading) {
+    return;
+  }
 
   const recentConversations = conversationGroups.map(
     ({ conversations: groupConversations, dateLabel }) => {
@@ -54,14 +58,21 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
           <EuiFlexGroup direction={'column'}>
             {groupConversations.map((conversation) => {
               const agent = agentMap[conversation.agentId];
+              if (!agent) {
+                return null;
+              }
               return (
                 <EuiFlexItem key={conversation.id}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
-                    {agent && (
-                      <EuiFlexItem grow={false}>
-                        <EuiAvatar name={agent.name} size="s" />
-                      </EuiFlexItem>
-                    )}
+                    <EuiFlexItem grow={false}>
+                      <EuiAvatar
+                        name={agent.name}
+                        initials={agent.avatar.text}
+                        color={agent.avatar.color}
+                        size="s"
+                      />
+                    </EuiFlexItem>
+
                     <EuiFlexItem direction="column" grow={false}>
                       <EuiLink
                         onClick={() => {

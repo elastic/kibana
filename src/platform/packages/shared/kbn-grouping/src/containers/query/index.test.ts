@@ -94,7 +94,7 @@ describe('group selector', () => {
     it('groupByField script should contain logic which gets all values of groupByField', () => {
       const scriptResponse = {
         source:
-          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+          "def groupValues = doc[params['selectedGroup']]; int count = groupValues.size(); if (count == 0 || count > 100 ) { emit(params['uniqueValue']); } else { emit(groupValues.join(params['uniqueValue']))}",
         params: {
           selectedGroup: 'resource.name',
           uniqueValue: 'whatAGreatAndUniqueValue',
@@ -113,7 +113,7 @@ describe('group selector', () => {
 
       const scriptResponse = {
         source:
-          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { for (def id : doc[params['selectedGroup']]) { emit(id) }}",
+          "def groupValues = doc[params['selectedGroup']]; int count = groupValues.size(); if (count == 0 || count > 100 ) { emit(params['uniqueValue']); } else { for (int i = 0; i < count && i < 100; i++) { emit(groupValues[i]); } }",
         params: {
           selectedGroup: groupByField,
           uniqueValue: 'whatAGreatAndUniqueValue',

@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/Either';
 
 export const NonEmptyArray = <C extends t.Mixed>(
   codec: C,

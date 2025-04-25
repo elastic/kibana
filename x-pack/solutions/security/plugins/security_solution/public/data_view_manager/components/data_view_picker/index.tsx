@@ -21,7 +21,18 @@ import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 
-export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
+interface DataViewPickerProps {
+  /**
+   * The scope of the data view picker
+   */
+  scope: DataViewManagerScopeName;
+  /**
+   * Optional callback when the data view picker is closed
+   */
+  onClosePopover?: () => void;
+}
+
+export const DataViewPicker = memo(({ scope, onClosePopover }: DataViewPickerProps) => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
 
@@ -31,7 +42,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataViewSpec, status } = useDataViewSpec(props.scope);
+  const { dataViewSpec, status } = useDataViewSpec(scope);
 
   const dataViewId = dataViewSpec?.id;
 
@@ -39,17 +50,17 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (newDataView) => {
         dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
-        selectDataView({ id: newDataView.id, scope: [props.scope] });
+        selectDataView({ id: newDataView.id, scope: [scope] });
       },
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, dispatch, props.scope, selectDataView]);
+  }, [dataViewEditor, dispatch, scope, selectDataView]);
 
   const handleChangeDataView = useCallback(
     (id: string) => {
-      selectDataView({ id, scope: [props.scope] });
+      selectDataView({ id, scope: [scope] });
     },
-    [props.scope, selectDataView]
+    [scope, selectDataView]
   );
 
   const editField = useCallback(
@@ -84,9 +95,9 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
    */
   const handleDataViewModified = useCallback(
     (updatedDataView: DataView) => {
-      selectDataView({ id: updatedDataView.id, scope: [props.scope] });
+      selectDataView({ id: updatedDataView.id, scope: [scope] });
     },
-    [props.scope, selectDataView]
+    [scope, selectDataView]
   );
 
   const triggerConfig = useMemo(() => {
@@ -127,6 +138,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
         adHocDataViews={adhocDataViews}
         savedDataViews={savedDataViews}
         managedDataViews={managedDataViews}
+        onClosePopover={onClosePopover}
       />
     </div>
   );

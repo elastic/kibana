@@ -24,6 +24,7 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
@@ -211,14 +212,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           return;
         }
 
-        const isAssistantAvailable =
+        const shouldShowAssistantManagement =
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
           license?.hasAtLeast('enterprise');
         const assistantManagementApp = management?.sections.section.kibana.getApp(
           'securityAiAssistantManagement'
         );
 
-        if (!isAssistantAvailable) {
+        if (!shouldShowAssistantManagement) {
           assistantManagementApp?.disable();
         }
       });
