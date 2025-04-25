@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile }) {
   describe('Osquery Endpoints', () => {
     loadTestFile(require.resolve('./packs'));
   });
