@@ -73,9 +73,6 @@ export default ({ getService }: FtrProviderContext) => {
         evaluatorConnectorId: 'gpt-4o',
         alertsIndexPattern: '.alerts-security.alerts-default',
         replacements: {},
-        screenContext: {
-          timeZone: 'America/Denver',
-        },
         size: 10,
         langSmithApiKey: loadLangSmithKeyFromEnvVar(),
       };
