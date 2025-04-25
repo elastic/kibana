@@ -75,12 +75,6 @@ const configSchema = schema.object({
     migrationToFleetAvailable: disabledOnServerless,
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
-    /**
-     * Depends on optional "profilingDataAccess" and "profiling"
-     * plugins. Enable both with `xpack.profiling.enabled: true` before
-     * enabling this feature flag.
-     */
-    profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
     ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
   }),
   serverless: schema.object({

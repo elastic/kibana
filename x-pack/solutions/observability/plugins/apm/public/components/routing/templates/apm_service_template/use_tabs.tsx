@@ -26,7 +26,6 @@ import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { isApmSignal, isLogsSignal } from '../../../../utils/get_signal_type';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
@@ -117,7 +116,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const isAwsLambdaEnabled = core.uiSettings.get<boolean>(enableAwsLambdaMetrics, true);
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const isInfraTabAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfrastructureTabAvailable);
-  const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
   const {
     path: { serviceName },
     query: queryFromUrl,
@@ -276,10 +274,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Universal Profiling',
       }),
 
-      hidden:
-        !isProfilingIntegrationEnabled ||
-        isRumOrMobileAgentName(agentName) ||
-        isAWSLambdaAgentName(serverlessType),
+      hidden: isRumOrMobileAgentName(agentName) || isAWSLambdaAgentName(serverlessType),
     },
     {
       key: 'dashboards',

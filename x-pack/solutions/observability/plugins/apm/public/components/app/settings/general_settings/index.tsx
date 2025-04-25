@@ -19,7 +19,6 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableAgentExplorerView,
-  apmEnableProfilingIntegration,
   apmEnableTableSearchBar,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
@@ -33,8 +32,6 @@ import {
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
-import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const LazyFieldRow = React.lazy(async () => ({
@@ -43,43 +40,33 @@ const LazyFieldRow = React.lazy(async () => ({
 
 const FieldRow = withSuspense(LazyFieldRow);
 
-function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
-  const keys = [
-    enableComparisonByDefault,
-    defaultApmServiceEnvironment,
-    apmServiceGroupMaxNumberOfServices,
-    enableInspectEsQueries,
-    apmLabsButton,
-    apmAWSLambdaPriceFactor,
-    apmAWSLambdaRequestCostPerMillion,
-    apmEnableServiceMetrics,
-    apmEnableContinuousRollups,
-    enableAgentExplorerView,
-    apmEnableTableSearchBar,
-    apmEnableServiceInventoryTableSearchBar,
-    apmEnableServiceMapApiV2,
-  ];
-
-  if (isProfilingIntegrationEnabled) {
-    keys.push(...[apmEnableProfilingIntegration, apmEnableTransactionProfiling]);
-  }
-
-  return keys;
-}
+const SETTINGS_KEYS = [
+  enableComparisonByDefault,
+  defaultApmServiceEnvironment,
+  apmServiceGroupMaxNumberOfServices,
+  enableInspectEsQueries,
+  apmLabsButton,
+  apmAWSLambdaPriceFactor,
+  apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
+  enableAgentExplorerView,
+  apmEnableTableSearchBar,
+  apmEnableServiceInventoryTableSearchBar,
+  apmEnableServiceMapApiV2,
+  apmEnableTransactionProfiling,
+];
 
 export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications, settings, application } = useApmPluginContext().core;
-  const isProfilingIntegrationEnabled = useApmFeatureFlag(
-    ApmFeatureFlagName.ProfilingIntegrationAvailable
-  );
 
   const canSave =
     application.capabilities.advancedSettings.save &&
     (application.capabilities.apm['settings:save'] as boolean);
-  const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
+
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(apmSettingsKeys);
+    useEditableSettings(SETTINGS_KEYS);
 
   async function handleSave() {
     try {
@@ -107,7 +94,7 @@ export function GeneralSettings() {
   return (
     <>
       <EuiSpacer />
-      {apmSettingsKeys.map((settingKey) => {
+      {SETTINGS_KEYS.map((settingKey) => {
         const field = fields[settingKey];
         return (
           <FieldRowProvider

@@ -24,10 +24,6 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { isInfraTabHidden, isMetricsTabHidden, useTabs } from './use_tabs';
 
-jest.mock('../../../../hooks/use_profiling_integration_setting', () => ({
-  useProfilingIntegrationSetting: () => true,
-}));
-
 jest.mock('../../../alerting/utils/get_alerting_capabilities', () => ({
   getAlertingCapabilities: () => ({ isAlertingAvailable: true, canReadAlerts: true }),
 }));

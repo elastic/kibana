@@ -217,7 +217,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (boolean?|true?)',
         'xpack.apm.featureFlags.storageExplorerAvailable (boolean?|true?)',
-        'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean?)',
         'xpack.apm.serverless.enabled (true?|never)',
         'xpack.observability_onboarding.serverless.enabled (true?|never)',
         'xpack.cases.files.allowedMimeTypes (array?)',
