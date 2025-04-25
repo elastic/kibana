@@ -48,6 +48,6 @@ describe('<Table />', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('alertsTableErrorPrompt')).toBeInTheDocument();
+    expect(getByTestId('internalAlertsPageLoading')).toBeInTheDocument();
   });
 });
