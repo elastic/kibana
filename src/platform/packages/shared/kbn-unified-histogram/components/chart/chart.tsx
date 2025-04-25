@@ -26,7 +26,7 @@ import type {
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
+import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
@@ -91,6 +91,7 @@ export interface UnifiedHistogramChartProps {
   columns?: DatatableColumn[];
 }
 
+const RequestStatusError: typeof RequestStatus.ERROR = 2;
 const HistogramMemoized = memo(Histogram);
 
 export function UnifiedHistogramChart({
@@ -168,7 +169,7 @@ export function UnifiedHistogramChart({
       dataLoadingSubject$?: PublishingSubject<boolean | undefined>
     ) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
-      const requestFailed = lensRequest?.status === RequestStatus.ERROR;
+      const requestFailed = lensRequest?.status === RequestStatusError;
       const json = lensRequest?.response?.json as
         | IKibanaSearchResponse<estypes.SearchResponse>
         | undefined;

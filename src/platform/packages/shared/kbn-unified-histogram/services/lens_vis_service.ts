@@ -34,8 +34,8 @@ import {
   mapVisToChartType,
   computeInterval,
 } from '@kbn/visualization-utils';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { XYConfiguration } from '@kbn/visualizations-plugin/common';
+import type { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -413,6 +413,7 @@ export class LensVisService {
       },
     };
 
+    const legendSize: `${LegendSize.EXTRA_LARGE}` = 'xlarge';
     const visualizationState = {
       layers: [
         {
@@ -435,7 +436,7 @@ export class LensVisService {
       legend: {
         isVisible: true,
         position: 'right',
-        legendSize: LegendSize.EXTRA_LARGE,
+        legendSize,
         shouldTruncate: false,
       },
       preferredSeriesType: 'bar_stacked',

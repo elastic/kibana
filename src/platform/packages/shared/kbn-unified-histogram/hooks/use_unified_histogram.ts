@@ -8,13 +8,13 @@
  */
 
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-import { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
 import { Observable, Subject, of } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { pick } from 'lodash';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { UnifiedHistogramChartProps } from '../components/chart/chart';
 import {

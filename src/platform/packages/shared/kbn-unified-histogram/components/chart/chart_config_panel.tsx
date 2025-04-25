@@ -12,7 +12,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
+import type { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { deriveLensSuggestionFromLensAttributes } from '../../utils/external_vis_context';
 
