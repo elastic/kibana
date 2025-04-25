@@ -111,10 +111,11 @@ export interface FindingMisconfigurationFlyoutContentProps {
 }
 
 export interface FindingVulnerabilityFlyoutProps extends Record<string, unknown> {
-  vulnerabilityId: string;
+  vulnerabilityId: string | string[];
   resourceId: string;
-  packageName: string;
-  packageVersion: string;
+  packageName: string | string[];
+  packageVersion: string | string[];
+  eventId: string;
 }
 export interface FindingVulnerabilityPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-vulnerability-panel';

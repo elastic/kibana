@@ -26,6 +26,7 @@ export const FindingsVulnerabilityPanel = ({
   resourceId,
   packageName,
   packageVersion,
+  eventId,
 }: FindingVulnerabilityFlyoutProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspVulnerabilityFlyout = cloudSecurityPosture.getCloudSecurityPostureVulnerabilityFlyout();
@@ -38,6 +39,7 @@ export const FindingsVulnerabilityPanel = ({
         resourceId={resourceId}
         packageName={packageName}
         packageVersion={packageVersion}
+        eventId={eventId}
       >
         {({ finding, createRuleFn }: FindingVulnerabilityFullFlyoutContentProps) => {
           return (

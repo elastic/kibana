@@ -8,7 +8,10 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import type { FindingVulnerabilityPanelExpandableFlyoutProps, FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type {
+  FindingVulnerabilityPanelExpandableFlyoutProps,
+  FindingsMisconfigurationPanelExpandableFlyoutProps,
+} from '@kbn/cloud-security-posture';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
 import { AIForSOCDetailsProvider } from './ai_for_soc/context';
 import { AIForSOCPanel } from './ai_for_soc';

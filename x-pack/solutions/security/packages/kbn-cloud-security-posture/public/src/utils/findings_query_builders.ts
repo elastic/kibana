@@ -243,34 +243,32 @@ export const createMisconfigurationFindingsQuery = (resourceId?: string, ruleId?
 
 export const createGetVulnerabilityFindingsQuery = (
   vulnerabilityId?: string | string[],
-  resourceId?: string,
+  resourceId?: string | string[],
   packageName?: string | string[],
-  packageVersion?: string | string[]
+  packageVersion?: string | string[],
+  eventId?: string | string[]
 ) => {
+  const filters: Array<{ terms: Record<string, string[]> }> = [];
+
+  const addTermFilter = (field: string, value?: string | string[]) => {
+    if (value !== undefined) {
+      filters.push({
+        terms: {
+          [field]: Array.isArray(value) ? value : [value],
+        },
+      });
+    }
+  };
+
+  addTermFilter('vulnerability.id', vulnerabilityId);
+  addTermFilter('resource.id', resourceId);
+  addTermFilter('package.name', packageName);
+  addTermFilter('package.version', packageVersion);
+  addTermFilter('event.id', eventId);
+
   return {
     bool: {
-      filter: [
-        {
-          term: {
-            'vulnerability.id': vulnerabilityId,
-          },
-        },
-        {
-          term: {
-            'resource.id': resourceId,
-          },
-        },
-        {
-          term: {
-            'package.name': packageName,
-          },
-        },
-        {
-          term: {
-            'package.version': packageVersion,
-          },
-        },
-      ],
+      filter: filters,
     },
   };
 };

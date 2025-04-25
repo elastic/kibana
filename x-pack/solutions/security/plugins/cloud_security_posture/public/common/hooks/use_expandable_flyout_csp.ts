@@ -49,6 +49,7 @@ export const useExpandableFlyoutCsp = (
               resourceId: finding?.resource?.id,
               packageName: finding?.package?.name,
               packageVersion: finding?.package?.version,
+              eventId: finding?.event?.id,
             },
           },
         });
