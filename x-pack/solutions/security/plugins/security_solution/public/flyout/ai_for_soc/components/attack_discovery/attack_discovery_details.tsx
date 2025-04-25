@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import React, { memo } from 'react';
 import { MiniAttackChain } from '../../../../attack_discovery/pages/results/attack_discovery_panel/panel_header/summary_actions/mini_attack_chain';
-import * as i18n from '../../constants/translations';
+import * as i18n from './translations';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

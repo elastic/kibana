@@ -18,6 +18,13 @@ export const ALERT_PART = i18n.translate(
   }
 );
 
+export const ATTACK_CHAIN = i18n.translate(
+  'xpack.securitySolution.alertSummary.attackDiscovery.attackChainLabel',
+  {
+    defaultMessage: 'Attack chain:',
+  }
+);
+
 export const VIEW_DETAILS = i18n.translate(
   'xpack.securitySolution.alertSummary.attackDiscovery.viewDetails',
   {
