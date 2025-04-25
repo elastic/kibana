@@ -155,14 +155,14 @@ describe('getExpressionType', () => {
 
       expect(
         getExpressionType(
-          getASTForExpression('var0'),
+          getASTForExpression('col0'),
           new Map(),
           new Map([
             [
-              'var0',
+              'col0',
               [
                 {
-                  name: 'var0',
+                  name: 'col0',
                   type: 'long',
                   location: { min: 0, max: 0 },
                 },

@@ -108,8 +108,8 @@ describe('autocomplete', () => {
 
     testSuggestions('from a | /', commands);
     testSuggestions('from a metadata _id | /', commands);
-    testSuggestions('from a | eval var0 = a | /', commands);
-    testSuggestions('from a metadata _id | eval var0 = a | /', commands);
+    testSuggestions('from a | eval col0 = a | /', commands);
+    testSuggestions('from a metadata _id | eval col0 = a | /', commands);
   });
 
   for (const command of ['keep', 'drop']) {
@@ -209,7 +209,7 @@ describe('autocomplete', () => {
   describe('callbacks', () => {
     it('should send the columns query without the last command', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
-      const statement = 'from a | drop keywordField | eval var0 = abs(doubleField) ';
+      const statement = 'from a | drop keywordField | eval col0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf(' ');
       const context = createCompletionContext(statement[triggerOffset]);
       await suggest(statement, triggerOffset + 1, context, callbackMocks);
@@ -219,7 +219,7 @@ describe('autocomplete', () => {
     });
     it('should send the fields query aware of the location', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
-      const statement = 'from a | drop | eval var0 = abs(doubleField) ';
+      const statement = 'from a | drop | eval col0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
       const context = createCompletionContext(statement[triggerOffset]);
       await suggest(statement, triggerOffset + 1, context, callbackMocks);
@@ -314,12 +314,12 @@ describe('autocomplete', () => {
 
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
-      'var0 = ',
+      'col0 = ',
       ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
 
-    testSuggestions('FROM index1 | EVAL var0 = f/', [
+    testSuggestions('FROM index1 | EVAL col0 = f/', [
       ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
@@ -353,12 +353,12 @@ describe('autocomplete', () => {
 
     // ENRICH policy WITH policyfield
     testSuggestions('FROM index1 | ENRICH policy WITH v/', [
-      'var0 = ',
+      'col0 = ',
       ...getPolicyFields('policy'),
     ]);
 
     testSuggestions('FROM index1 | ENRICH policy WITH \tv/', [
-      'var0 = ',
+      'col0 = ',
       ...getPolicyFields('policy'),
     ]);
 
@@ -398,7 +398,7 @@ describe('autocomplete', () => {
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
-      'var0 = ',
+      'col0 = ',
       ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
         scalar: true,
         agg: true,
@@ -411,7 +411,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
-      'var0 = ',
+      'col0 = ',
       getDateHistogramCompletionItem(),
       ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
@@ -564,7 +564,7 @@ describe('autocomplete', () => {
 
     // Assignment
     testSuggestions(`FROM a | ENRICH policy on b with /`, [
-      attachTriggerCommand('var0 = '),
+      attachTriggerCommand('col0 = '),
       ...getPolicyFields('policy'),
     ]);
 
@@ -723,12 +723,12 @@ describe('autocomplete', () => {
       );
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
-        'var0 = ',
+        'col0 = ',
         ...getPolicyFields('policy'),
       ]);
       describe('replacement range', () => {
         testSuggestions('FROM a | ENRICH policy ON @timestamp WITH othe/', [
-          'var0 = ',
+          'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
             command: undefined,
@@ -736,7 +736,7 @@ describe('autocomplete', () => {
           })),
         ]);
         testSuggestions(
-          'FROM a | ENRICH policy ON @timestamp WITH var0 = othe/',
+          'FROM a | ENRICH policy ON @timestamp WITH col0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
             command: undefined,
@@ -753,7 +753,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM a | STATS /',
       [
-        'var0 = ',
+        'col0 = ',
         ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
           scalar: true,
           agg: true,
@@ -784,7 +784,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
       getDateHistogramCompletionItem(),
-      attachTriggerCommand('var0 = '),
+      attachTriggerCommand('col0 = '),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
@@ -792,7 +792,7 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY assignment (checking field suggestions)
-    testSuggestions('FROM a | STATS AVG(numberField) BY var0 = /', [
+    testSuggestions('FROM a | STATS AVG(numberField) BY col0 = /', [
       getDateHistogramCompletionItem(),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)

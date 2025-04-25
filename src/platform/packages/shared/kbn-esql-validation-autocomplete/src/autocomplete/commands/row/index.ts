@@ -23,12 +23,12 @@ export async function suggest({
   command,
   innerText,
 }: CommandSuggestParams<'row'>): Promise<SuggestionRawDefinition[]> {
-  // ROW var0 = /
+  // ROW col0 = /
   if (/=\s*$/.test(innerText)) {
     return getFunctionSuggestions({ location: Location.ROW });
   }
 
-  // ROW var0 = 23 /
+  // ROW col0 = 23 /
   else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
     return [
       { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },

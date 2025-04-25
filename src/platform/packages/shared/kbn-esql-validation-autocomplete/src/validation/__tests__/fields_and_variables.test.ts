@@ -172,8 +172,8 @@ describe('userDefinedColumn support', () => {
     // @todo unskip after https://github.com/elastic/kibana/issues/195682
     test.skip('userDefinedColumns', async () => {
       const { expectErrors } = await setup();
-      await expectErrors('FROM index | EVAL var = textField, var2 = var, TEST(var2)', [
-        `Argument of [test] must be [cartesian_point], found value [var2] type [text]`,
+      await expectErrors('FROM index | EVAL var = textField, col2 = var, TEST(col2)', [
+        `Argument of [test] must be [cartesian_point], found value [col2] type [text]`,
       ]);
     });
 
