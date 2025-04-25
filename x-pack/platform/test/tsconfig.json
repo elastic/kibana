@@ -39,5 +39,10 @@
     "@kbn/upgrade-assistant-plugin",
     "@kbn/search-types",
     "@kbn/spaces-plugin",
+    "@kbn/transform-plugin",
+    "@kbn/config-schema",
+    "@kbn/ml-plugin",
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/fleet-plugin",
   ]
 }
