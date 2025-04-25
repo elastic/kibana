@@ -938,6 +938,7 @@ x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
+x-pack/platform/test
 x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana
 x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana
 x-pack/solutions/chat/packages/wc-framework-types-server @elastic/search-kibana
@@ -947,12 +948,12 @@ x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-common @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-server @elastic/search-kibana
-x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana
-x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana
-x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana
-x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana
-x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana
-x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana
+x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
@@ -1893,9 +1894,10 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.chat.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
+/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
+/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
+/config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
