@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { Container } from 'inversify';
 
 /**
  * Public setup contract of the DI service.
@@ -17,7 +17,7 @@ export interface CoreDiServiceSetup {
   /**
    * Get the plugin-scoped container
    */
-  getContainer(): interfaces.Container;
+  getContainer(): Container;
 }
 
 /**
@@ -28,5 +28,5 @@ export interface CoreDiServiceStart extends CoreDiServiceSetup {
   /**
    * Fork the current plugin scope
    */
-  fork(): interfaces.Container;
+  fork(): Container;
 }

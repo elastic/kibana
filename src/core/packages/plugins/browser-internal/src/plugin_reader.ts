@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { ContainerModule } from 'inversify';
 import type { PluginInitializer } from '@kbn/core-plugins-browser';
 
 /**
@@ -20,7 +20,7 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, unknown>;
  * @internal
  */
 export interface PluginDefinition {
-  module?: interfaces.ContainerModule;
+  module?: ContainerModule;
   plugin?: UnknownPluginInitializer;
 }
 

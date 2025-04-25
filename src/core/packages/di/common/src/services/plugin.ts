@@ -7,49 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { Container, ServiceIdentifier } from 'inversify';
 
 /**
  * The service identifier for the global service references.
  */
-export const Global = Symbol.for(
-  'Global'
-) as interfaces.ServiceIdentifier<interfaces.ServiceIdentifier>;
+export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
 
 /**
  * Plugin's setup contract.
  */
-export const Setup = Symbol.for('Setup') as interfaces.ServiceIdentifier;
+export const Setup = Symbol.for('Setup') as ServiceIdentifier;
 
 /**
  * Plugin's start contract.
  */
-export const Start = Symbol.for('Start') as interfaces.ServiceIdentifier;
+export const Start = Symbol.for('Start') as ServiceIdentifier;
 
 /**
  * Plugin's setup lifecycle hook.
  */
-export const OnSetup = Symbol.for('OnSetup') as interfaces.ServiceIdentifier<
-  (container: interfaces.Container) => void
->;
+export const OnSetup = Symbol.for('OnSetup') as ServiceIdentifier<(container: Container) => void>;
 
 /**
  * Plugin's start lifecycle hook.
  */
-export const OnStart = Symbol.for('OnStart') as interfaces.ServiceIdentifier<
-  (container: interfaces.Container) => void
->;
+export const OnStart = Symbol.for('OnStart') as ServiceIdentifier<(container: Container) => void>;
 
 /**
  * Plugin's setup dependency.
  */
-export function PluginSetup<T>(plugin: keyof any): interfaces.ServiceIdentifier<T> {
+export function PluginSetup<T>(plugin: keyof any): ServiceIdentifier<T> {
   return Symbol.for(`plugin.setup.${String(plugin)}`);
 }
 
 /**
  * Plugin's start dependency.
  */
-export function PluginStart<T>(plugin: keyof any): interfaces.ServiceIdentifier<T> {
+export function PluginStart<T>(plugin: keyof any): ServiceIdentifier<T> {
   return Symbol.for(`plugin.start.${String(plugin)}`);
 }

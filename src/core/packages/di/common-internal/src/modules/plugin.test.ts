@@ -7,87 +7,88 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container, type interfaces } from 'inversify';
+import type { Container } from 'inversify';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 import { Plugin, PluginModule } from './plugin';
+import { InternalContainer } from '../container';
 
 describe('PluginModule', () => {
-  let root: interfaces.Container;
+  const token1 = Symbol.for('token1');
+  const token2 = Symbol.for('token2');
+  const token3 = Symbol.for('token3');
+
+  let root: InternalContainer;
 
   beforeEach(() => {
-    root = new Container();
-    root.load(new PluginModule());
+    root = new InternalContainer();
+    root.loadSync(new PluginModule());
   });
 
   describe('Plugin', () => {
-    it('should throw if target is not named', () => {
-      expect(() => root.get(Plugin)).toThrowError('Plugin instance must be named.');
-    });
-
     it('should create an isolated child container', () => {
-      const getNamed = jest.fn(() => root.getNamed(Plugin, 'something'));
+      const child = root.get(Plugin)(token1);
 
-      expect(getNamed).not.toThrow();
-      expect(getNamed).toReturnWith(expect.any(Container));
-      expect(getNamed).toReturnWith(expect.objectContaining({ parent: root }));
+      expect(child).toBeInstanceOf(InternalContainer);
+      expect(child).toHaveProperty('parent', root);
     });
 
     it('should return the same child container instance for the same id', () => {
-      const child1 = root.getNamed(Plugin, 'child1');
-      const child2 = root.getNamed(Plugin, 'child2');
+      const child1 = root.get(Plugin)(token1);
+      const child2 = root.get(Plugin)(token2);
 
-      expect(root.getNamed(Plugin, 'child1')).toBe(child1);
-      expect(root.getNamed(Plugin, 'child2')).toBe(child2);
+      expect(root.get(Plugin)(token1)).toBe(child1);
+      expect(root.get(Plugin)(token2)).toBe(child2);
     });
 
-    it('should dispose the child container when the parent is disposed', () => {
-      const child = root.getNamed(Plugin, 'child');
+    it('should dispose the child container when the parent is disposed', async () => {
+      const child = root.get(Plugin)(token1);
       child.bind('test').toConstantValue('test');
-      root.unbindAll();
+      await root.unbindAll();
 
       expect(child.isCurrentBound('test')).toBe(false);
     });
 
-    it('should disassociate the child container from the parent when disposed', () => {
-      const child = root.getNamed(Plugin, 'child');
-      child.unbindAll();
+    it('should disassociate the child container from the parent when disposed', async () => {
+      const child = root.get(Plugin)(token1);
+      await child.unbindAll();
 
-      expect(root.getNamed(Plugin, 'child')).not.toBe(child);
+      expect(root.get(Plugin)(token1)).not.toBe(child);
     });
 
     it('should create grandchild containers from the related child container', () => {
-      const child = root.getNamed(Plugin, 'child');
+      const child = root.get(Plugin)(token1);
       const scope = root.createChild();
-      const grandchild = scope.getNamed(Plugin, 'child');
+      const grandchild = scope.get(Plugin)(token1);
 
       expect(grandchild).not.toBe(child);
-      expect(grandchild.parent).toBe(child);
+      expect(grandchild).toHaveProperty('parent', child);
     });
   });
 
   describe('Global', () => {
-    function activate(id: string) {
-      root.getNamed(Plugin, id).get(Setup);
+    function activate(id: PluginOpaqueId) {
+      root.get(Plugin)(id).get(Setup);
     }
 
-    let plugin1: interfaces.Container;
-    let plugin2: interfaces.Container;
+    let plugin1: Container;
+    let plugin2: Container;
 
     beforeEach(() => {
-      plugin1 = root.getNamed(Plugin, 'plugin1');
+      plugin1 = root.get(Plugin)(token1);
       plugin1.bind('service1').toConstantValue('service1');
       plugin1.bind('service2').toConstantValue('service2');
       plugin1.bind(Global).toConstantValue('service1');
 
-      plugin2 = root.getNamed(Plugin, 'plugin2');
+      plugin2 = root.get(Plugin)(token2);
       plugin2.bind('service3').toConstantValue('service3.1');
       plugin2.bind('service3').toConstantValue('service3.2');
       plugin2.bind('service4').toConstantValue('service4');
       plugin2.bind(Global).toConstantValue('service3');
       plugin2.bind(Global).toConstantValue('service3');
 
-      activate('plugin1');
-      activate('plugin2');
+      activate(token1);
+      activate(token2);
     });
 
     describe('singleton scope', () => {
@@ -109,7 +110,7 @@ describe('PluginModule', () => {
       });
 
       it('should allow transitive bindings', () => {
-        const plugin3 = root.getNamed(Plugin, 'plugin3');
+        const plugin3 = root.get(Plugin)(token3);
         plugin3.bind('service5').toService('service1');
 
         expect(plugin3.get('service5')).toBe('service1');
@@ -117,7 +118,7 @@ describe('PluginModule', () => {
 
       it('should inherit services from the parent scope', () => {
         const fork = root.createChild();
-        const plugin1Fork = fork.getNamed(Plugin, 'plugin1');
+        const plugin1Fork = fork.get(Plugin)(token1);
 
         expect(plugin1Fork.isBound('service1')).toBe(true);
         expect(plugin1Fork.isBound('service2')).toBe(true);
@@ -130,29 +131,29 @@ describe('PluginModule', () => {
     });
 
     describe('request scope', () => {
-      let fork: interfaces.Container;
-      let plugin2Fork: interfaces.Container;
-      let plugin3: interfaces.Container;
+      let fork: Container;
+      let plugin2Fork: Container;
+      let plugin3: Container;
 
       beforeEach(() => {
-        plugin3 = root.getNamed(Plugin, 'plugin3');
+        plugin3 = root.get(Plugin)(token3);
         plugin3
           .bind('service5')
-          .toDynamicValue(({ container }) => container.getAll('service6'))
+          .toDynamicValue(({ getAll }) => getAll('service6'))
           .inRequestScope();
         plugin3.bind(Global).toConstantValue('service5');
 
-        activate('plugin3');
+        activate(token3);
 
         fork = root.createChild();
-        plugin2Fork = fork.getNamed(Plugin, 'plugin2');
+        plugin2Fork = fork.get(Plugin)(token2);
       });
 
       it('should resolve dependencies from the forked context', () => {
         plugin2Fork.bind('service6').toConstantValue('service6');
         plugin2Fork.bind(Global).toConstantValue('service6');
 
-        expect(() => plugin2.get('service5')).toThrow();
+        expect(plugin2.get('service5')).toEqual([]);
         expect(plugin2Fork.get('service5')).toEqual(['service6']);
       });
 
@@ -172,10 +173,10 @@ describe('PluginModule', () => {
     ${'Setup'} | ${Setup} | ${OnSetup}
     ${'Start'} | ${Start} | ${OnStart}
   `('$name', ({ hook, token }) => {
-    let plugin: interfaces.Container;
+    let plugin: Container;
 
     beforeEach(() => {
-      plugin = root.getNamed(Plugin, 'plugin');
+      plugin = root.get(Plugin)(token1);
       plugin.bind('service1').toConstantValue('service1');
       plugin.bind('service2').toConstantValue('service2');
     });
@@ -188,10 +189,7 @@ describe('PluginModule', () => {
     it('should return the plugin contract', () => {
       plugin
         .bind(token)
-        .toDynamicValue(({ container }) => ({
-          svc1: container.get('service1'),
-          svc2: container.get('service2'),
-        }))
+        .toResolvedValue((svc1, svc2) => ({ svc1, svc2 }), ['service1', 'service2'])
         .inSingletonScope();
 
       expect(plugin.isBound(token)).toBe(true);
@@ -226,7 +224,7 @@ describe('PluginModule', () => {
     });
 
     it('should call the hook function only once per scope', () => {
-      const plugin2 = root.getNamed(Plugin, 'plugin2');
+      const plugin2 = root.get(Plugin)(token2);
       const handler1 = jest.fn();
       const handler2 = jest.fn();
       const handler3 = jest.fn();

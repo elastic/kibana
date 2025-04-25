@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { useService } from '@redtea/react-inversify';
+import { useService } from '@kbn/core-di-browser';
 import {
   EuiHorizontalRule,
   EuiPage,
@@ -41,7 +41,7 @@ export function App() {
   return (
     <EuiProvider>
       <EuiPage>
-        <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <EuiPageBody css={{ maxWidth: 1200, margin: '0 auto' }}>
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle size="l">

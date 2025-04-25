@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type interfaces, ContainerModule } from 'inversify';
+import { ContainerModule } from 'inversify';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -35,8 +35,9 @@ import {
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
-const mockContainerModuleCallback: jest.MockedFunction<interfaces.ContainerModuleCallBack> =
-  jest.fn();
+const mockContainerModuleCallback: jest.MockedFunction<
+  ConstructorParameters<typeof ContainerModule>[0]
+> = jest.fn();
 const pluginModule = new ContainerModule(mockContainerModuleCallback);
 const logger = loggingSystemMock.create();
 jest.doMock(
@@ -337,7 +338,7 @@ test('`setup` initializes the plugin container module', async () => {
     runtimeResolver,
   });
   const setupDependencies = { 'some-required-dep': { contract: 'no' } };
-  mockContainerModuleCallback.mockImplementationOnce((bind) => {
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
     bind(Setup).toConstantValue({ contract: 'yes' });
   });
   expect(plugin.setup(setupContext, setupDependencies)).toEqual({ contract: 'yes' });
@@ -510,7 +511,7 @@ test('`start` loads start dependencies into the plugin container', async () => {
     someApi: () => 'foo',
   };
 
-  mockContainerModuleCallback.mockImplementationOnce((bind) => {
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
     bind(Setup).toConstantValue({});
     bind(Start).toConstantValue(startContract);
   });
@@ -620,7 +621,7 @@ test('`stop` cleans up the plugin container', async () => {
     runtimeResolver,
   });
   const setupDependencies = { 'some-required-dep': { contract: 'no' } };
-  mockContainerModuleCallback.mockImplementationOnce((bind) => {
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
     bind(Setup).toConstantValue({ contract: 'yes' });
   });
   expect(plugin.setup(setupContext, setupDependencies)).toEqual({ contract: 'yes' });

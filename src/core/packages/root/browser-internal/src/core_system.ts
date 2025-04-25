@@ -296,7 +296,7 @@ export class CoreSystem {
       };
 
       const container = injection.getContainer();
-      container.load(applicationModule);
+      container.loadSync(applicationModule);
 
       // Services that do not expose contracts at setup
       await this.plugins.setup(core);

@@ -14,7 +14,7 @@ jest.mock('./modules/plugin', () => ({
   PluginModule: jest.fn().mockReturnValue(pluginModuleMock),
 }));
 
-import { Container, type interfaces } from 'inversify';
+import { Container } from 'inversify';
 import { CoreInjectionService } from './service';
 import { Plugin } from './modules/plugin';
 
@@ -25,11 +25,15 @@ describe('CoreInjectionService', () => {
     service = new CoreInjectionService();
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('setup', () => {
     let setup: ReturnType<CoreInjectionService['setup']>;
 
     beforeEach(() => {
-      jest.spyOn(Container.prototype, 'load').mockImplementation(() => {});
+      jest.spyOn(Container.prototype, 'loadSync').mockReturnValue(undefined);
       setup = service.setup();
     });
 
@@ -40,7 +44,7 @@ describe('CoreInjectionService', () => {
     });
 
     it('should load the plugin module into the root container', () => {
-      expect(Container.prototype.load).toHaveBeenCalledWith(pluginModuleMock);
+      expect(Container.prototype.loadSync).toHaveBeenCalledWith(pluginModuleMock);
     });
 
     describe('getContainer', () => {
@@ -50,10 +54,10 @@ describe('CoreInjectionService', () => {
 
       it('should return the plugin container for the specified identifier', () => {
         const id = Symbol.for('test');
-        const plugin = {} as interfaces.Container;
+        const plugin = {} as Container;
         const root = setup.getContainer();
 
-        root.bind(Plugin).toConstantValue(plugin).whenTargetNamed(id);
+        root.bind(Plugin).toConstantValue(() => plugin);
         expect(setup.getContainer(id)).toBe(plugin);
       });
     });
@@ -75,37 +79,38 @@ describe('CoreInjectionService', () => {
 
     describe('fork', () => {
       const id = Symbol.for('test');
-      const plugin = {} as interfaces.Container;
+      const plugin = {} as Container;
 
-      let root: interfaces.Container;
+      let root: Container;
 
       beforeEach(() => {
         root = start.getContainer();
-        root.bind(Plugin).toConstantValue(plugin).whenTargetNamed(id);
+        root.bind('something').toConstantValue('value');
+        root.bind(Plugin).toConstantValue(() => plugin);
       });
 
       it('should create a child container if no identifier is provided', () => {
         const fork = start.fork();
 
         expect(fork).not.toBe(root);
-        expect(fork.parent).toBe(root);
+        expect(fork.get('something')).toBe('value');
       });
 
       it('should return the plugin container resolved in the forked scope for the specified identifier', () => {
-        const getNamedSpy = jest.spyOn(Container.prototype, 'getNamed');
+        const getSpy = jest.spyOn(Container.prototype, 'get');
 
         expect(start.fork(id)).toBe(plugin);
 
-        const [fork] = getNamedSpy.mock.contexts;
+        const [fork] = getSpy.mock.contexts;
         expect(fork).not.toBe(root);
-        expect(fork.parent).toBe(root);
+        expect(fork.get('something')).toBe('value');
       });
 
       it('should unbind all bindings in the forked container when deactivating the plugin scope', () => {
-        const getNamedSpy = jest.spyOn(Container.prototype, 'getNamed');
+        const getSpy = jest.spyOn(Container.prototype, 'get');
 
         start.fork(id);
-        const [fork] = getNamedSpy.mock.contexts;
+        const [fork] = getSpy.mock.contexts;
         fork.bind(id).toConstantValue(plugin);
         fork.get(id);
         jest.spyOn(fork, 'unbindAll');

@@ -403,7 +403,7 @@ export class Server {
     };
 
     const container = injectionSetup.getContainer();
-    container.load(httpModule);
+    container.loadSync(httpModule);
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;

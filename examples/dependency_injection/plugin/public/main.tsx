@@ -9,11 +9,10 @@
 
 import React, { ContextType } from 'react';
 import ReactDOM from 'react-dom';
-import { Context } from '@redtea/react-inversify';
 import { inject, injectable } from 'inversify';
 import { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
 import type { CoreDiServiceStart } from '@kbn/core-di';
-import { ApplicationParameters, CoreStart } from '@kbn/core-di-browser';
+import { ApplicationParameters, Context, CoreStart } from '@kbn/core-di-browser';
 import { App } from './app';
 
 @injectable()

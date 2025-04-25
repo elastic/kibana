@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { Container, ContainerModule } from 'inversify';
 import { join } from 'path';
 import typeDetect from 'type-detect';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -42,7 +42,7 @@ interface PluginDefinition<
   TPluginsStart extends object = object
 > {
   readonly config?: PluginConfigDescriptor;
-  readonly module?: interfaces.ContainerModule;
+  readonly module?: ContainerModule;
   readonly plugin?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 }
 
@@ -78,7 +78,7 @@ export class PluginWrapper<
   private instance?:
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
     | PrebootPlugin<TSetup, TPluginsSetup>;
-  private container?: interfaces.Container;
+  private container?: Container;
 
   private readonly startDependencies$ = new Subject<
     [CoreStart, TPluginsStart, TStart | undefined]
@@ -143,10 +143,10 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
-      this.container.load(this.definition.module);
-      this.container.load(toContainerModule(this.initializerContext, PluginInitializerService));
-      this.container.load(toContainerModule(setupContext, CoreSetupService));
-      this.container.load(toContainerModule(plugins, PluginSetup));
+      this.container.loadSync(this.definition.module);
+      this.container.loadSync(toContainerModule(this.initializerContext, PluginInitializerService));
+      this.container.loadSync(toContainerModule(setupContext, CoreSetupService));
+      this.container.loadSync(toContainerModule(plugins, PluginSetup));
     }
 
     return [
@@ -171,8 +171,8 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    this.container?.load(toContainerModule(startContext, CoreStartService));
-    this.container?.load(toContainerModule(plugins, PluginStart));
+    this.container?.loadSync(toContainerModule(startContext, CoreStartService));
+    this.container?.loadSync(toContainerModule(plugins, PluginStart));
 
     const contract = [
       this.instance?.start(startContext, plugins),
@@ -200,7 +200,7 @@ export class PluginWrapper<
     }
 
     await this.instance?.stop?.();
-    this.container?.unbindAll();
+    await this.container?.unbindAll();
     this.instance = undefined;
     this.container = undefined;
   }

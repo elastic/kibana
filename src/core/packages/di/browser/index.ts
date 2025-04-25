@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { Context, useContainer, useService } from './src/react';
 export { Application, ApplicationParameters } from './src/services/application';
 export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';

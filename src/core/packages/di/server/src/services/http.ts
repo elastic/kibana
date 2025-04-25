@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { Newable, ServiceIdentifier } from 'inversify';
 import type {
   IRouter,
   KibanaRequest,
@@ -23,7 +23,7 @@ interface RouteDefinition<
   B = unknown,
   Method extends Exclude<RouteMethod, 'options'> = Exclude<RouteMethod, 'options'>
 > extends RouteConfig<P, Q, B, Method>,
-    interfaces.Newable<RouteHandler> {
+    Newable<RouteHandler> {
   method: Method;
 }
 
@@ -31,12 +31,11 @@ interface RouteHandler {
   handle(): ReturnType<RequestHandler>;
 }
 
-export const Route: interfaces.ServiceIdentifier<
-  interfaces.ServiceIdentifier<RouteHandler> & RouteDefinition
-> = Symbol('Route');
+export const Route: ServiceIdentifier<ServiceIdentifier<RouteHandler> & RouteDefinition> =
+  Symbol('Route');
 
-export const Router: interfaces.ServiceIdentifier<IRouter<any>> = Symbol('Router');
+export const Router: ServiceIdentifier<IRouter<any>> = Symbol('Router');
 
-export const Request: interfaces.ServiceIdentifier<KibanaRequest> = Symbol('Request');
+export const Request: ServiceIdentifier<KibanaRequest> = Symbol('Request');
 
-export const Response: interfaces.ServiceIdentifier<KibanaResponseFactory> = Symbol('Response');
+export const Response: ServiceIdentifier<KibanaResponseFactory> = Symbol('Response');
