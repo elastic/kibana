@@ -64,14 +64,19 @@ export const Sidebar = ({ history }: { history: ScopedHistory }) => {
                 onClick: () => history.push(`/rule_status_filter`),
               },
               {
-                id: 'alerts table',
+                id: 'alerts_table',
                 name: 'Alert Table',
                 onClick: () => history.push('/alerts_table'),
               },
               {
-                id: 'rules settings link',
+                id: 'rules_settings_link',
                 name: 'Rules Settings Link',
                 onClick: () => history.push('/rules_settings_link'),
+              },
+              {
+                id: 'alerts_filters_form',
+                name: 'Alerts filters form',
+                onClick: () => history.push('/alerts_filters_form'),
               },
             ],
           },

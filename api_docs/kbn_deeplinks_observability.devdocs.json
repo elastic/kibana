@@ -506,6 +506,20 @@
           },
           {
             "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.waterfallItemId",
+            "type": "string",
+            "tags": [],
+            "label": "waterfallItemId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
             "id": "def-common.TransactionDetailsByTraceIdLocatorParams.traceId",
             "type": "string",
             "tags": [],

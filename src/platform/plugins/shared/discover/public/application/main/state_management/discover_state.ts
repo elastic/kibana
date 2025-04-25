@@ -272,6 +272,7 @@ export function getDiscoverStateContainer({
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
+    tabId,
     stateStorage,
     internalState,
     savedSearchContainer,
@@ -303,7 +304,7 @@ export function getDiscoverStateContainer({
     appStateContainer,
     internalState,
     runtimeStateManager,
-    getSavedSearch: savedSearchContainer.getState,
+    savedSearchContainer,
     setDataView,
     injectCurrentTab,
     getCurrentTab,

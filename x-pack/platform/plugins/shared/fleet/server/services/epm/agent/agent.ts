@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
@@ -30,7 +30,7 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
     let template = getHandlebarsCompiledTemplateCache(templateStr);
 
     if (!template) {
-      template = handlebars.compile(templateStr, { noEscape: true });
+      template = handlebars.compileAST(templateStr, { noEscape: true });
       setHandlebarsCompiledTemplateCache(templateStr, template);
     }
 

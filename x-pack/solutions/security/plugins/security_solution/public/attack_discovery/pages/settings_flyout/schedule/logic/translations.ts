@@ -86,3 +86,10 @@ export const DISABLE_ATTACK_DISCOVERY_SCHEDULES_FAILURE = (failed = 1) =>
       values: { failed },
     }
   );
+
+export const FETCH_ATTACK_DISCOVERY_SCHEDULE_RULE_TYPE_FAILURE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.schedule.fetchScheduleRuleTypeFailDescription',
+  {
+    defaultMessage: 'Failed to fetch attack discovery schedule rule type',
+  }
+);

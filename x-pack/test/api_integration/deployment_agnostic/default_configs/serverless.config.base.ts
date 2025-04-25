@@ -121,11 +121,15 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          // defined in MKI control plane. Necessary for Synthetics app testing
-          '--xpack.uptime.service.password=test',
-          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-          '--xpack.uptime.service.devUrl=mockDevUrl',
-          '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          ...(options.serverlessProject === 'oblt'
+            ? [
+                // defined in MKI control plane. Necessary for Synthetics app testing
+                '--xpack.uptime.service.password=test',
+                '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+                '--xpack.uptime.service.devUrl=mockDevUrl',
+                '--xpack.uptime.service.manifestUrl=mockDevUrl',
+              ]
+            : []),
         ],
       },
       testFiles: options.testFiles,
