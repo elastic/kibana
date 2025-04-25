@@ -83,9 +83,13 @@ export class AlertRuleFromVisAction implements Action<Context> {
     let renameQuery = '';
     const escapeFieldName = (fieldName: string) => {
       if (!fieldName || fieldName === 'undefined') return missingSourceFieldPlaceholder;
+
       // Detect if the passed column name is actually an ES|QL function call instead of a field name
       const esqlFunctionRegex = /[A-Z]+\(.*?\)/;
       if (esqlFunctionRegex.test(fieldName)) {
+        // If there are any backticks in the field name, change them to double backticks
+        const sanitizedFieldName = fieldName.replace('`', '``');
+
         // Convert the function to a lowercase, snake_cased variable
         // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
         const colName = `_${fieldName
@@ -99,9 +103,9 @@ export class AlertRuleFromVisAction implements Action<Context> {
         // Add this to the renameQuery as a side effect
         if (fieldName.includes('*')) {
           // Wildcards cannot be used in RENAME
-          renameQuery += `| EVAL ${colName} = \`${fieldName}\``;
+          renameQuery += `| EVAL ${colName} = \`${sanitizedFieldName}\``;
         } else {
-          renameQuery += `| RENAME \`${fieldName}\` as ${colName} `;
+          renameQuery += `| RENAME \`${sanitizedFieldName}\` as ${colName} `;
         }
         return colName;
       }
@@ -127,11 +131,12 @@ export class AlertRuleFromVisAction implements Action<Context> {
       const queries = `${values
         .map((v) => {
           try {
+            // If the value is a string, first attempt to parse it as a JSON-formatted array
             if (typeof v === 'string') {
               const parsed = JSON.parse(v);
               if (Array.isArray(parsed)) {
                 return `${escapeFieldName(fieldName)} IN (${parsed
-                  .map((multiVal) => `"${multiVal}"`)
+                  .map((multiVal) => formatStringForESQL(multiVal))
                   .join(',')})`;
               }
             }
@@ -139,7 +144,9 @@ export class AlertRuleFromVisAction implements Action<Context> {
             // Do nothing, continue to return statement
           }
           return v
-            ? `${escapeFieldName(fieldName)} == ${typeof v === 'number' ? v : `"${v}"`}`
+            ? `${escapeFieldName(fieldName)} == ${
+                typeof v === 'number' ? v : formatStringForESQL(v)
+              }`
             : '';
         })
         .filter(Boolean)
@@ -264,6 +271,17 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
   };
 };
 
+const formatStringForESQL = (value: string) => {
+  let sanitizedValue = value;
+  // This is how you escape backslashes in Javascript. This language was invented in 10 days in 1995 and now we have to do this
+
+  // This translates to "If value includes a '\' character" in reasonable human being language
+  if (value.includes('\\')) {
+    // Split value by every '\' and replace them all with '\\'. I promise this is what this code means.
+    sanitizedValue = value.split('\\').join('\\\\');
+  }
+  return `"${sanitizedValue}"`;
+};
 const missingSourceFieldPlaceholder = i18n.translate(
   'xpack.triggersActionsUI.alertRuleFromVis.fieldNamePlaceholder',
   {
