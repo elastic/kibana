@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -245,6 +246,36 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     <EuiPanel hasBorder={true}>
       <SloManagementSearchBar onRefresh={refetch} />
       <EuiSpacer size="m" />
+
+      {!!selectedItems.length ? (
+        <EuiButtonEmpty
+          data-test-subj="sloSloManagementTableBulkDeleteButton"
+          onClick={() => {}}
+          size="xs"
+          css={{ blockSize: '0px' }}
+        >
+          {i18n.translate(
+            'xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel',
+            {
+              defaultMessage: 'Delete {count} SLOs',
+              values: {
+                count: selectedItems.length,
+              },
+            }
+          )}
+        </EuiButtonEmpty>
+      ) : (
+        <EuiText size="xs">
+          {i18n.translate('xpack.slo.sloManagementTable.itemCount', {
+            defaultMessage: 'Showing {count} of {total} SLOs',
+            values: {
+              count: data?.results.length ?? 0,
+              total: data?.total ?? 0,
+            },
+          })}
+        </EuiText>
+      )}
+      <EuiSpacer size="s" />
       <EuiBasicTable<SLODefinitionResponse>
         tableCaption={TABLE_CAPTION}
         error={
