@@ -95,7 +95,7 @@ describe('resolveRuleRoute', () => {
       'params',
       'throttle',
       'enabled',
-      'alias_target_id',
+      'alias_target_id'
     ),
     rule_type_id: mockedRule.alertTypeId,
     notify_when: mockedRule.notifyWhen,
@@ -277,9 +277,9 @@ describe('resolveRuleRoute', () => {
       artifacts: {
         dashboards: [
           {
-            id: '123'
-          }
-        ]
+            id: '123',
+          },
+        ],
       },
     } as ResolvedSanitizedRule);
 
@@ -300,10 +300,9 @@ describe('resolveRuleRoute', () => {
     expect(routeRes.body.artifacts).toEqual({
       dashboards: [
         {
-          id: '123'
-        }
-      ]
-    })
-
+          id: '123',
+        },
+      ],
+    });
   });
 });
