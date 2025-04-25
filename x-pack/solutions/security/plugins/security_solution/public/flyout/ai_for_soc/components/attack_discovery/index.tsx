@@ -19,6 +19,7 @@ import {
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { useIdsFromUrl } from '../../../../attack_discovery/pages/results/history/use_ids_from_url';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { AttackDiscoveryDetails } from './attack_discovery_details';
@@ -29,9 +30,9 @@ interface Props {
 }
 
 export const AttackDiscoveryWidget = memo(({ id }: Props) => {
-  const { assistantAvailability, http, navigateToApp } = useAssistantContext();
+  const { assistantAvailability, http } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
-
+  const { navigateTo } = useNavigateTo();
   const { pathname } = useLocation();
   const { setIdsUrl } = useIdsFromUrl();
 
@@ -46,12 +47,12 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
       if (pathname.includes('attack_discovery')) {
         setIdsUrl([attackDiscoveryId]);
       } else {
-        navigateToApp('security', {
+        navigateTo({
           path: `attack_discovery?id=${attackDiscoveryId}`,
         });
       }
     },
-    [pathname, setIdsUrl, navigateToApp]
+    [pathname, setIdsUrl, navigateTo]
   );
   useEffect(() => {
     if (data != null && data.data.length > 0) {

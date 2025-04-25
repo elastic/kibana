@@ -11,6 +11,20 @@ export const ALERTS = i18n.translate('xpack.securitySolution.alertSummary.attack
   defaultMessage: 'Alerts:',
 });
 
+export const ALERT_PART = i18n.translate(
+  'xpack.securitySolution.alertSummary.attackDiscovery.alertPart',
+  {
+    defaultMessage: 'This alert is part of a',
+  }
+);
+
+export const VIEW_DETAILS = i18n.translate(
+  'xpack.securitySolution.alertSummary.attackDiscovery.viewDetails',
+  {
+    defaultMessage: 'View details in Attack Discovery',
+  }
+);
+
 export const NO_RESULTS = i18n.translate(
   'xpack.securitySolution.alertSummary.attackDiscovery.noResults',
   {

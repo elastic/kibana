@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 import * as i18n from '../../constants/translations';
 
 interface Props {
@@ -15,10 +15,10 @@ interface Props {
 }
 
 export const ConnectorMissingCallout = memo(({ canSeeAdvancedSettings }: Props) => {
-  const { navigateToApp } = useAssistantContext();
+  const { navigateTo } = useNavigateTo();
   const goToKibanaSettings = useCallback(
-    () => navigateToApp('management', { path: '/kibana/settings?query=defaultAIConnector' }),
-    [navigateToApp]
+    () => navigateTo({ appId: 'management', path: '/kibana/settings?query=defaultAIConnector' }),
+    [navigateTo]
   );
 
   return (
