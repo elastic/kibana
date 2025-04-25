@@ -15,6 +15,26 @@ import {
   deleteAllAlerts,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { moveIndexToFrozenDataTier } from '../../../../utils/frozen_data_tier';
+
+type CleanupFn = () => Promise<void>;
+type CleanupStack = ReturnType<typeof getCleanupStack>;
+const getCleanupStack = () => {
+  let cleanOperationsStack: CleanupFn[] = [];
+
+  return {
+    push(operation: CleanupFn) {
+      cleanOperationsStack.push(operation);
+    },
+    async runCleanup() {
+      for (let idx = cleanOperationsStack.length - 1; idx >= 0; idx--) {
+        await cleanOperationsStack[idx]();
+      }
+
+      cleanOperationsStack = [];
+    },
+  };
+};
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -23,179 +43,161 @@ export default ({ getService }: FtrProviderContext) => {
   const securitySolutionApi = getService('securitySolutionApi');
   const retry = getService('retry');
 
-  describe('@ess frozen indices queried', () => {
-    const index = 'test_idx';
+  const indexSampleData = async (index: string) => {
     const { indexListOfDocuments } = dataGeneratorFactory({ es, index, log });
-
-    const cleanOperationsStack: Array<() => Promise<void>> = [];
-    const pushToCleanOperationStack = (operation: () => Promise<void>) =>
-      cleanOperationsStack.push(operation);
-    const runCleanOperations = async () => {
-      for (let idx = cleanOperationsStack.length - 1; idx >= 0; idx--) {
-        await cleanOperationsStack[idx]();
-      }
+    const id = uuidv4();
+    const timestamp = new Date().toISOString();
+    const firstDoc = {
+      id,
+      '@timestamp': timestamp,
+      foo: 'bar',
     };
 
-    after(async () => {
-      await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
-      await runCleanOperations();
+    await indexListOfDocuments([firstDoc]);
+  };
+
+  const createTestRule = async (indices: string[]) => {
+    const createRuleProps: CreateRuleProps = {
+      body: {
+        name: `spammy_rule`,
+        description: 'Spammy query rule',
+        enabled: true,
+        risk_score: 1,
+        rule_id: 'rule-1',
+        severity: 'low',
+        type: 'query',
+        query: 'foo: *',
+        index: indices,
+        from: 'now-3600s',
+      },
+    };
+
+    const { body: createdRuleResponse } = await securitySolutionApi
+      .createRule(createRuleProps)
+      .expect(200);
+
+    return createdRuleResponse.id;
+  };
+
+  const getRuleExecutionResult = async (ruleId: string) => {
+    const startDate = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const ruleExecutionsResultUrl = `/internal/detection_engine/rules/${ruleId}/execution/results`;
+    return await supertest
+      .get(`${ruleExecutionsResultUrl}?start=${startDate}&end=9999-12-31T23:59:59Z`)
+      .set('elastic-api-version', '1')
+      .send()
+      .expect(200);
+  };
+
+  describe('@ess frozen indices queried', () => {
+    let cleanupStack: CleanupStack;
+    let ruleId: string;
+    beforeEach(async () => {
+      cleanupStack = getCleanupStack();
     });
 
-    it('should report the querying of frozen indices during rule execution', async () => {
-      const id = uuidv4();
-      const timestamp = new Date().toISOString();
-      const firstDoc = {
-        id,
-        '@timestamp': timestamp,
-        foo: 'bar',
-      };
+    afterEach(async () => {
+      await cleanupStack.runCleanup();
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
+    });
 
-      await indexListOfDocuments([firstDoc]);
+    describe('when an index that is not in the frozen data tier is queried', () => {
+      const index = `test_idx-${uuidv4()}`;
 
-      const createRuleProps: CreateRuleProps = {
-        body: {
-          name: 'spammy_1s',
-          description: 'Spammy query rule',
-          enabled: true,
-          risk_score: 1,
-          rule_id: 'rule-1',
-          severity: 'low',
-          type: 'query',
-          query: 'foo: *',
-          index: ['test_idx*'],
-          interval: '1s',
-          from: 'now-3600s',
-        },
-      };
+      it('should not report that frozen indices were queried', async () => {
+        await indexSampleData(index);
 
-      const startDate = new Date().toISOString();
+        ruleId = await createTestRule(['test_idx*']);
 
-      const { body: createdRuleResponse } = await securitySolutionApi
-        .createRule(createRuleProps)
-        .expect(200);
-      const ruleId = createdRuleResponse.id;
-      const ruleExecutionsResultUrl = `/internal/detection_engine/rules/${ruleId}/execution/results`;
-      // Wait for a successful execution. The counter should be zero at this point
-      await retry.try(async () => {
-        const response = await supertest
-          .get(`${ruleExecutionsResultUrl}?start=${startDate}&end=9999-12-31T23:59:59Z`)
-          .set('elastic-api-version', '1')
-          .send();
-        expect(response.statusCode).to.be.equal(200);
-        const { total, events } = response.body;
-        expect(total).to.be.greaterThan(1);
-        expect(events[0].status).to.be.equal('success');
-        expect(events[0].frozen_indices_queried_count).to.eql(0);
+        // Wait for a successful execution. The counter should be zero at this point
+        await retry.try(async () => {
+          const response = await getRuleExecutionResult(ruleId);
+          expect(response.statusCode).to.be.equal(200);
+          const { total, events } = response.body;
+          expect(total).to.be.equal(1);
+          expect(events[0].status).to.be.equal('success');
+          expect(events[0].frozen_indices_queried_count).to.be.equal(0);
+        });
+
+        cleanupStack.push(async () => {
+          await es.indices.delete({
+            index,
+          });
+        });
       });
+    });
 
-      // Create a snapshot repository
-      const snapshotName = 'my-snapshot';
-      await supertest
-        .put('/api/snapshot_restore/repositories')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: snapshotName,
-          type: 'fs',
-          settings: {
-            location: '/tmp',
-          },
-        })
-        .expect(200);
+    describe('when an index that is in the frozen data tier is queried', () => {
+      const index = `test_idx-${uuidv4()}`;
 
-      pushToCleanOperationStack(async () => {
+      it('should report that frozen indices were queried', async () => {
+        await indexSampleData(index);
+
+        ruleId = await createTestRule(['test_idx*']);
+
+        const { newIndexName, snapshotRepositoryName, ilmPolicyName } =
+          await moveIndexToFrozenDataTier({ es, index, retry });
+
+        // schedule a rule run after moving the index to frozen
         await supertest
-          .delete(`/api/snapshot_restore/repositories/${snapshotName}`)
+          .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
           .set('kbn-xsrf', 'foo')
-          .send()
-          .expect(200);
+          .expect(204);
+
+        await retry.try(async () => {
+          const response = await getRuleExecutionResult(ruleId);
+          expect(response.statusCode).to.be.equal(200);
+          const { total, events } = response.body;
+          expect(total).to.be.equal(2);
+          expect(events[0].status).to.be.equal('success');
+          expect(events[0].frozen_indices_queried_count).to.be.equal(1);
+        });
+
+        cleanupStack.push(async () => {
+          await es.snapshot.deleteRepository({
+            name: snapshotRepositoryName,
+          });
+        });
+
+        cleanupStack.push(async () => {
+          await es.ilm.deleteLifecycle({
+            name: ilmPolicyName,
+          });
+        });
+
+        // We need to remove the index first before removing the snapshot. This is why we add it last
+        cleanupStack.push(async () => {
+          await es.indices.delete({
+            index: newIndexName,
+          });
+        });
       });
+    });
 
-      // We need to delete the index before deleting the snapshot
-      pushToCleanOperationStack(async () => {
-        await supertest
-          .post('/api/index_management/indices/delete')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            indices: [`partial-${index}`],
-          })
-          .expect(200);
-      });
+    describe('when an index with a name starting with "partial-" is queried', () => {
+      const indexPrefixedWithPatial = `partial-some-other-index-${uuidv4()}`;
 
-      // Verify snapshot repository is working
-      await supertest
-        .get(`/api/snapshot_restore/repositories/${snapshotName}/verify`)
-        .set('kbn-xsrf', 'foo')
-        .send()
-        .expect(200);
+      it('should not report that frozen indices were queried', async () => {
+        await indexSampleData(indexPrefixedWithPatial);
 
-      // Create an ilm policy that moves the index to frozen after 0 days
-      const frozenIlmName = 'frozen-ilm';
-      await supertest
-        .post('/api/index_lifecycle_management/policies')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'frozen-ilm',
-          phases: {
-            hot: {
-              actions: {
-                set_priority: {
-                  priority: 100,
-                },
-              },
-              min_age: '0ms',
-            },
-            frozen: {
-              min_age: '0d',
-              actions: {
-                searchable_snapshot: {
-                  snapshot_repository: 'my-snapshot',
-                },
-              },
-            },
-          },
-        })
-        .expect(200);
+        ruleId = await createTestRule(['partial-*']);
 
-      pushToCleanOperationStack(async () => {
-        await supertest
-          .delete(`/api/index_lifecycle_management/policies/${frozenIlmName}`)
-          .set('kbn-xsrf', 'foo')
-          .send()
-          .expect(200);
-      });
+        // Wait for a successful execution. The counter should be zero at this point
+        await retry.try(async () => {
+          const response = await getRuleExecutionResult(ruleId);
+          expect(response.statusCode).to.be.equal(200);
+          const { total, events } = response.body;
+          expect(total).to.be.equal(1);
+          expect(events[0].status).to.be.equal('success');
+          expect(events[0].frozen_indices_queried_count).to.be.equal(0);
+        });
 
-      // Attach the policy to the test index
-      await supertest
-        .post('/api/index_lifecycle_management/index/add')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          indexName: index,
-          policyName: frozenIlmName,
-          alias: '',
-        })
-        .expect(200);
-
-      pushToCleanOperationStack(async () => {
-        await supertest
-          .post('/api/index_lifecycle_management/index/remove')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            indexNames: [`partial-${index}`],
-          })
-          .expect(200);
-      });
-
-      await retry.try(async () => {
-        const response = await supertest
-          .get(`${ruleExecutionsResultUrl}?start=${startDate}&end=9999-12-31T23:59:59Z`)
-          .set('elastic-api-version', '1')
-          .send()
-          .expect(200);
-        const { total, events } = response.body;
-        expect(total).to.be.greaterThan(1);
-        expect(events[0].status).to.be.equal('success');
-        expect(events[0].frozen_indices_queried_count).to.eql(1);
+        cleanupStack.push(async () => {
+          await es.indices.delete({
+            index: indexPrefixedWithPatial,
+          });
+        });
       });
     });
   });
