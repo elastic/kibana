@@ -24,7 +24,7 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
-import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import type { ConfigSchema } from './config_schema';
 
 export class ElasticAssistantPlugin
