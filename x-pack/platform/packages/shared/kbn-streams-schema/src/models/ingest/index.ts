@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { base as nBase } from '../base';
-import { IngestBase, ingestBase as nIngestBase } from './base';
+import { BaseStream } from '../base';
+import { IngestBase, IngestBaseStream } from './base';
 import { ModelValidation, joinValidation } from '../validation/model_validation';
 import { Validation, validation } from '../validation/validation';
 import { UnwiredIngest, UnwiredStream } from './unwired';
 import { WiredIngest, WiredStream } from './wired';
 
 /* eslint-disable @typescript-eslint/no-namespace */
-export namespace ingest {
-  export import base = nIngestBase;
+export namespace IngestStream {
+  export import base = IngestBaseStream;
 
   export namespace all {
     export type UpsertRequest = WiredStream.UpsertRequest | UnwiredStream.UpsertRequest;
@@ -26,10 +26,10 @@ export namespace ingest {
     export type Model = WiredStream.Model | UnwiredStream.Model;
   }
 
-  export const all: ModelValidation<nBase.Model, ingest.all.Model> = joinValidation(nBase, [
-    WiredStream,
-    UnwiredStream,
-  ]);
+  export const all: ModelValidation<BaseStream.Model, IngestStream.all.Model> = joinValidation(
+    BaseStream,
+    [WiredStream, UnwiredStream]
+  );
 }
 
 export type Ingest = WiredIngest | UnwiredIngest;
@@ -38,4 +38,4 @@ export const Ingest: Validation<IngestBase, Ingest> = validation(
   z.union([WiredIngest.right, UnwiredIngest.right])
 );
 
-ingest.base = nIngestBase;
+IngestStream.base = IngestBaseStream;

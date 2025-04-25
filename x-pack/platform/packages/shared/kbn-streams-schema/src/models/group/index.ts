@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { base } from '../base';
-import { OmitName } from '../core';
+import { BaseStream } from '../base';
 import { Validation, validation } from '../validation/validation';
 import { ModelValidation, modelValidation } from '../validation/model_validation';
 
@@ -23,19 +22,15 @@ export const Group: Validation<unknown, Group> = validation(
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace GroupStream {
-  export interface Definition extends base.Definition {
+  export interface Definition extends BaseStream.Definition {
     group: Group;
   }
 
-  export interface Source extends base.Source, GroupStream.Definition {}
+  export type Source = BaseStream.Source<GroupStream.Definition>;
 
-  export interface GetResponse extends base.GetResponse {
-    stream: Definition;
-  }
+  export type GetResponse = BaseStream.GetResponse<Definition>;
 
-  export interface UpsertRequest extends base.UpsertRequest {
-    stream: OmitName<Definition>;
-  }
+  export type UpsertRequest = BaseStream.UpsertRequest<Definition>;
 
   export interface Model {
     Definition: GroupStream.Definition;
@@ -45,11 +40,14 @@ export namespace GroupStream {
   }
 }
 
-export const GroupStream: ModelValidation<base.Model, GroupStream.Model> = modelValidation(base, {
-  Source: z.object({}),
-  Definition: z.object({
-    group: Group.right,
-  }),
-  GetResponse: z.object({}),
-  UpsertRequest: z.object({}),
-});
+export const GroupStream: ModelValidation<BaseStream.Model, GroupStream.Model> = modelValidation(
+  BaseStream,
+  {
+    Source: z.object({}),
+    Definition: z.object({
+      group: Group.right,
+    }),
+    GetResponse: z.object({}),
+    UpsertRequest: z.object({}),
+  }
+);

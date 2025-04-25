@@ -11,35 +11,35 @@ import { StreamQuery, streamQuerySchema } from '../queries';
 import { ModelValidation, modelValidation } from './validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
-export namespace base {
+export namespace BaseStream {
   export interface Definition {
     name: string;
     description: string;
   }
 
-  export type Source = Definition;
+  export type Source<TDefinition extends Definition = Definition> = TDefinition;
 
-  export interface GetResponse {
+  export interface GetResponse<TDefinition extends Definition = Definition> {
     dashboards: string[];
-    stream: Definition;
+    stream: TDefinition;
     queries: StreamQuery[];
   }
 
-  export interface UpsertRequest {
+  export interface UpsertRequest<TDefinition extends Definition = Definition> {
     dashboards: string[];
-    stream: OmitName<Definition>;
+    stream: OmitName<TDefinition>;
     queries: StreamQuery[];
   }
 
   export interface Model {
-    Definition: base.Definition;
-    Source: base.Source;
-    GetResponse: base.GetResponse;
-    UpsertRequest: base.UpsertRequest;
+    Definition: BaseStream.Definition;
+    Source: BaseStream.Source;
+    GetResponse: BaseStream.GetResponse;
+    UpsertRequest: BaseStream.UpsertRequest;
   }
 }
 
-export const base: ModelValidation<IModel, base.Model> = modelValidation({
+export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValidation({
   Definition: z.object({
     name: z.string(),
     description: z.string(),
