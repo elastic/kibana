@@ -18,13 +18,14 @@ import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_an
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import {
-  RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
   getMissingRiskEnginePrivileges,
 } from '../../../../common/entity_analytics/risk_engine';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 
-export const getUserRiskEnginePrivileges = async (
+export const getRunRiskEnginePrivileges = async (
   request: KibanaRequest,
   security: SecurityPluginStart
 ) => {
@@ -33,7 +34,23 @@ export const getUserRiskEnginePrivileges = async (
     security,
     privilegesToCheck: {
       elasticsearch: {
-        cluster: RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+        cluster: TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+        index: {},
+      },
+    },
+  });
+};
+
+export const getEnableRiskEnginePrivileges = async (
+  request: KibanaRequest,
+  security: SecurityPluginStart
+) => {
+  return checkAndFormatPrivileges({
+    request,
+    security,
+    privilegesToCheck: {
+      elasticsearch: {
+        cluster: TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
         index: RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
       },
     },
@@ -57,14 +74,29 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
     )
     .join('\n');
 
-  const clusterPrivilegesMessage = !clusterPrivileges.length
+  const clusterRunPrivilegesMessage = !clusterPrivileges.run.length
     ? ''
-    : i18n.translate('xpack.securitySolution.entityAnalytics.riskEngine.missingClusterPrivilege', {
-        defaultMessage: 'Missing cluster privileges: {privileges}.',
-        values: {
-          privileges: clusterPrivileges.join(', '),
-        },
-      });
+    : i18n.translate(
+        'xpack.securitySolution.entityAnalytics.riskEngine.missingClusterRunPrivilege',
+        {
+          defaultMessage: 'Missing cluster privileges to run the risk engine: {privileges}.',
+          values: {
+            privileges: clusterPrivileges.run.join(', '),
+          },
+        }
+      );
+
+  const clusterEnablePrivilegesMessage = !clusterPrivileges.enable.length
+    ? ''
+    : i18n.translate(
+        'xpack.securitySolution.entityAnalytics.riskEngine.missingClusterEnablePrivilege',
+        {
+          defaultMessage: 'Missing cluster privileges to enable the risk engine: {privileges}.',
+          values: {
+            privileges: clusterPrivileges.enable.join(', '),
+          },
+        }
+      );
 
   const unauthorizedMessage = i18n.translate(
     'xpack.securitySolution.entityAnalytics.riskEngine.unauthorized',
@@ -73,7 +105,7 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
     }
   );
 
-  return `${unauthorizedMessage} ${indexPrivilegesMessage} ${clusterPrivilegesMessage}`;
+  return `${unauthorizedMessage} ${indexPrivilegesMessage} ${clusterRunPrivilegesMessage} ${clusterEnablePrivilegesMessage}`;
 };
 
 /**
@@ -83,20 +115,62 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
  * @param handler - The route handler to wrap
  **/
 export const withRiskEnginePrivilegeCheck = <P, Q, B>(
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
-  handler: (
+  privilegeTypeOrServices:
+    | 'run'
+    | 'enable'
+    | StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
+  handlerOrServices:
+    | ((
+        context: SecuritySolutionRequestHandlerContext,
+        request: KibanaRequest<P, Q, B>,
+        response: KibanaResponseFactory
+      ) => Promise<IKibanaResponse>)
+    | StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
+  optionalHandler?: (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) => Promise<IKibanaResponse>
 ) => {
+  // Determine if privilegeType is provided or if it's the default case
+  let privilegeType: 'run' | 'enable' = 'enable';
+  let getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>;
+  let handler: (
+    context: SecuritySolutionRequestHandlerContext,
+    request: KibanaRequest<P, Q, B>,
+    response: KibanaResponseFactory
+  ) => Promise<IKibanaResponse>;
+
+  if (typeof privilegeTypeOrServices === 'string') {
+    // First parameter is the privilegeType
+    privilegeType = privilegeTypeOrServices;
+    getStartServices = handlerOrServices as StartServicesAccessor<
+      SecuritySolutionPluginStartDependencies,
+      unknown
+    >;
+    if (optionalHandler === undefined) {
+      throw new Error('Handler is required when using privilege type parameter');
+    }
+    handler = optionalHandler;
+  } else {
+    // First parameter is getStartServices, privilegeType is default 'enable'
+    getStartServices = privilegeTypeOrServices;
+    handler = handlerOrServices as (
+      context: SecuritySolutionRequestHandlerContext,
+      request: KibanaRequest<P, Q, B>,
+      response: KibanaResponseFactory
+    ) => Promise<IKibanaResponse>;
+  }
+
   return async (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) => {
     const [_, { security }] = await getStartServices();
-    const privileges = await getUserRiskEnginePrivileges(request, security);
+    const privilegeCheckFn =
+      privilegeType === 'run' ? getRunRiskEnginePrivileges : getEnableRiskEnginePrivileges;
+    const privileges = await privilegeCheckFn(request, security);
     if (!privileges.has_all_required) {
       const siemResponse = buildSiemResponse(response);
       return siemResponse.error({
