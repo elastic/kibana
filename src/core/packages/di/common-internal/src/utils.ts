@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type interfaces, ContainerModule } from 'inversify';
+import { ContainerModule, type ServiceIdentifier } from 'inversify';
 
 export function toContainerModule<T extends object>(
   object: T,
   iteratee = toServiceIdentifier<T>()
-): interfaces.ContainerModule {
-  return new ContainerModule((bind) => {
+): ContainerModule {
+  return new ContainerModule(({ bind }) => {
     for (const [key, value] of Object.entries(object)) {
       bind(iteratee(key as keyof T)).toConstantValue(value);
     }
@@ -22,6 +22,6 @@ export function toContainerModule<T extends object>(
 
 export function toServiceIdentifier<T>(
   ...prefix: string[]
-): <K extends keyof T>(key: K) => interfaces.ServiceIdentifier<T[K]> {
+): <K extends keyof T>(key: K) => ServiceIdentifier<T[K]> {
   return (...key) => Symbol.for([...prefix, key].join('.'));
 }

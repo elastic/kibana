@@ -9,7 +9,7 @@
 
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
-import { type interfaces, ContainerModule } from 'inversify';
+import { ContainerModule } from 'inversify';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
@@ -36,8 +36,10 @@ function createManifest(
   } as DiscoveredPlugin;
 }
 
-let mockContainerModuleCallback: jest.MockedFunction<interfaces.ContainerModuleCallBack>;
-let pluginModule: interfaces.ContainerModule;
+let mockContainerModuleCallback: jest.MockedFunction<
+  ConstructorParameters<typeof ContainerModule>[0]
+>;
+let pluginModule: ContainerModule;
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
 const opaqueId = Symbol();
 const initializerContext = createPluginInitializerContextMock();
@@ -81,7 +83,7 @@ describe('PluginWrapper', () => {
 
   test('`setup` initializes the plugin container module', () => {
     mockPluginReader.mockReturnValueOnce({ module: pluginModule });
-    mockContainerModuleCallback.mockImplementationOnce((bind) => {
+    mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
       bind(Setup).toConstantValue({ contract: 'yes' });
     });
     const injection = injectionServiceMock.createInternalSetupContract();
@@ -141,7 +143,7 @@ describe('PluginWrapper', () => {
 
   test('`start` loads start dependencies into the plugin container', () => {
     mockPluginReader.mockReturnValueOnce({ module: pluginModule });
-    mockContainerModuleCallback.mockImplementationOnce((bind) => {
+    mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
       bind(Setup).toConstantValue({});
       bind(Start).toConstantValue({ contract: 'yes' });
     });
@@ -157,7 +159,7 @@ describe('PluginWrapper', () => {
   });
 
   test('`stop` fails if plugin is not setup up', async () => {
-    expect(() => plugin.stop()).toThrowErrorMatchingInlineSnapshot(
+    await expect(plugin.stop()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`
     );
   });
@@ -171,23 +173,23 @@ describe('PluginWrapper', () => {
   test('`stop` does not fail if plugin.stop does not exist', async () => {
     mockInitializer.mockReturnValueOnce({ setup: jest.fn(), start: jest.fn() } as any);
     await plugin.setup({} as any, {} as any);
-    expect(() => plugin.stop()).not.toThrow();
+    await expect(plugin.stop()).resolves.toBeUndefined();
   });
 
-  test('`stop` cleans up the plugin container', () => {
+  test('`stop` cleans up the plugin container', async () => {
     mockPluginReader.mockReturnValueOnce({ module: pluginModule });
-    mockContainerModuleCallback.mockImplementationOnce((bind) => {
+    mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
       bind(Setup).toConstantValue({});
       bind(Start).toConstantValue({ contract: 'yes' });
     });
     const injection = injectionServiceMock.createInternalSetupContract();
     const container = injection.getContainer();
 
-    plugin.setup({ injection } as any, {});
-    plugin.start({ injection } as any, {});
+    await plugin.setup({ injection } as any, {});
+    await plugin.start({ injection } as any, {});
 
     expect(container.isBound(CoreSetup('injection'))).toBe(true);
-    plugin.stop();
+    await plugin.stop();
     expect(container.isBound(CoreSetup('injection'))).toBe(false);
   });
 });

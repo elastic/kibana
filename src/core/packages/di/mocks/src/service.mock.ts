@@ -25,9 +25,10 @@ function create(): jest.Mocked<PublicMethodsOf<CoreInjectionService>> {
 }
 
 function createContainer() {
-  const container = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
+  const container = new Container({ defaultScope: 'Singleton' });
+  container.bind(Container).toConstantValue(container);
 
-  for (const method of ['bind', 'get', 'getAll', 'isBound', 'load']) {
+  for (const method of ['bind', 'get', 'isBound', 'load', 'loadSync', 'unbind', 'unbindAll']) {
     jest.spyOn(container, method as MethodKeysOf<Container>);
   }
 
@@ -44,7 +45,14 @@ function createStartContract(): jest.MockedObjectDeep<CoreDiServiceStart> {
   const getContainer = once(createContainer);
 
   return {
-    fork: jest.fn().mockImplementation(once(() => getContainer().createChild())),
+    fork: jest.fn().mockImplementation(
+      once(() => {
+        const container = new Container({ defaultScope: 'Singleton', parent: getContainer() });
+        container.bind(Container).toConstantValue(container);
+
+        return container;
+      })
+    ),
     getContainer: jest.fn().mockImplementation(getContainer),
   };
 }

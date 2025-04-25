@@ -13,35 +13,31 @@ import { AppUnmount } from '@kbn/core-application-browser';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import { Global, OnSetup } from '@kbn/core-di';
 
-export const application = new ContainerModule(
-  (bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
-    onActivation(Application, ({ container }, definition) => {
-      container.get(CoreSetup('application')).register({
-        ...definition,
-        mount(params) {
-          const scope = container.get(CoreStart('injection')).fork();
-          scope.bind(ApplicationParameters).toConstantValue(params);
-          scope.bind(Global).toConstantValue(ApplicationParameters);
-          const unmount = scope.get(definition).mount();
-          const wrap = (callback: AppUnmount) => () => {
-            try {
-              return callback();
-            } finally {
-              scope.unbindAll();
-            }
-          };
+export const application = new ContainerModule(({ bind, onActivation }) => {
+  onActivation(Application, ({ get }, definition) => {
+    get(CoreSetup('application')).register({
+      ...definition,
+      mount(params) {
+        const scope = get(CoreStart('injection')).fork();
+        scope.bind(ApplicationParameters).toConstantValue(params);
+        scope.bind(Global).toConstantValue(ApplicationParameters);
+        const unmount = scope.get(definition).mount();
+        const wrap = (callback: AppUnmount) => () => {
+          try {
+            return callback();
+          } finally {
+            scope.unbindAll();
+          }
+        };
 
-          return isPromise(unmount) ? unmount.then(wrap) : wrap(unmount);
-        },
-      });
-
-      return definition;
+        return isPromise(unmount) ? unmount.then(wrap) : wrap(unmount);
+      },
     });
 
-    bind(OnSetup).toConstantValue((container) => {
-      if (container.isCurrentBound(Application)) {
-        container.getAll(Application);
-      }
-    });
-  }
-);
+    return definition;
+  });
+
+  bind(OnSetup).toConstantValue((container) => {
+    container.getAll(Application);
+  });
+});

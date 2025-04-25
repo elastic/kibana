@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { Container } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 
 /** @internal */
 export interface InternalCoreDiServiceSetup {
-  getContainer(id?: PluginOpaqueId, container?: interfaces.Container): interfaces.Container;
+  getContainer(id?: PluginOpaqueId, container?: Container): Container;
 }
 
 /** @internal */
 export interface InternalCoreDiServiceStart extends InternalCoreDiServiceSetup {
-  fork(id?: PluginOpaqueId, container?: interfaces.Container): interfaces.Container;
+  fork(id?: PluginOpaqueId, container?: Container): Container;
 }

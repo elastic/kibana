@@ -7,103 +7,74 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { once } from 'lodash';
-import { ContainerModule, type interfaces } from 'inversify';
+import { noop, once } from 'lodash';
+import {
+  type Container,
+  ContainerModule,
+  type ResolutionContext,
+  type ServiceIdentifier,
+} from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import { InternalContainer } from '../container';
 
-const Context = Symbol('Context') as interfaces.ServiceIdentifier<interfaces.Container>;
-const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
+const Context = Symbol('Context') as ServiceIdentifier<InternalContainer>;
+const Id = Symbol('Id') as ServiceIdentifier<PluginOpaqueId>;
 
-export const Plugin = Symbol.for('Plugin') as interfaces.ServiceIdentifier<interfaces.Container>;
+type PluginFactory = (id: PluginOpaqueId) => Container;
+export const Plugin = Symbol.for('Plugin') as ServiceIdentifier<PluginFactory>;
 
 export class PluginModule extends ContainerModule {
-  private services = new WeakMap<
-    interfaces.Container,
-    Map<interfaces.ServiceIdentifier<unknown>, number>
-  >();
-  private activated = new WeakSet<interfaces.Container>();
-  private bound = new WeakSet<interfaces.Container>();
+  private services = new WeakMap<Container, Map<ServiceIdentifier, number>>();
+  private activated = new WeakSet<Container>();
+  private bound = new WeakSet<Container>();
 
   constructor() {
-    super((bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
-      bind(Setup)
-        .toDynamicValue(() => undefined)
+    super(({ bind, onActivation }) => {
+      bind(OnSetup).toConstantValue(this.onSetup.bind(this));
+      bind(Plugin)
+        .toResolvedValue(this.getPluginFactory.bind(this), [InternalContainer])
         .inRequestScope();
-      bind(Start)
-        .toDynamicValue(() => undefined)
-        .inRequestScope();
-      bind(OnSetup).toConstantValue((scope) => this.bindServices(scope));
-      bind(Plugin).toDynamicValue(this.getScope).inRequestScope();
-      onActivation(Global, this.bindService);
-      onActivation(Setup, this.activate(OnSetup));
-      onActivation(Start, this.activate(OnStart));
+      bind(Setup).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
+      bind(Start).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
+      onActivation(Global, this.onGlobalActivation.bind(this));
+      onActivation(Setup, this.onContractActivation.bind(this, OnSetup));
+      onActivation(Start, this.onContractActivation.bind(this, OnStart));
     });
   }
 
-  protected activate(
-    hook: interfaces.ServiceIdentifier<(container: interfaces.Container) => void>
-  ): interfaces.BindingActivation<unknown> {
-    return ({ container }, contract) => {
-      if (this.activated.has(container)) {
-        return contract;
-      }
-
-      for (let current: typeof container.parent = container; current; current = current.parent) {
-        if (current.isCurrentBound(hook)) {
-          current.getAll(hook).forEach((callback) => callback(container));
-        }
-      }
-
-      this.activated.add(container);
-
-      return contract;
-    };
+  protected getDefaultContract() {
+    return undefined;
   }
 
-  protected getScope: interfaces.DynamicValue<interfaces.Container> = ({
-    container,
-    currentRequest: { target },
-  }) => {
-    const id = target.getNamedTag()?.value as PluginOpaqueId | undefined;
-
-    if (!id) {
-      throw new Error('Plugin instance must be named.');
+  protected onContractActivation<T>(
+    hook: ServiceIdentifier<(container: Container) => void>,
+    { get }: ResolutionContext,
+    contract: T
+  ): T {
+    const container = get(InternalContainer);
+    if (this.activated.has(container)) {
+      return contract;
     }
 
-    if (!container.isCurrentBound(id)) {
-      const parent = container.parent?.getNamed(Plugin, id) ?? container;
-      const scope = parent.createChild();
-
-      scope.bind(Id).toConstantValue(id);
-      scope
-        .bind(Context)
-        .toConstantValue(container)
-        .onDeactivation(
-          once(() => {
-            try {
-              container.unbind(id);
-              // eslint-disable-next-line no-empty
-            } catch {}
-          })
-        );
-      scope.get(Context);
-
-      container
-        .bind(id)
-        .toConstantValue(scope)
-        .onDeactivation(once(() => scope.unbindAll()));
+    for (let current = container as typeof container.parent; current; current = current.parent) {
+      if (current.isCurrentBound(hook)) {
+        current.getAll(hook).forEach((callback) => callback(container));
+      }
     }
 
-    return container.get(id);
-  };
+    this.activated.add(container);
 
-  protected bindService: interfaces.BindingActivation<interfaces.ServiceIdentifier> = (
-    { container: scope },
-    service
-  ) => {
-    const context = scope.get(Context);
-    const id = scope.get(Id);
+    return contract;
+  }
+
+  protected onGlobalActivation<T extends ServiceIdentifier>(
+    { get }: ResolutionContext,
+    service: T
+  ): T {
+    const scope = get(InternalContainer);
+    const context = get(Context);
+    const id = get(Id);
     const index = this.getServicesCount(scope, service);
 
     this.incrementServicesCount(scope, service);
@@ -113,42 +84,26 @@ export class PluginModule extends ContainerModule {
 
     context
       .bind(service)
-      .toDynamicValue(({ container: origin }) => {
+      .toResolvedValue<[InternalContainer, InternalContainer | undefined]>(
         // eslint-disable-next-line @typescript-eslint/no-shadow
-        const context = origin.isBound(Context) ? origin.get(Context) : origin;
-        const target = context.getNamed(Plugin, id);
+        (origin, context = origin) => {
+          const target = context.get(Plugin)(id);
 
-        this.bindServices(origin);
-        this.inheritServices(target);
+          this.onSetup(origin);
+          this.bindServices(target);
 
-        return this.getServicesCount(scope, service) > 1
-          ? target.getAll(service)[index]
-          : target.get(service);
-      })
+          return this.getServicesCount(scope, service) > 1
+            ? target.getAll(service)[index]
+            : target.get(service);
+        },
+        [InternalContainer, { serviceIdentifier: Context, optional: true }]
+      )
       .inRequestScope();
 
     return service;
-  };
-
-  private getServicesCount(
-    scope: interfaces.Container,
-    service: interfaces.ServiceIdentifier<unknown>
-  ) {
-    return this.services.get(scope)?.get(service) ?? 0;
   }
 
-  private incrementServicesCount(
-    scope: interfaces.Container,
-    service: interfaces.ServiceIdentifier<unknown>
-  ) {
-    if (!this.services.has(scope)) {
-      this.services.set(scope, new Map());
-    }
-
-    this.services.get(scope)?.set(service, this.getServicesCount(scope, service) + 1);
-  }
-
-  private bindServices(scope: interfaces.Container) {
+  protected onSetup(scope: Container) {
     if (this.bound.has(scope)) {
       return;
     }
@@ -157,11 +112,33 @@ export class PluginModule extends ContainerModule {
     if (!scope.isCurrentBound(Global)) {
       return;
     }
-
     scope.getAll(Global);
   }
 
-  private inheritServices(scope: interfaces.Container) {
+  protected getPluginFactory(context: InternalContainer): PluginFactory {
+    return (id) => {
+      if (!context.isCurrentBound(id)) {
+        const parent = context.parent?.get(Plugin)(id) ?? context;
+        const scope = (parent as InternalContainer).createChild();
+
+        scope.bind(Id).toConstantValue(id);
+        scope
+          .bind(Context)
+          .toConstantValue(context)
+          .onDeactivation(once(() => context.unbind(id).catch(noop)));
+        scope.get(Context);
+
+        context
+          .bind(id)
+          .toConstantValue(scope)
+          .onDeactivation(once(() => scope.unbindAll()));
+      }
+
+      return context.get(id);
+    };
+  }
+
+  private bindServices(scope: Container) {
     if (this.bound.has(scope)) {
       return;
     }
@@ -171,13 +148,24 @@ export class PluginModule extends ContainerModule {
       for (let index = 0; index < count; index++) {
         scope
           .bind(service)
-          .toDynamicValue(({ container }) => {
-            const context = container.get(Context);
-
-            return count > 1 ? context.getAll(service)[index] : context.get(service);
-          })
+          .toResolvedValue(
+            (context) => (count > 1 ? context.getAll(service)[index] : context.get(service)),
+            [Context]
+          )
           .inRequestScope();
       }
     }
+  }
+
+  private getServicesCount(scope: Container, service: ServiceIdentifier<unknown>) {
+    return this.services.get(scope)?.get(service) ?? 0;
+  }
+
+  private incrementServicesCount(scope: Container, service: ServiceIdentifier<unknown>) {
+    if (!this.services.has(scope)) {
+      this.services.set(scope, new Map());
+    }
+
+    this.services.get(scope)?.set(service, this.getServicesCount(scope, service) + 1);
   }
 }

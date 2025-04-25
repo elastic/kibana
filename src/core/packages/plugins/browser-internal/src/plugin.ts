@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { interfaces } from 'inversify';
+import type { Container } from 'inversify';
 import { firstValueFrom, Subject } from 'rxjs';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
@@ -44,7 +44,7 @@ export class PluginWrapper<
   public readonly runtimePluginDependencies: DiscoveredPlugin['runtimePluginDependencies'];
   private definition?: PluginDefinition;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
-  private container?: interfaces.Container;
+  private container?: Container;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
@@ -74,10 +74,10 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = setupContext.injection.getContainer();
-      this.container.load(this.definition.module);
-      this.container.load(toContainerModule(this.initializerContext, PluginInitializerService));
-      this.container.load(toContainerModule(setupContext, CoreSetupService));
-      this.container.load(toContainerModule(plugins, PluginSetup));
+      this.container.loadSync(this.definition.module);
+      this.container.loadSync(toContainerModule(this.initializerContext, PluginInitializerService));
+      this.container.loadSync(toContainerModule(setupContext, CoreSetupService));
+      this.container.loadSync(toContainerModule(plugins, PluginSetup));
     }
 
     return [this.instance?.setup(setupContext, plugins), this.container?.get<TSetup>(Setup)].find(
@@ -97,8 +97,8 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.container?.load(toContainerModule(startContext, CoreStartService));
-    this.container?.load(toContainerModule(plugins, PluginStart));
+    this.container?.loadSync(toContainerModule(startContext, CoreStartService));
+    this.container?.loadSync(toContainerModule(plugins, PluginStart));
     const contract = [
       this.instance?.start(startContext, plugins),
       this.container?.get<TStart>(Start),
@@ -112,13 +112,13 @@ export class PluginWrapper<
   /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
-  public stop() {
+  public async stop() {
     if (this.definition === undefined) {
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
-    this.instance?.stop?.();
-    this.container?.unbindAll();
+    await this.instance?.stop?.();
+    await this.container?.unbindAll();
     this.instance = undefined;
     this.container = undefined;
   }
