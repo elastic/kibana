@@ -99,7 +99,7 @@ export async function ensureTemplatesAndIndexCreated(
 
   try {
     await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
-    logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created or updated successfully.`);
+    logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created successfully.`);
   } catch (error) {
     logger.error(`Unable to create index ${LOCKS_CONCRETE_INDEX_NAME}: ${error.message}`);
   }
