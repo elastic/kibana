@@ -42,7 +42,6 @@ export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem 
 
   return (
     <EuiLink data-test-subj="installedIntegrationsDashboardsLink" href={link}>
-      {' '}
       {dashboardsCount}
     </EuiLink>
   );
