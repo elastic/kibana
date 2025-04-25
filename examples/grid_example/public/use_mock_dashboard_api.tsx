@@ -79,7 +79,7 @@ export const useMockDashboardApi = ({
         const newId = v4();
         otherPanels[newId] = {
           ...oldPanel,
-          explicitInput: { ...newPanel.initialState, id: newId },
+          explicitInput: { ...(newPanel.serializedState?.rawState ?? {}), id: newId },
         };
         mockDashboardApi.panels$.next(otherPanels);
         return newId;
@@ -107,13 +107,16 @@ export const useMockDashboardApi = ({
               i: newId,
             },
             explicitInput: {
-              ...panelPackage.initialState,
+              ...(panelPackage.serializedState?.rawState ?? {}),
               id: newId,
             },
           },
         });
       },
       canRemovePanels: () => true,
+      getChildApi: () => {
+        throw new Error('getChildApi implemenation not provided');
+      },
     };
     // only run onMount
     // eslint-disable-next-line react-hooks/exhaustive-deps

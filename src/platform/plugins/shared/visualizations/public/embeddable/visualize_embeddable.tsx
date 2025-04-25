@@ -156,13 +156,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     const serializeVisualizeEmbeddable = (
       savedObjectId: string | undefined,
-      linkedToLibrary: boolean
+      linkedToLibraryArg: boolean
     ) => {
       return serializeState({
         serializedVis: vis$.getValue().serialize(),
         titles: titleManager.getLatestState(),
         id: savedObjectId,
-        linkedToLibrary,
+        linkedToLibrary: linkedToLibraryArg,
         ...(runtimeState.savedObjectProperties
           ? { savedObjectProperties: runtimeState.savedObjectProperties }
           : {}),
