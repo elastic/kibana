@@ -4,6 +4,23 @@ env:
   GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-deploy-project-from-pr
 
 steps:
+  - group: 'Notify if missing labels'
+    if: "build.env('GITHUB_PR_LABELS') !~ /ci:project-deploy-(elasticsearch|observability|security)/"
+
+    steps:
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Project deployments require a Github label, please add one or more of `ci:project-deploy-(elasticsearch|observability|security)` and trigger the job through the checkbox again." \
+            --context "project-deploy-job" \
+            --clear-previous
+        label: Comment missing labels
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
   - group: 'Project Deployment'
     if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|security)/"
 
