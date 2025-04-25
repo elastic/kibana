@@ -277,7 +277,7 @@ export function initializePanelsManager(
   const duplicatePanel = async (uuidToDuplicate: string) => {
     const layoutItemToDuplicate = layout$.value[uuidToDuplicate];
     const apiToDuplicate = children$.value[uuidToDuplicate];
-    if (!apiToDuplicate) throw new PanelNotFoundError();
+    if (!apiToDuplicate || !layoutItemToDuplicate) throw new PanelNotFoundError();
 
     const allTitles = await getPanelTitles();
     const lastTitle = apiPublishesTitle(apiToDuplicate) ? getTitle(apiToDuplicate) ?? '' : '';
@@ -299,7 +299,7 @@ export function initializePanelsManager(
     });
     layout$.next({
       ...otherPanels,
-      uuidOfDuplicate: {
+      [uuidOfDuplicate]: {
         gridData: { ...newPanelPlacement, i: uuidOfDuplicate },
         type: layoutItemToDuplicate.type,
       },
