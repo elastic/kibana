@@ -113,7 +113,6 @@ export const eqlExecutor = async ({
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
 
-  // eslint-disable-next-line complexity
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
