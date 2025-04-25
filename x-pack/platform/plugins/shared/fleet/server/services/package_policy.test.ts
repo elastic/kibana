@@ -3108,7 +3108,7 @@ describe('Package policy service', () => {
         });
       });
 
-      it('should only set removeProtection for endpoint packages in a mixed bulkUpdate', async () => {
+      it('should only set removeProtection for endpoint package in a mixed bulkUpdate', async () => {
         const savedObjectsClient = savedObjectsClientMock.create();
 
         const mixedPoliciesSO = [
@@ -3125,7 +3125,10 @@ describe('Package policy service', () => {
             package: { name: 'not-endpoint', title: 'Other', version: '1.0.0' },
           }),
         ];
-        const mixedTestedPolicies = mixedPoliciesSO.map((so) => so.attributes);
+        const mixedTestedPolicies = [
+          { ...mixedPoliciesSO[0].attributes, policy_ids: [] }, // endpoint policy IDs removed
+          { ...mixedPoliciesSO[1].attributes, policy_ids: ['test-agent-policy-2'] }, // not-endpoint unchanged
+        ];
 
         setupSOClientMocks(savedObjectsClient, mixedPoliciesSO);
 
@@ -3140,14 +3143,12 @@ describe('Package policy service', () => {
         const calls = mockAgentPolicyService.bumpRevision.mock.calls;
         expect(calls).toHaveLength(2);
 
-        // Endpoint: logic applies (true or false depending on ids, tweak as needed)
-        expect(calls[0][2]).toContain('test-agent-policy-1');
-        expect(calls[0]?.[3]?.removeProtection).toBeDefined();
-        expect(typeof calls[0]?.[3]?.removeProtection).toBe('boolean');
+        // Find by id, not by order
+        const endpointCall = calls.find((call) => call[2] === 'test-agent-policy-1');
+        const nonEndpointCall = calls.find((call) => call[2] === 'test-agent-policy-2');
 
-        // Non-endpoint: always false
-        expect(calls[1][2]).toContain('test-agent-policy-2');
-        expect(calls[1][3]).toMatchObject({ removeProtection: false });
+        expect(endpointCall?.[3]).toMatchObject({ removeProtection: true });
+        expect(nonEndpointCall?.[3]).toMatchObject({ removeProtection: false });
       });
     });
   });
