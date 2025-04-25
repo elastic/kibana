@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { usePermissions } from '../../hooks/use_permissions';
-import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../hooks/use_kibana';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { SloManagementContent } from './components/slo_management_content';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useKibana } from '../../hooks/use_kibana';
+import { useLicense } from '../../hooks/use_license';
+import { usePermissions } from '../../hooks/use_permissions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { SloOutdatedFilterCallout } from './components/slo_management_outdated_filter_callout';
+import { SloManagementTableWrapper } from './components/slo_management_table_wrapper';
 
 export function SloManagementPage() {
   const {
@@ -71,7 +73,10 @@ export function SloManagementPage() {
       }}
     >
       <HeaderMenu />
-      <SloManagementContent />
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <SloOutdatedFilterCallout />
+        <SloManagementTableWrapper />
+      </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );
 }

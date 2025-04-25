@@ -19,35 +19,27 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
+import React from 'react';
+import { sloPaths } from '../../../../common';
+import { SLO_MODEL_VERSION } from '../../../../common/constants';
+import { paths } from '../../../../common/locators/paths';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { useResetSlo } from '../../../hooks/use_reset_slo';
-import { useEnableSlo } from '../../../hooks/use_enable_slo';
-import { useDisableSlo } from '../../../hooks/use_disable_slo';
-import { useCloneSlo } from '../../../hooks/use_clone_slo';
-import { sloPaths } from '../../../../common';
-import { paths } from '../../../../common/locators/paths';
-import { SloManagementSearchBar } from './slo_management_search_bar';
-import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
-import { SLO_MODEL_VERSION } from '../../../../common/constants';
 import { useUrlSearchState } from './hooks/use_url_search_state';
-import { useDeleteSlo } from '../../../hooks/use_delete_slo';
+import { SloManagementSearchBar } from './slo_management_search_bar';
+import type { Action } from './slo_management_table_wrapper';
 
-export function SloManagementTable() {
+export function SloManagementTable({ setAction }: { setAction: (action: Action) => void }) {
   const { state, onStateChange } = useUrlSearchState();
   const { search, page, perPage, tags, includeOutdatedOnly } = state;
-  const { services } = useKibana();
-
   const {
-    http,
-    application: { navigateToUrl },
-  } = services;
+    services: {
+      http,
+      application: { navigateToUrl },
+    },
+  } = useKibana();
 
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
     page: page + 1,
@@ -58,63 +50,6 @@ export function SloManagementTable() {
   });
 
   const { data: permissions } = usePermissions();
-
-  const [sloToDelete, setSloToDelete] = useState<SLODefinitionResponse | undefined>(undefined);
-  const [sloToReset, setSloToReset] = useState<SLODefinitionResponse | undefined>(undefined);
-  const [sloToEnable, setSloToEnable] = useState<SLODefinitionResponse | undefined>(undefined);
-  const [sloToDisable, setSloToDisable] = useState<SLODefinitionResponse | undefined>(undefined);
-
-  const { mutate: deleteSlo } = useDeleteSlo();
-  const { mutate: resetSlo } = useResetSlo();
-  const { mutate: enableSlo } = useEnableSlo();
-  const { mutate: disableSlo } = useDisableSlo();
-
-  const handleDeleteConfirm = () => {
-    if (sloToDelete) {
-      deleteSlo({ id: sloToDelete.id, name: sloToDelete.name });
-      setSloToDelete(undefined);
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setSloToDelete(undefined);
-  };
-
-  const handleResetConfirm = () => {
-    if (sloToReset) {
-      resetSlo({ id: sloToReset.id, name: sloToReset.name });
-      setSloToReset(undefined);
-    }
-  };
-
-  const handleResetCancel = () => {
-    setSloToReset(undefined);
-  };
-
-  const handleEnableConfirm = async () => {
-    if (sloToEnable) {
-      enableSlo({ id: sloToEnable.id, name: sloToEnable.name });
-      setSloToEnable(undefined);
-    }
-  };
-
-  const handleEnableCancel = () => {
-    setSloToEnable(undefined);
-  };
-
-  const handleDisableConfirm = async () => {
-    if (sloToDisable) {
-      disableSlo({ id: sloToDisable.id, name: sloToDisable.name });
-      setSloToDisable(undefined);
-    }
-  };
-
-  const handleDisableCancel = () => {
-    setSloToDisable(undefined);
-  };
-
-  const navigateToClone = useCloneSlo();
-
   const actions: Array<DefaultItemAction<SLODefinitionResponse>> = [
     {
       type: 'icon',
@@ -141,9 +76,7 @@ export function SloManagementTable() {
         defaultMessage: 'Clone',
       }),
       'data-test-subj': 'sloActionsClone',
-      onClick: (slo: SLODefinitionResponse) => {
-        navigateToClone(slo);
-      },
+      onClick: (slo: SLODefinitionResponse) => setAction({ item: slo, type: 'clone' }),
     },
     {
       type: 'icon',
@@ -168,12 +101,7 @@ export function SloManagementTable() {
       enabled: () => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => {
         const isEnabled = slo.enabled;
-
-        if (isEnabled) {
-          setSloToDisable(slo);
-        } else {
-          setSloToEnable(slo);
-        }
+        setAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
       },
     },
     {
@@ -187,9 +115,7 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsDelete',
       enabled: (slo: SLODefinitionResponse) => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => {
-        setSloToDelete(slo);
-      },
+      onClick: (slo: SLODefinitionResponse) => setAction({ item: slo, type: 'delete' }),
     },
 
     {
@@ -203,9 +129,7 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsReset',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => {
-        setSloToReset(slo);
-      },
+      onClick: (slo: SLODefinitionResponse) => setAction({ item: slo, type: 'reset' }),
     },
   ];
 
@@ -313,60 +237,26 @@ export function SloManagementTable() {
   };
 
   return (
-    <>
-      <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar onRefresh={refetch} />
-        <EuiSpacer size="m" />
-        <EuiBasicTable<SLODefinitionResponse>
-          tableCaption={TABLE_CAPTION}
-          error={
-            isError
-              ? i18n.translate('xpack.slo.sloManagementTable.error', {
-                  defaultMessage: 'An error occurred while retrieving SLO definitions',
-                })
-              : undefined
-          }
-          items={data?.results ?? []}
-          rowHeader="name"
-          columns={columns}
-          pagination={pagination}
-          onChange={onTableChange}
-          loading={isLoading}
-        />
-      </EuiPanel>
-
-      {sloToDelete ? (
-        <SloDeleteModal
-          slo={sloToDelete}
-          onCancel={handleDeleteCancel}
-          onSuccess={handleDeleteConfirm}
-        />
-      ) : null}
-
-      {sloToReset ? (
-        <SloResetConfirmationModal
-          slo={sloToReset}
-          onCancel={handleResetCancel}
-          onConfirm={handleResetConfirm}
-        />
-      ) : null}
-
-      {sloToEnable ? (
-        <SloEnableConfirmationModal
-          slo={sloToEnable}
-          onCancel={handleEnableCancel}
-          onConfirm={handleEnableConfirm}
-        />
-      ) : null}
-
-      {sloToDisable ? (
-        <SloDisableConfirmationModal
-          slo={sloToDisable}
-          onCancel={handleDisableCancel}
-          onConfirm={handleDisableConfirm}
-        />
-      ) : null}
-    </>
+    <EuiPanel hasBorder={true}>
+      <SloManagementSearchBar onRefresh={refetch} />
+      <EuiSpacer size="m" />
+      <EuiBasicTable<SLODefinitionResponse>
+        tableCaption={TABLE_CAPTION}
+        error={
+          isError
+            ? i18n.translate('xpack.slo.sloManagementTable.error', {
+                defaultMessage: 'An error occurred while retrieving SLO definitions',
+              })
+            : undefined
+        }
+        items={data?.results ?? []}
+        rowHeader="name"
+        columns={columns}
+        pagination={pagination}
+        onChange={onTableChange}
+        loading={isLoading}
+      />
+    </EuiPanel>
   );
 }
 
