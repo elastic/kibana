@@ -75,14 +75,6 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
       });
 
       it('with logs collection disabled', async () => {
-        // First, make sure either the enableLogsLink or viewDetailsLink is available
-        await retry.waitFor('A button to open ES Deprecations flyout to be visible', async () => {
-          return (
-            (await testSubjects.exists('enableLogsLink')) ||
-            (await testSubjects.exists('viewDetailsLink'))
-          );
-        });
-
         await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
 
         // Add additional retry and wait for flyout to be fully visible
@@ -104,14 +96,6 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
       });
 
       it('with logs collection enabled', async () => {
-        // First, make sure either the enableLogsLink or viewDetailsLink is available
-        await retry.waitFor('A button to open ES Deprecations flyout to be visible', async () => {
-          return (
-            (await testSubjects.exists('enableLogsLink')) ||
-            (await testSubjects.exists('viewDetailsLink'))
-          );
-        });
-
         await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
 
         // Add additional retry and wait for flyout to be fully visible
