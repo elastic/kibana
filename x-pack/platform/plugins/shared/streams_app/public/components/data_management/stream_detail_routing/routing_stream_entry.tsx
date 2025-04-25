@@ -78,9 +78,7 @@ export function RoutingStreamEntry({
             {...draggableProvided.dragHandleProps}
             aria-label={i18n.translate(
               'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
-              {
-                defaultMessage: 'Drag Handle',
-              }
+              { defaultMessage: 'Drag Handle' }
             )}
           >
             <EuiIcon type="grabOmnidirectional" />
