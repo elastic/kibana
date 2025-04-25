@@ -27,7 +27,7 @@ const stream: WiredIngestUpsertRequest = {
     wired: {
       routing: [],
       fields: {
-        numberfield: {
+        'attributes.numberfield': {
           type: 'long',
         },
       },
