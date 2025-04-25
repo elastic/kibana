@@ -50,8 +50,9 @@ export const getInstalledIntegrationList = async (
 
   const installedPackages = installedPackageData?.items?.filter((installedPkg) => {
     const isInstalled =
-      installedPkg.status === installationStatuses.Installed ||
-      installedPkg.status === installationStatuses.InstallFailed;
+      (installedPkg.status === installationStatuses.Installed ||
+        installedPkg.status === installationStatuses.InstallFailed) &&
+      installedPkg.dataStreams.length > 0;
     return availableIntegrationNames
       ? isInstalled &&
           availableIntegrationNames.some(
