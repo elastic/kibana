@@ -187,6 +187,26 @@ const TrustedAppDataSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+/**
+ * Schema to validate Trusted Apps in Advanced mode
+ */
+const TrustedAppAdvancedModeDataSchema = schema.object(
+  {
+    entries: schema.arrayOf(
+      schema.object(
+        {
+          field: schema.string(),
+        },
+        { unknowns: 'ignore' }
+      ),
+      { minSize: 1 }
+    ),
+  },
+  {
+    unknowns: 'ignore',
+  }
+);
+
 export class TrustedAppValidator extends BaseValidator {
   static isTrustedApp(item: { listId: string }): boolean {
     return item.listId === ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
