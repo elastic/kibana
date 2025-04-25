@@ -208,6 +208,7 @@ class Package {
     /** @type {import('@kbn/projects-solutions-groups').ModuleVisibility} */
     let visibility = 'shared';
 
+    // the following checks will only work in dev mode, as production builds create NPM packages under 'node_modules/@kbn-...'
     if (dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/')) {
       group = 'platform';
       visibility =
@@ -228,6 +229,7 @@ class Package {
       group = 'chat';
       visibility = 'private';
     } else {
+      // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
       //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
