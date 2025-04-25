@@ -36,12 +36,9 @@ export const getRetrieveIntegrationsNode = ({
       telemetryClient.reportIntegrationsMatch({
         preFilterIntegrations: [],
       });
+      const comment = '## Integration Matching Summary\n\nNo related integration found.';
       return {
-        comments: [
-          generateAssistantComment(
-            '## Integration Matching Summary\nNo related integration found.'
-          ),
-        ],
+        comments: [generateAssistantComment(comment)],
       };
     }
 
