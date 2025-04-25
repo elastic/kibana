@@ -1,6 +1,6 @@
 {
   "type": "plugin",
-  "id": "@kbn/lock-manager",
+  "id": "@kbn/lock-manager-plugin",
   "owner": ["@elastic/obs-ai-assistant"],  
   "group": "platform",
   "visibility": "shared",
