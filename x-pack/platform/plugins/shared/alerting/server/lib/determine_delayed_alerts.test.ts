@@ -202,7 +202,7 @@ describe('determineDelayedAlerts', () => {
     expect(ruleRunMetricsStore.setNumberOfDelayedAlerts).toHaveBeenCalledWith(2);
   });
 
-  test('should remove the alert from recoveredAlerts and should not return the alert in trackedRecoveredAlerts if the activeCount is less than the rule alertDelay greater and than 0', () => {
+  test.only('should remove the alert from recoveredAlerts and should not return the alert in trackedRecoveredAlerts if the activeCount is less than the rule alertDelay greater and than 0', () => {
     const alert1 = new Alert('1', {
       meta: { activeCount: 1, uuid: 'uuid-1' },
     });
@@ -218,8 +218,32 @@ describe('determineDelayedAlerts', () => {
       startedAt: null,
       ruleRunMetricsStore,
     });
-    expect(recoveredAlerts).toMatchInlineSnapshot();
-    expect(trackedRecoveredAlerts).toMatchInlineSnapshot();
+    expect(recoveredAlerts).toMatchInlineSnapshot(`
+      Object {
+        "2": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": "uuid-2",
+          },
+          "state": Object {},
+        },
+      }
+    `);
+    expect(trackedRecoveredAlerts).toMatchInlineSnapshot(`
+      Object {
+        "2": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": "uuid-2",
+          },
+          "state": Object {},
+        },
+      }
+    `);
     expect(ruleRunMetricsStore.setNumberOfDelayedAlerts).toHaveBeenCalledWith(0);
   });
 
