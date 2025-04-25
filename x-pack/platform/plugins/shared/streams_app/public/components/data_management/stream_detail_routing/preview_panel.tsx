@@ -15,7 +15,7 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import { useDebounced } from '../../../util/use_debounce';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -26,14 +26,9 @@ import { PreviewMatches } from './preview_matches';
 import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 import { selectCurrentRule } from './state_management/stream_routing_state_machine';
 import { AssetImage } from '../../asset_image';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export function PreviewPanel() {
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
 
   const isIdle = routingSnapshot.matches({ ready: 'idle' });
@@ -46,11 +41,7 @@ export function PreviewPanel() {
 
   const debouncedCondition = useDebounced(condition, 300);
 
-  const {
-    timeRange,
-    setTimeRange,
-    absoluteTimeRange: { start, end },
-  } = data.query.timefilter.timefilter.useTimefilter();
+  const { timeState, timeState$ } = useTimefilter();
 
   const {
     isLoadingDocuments,
@@ -62,13 +53,27 @@ export function PreviewPanel() {
     documentCountsError,
   } = useAsyncSample({
     condition: debouncedCondition,
-    start: start?.valueOf(),
-    end: end?.valueOf(),
+    start: timeState.start,
+    end: timeState.end,
     size: 100,
     streamDefinition: definition,
   });
 
   const hasDocuments = !isEmpty(documents);
+
+  useEffect(() => {
+    const subscription = timeState$.subscribe({
+      next: ({ kind }) => {
+        if (kind === 'override') {
+          refresh();
+        }
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [timeState$, refresh]);
+
   let content;
 
   if (isIdle) {
@@ -199,26 +204,8 @@ export function PreviewPanel() {
                 defaultMessage: 'Data Preview',
               })}
             </strong>
-          </EuiFlexGroup>
-          <StreamsAppSearchBar
-            onQuerySubmit={({ dateRange }, isUpdate) => {
-              if (!isUpdate) {
-                refresh();
-                return;
-              }
-
-              if (dateRange) {
-                setTimeRange({
-                  from: dateRange.from,
-                  to: dateRange?.to,
-                  mode: dateRange.mode,
-                });
-              }
-            }}
-            onRefresh={refresh}
-            dateRangeFrom={timeRange.from}
-            dateRangeTo={timeRange.to}
-          />
+          </EuiFlexGroup>            
+          <StreamsAppSearchBar showDatePicker />
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiSpacer size="s" />

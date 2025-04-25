@@ -1138,6 +1138,24 @@
             "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.onClosePopover",
+            "type": "Function",
+            "tags": [],
+            "label": "onClosePopover",
+            "description": [
+              "\nOptional callback when data view picker is closed"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -26,7 +26,7 @@ export class FleetManager extends Manager {
   }
 
   public async setup(): Promise<void> {
-    const version = await getLatestAvailableAgentVersion(this.kbnClient);
+    const version = await getLatestAvailableAgentVersion(this.kbnClient, this.log);
     this.fleetServer = await startFleetServer({
       kbnClient: this.kbnClient,
       logger: this.log,

@@ -239,10 +239,15 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/security-ai-prompts",
+    "@kbn/inference-common",
+    "@kbn/esql-ast",
+    "@kbn/inference-langchain",
     "@kbn/scout-security",
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
-    "@kbn/inference-endpoint-ui-common"
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/actions-types",
+    "@kbn/triggers-actions-ui-types",
   ]
 }

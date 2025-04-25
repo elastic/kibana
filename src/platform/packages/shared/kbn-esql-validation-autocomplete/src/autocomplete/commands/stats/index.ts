@@ -25,6 +25,7 @@ import {
   getPosition,
   whereCompleteItem,
 } from './util';
+import { ESQL_VARIABLES_PREFIX } from '../../../shared/constants';
 import { isMarkerNode } from '../../../shared/context';
 
 export async function suggest({
@@ -43,10 +44,12 @@ export async function suggest({
     await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
     true
   );
+  const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
     Boolean(supportsControls),
     ESQLVariableType.FUNCTIONS,
-    getVariables
+    getVariables,
+    lastCharacterTyped !== ESQL_VARIABLES_PREFIX
   );
 
   switch (pos) {

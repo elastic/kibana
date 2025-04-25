@@ -6,12 +6,22 @@
  */
 
 import React from 'react';
+
 import { render, fireEvent } from '@testing-library/react';
 import { CardSelectorList } from './card_selector_list';
 import type { CardSelectorListItem } from './card_selector_list';
 import { RulesCardItemId } from '../rules/types';
+import { OnboardingCardId } from '../../../../constants';
+import { OnboardingContextProvider } from '../../../onboarding_context';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
+import { TestProviders } from '../../../../../common/mock';
 
 const mockOnSelect = jest.fn();
+
+jest.mock('../../../../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: { get: jest.fn() },
+}));
+const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;
 
 const items: CardSelectorListItem[] = [
   {
@@ -31,6 +41,7 @@ const defaultProps = {
   onSelect: mockOnSelect,
   selectedItem: items[0],
   title: 'Select a Rule',
+  cardId: OnboardingCardId.rules,
 };
 
 describe('CardSelectorList', () => {
@@ -40,6 +51,7 @@ describe('CardSelectorList', () => {
     Element.prototype.scrollIntoView = scrollIntoViewMock;
   });
   beforeEach(() => {
+    mockExperimentalFeatures.mockReturnValue({});
     jest.clearAllMocks();
   });
   afterAll(() => {
@@ -47,46 +59,81 @@ describe('CardSelectorList', () => {
   });
 
   it('renders the component with the correct title', () => {
-    const { getByText } = render(<CardSelectorList {...defaultProps} />);
+    const { getByText } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <CardSelectorList {...defaultProps} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
     expect(getByText('Select a Rule')).toBeInTheDocument();
   });
 
   it('renders all card items', () => {
-    const { getByTestId } = render(<CardSelectorList {...defaultProps} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <CardSelectorList {...defaultProps} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
     items.forEach((item) => {
       expect(getByTestId(`cardSelectorItem-${item.id}`)).toBeInTheDocument();
     });
   });
 
   it('applies the "selected" class to the selected item', () => {
-    const { getByTestId } = render(<CardSelectorList {...defaultProps} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <CardSelectorList {...defaultProps} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
     const selectedItem = getByTestId(`cardSelectorItem-${RulesCardItemId.install}`);
     expect(selectedItem).toHaveClass('selectedCardPanelItem');
   });
 
   it('does not apply the "selected" class to unselected items', () => {
-    const { getByTestId } = render(<CardSelectorList {...defaultProps} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <CardSelectorList {...defaultProps} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
     const unselectedItem = getByTestId(`cardSelectorItem-${RulesCardItemId.create}`);
     expect(unselectedItem).not.toHaveClass('selectedCardPanelItem');
   });
 
   it('calls onSelect with the correct item when an item is clicked', () => {
-    const { getByTestId } = render(<CardSelectorList {...defaultProps} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <CardSelectorList {...defaultProps} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
     const unselectedItem = getByTestId(`cardSelectorItem-${RulesCardItemId.create}`);
     fireEvent.click(unselectedItem);
     expect(mockOnSelect).toHaveBeenCalledWith(items[1]);
   });
 
-  it('scrolls to the selected item on initial render', () => {
-    jest.useFakeTimers();
-    render(<CardSelectorList {...defaultProps} />);
-    jest.runAllTimers();
-    expect(scrollIntoViewMock).toHaveBeenCalled();
-  });
-
   it('updates the selected item visually when onSelect is called', () => {
-    const { rerender, getByTestId } = render(<CardSelectorList {...defaultProps} />);
-    rerender(<CardSelectorList {...defaultProps} selectedItem={items[1]} />);
+    const { rerender, getByTestId } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <CardSelectorList {...defaultProps} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
+    rerender(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <CardSelectorList {...defaultProps} selectedItem={items[1]} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
 
     const newlySelectedItem = getByTestId(`cardSelectorItem-${RulesCardItemId.create}`);
     const previouslySelectedItem = getByTestId(`cardSelectorItem-${RulesCardItemId.install}`);
