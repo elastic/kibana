@@ -12,9 +12,10 @@ import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerting-types';
 import type { EuiDataGridColumn } from '@elastic/eui';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
+import type { AdditionalTableContext } from '../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
-  AdditionalTableContext,
   ALERT_TABLE_CONSUMERS,
   CASES_CONFIGURATION,
   columns,
@@ -29,7 +30,6 @@ import { getDataViewStateFromIndexFields } from '../../../common/containers/sour
 import { useKibana } from '../../../common/lib/kibana';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
-import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import { useAdditionalBulkActions } from '../../../detections/hooks/alert_summary/use_additional_bulk_actions';
 
 export interface TableProps {
