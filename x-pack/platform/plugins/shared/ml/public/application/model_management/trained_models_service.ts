@@ -32,7 +32,6 @@ import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
-import { ELASTIC_HOSTED_MODEL_IDS } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   isBaseNLPModelItem,
   isNLPModelItem,
@@ -92,6 +91,7 @@ export class TrainedModelsService {
   private isInitialized = false;
   private telemetryService!: ITelemetryClient;
   private deploymentParamsMapper!: DeploymentParamsMapper;
+  private uiInitiatedDownloads = new Set<string>();
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -163,6 +163,8 @@ export class TrainedModelsService {
 
   public downloadModel(modelId: string) {
     this._isLoading$.next(true);
+    this.uiInitiatedDownloads.add(modelId);
+
     from(this.trainedModelsApiService.installElasticTrainedModelConfig(modelId))
       .pipe(
         finalize(() => {
@@ -182,6 +184,7 @@ export class TrainedModelsService {
             model_id: modelId,
             result: 'failure',
           });
+          this.uiInitiatedDownloads.delete(modelId);
         },
       });
   }
@@ -619,7 +622,7 @@ export class TrainedModelsService {
                 this.abortedDownloads.delete(item.model_id);
                 newItem.state = MODEL_STATE.NOT_DOWNLOADED;
 
-                if (this.isHostedModel(item.model_id)) {
+                if (this.uiInitiatedDownloads.has(item.model_id)) {
                   this.telemetryService.trackTrainedModelsModelDownload({
                     model_id: item.model_id,
                     result: 'cancelled',
@@ -630,7 +633,10 @@ export class TrainedModelsService {
                 newItem.state = MODEL_STATE.DOWNLOADED;
 
                 // Only track success if the model was downloading
-                if (downloadInProgress.has(item.model_id) && this.isHostedModel(item.model_id)) {
+                if (
+                  downloadInProgress.has(item.model_id) &&
+                  this.uiInitiatedDownloads.has(item.model_id)
+                ) {
                   this.telemetryService.trackTrainedModelsModelDownload({
                     model_id: item.model_id,
                     result: 'success',
@@ -661,12 +667,13 @@ export class TrainedModelsService {
           this.stopPolling();
           this.downloadStatusFetchInProgress = false;
 
-          downloadInProgress.forEach((modelId) => {
+          this.uiInitiatedDownloads.forEach((modelId) => {
             this.telemetryService.trackTrainedModelsModelDownload({
               model_id: modelId,
               result: 'failure',
             });
           });
+          this.uiInitiatedDownloads.clear();
         },
       });
   }
@@ -676,10 +683,6 @@ export class TrainedModelsService {
       this.pollingSubscription.unsubscribe();
     }
     this.downloadStatusFetchInProgress = false;
-  }
-
-  private isHostedModel(modelId: string) {
-    return ELASTIC_HOSTED_MODEL_IDS.includes(modelId);
   }
 
   private cleanupService() {
