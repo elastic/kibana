@@ -13,7 +13,7 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 jest.mock('./use_kibana');
 jest.mock('./use_ai_assistant_app_service');
 jest.mock('p-retry', () => {
-  return (fn: () => Promise<any>) => fn(); // disables retry for test
+  return (fn: () => Promise<any>) => fn();
 });
 
 describe('useKnowledgeBase', () => {

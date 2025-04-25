@@ -74,7 +74,7 @@ const WarmUpModel = ({
             color="primary"
             fill
             isLoading={knowledgeBase.isWarmingUpModel}
-            data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
+            data-test-subj="observabilityAiAssistantWelcomeMessageReDeployModelButton"
             onClick={handleWarmup}
           >
             {i18n.translate('xpack.aiAssistant.knowledgeBase.wakeUpKnowledgeBaseModel', {

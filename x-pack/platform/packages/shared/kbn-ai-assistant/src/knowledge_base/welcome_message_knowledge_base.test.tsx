@@ -8,17 +8,14 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
-
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 
-jest.mock('./select_model_and_install_knowledge_base', () => ({
-  __esModule: true,
-  SelectModelAndInstallKnowledgeBase: ({ onInstall, isInstalling }: any) => (
-    <button onClick={() => onInstall('mock-id')} disabled={isInstalling}>
-      Install Knowledge Base
-    </button>
-  ),
+jest.mock('../hooks/use_inference_endpoints', () => ({
+  useInferenceEndpoints: () => ({
+    inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+    isLoading: false,
+  }),
 }));
 
 function createMockKnowledgeBase(
@@ -50,6 +47,28 @@ function renderComponent(kb: UseKnowledgeBaseResult) {
 describe('WelcomeMessageKnowledgeBase', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it(`renders the "not set up" state if server returns errorMessage (no model exists) but user hasn't started installing`, async () => {
+    const kb = createMockKnowledgeBase({
+      isInstalling: false,
+      install: jest.fn(async (_id: string) => {}),
+      status: {
+        value: {
+          enabled: true,
+          kbState: KnowledgeBaseState.NOT_INSTALLED,
+          errorMessage: 'no model',
+        },
+        loading: false,
+        refresh: jest.fn(),
+      },
+    });
+
+    renderComponent(kb);
+
+    expect(screen.getByText(/Get started by setting up the Knowledge Base/i)).toBeInTheDocument();
+    expect(screen.getByText(/Install Knowledge Base/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Inspect/i)).toBeNull();
   });
 
   it('renders install message if isInstalling', () => {
@@ -175,26 +194,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       screen.getByText(/Knowledge Base setup failed. Check 'Inspect' for details./i)
     ).toBeInTheDocument();
     expect(screen.getAllByText(/Inspect/i)).toHaveLength(2);
-  });
-
-  it('renders "not set up" if server returns errorMessage (no model exists) but user hasnt started installing', () => {
-    const kb = createMockKnowledgeBase({
-      isInstalling: false,
-      status: {
-        value: {
-          enabled: true,
-          kbState: KnowledgeBaseState.NOT_INSTALLED,
-          errorMessage: 'no model',
-        },
-        loading: false,
-        refresh: jest.fn(),
-      },
-    });
-    renderComponent(kb);
-
-    expect(screen.getByText(/Get started by setting up the Knowledge Base/i)).toBeInTheDocument();
-    expect(screen.getByText(/Install Knowledge Base/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Inspect/i)).toBeNull();
   });
 
   it('renders "We are setting up your knowledge base" if model is not ready but endpoint exists', () => {
