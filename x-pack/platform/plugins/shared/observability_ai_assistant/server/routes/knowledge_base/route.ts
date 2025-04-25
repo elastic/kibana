@@ -11,13 +11,16 @@ import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
   InferenceInferenceEndpointInfo,
-  MlDeploymentAllocationState,
-  MlDeploymentAssignmentState,
-  MlTrainedModelDeploymentAllocationStatus,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import {
+  Instruction,
+  KnowledgeBaseEntry,
+  KnowledgeBaseEntryRole,
+  KnowledgeBaseState,
+} from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -31,14 +34,10 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     request,
   }): Promise<{
     errorMessage?: string;
-    ready: boolean;
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
-    model_stats?: {
-      deployment_state?: MlDeploymentAssignmentState;
-      allocation_state?: MlDeploymentAllocationState;
-      allocation_count?: MlTrainedModelDeploymentAllocationStatus['allocation_count'];
-    };
+    modelStats?: Partial<MlTrainedModelStats>;
+    kbState: KnowledgeBaseState;
   }> => {
     const client = await service.getClient({ request });
 
@@ -308,8 +307,9 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const { ready } = await client.getKnowledgeBaseStatus();
-    if (!ready) {
+    const { kbState } = await client.getKnowledgeBaseStatus();
+
+    if (kbState !== KnowledgeBaseState.READY) {
       throw new Error('Knowledge base is not ready');
     }
 

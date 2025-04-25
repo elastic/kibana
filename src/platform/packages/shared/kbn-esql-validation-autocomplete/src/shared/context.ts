@@ -26,6 +26,7 @@ import {
   pipePrecedesCurrentWord,
   getFunctionDefinition,
   isOptionItem,
+  within,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -129,10 +130,7 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   const containingFunction = Walker.findAll(
     command,
     (node) =>
-      node.type === 'function' &&
-      node.subtype === 'variadic-call' &&
-      node.location?.min <= offset &&
-      node.location?.max >= offset
+      node.type === 'function' && node.subtype === 'variadic-call' && within(offset, node.location)
   ).pop() as ESQLFunction | undefined;
 
   return {
@@ -166,7 +164,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let inComment = false;
 
   Walker.visitComments(ast, (node) => {
-    if (node.location && node.location.min <= offset && node.location.max >= offset) {
+    if (within(offset, node.location)) {
       inComment = true;
     }
   });
@@ -180,7 +178,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let withinStatsWhereClause = false;
   Walker.walk(ast, {
     visitFunction: (fn) => {
-      if (fn.name === 'where' && fn.location.min <= offset) {
+      if (fn.name === 'where' && within(offset, fn.location)) {
         withinStatsWhereClause = true;
       }
     },
@@ -207,7 +205,12 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       }
     }
   }
-  if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
+  if (
+    !command ||
+    (queryString.length <= offset &&
+      pipePrecedesCurrentWord(queryString) &&
+      command.location.max < queryString.length)
+  ) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option, containingFunction };
   }

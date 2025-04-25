@@ -352,7 +352,7 @@ export class StreamsClient {
           scopedClusterClient: this.dependencies.scopedClusterClient,
         });
         if (!privileges.read) {
-          throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
+          throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
       }
       return streamDefinition;
@@ -382,7 +382,7 @@ export class StreamsClient {
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
-            throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
+            throw new SecurityError(`Cannot read stream, insufficient privileges`);
           }
         }
       ),
@@ -414,6 +414,47 @@ export class StreamsClient {
       const dataStream = response.data_streams[0];
       return dataStream;
     });
+  }
+
+  /**
+   * Checks whether the user has the required privileges to manage the stream.
+   * Managing a stream means updating the stream properties. It does not
+   * include the dashboard links.
+   */
+  async getPrivileges(name: string) {
+    const privileges =
+      await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
+        cluster: [
+          'manage_index_templates',
+          'manage_ingest_pipelines',
+          'manage_pipeline',
+          'read_pipeline',
+        ],
+        index: [
+          {
+            names: [name],
+            privileges: [
+              'read',
+              'write',
+              'create',
+              'manage',
+              'monitor',
+              'manage_data_stream_lifecycle',
+              'manage_ilm',
+            ],
+          },
+        ],
+      });
+
+    return {
+      manage:
+        Object.values(privileges.cluster).every((privilege) => privilege === true) &&
+        Object.values(privileges.index[name]).every((privilege) => privilege === true),
+      monitor: privileges.index[name].monitor,
+      lifecycle:
+        privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
+      simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
+    };
   }
 
   /**
@@ -454,18 +495,33 @@ export class StreamsClient {
    * Lists both managed and unmanaged streams
    */
   async listStreams(): Promise<StreamDefinition[]> {
+    const streams = await this.listStreamsWithDataStreamExistence();
+    return streams.map((stream) => {
+      const { data_stream_exists: _, ...rest } = stream;
+      return rest;
+    });
+  }
+
+  async listStreamsWithDataStreamExistence(): Promise<
+    Array<StreamDefinition & { data_stream_exists: boolean }>
+  > {
     const [managedStreams, unmanagedStreams] = await Promise.all([
       this.getManagedStreams(),
       this.getUnmanagedDataStreams(),
     ]);
 
-    const allDefinitionsById = new Map<string, StreamDefinition>(
-      managedStreams.map((stream) => [stream.name, stream])
+    const allDefinitionsById = new Map<string, StreamDefinition & { data_stream_exists: boolean }>(
+      managedStreams.map((stream) => [stream.name, { ...stream, data_stream_exists: false }])
     );
 
     unmanagedStreams.forEach((stream) => {
       if (!allDefinitionsById.get(stream.name)) {
-        allDefinitionsById.set(stream.name, stream);
+        allDefinitionsById.set(stream.name, { ...stream, data_stream_exists: true });
+      } else {
+        allDefinitionsById.set(stream.name, {
+          ...allDefinitionsById.get(stream.name)!,
+          data_stream_exists: true,
+        });
       }
     });
 

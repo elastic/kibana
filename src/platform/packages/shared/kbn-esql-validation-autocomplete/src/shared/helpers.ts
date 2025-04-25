@@ -21,6 +21,7 @@ import {
 import {
   ESQLIdentifier,
   ESQLInlineCast,
+  ESQLLocation,
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
@@ -97,6 +98,9 @@ export function isAssignmentComplete(node: ESQLFunction | undefined) {
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
+
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
 
 function isMathFunction(query: string) {
   const queryTrimmed = query.trimEnd();
@@ -200,12 +204,21 @@ function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   return commandLookups!;
 }
 
-export function getCommandDefinition(name: string): CommandDefinition<string> {
-  return buildCommandLookup().get(name.toLowerCase())!;
+export function getCommandDefinition<CommandName extends string>(
+  name: CommandName
+): CommandDefinition<CommandName> {
+  return buildCommandLookup().get(name.toLowerCase()) as unknown as CommandDefinition<CommandName>;
 }
 
 export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
+}
+
+export function getCommandsByName(names: string[]): Array<CommandDefinition<string>> {
+  const commands = buildCommandLookup();
+  return names.map((name) => commands.get(name)).filter((command) => command) as Array<
+    CommandDefinition<string>
+  >;
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {

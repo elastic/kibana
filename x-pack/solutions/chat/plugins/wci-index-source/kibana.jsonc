@@ -1,7 +1,10 @@
 {
   "type": "plugin",
   "id": "@kbn/wci-index-source",
-  "owner": "@elastic/search-kibana",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+   ],
   "group": "chat",
   "visibility": "private",
   "description": "WorkChat Index Source Integration plugin",

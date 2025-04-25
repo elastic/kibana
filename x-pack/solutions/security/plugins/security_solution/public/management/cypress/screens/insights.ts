@@ -39,4 +39,13 @@ export const workflowInsightsSelectors = {
     cy
       .getByTestSubj('globalToastList')
       .within(() => cy.getByTestSubj('euiToastBody').contains(content)),
+  surveySectionExists: () => {
+    cy.getByTestSubj('workflowInsightsSurveySection').should('exist');
+    cy.getByTestSubj('workflowInsightsSurveySection').within(() => {
+      cy.getByTestSubj('workflowInsightsSurveyLink').should('exist');
+    });
+  },
+  surveySectionDoesNotExist: () => {
+    cy.getByTestSubj('workflowInsightsSurveySection').should('not.exist');
+  },
 };

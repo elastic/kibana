@@ -6,6 +6,7 @@
  */
 
 import url from 'url';
+import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 import { synthtrace } from '../../../synthtrace';
 import { sendotlp } from '../../fixtures/synthtrace/sendotlp';
 import { checkA11y } from '../../support/commands';
@@ -33,7 +34,7 @@ describe('Service Overview', () => {
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
       }),
-      'otelToApm'
+      ApmSynthtracePipelineSchema.Otel
     );
   });
 
@@ -151,9 +152,16 @@ describe('Service Overview', () => {
       cy.url().should('include', '/sendotlp-otel-native-synth/errors');
     });
 
-    it('navigates to error detail page', () => {
-      cy.contains('a', '*errors.errorString').click();
+    it('navigates to error detail page and checks error summary', () => {
+      cy.contains('a', 'boom').click();
       cy.contains('div', 'boom');
+
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
+      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
     });
   });
 });

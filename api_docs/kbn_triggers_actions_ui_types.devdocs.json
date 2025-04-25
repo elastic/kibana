@@ -157,20 +157,6 @@
           },
           {
             "parentPluginId": "@kbn/triggers-actions-ui-types",
-            "id": "def-common.RuleType.hasFieldsForAAD",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasFieldsForAAD",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/triggers-actions-ui-types",
             "id": "def-common.RuleType.hasAlertsMappings",
             "type": "CompoundType",
             "tags": [],
