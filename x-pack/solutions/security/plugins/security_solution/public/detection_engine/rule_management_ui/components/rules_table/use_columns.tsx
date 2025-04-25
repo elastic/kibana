@@ -476,7 +476,7 @@ export const useMonitoringColumns = ({
             customTooltip={
               <div style={{ maxWidth: '20px' }}>
                 <PopoverTooltip columnName={i18n.COLUMN_GAP} anchorColor="subdued">
-                  <EuiText style={{ width: 300 }}>
+                  <EuiText css={{ width: 300 }}>
                     <FormattedMessage
                       defaultMessage="Duration of most recent gap in Rule execution. Adjust Rule look-back or {seeDocs} for mitigating gaps."
                       id="xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltip"
@@ -505,7 +505,12 @@ export const useMonitoringColumns = ({
       },
       {
         field: 'gap_info.total_unfilled_duration_ms',
-        name: i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION,
+        name: (
+          <TableHeaderTooltipCell
+            title={i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION}
+            tooltipContent={i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP}
+          />
+        ),
         render: (value: number | undefined) => (
           <EuiText data-test-subj="gap_info" size="s">
             {value != null && value > 0
