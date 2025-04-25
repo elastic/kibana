@@ -91,19 +91,22 @@ export const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
   showFullScreenSelector: false,
 };
 export const GRID_STYLE: EuiDataGridStyle = { border: 'horizontal' };
+export const CASES_CONFIGURATION = {
+  featureId: CASES_FEATURE_ID,
+  owner: [APP_ID],
+  syncAlerts: true,
+};
 
 // This will guarantee that ALL cells will have their values vertically centered.
 // While these styles were originally applied in the RenderCell component, they were not applied to the bulk action checkboxes.
 // These are necessary because the ResponseOps alerts table is not centering values vertically, which is visible when using a custom row height.
-const EuiDataGridStyleWrapper = styled.div`
+export const EuiDataGridStyleWrapper = styled.div`
   div .euiDataGridRowCell__content {
     align-items: center;
     display: flex;
     height: 100%;
   }
 `;
-
-const CASES_CONFIGURATION = { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true };
 
 export interface AdditionalTableContext {
   /**
