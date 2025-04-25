@@ -178,7 +178,7 @@ describe('risk engine cleanup route', () => {
       expect(response.status).toBe(403);
       expect(response.body).toEqual({
         message:
-          'User is missing risk engine privileges.  Missing cluster privileges: manage_index_templates, manage_transform, manage_ingest_pipelines.',
+          'User is missing risk engine privileges.  Missing cluster privileges to run the risk engine: manage_transform. Missing cluster privileges to enable the risk engine: manage_index_templates, manage_transform, manage_ingest_pipelines.',
         status_code: 403,
       });
     });
