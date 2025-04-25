@@ -8,6 +8,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { mount } from 'enzyme';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import { SecurityPageName } from '../../../../app/types';
