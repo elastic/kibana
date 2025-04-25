@@ -39,9 +39,10 @@ describe('getEmbeddableAlertsTableFactory', () => {
           title: 'Test embeddable alerts table',
         },
       },
-      finalizeApi: (api) => api as any,
+      finalizeApi: (apiRegistration) => apiRegistration as any,
       uuid,
-      parentApi: undefined,
+      // parentApi is unused by our factory
+      parentApi: {} as any,
     });
 
     render(<Component />);
