@@ -54,7 +54,7 @@ tags:
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
       description: Alerting documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/alerting-getting-started.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
     x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
@@ -74,14 +74,14 @@ tags:
     name: cases
     externalDocs:
       description: Cases documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/cases.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
     externalDocs:
       description: Connector documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/action-types.html
+      url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: Dashboards
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
@@ -1631,6 +1631,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -2290,6 +2304,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2549,6 +2577,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3218,6 +3260,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3442,6 +3498,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -4637,6 +4707,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -24681,6 +24765,20 @@ paths:
           name: kqlQuery
           schema:
             type: string
+        - description: The page size to use for cursor-based pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: size
+          schema:
+            default: 1
+            type: integer
+        - description: The cursor to use for fetching the results from, when using a cursor-base pagination.
+          in: query
+          name: searchAfter
+          schema:
+            items:
+              type: string
+            type: array
         - description: The page to use for pagination, must be greater or equal than 1
           example: 1
           in: query
@@ -25096,6 +25194,73 @@ paths:
                 $ref: '#/components/schemas/SLOs_404_response'
           description: Not found response
       summary: Enable an SLO
+      tags:
+        - slo
+  /s/{spaceId}/internal/observability/slos/_definitions:
+    get:
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: getDefinitionsOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: Indicates if the API returns only outdated SLO or all SLO definitions
+          example: true
+          in: query
+          name: includeOutdatedOnly
+          schema:
+            type: boolean
+        - description: Filters the SLOs by tag
+          in: query
+          name: tags
+          schema:
+            type: string
+        - description: Filters the SLOs by name
+          example: my service availability
+          in: query
+          name: search
+          schema:
+            type: string
+        - description: The page to use for pagination, must be greater or equal than 1
+          example: 1
+          in: query
+          name: page
+          schema:
+            type: number
+        - description: Number of SLOs returned by page
+          example: 100
+          in: query
+          name: perPage
+          schema:
+            default: 100
+            maximum: 1000
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_find_slo_definitions_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Get the SLO definitions
       tags:
         - slo
 components:
@@ -46048,6 +46213,55 @@ components:
           type: string
       title: FilterMeta
       type: object
+    SLOs_find_slo_definitions_response:
+      description: |
+        A paginated response of SLO definitions matching the query.
+      oneOf:
+        - type: object
+          properties:
+            page:
+              example: 1
+              type: number
+            perPage:
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            total:
+              example: 34
+              type: number
+        - type: object
+          properties:
+            page:
+              default: 1
+              description: for backward compability
+              type: number
+            perPage:
+              description: for backward compability
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            searchAfter:
+              description: the cursor to provide to get the next paged results
+              example:
+                - some-slo-id
+                - other-cursor-id
+              items:
+                type: string
+              type: array
+            size:
+              example: 25
+              type: number
+            total:
+              example: 34
+              type: number
+      title: Find SLO definitions response
+      type: object
     SLOs_find_slo_response:
       description: |
         A paginated response of SLOs matching the query.
@@ -46062,6 +46276,12 @@ components:
           items:
             $ref: '#/components/schemas/SLOs_slo_with_summary_response'
           type: array
+        searchAfter:
+          type: string
+        size:
+          description: Size provided for cursor based pagination
+          example: 25
+          type: number
         total:
           example: 34
           type: number

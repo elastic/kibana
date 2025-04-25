@@ -122,10 +122,6 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |This plugin contains the library listing page for event annotation groups.
 
 
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_error/README.md[expressionError]
-|Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
-
-
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_gauge[expressionGauge]
 |WARNING: Missing or empty README.
 
@@ -134,16 +130,8 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |WARNING: Missing or empty README.
 
 
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_image/README.md[expressionImage]
-|Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
-
-
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_legacy_metric/README.md[expressionLegacyMetricVis]
 |Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
-
-
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_metric/README.md[expressionMetric]
-|Expression Metric plugin adds a metric renderer and function to the expression plugin.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_metric/README.md[expressionMetricVis]
@@ -152,14 +140,6 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_partition_vis/README.md[expressionPartitionVis]
 |Expression Partition Visualization plugin adds a partitionVis renderer and pieVis, mosaicVis, treemapVis, waffleVis functions to the expression plugin. The renderer will display the pie, waffle, treemap and mosaic charts.
-
-
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_repeat_image/README.md[expressionRepeatImage]
-|Expression Repeat Image plugin adds a repeatImage function to the expression plugin and an associated renderer. The renderer will display the given image in mutliple instances.
-
-
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_reveal_image/README.md[expressionRevealImage]
-|Expression Reveal Image plugin adds a revealImage function to the expression plugin and an associated renderer. The renderer will display the given percentage of a given image.
 
 
 |<<kibana-expressions-plugin>>
@@ -182,10 +162,6 @@ This plugin provides methods which will parse & execute an *expression pipeline*
 string for you, as well as a series of registries for advanced users who might
 want to incorporate their own functions, types, and renderers into the service
 for use in their own application.
-
-
-|{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_shape/README.md[expressionShape]
-|Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_tagcloud/README.md[expressionTagcloud]
@@ -949,6 +925,12 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
+
+
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/task_manager_dependencies/README.md[taskManagerDependencies]
+|This plugin is used as a temporary sidecar plugin to enable the task manager plugin access to
+the encrypted saved objects client as there is a circular dependency if the task manager were to
+require the encrypted saved objects plugin directly.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/telemetry_collection_xpack/README.md[telemetryCollectionXpack]

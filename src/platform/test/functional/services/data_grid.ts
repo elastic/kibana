@@ -948,7 +948,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getCurrentPageNumber() {
-    const currentPage = await this.find.byCssSelector('.euiPaginationButton[aria-current="true"]');
+    const currentPage = await this.find.byCssSelector('.euiPaginationButton[aria-current="page"]');
     return await currentPage.getVisibleText();
   }
 

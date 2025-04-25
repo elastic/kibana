@@ -15,22 +15,17 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 
-import * as i18n from './translations';
-
 import { useKibana } from '../../../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../../../common/lib/kuery';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
 import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
-import { parseFilterQuery } from '../../parse_filter_query';
-import { getGenAiConfig } from '../../../use_attack_discovery/helpers';
+import * as i18n from './translations';
+import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
 
 interface Props {
   onClose: () => void;
@@ -63,37 +58,13 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       }
 
       try {
-        const genAiConfig = getGenAiConfig(connector);
-
-        const [filterQuery, kqlError] = convertToBuildEsQuery({
-          config: getEsQueryConfig(uiSettings),
+        const scheduleToCreate = convertFormDataInBaseSchedule(
+          scheduleData,
+          alertsIndexPattern ?? '',
+          connector,
           indexPattern,
-          queries: [scheduleData.alertsSelectionSettings.query],
-          filters: scheduleData.alertsSelectionSettings.filters,
-        });
-        const filter = parseFilterQuery({ filterQuery, kqlError });
-
-        const apiConfig = {
-          connectorId: connector.id,
-          name: connector.name,
-          actionTypeId: connector.actionTypeId,
-          provider: connector.apiProvider,
-          model: genAiConfig?.defaultModel,
-        };
-        const scheduleToCreate = {
-          name: scheduleData.name,
-          enabled: true,
-          params: {
-            alertsIndexPattern: alertsIndexPattern ?? '',
-            apiConfig,
-            end: scheduleData.alertsSelectionSettings.end,
-            filter,
-            size: scheduleData.alertsSelectionSettings.size,
-            start: scheduleData.alertsSelectionSettings.start,
-          },
-          schedule: { interval: scheduleData.interval },
-          actions: scheduleData.actions,
-        };
+          uiSettings
+        );
         await createAttackDiscoverySchedule({ scheduleToCreate });
         onClose();
       } catch (err) {
@@ -111,8 +82,8 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   );
 
   const { editForm, actionButtons } = useEditForm({
+    isLoading: isLoadingConnectors || isLoadingQuery,
     onSave: onCreateSchedule,
-    saveButtonDisabled: isLoadingConnectors || isLoadingQuery,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,
   });
 
@@ -124,7 +95,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       onClose={onClose}
       paddingSize="m"
       side="right"
-      size="s"
+      size="m"
       type="overlay"
     >
       <EuiFlyoutHeader hasBorder>

@@ -27,7 +27,6 @@ export function SvlDatastreamsHelpers({ getService }: FtrProviderContext) {
             },
           },
           lifecycle: {
-            // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
             enabled: true,
           },
         },

@@ -7,6 +7,7 @@
 import { performance } from 'perf_hooks';
 import isEmpty from 'lodash/isEmpty';
 
+import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { buildEqlSearchRequest } from './build_eql_search_request';
 
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -126,14 +127,14 @@ export const eqlExecutor = async ({
 
       let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
 
-      // @ts-expect-error shard_failures exists in
-      // elasticsearch response v9
-      // needs to be spec needs to be backported
-      // https://github.com/elastic/elasticsearch-specification/pull/3372#issuecomment-2621835599
-      // TODO: remove ts-expect-error when ES lib version is updated
       const shardFailures = response.shard_failures;
       if (!isEmpty(shardFailures)) {
-        logShardFailures(isSequenceQuery, shardFailures, result, ruleExecutionLogger);
+        logShardFailures(
+          isSequenceQuery,
+          shardFailures as ShardFailure[],
+          result,
+          ruleExecutionLogger
+        );
       }
 
       const { events, sequences } = response.hits;
@@ -158,7 +159,6 @@ export const eqlExecutor = async ({
       } else if (sequences) {
         if (
           isAlertSuppressionActive &&
-          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
         ) {
           await bulkCreateSuppressedSequencesInMemory({
