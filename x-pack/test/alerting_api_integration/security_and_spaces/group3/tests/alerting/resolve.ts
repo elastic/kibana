@@ -103,13 +103,13 @@ export default ({ getService }: FtrProviderContext) => {
                   {
                     id: '456',
                   },
-                ]
-              }
+                ],
+              },
             })
           )
           .expect(200);
 
-          objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
           .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/${createdRule1.id}/_resolve`)
@@ -125,7 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             {
               id: '456',
-            }
+            },
           ],
         });
       });
