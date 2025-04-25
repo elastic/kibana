@@ -114,7 +114,8 @@ export const useListDetailsView = (exceptionListId: string) => {
 
   const initializeList = useCallback(async () => {
     try {
-      if (ALL_ENDPOINT_ARTIFACT_LIST_IDS.includes(exceptionListId)) return setInvalidListId(true);
+      if ((ALL_ENDPOINT_ARTIFACT_LIST_IDS as string[]).includes(exceptionListId))
+        return setInvalidListId(true);
       setIsLoading(true);
 
       const result = await getListById({
