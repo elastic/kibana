@@ -11,7 +11,7 @@ import { getComponentTemplate } from './templates/kb_component_template';
 import { resourceNames } from '..';
 import { createKnowledgeBaseIndex } from '../knowledge_base_service/create_knowledge_base_index';
 import { updateKnowledgeBaseWriteIndexAlias } from '../knowledge_base_service/update_knowledge_base_index_alias';
-import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
+import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { updateKnowledgeBaseIndexMappingFromIndexTemplate } from '../knowledge_base_service/update_knowledge_base_index_mapping';
 
 export async function createOrUpdateKnowledgeBaseIndexAssets({
@@ -51,7 +51,7 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
     });
 
     // Knowledge base: update write index if index exists
-    const indexExists = await hasKbIndex({ esClient: coreStart.elasticsearch.client });
+    const indexExists = await hasKbWriteIndex({ esClient: coreStart.elasticsearch.client });
     if (indexExists) {
       logger.debug('Knowledge base index already exists, updating index mapping');
       await updateKnowledgeBaseIndexMappingFromIndexTemplate({

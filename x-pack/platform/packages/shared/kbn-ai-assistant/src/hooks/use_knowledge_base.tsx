@@ -100,7 +100,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       try {
         await service.callApi('POST /internal/observability_ai_assistant/kb/warmup_model', {
           params: {
-            body: {
+            query: {
               inference_id: inferenceId,
             },
           },

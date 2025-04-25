@@ -6,7 +6,6 @@
  */
 
 import pLimit from 'p-limit';
-import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
@@ -40,11 +39,6 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     kbState: KnowledgeBaseState;
   }> => {
     const client = await service.getClient({ request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
     return client.getKnowledgeBaseStatus();
   },
 });
@@ -77,7 +71,7 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
 const warmupModelKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/warmup_model',
   params: t.type({
-    body: t.type({
+    query: t.type({
       inference_id: t.string,
     }),
   }),
@@ -88,7 +82,7 @@ const warmupModelKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-    const { inference_id: inferenceId } = resources.params.body;
+    const { inference_id: inferenceId } = resources.params.query;
     return client.warmupKbModel(inferenceId);
   },
 });
@@ -122,11 +116,6 @@ const startupMigrationsKnowledgeBase = createObservabilityAIAssistantServerRoute
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
     return client.runStartupMigrations();
   },
 });
@@ -145,12 +134,8 @@ const getKnowledgeBaseInferenceEndpoints = createObservabilityAIAssistantServerR
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    if (!client) {
-      throw notImplemented();
-    }
-
     return {
-      endpoints: await client.getPreconfiguredInferenceEndpoints(),
+      endpoints: await client.getInferenceEndpointsForEmbedding(),
     };
   },
 });
@@ -168,10 +153,6 @@ const getKnowledgeBaseUserInstructions = createObservabilityAIAssistantServerRou
     userInstructions: Array<Instruction & { public?: boolean }>;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
 
     return {
       userInstructions: await client.getKnowledgeBaseUserInstructions(),
@@ -195,10 +176,6 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
 
     const { id, text, public: isPublic } = resources.params.body;
     return client.addUserInstruction({
@@ -227,14 +204,9 @@ const getKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     entries: KnowledgeBaseEntry[];
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
     const { query, sortBy, sortDirection } = resources.params.query;
 
-    return await client.getKnowledgeBaseEntries({ query, sortBy, sortDirection });
+    return client.getKnowledgeBaseEntries({ query, sortBy, sortDirection });
   },
 });
 
@@ -270,10 +242,6 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    if (!client) {
-      throw notImplemented();
-    }
-
     const entry = resources.params.body;
     return client.addKnowledgeBaseEntry({
       entry: {
@@ -302,11 +270,6 @@ const deleteKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
     return client.deleteKnowledgeBaseEntry(resources.params.path.entryId);
   },
 });
@@ -325,10 +288,6 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
 
     const { kbState } = await client.getKnowledgeBaseStatus();
 

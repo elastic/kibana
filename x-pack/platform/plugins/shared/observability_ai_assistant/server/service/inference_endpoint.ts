@@ -21,7 +21,7 @@ import { getInferenceIdFromWriteIndex } from './knowledge_base_service/get_infer
 
 const SUPPORTED_TASK_TYPES = ['sparse_embedding', 'text_embedding'];
 
-export const getPreconfiguredInferenceEndpointsForEmbedding = async ({
+export const getInferenceEndpointsForEmbedding = async ({
   esClient,
   logger,
 }: {

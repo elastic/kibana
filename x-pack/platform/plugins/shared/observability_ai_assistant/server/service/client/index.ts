@@ -75,7 +75,7 @@ import { waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/populate_missing_semantic_text_fields';
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
-import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
+import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 const MAX_FUNCTION_CALLS = 8;
@@ -666,8 +666,8 @@ export class ObservabilityAIAssistantClient {
     );
   };
 
-  getPreconfiguredInferenceEndpoints = () => {
-    return this.dependencies.knowledgeBaseService.getPreconfiguredInferenceEndpoints();
+  getInferenceEndpointsForEmbedding = () => {
+    return this.dependencies.knowledgeBaseService.getInferenceEndpointsForEmbedding();
   };
 
   getKnowledgeBaseStatus = () => {
@@ -685,7 +685,7 @@ export class ObservabilityAIAssistantClient {
 
     logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
 
-    const doesKbIndexExist = await hasKbIndex({ esClient });
+    const doesKbIndexExist = await hasKbWriteIndex({ esClient });
 
     // KB index doesn't exist. Setup index assets for the KB for the first time
     if (!doesKbIndexExist) {

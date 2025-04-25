@@ -59,7 +59,10 @@ const e5LargeDescription = i18n.translate(
   }
 );
 
-const INFERENCE_ENDPOINT_METADATA: Record<string, { title: string; description: string }> = {
+const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
+  string,
+  { title: string; description: string }
+> = {
   '.elser-2-elasticsearch': {
     title: elserTitle,
     description: elserDescription,
@@ -85,7 +88,7 @@ export const getModelOptionsForInferenceEndpoints = ({
 }): ModelOptionsData[] => {
   // TODO: add logic to show the EIS models if EIS is enabled, if not show the other models
   return endpoints.map((endpoint) => {
-    const meta = INFERENCE_ENDPOINT_METADATA[endpoint.inference_id] || {
+    const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id] || {
       title: endpoint.inference_id,
       description: '',
     };

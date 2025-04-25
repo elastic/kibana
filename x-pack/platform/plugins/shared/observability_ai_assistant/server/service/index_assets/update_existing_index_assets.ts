@@ -10,7 +10,7 @@ import type { ObservabilityAIAssistantPluginStartDependencies } from '../../type
 import { createOrUpdateConversationIndexAssets } from './create_or_update_conversation_index_assets';
 import { createOrUpdateKnowledgeBaseIndexAssets } from './create_or_update_knowledge_base_index_assets';
 import { resourceNames } from '..';
-import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
+import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 export const DEFAULT_INFERENCE_ENDPOINT = '.elser-2-elasticsearch';
@@ -25,7 +25,7 @@ export async function updateExistingIndexAssets({
   const [coreStart] = await core.getStartServices();
   const { asInternalUser } = coreStart.elasticsearch.client;
 
-  const doesKbIndexExist = await hasKbIndex({ esClient: coreStart.elasticsearch.client });
+  const doesKbIndexExist = await hasKbWriteIndex({ esClient: coreStart.elasticsearch.client });
 
   const doesConversationIndexExist = await asInternalUser.indices.exists({
     index: resourceNames.writeIndexAlias.conversations,

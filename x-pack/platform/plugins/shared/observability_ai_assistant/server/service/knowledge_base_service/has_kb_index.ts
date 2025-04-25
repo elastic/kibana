@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { resourceNames } from '..';
 
-export async function hasKbIndex({
+export async function hasKbWriteIndex({
   esClient,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };

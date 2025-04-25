@@ -27,5 +27,5 @@ export async function getInferenceIdFromWriteIndex(esClient: {
     throw new Error(`inference_id not found in field mappings for index ${indexName}`);
   }
 
-  return inferenceId as string;
+  return inferenceId;
 }
