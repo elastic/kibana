@@ -24,7 +24,7 @@ const Url = euiStyled('span')`
 interface HttpInfoProps {
   method?: string;
   status?: number;
-  url: string;
+  url?: string;
 }
 
 const Span = euiStyled('span')`

@@ -59,7 +59,7 @@ export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 export const PROCESSOR_NAME = 'processor.name';
 
-export const TRANSACTION_AGENT_MARKS = 'transaction.agent.marks';
+export const TRANSACTION_MARKS_AGENT = 'transaction.marks.agent';
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
@@ -196,6 +196,12 @@ export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
+
+// OpenTelemetry semconv fields for HTTP server https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-server-semantic-conventions
+export const URL_PATH = 'url.path';
+export const URL_SCHEME = 'url.scheme';
+export const SERVER_ADDRESS = 'server.address';
+export const SERVER_PORT = 'server.port';
 
 // OpenTelemetry span links
 export const LINKS_SPAN_ID = 'links.span_id';

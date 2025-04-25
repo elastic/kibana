@@ -304,6 +304,7 @@ describe('createInitialState', () => {
         "retryAttempts": 15,
         "retryCount": 0,
         "retryDelay": 0,
+        "skipRetryReset": false,
         "targetIndexMappings": Object {
           "_meta": Object {
             "indexTypesMap": Object {
