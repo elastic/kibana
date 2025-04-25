@@ -31,6 +31,15 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
     }),
     protectionField: 'network',
   },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.security',
+      {
+        defaultMessage: 'Security',
+      }
+    ),
+    protectionField: 'security',
+  },
 ];
 
 export type MacEventCollectionCardProps = PolicyFormComponentCommonProps;
