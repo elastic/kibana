@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useRef } from 'react';
 import { EuiButtonGroup, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
@@ -45,6 +45,8 @@ const toggleButtonsIcons: Array<{ id: OverviewView; iconType: IconType; label: s
 ];
 
 export const ViewButtons = () => {
+  const isInitialMount = useRef(true);
+
   const { status, loaded } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
@@ -57,8 +59,9 @@ export const ViewButtons = () => {
     'synthetics.overviewView',
     urlView || view
   );
+  const dispatch = useDispatch();
 
-  useEffect(() => {
+  if (isInitialMount.current) {
     // When the component mounts, check if there is a view in the URL first
     if (urlView) {
       dispatch(setOverviewViewAction(urlView));
@@ -67,12 +70,10 @@ export const ViewButtons = () => {
       dispatch(setOverviewViewAction(localStorageView));
       updateUrlParams({ view: localStorageView });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    isInitialMount.current = false;
+  }
 
   const loading = !status || !loaded;
-
-  const dispatch = useDispatch();
 
   const onChangeView = (id: string) => {
     if (!isOverviewView(id)) {
