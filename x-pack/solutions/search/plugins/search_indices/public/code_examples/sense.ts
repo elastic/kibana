@@ -6,7 +6,11 @@
  */
 
 import { INDEX_PLACEHOLDER } from '../constants';
-import { IngestDataCodeDefinition } from '../types';
+import {
+  IngestDataCodeDefinition,
+  SearchCodeDefinition,
+  SearchCodeSnippetFunction,
+} from '../types';
 import { CreateIndexLanguageExamples } from './types';
 
 export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {
@@ -64,4 +68,14 @@ ${JSON.stringify(document)}\n`;
   },
   updateMappingsCommand: ({ indexName, mappingProperties }) => `PUT /${indexName}/_mapping
 ${JSON.stringify({ properties: mappingProperties }, null, 2)}`,
+};
+
+const searchCommand: SearchCodeSnippetFunction = ({
+  indexName,
+  queryObject,
+}) => `POST /${indexName}/_search
+${JSON.stringify(queryObject, null, 2)}`;
+
+export const ConsoleSearchExample: SearchCodeDefinition = {
+  searchCommand,
 };

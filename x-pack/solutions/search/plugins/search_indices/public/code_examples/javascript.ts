@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
-import { CodeLanguage, IngestDataCodeDefinition } from '../types';
+import {
+  CodeLanguage,
+  IngestDataCodeDefinition,
+  SearchCodeDefinition,
+  SearchCodeSnippetFunction,
+} from '../types';
 import { CreateIndexLanguageExamples } from './types';
 
 export const JAVASCRIPT_INFO: CodeLanguage = {
@@ -148,4 +153,33 @@ const updateMappingResponse = await client.indices.putMapping({
   properties: mapping,
 });
 console.log(updateMappingResponse);`,
+};
+
+const searchCommand: SearchCodeSnippetFunction = ({
+  elasticsearchURL,
+  apiKey,
+  indexName,
+  queryObject,
+}) => `import { Client } from "@elastic/elasticsearch";
+
+const client = new Client({
+  node: '${elasticsearchURL}',
+  auth: {
+    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+  }
+});
+
+const index = "${indexName}";
+const query = ${JSON.stringify(queryObject, null, 2)};
+
+const result = await client.search({
+  index,
+  query,
+});
+
+console.log(result.hits.hits);
+`;
+
+export const JavascriptSearchExample: SearchCodeDefinition = {
+  searchCommand,
 };

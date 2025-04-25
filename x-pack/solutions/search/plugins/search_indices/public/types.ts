@@ -115,6 +115,12 @@ export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
 
 export type IngestCodeSnippetFunction = (params: IngestCodeSnippetParameters) => string;
 
+export interface SearchCodeSnippetParameters extends CodeSnippetParameters {
+  indexName: string;
+  queryObject: {};
+}
+export type SearchCodeSnippetFunction = (params: SearchCodeSnippetParameters) => string;
+
 export interface IngestDataCodeDefinition {
   installCommand?: string;
   ingestCommand: IngestCodeSnippetFunction;
@@ -131,6 +137,17 @@ export interface IngestDataCodeExamples {
   curl: IngestDataCodeDefinition;
   python: IngestDataCodeDefinition;
   javascript: IngestDataCodeDefinition;
+}
+
+export interface SearchCodeDefinition {
+  searchCommand: SearchCodeSnippetFunction;
+}
+
+export interface SearchCodeExamples {
+  sense: SearchCodeDefinition;
+  curl: SearchCodeDefinition;
+  python: SearchCodeDefinition;
+  javascript: SearchCodeDefinition;
 }
 
 export interface CreateIndexFormState {

@@ -12,6 +12,8 @@ import {
   CodeSnippetParameters,
   IngestCodeSnippetFunction,
   IngestDataCodeDefinition,
+  SearchCodeDefinition,
+  SearchCodeSnippetFunction,
 } from '../types';
 
 import { CreateIndexLanguageExamples } from './types';
@@ -137,4 +139,29 @@ export const PythonIngestDataExample: IngestDataCodeDefinition = {
   installCommand: PYTHON_INSTALL_CMD,
   ingestCommand: ingestionCommand,
   updateMappingsCommand,
+};
+
+const searchCommand: SearchCodeSnippetFunction = ({
+  elasticsearchURL,
+  apiKey,
+  indexName,
+  queryObject,
+}) => `from elasticsearch import Elasticsearch
+
+client = Elasticsearch(
+    "${elasticsearchURL}",
+    api_key="${apiKey ?? API_KEY_PLACEHOLDER}"
+)
+
+query_object = ${JSON.stringify(queryObject, null, 4)}
+
+search_response = client.search(
+    index="${indexName}",
+    query=query_object,
+)
+print(search_response)
+`;
+
+export const PythonSearchExample: SearchCodeDefinition = {
+  searchCommand,
 };
