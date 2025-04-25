@@ -30,7 +30,7 @@ import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
-import { registerSyncGlobalParamsTask } from './synthetics_service/sync_global_params_task';
+import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -39,6 +39,7 @@ export class Plugin implements PluginType {
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+  private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
@@ -90,11 +91,11 @@ export class Plugin implements PluginType {
 
     registerSyntheticsSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
-    registerSyncGlobalParamsTask({
-      serverSetup: this.server,
-      syntheticsMonitorClient: this.syntheticsMonitorClient,
-      taskManager: plugins.taskManager,
-    });
+    this.syncPrivateLocationMonitorsTask = new SyncPrivateLocationMonitorsTask(
+      this.server,
+      plugins.taskManager,
+      this.syntheticsMonitorClient
+    );
 
     return {};
   }
@@ -114,6 +115,7 @@ export class Plugin implements PluginType {
       this.server.spaces = pluginsStart.spaces;
       this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
     }
+    this.syncPrivateLocationMonitorsTask?.start();
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
