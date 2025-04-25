@@ -16,7 +16,7 @@ import {
 } from '@kbn/esql-ast/src/types';
 import {
   ESQLRealField,
-  collectVariables,
+  collectUserDefinedColumns,
   getFunctionDefinition,
   getFunctionSignatures,
   type ESQLCallbacks,
@@ -180,11 +180,11 @@ async function getHintForFunctionArg(
     return [];
   }
   const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-  const anyVariables = collectVariables(root.commands, fieldsMap, query);
+  const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, fieldsMap, query);
 
   const references = {
     fields: fieldsMap,
-    variables: anyVariables,
+    userDefinedColumns: anyUserDefinedColumns,
   };
 
   const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
