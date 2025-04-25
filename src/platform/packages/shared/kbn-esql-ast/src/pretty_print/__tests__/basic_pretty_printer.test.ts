@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction } from '../../types';
+import { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
@@ -451,6 +451,32 @@ describe('single line query', () => {
 
           expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)');
         });
+      });
+    });
+
+    describe('map expressions', () => {
+      test('empty map', () => {
+        const src = 'ROW fn(1, {"foo": "bar"})';
+        const { root } = parse(src);
+        const node = Walker.match(root, { type: 'map' })! as ESQLMap;
+
+        node.entries = [];
+
+        const text = BasicPrettyPrinter.print(root);
+
+        expect(text).toBe('ROW FN(1, {})');
+      });
+
+      test('one entry in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"booyaka": [1, 2, 42]})');
+
+        expect(text).toBe('ROW FN(1, {"booyaka": [1, 2, 42]})');
+      });
+
+      test('two entries in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"foo": "bar", "baz": null})');
+
+        expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
       });
     });
 

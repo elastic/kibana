@@ -58,7 +58,9 @@ export interface UserSummaryProps {
   jobNameById: Record<string, string | undefined>;
 }
 
-const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
+const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
+  shouldForwardProp: (prop) => prop !== '$width',
+})`
   padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;

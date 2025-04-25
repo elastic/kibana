@@ -25,10 +25,11 @@ export const getAttackDiscoveryScheduleType = ({
   return {
     id: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
     name: 'Attack Discovery Schedule',
+    ruleTaskTimeout: '30m',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
     category: DEFAULT_APP_CATEGORIES.security.id,
-    producer: 'assistant',
+    producer: 'siem',
     solution: 'security',
     validate: {
       params: {

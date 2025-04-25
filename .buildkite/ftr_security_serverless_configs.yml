@@ -16,11 +16,6 @@ disabled:
   # Playwright
   - x-pack/test/security_solution_playwright/serverless_config.ts
 
-  # Serverless base config files
-  - x-pack/test_serverless/api_integration/config.base.ts
-  - x-pack/test_serverless/functional/config.base.ts
-  - x-pack/test_serverless/shared/config.base.ts
-
   # MKI only configs files
   - x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts
 
@@ -49,6 +44,10 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group7.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group8.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group9.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group10.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group11.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group12.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/serverless.config.ts
@@ -135,6 +134,7 @@ enabled:
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/ai4dsoc/cases/search_ai_lake_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/ai4dsoc/nlp_cleanup_task/search_ai_lake_tier/configs/serverless.config.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/security.serverless.config.ts
   - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts

@@ -38,7 +38,6 @@ import {
   createFleetStartContractMock,
   createFleetToHostFilesClientMock,
   createMessageSigningServiceMock,
-  createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -155,6 +154,7 @@ export const createMockEndpointAppContextService = (
       name: 'default',
       disabledFeatures: [],
     })),
+    getSpaceId: jest.fn().mockReturnValue('default'),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -186,9 +186,17 @@ export const createMockEndpointAppContextServiceStartContract =
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const security =
       securityServiceMock.createStart() as unknown as DeeplyMockedKeys<SecurityServiceStart>;
-    const packagePolicyService = createPackagePolicyServiceMock();
+    const fleetStartServices = createFleetStartContractMock();
 
-    packagePolicyService.list.mockImplementation(async (_, options) => {
+    // Ensure the agent service always returns the same agent service instance
+    fleetStartServices.agentService.asInternalScopedUser.mockReturnValue(
+      fleetStartServices.agentService.asInternalUser
+    );
+    fleetStartServices.agentService.asScoped.mockReturnValue(
+      fleetStartServices.agentService.asInternalUser
+    );
+
+    fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
         items: [],
         total: 0,
@@ -212,7 +220,7 @@ export const createMockEndpointAppContextServiceStartContract =
         logger
       ) as DeeplyMockedKeys<ProductFeaturesService>,
       experimentalFeatures: config.experimentalFeatures,
-      fleetStartServices: createFleetStartContractMock(),
+      fleetStartServices,
       cases: casesPluginMock.createStartContract(),
       manifestManager: getManifestManagerMock() as DeeplyMockedKeys<ManifestManager>,
       alerting: alertsMock.createStart(),
