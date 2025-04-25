@@ -1974,6 +1974,8 @@
       "@kbn/test-suites-xpack/*": ["x-pack/test/*"],
       "@kbn/test-suites-xpack-performance": ["x-pack/performance"],
       "@kbn/test-suites-xpack-performance/*": ["x-pack/performance/*"],
+      "@kbn/test-suites-xpack-platform": ["x-pack/platform/test"],
+      "@kbn/test-suites-xpack-platform/*": ["x-pack/platform/test/*"],
       "@kbn/testing-embedded-lens-plugin": ["x-pack/examples/testing_embedded_lens"],
       "@kbn/testing-embedded-lens-plugin/*": ["x-pack/examples/testing_embedded_lens/*"],
       "@kbn/third-party-lens-navigation-prompt-plugin": ["x-pack/examples/third_party_lens_navigation_prompt"],
