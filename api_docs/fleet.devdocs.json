@@ -117,7 +117,7 @@
         "label": "LazyPackageCard",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, descriptionLineClamp, maxCardHeight, showDescription, showReleaseBadge, }: ",
+          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, showCompressedInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, descriptionLineClamp, maxCardHeight, showDescription, showReleaseBadge, }: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -1897,6 +1897,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "showInstallationStatus",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.showCompressedInstallationStatus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCompressedInstallationStatus",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -24599,7 +24613,7 @@
             "label": "latest_uninstall_failed_attempts",
             "description": [],
             "signature": [
-              "UninstallFailedAttempt",
+              "FailedAttempt",
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
@@ -24616,6 +24630,22 @@
             "signature": [
               "InstallLatestExecutedState",
               " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.latest_custom_asset_install_failed_attempts",
+            "type": "Object",
+            "tags": [],
+            "label": "latest_custom_asset_install_failed_attempts",
+            "description": [],
+            "signature": [
+              "{ [asset: string]: ",
+              "CustomAssetFailedAttempt",
+              "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
