@@ -6,6 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 const INGEST_PIPELINE_PREFIX = 'testing-ingest-pipeline';
 const DS_PREFIX = 'testing-datastream';
@@ -28,52 +29,48 @@ export const randomDatastream = async (
 ): Promise<string> => {
   const name = `${DS_PREFIX}-${Date.now()}`;
 
-  const settings = {
-    index: {
-      mode: 'standard',
+  const indexTemplateBody: IndicesPutIndexTemplateRequest = {
+    name: DS_PREFIX,
+    index_patterns: [`${DS_PREFIX}-*`],
+    data_stream: {},
+    template: {
+      settings: {
+        index: {
+          mode: 'standard',
+          mapping: {
+            source: {
+              mode: 'stored',
+            },
+          },
+        },
+      },
     },
   };
 
-  if (opts.policyName) {
-    settings.index = {
-      ...settings.index,
+  if (opts.policyName && indexTemplateBody.template?.settings !== undefined) {
+    indexTemplateBody.template.settings.index = {
+      ...indexTemplateBody.template.settings.index,
       lifecycle: {
         name: opts.policyName,
       },
     };
   }
 
-  if (opts.defaultPipeline) {
-    settings.index = {
-      ...settings.index,
+  if (opts.defaultPipeline && indexTemplateBody.template?.settings !== undefined) {
+    indexTemplateBody.template.settings.index = {
+      ...indexTemplateBody.template.settings.index,
       default_pipeline: opts.defaultPipeline,
     };
   }
 
-  if (opts.finalPipeline) {
-    settings.index = {
-      ...settings.index,
+  if (opts.finalPipeline && indexTemplateBody.template?.settings !== undefined) {
+    indexTemplateBody.template.settings.index = {
+      ...indexTemplateBody.template.settings.index,
       final_pipeline: opts.finalPipeline,
     };
   }
 
-  const indexTemplateBody = {
-    index_patterns: [`${DS_PREFIX}-*`],
-    data_stream: {},
-    template: {
-      settings,
-      mappings: {
-        _source: {
-          mode: 'stored',
-        },
-      },
-    },
-  };
-
-  await es.indices.putIndexTemplate({
-    name: DS_PREFIX,
-    ...indexTemplateBody,
-  });
+  await es.indices.putIndexTemplate(indexTemplateBody);
 
   await es.indices.createDataStream({ name });
 
