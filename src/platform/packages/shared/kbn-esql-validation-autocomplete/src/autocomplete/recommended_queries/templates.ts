@@ -117,21 +117,6 @@ export const getRecommendedQueries = ({
           },
           {
             label: i18n.translate(
-              'kbn-esql-validation-autocomplete.recommendedQueries.categorize.label',
-              {
-                defaultMessage: 'Detect change points',
-              }
-            ),
-            description: i18n.translate(
-              'kbn-esql-validation-autocomplete.recommendedQueries.categorize.description',
-              {
-                defaultMessage: 'Change point on count aggregation',
-              }
-            ),
-            queryString: `${fromCommand}\n | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart\n | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend) \n | CHANGE_POINT count ON buckets `,
-          },
-          {
-            label: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.lastHour.label',
               {
                 defaultMessage: 'Total count vs count last hour',
