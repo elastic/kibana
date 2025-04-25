@@ -16,19 +16,17 @@ import {
   bufferToggle,
   windowToggle,
   tap,
+  finalize,
   type Observable,
 } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
-  NotificationCoordinator,
   NotificationCoordinatorState,
+  NotificationCoordinatorPublicApi,
 } from '@kbn/core-notifications-browser';
 
 export class Coordinator {
-  private readonly coordinationLock$ = new BehaviorSubject<{
-    locked: boolean;
-    controller: string | null;
-  }>({
+  private readonly coordinationLock$ = new BehaviorSubject<NotificationCoordinatorState>({
     locked: false,
     controller: null,
   });
@@ -84,13 +82,19 @@ export class Coordinator {
       mergeMap((x) => x),
       tap((value) => {
         const lock = this.coordinationLock$.getValue();
-        // if the source has values to emit and the lock is not owned, acquire a lock for said source,
-        // precisely because of this approach acquiring a lock, is solely based on availability.
+        // if the source has values to emit and the lock is not owned (because of values that were buffered whilst the lock was owned by another registrar) we acquire a lock for said source.
         if (value.length && !lock.locked) {
           this.acquireLock(registrar);
         } else if (!value.length && lock.controller === registrar) {
           // here we handle the scenario where the source observable has been emptied out,
           // in such event if the lock is still held by the registrar we release it
+          this.releaseLock(registrar);
+        }
+      }),
+      finalize(() => {
+        // when the coordinated observable is completed we release the lock if it is still held by the registrar
+        const lock = this.coordinationLock$.getValue();
+        if (lock.locked && lock.controller === registrar) {
           this.releaseLock(registrar);
         }
       })
@@ -101,7 +105,7 @@ export class Coordinator {
 export function notificationCoordinator(
   this: Coordinator,
   registrar: string
-): ReturnType<NotificationCoordinator> {
+): NotificationCoordinatorPublicApi {
   return {
     optInToCoordination: <T extends Array<{ id: string }>>(
       ...args: Parameters<typeof this.optInToCoordination<T>> extends [infer Head, ...infer Tail]

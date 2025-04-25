@@ -66,6 +66,59 @@ describe('notification coordination', () => {
       expect(subscriptionHandler).not.toHaveBeenCalled();
     });
 
+    it('will acquire a lock and emit to just the coordinated with matching even in race type scenarios', async () => {
+      const coordinator = new Coordinator();
+
+      // only emit values when the lock has not been acquired
+      const optInCondition = jest.fn(({ locked }) => !locked);
+
+      const SUT1 = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
+      const SUT2 = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
+      const SUT3 = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
+
+      const coordinatedSUT1SubscriptionHandler = jest.fn();
+      const coordinatedSUT2SubscriptionHandler = jest.fn();
+      const coordinatedSUT3SubscriptionHandler = jest.fn();
+
+      const coordinatedSUT1Sub = coordinator
+        .optInToCoordination('test1', SUT1.asObservable(), optInCondition)
+        .subscribe(coordinatedSUT1SubscriptionHandler);
+
+      const coordinatedSUT2Sub = coordinator
+        .optInToCoordination('test2', SUT2.asObservable(), optInCondition)
+        .subscribe(coordinatedSUT2SubscriptionHandler);
+
+      const coordinatedSUT3Sub = coordinator
+        .optInToCoordination('test3', SUT3.asObservable(), optInCondition)
+        .subscribe(coordinatedSUT3SubscriptionHandler);
+
+      // simulate as best as we can the scenario where all 3 observables emit at the same time
+      await Promise.all([
+        Promise.resolve('1').then((id) => SUT1.next([{ id }])),
+        Promise.resolve('2').then((id) => SUT2.next([{ id }])),
+        Promise.resolve('3').then((id) => SUT3.next([{ id }])),
+      ]);
+
+      expect(await Rx.firstValueFrom(coordinator.lock$)).toEqual(
+        expect.objectContaining({ locked: true })
+      );
+
+      // only one of the subscription handlers should have been called
+      expect(
+        [
+          coordinatedSUT1SubscriptionHandler,
+          coordinatedSUT2SubscriptionHandler,
+          coordinatedSUT3SubscriptionHandler,
+        ].filter((handler) => {
+          return handler.mock.calls.length > 0;
+        })
+      ).toHaveLength(1);
+
+      [coordinatedSUT1Sub, coordinatedSUT2Sub, coordinatedSUT3Sub].forEach((sub) => {
+        sub.unsubscribe();
+      });
+    });
+
     it("automatically releases an acquired lock if the source observable has no values to be emitted anymore despite it's optin condition being met", async () => {
       const coordinator = new Coordinator();
 
@@ -96,6 +149,37 @@ describe('notification coordination', () => {
       });
 
       sub.unsubscribe();
+    });
+
+    it('automatically releases an acquired lock if the coordinated observable that owns the current lock is unsubscribed from', async () => {
+      const coordinator = new Coordinator();
+
+      const optInCondition = jest.fn(() => true);
+
+      const items = new Rx.BehaviorSubject<Array<{ id: string }>>([]);
+
+      const coordinatedItems$ = coordinator.optInToCoordination(
+        'test',
+        items.asObservable(),
+        optInCondition
+      );
+
+      const sub = coordinatedItems$.subscribe();
+
+      items.next([{ id: '1' }]);
+
+      expect(await Rx.firstValueFrom(coordinator.lock$)).toEqual({
+        locked: true,
+        controller: 'test',
+      });
+
+      sub.unsubscribe();
+
+      // the lock should be released when unsubscribed
+      expect(await Rx.firstValueFrom(coordinator.lock$)).toEqual({
+        locked: false,
+        controller: null,
+      });
     });
   });
 
