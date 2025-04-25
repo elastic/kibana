@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import * as React from 'react';
-
-export const BasicRules = () => {
-  return <h1>{'Basic Rules'}</h1>;
-};
+export { IngestPipelinesAPIProvider } from './api';
+export { IngestPipelinesFixturesProvider } from './fixtures';
