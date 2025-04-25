@@ -204,6 +204,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     },
     {
       field: 'State',
+      width: '20%',
       name: i18n.translate('xpack.slo.sloManagementTable.columns.state', {
         defaultMessage: 'State',
       }),
@@ -215,7 +216,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     },
     {
       name: 'Actions',
-      width: '5%',
+      width: '10%',
       actions,
     },
   ];
