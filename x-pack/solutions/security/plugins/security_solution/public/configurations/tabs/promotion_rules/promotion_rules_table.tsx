@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FindRulesSortField } from '../../../../common/api/detection_engine';
@@ -201,7 +200,6 @@ const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColum
       return [
         {
           ...RULE_NAME_COLUMN,
-          render: (value: Rule['name']) => <EuiText size="s">{value}</EuiText>,
           width: '30%',
         } as EuiBasicTableColumn<Rule>,
         INDEXING_DURATION_COLUMN,
@@ -217,7 +215,6 @@ const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColum
     return [
       {
         ...RULE_NAME_COLUMN,
-        render: (value: Rule['name']) => <EuiText size="s">{value}</EuiText>,
         width: '100%',
       } as EuiBasicTableColumn<Rule>,
       LAST_EXECUTION_COLUMN,
