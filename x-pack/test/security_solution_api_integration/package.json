@@ -61,6 +61,9 @@
     "initialize-server:siem_migrations:trial_complete": "node ./scripts/index.js server siem_migrations trial_license_complete_tier",
     "run-tests:siem_migrations:trial_complete": "node ./scripts/index.js runner siem_migrations trial_license_complete_tier",
 
+    "genai_evals:server:ess": "npm run initialize-server:genai:trial_complete evaluations ess",
+    "genai_evals:runner:ess": "npm run run-tests:genai:trial_complete evaluations ess essEnv",
+
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
     "genai_kb_entries:qa:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaPeriodicEnv",
