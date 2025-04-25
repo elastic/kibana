@@ -31,7 +31,7 @@ reIndexWithLock().catch((err) => {
 Performs one atomic Elasticsearch update that creates a new lock or renews an existing one - so when multiple processes race for the same lock, only one succeeds.
 
 **TTL-Based Lease**
-Each lock has a short, fixed lifespan (default 30s) and will automatically expire if not renewed. While your callback is executing, the library quietly refreshes the TTL to keep the lock alive. This safeguards against deadlocks locks if a Kibana node crashes after having obtained a lock
+Each lock has a short, fixed lifespan (default 30s) and will automatically expire if not renewed. While your callback is executing, the library quietly refreshes the TTL to keep the lock alive. This safeguards against deadlocks if a Kibana node crashes after having obtained a lock.
 
 Note: If your long-running task (e.g. re-indexing) outlives the lock TTL because the Kibana node crashed, another process could acquire the same lock and start that task again. To prevent duplicate work, include an application-level check (for example, querying Elasticsearch or your own status flag) to verify the operation isn’t already in progress before proceeding.
 
