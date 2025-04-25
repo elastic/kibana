@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 import { getEntryNestedMock } from './index.mock';
 import { entriesNested, EntryNested } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';

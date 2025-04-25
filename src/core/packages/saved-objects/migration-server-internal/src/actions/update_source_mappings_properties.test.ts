@@ -8,7 +8,7 @@
  */
 
 import { chain } from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   updateSourceMappingsProperties,
