@@ -115,14 +115,53 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
  * @param handler - The route handler to wrap
  **/
 export const withRiskEnginePrivilegeCheck = <P, Q, B>(
-  privilegeType: 'run' | 'enable' = 'enable',
-  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
-  handler: (
+  privilegeTypeOrServices:
+    | 'run'
+    | 'enable'
+    | StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
+  handlerOrServices:
+    | ((
+        context: SecuritySolutionRequestHandlerContext,
+        request: KibanaRequest<P, Q, B>,
+        response: KibanaResponseFactory
+      ) => Promise<IKibanaResponse>)
+    | StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>,
+  optionalHandler?: (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
   ) => Promise<IKibanaResponse>
 ) => {
+  // Determine if privilegeType is provided or if it's the default case
+  let privilegeType: 'run' | 'enable' = 'enable';
+  let getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies, unknown>;
+  let handler: (
+    context: SecuritySolutionRequestHandlerContext,
+    request: KibanaRequest<P, Q, B>,
+    response: KibanaResponseFactory
+  ) => Promise<IKibanaResponse>;
+
+  if (typeof privilegeTypeOrServices === 'string') {
+    // First parameter is the privilegeType
+    privilegeType = privilegeTypeOrServices;
+    getStartServices = handlerOrServices as StartServicesAccessor<
+      SecuritySolutionPluginStartDependencies,
+      unknown
+    >;
+    if (optionalHandler === undefined) {
+      throw new Error('Handler is required when using privilege type parameter');
+    }
+    handler = optionalHandler;
+  } else {
+    // First parameter is getStartServices, privilegeType is default 'enable'
+    getStartServices = privilegeTypeOrServices;
+    handler = handlerOrServices as (
+      context: SecuritySolutionRequestHandlerContext,
+      request: KibanaRequest<P, Q, B>,
+      response: KibanaResponseFactory
+    ) => Promise<IKibanaResponse>;
+  }
+
   return async (
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<P, Q, B>,
