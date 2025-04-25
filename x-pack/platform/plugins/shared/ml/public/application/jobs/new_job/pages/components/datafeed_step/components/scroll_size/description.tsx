@@ -14,25 +14,28 @@ import type { Validation } from '../../../../../common/job_validator';
 
 interface Props {
   validation: Validation;
+  titleId: string;
 }
 
-export const Description: FC<PropsWithChildren<Props>> = memo(({ children, validation }) => {
-  const title = i18n.translate('xpack.ml.newJob.wizard.datafeedStep.scrollSize.title', {
-    defaultMessage: 'Scroll size',
-  });
-  return (
-    <EuiDescribedFormGroup
-      title={<h3>{title}</h3>}
-      description={
-        <FormattedMessage
-          id="xpack.ml.newJob.wizard.datafeedStep.scrollSize.description"
-          defaultMessage="The maximum number of documents to return in each search request."
-        />
-      }
-    >
-      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
-        <>{children}</>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
-});
+export const Description: FC<PropsWithChildren<Props>> = memo(
+  ({ children, validation, titleId }) => {
+    const title = i18n.translate('xpack.ml.newJob.wizard.datafeedStep.scrollSize.title', {
+      defaultMessage: 'Scroll size',
+    });
+    return (
+      <EuiDescribedFormGroup
+        title={<h3 id={titleId}>{title}</h3>}
+        description={
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.datafeedStep.scrollSize.description"
+            defaultMessage="The maximum number of documents to return in each search request."
+          />
+        }
+      >
+        <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
+          <>{children}</>
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+);
