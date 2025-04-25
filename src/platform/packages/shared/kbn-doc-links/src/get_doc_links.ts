@@ -195,6 +195,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       machineLearningStart: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/nlp-end-to-end-tutorial`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       mlDocumentEnrichment: `${ELASTIC_DOCS}explore-analyze/machine-learning/machine-learning-in-kibana/inference-processing`,
+      searchApplicationsTemplates: `${ELASTIC_DOCS}solutions/search/search-applications/search-application-api`,
       searchApplicationsSearchApi: `${ELASTIC_DOCS}solutions/search/search-applications/search-application-security`,
       searchApplications: `${ELASTIC_DOCS}solutions/search/search-applications`,
       searchApplicationsSearch: `${ELASTIC_DOCS}solutions/search/search-applications/search-application-client`,
