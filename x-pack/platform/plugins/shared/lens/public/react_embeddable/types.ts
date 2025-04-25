@@ -489,7 +489,12 @@ type TypedLensAttributes<TVisType, TVisState> = Simplify<
     visualizationType: TVisType;
     state: Simplify<
       Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {
-        datasourceStates: StructuredDatasourceStates;
+        datasourceStates: {
+          // This is of type StructuredDatasourceStates but does not conform to Record<string, unknown>
+          // so I am leaving this alone until we improve this datasource typing structure.
+          formBased?: FormBasedPersistedState;
+          textBased?: TextBasedPersistedState;
+        };
         visualization: TVisState;
       }
     >;
