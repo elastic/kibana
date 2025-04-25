@@ -18,9 +18,9 @@ export const padPrecheckAndInstallRoute = (
   config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
-    .post({
+    .get({
       access: 'internal',
-      path: '/api/entity_analytics/monitoring/pad/install',
+      path: '/api/entity_analytics/privileged_user_monitoring/pad/install/status',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
