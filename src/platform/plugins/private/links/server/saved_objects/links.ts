@@ -10,8 +10,9 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { APP_ICON, CONTENT_ID } from '../../common';
+import { SavedObjectLinksAttributes, savedObjectLinksAttributesSchema } from './schema/v1';
 
-export const linksSavedObjectType: SavedObjectsType = {
+export const linksSavedObjectType: SavedObjectsType<SavedObjectLinksAttributes> = {
   name: CONTENT_ID,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
@@ -37,5 +38,14 @@ export const linksSavedObjectType: SavedObjectsType = {
   },
   migrations: () => {
     return {};
+  },
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: savedObjectLinksAttributesSchema.extends({}, { unknowns: 'ignore' }),
+        create: savedObjectLinksAttributesSchema,
+      },
+    },
   },
 };

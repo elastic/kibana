@@ -20,9 +20,10 @@ export {
 export {
   createInject,
   createExtract,
+  prefixReferencesFromPanel,
+  getReferencesForControls,
+  getReferencesForPanelId,
 } from './dashboard_container/persistable_state/dashboard_container_references';
-
-export { prefixReferencesFromPanel } from './dashboard_container/persistable_state/dashboard_container_references';
 
 export {
   convertPanelsArrayToPanelMap,

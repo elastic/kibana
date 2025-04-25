@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type {
+  LinksAttributes,
+  LinksByValueSerializedState,
+  LinksByReferenceSerializedState,
+  LinksSerializedState,
+} from './latest';
+
 export { LinksStorage } from './links_storage';

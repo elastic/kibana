@@ -28,7 +28,7 @@ export type {
   ReplaceTagReferencesByNameParams,
 } from './types';
 export {
-  serviceDefinition,
+  getServiceDefinition,
   dashboardAttributesSchema,
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
@@ -38,7 +38,7 @@ export {
 } from './cm_services';
 export {
   dashboardAttributesOut,
-  itemAttrsToSavedObject,
-  itemAttrsToSavedObjectWithTags,
+  itemToSavedObject,
+  itemToSavedObjectWithTags,
   savedObjectToItem,
 } from './transform_utils';

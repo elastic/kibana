@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { SavedObjectLinksAttributes } from './saved_objects/schema/v1';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
-import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
+import { inject, extract } from './references';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -25,6 +33,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     core: CoreSetup,
     plugins: {
       contentManagement: ContentManagementServerSetup;
+      embeddable: EmbeddableSetup;
     }
   ) {
     plugins.contentManagement.register({
@@ -38,7 +47,13 @@ export class LinksServerPlugin implements Plugin<object, object> {
       },
     });
 
-    core.savedObjects.registerType<LinksAttributes>(linksSavedObjectType);
+    plugins.embeddable.registerEmbeddableFactory({
+      id: CONTENT_ID,
+      inject,
+      extract,
+    });
+
+    core.savedObjects.registerType<SavedObjectLinksAttributes>(linksSavedObjectType);
 
     return {};
   }

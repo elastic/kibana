@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getServiceDefinition } from './cm_services';
+import { TypeOf } from '@kbn/config-schema';
+import { linksAttributesSchema } from './cm_services';
+
+export type LinksAttributes = TypeOf<typeof linksAttributesSchema>;
+
+export interface LinksByValueSerializedState {
+  attributes: LinksAttributes;
+}
+
+export interface LinksByReferenceSerializedState {
+  savedObjectId: string;
+}
+
+export type LinksSerializedState = LinksByValueSerializedState | LinksByReferenceSerializedState;

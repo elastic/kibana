@@ -9,18 +9,23 @@
 
 import Boom from '@hapi/boom';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
-import { StorageContext } from '@kbn/content-management-plugin/server';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
-import { cmServicesDefinition } from './cm_services';
-import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObjectWithTags, savedObjectToItem } from './latest';
+import { getCmServicesDefinition } from './cm_services';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
+import { itemToSavedObjectWithTags, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -68,20 +73,24 @@ export class DashboardStorage {
   constructor({
     logger,
     throwOnResultValidationError,
+    embeddable,
     savedObjectsTagging,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
+    embeddable: EmbeddableStart;
     savedObjectsTagging?: SavedObjectTaggingStart;
   }) {
     this.savedObjectsTagging = savedObjectsTagging;
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
+    this.embeddable = embeddable;
   }
 
   private logger: Logger;
   private savedObjectsTagging?: SavedObjectTaggingStart;
   private throwOnResultValidationError: boolean;
+  private embeddable: EmbeddableStart;
 
   private getTagNamesFromReferences(references: SavedObjectReference[], allTags: Tag[]) {
     return Array.from(
@@ -175,7 +184,7 @@ export class DashboardStorage {
   }
 
   async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = (await tagsClient?.getAll()) ?? [];
@@ -187,7 +196,7 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false, {
+    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false, {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
     });
@@ -233,7 +242,7 @@ export class DashboardStorage {
     data: DashboardAttributes,
     options: DashboardCreateOptions
   ): Promise<DashboardCreateOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = tagsClient ? await tagsClient?.getAll() : [];
@@ -259,11 +268,12 @@ export class DashboardStorage {
       attributes: soAttributes,
       references: soReferences,
       error: attributesError,
-    } = await itemAttrsToSavedObjectWithTags({
+    } = await itemToSavedObjectWithTags({
       attributes: dataToLatest,
+      embeddable: this.embeddable,
       replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
-      incomingReferences: options.references,
+      references: options.references,
     });
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
@@ -276,7 +286,7 @@ export class DashboardStorage {
       { ...optionsToLatest, references: soReferences }
     );
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false, {
+    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false, {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
     });
@@ -315,7 +325,7 @@ export class DashboardStorage {
     data: DashboardAttributes,
     options: DashboardUpdateOptions
   ): Promise<DashboardUpdateOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = (await tagsClient?.getAll()) ?? [];
@@ -341,11 +351,12 @@ export class DashboardStorage {
       attributes: soAttributes,
       references: soReferences,
       error: attributesError,
-    } = await itemAttrsToSavedObjectWithTags({
+    } = await itemToSavedObjectWithTags({
       attributes: dataToLatest,
+      embeddable: this.embeddable,
       replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
-      incomingReferences: options.references,
+      references: options.references,
     });
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
@@ -356,13 +367,21 @@ export class DashboardStorage {
       DASHBOARD_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      {
+        ...optionsToLatest,
+        references: soReferences,
+      }
     );
 
-    const { item, error: itemError } = savedObjectToItem(partialSavedObject, true, {
-      getTagNamesFromReferences: (references: SavedObjectReference[]) =>
-        this.getTagNamesFromReferences(references, allTags),
-    });
+    const { item, error: itemError } = savedObjectToItem(
+      partialSavedObject,
+      this.embeddable,
+      true,
+      {
+        getTagNamesFromReferences: (references: SavedObjectReference[]) =>
+          this.getTagNamesFromReferences(references, allTags),
+      }
+    );
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -409,7 +428,7 @@ export class DashboardStorage {
     query: SearchQuery,
     options: DashboardSearchOptions
   ): Promise<DashboardSearchOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = (await tagsClient?.getAll()) ?? [];
@@ -429,7 +448,7 @@ export class DashboardStorage {
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const { item } = savedObjectToItem(so, false, {
+          const { item } = savedObjectToItem(so, this.embeddable, false, {
             allowedAttributes: soQuery.fields,
             allowedReferences: optionsToLatest?.includeReferences,
             getTagNamesFromReferences: (references: SavedObjectReference[]) =>

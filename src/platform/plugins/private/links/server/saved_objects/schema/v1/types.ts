@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getServiceDefinition } from './cm_services';
+import { TypeOf } from '@kbn/config-schema';
+import { savedObjectLinksAttributesSchema } from './v1';
+
+export type SavedObjectLinksAttributes = TypeOf<typeof savedObjectLinksAttributesSchema>;

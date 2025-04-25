@@ -9,10 +9,9 @@
 
 import { SavedObject, SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { extractReferences, injectReferences } from '../../../common';
 import type { DashboardSavedObjectTypeMigrationsDeps } from './dashboard_saved_object_migrations';
 import type { DashboardSavedObjectAttributes } from '../schema';
-import { itemAttrsToSavedObject, savedObjectToItem } from '../../content_management/latest';
+import { itemToSavedObject, savedObjectToItem } from '../../content_management/latest';
 
 /**
  * In 7.8.0 we introduced dashboard drilldowns which are stored inside dashboard saved object as part of embeddable state
@@ -37,32 +36,21 @@ export function createExtractPanelReferencesMigration(
      */
     const oldNonPanelReferences = references.filter((ref) => !ref.name.startsWith('panel_'));
 
-    // Use Content Management to convert the saved object to the DashboardAttributes
-    // expected by injectReferences
+    // Content Management transform functions `savedObjectToItem` and `itemToSavedObject`
+    // will run embeddable inject and extract functions for each panel
     const { item, error: itemError } = savedObjectToItem(
       doc as unknown as SavedObject<DashboardSavedObjectAttributes>,
+      deps.embeddable,
       false
     );
 
     if (itemError) throw itemError;
 
-    const parsedAttributes = item.attributes;
-    const injectedAttributes = injectReferences(
-      {
-        attributes: parsedAttributes,
-        references,
-      },
-      { embeddablePersistableStateService: deps.embeddable }
-    );
-
-    const { attributes: extractedAttributes, references: newPanelReferences } = extractReferences(
-      { attributes: injectedAttributes, references: [] },
-      { embeddablePersistableStateService: deps.embeddable }
-    );
-
-    const { attributes, error: attributesError } = itemAttrsToSavedObject({
-      attributes: extractedAttributes,
-    });
+    const {
+      attributes,
+      error: attributesError,
+      references: newPanelReferences,
+    } = itemToSavedObject({ attributes: item.attributes, embeddable: deps.embeddable });
     if (attributesError) throw attributesError;
 
     return {

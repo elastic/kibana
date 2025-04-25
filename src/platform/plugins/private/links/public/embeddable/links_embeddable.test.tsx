@@ -32,14 +32,14 @@ const getLinks: () => Link[] = () => [
     order: 0,
     type: 'dashboardLink',
     label: '',
-    destinationRefName: 'link_001_dashboard',
+    destination: '999',
   },
   {
     id: '002',
     order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
-    destinationRefName: 'link_002_dashboard',
+    destination: '888',
   },
   {
     id: '003',
@@ -248,7 +248,7 @@ describe('getLinksEmbeddableFactory', () => {
               layout: 'vertical',
             },
           },
-          references,
+          references: [],
         });
       });
     });
@@ -312,7 +312,7 @@ describe('getLinksEmbeddableFactory', () => {
               layout: 'horizontal',
             },
           },
-          references,
+          references: [],
         });
 
         expect(await api.canLinkToLibrary()).toBe(true);
@@ -328,7 +328,35 @@ describe('getLinksEmbeddableFactory', () => {
         expect(linksClient.create).toHaveBeenCalledWith({
           data: {
             title: 'some new title',
-            links: getLinks(),
+            links: [
+              {
+                id: '001',
+                order: 0,
+                type: 'dashboardLink',
+                label: '',
+                destinationRefName: 'link_001_dashboard',
+              },
+              {
+                id: '002',
+                order: 1,
+                type: 'dashboardLink',
+                label: 'Dashboard 2',
+                destinationRefName: 'link_002_dashboard',
+              },
+              {
+                id: '003',
+                order: 2,
+                type: 'externalLink',
+                label: 'Example homepage',
+                destination: 'https://example.com',
+              },
+              {
+                id: '004',
+                order: 3,
+                type: 'externalLink',
+                destination: 'https://elastic.co',
+              },
+            ],
             layout: 'horizontal',
           },
           options: { references },

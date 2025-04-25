@@ -11,7 +11,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
@@ -41,6 +41,7 @@ interface SetupDeps {
 }
 
 interface StartDeps {
+  embeddable: EmbeddableStart;
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
@@ -67,12 +68,13 @@ export class DashboardPlugin
       })
     );
 
-    void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
+    void core.getStartServices().then(([_, { embeddable, savedObjectsTagging }]) => {
       const { contentClient } = plugins.contentManagement.register({
         id: CONTENT_ID,
         storage: new DashboardStorage({
           throwOnResultValidationError: this.initializerContext.env.mode.dev,
           logger: this.logger.get('storage'),
+          embeddable,
           savedObjectsTagging,
         }),
         version: {
