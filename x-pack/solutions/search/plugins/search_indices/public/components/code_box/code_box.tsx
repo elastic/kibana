@@ -28,16 +28,13 @@ import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { getDefaultCodingLanguage } from '../../utils/language';
 
 import * as Styles from './styles';
+import { CodeLanguage } from '../../types';
 
 export interface CodeSampleOption {
-  language: {
-    id: string;
-    title: string;
-    iconType: string;
-    stylingId?: string;
-  };
+  language: CodeLanguage;
   code: string;
 }
 
@@ -62,9 +59,7 @@ export const CodeBox = (props: CodeBoxProps) => {
   }>().services;
   const assetBasePath = useAssetBasePath();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [selectedLangId, setSelectedLanguage] = useState<string | null>(
-    options.length ? options[0].language.id : null // TODO : get default language like getting started page
-  );
+  const [selectedLangId, setSelectedLanguage] = useState<string | null>(getDefaultCodingLanguage);
   const selectedOption: CodeSampleOption | null = useMemo(
     () => options.find((opt) => opt.language.id === selectedLangId) ?? null,
     [selectedLangId, options]
@@ -74,7 +69,7 @@ export const CodeBox = (props: CodeBoxProps) => {
       options.map(({ language }) => (
         <EuiContextMenuItem
           key={language.id}
-          icon={`${assetBasePath}/${language.iconType}`}
+          icon={`${assetBasePath}/${language.icon}`}
           aria-label={i18n.translate('xpack.searchIndices.codeBox.languageMenu.item.ariaLabel', {
             defaultMessage: 'Change language to {languageName} for this code example',
             values: { languageName: language.title },
@@ -185,10 +180,9 @@ export const CodeBox = (props: CodeBoxProps) => {
           isCopyable={!showTopBar}
           transparentBackground
           fontSize="m"
-          language={selectedOption?.language?.stylingId || selectedOption?.language.id || 'text'}
+          language={selectedOption?.language.codeBlockLanguage || 'text'}
           overflowHeight={500}
           css={Styles.CodeBoxCodeBlock}
-          lineNumbers
         >
           {codeSnippet}
         </EuiCodeBlock>
