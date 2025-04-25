@@ -18,9 +18,7 @@ import {
   useRuntimeState,
   CurrentTabProvider,
   RuntimeStateProvider,
-  useInternalStateDispatch,
-  useCurrentTabAction,
-  internalStateActions,
+  useCurrentTabSelector,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
@@ -135,20 +133,17 @@ const UnifiedHistogramChartWrapper = ({
     }
   }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
 
-  const dispatch = useInternalStateDispatch();
-  const setUnifiedHistogramLayoutProps = useCurrentTabAction(
-    internalStateActions.setUnifiedHistogramLayoutProps
-  );
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
 
   useEffect(() => {
     if (unifiedHistogram.layoutProps) {
-      dispatch(
-        setUnifiedHistogramLayoutProps({
-          unifiedHistogramLayoutProps: unifiedHistogram.layoutProps,
-        })
+      const currentTabRuntimeState = selectTabRuntimeState(
+        stateContainer.runtimeStateManager,
+        currentTabId
       );
+      currentTabRuntimeState.unifiedHistogramLayoutProps$.next(unifiedHistogram.layoutProps);
     }
-  }, [dispatch, setUnifiedHistogramLayoutProps, unifiedHistogram.layoutProps]);
+  }, [currentTabId, stateContainer.runtimeStateManager, unifiedHistogram.layoutProps]);
 
   const isEsqlMode = useIsEsqlMode();
   const renderCustomChartToggleActions = useCallback(
