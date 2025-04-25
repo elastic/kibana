@@ -20,6 +20,7 @@ import {
   PublishesDataViews,
   PublishesRendered,
   PublishesTimeRange,
+  PublishesTitle,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -74,6 +75,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
+  Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &
   HasSupportedTriggers &
