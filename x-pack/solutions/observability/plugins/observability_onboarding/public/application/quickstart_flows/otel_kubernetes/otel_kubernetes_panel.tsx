@@ -81,15 +81,14 @@ export const OtelKubernetesPanel: React.FC = () => {
     );
   }
 
+  const agentVersion = data?.elasticAgentVersionInfo.agentTargetVersion ?? '';
   /**
    * Extracting the base version in case it has any suffix like `+build12345678`,
    * as in this flow agent version is used to reference the git tag without any
    * suffixes.
    */
-  const agentVersion = data?.elasticAgentVersionInfo.agentTargetVersion.split('+')[0];
-  const otelKubeStackValuesFileUrl = agentVersion
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${agentVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`
-    : '';
+  const agentBaseVersion = agentVersion.split('+')[0];
+  const otelKubeStackValuesFileUrl = `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${agentBaseVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`;
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const installStackCommand = data
