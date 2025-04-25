@@ -180,7 +180,7 @@ function buildEvaluation(burnRateWindows: BurnRateWindowWithDuration[]) {
   };
 }
 
-function buildTopHitsAgg() {
+function buildGroupingAgg() {
   return {
     groupings: {
       top_hits: {
@@ -246,7 +246,7 @@ export function buildQuery(
         aggs: {
           ...buildWindowAggs(startedAt, slo, burnRateWindows, delayInSeconds),
           ...buildEvaluation(burnRateWindows),
-          ...buildTopHitsAgg(),
+          ...buildGroupingAgg(),
         },
       },
     },

@@ -159,6 +159,6 @@ function transformGroupings(
 ): Record<string, unknown> | undefined {
   if (groupings.hits && groupings.hits.hits && groupings.hits.hits.length > 0) {
     const topHit = groupings.hits.hits[0];
-    return topHit._source?.slo.groupings;
+    return topHit._source?.slo?.groupings;
   }
 }
