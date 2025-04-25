@@ -524,3 +524,16 @@ export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
  * Whether it is a Jest environment
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
+
+export const AI_FOR_SOC_INTEGRATIONS = [
+  'splunk',
+  'google_secops',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'crowdstrike',
+];
+
+/*
+ * The tag to mark promotion rules that are related to the AI for SOC integrations
+ */
+export const PROMOTION_RULE_TAG = 'Promotion';

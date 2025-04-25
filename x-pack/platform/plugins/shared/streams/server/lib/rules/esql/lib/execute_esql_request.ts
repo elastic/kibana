@@ -5,39 +5,61 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 
-export interface EsqlResultColumn {
+interface EsqlResultColumn {
   name: string;
   type: 'date' | 'keyword';
 }
 
-export type EsqlResultRow = Array<string | null>;
+type EsqlRowValue = string | number | boolean | null | Record<string, unknown>;
+type EsqlResultRow = EsqlRowValue[];
 
-export interface EsqlTable {
+interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
 }
 
+type Response = Array<{
+  _id: string;
+  _source: Record<string, unknown>;
+}>;
+
 export const executeEsqlRequest = async ({
   esClient,
   requestBody,
-  requestQueryParams,
 }: {
-  logger?: Logger;
   esClient: ElasticsearchClient;
   requestBody: Record<string, unknown>;
-  requestQueryParams?: { drop_null_columns?: boolean };
-}): Promise<EsqlTable> => {
+}): Promise<Response> => {
   try {
-    const rawResponse = await esClient.transport.request<EsqlTable>({
+    const response = await esClient.transport.request<EsqlTable>({
       method: 'POST',
       path: '/_query',
       body: requestBody,
-      querystring: requestQueryParams,
+      querystring: { drop_null_columns: true },
     });
-    return rawResponse;
+
+    const [sourceIndex, idIndex] = [
+      response.columns.findIndex((col) => col.name === '_source'),
+      response.columns.findIndex((col) => col.name === '_id'),
+    ];
+
+    const results = response.values
+      .map((row) => ({
+        _id: row[idIndex],
+        _source: row[sourceIndex],
+      }))
+      .filter(
+        (row) =>
+          row._id !== null &&
+          typeof row._id === 'string' &&
+          row._source !== null &&
+          typeof row._source === 'object'
+      ) as Response;
+
+    return results;
   } catch (e) {
     throw getKbnServerError(e);
   }
