@@ -28,6 +28,7 @@ import {
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
   patchRule,
+  runSoonRule,
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
@@ -683,14 +684,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: false,
-            });
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: true,
-            });
+            runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -751,14 +745,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: false,
-            });
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: true,
-            });
+            runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -837,14 +824,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: false,
-            });
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: true,
-            });
+            runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -906,14 +886,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: false,
-            });
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: true,
-            });
+            runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
