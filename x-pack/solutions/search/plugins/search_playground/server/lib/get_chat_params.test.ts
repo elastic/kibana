@@ -105,6 +105,7 @@ describe('getChatParams', () => {
       model: 'gemini-1.5-pro',
       connectorId: '1',
       actionsClient: expect.anything(),
+      streaming: true,
     });
     expect(result.chatPrompt).toContain('Hello, world!');
   });
