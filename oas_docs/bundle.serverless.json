@@ -18202,13 +18202,13 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -18385,13 +18385,13 @@
                                       "type": "string"
                                     },
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -19507,10 +19507,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "api_key_id",
-                                "type"
-                              ],
                               "type": "object"
                             },
                             "type": "object"
@@ -21605,10 +21601,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -22086,10 +22078,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -23255,6 +23243,9 @@
                           "created_at": {
                             "type": "string"
                           },
+                          "hidden": {
+                            "type": "boolean"
+                          },
                           "id": {
                             "type": "string"
                           },
@@ -23297,6 +23288,9 @@
                           },
                           "created_at": {
                             "type": "string"
+                          },
+                          "hidden": {
+                            "type": "boolean"
                           },
                           "id": {
                             "type": "string"
@@ -23448,6 +23442,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -23636,6 +23633,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -24156,6 +24156,93 @@
           }
         },
         "summary": "Create a custom integration",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/custom_integrations/{pkgName}": {
+      "put": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-all AND integrations-all.",
+        "operationId": "put-fleet-epm-custom-integrations-pkgname",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "categories": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "readMeData": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "readMeData"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {},
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update a custom integration",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -43806,6 +43893,12 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "type": "string"
                           },
@@ -43947,6 +44040,12 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "type": "string"
                           },

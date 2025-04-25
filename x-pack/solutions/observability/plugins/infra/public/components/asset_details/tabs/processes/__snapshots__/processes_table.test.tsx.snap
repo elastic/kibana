@@ -163,6 +163,7 @@ Object {
               >
                 <button
                   aria-expanded="false"
+                  aria-label="Expand process details"
                   class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                   data-test-subj="infraProcessRowButton"
                   type="button"
@@ -428,6 +429,7 @@ Object {
             >
               <button
                 aria-expanded="false"
+                aria-label="Expand process details"
                 class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                 data-test-subj="infraProcessRowButton"
                 type="button"
