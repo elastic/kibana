@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { LockManagerStartDeps, LockManagerSetupDeps } from '../types';
+import { LockManagerStartDeps, LockManagerSetupDeps } from './types';
 
 export type LockManagerPluginSetup = ReturnType<LockManagerPlugin['setup']>;
 export type LockManagerPluginStart = ReturnType<LockManagerPlugin['start']>;
