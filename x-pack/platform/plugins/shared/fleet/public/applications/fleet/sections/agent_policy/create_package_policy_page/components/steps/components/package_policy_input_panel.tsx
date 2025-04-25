@@ -259,6 +259,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   data-test-subj="PackagePolicy.InputStreamConfig"
                   packageInfo={packageInfo}
                   packageInputStream={packageInputStream}
+                  totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
