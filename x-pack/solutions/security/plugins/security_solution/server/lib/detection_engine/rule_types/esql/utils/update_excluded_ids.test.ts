@@ -7,28 +7,31 @@
 
 import { updateExcludedIds } from './update_excluded_ids';
 import type { FetchedDocument } from '../fetch_source_documents';
-import type { EsqlTable } from '../esql_request';
 
 const fetchedDocumentMock: FetchedDocument = {
   fields: {},
-  _index: 'index',
+  _index: 'auditbeat',
   _version: 1,
+  _id: 'id1',
 };
 
 const sourceDocuments: Record<string, FetchedDocument[]> = {
   id1: [fetchedDocumentMock],
-  id2: [fetchedDocumentMock],
-  id3: [fetchedDocumentMock],
+  id2: [{ ...fetchedDocumentMock, _id: 'id2' }],
+  id3: [{ ...fetchedDocumentMock, _id: 'id3' }],
 };
 
-const results: EsqlTable = {
-  columns: [{ name: '_id', type: 'keyword' }],
-  values: [['id1'], ['id2'], ['id3']],
-};
+const results = [
+  { _id: 'id1', _index: 'auditbeat' },
+  { _id: 'id2', _index: 'auditbeat' },
+  { _id: 'id3', _index: 'auditbeat' },
+];
 
 describe('updateExcludedIds', () => {
   it('should return unchanged excludedDocumentIds if query is aggregating', () => {
-    const excludedDocumentIds = ['prev-id-0', 'prev-id-1', 'prev-id-2'];
+    const excludedDocumentIds: Record<string, Set<string>> = {
+      auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2']),
+    };
 
     const result = updateExcludedIds({
       excludedDocumentIds,
@@ -42,7 +45,10 @@ describe('updateExcludedIds', () => {
   });
 
   it('should add all source document ids to excluded when hasMvExpand is false', () => {
-    const excludedDocumentIds = ['prev-id-0', 'prev-id-1', 'prev-id-2'];
+    const excludedDocumentIds: Record<string, Set<string>> = {
+      auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2']),
+    };
+
     const result = updateExcludedIds({
       excludedDocumentIds,
       hasMvExpand: false,
@@ -51,24 +57,33 @@ describe('updateExcludedIds', () => {
       isRuleAggregating: false,
     });
 
-    expect(result).toEqual(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1', 'id2', 'id3']);
+    expect(result).toEqual({
+      auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1', 'id2', 'id3']),
+    });
   });
 
   it('should add all source document ids to excluded when only one document exists', () => {
-    const excludedDocumentIds = ['prev-id-0', 'prev-id-1', 'prev-id-2'];
+    const excludedDocumentIds: Record<string, Set<string>> = {
+      auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2']),
+    };
+
     const result = updateExcludedIds({
       excludedDocumentIds,
       hasMvExpand: true,
       sourceDocuments: { id1: [fetchedDocumentMock] },
-      results,
+      results: [{ _id: 'id1', _index: 'auditbeat' }],
       isRuleAggregating: false,
     });
 
-    expect(result).toEqual(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1']);
+    expect(result).toEqual({
+      auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1']),
+    });
   });
 
   it('should exclude all source document ids except the last one from results when hasMvExpand is true', () => {
-    const excludedDocumentIds = ['prev-id-0', 'prev-id-1', 'prev-id-2'];
+    const excludedDocumentIds: Record<string, Set<string>> = {
+      auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2']),
+    };
 
     const result = updateExcludedIds({
       excludedDocumentIds,
@@ -78,6 +93,70 @@ describe('updateExcludedIds', () => {
       isRuleAggregating: false,
     });
 
-    expect(result).toEqual(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1', 'id2']);
+    expect(result).toEqual({
+      auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1', 'id2']),
+    });
+  });
+
+  describe('identical ids in different indices', () => {
+    it('should exclude all source documents for same id from different indices', () => {
+      const excludedDocumentIds: Record<string, Set<string>> = {
+        auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2']),
+      };
+
+      const result = updateExcludedIds({
+        excludedDocumentIds,
+        hasMvExpand: false,
+        sourceDocuments: {
+          id1: [fetchedDocumentMock],
+          id2: [
+            { ...fetchedDocumentMock, _id: 'id2' },
+            { ...fetchedDocumentMock, _id: 'id2', _index: 'filebeat' },
+          ],
+          id3: [{ ...fetchedDocumentMock, _id: 'id3' }],
+        },
+        results: [
+          { _id: 'id1', _index: 'auditbeat' },
+          { _id: 'id2', _index: 'filebeat' },
+          { _id: 'id2', _index: 'auditbeat' },
+          { _id: 'id3', _index: 'auditbeat' },
+        ],
+        isRuleAggregating: false,
+      });
+
+      expect(result).toEqual({
+        auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1', 'id2', 'id3']),
+        filebeat: new Set(['id2']),
+      });
+    });
+
+    it('should respect index of last id or results', () => {
+      const excludedDocumentIds: Record<string, Set<string>> = {
+        auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2']),
+      };
+
+      const result = updateExcludedIds({
+        excludedDocumentIds,
+        hasMvExpand: false,
+        sourceDocuments: {
+          id1: [fetchedDocumentMock],
+          id2: [
+            { ...fetchedDocumentMock, _id: 'id2' },
+            { ...fetchedDocumentMock, _id: 'id2', _index: 'filebeat' },
+          ],
+        },
+        results: [
+          { _id: 'id1', _index: 'auditbeat' },
+          { _id: 'id2', _index: 'filebeat' },
+        ],
+        isRuleAggregating: false,
+      });
+
+      // id2 excluded only to filebeat, because it is the last id in the results, not in auditbeat index
+      expect(result).toEqual({
+        auditbeat: new Set(['prev-id-0', 'prev-id-1', 'prev-id-2', 'id1']),
+        filebeat: new Set(['id2']),
+      });
+    });
   });
 });
