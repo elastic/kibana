@@ -17,6 +17,7 @@ import { Config } from './config';
 interface Options {
   config: Config;
   log: ToolingLog;
+  indent?: number;
 }
 
 export interface GlobalTask {
@@ -31,11 +32,11 @@ export interface Task {
   run(config: Config, log: ToolingLog, build: Build): Promise<void>;
 }
 
-export function createRunner({ config, log }: Options) {
+export function createRunner({ config, log, indent = 4 }: Options) {
   async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
     log.info(desc);
     try {
-      await log.indent(4, async () => {
+      await log.indent(indent, async () => {
         const start = Date.now();
         const time = () => {
           const secs = Math.round((Date.now() - start) / 1000);

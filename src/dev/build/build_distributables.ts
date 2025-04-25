@@ -9,7 +9,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, createRunner, Task, GlobalTask } from './lib';
+import { Config, Task, createRunner } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -45,15 +45,71 @@ export interface BuildOptions {
   eprRegistry: 'production' | 'snapshot';
 }
 
+interface TaskResult {
+  description: string;
+  output: string[];
+  error?: any;
+}
+
+const captureArtifactLogs = async (
+  task: Task,
+  artifactRun: ReturnType<typeof createRunner>
+): Promise<TaskResult> => {
+  const { description } = task;
+  const output: string[] = [];
+
+  const pushLogLine = (chunk: string | Uint8Array) => {
+    // End up with extra newlines so trim them now
+    output.push(chunk.toString().trimEnd());
+    return true;
+  };
+
+  const originalStdoutWrite = process.stdout.write;
+  const originalStderrWrite = process.stderr.write;
+
+  process.stdout.write = pushLogLine;
+  process.stderr.write = pushLogLine;
+
+  try {
+    await artifactRun(task);
+    return { description, output };
+  } catch (error) {
+    return { description, output, error };
+  } finally {
+    process.stdout.write = originalStdoutWrite;
+    process.stderr.write = originalStderrWrite;
+  }
+};
+
+const printArtifactLogs = async (result: PromiseSettledResult<TaskResult>, log: ToolingLog) => {
+  if (result.status === 'fulfilled') {
+    const { description, output, error } = result.value;
+
+    // First and last logs have different formatting
+    const lastLog = output.pop();
+    log.write(output.shift());
+
+    log.indent(4, () => log.write(output.join('\n')));
+
+    if (error) {
+      log.error(`${description} failed with error: ${error}`);
+    }
+
+    log.indent(-4);
+    log.write(lastLog);
+  } else {
+    log.error(`Build task failed with error: ${result.reason}`);
+  }
+};
+
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
   const config = await Config.create(options);
 
-  const run: (task: Task | GlobalTask) => Promise<void> = createRunner({
-    config,
-    log,
-  });
+  const run = createRunner({ config, log });
+  // Since the artifact tasks run in parallel the indention is additive, so we'll indent in printArtifactLogs
+  const artifactRun = createRunner({ config, log, indent: 0 });
 
   /**
    * verify, reset, and initialize the build environment
@@ -145,58 +201,54 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
     if (options.createDebPackage) {
       // control w/ --deb or --skip-os-packages
-      artifactTasks.push(run(Tasks.CreateDebPackage));
+      artifactTasks.push(Tasks.CreateDebPackage);
     }
     if (options.createRpmPackage) {
       // control w/ --rpm or --skip-os-packages
-      artifactTasks.push(run(Tasks.CreateRpmPackage));
+      artifactTasks.push(Tasks.CreateRpmPackage);
     }
   }
 
   if (options.createDockerUBI) {
     // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
-    artifactTasks.push(run(Tasks.CreateDockerUBI));
+    artifactTasks.push(Tasks.CreateDockerUBI);
   }
 
   if (options.createDockerWolfi) {
     // control w/ --docker-images or --skip-docker-wolfi or --skip-os-packages
-    artifactTasks.push(run(Tasks.CreateDockerWolfi));
+    artifactTasks.push(Tasks.CreateDockerWolfi);
   }
 
   if (options.createDockerCloud) {
     // control w/ --docker-images and --skip-docker-cloud
-    artifactTasks.push(run(Tasks.CreateDockerCloud));
+    artifactTasks.push(Tasks.CreateDockerCloud);
   }
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    artifactTasks.push(run(Tasks.CreateDockerServerless));
+    artifactTasks.push(Tasks.CreateDockerServerless);
   }
 
   if (options.createDockerFIPS) {
     // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
-    artifactTasks.push(run(Tasks.CreateDockerFIPS));
+    artifactTasks.push(Tasks.CreateDockerFIPS);
   }
 
   if (options.createDockerCloudFIPS) {
     // control w/ --docker-images and --skip-docker-cloud-fips
-    artifactTasks.push(run(Tasks.CreateDockerCloudFIPS));
+    artifactTasks.push(Tasks.CreateDockerCloudFIPS);
   }
 
   if (options.createDockerContexts) {
     // control w/ --skip-docker-contexts
-    artifactTasks.push(run(Tasks.CreateDockerContexts));
+    artifactTasks.push(Tasks.CreateDockerContexts);
   }
 
-  // Run all artifact tasks in parallel
-  await Promise.allSettled(
-    artifactTasks.map((p) =>
-      p.catch((e) => {
-        log.error(e);
-        throw e;
-      })
-    )
+  const artifactResults = await Promise.allSettled(
+    artifactTasks.map((task) => captureArtifactLogs(task, artifactRun))
   );
+
+  artifactResults.forEach((result) => printArtifactLogs(result, log));
 
   /**
    * finalize artifacts by writing sha1sums of each into the target directory
