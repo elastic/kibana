@@ -31,6 +31,7 @@ export type {
   ESQLInlineCast,
   ESQLAstRenameExpression,
   ESQLAstBaseItem,
+  ESQLAstChangePointCommand,
 } from './src/types';
 
 export {
