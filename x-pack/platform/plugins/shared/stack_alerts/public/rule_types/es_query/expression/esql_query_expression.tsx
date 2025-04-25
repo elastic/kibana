@@ -75,6 +75,18 @@ export const EsqlQueryExpression: React.FC<
     [setRuleParams]
   );
 
+  const clearParam = useCallback(
+    (paramField: string) => {
+      setCurrentRuleParams((currentParams) => {
+        const nextParams = { ...currentParams };
+        delete nextParams[paramField];
+        return nextParams;
+      });
+      setRuleParams(paramField, undefined);
+    },
+    [setRuleParams]
+  );
+
   const setDefaultExpressionValues = () => {
     setRuleProperty('params', currentRuleParams);
     if (esqlQuery?.esql) {
@@ -169,9 +181,12 @@ export const EsqlQueryExpression: React.FC<
       if (!timeField && timestampField) {
         setParam('timeField', timestampField);
       }
+      if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
+        clearParam('timeField');
+      }
       setDetectedTimestamp(timestampField);
     },
-    [timeField, setParam, dataViews, http]
+    [timeField, setParam, clearParam, dataViews, http]
   );
 
   return (
