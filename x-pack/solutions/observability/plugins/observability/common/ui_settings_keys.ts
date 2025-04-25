@@ -33,7 +33,6 @@ export const apmEnableServiceMetrics = 'observability:apmEnableServiceMetrics';
 export const apmEnableContinuousRollups = 'observability:apmEnableContinuousRollups';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
 export const enableLegacyUptimeApp = 'observability:enableLegacyUptimeApp';
-export const apmEnableProfilingIntegration = 'observability:apmEnableProfilingIntegration';
 export const profilingShowErrorFrames = 'observability:profilingShowErrorFrames';
 export const profilingPervCPUWattX86 = 'observability:profilingPerVCPUWattX86';
 export const profilingPervCPUWattArm64 = 'observability:profilingPervCPUWattArm64';

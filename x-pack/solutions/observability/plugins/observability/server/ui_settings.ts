@@ -30,7 +30,6 @@ import {
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
-  apmEnableProfilingIntegration,
   profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
@@ -488,16 +487,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [apmEnableProfilingIntegration]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
-      defaultMessage: 'Enable Universal Profiling integration in APM',
-    }),
-    value: true,
-    schema: schema.boolean(),
-    requiresPageReload: false,
     solution: 'oblt',
   },
   [profilingShowErrorFrames]: {

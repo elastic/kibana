@@ -42,7 +42,6 @@ export {
   apmEnableContinuousRollups,
   enableCriticalPath,
   syntheticsThrottlingEnabled,
-  apmEnableProfilingIntegration,
   profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
