@@ -271,6 +271,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           soClient: coreContext.savedObjects.client,
           logger: options.logger,
           namespace: getSpaceId(),
+          soTypeRegistry: coreContext.savedObjects.typeRegistry,
         });
       }),
       getEntityStoreDataClient: memoize(() => {

@@ -9,7 +9,6 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -34,22 +33,17 @@ export const padPrecheckAndInstallRoute = (
         validate: {},
       },
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<InitMonitoringEngineResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
 
         try {
           const clientResponse = await secSol
             .getPadPrecheckAndInstallClient()
-            .padPrecheckAndInstall();
-          logger.info(`PAD precheck and installation status: ${JSON.stringify(clientResponse)}`);
+            .runPadPrecheckAndInstall();
+          logger.info(`PAD precheck and installation status: ${clientResponse.status_code}`);
           return response.ok({
             body: {
-              status: 'installing',
               data: clientResponse,
             },
           });
