@@ -59,7 +59,7 @@ function registerBeatsTutorialsWithCustomIntegrations(
       ? [
           {
             type: tutorial.euiIconType.endsWith('svg') ? 'svg' : 'eui',
-            src: core.http.basePath.prepend(tutorial.euiIconType),
+            src: tutorial.euiIconType,
           },
         ]
       : [],

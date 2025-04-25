@@ -6,9 +6,13 @@
  */
 
 import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
+import { configSchema } from './config_schema';
 
+export const config: PluginConfigDescriptor = {
+  schema: configSchema,
+};
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { ElasticAssistantPlugin } = await import('./plugin');
   return new ElasticAssistantPlugin(initializerContext);
