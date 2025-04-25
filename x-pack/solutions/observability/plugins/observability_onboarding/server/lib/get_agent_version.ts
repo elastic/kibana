@@ -50,10 +50,9 @@ export function getLatestAgentVersionInRange(
   fromVersion: string,
   upToVersion: string
 ): string {
-  const targetVersion =
+  return (
     agentVersionList.find((version) => {
       return semver.satisfies(version, `>=${fromVersion} <${upToVersion}`);
-    }) ?? kibanaVersion;
-
-  return targetVersion.split('+')[0];
+    }) ?? kibanaVersion
+  );
 }

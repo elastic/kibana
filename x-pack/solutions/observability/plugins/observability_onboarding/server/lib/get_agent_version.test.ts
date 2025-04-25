@@ -48,20 +48,4 @@ describe('getLatestAgentVersionInRange()', () => {
 
     expect(result).toBe('8.18.0');
   });
-
-  it('returns the base version in case the matched version has a build suffix', () => {
-    const agentVersionList = ['10.0.0', '9.1.0+build123', '9.0.1', '9.0.0'];
-    const kibanaVersion = '8.18.0';
-    const fromVersion = '9.0.0';
-    const upToVersion = '10.0.0';
-
-    const result = getLatestAgentVersionInRange(
-      agentVersionList,
-      kibanaVersion,
-      fromVersion,
-      upToVersion
-    );
-
-    expect(result).toBe('9.1.0');
-  });
 });
