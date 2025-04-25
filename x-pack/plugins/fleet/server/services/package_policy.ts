@@ -1134,7 +1134,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
       const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
-      // Only apply removeProtection for endpoint packages
+      // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
       const removeProtection =
         isEndpointPolicy &&
         ((assignedInOldPolicy && !assignedInNewPolicy) ||
