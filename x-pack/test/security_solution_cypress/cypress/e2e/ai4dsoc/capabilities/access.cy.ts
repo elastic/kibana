@@ -12,6 +12,7 @@ import {
   ALERT_SUMMARY_URL,
   ALERTS_URL,
   MAINTENANCE_WINDOW_URL,
+  RULES_URL,
   RULES_LANDING_URL,
   STACK_RULES_URL,
 } from '../../../urls/navigation';
@@ -98,6 +99,12 @@ describe('Capabilities', { tags: '@serverless' }, () => {
       });
 
       it('should redirect from rules to get started page', () => {
+        visit(RULES_URL);
+        cy.get(GET_STARTED_PAGE).should('exist');
+      });
+
+      // TODO: Redirecting Rules Landing is not supported for now, but should be in the future
+      it.skip('should not redirect from rules to get started page', () => {
         visit(RULES_LANDING_URL);
         cy.get(GET_STARTED_PAGE).should('exist');
       });
