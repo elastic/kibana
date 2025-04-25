@@ -162,10 +162,8 @@ describe('getRecentEsDeprecationLogs', () => {
     // Verify search was called with correct params
     expect(dataClient.asCurrentUser.search).toHaveBeenCalledWith({
       index: '.logs-deprecation.elasticsearch-default',
-      body: expect.objectContaining({
-        query: expect.any(Object),
-        sort: [{ '@timestamp': { order: 'desc' } }],
-      }),
+      query: expect.any(Object),
+      sort: [{ '@timestamp': { order: 'desc' } }],
     });
   });
 
@@ -231,15 +229,13 @@ describe('getRecentEsDeprecationLogs', () => {
     // Verify the search query uses the correct timeframe
     expect(dataClient.asCurrentUser.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              must: expect.objectContaining({
-                range: expect.objectContaining({
-                  '@timestamp': expect.objectContaining({
-                    gte: expect.any(String),
-                    lte: expect.any(String),
-                  }),
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            must: expect.objectContaining({
+              range: expect.objectContaining({
+                '@timestamp': expect.objectContaining({
+                  gte: expect.any(String),
+                  lte: expect.any(String),
                 }),
               }),
             }),
