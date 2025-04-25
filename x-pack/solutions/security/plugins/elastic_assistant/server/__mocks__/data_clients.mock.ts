@@ -49,6 +49,7 @@ const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock =>
   createAttackDiscovery: jest.fn(),
   createAttackDiscoveryAlerts: jest.fn(),
   findAllAttackDiscoveries: jest.fn(),
+  getAlertConnectorNames: jest.fn(),
   getAttackDiscovery: jest.fn(),
   findAttackDiscoveryAlerts: jest.fn(),
   findDocuments: jest.fn(),

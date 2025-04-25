@@ -130,6 +130,67 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     });
   };
 
+  // Runs an aggregation only bound to the (optional) alertIds and date range
+  // to prevent the connector names from being filtered-out as the user applies more filters:
+  public getAlertConnectorNames = async ({
+    alertIds,
+    authenticatedUser,
+    end,
+    ids,
+    index,
+    logger,
+    page,
+    perPage,
+    sortField,
+    sortOrder,
+    start,
+  }: {
+    alertIds: string[] | undefined;
+    authenticatedUser: AuthenticatedUser;
+    end: string | undefined;
+    ids: string[] | undefined;
+    index: string;
+    logger: Logger;
+    page: number;
+    perPage: number;
+    sortField: string;
+    sortOrder: string;
+    start: string | undefined;
+  }): Promise<string[]> => {
+    const aggs = getFindAttackDiscoveryAlertsAggregation();
+
+    // just use the (optional) alertIds and date range to prevent the connector
+    // names from being filtered-out as the user applies more filters:
+    const connectorsAggsFilter = combineFindAttackDiscoveryFilters({
+      alertIds, // optional
+      end,
+      ids,
+      start,
+    });
+
+    const combinedConnectorsAggsFilter = getCombinedFilter({
+      authenticatedUser,
+      filter: connectorsAggsFilter,
+    });
+
+    const aggsResult = await this.findDocuments<AttackDiscoveryAlertDocument>({
+      aggs,
+      filter: combinedConnectorsAggsFilter,
+      index,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+    });
+
+    const { connectorNames } = transformSearchResponseToAlerts({
+      logger,
+      response: aggsResult.data,
+    });
+
+    return connectorNames;
+  };
+
   public findAttackDiscoveryAlerts = async ({
     authenticatedUser,
     findAttackDiscoveryAlertsParams,
@@ -139,11 +200,9 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     findAttackDiscoveryAlertsParams: FindAttackDiscoveryAlertsParams;
     logger: Logger;
   }): Promise<AttackDiscoveryFindResponse> => {
-    const aggs = getFindAttackDiscoveryAlertsAggregation();
-
     const {
       alertIds,
-      connectorNames,
+      connectorNames, // <-- as a filter input
       end,
       ids,
       search,
@@ -155,6 +214,9 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       page = FIRST_PAGE,
       perPage = DEFAULT_PER_PAGE,
     } = findAttackDiscoveryAlertsParams;
+
+    const spaceId = this.spaceId;
+    const index = getScheduledAndAdHocIndexPattern(spaceId);
 
     const filter = combineFindAttackDiscoveryFilters({
       alertIds,
@@ -172,11 +234,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       shared,
     });
 
-    const spaceId = this.spaceId;
-    const index = getScheduledAndAdHocIndexPattern(spaceId);
-
     const result = await this.findDocuments<AttackDiscoveryAlertDocument>({
-      aggs,
       filter: combinedFilter,
       index,
       page,
@@ -185,17 +243,27 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       sortOrder,
     });
 
-    const {
-      connectorNames: alertConnectorNames,
-      data,
-      uniqueAlertIdsCount,
-    } = transformSearchResponseToAlerts({
+    const { data, uniqueAlertIdsCount } = transformSearchResponseToAlerts({
       logger,
       response: result.data,
     });
 
+    const alertConnectorNames = await this.getAlertConnectorNames({
+      alertIds,
+      authenticatedUser,
+      end,
+      ids,
+      index,
+      logger,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
+      start,
+    });
+
     return {
-      connector_names: alertConnectorNames,
+      connector_names: alertConnectorNames, // <-- from the separate aggregation
       data,
       page: result.page,
       per_page: result.perPage,
