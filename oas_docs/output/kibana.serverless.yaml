@@ -24962,6 +24962,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -24994,6 +24996,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -25097,6 +25101,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
@@ -25223,6 +25229,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
