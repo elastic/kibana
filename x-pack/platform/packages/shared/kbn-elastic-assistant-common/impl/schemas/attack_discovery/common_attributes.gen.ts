@@ -290,6 +290,10 @@ export const CreateAttackDiscoveryAlertsParams = z.object({
 export type FindAttackDiscoveryAlertsParams = z.infer<typeof FindAttackDiscoveryAlertsParams>;
 export const FindAttackDiscoveryAlertsParams = z.object({
   /**
+   * filter by alert IDs within Attack discovery
+   */
+  alertIds: z.array(z.string()).optional(),
+  /**
    * filter by connector names
    */
   connectorNames: z.array(z.string()).optional(),

@@ -1,0 +1,30 @@
+steps:
+  - group: Security Solution Gen AI
+    key: security-solution-gen-ai
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    steps:
+      - command: .buildkite/scripts/steps/test/ftr_configs.sh
+        env:
+          FTR_CONFIG: "x-pack/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts"
+          FTR_CONFIG_GROUP_KEY: 'ftr-security-solution-gen-ai-evaluations'
+          FTR_SECURITY_GEN_AI: "1"
+        label: Security Solution Gen AI Evaluations
+        key: security-solution-gen-ai-evaluations
+        timeout_in_minutes: 50
+        parallelism: 1
+        agents:
+          machineType: n2-standard-4
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+            - exit_status: '*'
+              limit: 1
