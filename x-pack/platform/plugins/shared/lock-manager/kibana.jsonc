@@ -1,6 +1,17 @@
 {
-  "type": "shared-common",
+  "type": "plugin",
   "id": "@kbn/lock-manager",
-  "owner": ["@elastic/obs-ai-assistant"],
-  "devOnly": true
+  "owner": ["@elastic/obs-ai-assistant"],  
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "lockManager",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
 }
+
+
