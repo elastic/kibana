@@ -1632,6 +1632,8 @@
       "@kbn/search-notebooks/*": ["x-pack/solutions/search/plugins/search_notebooks/*"],
       "@kbn/search-playground": ["x-pack/solutions/search/plugins/search_playground"],
       "@kbn/search-playground/*": ["x-pack/solutions/search/plugins/search_playground/*"],
+      "@kbn/search-queries": ["x-pack/solutions/search/packages/kbn-search-queries"],
+      "@kbn/search-queries/*": ["x-pack/solutions/search/packages/kbn-search-queries/*"],
       "@kbn/search-query-rules": ["x-pack/solutions/search/plugins/search_query_rules"],
       "@kbn/search-query-rules/*": ["x-pack/solutions/search/plugins/search_query_rules/*"],
       "@kbn/search-response-warnings": ["src/platform/packages/shared/kbn-search-response-warnings"],

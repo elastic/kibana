@@ -6954,6 +6954,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/search-queries@link:x-pack/solutions/search/packages/kbn-search-queries":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-query-rules@link:x-pack/solutions/search/plugins/search_query_rules":
   version "0.0.0"
   uid ""

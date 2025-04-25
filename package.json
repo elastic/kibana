@@ -825,6 +825,7 @@
     "@kbn/search-navigation": "link:x-pack/solutions/search/plugins/search_solution/search_navigation",
     "@kbn/search-notebooks": "link:x-pack/solutions/search/plugins/search_notebooks",
     "@kbn/search-playground": "link:x-pack/solutions/search/plugins/search_playground",
+    "@kbn/search-queries": "link:x-pack/solutions/search/packages/kbn-search-queries",
     "@kbn/search-query-rules": "link:x-pack/solutions/search/plugins/search_query_rules",
     "@kbn/search-response-warnings": "link:src/platform/packages/shared/kbn-search-response-warnings",
     "@kbn/search-shared-ui": "link:x-pack/solutions/search/packages/shared-ui",
