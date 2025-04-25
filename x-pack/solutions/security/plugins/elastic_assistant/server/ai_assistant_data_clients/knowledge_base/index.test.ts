@@ -63,7 +63,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       kibanaVersion: '8.8.0',
       ml,
       getElserId: getElserId.mockResolvedValue('elser-id'),
-      modelIdOverride: false,
+      elserInferenceId: ASSISTANT_ELSER_INFERENCE_ID,
       getIsKBSetupInProgress: mockGetIsKBSetupInProgress.mockReturnValue(false),
       getProductDocumentationStatus: jest.fn().mockResolvedValue('installed'),
       ingestPipelineResourceName: 'something',
@@ -285,9 +285,6 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       await client.setupKnowledgeBase({});
-
-      // install model
-      expect(trainedModelsProviderMock.installElasticModel).toHaveBeenCalledWith('elser-id');
 
       expect(loadSecurityLabs).toHaveBeenCalled();
     });

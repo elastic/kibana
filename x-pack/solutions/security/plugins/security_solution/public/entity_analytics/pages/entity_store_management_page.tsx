@@ -67,7 +67,7 @@ const isEntityStoreInstalled = (status?: StoreStatus) => status && status !== 'n
 const entityStoreLabel = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title',
   {
-    defaultMessage: 'Entity Store',
+    defaultMessage: 'Entity store',
   }
 );
 
