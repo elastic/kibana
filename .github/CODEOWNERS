@@ -947,12 +947,12 @@ x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-common @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-server @elastic/search-kibana
-x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana
-x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana
-x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana
-x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana
-x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana
-x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana
+x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
@@ -1656,6 +1656,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
+/x-pack/platform/plugins/private/painless_lab/ui_tests # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
@@ -1889,9 +1890,10 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security
-/config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.chat.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
+/config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
+/config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
+/config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
@@ -1968,6 +1970,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
+/.github/workflows/auto-approve-renovate-updates.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
@@ -2102,6 +2105,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test_serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
 /x-pack/test/functional_search/ @elastic/search-kibana
+/x-pack/test/api_integration/apis/search_playground/ @elastic/search-kibana
 
 # workchat
 /x-pack/test_serverless/api_integration/test_suites/chat @elastic/search-kibana @elastic/workchat-eng
