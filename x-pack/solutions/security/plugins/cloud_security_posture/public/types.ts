@@ -56,7 +56,7 @@ export interface CspClientPluginStart {
     Header: React.FC<FindingsVulnerabilityFlyoutHeaderProps>;
     Body: React.FC<FindingsVulnerabilityFlyoutContentProps>;
     Footer: React.FC<FindingsVulnerabilityFlyoutFooterProps>;
-  }
+  };
 }
 
 export interface CspClientPluginSetupDeps {
