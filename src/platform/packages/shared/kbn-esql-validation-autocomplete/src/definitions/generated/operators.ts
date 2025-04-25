@@ -5464,7 +5464,6 @@ export const operatorFunctionDefinitions = [
   modDefinition,
   mulDefinition,
   negDefinition,
-  notEqualsDefinition,
   notInDefinition,
   notLikeDefinition,
   notRlikeDefinition,
