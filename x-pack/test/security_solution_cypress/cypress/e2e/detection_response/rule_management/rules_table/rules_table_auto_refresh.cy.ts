@@ -70,6 +70,7 @@ describe(
     describe('when enabled', () => {
       beforeEach(() => {
         visitRulesManagementTable();
+        // Mocking global clock after the page load, otherwise deep links are not registered properly as they use debounceTime
         disableAutoRefresh();
         mockGlobalClock();
         enableAutoRefresh();
@@ -98,6 +99,7 @@ describe(
     describe('when disabled', () => {
       beforeEach(() => {
         visitRulesManagementTable();
+        // Mocking global clock after the page load, otherwise deep links are not registered properly as they use debounceTime
         disableAutoRefresh();
         mockGlobalClock();
         enableAutoRefresh();
@@ -148,6 +150,7 @@ describe(
     describe('when one rule is selected', () => {
       it('does NOT refresh after refresh interval has passed', () => {
         visitRulesManagementTable();
+        // Mocking global clock after the page load, otherwise deep links are not registered properly as they use debounceTime
         disableAutoRefresh();
         mockGlobalClock();
         enableAutoRefresh();

@@ -12,7 +12,7 @@ import { createNavigationTree } from './navigation_tree';
 import { createAiNavigationTree } from './ai_navigation/ai_navigation_tree';
 
 jest.mock('./navigation_tree');
-jest.mock('./ai_navigation_tree');
+jest.mock('./ai_navigation/ai_navigation_tree');
 
 const mockedCreateNavigationTree = createNavigationTree as jest.Mock;
 const mockedCreateAiNavigationTree = createAiNavigationTree as jest.Mock;
