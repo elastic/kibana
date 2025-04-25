@@ -8,6 +8,7 @@
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { HomeChatSection } from './home_chat_section';
 import { HomeAssistantsSection } from './home_assistants_section';
 import { HomeConversationHistorySection } from './home_conversation_history';
 
@@ -22,9 +23,12 @@ export const WorkChatHomeView: React.FC<{}> = () => {
     <KibanaPageTemplate data-test-subj="workChatHomePage">
       <KibanaPageTemplate.Header pageTitle="WorkChat" rightSideItems={headerButtons} />
       <KibanaPageTemplate.Section>
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-          <HomeAssistantsSection />
-          <HomeConversationHistorySection />
+        <EuiFlexGroup gutterSize="l" alignItems="flexStart" direction="column">
+          <HomeChatSection />
+          <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+            <HomeAssistantsSection />
+            <HomeConversationHistorySection />
+          </EuiFlexGroup>
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
