@@ -126,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             'inventory',
             'logs',
             'maintenanceWindow',
+            'manageReporting',
             'maps_v2',
             'osquery',
             'rulesSettings',
