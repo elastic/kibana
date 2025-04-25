@@ -41,6 +41,7 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -246,6 +247,15 @@ const TriggersActionsUiExampleApp = ({
                     ...startServices,
                   }}
                 />
+              </Page>
+            )}
+          />
+          <Route
+            exact
+            path="/task_manager_with_api_key"
+            render={() => (
+              <Page title="Task Manager with API Key">
+                <TaskWithApiKeySandbox http={http} />
               </Page>
             )}
           />
