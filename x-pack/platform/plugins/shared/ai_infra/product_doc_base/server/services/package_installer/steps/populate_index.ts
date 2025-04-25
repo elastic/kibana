@@ -47,11 +47,13 @@ const indexContentFile = async ({
   contentBuffer,
   esClient,
   legacySemanticText,
+  elserInferenceId = internalElserInferenceId,
 }: {
   indexName: string;
   contentBuffer: Buffer;
   esClient: ElasticsearchClient;
   legacySemanticText: boolean;
+  elserInferenceId?: string;
 }) => {
   const fileContent = contentBuffer.toString('utf-8');
   const lines = fileContent.split('\n');
@@ -65,7 +67,7 @@ const indexContentFile = async ({
     .map((doc) =>
       rewriteInferenceId({
         document: doc,
-        inferenceId: internalElserInferenceId,
+        inferenceId: elserInferenceId,
         legacySemanticText,
       })
     );
