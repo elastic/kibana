@@ -22,7 +22,6 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiButtonEmpty,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import type { IndexSourceDefinition } from '@kbn/wci-common';
 import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
@@ -55,11 +54,6 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
 
   const { generateSchema } = useGenerateSchema();
   const { isLoading, data } = useIndexNameAutocomplete({ query });
-  const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
-
-  const onIndexNameChange = (onChangeSelectedOptions: EuiComboBoxOptionOption[]) => {
-    setSelected(onChangeSelectedOptions);
-  };
 
   const onSearchChange = (searchValue: string) => {
     setQuery(searchValue);
@@ -132,12 +126,18 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             render={({ field }) => (
               <EuiComboBox
                 data-test-subj="workchatAppIntegrationEditViewIndex"
-                placeholder="Select an index"
+                placeholder={'Select an index'}
+                {...field}
                 isLoading={isLoading}
-                selectedOptions={selectedOptions}
+                selectedOptions={
+                  field.value ? [{ label: field.value, key: field.value }] : undefined
+                }
                 singleSelection={{ asPlainText: true }}
                 options={data.map((option) => ({ label: option, key: option }))}
-                onChange={onIndexNameChange}
+                onChange={(selected) => {
+                  const index = selected.length > 0 ? selected[0].key : '';
+                  field.onChange(index);
+                }}
                 fullWidth={true}
                 onSearchChange={onSearchChange}
                 append={
@@ -145,13 +145,9 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                     size="xs"
                     iconType="gear"
                     onClick={() => {
-                      if (selectedOptions.length === 0) return;
-                      if (!selectedOptions[0].key) return;
+                      if (!field.value) return;
 
-                      generateSchema(
-                        { indexName: selectedOptions[0].key },
-                        { onSuccess: onSchemaGenerated }
-                      );
+                      generateSchema({ indexName: field.value }, { onSuccess: onSchemaGenerated });
                     }}
                   >
                     Generate configuration
