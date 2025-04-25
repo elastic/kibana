@@ -97,8 +97,12 @@ export async function ensureTemplatesAndIndexCreated(
     logger.error(`Unable to create index template ${LOCKS_INDEX_TEMPLATE_NAME}: ${error.message}`);
   }
 
-  await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
-  logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created or updated successfully.`);
+  try {
+    await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
+    logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created or updated successfully.`);
+  } catch (error) {
+    logger.error(`Unable to create index ${LOCKS_CONCRETE_INDEX_NAME}: ${error.message}`);
+  }
 }
 
 export async function setuplockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
