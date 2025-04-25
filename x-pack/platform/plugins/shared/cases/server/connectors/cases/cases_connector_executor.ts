@@ -21,6 +21,7 @@ import {
   MAX_ALERTS_PER_CASE,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
@@ -820,16 +821,26 @@ export class CasesConnectorExecutor {
       })
       .join(' & ');
 
-    const ruleName = params.rule.name;
-
     const oracleCounterString =
       oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : '';
 
     const staticSuffixStart = ` - ${GROUPED_BY_TITLE('')}`;
     const staticSuffixEnd = `${oracleCounterString} (${AUTO_CREATED_TITLE})`;
 
+    const ruleName = params.rule.name;
+    const ruleNameTrimmed = ruleName.slice(0, MAX_RULE_NAME_LENGTH - totalDots);
+    const ruleNameTrimmedWithDots =
+      ruleName.length > ruleNameTrimmed.length
+        ? `${ruleNameTrimmed}${'.'.repeat(totalDots)}`
+        : ruleNameTrimmed;
+
+    const maxSuffixLength =
+      ruleNameTrimmedWithDots.length < MAX_RULE_NAME_LENGTH
+        ? MAX_TITLE_LENGTH - ruleNameTrimmedWithDots.length
+        : MAX_SUFFIX_LENGTH;
+
     const maxGroupingDescriptionLength =
-      MAX_SUFFIX_LENGTH - (staticSuffixStart.length + staticSuffixEnd.length);
+      maxSuffixLength - (staticSuffixStart.length + staticSuffixEnd.length);
 
     const groupingDescriptionTrimmed =
       groupingDescription.length > maxGroupingDescriptionLength
@@ -839,13 +850,6 @@ export class CasesConnectorExecutor {
         : groupingDescription;
 
     const suffix = `${staticSuffixStart}${groupingDescriptionTrimmed}${staticSuffixEnd}`;
-
-    const ruleNameTrimmed = ruleName.slice(0, MAX_RULE_NAME_LENGTH - totalDots);
-
-    const ruleNameTrimmedWithDots =
-      ruleName.length > ruleNameTrimmed.length
-        ? `${ruleNameTrimmed}${'.'.repeat(totalDots)}`
-        : ruleNameTrimmed;
 
     return `${ruleNameTrimmedWithDots}${suffix}`;
   }
