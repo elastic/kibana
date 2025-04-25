@@ -116,7 +116,6 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password);
         const { artifacts } = response.body;
-        const { dashboards } = artifacts;
 
         expect(artifacts).to.eql({
           dashboards: [
