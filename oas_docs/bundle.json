@@ -23252,6 +23252,9 @@
                           "created_at": {
                             "type": "string"
                           },
+                          "hidden": {
+                            "type": "boolean"
+                          },
                           "id": {
                             "type": "string"
                           },
@@ -23294,6 +23297,9 @@
                           },
                           "created_at": {
                             "type": "string"
+                          },
+                          "hidden": {
+                            "type": "boolean"
                           },
                           "id": {
                             "type": "string"
@@ -23445,6 +23451,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -23633,6 +23642,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
