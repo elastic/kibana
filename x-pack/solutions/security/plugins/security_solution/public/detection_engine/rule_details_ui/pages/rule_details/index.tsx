@@ -39,6 +39,7 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { AiForSOCAlertsTable } from './ai_for_soc/wrapper';
 import {
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
@@ -92,7 +93,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID, SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 
@@ -214,10 +215,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     analytics,
     i18n: i18nStart,
     theme,
-    application: {
-      navigateToApp,
-      capabilities: { actions },
-    },
+    application: { navigateToApp, capabilities },
     timelines: timelinesUi,
     spaces: spacesApi,
   } = useKibana().services;
@@ -317,6 +315,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
+  const actions = capabilities.actions;
   const hasActionsPrivileges = useMemo(() => {
     if (rule?.actions != null && rule?.actions.length > 0 && isBoolean(actions.show)) {
       return actions.show;
@@ -591,6 +590,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
 
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/xxxxxx
+  const AIForSOC = Boolean(capabilities[SECURITY_FEATURE_ID].configurations);
+
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -687,6 +690,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         <EditRuleSettingButtonLink
                           ruleId={ruleId}
                           disabled={
+                            AIForSOC ||
                             !isExistingRule ||
                             !hasUserCRUDPermission(canUserCRUD) ||
                             (isMlRule(rule?.type) && !hasMlPermissions)
@@ -773,44 +777,60 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <Routes>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <AlertsTableFilterGroup
-                          status={filterGroup}
-                          onFilterGroupChanged={onFilterGroupChangedCallback}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer size="l" />
-                    <Display show={!globalFullScreen}>
-                      <AlertsHistogramPanel
-                        filters={alertMergedFilters}
-                        signalIndexName={signalIndexName}
-                        defaultStackByOption={defaultRuleStackByOption}
-                        updateDateRange={updateDateRangeCallback}
-                      />
-                      <EuiSpacer />
-                    </Display>
-                    {ruleId != null && (
-                      <GroupedAlertsTable
-                        accordionButtonContent={defaultGroupTitleRenderers}
-                        accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
-                        defaultFilters={alertMergedFilters}
-                        defaultGroupingOptions={defaultGroupingOptions}
-                        from={from}
-                        globalFilters={filters}
-                        globalQuery={query}
-                        hasIndexMaintenance={hasIndexMaintenance ?? false}
-                        hasIndexWrite={hasIndexWrite ?? false}
-                        loading={loading}
-                        renderChildComponent={renderGroupedAlertTable}
-                        runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
-                        signalIndexName={signalIndexName}
-                        tableId={TableId.alertsOnRuleDetailsPage}
-                        to={to}
-                      />
+                    {!AIForSOC ? (
+                      <>
+                        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                          <EuiFlexItem grow={false}>
+                            <AlertsTableFilterGroup
+                              status={filterGroup}
+                              onFilterGroupChanged={onFilterGroupChangedCallback}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiSpacer size="l" />
+                        <Display show={!globalFullScreen}>
+                          <AlertsHistogramPanel
+                            filters={alertMergedFilters}
+                            signalIndexName={signalIndexName}
+                            defaultStackByOption={defaultRuleStackByOption}
+                            updateDateRange={updateDateRangeCallback}
+                          />
+                          <EuiSpacer />
+                        </Display>
+                        {ruleId != null && (
+                          <GroupedAlertsTable
+                            accordionButtonContent={defaultGroupTitleRenderers}
+                            accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+                            currentAlertStatusFilterValue={currentAlertStatusFilterValue}
+                            defaultFilters={alertMergedFilters}
+                            defaultGroupingOptions={defaultGroupingOptions}
+                            from={from}
+                            globalFilters={filters}
+                            globalQuery={query}
+                            hasIndexMaintenance={hasIndexMaintenance ?? false}
+                            hasIndexWrite={hasIndexWrite ?? false}
+                            loading={loading}
+                            renderChildComponent={renderGroupedAlertTable}
+                            runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
+                            signalIndexName={signalIndexName}
+                            tableId={TableId.alertsOnRuleDetailsPage}
+                            to={to}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {ruleId != null && maybeRule != null && (
+                          <AiForSOCAlertsTable
+                            filters={alertMergedFilters}
+                            from={from}
+                            query={query}
+                            rule={maybeRule}
+                            to={to}
+                          />
+                        )}
+                      </>
                     )}
                   </>
                 </Route>

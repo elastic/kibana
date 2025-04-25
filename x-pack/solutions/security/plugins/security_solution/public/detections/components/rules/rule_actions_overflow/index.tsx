@@ -16,7 +16,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
-import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import { APP_UI_ID, SECURITY_FEATURE_ID, SecurityPageName } from '../../../../../common/constants';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -70,9 +70,14 @@ const RuleActionsOverflowComponent = ({
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, capabilities },
     telemetry,
   } = useKibana().services;
+
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/xxxxxx
+  const AIForSOC = Boolean(capabilities[SECURITY_FEATURE_ID].configurations);
+
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -93,7 +98,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DUPLICATE_RULE}
               icon="copy"
-              disabled={!canDuplicateRuleWithActions || !userHasPermissions}
+              disabled={AIForSOC || !canDuplicateRuleWithActions || !userHasPermissions}
               data-test-subj="rules-details-duplicate-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
@@ -180,7 +185,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.DELETE_RULE}
               icon="trash"
-              disabled={!userHasPermissions}
+              disabled={AIForSOC || !userHasPermissions}
               data-test-subj="rules-details-delete-rule"
               onClick={async () => {
                 closePopover();
@@ -204,6 +209,7 @@ const RuleActionsOverflowComponent = ({
           ]
         : [],
     [
+      AIForSOC,
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
