@@ -18,26 +18,16 @@ export const getKuery = ({
   selectedTags,
   selectedStatus,
   selectedAgentIds,
-  showAgentless,
 }: {
   search?: string;
   selectedAgentPolicies?: string[];
   selectedTags?: string[];
   selectedStatus?: string[];
   selectedAgentIds?: string[];
-  showAgentless?: boolean;
 }) => {
   let kueryBuilder = '';
   if (search) {
     kueryBuilder = search.trim();
-  }
-
-  // Hide agentless agents
-  if (!showAgentless) {
-    if (kueryBuilder) {
-      kueryBuilder = `(${kueryBuilder}) and`;
-    }
-    kueryBuilder = `${kueryBuilder} not ${AGENTS_PREFIX}.local_metadata.host.hostname:"agentless-*"`;
   }
 
   if (selectedAgentPolicies?.length) {

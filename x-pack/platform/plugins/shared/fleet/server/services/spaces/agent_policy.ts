@@ -168,6 +168,7 @@ export async function updateAgentPolicySpaces({
       while (hasMore) {
         const { agents } = await getAgentsByKuery(esClient, newSpaceSoClient, {
           kuery: `policy_id:"${agentPolicyId}"`,
+          showAgentless: true,
           showInactive: true,
           perPage: UPDATE_AGENT_BATCH_SIZE,
           pitId,

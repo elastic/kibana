@@ -78,6 +78,7 @@ export async function populateAssignedAgentsCount(
     (agentPolicy: GetAgentPoliciesResponseItem) => {
       const totalAgents = agentClient
         .listAgents({
+          showAgentless: true,
           showInactive: true,
           perPage: 0,
           page: 1,
@@ -86,6 +87,7 @@ export async function populateAssignedAgentsCount(
         .then(({ total }) => (agentPolicy.agents = total));
       const unprivilegedAgents = agentClient
         .listAgents({
+          showAgentless: true,
           showInactive: true,
           perPage: 0,
           page: 1,

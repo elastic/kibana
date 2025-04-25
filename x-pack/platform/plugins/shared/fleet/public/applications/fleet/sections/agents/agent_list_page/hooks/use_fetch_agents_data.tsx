@@ -162,9 +162,8 @@ export function useFetchAgentsData() {
       selectedAgentPolicies,
       selectedTags,
       selectedStatus,
-      showAgentless,
     });
-  }, [search, selectedAgentPolicies, selectedStatus, selectedTags, showAgentless]);
+  }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
 
   kuery =
     includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
@@ -215,6 +214,7 @@ export function useFetchAgentsData() {
               kuery: kuery && kuery !== '' ? kuery : undefined,
               sortField: getSortFieldForAPI(sortField),
               sortOrder,
+              showAgentless,
               showInactive,
               showUpgradeable,
               getStatusSummary: true,
@@ -360,6 +360,7 @@ export function useFetchAgentsData() {
       kuery,
       sortField,
       sortOrder,
+      showAgentless,
       showInactive,
       showUpgradeable,
       fullAgentPolicyFecher,

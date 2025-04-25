@@ -670,6 +670,7 @@ class AgentPolicyService {
           }
           if (options.withAgentCount) {
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
+              showAgentless: true,
               showInactive: true,
               perPage: 0,
               page: 1,
@@ -1243,6 +1244,7 @@ class AgentPolicyService {
 
     // Prevent deleting policy when assigned agents are inactive
     const { total } = await getAgentsByKuery(esClient, soClient, {
+      showAgentless: true,
       showInactive: true,
       perPage: 0,
       page: 1,

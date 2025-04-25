@@ -68,6 +68,7 @@ export async function bulkRequestDiagnostics(
   const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
   const res = await getAgentsByKuery(esClient, soClient, {
     kuery,
+    showAgentless: true,
     showInactive: false,
     page: 1,
     perPage: batchSize,

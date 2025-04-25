@@ -331,6 +331,7 @@ export class AutomaticAgentUpgradeTask {
     kuery: string
   ) {
     const res = await getAgentsByKuery(esClient, soClient, {
+      showAgentless: true,
       showInactive: false,
       perPage: 0,
       kuery,
