@@ -12,6 +12,7 @@ import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testi
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain, contextLimitCheck } from './conversational_chain';
 import { ChatMessage, MessageRole } from '../types';
+import { ContextModelLimitError } from '../../common';
 
 describe('conversational chain', () => {
   beforeEach(() => {
@@ -532,7 +533,7 @@ describe('conversational chain', () => {
       modelLimit: 100,
       expectedHasClipped: true,
       isChatModel: false,
-      expectedErrorMessage: 'Context exceeds the model limit',
+      expectedErrorMessage: ContextModelLimitError,
     });
   }, 10000);
 
@@ -574,7 +575,7 @@ describe('conversational chain', () => {
         chat_history: 'This is a test chat history.',
       };
       await expect(contextLimitCheck(33, prompt)(input)).rejects.toMatchInlineSnapshot(
-        `[ContextLimitError: Context exceeds the model limit]`
+        `[ContextLimitError: ${ContextModelLimitError}]`
       );
     });
   });
