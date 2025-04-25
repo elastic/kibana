@@ -17,8 +17,9 @@ import type {
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
 } from '@kbn/elastic-assistant-common';
-import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
 import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
+import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import {
   ActionType,
@@ -142,8 +143,7 @@ class SecurityWorkflowInsightsService {
   public async create(insight: SecurityWorkflowInsight): Promise<WriteResponseBase | void> {
     await this.isInitialized;
 
-    const insightToCreate = { ...insight };
-    const id = generateInsightId(insightToCreate);
+    const insightToCreate = cloneDeep(insight);
 
     const remediationExists = await checkIfRemediationExists({
       insight: insightToCreate,
@@ -154,6 +154,8 @@ class SecurityWorkflowInsightsService {
     if (remediationExists) {
       insightToCreate.action.type = ActionType.Remediated;
     }
+
+    const id = generateInsightId(insightToCreate);
 
     // if insight already exists, update instead
     const existingInsights = await this.fetch({ ids: [id] });
