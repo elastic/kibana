@@ -8,20 +8,16 @@
 import * as Rx from 'rxjs';
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine } from '../../../common/product';
-import { createStackManagementNavigationTree } from '../stack_management_navigation';
 import { AiForTheSocIcon } from './icons';
-
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.socNavLinks.projectType.title',
-  { defaultMessage: 'AI for SOC' }
-);
+import { createStackManagementNavigationTree } from '../stack_management_navigation';
+import { SOLUTION_NAME } from './translations';
+import { AiSocCallout } from './callout';
 
 export const shouldUseAINavigation = (productTypes: SecurityProductTypes) =>
   productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
@@ -87,6 +83,22 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
             id: 'discover:',
             link: 'discover',
             spaceBefore: 'm',
+          },
+        ],
+      },
+    ],
+    callout: [
+      {
+        type: 'navGroup',
+        id: 'calloutGroup',
+        title: '',
+        defaultIsCollapsed: false,
+        isCollapsible: false,
+        children: [
+          {
+            id: 'ai_soc_callout',
+            title: '',
+            renderItem: AiSocCallout,
           },
         ],
       },

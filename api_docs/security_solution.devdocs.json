@@ -1991,7 +1991,7 @@
           "label": "setOnboardingSettings",
           "description": [],
           "signature": [
-            "({ userUrl, isAgentlessAvailable, }: { userUrl: UserUrl; isAgentlessAvailable: boolean; }) => void"
+            "({ userUrl, isAgentlessAvailable, projectUrl, deploymentUrl, }: { userUrl: UserUrl; isAgentlessAvailable: boolean; projectUrl?: string | undefined; deploymentUrl?: string | undefined; }) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -2006,7 +2006,7 @@
               "label": "__0",
               "description": [],
               "signature": [
-                "{ userUrl: UserUrl; isAgentlessAvailable: boolean; }"
+                "{ userUrl: UserUrl; isAgentlessAvailable: boolean; projectUrl?: string | undefined; deploymentUrl?: string | undefined; }"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/onboarding/service/onboarding_service.ts",
               "deprecated": false,
@@ -3017,6 +3017,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getProductFeatureService",
+            "type": "Function",
+            "tags": [],
+            "label": "getProductFeatureService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ProductFeaturesService"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3032,7 +3049,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; enableUiSettingsValidations: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskTimeout: string; packagerTaskPackagePolicyUpdateBatchSize: number; completeExternalResponseActionsTaskInterval: string; completeExternalResponseActionsTaskTimeout: string; maxUploadResponseActionFileBytes: number; offeringSettings: Record<string, boolean>; entityAnalytics: Readonly<{} & { riskEngine: Readonly<{} & { alertSampleSizePerShard: number; }>; assetCriticality: Readonly<{} & { csvUpload: Readonly<{} & { errorRetries: number; maxBulkRequestBodySizeBytes: number; }>; }>; entityStore: Readonly<{} & { frequency: moment.Duration; syncDelay: moment.Duration; developer: Readonly<{} & { pipelineDebugMode: boolean; }>; }>; }>; }>, \"offeringSettings\"> & { experimentalFeatures: ",
+          "Omit<Readonly<{ prebuiltRulesPackageVersion?: string | undefined; siemRuleMigrations?: Readonly<{ elserInferenceId?: string | undefined; } & {}> | undefined; } & { enabled: boolean; enableUiSettingsValidations: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskTimeout: string; packagerTaskPackagePolicyUpdateBatchSize: number; completeExternalResponseActionsTaskInterval: string; completeExternalResponseActionsTaskTimeout: string; maxUploadResponseActionFileBytes: number; offeringSettings: Record<string, boolean>; entityAnalytics: Readonly<{} & { riskEngine: Readonly<{} & { alertSampleSizePerShard: number; }>; assetCriticality: Readonly<{} & { csvUpload: Readonly<{} & { errorRetries: number; maxBulkRequestBodySizeBytes: number; }>; }>; entityStore: Readonly<{} & { frequency: moment.Duration; syncDelay: moment.Duration; developer: Readonly<{} & { pipelineDebugMode: boolean; }>; }>; }>; }>, \"offeringSettings\"> & { experimentalFeatures: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
