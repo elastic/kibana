@@ -27,9 +27,9 @@ import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../../types';
-import { TabStatus } from '../../types';
+import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
-import { TabPreview, type TabPreviewProps } from '../tab_preview';
+import { TabPreview } from '../tab_preview';
 
 export interface TabProps {
   item: TabItem;
@@ -39,7 +39,8 @@ export interface TabProps {
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
-  getPreviewData: TabPreviewProps['getPreviewData'];
+  getPreviewData: (item: TabItem) => TabPreviewData;
+
   services: TabsServices;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
@@ -69,7 +70,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
-  const { status } = getPreviewData(item);
+  const previewData = getPreviewData(item);
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
@@ -192,7 +193,7 @@ export const Tab: React.FC<TabProps> = (props) => {
             />
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
-              {status === TabStatus.RUNNING && <EuiLoadingSpinner size="m" />}
+              {previewData.status === TabStatus.RUNNING && <EuiLoadingSpinner size="m" />}
               <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
               </EuiText>
@@ -241,7 +242,7 @@ export const Tab: React.FC<TabProps> = (props) => {
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
       tabItem={item}
-      getPreviewData={getPreviewData}
+      previewData={previewData}
     >
       <TabWithBackground
         data-test-subj={`unifiedTabs_tab_${item.id}`}
