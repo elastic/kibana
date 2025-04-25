@@ -9,9 +9,9 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { createOrUpdateConversationIndexAssets } from './create_or_update_conversation_index_assets';
 import { createOrUpdateKnowledgeBaseIndexAssets } from './create_or_update_knowledge_base_index_assets';
-import { resourceNames } from '..';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { resourceNames } from '..';
 
 export const DEFAULT_INFERENCE_ENDPOINT = '.elser-2-elasticsearch';
 

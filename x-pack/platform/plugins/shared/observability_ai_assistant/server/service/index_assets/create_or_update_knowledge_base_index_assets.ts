@@ -6,13 +6,10 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { getComponentTemplate } from './templates/kb_component_template';
 import { resourceNames } from '..';
-import { createKnowledgeBaseIndex } from '../knowledge_base_service/create_knowledge_base_index';
-import { updateKnowledgeBaseWriteIndexAlias } from '../knowledge_base_service/update_knowledge_base_index_alias';
-import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
-import { updateKnowledgeBaseIndexMappingFromIndexTemplate } from '../knowledge_base_service/update_knowledge_base_index_mapping';
 
 export async function createOrUpdateKnowledgeBaseIndexAssets({
   logger,
@@ -50,29 +47,20 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       },
     });
 
-    // Knowledge base: update write index if index exists
-    const indexExists = await hasKbWriteIndex({ esClient: coreStart.elasticsearch.client });
-    if (indexExists) {
-      logger.debug('Knowledge base index already exists, updating index mapping');
-      await updateKnowledgeBaseIndexMappingFromIndexTemplate({
-        esClient: coreStart.elasticsearch.client,
-        logger,
-      });
-      return;
-    }
-
-    // Knowledge base: create write index
-    await createKnowledgeBaseIndex({
-      esClient: coreStart.elasticsearch.client,
+    // Knowledge base: write index
+    const kbAliasName = resourceNames.writeIndexAlias.kb;
+    await createConcreteWriteIndex({
+      esClient: asInternalUser,
       logger,
-      inferenceId,
-      indexName: resourceNames.concreteWriteIndexName.kb,
-    });
-
-    await updateKnowledgeBaseWriteIndexAlias({
-      esClient: coreStart.elasticsearch.client,
-      logger,
-      index: resourceNames.concreteWriteIndexName.kb,
+      totalFieldsLimit: 10000,
+      indexPatterns: {
+        alias: kbAliasName,
+        pattern: `${kbAliasName}*`,
+        basePattern: `${kbAliasName}*`,
+        name: resourceNames.concreteWriteIndexName.kb,
+        template: resourceNames.indexTemplate.kb,
+      },
+      dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
     });
 
     logger.info('Successfully set up knowledge base index assets');
