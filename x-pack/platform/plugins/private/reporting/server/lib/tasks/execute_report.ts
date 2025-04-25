@@ -335,6 +335,7 @@ export class ExecuteReportTask implements ReportingTask {
     if (requestFromTask) {
       apiKeyAuthHeaders = requestFromTask.headers;
       useApiKeyAuthentication = true;
+      this.logger.debug(`Using API key authentication with request from task instance`);
     }
 
     let decryptedHeaders;
@@ -354,6 +355,7 @@ export class ExecuteReportTask implements ReportingTask {
     let headersToUse: Headers = {};
 
     if (useApiKeyAuthentication && apiKeyAuthHeaders) {
+      this.logger.debug(`Merging API key authentication headers with decrypted headers`);
       const { cookie, authorization, ...restDecryptedHeaders } = decryptedHeaders || {};
 
       headersToUse = {
@@ -361,10 +363,9 @@ export class ExecuteReportTask implements ReportingTask {
         ...restDecryptedHeaders,
       };
     } else {
+      this.logger.debug(`Using decrypted headers only`);
       headersToUse = decryptedHeaders || {};
     }
-
-    this.logger.info(`Generating KibanaRequest with headers ${JSON.stringify(headersToUse)}`);
 
     return this._getFakeRequest(headersToUse, spaceId, this.logger);
   }
