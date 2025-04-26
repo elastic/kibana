@@ -36,22 +36,7 @@ export async function uninstallProductDoc(supertest: SuperTest.Agent) {
     .expect(200);
 }
 
-async function getKibanaStatus(supertest: SuperTest.Agent) {
-  return supertest
-    .get('/api/status')
-    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-    .set('kbn-xsrf', 'foo')
-    .expect(200);
-}
-
-export async function createProductDoc(supertest: SuperTest.Agent) {
-  const {
-    body: {
-      version: { number: kibanaVersion },
-    },
-  } = await getKibanaStatus(supertest);
-
+export async function createProductDoc(kibanaVersion: string) {
   const [versionMajor, versionMinor] = kibanaVersion.split('.');
 
   const artifacts: string[] = [];

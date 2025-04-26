@@ -26,10 +26,9 @@ import { mockKibanaProductDoc } from '../product_docs/products';
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/218819
-  // Failing: See https://github.com/elastic/kibana/issues/218820
-  describe.skip('retrieve_elastic_doc', function () {
+  describe('retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     const supertest = getService('supertest');
@@ -96,7 +95,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
       before(async () => {
-        await createProductDoc(supertest);
+        const kibanaVersion = await kibanaServer.version.get();
+        await createProductDoc(kibanaVersion);
 
         llmProxy = await createLlmProxy(log);
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
