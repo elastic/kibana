@@ -35,6 +35,13 @@ export const MARK_AS_CLOSED = i18n.translate(
   }
 );
 
+export const MARK_AS_OPEN = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.markAsOpenButtonLabel',
+  {
+    defaultMessage: 'Mark as open',
+  }
+);
+
 export const TAKE_ACTION = i18n.translate(
   'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.title',
   {

@@ -10,7 +10,7 @@ import { AuthenticatedUser } from '@kbn/core/server';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_ID,
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
-  CreateAttackDiscoveryAlertsParams,
+  type CreateAttackDiscoveryAlertsParams,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -78,8 +78,6 @@ export const transformToAlertDocuments = ({
 
   const replacementsOrEmpty = replacements ?? {};
 
-  const alertUuid = uuidv4();
-
   return attackDiscoveries.map(
     ({
       alertIds,
@@ -88,76 +86,82 @@ export const transformToAlertDocuments = ({
       mitreAttackTactics,
       summaryMarkdown,
       title,
-    }) => ({
-      '@timestamp': now.toISOString(),
-      [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds,
-      [ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]: alertsContextCount,
-      [ALERT_ATTACK_DISCOVERY_API_CONFIG]: {
-        action_type_id: apiConfig.actionTypeId,
-        connector_id: apiConfig.connectorId,
-        model: apiConfig.model,
-        name: connectorName,
-        provider: apiConfig.provider,
-      },
-      [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: detailsMarkdown,
-      [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]:
-        replaceAnonymizedValuesWithOriginalValues({
-          messageContent: detailsMarkdown,
-          replacements: replacementsOrEmpty,
-        }),
-      [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN]: entitySummaryMarkdown,
-      [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]:
-        entitySummaryMarkdown != null
-          ? replaceAnonymizedValuesWithOriginalValues({
-              messageContent: entitySummaryMarkdown,
-              replacements: replacementsOrEmpty,
-            })
-          : undefined,
-      [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: mitreAttackTactics,
-      [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: !isEmpty(replacementsOrEmpty)
-        ? Object.entries(replacementsOrEmpty).map(([uuid, value]) => ({
-            uuid,
-            value,
-          }))
-        : undefined,
-      [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: summaryMarkdown,
-      [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]:
-        replaceAnonymizedValuesWithOriginalValues({
-          messageContent: summaryMarkdown,
-          replacements: replacementsOrEmpty,
-        }),
-      [ALERT_ATTACK_DISCOVERY_TITLE]: title,
-      [ALERT_ATTACK_DISCOVERY_TITLE_WITH_REPLACEMENTS]: replaceAnonymizedValuesWithOriginalValues({
-        messageContent: title,
-        replacements: replacementsOrEmpty,
-      }),
-      [ALERT_ATTACK_DISCOVERY_USER_ID]: authenticatedUser.profile_uid,
-      [ALERT_ATTACK_DISCOVERY_USER_NAME]: authenticatedUser.username,
-      [ALERT_ATTACK_DISCOVERY_USERS]: [
-        {
-          id: authenticatedUser.profile_uid,
-          name: authenticatedUser.username,
+    }) => {
+      const alertUuid = uuidv4();
+
+      return {
+        '@timestamp': now.toISOString(),
+        [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: alertIds,
+        [ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]: alertsContextCount,
+        [ALERT_ATTACK_DISCOVERY_API_CONFIG]: {
+          action_type_id: apiConfig.actionTypeId,
+          connector_id: apiConfig.connectorId,
+          model: apiConfig.model,
+          name: connectorName,
+          provider: apiConfig.provider,
         },
-      ],
-      [ALERT_RULE_EXECUTION_UUID]: generationUuid,
-      [ALERT_INSTANCE_ID]: alertUuid,
-      [ALERT_RISK_SCORE]: getAlertRiskScore({
-        alertIds,
-        anonymizedAlerts,
-      }),
-      [ALERT_RULE_CATEGORY]: 'Attack discovery ad hoc (placeholder rule category)',
-      [ALERT_RULE_CONSUMER]: 'siem',
-      [ALERT_RULE_NAME]: 'Attack discovery ad hoc (placeholder rule name)',
-      [ALERT_RULE_PRODUCER]: 'siem',
-      [ALERT_RULE_REVISION]: 1,
-      [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID, // sentinel value
-      [ALERT_RULE_UUID]: ATTACK_DISCOVERY_AD_HOC_RULE_ID, // sentinel value
-      [ALERT_STATUS]: 'active',
-      [ALERT_UUID]: alertUuid, // IMPORTANT: the document _id should be the same as this field when it's bulk inserted
-      [ALERT_WORKFLOW_STATUS]: 'open',
-      [ECS_VERSION]: EcsVersion,
-      [EVENT_KIND]: 'signal',
-      [SPACE_IDS]: [spaceId],
-    })
+        [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: detailsMarkdown,
+        [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]:
+          replaceAnonymizedValuesWithOriginalValues({
+            messageContent: detailsMarkdown,
+            replacements: replacementsOrEmpty,
+          }),
+        [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN]: entitySummaryMarkdown,
+        [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]:
+          entitySummaryMarkdown != null
+            ? replaceAnonymizedValuesWithOriginalValues({
+                messageContent: entitySummaryMarkdown,
+                replacements: replacementsOrEmpty,
+              })
+            : undefined,
+        [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: mitreAttackTactics,
+        [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: !isEmpty(replacementsOrEmpty)
+          ? Object.entries(replacementsOrEmpty).map(([uuid, value]) => ({
+              uuid,
+              value,
+            }))
+          : undefined,
+        [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: summaryMarkdown,
+        [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]:
+          replaceAnonymizedValuesWithOriginalValues({
+            messageContent: summaryMarkdown,
+            replacements: replacementsOrEmpty,
+          }),
+        [ALERT_ATTACK_DISCOVERY_TITLE]: title,
+        [ALERT_ATTACK_DISCOVERY_TITLE_WITH_REPLACEMENTS]: replaceAnonymizedValuesWithOriginalValues(
+          {
+            messageContent: title,
+            replacements: replacementsOrEmpty,
+          }
+        ),
+        [ALERT_ATTACK_DISCOVERY_USER_ID]: authenticatedUser.profile_uid,
+        [ALERT_ATTACK_DISCOVERY_USER_NAME]: authenticatedUser.username,
+        [ALERT_ATTACK_DISCOVERY_USERS]: [
+          {
+            id: authenticatedUser.profile_uid,
+            name: authenticatedUser.username,
+          },
+        ],
+        [ALERT_RULE_EXECUTION_UUID]: generationUuid,
+        [ALERT_INSTANCE_ID]: alertUuid,
+        [ALERT_RISK_SCORE]: getAlertRiskScore({
+          alertIds,
+          anonymizedAlerts,
+        }),
+        [ALERT_RULE_CATEGORY]: 'Attack discovery ad hoc (placeholder rule category)',
+        [ALERT_RULE_CONSUMER]: 'siem',
+        [ALERT_RULE_NAME]: 'Attack discovery ad hoc (placeholder rule name)',
+        [ALERT_RULE_PRODUCER]: 'siem',
+        [ALERT_RULE_REVISION]: 1,
+        [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID, // sentinel value
+        [ALERT_RULE_UUID]: ATTACK_DISCOVERY_AD_HOC_RULE_ID, // sentinel value
+        [ALERT_STATUS]: 'active',
+        [ALERT_UUID]: alertUuid, // IMPORTANT: the document _id should be the same as this field when it's bulk inserted
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [ECS_VERSION]: EcsVersion,
+        [EVENT_KIND]: 'signal',
+        [SPACE_IDS]: [spaceId],
+      };
+    }
   );
 };

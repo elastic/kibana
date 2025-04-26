@@ -117,7 +117,10 @@ export const useFindAttackDiscoveries = ({
   );
 
   const getNextPageParam = useCallback((lastPage: AttackDiscoveryFindResponse) => {
-    const totalPages = Math.max(DEFAULT_PAGE, Math.ceil(lastPage.total / lastPage.perPage));
+    const totalPages = Math.max(
+      DEFAULT_PAGE,
+      Math.ceil(lastPage.total / (lastPage.per_page ?? DEFAULT_PER_PAGE))
+    );
 
     if (totalPages === lastPage.page) {
       return;

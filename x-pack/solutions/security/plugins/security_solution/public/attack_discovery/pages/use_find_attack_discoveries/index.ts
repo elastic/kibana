@@ -13,8 +13,9 @@ import type {
   RefetchOptions,
   RefetchQueryFilters,
 } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface Props {
   ids?: string[];
@@ -68,6 +69,7 @@ export const useFindAttackDiscoveries = ({
   sortField = '@timestamp',
   sortOrder = 'desc',
 }: Props): UseFindAttackDiscoveries => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -76,8 +78,8 @@ export const useFindAttackDiscoveries = ({
   }, []);
 
   const queryFn = useCallback(
-    async ({ pageParam }: { pageParam?: PageParam }) => {
-      return http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
+    async ({ pageParam }: { pageParam?: PageParam }) =>
+      http.fetch<AttackDiscoveryFindResponse>(ATTACK_DISCOVERY_FIND, {
         method: 'GET',
         version: API_VERSIONS.internal.v1,
         query: {
@@ -94,8 +96,7 @@ export const useFindAttackDiscoveries = ({
           status,
         },
         signal: abortController.current.signal,
-      });
-    },
+      }),
     [
       connectorNames,
       end,
@@ -113,7 +114,10 @@ export const useFindAttackDiscoveries = ({
   );
 
   const getNextPageParam = useCallback((lastPage: AttackDiscoveryFindResponse) => {
-    const totalPages = Math.max(DEFAULT_PAGE, Math.ceil(lastPage.total / lastPage.perPage));
+    const totalPages = Math.max(
+      DEFAULT_PAGE,
+      Math.ceil(lastPage.total / (lastPage.per_page ?? DEFAULT_PER_PAGE))
+    );
 
     if (totalPages === lastPage.page) {
       return;
@@ -150,7 +154,7 @@ export const useFindAttackDiscoveries = ({
     ],
     queryFn,
     {
-      enabled: isAssistantEnabled,
+      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
       getNextPageParam,
       refetchOnWindowFocus,
     }
@@ -164,4 +168,19 @@ export const useFindAttackDiscoveries = ({
     refetch,
     status: queryStatus,
   };
+};
+
+/**
+ * We use this hook to invalidate the attack discovery generations cache.
+ *
+ * @returns A attack discovery schedule cache invalidation callback
+ */
+export const useInvalidateFindAttackDiscoveries = () => {
+  const queryClient = useQueryClient();
+
+  return useCallback(() => {
+    queryClient.invalidateQueries(['GET', ATTACK_DISCOVERY_FIND], {
+      refetchType: 'all',
+    });
+  }, [queryClient]);
 };

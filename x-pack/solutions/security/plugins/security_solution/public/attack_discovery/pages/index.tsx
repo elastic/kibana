@@ -220,7 +220,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     const filter = parseFilterQuery({ filterQuery, kqlError });
 
     try {
-      return fetchAttackDiscoveries({
+      return await fetchAttackDiscoveries({
         end,
         filter, // <-- combined search bar query and filters
         size,

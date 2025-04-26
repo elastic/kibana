@@ -14,12 +14,14 @@ import { TakeAction } from '../../take_action';
 import * as i18n from './translations';
 
 interface Props {
+  refetchFindAttackDiscoveries?: () => void;
   selectedAttackDiscoveries: Record<string, boolean>;
   selectedConnectorAttackDiscoveries: AttackDiscoveryAlert[];
   setSelectedAttackDiscoveries: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
 const SelectedActionsComponent: React.FC<Props> = ({
+  refetchFindAttackDiscoveries,
   selectedAttackDiscoveries,
   selectedConnectorAttackDiscoveries,
   setSelectedAttackDiscoveries,
@@ -58,7 +60,13 @@ const SelectedActionsComponent: React.FC<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <TakeAction attackDiscoveries={selected} buttonSize="xs" buttonText={buttonText} />
+        <TakeAction
+          attackDiscoveries={selected}
+          buttonSize="xs"
+          buttonText={buttonText}
+          refetchFindAttackDiscoveries={refetchFindAttackDiscoveries}
+          setSelectedAttackDiscoveries={setSelectedAttackDiscoveries}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
