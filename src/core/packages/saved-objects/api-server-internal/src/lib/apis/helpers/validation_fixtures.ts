@@ -30,7 +30,6 @@ export const typedef: Partial<SavedObjectsType> = {
       count: schema.number(),
     }),
   },
-  switchToModelVersionAt: '8.10.0',
 };
 
 export const typedef1: Partial<SavedObjectsType> = {
@@ -53,7 +52,6 @@ export const typedef1: Partial<SavedObjectsType> = {
       count: schema.number(),
     }),
   },
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     '1': {
       changes: [
@@ -96,7 +94,6 @@ export const typedef2: Partial<SavedObjectsType> = {
       foo: schema.string(),
     }),
   },
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     '1': {
       changes: [
