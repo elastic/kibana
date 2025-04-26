@@ -164,7 +164,6 @@ mapped_pages:
 | [licensing](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/licensing/README.md) | The licensing plugin retrieves license data from Elasticsearch at regular configurable intervals. |
 | [lists](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/lists/README.md) | README.md for developers working on the backend lists on how to get started using the CURL scripts in the scripts folder. |
 | [llmTasks](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ai_infra/llm_tasks/README.md) | This plugin contains various LLM tasks. |
-| [lockManager](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/lock-manager/README.md) | A simple, distributed lock manager built on Elasticsearch. Ensures that only one process at a time can hold a named lock, with automatic lease renewal and safe release. |
 | [logsDataAccess](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_data_access/README.md) | Exposes services to access logs data. |
 | [logsShared](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_shared/README.md) | Exposes the shared components and APIs to access and visualize logs. |
 | [logstash](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/logstash) | WARNING: Missing or empty README. |
