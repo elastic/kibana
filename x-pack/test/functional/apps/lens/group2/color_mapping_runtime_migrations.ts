@@ -26,14 +26,16 @@ const neutralPaletteColors = palettes
   .map((c) => c.toLowerCase());
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);
+  const { lens, dashboard } = getPageObjects(['lens', 'dashboard']);
+  const log = getService('log');
+  const retry = getService('retry');
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  describe('lens old color mapping runtime migrations - nick', () => {
+  describe('lens old color mapping runtime migrations', () => {
     let panels: WebElementWrapper[] = [];
     let panelTitleIndex = new Map<string, number>();
 
@@ -334,24 +336,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Saving with new color mapping config', () => {
       const customColor = '#0118d8';
 
-      async function editAndApplyColorMapping(panelTitle: string, dimension: string) {
+      async function editAndApplyColorMapping(panelTitle: string, dimension: string, j = 1) {
+        await log.debug(`editAndApplyColorMapping: "${panelTitle}"`);
         const panel = panels[getPaneIndex(panelTitle)];
-        await panel.moveMouseTo();
+        await panel.moveMouseTo({ xOffset: 10, yOffset: -10 });
         await dashboardPanelActions.clickInlineEdit(panel);
         await testSubjects.click(dimension);
         await testSubjects.click('lns_colorEditing_trigger');
         await testSubjects.click('lns-colorMapping-colorSwatch-0');
+
         await testSubjects.click('lns-colorMapping-colorPicker-tab-custom');
         await testSubjects.setValue('lns-colorMapping-colorPicker-custom-input', customColor, {
-          // typeCharByChar: true,
-          // clearWithKeyboard: true,
+          typeCharByChar: true,
+          clearWithKeyboard: true,
         });
-        await common.sleep(1000); // wait for color to be set
-        // await browser.pressKeys(browser.keys.ENTER);
+
+        await retry.waitFor('verify color is correct before continuing', async () => {
+          const swatch = await testSubjects.find('lns-colorMapping-colorSwatch-0');
+          const color = chroma(await swatch.getComputedStyle('background-color')).hex(); // eui converts hex to rgb
+          return color === customColor;
+        });
+
         await browser.pressKeys(browser.keys.ESCAPE);
         await testSubjects.click('lns-indexPattern-SettingWithSiblingFlyoutBack');
         await lens.closeDimensionEditor();
-        await testSubjects.click('applyFlyoutButton');
+
+        await retry.try(async () => {
+          // Clicking apply on flyout is ridiculously flaky :(
+          await testSubjects.existOrFail('applyFlyoutButton');
+          await testSubjects.click('applyFlyoutButton');
+          await testSubjects.missingOrFail('applyFlyoutButton');
+        });
       }
 
       const testParams = {
