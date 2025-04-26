@@ -200,6 +200,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     findAttackDiscoveryAlertsParams: FindAttackDiscoveryAlertsParams;
     logger: Logger;
   }): Promise<AttackDiscoveryFindResponse> => {
+    const aggs = getFindAttackDiscoveryAlertsAggregation();
     const {
       alertIds,
       connectorNames, // <-- as a filter input
@@ -235,6 +236,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     });
 
     const result = await this.findDocuments<AttackDiscoveryAlertDocument>({
+      aggs,
       filter: combinedFilter,
       index,
       page,
