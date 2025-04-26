@@ -133,12 +133,15 @@ export function savedObjectLinks(
       return {
         source_id: object.id,
         target_id: existingLink?.target_id ?? v4(),
-        references: uniqBy(object.references, (ref) => ref.id).map((ref) => ({
-          source_id: ref.id,
-          target_id:
-            existingLink?.references.find((existingRef) => ref.id === existingRef.source_id)
-              ?.target_id ?? v4(),
-        })),
+        references: uniqBy(object.references, (ref) => ref.id)
+          // do not generate links for references not included in the content pack
+          .filter((ref) => savedObjects.find((so) => so.id === ref.id))
+          .map((ref) => ({
+            source_id: ref.id,
+            target_id:
+              existingLink?.references.find((existingRef) => ref.id === existingRef.source_id)
+                ?.target_id ?? v4(),
+          })),
       };
     });
 

@@ -25,6 +25,7 @@ describe('Saved object helpers', () => {
       const links = savedObjectLinks(
         [
           { type: 'dashboard', id: 'foo', references: [{ type: 'index-pattern', id: 'index1' }] },
+          { type: 'index-pattern', id: 'index1' },
         ] as ContentPackSavedObject[],
         existingLinks
       );
@@ -46,6 +47,7 @@ describe('Saved object helpers', () => {
       const links = savedObjectLinks(
         [
           { type: 'dashboard', id: 'foo', references: [{ type: 'index-pattern', id: 'index1' }] },
+          { type: 'index-pattern', id: 'index1' },
         ] as ContentPackSavedObject[],
         existingLinks
       );
@@ -78,6 +80,7 @@ describe('Saved object helpers', () => {
               { type: 'index-pattern', id: 'index1' },
             ],
           },
+          { type: 'index-pattern', id: 'index1' },
         ] as ContentPackSavedObject[],
         existingLinks
       );
@@ -92,6 +95,35 @@ describe('Saved object helpers', () => {
             source_id: 'foo',
             target_id: expectUuid,
             references: [{ source_id: 'index1', target_id: expectUuid }],
+          },
+        ],
+      });
+    });
+
+    it('does not generate a link for references not included', () => {
+      const existingLinks = { dashboards: [] } as ContentPackSavedObjectLinks;
+
+      const links = savedObjectLinks(
+        [
+          {
+            type: 'dashboard',
+            id: 'foo',
+            references: [{ type: 'index-pattern', id: 'index1' }],
+          },
+        ] as ContentPackSavedObject[],
+        existingLinks
+      );
+
+      const expectUuid = expect.stringMatching(
+        /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/
+      );
+
+      expect(links).toEqual({
+        dashboards: [
+          {
+            source_id: 'foo',
+            target_id: expectUuid,
+            references: [],
           },
         ],
       });
