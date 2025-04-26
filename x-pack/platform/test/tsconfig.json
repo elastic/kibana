@@ -47,5 +47,8 @@
     "@kbn/ml-plugin",
     "@kbn/ml-data-frame-analytics-utils",
     "@kbn/fleet-plugin",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/aiops-test-utils",
+    "@kbn/ml-agg-utils",
   ]
 }
