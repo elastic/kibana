@@ -566,6 +566,17 @@ describe('Acceptable Mac/Linux wildcard paths', () => {
 });
 
 describe('Acceptable Mac/Linux exact paths', () => {
+  it('should accept paths when it is the root path', () => {
+    expect(
+      isPathValid({
+        os: OperatingSystem.LINUX,
+        field: ConditionEntryField.PATH,
+        type: 'match',
+        value: '/',
+      })
+    ).toEqual(true);
+  });
+
   it('should accept paths when it ends with a file name', () => {
     expect(
       isPathValid({
@@ -614,17 +625,6 @@ describe('Acceptable Mac/Linux exact paths with hyphens', () => {
 });
 
 describe('Unacceptable Mac/Linux exact paths', () => {
-  it('should not accept paths when it is the root path', () => {
-    expect(
-      isPathValid({
-        os: OperatingSystem.LINUX,
-        field: ConditionEntryField.PATH,
-        type: 'match',
-        value: '/',
-      })
-    ).toEqual(false);
-  });
-
   it('should not accept paths with \\', () => {
     expect(
       isPathValid({

@@ -316,6 +316,36 @@ describe('Trusted apps form', () => {
       expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
     });
 
+    it('should show path malformed path warning for linux/mac without an executable name', () => {
+      render();
+      expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+        os_types: [OperatingSystem.LINUX],
+        entries: [createEntry(ConditionEntryField.PATH, 'match', '/')],
+      };
+      formProps.item = { ...formProps.item, ...propsItem };
+      render();
+      expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+    });
+
+    it('should show path malformed path warning for windows with no executable name', () => {
+      render();
+      expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [createEntry(ConditionEntryField.PATH, 'match', 'c:\\fold\\')],
+      };
+      formProps.item = { ...formProps.item, ...propsItem };
+      render();
+      expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+    });
+
     it('should show wildcard in path warning', () => {
       render();
       expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();

@@ -184,7 +184,7 @@ const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string 
       /^[a-z]:(?:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
     return filePathRegex.test(value);
   }
-  return /^((\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);
+  return /^(\/|(\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);
 };
 
 const isWindowsWildcardPathValid = (path: string): boolean => {
@@ -199,7 +199,7 @@ const isWindowsWildcardPathValid = (path: string): boolean => {
     trimmedValue.length !== path.length ||
     firstCharacter === '^' ||
     lastCharacter === '\\' ||
-    !hasWildcard({ path, isWindowsPath: true })
+    !hasWildcardInPath({ path, isWindowsPath: true })
   ) {
     return false;
   } else {
@@ -219,7 +219,7 @@ const isLinuxMacWildcardPathValid = (path: string): boolean => {
     lastCharacter === '/' ||
     path.length > 1024 === true ||
     path.includes('//') === true ||
-    !hasWildcard({ path, isWindowsPath: false })
+    !hasWildcardInPath({ path, isWindowsPath: false })
   ) {
     return false;
   } else {
@@ -227,7 +227,7 @@ const isLinuxMacWildcardPathValid = (path: string): boolean => {
   }
 };
 
-const hasWildcard = ({
+const hasWildcardInPath = ({
   path,
   isWindowsPath,
 }: {
