@@ -82,7 +82,6 @@
     "@kbn/rison",
     "@kbn/reporting-plugin",
     "@kbn/aiops-plugin",
-    "@kbn/ml-agg-utils",
     "@kbn/logging",
     "@kbn/utility-types",
     "@kbn/data-views-plugin",
