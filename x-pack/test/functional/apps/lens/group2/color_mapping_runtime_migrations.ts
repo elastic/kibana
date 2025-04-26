@@ -434,6 +434,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should save xy chart custom color mappings from above', async () => {
         await browser.refresh();
         await dashboard.waitForRenderComplete();
+        await dashboard.switchToEditMode();
         panels = await dashboard.getDashboardPanels();
         await verifyCustomColor(...testParams.xy1);
         await verifyCustomColor(...testParams.xy2);
