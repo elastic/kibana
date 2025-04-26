@@ -633,7 +633,7 @@
     "@kbn/llm-tasks-plugin": "link:x-pack/platform/plugins/shared/ai_infra/llm_tasks",
     "@kbn/locator-examples-plugin": "link:examples/locator_examples",
     "@kbn/locator-explorer-plugin": "link:examples/locator_explorer",
-    "@kbn/lock-manager": "link:x-pack/packages/lock-manager",
+    "@kbn/lock-manager": "link:packages/lock-manager",
     "@kbn/logging": "link:src/platform/packages/shared/kbn-logging",
     "@kbn/logging-mocks": "link:src/platform/packages/shared/kbn-logging-mocks",
     "@kbn/logs-data-access-plugin": "link:x-pack/platform/plugins/shared/logs_data_access",
