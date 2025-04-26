@@ -1094,6 +1094,27 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
                       "type": "string"
@@ -2173,6 +2194,27 @@
                     ],
                     "type": "object"
                   },
+                  "artifacts": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "dashboards": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "consumer": {
                     "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
                     "type": "string"
@@ -2819,6 +2861,27 @@
                       "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
                       "nullable": true,
                       "type": "string"
+                    },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -3742,6 +3805,27 @@
                     ],
                     "type": "object"
                   },
+                  "artifacts": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "dashboards": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "flapping": {
                     "additionalProperties": false,
                     "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
@@ -4119,6 +4203,27 @@
                       "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
                       "nullable": true,
                       "type": "string"
+                    },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -6035,6 +6140,27 @@
                       "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
                       "nullable": true,
                       "type": "string"
+                    },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -10919,6 +11045,21 @@
                           "agentless": {
                             "additionalProperties": false,
                             "properties": {
+                              "cloud_connectors": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "target_csp": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "enabled"
+                                ],
+                                "type": "object"
+                              },
                               "resources": {
                                 "additionalProperties": false,
                                 "properties": {
@@ -11924,6 +12065,21 @@
                   "agentless": {
                     "additionalProperties": false,
                     "properties": {
+                      "cloud_connectors": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "target_csp": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "enabled"
+                        ],
+                        "type": "object"
+                      },
                       "resources": {
                         "additionalProperties": false,
                         "properties": {
@@ -12226,6 +12382,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -13257,6 +13428,21 @@
                           "agentless": {
                             "additionalProperties": false,
                             "properties": {
+                              "cloud_connectors": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "target_csp": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "enabled"
+                                ],
+                                "type": "object"
+                              },
                               "resources": {
                                 "additionalProperties": false,
                                 "properties": {
@@ -14534,6 +14720,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -15537,6 +15738,21 @@
                   "agentless": {
                     "additionalProperties": false,
                     "properties": {
+                      "cloud_connectors": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "target_csp": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "enabled"
+                        ],
+                        "type": "object"
+                      },
                       "resources": {
                         "additionalProperties": false,
                         "properties": {
@@ -15842,6 +16058,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -16873,6 +17104,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -17956,13 +18202,13 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -18139,13 +18385,13 @@
                                       "type": "string"
                                     },
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -19261,10 +19507,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "api_key_id",
-                                "type"
-                              ],
                               "type": "object"
                             },
                             "type": "object"
@@ -21359,10 +21601,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -21840,10 +22078,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -23009,6 +23243,9 @@
                           "created_at": {
                             "type": "string"
                           },
+                          "hidden": {
+                            "type": "boolean"
+                          },
                           "id": {
                             "type": "string"
                           },
@@ -23051,6 +23288,9 @@
                           },
                           "created_at": {
                             "type": "string"
+                          },
+                          "hidden": {
+                            "type": "boolean"
                           },
                           "id": {
                             "type": "string"
@@ -23202,6 +23442,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -23390,6 +23633,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -23910,6 +24156,93 @@
           }
         },
         "summary": "Create a custom integration",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/custom_integrations/{pkgName}": {
+      "put": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-all AND integrations-all.",
+        "operationId": "put-fleet-epm-custom-integrations-pkgname",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "categories": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "readMeData": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "readMeData"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {},
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update a custom integration",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -43560,6 +43893,12 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "type": "string"
                           },
@@ -43701,6 +44040,12 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "type": "string"
                           },
