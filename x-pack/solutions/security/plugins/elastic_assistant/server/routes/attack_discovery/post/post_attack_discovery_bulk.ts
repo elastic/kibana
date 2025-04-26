@@ -10,25 +10,23 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-  ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
-  PostAttackDiscoveryGenerationsDismissRequestParams,
-  PostAttackDiscoveryGenerationsDismissResponse,
+  ATTACK_DISCOVERY_BULK,
+  PostAttackDiscoveryBulkRequestBody,
+  PostAttackDiscoveryBulkResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import { ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED } from '../../../../common/constants';
 import { performChecks } from '../../helpers';
-import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 
-export const postAttackDiscoveryGenerationsDismissRoute = (
+export const postAttackDiscoveryBulkRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ): void => {
   router.versioned
     .post({
       access: 'internal',
-      path: ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+      path: ATTACK_DISCOVERY_BULK,
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
@@ -40,12 +38,12 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(PostAttackDiscoveryGenerationsDismissRequestParams),
+            body: buildRouteValidationWithZod(PostAttackDiscoveryBulkRequestBody),
           },
           response: {
             200: {
               body: {
-                custom: buildRouteValidationWithZod(PostAttackDiscoveryGenerationsDismissResponse),
+                custom: buildRouteValidationWithZod(PostAttackDiscoveryBulkResponse),
               },
             },
           },
@@ -55,7 +53,7 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
         context,
         request,
         response
-      ): Promise<IKibanaResponse<PostAttackDiscoveryGenerationsDismissResponse>> => {
+      ): Promise<IKibanaResponse<PostAttackDiscoveryBulkResponse>> => {
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
@@ -73,10 +71,20 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
           return checkResponse.response;
         }
 
+        const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
+          ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
+          false
+        );
+
+        if (!attackDiscoveryAlertsEnabled) {
+          return resp.error({
+            body: `Attack discovery alerts feature is disabled`,
+            statusCode: 403,
+          });
+        }
+
         try {
-          const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
-          const eventLogger = (await context.elasticAssistant).eventLogger;
-          const spaceId = (await context.elasticAssistant).getSpaceId();
+          const currentUser = await checkResponse.currentUser;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
           if (!dataClient) {
@@ -86,58 +94,26 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
             });
           }
 
-          const currentUser = await checkResponse.currentUser;
-          const executionUuid = request.params.execution_uuid;
+          const kibanaAlertWorkflowStatus = request.body.update?.kibana_alert_workflow_status;
+          const visibility = request.body.update?.visibility;
+          const ids = request.body.update?.ids;
 
-          const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
-            ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-            false
-          );
-
-          if (!attackDiscoveryAlertsEnabled) {
-            return resp.error({
-              body: `Attack discovery alerts feature is disabled`,
-              statusCode: 403,
+          if (ids == null || ids.length === 0) {
+            return response.ok({
+              body: { data: [] },
             });
           }
 
-          const previousGeneration = await dataClient.getAttackDiscoveryGenerationById({
+          const data = await dataClient.bulkUpdateAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
-            eventLogIndex,
-            executionUuid,
+            ids,
+            kibanaAlertWorkflowStatus,
             logger,
-            spaceId,
-          });
-
-          // event log details:
-          const connectorId = previousGeneration.connector_id;
-
-          await writeAttackDiscoveryEvent({
-            action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
-            attackDiscoveryAlertsEnabled,
-            authenticatedUser: currentUser,
-            connectorId,
-            dataClient,
-            eventLogger,
-            eventLogIndex,
-            executionUuid,
-            loadingMessage: undefined,
-            message: `Attack discovery generation ${executionUuid} for user ${currentUser.username} started`,
-            spaceId,
-          });
-
-          const latestGeneration = await dataClient.getAttackDiscoveryGenerationById({
-            authenticatedUser: currentUser,
-            eventLogIndex,
-            executionUuid,
-            logger,
-            spaceId,
+            visibility,
           });
 
           return response.ok({
-            body: {
-              ...latestGeneration,
-            },
+            body: { data },
           });
         } catch (err) {
           logger.error(err);
