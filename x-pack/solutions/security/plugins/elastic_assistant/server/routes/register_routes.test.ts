@@ -226,15 +226,11 @@ describe('registerRoutes', () => {
   });
 
   it('should call `chatCompleteRouteMock`', () => {
-    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, {
-      responseTimeout: 10 * 60 * 1000,
-    });
+    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, config);
   });
 
   it('should call `postActionsConnectorExecuteRouteMock`', () => {
-    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router, {
-      responseTimeout: 10 * 60 * 1000,
-    });
+    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router, config);
   });
 
   it('should call `bulkActionKnowledgeBaseEntriesRouteMock`', () => {
