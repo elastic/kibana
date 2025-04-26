@@ -15,4 +15,5 @@ export const transformResolveResponse = <Params extends RuleParams = never>(
   ...transformRuleToRuleResponseV1<Params>(rule),
   outcome: rule.outcome,
   alias_target_id: rule.alias_target_id,
+  ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
 });
