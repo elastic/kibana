@@ -875,7 +875,7 @@ describe('execute()', () => {
   });
 
   it('adds access token to headers in OAuth2 flow', async () => {
-    const accessToken = 'my-access-token';
+    const accessToken = 'Bearer my-access-token';
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
 
@@ -905,11 +905,11 @@ describe('execute()', () => {
     const config = { headers: {} };
     const result = await mockRequestCallback(config);
 
-    expect(result.headers.Authorization).toBe(`Bearer ${accessToken}`);
+    expect(result.headers.Authorization).toBe(accessToken);
   });
 
   it('merges custom headers with Authorization header', async () => {
-    const accessToken = 'token123';
+    const accessToken = 'Bearer token123';
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
 
@@ -939,7 +939,7 @@ describe('execute()', () => {
     const config = { headers: { 'X-Custom': 'value' } };
     const result = await mockRequestCallback(config);
 
-    expect(result.headers.Authorization).toBe(`Bearer ${accessToken}`);
+    expect(result.headers.Authorization).toBe(accessToken);
     expect(result.headers['X-Custom']).toBe('value');
   });
 });
