@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/lock-manager-plugin",
+  "name": "@kbn/lock-manager",
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0"

@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
-export interface LockManagerSetupDeps {}
-
-export interface LockManagerStartDeps {}
+export { LockAcquisitionError } from './src/lock_manager_client';
+export { LockManagerService } from './src/lock_manager_service';

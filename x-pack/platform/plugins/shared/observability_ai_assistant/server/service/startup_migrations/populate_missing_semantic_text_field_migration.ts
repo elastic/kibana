@@ -10,7 +10,7 @@ import pLimit from 'p-limit';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { uniq } from 'lodash';
 import pRetry from 'p-retry';
-import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager-plugin/server';
+import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
 import { waitForKbModel } from '../inference_endpoint';

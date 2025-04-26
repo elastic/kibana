@@ -6058,7 +6058,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lock-manager-plugin@link:x-pack/platform/plugins/shared/lock-manager":
+"@kbn/lock-manager@link:x-pack/packages/lock-manager":
   version "0.0.0"
   uid ""
 

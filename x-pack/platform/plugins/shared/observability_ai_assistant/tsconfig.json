@@ -54,7 +54,7 @@
     "@kbn/core-http-browser",
     "@kbn/sse-utils",
     "@kbn/core-security-server",
-    "@kbn/lock-manager-plugin"
+    "@kbn/lock-manager"
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,7 +9,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core/server';
-import { LockManagerService } from '@kbn/lock-manager-plugin/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import { createKbConcreteIndex } from '../startup_migrations/create_or_update_index_assets';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';

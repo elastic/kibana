@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/lock-manager",
+  "owner": ["@elastic/obs-ai-assistant"],  
+  "devOnly": true
+}
