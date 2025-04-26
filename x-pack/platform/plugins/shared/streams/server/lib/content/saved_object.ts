@@ -133,7 +133,7 @@ export function savedObjectLinks(
       return {
         source_id: object.id,
         target_id: existingLink?.target_id ?? v4(),
-        references: object.references.map((ref) => ({
+        references: uniqBy(object.references, (ref) => ref.id).map((ref) => ({
           source_id: ref.id,
           target_id:
             existingLink?.references.find((existingRef) => ref.id === existingRef.source_id)
