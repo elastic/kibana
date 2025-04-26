@@ -48,6 +48,8 @@ export const useFetchLatestScan = ({
 
         const defendInsight = response.data[0];
         if (!defendInsight) {
+          // no previous scan record - treat as 0 expected insights
+          onSuccess(0);
           return undefined;
         }
 

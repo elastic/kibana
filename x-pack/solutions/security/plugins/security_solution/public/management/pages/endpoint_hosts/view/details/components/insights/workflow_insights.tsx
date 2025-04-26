@@ -50,7 +50,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   ];
 
   // refetch is automatically triggered when expectedCount changes
-  const { data: insights } = useFetchInsights({
+  const { data: insights, isFetching: isFetchingInsights } = useFetchInsights({
     endpointId,
     onSuccess: setScanCompleted,
     scanCompleted,
@@ -79,9 +79,15 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
 
   useEffect(() => {
     const isInsightRunning = latestScan?.status === DefendInsightStatusEnum.running;
-    const hasPendingInsights = !!expectedCount && insights?.length !== expectedCount;
+    const hasPendingInsights = expectedCount !== null && insights?.length !== expectedCount;
+    const initialFetchNotStarted = expectedCount === null;
     setIsScanButtonDisabled(
-      isPostDefendInsightsLoading || isLoadingLatestScan || isInsightRunning || hasPendingInsights
+      isPostDefendInsightsLoading ||
+        isLoadingLatestScan ||
+        isInsightRunning ||
+        hasPendingInsights ||
+        isFetchingInsights ||
+        initialFetchNotStarted // hold off until we know `expectedCount` (even 0)
     );
   }, [
     endpointId,
@@ -90,6 +96,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     latestScan,
     insights,
     expectedCount,
+    isFetchingInsights,
   ]);
 
   const lastResultCaption = useMemo(() => {
