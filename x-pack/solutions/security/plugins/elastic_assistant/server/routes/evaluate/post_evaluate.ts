@@ -39,7 +39,7 @@ import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
-import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
+import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -52,18 +52,19 @@ import {
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
-import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { agentRunnableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
 import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
+import { ConfigSchema } from '../../config_schema';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
-const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
-const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
+  config?: ConfigSchema
 ) => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout ?? ROUTE_HANDLER_TIMEOUT;
+
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
@@ -219,7 +220,7 @@ export const postEvaluateRoute = (
                 actionsClient,
                 defendInsightsGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
                 evaluationId,
@@ -263,7 +264,7 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
                 evaluationId,
@@ -310,6 +311,7 @@ export const postEvaluateRoute = (
                   telemetryMetadata: {
                     pluginId: 'security_ai_assistant',
                   },
+                  timeout: ROUTE_HANDLER_TIMEOUT,
                 });
 
               const llm = createLlmInstance();
@@ -414,11 +416,9 @@ export const postEvaluateRoute = (
 
               const chatPromptTemplate = formatPrompt({
                 prompt: defaultSystemPrompt,
-                llmType,
-                isOpenAI,
               });
 
-              const agentRunnable = await agentRunableFactory({
+              const agentRunnable = await agentRunnableFactory({
                 llm: createLlmInstance(),
                 isOpenAI,
                 llmType,

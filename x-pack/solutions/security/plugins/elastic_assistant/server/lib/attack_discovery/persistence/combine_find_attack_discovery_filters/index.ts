@@ -7,6 +7,7 @@
 
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
+  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -18,6 +19,7 @@ const escapeQueryString = (str: string) => str.replace(/[+\-=&|><!(){}[\]^"~*?:\
 
 // returns a KQL filter by combining the provided filters with `AND`
 export const combineFindAttackDiscoveryFilters = ({
+  alertIds,
   connectorNames,
   end,
   ids,
@@ -25,6 +27,7 @@ export const combineFindAttackDiscoveryFilters = ({
   start,
   status,
 }: {
+  alertIds?: string[];
   connectorNames?: string[];
   end?: string;
   ids?: string[];
@@ -59,6 +62,10 @@ export const combineFindAttackDiscoveryFilters = ({
             )
             .join(' OR ')})`,
         ]
+      : []),
+
+    ...(alertIds && alertIds.length > 0
+      ? [`(${alertIds.map((id) => `${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "${id}"`).join(' OR ')})`]
       : []),
     ...(start ? [`@timestamp >= "${start}"`] : []),
     ...(end ? [`@timestamp <= "${end}"`] : []),

@@ -81,7 +81,7 @@ import { findDocuments } from '../find';
  * configuration after initial plugin start
  */
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
-  modelIdOverride?: string;
+  elserInferenceId?: string;
   manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
@@ -94,7 +94,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
   getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
-  modelIdOverride: boolean;
+  elserInferenceId?: string;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -167,7 +167,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
   public isInferenceEndpointExists = async (): Promise<boolean> =>
     isInferenceEndpointExists({
-      elserId: await this.options.getElserId(),
       esClient: await this.options.elasticsearchClientPromise,
       logger: this.options.logger,
       getTrainedModelsProvider: this.options.getTrainedModelsProvider,
@@ -242,57 +241,58 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
       }
 
-      /*
+      // `pt_tiny_elser` is deployed before the KB setup is started, so we don't need to check for it
+      if (!this.options.elserInferenceId) {
+        /*
         #1 Check if ELSER model is downloaded
         #2 Check if inference endpoint is deployed
         #3 Dry run ELSER model deployment if not already deployed
         #4 Create inference endpoint if not deployed / delete and create inference endpoint if model was not deployed
         #5 Load Security Labs docs
       */
-      const isInstalled = await this.isModelInstalled();
-      if (!isInstalled) {
-        await this.installModel();
-        await pRetry(
-          async () =>
-            (await this.isModelInstalled())
-              ? Promise.resolve()
-              : Promise.reject(new Error('Model not installed')),
-          { minTimeout: 30000, maxTimeout: 30000, retries: 20 }
-        );
-        this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
-      } else {
-        this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
-      }
+        const isInstalled = await this.isModelInstalled();
+        if (!isInstalled) {
+          await this.installModel();
+          await pRetry(
+            async () =>
+              (await this.isModelInstalled())
+                ? Promise.resolve()
+                : Promise.reject(new Error('Model not installed')),
+            { minTimeout: 30000, maxTimeout: 30000, retries: 20 }
+          );
+          this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
+        } else {
+          this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
+        }
 
-      const inferenceId = await getInferenceEndpointId({
-        esClient,
-        modelIdOverride: this.options.modelIdOverride,
-      });
-
-      const inferenceExists = await isInferenceEndpointExists({
-        elserId,
-        esClient,
-        inferenceEndpointId: inferenceId,
-        getTrainedModelsProvider: this.options.getTrainedModelsProvider,
-        logger: this.options.logger,
-      });
-
-      if (!inferenceExists) {
-        await createInferenceEndpoint({
-          elserId,
+        const inferenceId = await getInferenceEndpointId({
           esClient,
-          logger: this.options.logger,
-          inferenceId,
-          getTrainedModelsProvider: this.options.getTrainedModelsProvider,
         });
 
-        this.options.logger.debug(
-          `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
-        );
-      } else {
-        this.options.logger.debug(
-          `Inference endpoint for ELSER model '${elserId}' is already deployed`
-        );
+        const inferenceExists = await isInferenceEndpointExists({
+          esClient,
+          inferenceEndpointId: inferenceId,
+          getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+          logger: this.options.logger,
+        });
+
+        if (!inferenceExists) {
+          await createInferenceEndpoint({
+            elserId,
+            esClient,
+            logger: this.options.logger,
+            inferenceId,
+            getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+          });
+
+          this.options.logger.debug(
+            `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
+          );
+        } else {
+          this.options.logger.debug(
+            `Inference endpoint for ELSER model '${elserId}' is already deployed`
+          );
+        }
       }
 
       if (!ignoreSecurityLabs) {
@@ -834,18 +834,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 }
 
-export const getInferenceEndpointId = async ({
-  modelIdOverride,
-  esClient,
-}: {
-  modelIdOverride?: boolean;
-  esClient: ElasticsearchClient;
-}) => {
-  // Don't use default enpdpoint for pt_tiny_elser
-  if (modelIdOverride) {
-    return ASSISTANT_ELSER_INFERENCE_ID;
-  }
-
+export const getInferenceEndpointId = async ({ esClient }: { esClient: ElasticsearchClient }) => {
   try {
     const elasticsearchInference = await esClient.inference.get({
       inference_id: ASSISTANT_ELSER_INFERENCE_ID,
@@ -869,13 +858,11 @@ export const getInferenceEndpointId = async ({
  * @returns Promise<boolean> indicating whether the model is deployed
  */
 export const isInferenceEndpointExists = async ({
-  elserId,
   esClient,
   inferenceEndpointId,
   getTrainedModelsProvider,
   logger,
 }: {
-  elserId: string;
   esClient: ElasticsearchClient;
   getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
   inferenceEndpointId?: string;
@@ -884,19 +871,19 @@ export const isInferenceEndpointExists = async ({
   const inferenceId = inferenceEndpointId || (await getInferenceEndpointId({ esClient }));
 
   try {
-    const inferenceExists = !!(await esClient.inference.get({
+    const response = await esClient.inference.get({
       inference_id: inferenceId,
       task_type: 'sparse_embedding',
-    }));
+    });
 
-    if (!inferenceExists) {
+    if (!response.endpoints?.[0]?.service_settings?.model_id) {
       return false;
     }
 
     let getResponse;
     try {
       getResponse = await getTrainedModelsProvider().getTrainedModelsStats({
-        model_id: elserId,
+        model_id: response.endpoints?.[0]?.service_settings?.model_id,
       });
     } catch (e) {
       return false;
@@ -1037,11 +1024,9 @@ export const dryRunTrainedModelDeployment = async ({
 };
 
 export const deleteInferenceEndpoint = async ({
-  elserId,
   esClient,
   logger,
 }: {
-  elserId: string;
   esClient: ElasticsearchClient;
   logger: Logger;
 }) => {
@@ -1052,11 +1037,11 @@ export const deleteInferenceEndpoint = async ({
       force: true,
     });
     logger.debug(
-      `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
+      `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model`
     );
   } catch (error) {
     logger.debug(
-      `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
+      `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model:\n${error}`
     );
   }
 };
@@ -1075,7 +1060,7 @@ export const createInferenceEndpoint = async ({
   getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
 }) => {
   if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
-    await deleteInferenceEndpoint({ elserId, esClient, logger });
+    await deleteInferenceEndpoint({ esClient, logger });
 
     await pRetry(
       async () =>
@@ -1108,7 +1093,6 @@ export const createInferenceEndpoint = async ({
 
       // await for the model to be deployed
       const inferenceEndpointExists = await isInferenceEndpointExists({
-        elserId,
         esClient,
         inferenceEndpointId: ASSISTANT_ELSER_INFERENCE_ID,
         getTrainedModelsProvider,
@@ -1149,7 +1133,6 @@ export const ensureDedicatedInferenceEndpoint = async ({
     });
 
     const inferenceEndpointExists = await isInferenceEndpointExists({
-      elserId,
       esClient,
       inferenceEndpointId: ASSISTANT_ELSER_INFERENCE_ID,
       getTrainedModelsProvider,
@@ -1159,7 +1142,6 @@ export const ensureDedicatedInferenceEndpoint = async ({
     if (!isEndpointUsed) {
       if (inferenceEndpointExists) {
         await deleteInferenceEndpoint({
-          elserId,
           esClient,
           logger,
         });
