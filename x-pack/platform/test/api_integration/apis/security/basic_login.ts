@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { parse as parseCookie } from 'tough-cookie';
+import { Cookie, parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -88,10 +88,11 @@ export default function ({ getService }: FtrProviderContext) {
       expect(cookies).to.have.length(1);
 
       const sessionCookie = parseCookie(cookies[0]);
-      expect(sessionCookie.key).to.be('sid');
-      expect(sessionCookie.value).to.not.be.empty();
-      expect(sessionCookie.path).to.be('/');
-      expect(sessionCookie.httpOnly).to.be(true);
+      expect(sessionCookie).to.not.be(undefined);
+      expect(sessionCookie!.key).to.be('sid');
+      expect(sessionCookie!.value).to.not.be.empty();
+      expect(sessionCookie!.path).to.be('/');
+      expect(sessionCookie!.httpOnly).to.be(true);
     });
 
     it('should reject access to the API with wrong credentials in the header', async () => {
@@ -156,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with session cookie', () => {
-      let sessionCookie;
+      let sessionCookie: Cookie | undefined;
       beforeEach(async () => {
         const loginResponse = await supertest
           .post('/internal/security/login')
@@ -170,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         sessionCookie = parseCookie(loginResponse.headers['set-cookie'][0]);
+        expect(sessionCookie).to.not.be(undefined);
       });
 
       it('should allow access to the API', async () => {
@@ -180,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
         const apiResponse = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(200);
 
         expect(apiResponse.body).to.have.keys([
@@ -206,26 +208,28 @@ export default function ({ getService }: FtrProviderContext) {
         const apiResponseOne = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
         const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0]);
 
-        expect(sessionCookieOne.value).to.not.be.empty();
-        expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
+        expect(sessionCookieOne).to.not.be(undefined);
+        expect(sessionCookieOne!.value).to.not.be.empty();
+        expect(sessionCookieOne!.value).to.not.equal(sessionCookie!.value);
 
         const apiResponseTwo = await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
         const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0]);
 
-        expect(sessionCookieTwo.value).to.not.be.empty();
-        expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
+        expect(sessionCookieTwo).to.not.be(undefined);
+        expect(sessionCookieTwo!.value).to.not.be.empty();
+        expect(sessionCookieTwo!.value).to.not.equal(sessionCookieOne!.value);
       });
 
       it('should not extend cookie for system API calls', async () => {
@@ -233,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('kbn-system-request', 'true')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(200);
 
         expect(systemAPIResponse.headers['set-cookie']).to.be(undefined);
@@ -244,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Bearer AbCdEf')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(401);
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
@@ -253,18 +257,19 @@ export default function ({ getService }: FtrProviderContext) {
       it('should clear cookie on logout and redirect to login', async () => {
         const logoutResponse = await supertest
           .get('/api/security/logout?next=%2Fabc%2Fxyz&msg=test')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(302);
 
         const cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
         const logoutCookie = parseCookie(cookies[0]);
-        expect(logoutCookie.key).to.be('sid');
-        expect(logoutCookie.value).to.be.empty();
-        expect(logoutCookie.path).to.be('/');
-        expect(logoutCookie.httpOnly).to.be(true);
-        expect(logoutCookie.maxAge).to.be(0);
+        expect(logoutCookie).to.not.be(undefined);
+        expect(logoutCookie!.key).to.be('sid');
+        expect(logoutCookie!.value).to.be.empty();
+        expect(logoutCookie!.path).to.be('/');
+        expect(logoutCookie!.httpOnly).to.be(true);
+        expect(logoutCookie!.maxAge).to.be(0);
 
         expect(logoutResponse.headers.location).to.be('/login?next=%2Fabc%2Fxyz&msg=test');
       });
@@ -272,7 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not render login page and redirect to `next` URL', async () => {
         const loginViewResponse = await supertest
           .get('/login?next=%2Fapp%2Fml%3Fone%3Dtwo')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(302);
 
         expect(loginViewResponse.headers.location).to.be('/app/ml?one=two');
@@ -281,7 +286,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not render login page and redirect to the base path if `next` is absolute URL', async () => {
         const loginViewResponse = await supertest
           .get('/login?next=http%3A%2F%2Fhack.you%2F%3Fone%3Dtwo')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(302);
 
         expect(loginViewResponse.headers.location).to.be('/');
@@ -291,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
         // Try `//hack.you` that NodeJS URL parser with `slashesDenoteHost` option
         let loginViewResponse = await supertest
           .get('/login?next=%2F%2Fhack.you%2F%3Fone%3Dtwo')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(302);
 
         expect(loginViewResponse.headers.location).to.be('/');
@@ -300,7 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
         // but is parsed in a different by NodeJS URL parser.
         loginViewResponse = await supertest
           .get('/login?next=%2F%2F%2Fhack.you%2F%3Fone%3Dtwo')
-          .set('Cookie', sessionCookie.cookieString())
+          .set('Cookie', sessionCookie!.cookieString())
           .expect(302);
 
         expect(loginViewResponse.headers.location).to.be('/');
