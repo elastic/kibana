@@ -12,7 +12,7 @@ import type {
 import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 import type { FetchFieldCandidatesResponse } from '@kbn/aiops-log-rate-analysis/queries/fetch_field_candidates';
 
-import type { LogRateAnalysisDataGenerator } from '../../../functional/services/aiops/log_rate_analysis_data_generator';
+import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
 
 export interface TestData<T extends ApiVersion> {
   testName: string;

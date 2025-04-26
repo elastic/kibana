@@ -7,6 +7,7 @@
 
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 
+import { AiopsProvider } from './aiops';
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 import { UsageAPIProvider } from './usage_api';
 import { IngestPipelinesProvider } from './ingest_pipelines';
@@ -18,6 +19,7 @@ import { TransformProvider } from './transform';
 
 export const services = {
   ...kibanaApiIntegrationServices,
+  aiops: AiopsProvider,
   dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   ingestPipelines: IngestPipelinesProvider,

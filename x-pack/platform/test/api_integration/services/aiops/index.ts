@@ -7,9 +7,12 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security (trial license)', function () {
-    // THIS TEST NEEDS TO BE LAST. IT IS DESTRUCTIVE! IT REMOVES TRIAL LICENSE!!!
-    loadTestFile(require.resolve('./license_downgrade'));
-  });
+import { LogRateAnalysisDataGeneratorProvider } from './log_rate_analysis_data_generator';
+
+export function AiopsProvider(context: FtrProviderContext) {
+  const logRateAnalysisDataGenerator = LogRateAnalysisDataGeneratorProvider(context);
+
+  return {
+    logRateAnalysisDataGenerator,
+  };
 }

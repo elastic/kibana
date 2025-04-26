@@ -1603,7 +1603,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 # Additional plugins and packages maintained by the ML team.
 /src/platform/test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
-/x-pack/test/api_integration/apis/aiops/ @elastic/ml-ui
+/x-pack/platform/test/api_integration/apis/aiops/ @elastic/ml-ui
 /x-pack/platform/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/aiops @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui

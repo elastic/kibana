@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('security', function () {
+  describe('security (trial license)', function () {
     // Updates here should be mirrored in `./security_basic.ts` if tests
     // should also run under a basic license.
 
@@ -22,5 +22,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./privileges'));
     loadTestFile(require.resolve('./roles_bulk'));
+
+    // THIS TEST NEEDS TO BE LAST. IT IS DESTRUCTIVE! IT REMOVES TRIAL LICENSE!!!
+    loadTestFile(require.resolve('./license_downgrade'));
   });
 }

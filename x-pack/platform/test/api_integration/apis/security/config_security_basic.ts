@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export */
-
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseIntegrationTestsConfig = await readConfigFile(require.resolve('./config.ts'));
+  const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
   // security APIs should function the same under a basic or trial license
   return {
     ...baseIntegrationTestsConfig.getAll(),
-    testFiles: [require.resolve('./apis/security/security_basic')],
+    testFiles: [require.resolve('./security_basic')],
     esTestCluster: {
       ...baseIntegrationTestsConfig.get('esTestCluster'),
       license: 'basic',

@@ -9,12 +9,11 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
-
   return {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
-    esTestCluster: {
-      ...baseIntegrationTestsConfig.get('esTestCluster'),
+    junit: {
+      reportName: 'X-Pack API Integration Tests (Security Trial)',
     },
   };
 }
