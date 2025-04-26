@@ -178,7 +178,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lastMessage.content).to.be.a('string');
         });
 
-        it('should send 1 documents to the llm', () => {
+        it('should send 1 document to the llm', () => {
           expect(parsedContent.documents.length).to.be(1);
         });
 
