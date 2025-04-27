@@ -80,7 +80,7 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
 
     if (!span.parentSpanContext) {
       const traceId = span.spanContext().traceId;
-      this.getProjectId().then((projectId) => {
+      void this.getProjectId().then((projectId) => {
         // this is how Langfuse generates IDs, see
         // https://github.com/langfuse/langfuse/blob/2d4708921c67bca61c774633b7df65b3c5105f0d/web/src/features/otel/server/index.ts#L506
         const langfuseTraceId = Buffer.from(traceId).toString('hex');

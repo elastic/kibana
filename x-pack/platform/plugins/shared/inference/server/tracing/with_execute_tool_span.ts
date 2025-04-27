@@ -31,7 +31,7 @@ export function withExecuteToolSpan<T>(
       const res = cb(span);
 
       if (isPromise(res)) {
-        res.then((value) => {
+        void res.then((value) => {
           try {
             span?.setAttribute('output.value', JSON.stringify(value));
           } catch (err) {
