@@ -16,6 +16,5 @@
   "kbn_references": [
     "@kbn/logging",
     "@kbn/core",
-    "@kbn/test"
   ]
 }
