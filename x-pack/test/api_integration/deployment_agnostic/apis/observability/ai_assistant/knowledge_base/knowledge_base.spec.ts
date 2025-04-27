@@ -157,7 +157,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await clearKnowledgeBase(es);
       });
 
-      it('creates multiple items', async () => {
+      it('creates multiple entries', async () => {
         const entries = await getEntries();
         expect(entries.length).to.eql(3);
       });
