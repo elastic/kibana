@@ -8,7 +8,8 @@
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
-    ]
+    ],
+    "resolveJsonModule": true,
   },
   "include": [
     "**/*",
