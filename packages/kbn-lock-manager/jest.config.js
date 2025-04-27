@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/packages/lock-manager'],
+  roots: ['<rootDir>/packages/kbn-lock-manager'],
 };
