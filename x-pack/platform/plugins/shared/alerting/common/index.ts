@@ -45,6 +45,7 @@ export type {
   RuleSystemActionKey,
   SanitizedRuleConfig,
   RuleMonitoringLastRunMetrics,
+  Artifacts,
 } from './rule';
 export {
   RuleExecutionStatusValues,
@@ -209,6 +210,9 @@ export {
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
+export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
+
+// Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
 export const INTERNAL_ALERTING_SNOOZE_RULE =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze` as const;
@@ -242,6 +246,13 @@ export const INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH =
 export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
   `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
 
+// External
+export const ARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_archive`;
+export const UNARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_unarchive`;
+export const CREATE_MAINTENANCE_WINDOW_API_PATH = BASE_MAINTENANCE_WINDOW_API_PATH;
+export const GET_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
+export const UPDATE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
+export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
+
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-export const ENABLE_MAINTENANCE_WINDOWS = true;

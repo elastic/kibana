@@ -15,7 +15,7 @@ import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 import type { Decorator } from '@storybook/react';
-import { useParameter } from '@storybook/manager-api';
+import { useParameter } from '@storybook/preview-api';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
@@ -24,6 +24,8 @@ import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { MemoryRouter } from 'react-router-dom';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
+import { ReloadRequestTimeProvider } from '../../../hooks/use_reload_request_time';
 import { AlertPrefillProvider } from '../../../alerting/use_alert_prefill';
 import { PluginConfigProvider } from '../../../containers/plugin_config_context';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
@@ -33,6 +35,8 @@ import { assetDetailsProps, getLogEntries } from './context/fixtures';
 import { ContextProviders } from '../context_providers';
 import { DataViewsProvider } from '../hooks/use_data_views';
 import type { InfraConfig } from '../../../../server';
+import { TabSwitcherProvider } from '../hooks/use_tab_switcher';
+import type { TabIds } from '../types';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
@@ -57,6 +61,18 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
         action(`Navigate to: ${url}`);
       },
       getUrlForApp: (url: string) => url,
+      capabilities: {
+        maintenanceWindow: {
+          show: false,
+        },
+      },
+    },
+    docLinks: {
+      links: {
+        observability: {
+          guide: 'https://www.elastic.co/guide/en/observability/current/index.html',
+        },
+      },
     },
     chrome: {
       docTitle: {
@@ -66,6 +82,7 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
         },
       },
       setBreadcrumbs: () => {},
+      getChromeStyle$: () => of({} as ChromeStyle),
       setBreadcrumbsAppendExtension: () => () => {},
     },
     data: {
@@ -131,6 +148,12 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
               getRedirectUrl: (args: any) => {
                 action('share.url.locators.getRedirectUrl')(args);
               },
+              useUrl: () =>
+                ({
+                  getRedirectUrl: (args: any) => {
+                    action('share.url.locators.useUrl.getRedirectUrl')(args);
+                  },
+                } as unknown as LocatorPublic<any>),
             } as unknown as LocatorPublic<any>),
         },
       },
@@ -159,6 +182,7 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
       reportAssetDetailsFlyoutViewed: () => {},
       reportAssetDetailsPageViewed: () => {},
       reportAssetDashboardLoaded: () => {},
+      reportPerformanceMetricEvent: () => {},
     },
     observabilityShared: {
       navigation: { PageTemplate: ({ children }: { children?: any }) => <>{children}</> },
@@ -206,7 +230,9 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
           <KibanaContextProvider services={mockServices}>
             <SourceProvider sourceId="default">
               <MetricsDataViewProvider>
-                <AlertPrefillProvider>{story()} </AlertPrefillProvider>
+                <ReloadRequestTimeProvider>
+                  <AlertPrefillProvider>{story()}</AlertPrefillProvider>
+                </ReloadRequestTimeProvider>
               </MetricsDataViewProvider>
             </SourceProvider>
           </KibanaContextProvider>
@@ -229,3 +255,13 @@ export const DecorateWithAssetDetailsStateContext: Decorator = (story) => {
     </ContextProviders>
   );
 };
+
+export const DecorateWithTabSwitcherContext =
+  (defaultActiveTabId: TabIds): Decorator =>
+  (story) => {
+    return (
+      <TabSwitcherProvider defaultActiveTabId={defaultActiveTabId}>
+        <DataViewsProvider>{story()}</DataViewsProvider>
+      </TabSwitcherProvider>
+    );
+  };

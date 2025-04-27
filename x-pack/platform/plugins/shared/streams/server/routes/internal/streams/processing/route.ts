@@ -12,9 +12,9 @@ import {
   processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
 import { handleProcessingSuggestion } from './suggestions_handler';
 
@@ -45,7 +45,7 @@ export const simulateProcessorRoute = createServerRoute({
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
     return simulateProcessing({ params, scopedClusterClient, streamsClient });

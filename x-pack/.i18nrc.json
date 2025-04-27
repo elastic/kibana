@@ -22,6 +22,7 @@
     "xpack.cloud": "platform/plugins/shared/cloud",
     "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
+    "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
@@ -101,7 +102,7 @@
       "platform/plugins/shared/observability_ai_assistant",
       "solutions/observability/plugins/observability_ai_assistant_app"
     ],
-    "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
+    "xpack.observabilityAiAssistantManagement": "platform/plugins/private/observability_ai_assistant_management",
     "xpack.observabilityLogsExplorer": "solutions/observability/plugins/observability_logs_explorer",
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
     "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",

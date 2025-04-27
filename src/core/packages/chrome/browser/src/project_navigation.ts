@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, MouseEventHandler, ReactNode } from 'react';
+import type { ComponentType, MouseEventHandler } from 'react';
 import type { Location } from 'history';
 import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -227,7 +227,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id: string;
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title: string;
+  title?: string;
   /** Path in the tree of the node */
   path: string;
   /** App id or deeplink id */
@@ -250,10 +250,8 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
 
 export type PanelSelectedNode = Pick<
   ChromeProjectNavigationNode,
-  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink'
-> & {
-  title: string | ReactNode;
-};
+  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink' | 'title'
+>;
 
 /** @public */
 export interface SideNavCompProps {
@@ -388,7 +386,7 @@ export type RootNavigationItemDefinition<
 /**
  * @public
  *
- * Definition for the complete navigation tree, including body and footer
+ * Definition for the complete navigation tree, including body, callout, and footer
  */
 export interface NavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -405,7 +403,14 @@ export interface NavigationTreeDefinition<
    * or "group" items.
    * */
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  /**
+   * Special callout section displayed between the body and footer.
+   * Typically used for promotional or informational content.
+   * */
+  callout?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
+
+export type SideNavigationSection = keyof NavigationTreeDefinition;
 
 /**
  * @public
@@ -419,6 +424,7 @@ export interface NavigationTreeDefinitionUI {
   id: SolutionId;
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  callout?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }
 
 /**

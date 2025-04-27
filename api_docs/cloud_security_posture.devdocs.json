@@ -249,7 +249,7 @@
           "label": "getCloudSecurityPostureMisconfigurationFlyout",
           "description": [],
           "signature": [
-            "({ ruleId, resourceId, }: ",
+            "() => { Component: React.FC<",
             {
               "pluginId": "@kbn/cloud-security-posture",
               "scope": "public",
@@ -257,34 +257,36 @@
               "section": "def-public.FindingMisconfigurationFlyoutProps",
               "text": "FindingMisconfigurationFlyoutProps"
             },
-            ") => React.JSX.Element"
+            ">; Header: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsMisconfigurationFlyoutHeaderProps",
+              "text": "FindingsMisconfigurationFlyoutHeaderProps"
+            },
+            ">; Body: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingsMisconfigurationFlyoutContentProps",
+              "text": "FindingsMisconfigurationFlyoutContentProps"
+            },
+            ">; Footer: React.FC<",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingMisconfigurationFlyoutFooterProps",
+              "text": "FindingMisconfigurationFlyoutFooterProps"
+            },
+            ">; }"
           ],
           "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "cloudSecurityPosture",
-              "id": "def-public.CspClientPluginStart.getCloudSecurityPostureMisconfigurationFlyout.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "{\n    ruleId,\n    resourceId,\n  }",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "@kbn/cloud-security-posture",
-                  "scope": "public",
-                  "docId": "kibKbnCloudSecurityPosturePluginApi",
-                  "section": "def-public.FindingMisconfigurationFlyoutProps",
-                  "text": "FindingMisconfigurationFlyoutProps"
-                }
-              ],
-              "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
+          "children": [],
           "returnComment": []
         }
       ],
