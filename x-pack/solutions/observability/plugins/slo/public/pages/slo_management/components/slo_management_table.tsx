@@ -33,6 +33,7 @@ import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloManagementBulkActions } from './slo_management_bulk_actions';
 import { SloManagementSearchBar } from './slo_management_search_bar';
 import type { Action } from './slo_management_table_wrapper';
+import { useBulkOperation } from '../context/bulk_operation';
 
 export function SloManagementTable({ setAction }: { setAction: (action: Action) => void }) {
   const { state, onStateChange } = useUrlSearchState();
@@ -52,6 +53,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     tags,
     includeOutdatedOnly,
   });
+  const { tasks } = useBulkOperation();
 
   const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
   const onSelectionChange = (items: SLODefinitionResponse[]) => {
@@ -59,6 +61,11 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
   };
 
   const selection: EuiTableSelectionType<SLODefinitionResponse> = {
+    selectable: (item: SLODefinitionResponse) => {
+      return !tasks.find(
+        (task) => task.status === 'in-progress' && task.items.some((i) => i.id === item.id)
+      );
+    },
     onSelectionChange,
     initialSelected: [],
   };

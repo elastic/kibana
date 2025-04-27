@@ -11,6 +11,7 @@ import { BulkDeleteResponse, SLODefinitionResponse } from '@kbn/slo-schema';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useBulkOperation } from '../context/bulk_operation';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -19,6 +20,7 @@ export function useBulkDeleteSlo() {
     notifications: { toasts },
   } = useKibana().services;
   const { sloClient } = usePluginContext();
+  const bulkOperation = useBulkOperation();
 
   return useMutation<
     BulkDeleteResponse,
@@ -54,6 +56,8 @@ export function useBulkDeleteSlo() {
         });
       },
       onSuccess: (response, { items }) => {
+        bulkOperation.register({ taskId: response.taskId, operation: 'delete', items });
+
         toasts.addSuccess(
           i18n.translate('xpack.slo.bulkDelete.successNotification', {
             defaultMessage: '{count} SLO scheduled for deletion successfully',

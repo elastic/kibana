@@ -18,6 +18,7 @@ import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloOutdatedFilterCallout } from './components/slo_management_outdated_filter_callout';
 import { SloManagementTableWrapper } from './components/slo_management_table_wrapper';
+import { BulkOperationProvider } from './context/bulk_operation';
 
 export function SloManagementPage() {
   const {
@@ -73,10 +74,12 @@ export function SloManagementPage() {
       }}
     >
       <HeaderMenu />
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <SloOutdatedFilterCallout />
-        <SloManagementTableWrapper />
-      </EuiFlexGroup>
+      <BulkOperationProvider>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <SloOutdatedFilterCallout />
+          <SloManagementTableWrapper />
+        </EuiFlexGroup>
+      </BulkOperationProvider>
     </ObservabilityPageTemplate>
   );
 }
