@@ -70,6 +70,7 @@ packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
+packages/kbn-lock-manager @elastic/obs-ai-assistant
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-manifest @elastic/kibana-core
@@ -95,7 +96,6 @@ packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
-packages/lock-manager @elastic/obs-ai-assistant
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
