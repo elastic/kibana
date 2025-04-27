@@ -73,11 +73,11 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
         localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_INSIGHTS_SECTION}
       >
         <AlertCountInsight
-          // fieldName={'entity.id'}
-          // name={source?.entity?.id}
-          fieldName={'agent.type'}
-          name={'cloudbeat'}
-          // openDetailsPanel={openDetailsPanel}
+          fieldName={'entity.id'}
+          name={source?.entity?.id}
+          // fieldName={'agent.type'}
+          // name={'cloudbeat'}
+          // openDetailsPanel={() => {}}
           data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
