@@ -14,7 +14,6 @@
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
-    "../../package.json",
     "./api_integration/apis/logstash/pipeline/fixtures/*.json",
     "./api_integration/apis/logstash/pipelines/fixtures/*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
