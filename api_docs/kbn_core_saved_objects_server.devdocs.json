@@ -8910,10 +8910,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts"
               },
               {
@@ -9303,10 +9299,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/api-server-internal/src/lib/repository_create_repository.test.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -10052,22 +10044,6 @@
               " | ",
               "SavedObjectsModelVersionMapProvider",
               " | undefined"
-            ],
-            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-saved-objects-server",
-            "id": "def-server.SavedObjectsType.switchToModelVersionAt",
-            "type": "string",
-            "tags": [],
-            "label": "switchToModelVersionAt",
-            "description": [
-              "\nAllows to opt-in to the model version API.\n\nMust be a valid semver version (with the patch version being necessarily 0)\n\nWhen specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}\nto use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.\n\nOnce opted in, it will no longer be possible to use the legacy migration API after the specified version.\n"
-            ],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "deprecated": false,
