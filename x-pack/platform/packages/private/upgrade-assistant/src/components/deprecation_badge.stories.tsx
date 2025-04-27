@@ -11,6 +11,18 @@ import { DeprecationBadge } from './deprecation_badge';
 
 const meta: Meta<typeof DeprecationBadge> = {
   component: DeprecationBadge,
+  title: 'Upgrade Assistant/Deprecation Badge',
+  description: 'A deprecation badge',
+  argTypes: {
+    isCritical: {
+      name: 'Deprecation is critical?',
+      control: { type: 'boolean' },
+    },
+    isResolved: {
+      name: 'Deprecation is resolved?',
+      control: { type: 'boolean' },
+    },
+  },
 };
 
 export default meta;
