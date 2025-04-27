@@ -160,6 +160,7 @@ export const NodeSquare = ({
   nodeName,
   value,
   showBorder,
+  nodeMetric,
 }: {
   squareSize: number;
   togglePopover: UseBooleanHandlers['toggle'];
@@ -167,12 +168,13 @@ export const NodeSquare = ({
   nodeName: string;
   value: string;
   showBorder?: boolean;
+  nodeMetric?: string;
 }) => {
   const valueMode = squareSize > 70;
   const ellipsisMode = squareSize > 30;
   const nodeAriaLabel = i18n.translate('xpack.infra.node.ariaLabel', {
-    defaultMessage: '{nodeName}, click to open menu',
-    values: { nodeName },
+    defaultMessage: '{nodeName} {value} {nodeMetric} ',
+    values: { nodeName, nodeMetric, value },
   });
   const style: CSSProperties | undefined = showBorder ? { border: 'solid 4px #000' } : undefined;
 
