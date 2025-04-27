@@ -22212,6 +22212,12 @@ paths:
           schema:
             type: string
         - in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
+        - in: query
           name: showInactive
           required: false
           schema:
