@@ -6,10 +6,9 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { rawScheduleSchema, rawNotificationSchema, rawScheduledReportSchema } from './v1';
+import type { rawNotificationSchema, rawScheduledReportSchema } from './v1';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 
-export type RawSchedule = Mutable<TypeOf<typeof rawScheduleSchema>>;
 export type RawNotification = Mutable<TypeOf<typeof rawNotificationSchema>>;
 export type RawScheduledReport = Mutable<TypeOf<typeof rawScheduledReportSchema>>;

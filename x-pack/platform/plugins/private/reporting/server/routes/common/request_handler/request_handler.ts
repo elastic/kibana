@@ -19,7 +19,7 @@ import type { BaseParams } from '@kbn/reporting-common/types';
 import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
-import { RawSchedule } from '../../../saved_objects/scheduled_report/schemas/latest';
+import { RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { checkParamsVersion } from '../../../lib';
 import { type Counters } from '..';
 import type { ReportingCore } from '../../..';
@@ -54,7 +54,7 @@ interface ConstructorOpts<
 export interface RequestParams {
   exportTypeId: string;
   jobParams: BaseParams;
-  schedule?: RawSchedule;
+  schedule?: RruleSchedule;
 }
 
 /**

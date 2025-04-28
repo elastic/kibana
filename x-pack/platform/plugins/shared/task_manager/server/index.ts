@@ -23,6 +23,9 @@ export type {
   IntervalSchedule,
 } from './task';
 
+export type { RruleSchedule } from './saved_objects';
+export { scheduleRruleSchema } from './saved_objects';
+
 export { TaskStatus, TaskPriority, TaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';

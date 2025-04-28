@@ -10,23 +10,21 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import { isEmpty } from 'lodash';
-import {
-  rawNotificationSchema,
-  rawScheduleSchema,
-} from '../../../saved_objects/scheduled_report/schemas/v1';
+import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
 import { ScheduledReportingJobResponse } from '../../../types';
-import {
-  RawSchedule,
-  RawScheduledReport,
-} from '../../../saved_objects/scheduled_report/schemas/latest';
+import { RawScheduledReport } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RequestHandler, RequestParams } from './request_handler';
-import { transformRawScheduledReportToReport } from './lib';
+import {
+  transformRawScheduledReportToReport,
+  transformRawScheduledReportToTaskParams,
+} from './lib';
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
-    schedule: rawScheduleSchema,
+    schedule: scheduleRruleSchema,
     notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),
@@ -47,8 +45,8 @@ export class ScheduleRequestHandler extends RequestHandler<
     return validation;
   }
 
-  public getSchedule(): RawSchedule {
-    let rruleDef: null | RawSchedule['rrule'] = null;
+  public getSchedule(): RruleSchedule {
+    let rruleDef: null | RruleSchedule['rrule'] = null;
     const req = this.opts.req;
     const res = this.opts.res;
 
@@ -71,7 +69,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { reporting, logger, req, user } = this.opts;
 
     const soClient = await reporting.getSoClient(req);
-    const { version, job, jobType } = await this.createJob(exportTypeId, jobParams);
+    const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
 
     const payload = {
       ...job,
@@ -89,7 +87,7 @@ export class ScheduleRequestHandler extends RequestHandler<
       createdAt: moment.utc().toISOString(),
       createdBy: user ? user.username : false,
       title: job.title,
-      payload: Buffer.from(JSON.stringify(payload)).toString('base64'),
+      payload: JSON.stringify(payload),
       schedule: schedule!,
       migrationVersion: version,
       meta: {
@@ -108,11 +106,14 @@ export class ScheduleRequestHandler extends RequestHandler<
     );
     logger.debug(`Successfully created scheduled report: ${report.id}`);
 
-    // // Schedule the report with Task Manager
-    // const task = await reporting.scheduleTask(req, report.toReportTaskJSON());
-    // logger.info(
-    //   `Scheduled ${name} reporting task. Task ID: task:${task.id}. Report ID: ${result.id}`
-    // );
+    // Schedule the report with Task Manager
+    const task = await reporting.scheduleRecurringTask(
+      req,
+      transformRawScheduledReportToTaskParams(report)
+    );
+    logger.info(
+      `Scheduled "${name}" reporting task. Task ID: task:${task.id}. Report ID: ${report.id}`
+    );
 
     return transformRawScheduledReportToReport(report);
   }
@@ -121,12 +122,12 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { exportTypeId, jobParams } = params;
     const { reporting, res } = this.opts;
 
-    const earlyResponse = await this.checkLicenseAndTimezone(
+    const checkErrorResponse = await this.checkLicenseAndTimezone(
       exportTypeId,
       jobParams.browserTimezone
     );
-    if (earlyResponse) {
-      return earlyResponse;
+    if (checkErrorResponse) {
+      return checkErrorResponse;
     }
 
     // check that security requirements are met

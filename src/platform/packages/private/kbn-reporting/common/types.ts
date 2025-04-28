@@ -11,7 +11,7 @@ import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance, RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
@@ -207,13 +207,7 @@ export type ScheduledReportApiJSON = Omit<
   'payload' | 'output' | 'attempts' | 'status'
 > & {
   id: string;
-  schedule: {
-    rrule: {
-      freq: number;
-      interval: number;
-      tzid?: string;
-    };
-  };
+  schedule: RruleSchedule;
   payload: Omit<ReportSource['payload'], 'headers'>;
 };
 

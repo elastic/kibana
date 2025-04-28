@@ -6,21 +6,15 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import { ScheduledReportTaskParams } from '../../../../lib/tasks';
 import { RawScheduledReport } from '../../../../saved_objects/scheduled_report/schemas/latest';
 
-export function transformRawScheduledReportToReport(
+export function transformRawScheduledReportToTaskParams(
   rawScheduledReport: SavedObject<RawScheduledReport>
-): ScheduledReportApiJSON {
-  const parsedPayload = JSON.parse(rawScheduledReport.attributes.payload);
+): ScheduledReportTaskParams {
   return {
     id: rawScheduledReport.id,
     jobtype: rawScheduledReport.attributes.jobType,
-    created_at: rawScheduledReport.attributes.createdAt,
-    created_by: rawScheduledReport.attributes.createdBy as string | false,
-    payload: parsedPayload,
-    meta: rawScheduledReport.attributes.meta,
-    migration_version: rawScheduledReport.attributes.migrationVersion,
     schedule: rawScheduledReport.attributes.schedule,
   };
 }

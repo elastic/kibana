@@ -90,12 +90,12 @@ export class GenerateRequestHandler extends RequestHandler<
       reporting.getUsageCounter()
     );
 
-    const earlyResponse = await this.checkLicenseAndTimezone(
+    const checkErrorResponse = await this.checkLicenseAndTimezone(
       exportTypeId,
       jobParams.browserTimezone
     );
-    if (earlyResponse) {
-      return earlyResponse;
+    if (checkErrorResponse) {
+      return checkErrorResponse;
     }
 
     let report: Report | undefined;
