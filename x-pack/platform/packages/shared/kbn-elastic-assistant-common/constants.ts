@@ -78,6 +78,7 @@ export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
 
 export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+export const ATTACK_DISCOVERY_BULK = `${ATTACK_DISCOVERY}/_bulk` as const;
 export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}` as const;
 export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID =
   `${ATTACK_DISCOVERY}/cancel/{connectorId}` as const;
