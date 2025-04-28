@@ -78,7 +78,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicLabel"
-                defaultMessage="Topic from field. For more info, see our {guideLink}."
+                defaultMessage="Topic from field(s). For more info, see our {guideLink}."
                 values={{
                   guideLink: (
                     <EuiLink
@@ -88,7 +88,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                     >
                       <FormattedMessage
                         id="xpack.fleet.settings.kafkaGuideLink"
-                        defaultMessage="docs"
+                        defaultMessage="docs."
                       />
                     </EuiLink>
                   ),
