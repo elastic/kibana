@@ -10,6 +10,7 @@
 import { schema, Type } from '@kbn/config-schema';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import { validate as validateUuid, version as versionUuid } from 'uuid';
 import {
   type ControlGroupChainingSystem,
   type ControlLabelPosition,
@@ -40,6 +41,15 @@ const apiError = schema.object({
   statusCode: schema.number(),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
+
+const getUuidV4Schema = (description: string, errorMessage?: string) =>
+  schema.string({
+    validate: (value) =>
+      validateUuid(value) && versionUuid(value) === 4
+        ? undefined
+        : errorMessage ?? 'Invalid UUID format',
+    meta: { description },
+  });
 
 // This schema should be provided by the controls plugin. Perhaps we can resolve this with the embeddable registry.
 // See https://github.com/elastic/kibana/issues/192622
@@ -286,9 +296,10 @@ export const panelSchema = schema.object({
   panelRefName: schema.maybe(schema.string()),
   gridData: gridDataSchema,
   panelIndex: schema.maybe(
-    schema.string({
-      meta: { description: 'The unique ID of the panel.' },
-    })
+    getUuidV4Schema(
+      'The unique identifier of the panel in the dashboard. Must match UUID Version 4.',
+      '`panelIndex` must match UUID Version 4. API consumers should not specify a `panelIndex` property as one will be generated automatically.'
+    )
   ),
   title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
   version: schema.maybe(
