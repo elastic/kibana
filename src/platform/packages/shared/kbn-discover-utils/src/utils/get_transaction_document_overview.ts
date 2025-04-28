@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray } from 'lodash';
 import type { DataTableRecord, TransactionDocumentOverview } from '../types';
 import { fieldConstants } from '..';
+import { getFlattenedFields } from './get_flattened_fields';
 
 const fields: Array<keyof TransactionDocumentOverview> = [
   fieldConstants.TIMESTAMP_FIELD,
@@ -29,11 +29,5 @@ const fields: Array<keyof TransactionDocumentOverview> = [
 ];
 
 export function getTransactionDocumentOverview(doc: DataTableRecord): TransactionDocumentOverview {
-  const formatField = <T extends keyof TransactionDocumentOverview>(field: T) =>
-    castArray(doc.flattened[field])[0] as TransactionDocumentOverview[T];
-
-  return fields.reduce((acc, field) => {
-    acc[field] = formatField(field);
-    return acc;
-  }, {} as { [key in keyof TransactionDocumentOverview]?: string | number }) as TransactionDocumentOverview;
+  return getFlattenedFields<TransactionDocumentOverview>(doc, fields);
 }

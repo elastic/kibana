@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray } from 'lodash';
 import type { DataTableRecord, SpanDocumentOverview } from '../types';
 import { fieldConstants } from '..';
+import { getFlattenedFields } from './get_flattened_fields';
 
 const fields: Array<keyof SpanDocumentOverview> = [
   fieldConstants.TIMESTAMP_FIELD,
@@ -34,11 +34,5 @@ const fields: Array<keyof SpanDocumentOverview> = [
 ];
 
 export function getSpanDocumentOverview(doc: DataTableRecord): SpanDocumentOverview {
-  const formatField = <T extends keyof SpanDocumentOverview>(field: T) =>
-    castArray(doc.flattened[field])[0] as SpanDocumentOverview[T];
-
-  return fields.reduce((acc, field) => {
-    acc[field] = formatField(field);
-    return acc;
-  }, {} as { [key in keyof SpanDocumentOverview]?: string | number }) as SpanDocumentOverview;
+  return getFlattenedFields<SpanDocumentOverview>(doc, fields);
 }
