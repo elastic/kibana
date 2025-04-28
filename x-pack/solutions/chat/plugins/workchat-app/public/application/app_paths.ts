@@ -25,6 +25,7 @@ export const appPaths = {
   integrations: {
     list: '/integrations',
     create: '/integrations/create',
+    catalog: '/integrations/catalog',
     edit: ({ integrationId }: { integrationId: string }) => `/integrations/${integrationId}/edit`,
   },
 };
