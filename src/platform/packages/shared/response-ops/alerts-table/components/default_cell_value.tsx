@@ -29,7 +29,11 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 export const DefaultCellValue = ({
   alert,
   columnId,
-}: Pick<ComponentProps<GetAlertsTableProp<'renderCellValue'>>, 'alert' | 'columnId'>) => {
+  openLinksInNewTab,
+}: Pick<
+  ComponentProps<GetAlertsTableProp<'renderCellValue'>>,
+  'alert' | 'columnId' | 'openLinksInNewTab'
+>) => {
   const {
     services: { fieldFormats, http },
   } = useAlertsTableContext();
@@ -56,6 +60,7 @@ export const DefaultCellValue = ({
           href={http.basePath.prepend(
             `/app/management/insightsAndAlerting/triggersActions/rule/${ruleUuid}`
           )}
+          target={openLinksInNewTab ? '_blank' : undefined}
         >
           {ruleName}
         </EuiLink>

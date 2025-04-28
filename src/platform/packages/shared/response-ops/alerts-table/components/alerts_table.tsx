@@ -189,6 +189,7 @@ const AlertsTableContent = typedForwardRef(
       dynamicRowHeight = false,
       emptyStateHeight,
       emptyStateVariant,
+      openLinksInNewTab = false,
       additionalContext,
       renderCellValue,
       renderCellPopover,
@@ -480,6 +481,7 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
+          openLinksInNewTab,
           services: memoizedServices,
         } as RenderContext<AC>),
       [
@@ -510,6 +512,7 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutHeader,
         renderFlyoutBody,
         renderFlyoutFooter,
+        openLinksInNewTab,
         memoizedServices,
       ]
     );

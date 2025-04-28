@@ -203,6 +203,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   emptyStateVariant?: 'subdued' | 'transparent';
   /**
+   * If true, the links in default cells, flyout and row actions will open in a new tab
+   * @default false
+   */
+  openLinksInNewTab?: boolean;
+  /**
    * An object used to compose the render context passed to all render functions as part of their
    * props
    */
@@ -360,8 +365,9 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'renderFlyoutFooter'
     | 'services'
     | 'casesConfiguration'
+    | 'openLinksInNewTab'
   >,
-  'columns'
+  'columns' | 'openLinksInNewTab'
 > &
   AC;
 

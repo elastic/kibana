@@ -144,6 +144,7 @@ export const EmbeddableAlertsTable = ({
       }}
       emptyStateHeight="flex"
       emptyStateVariant="transparent"
+      openLinksInNewTab={true}
       casesConfiguration={{
         featureId: 'alerts',
         owner: [GENERAL_CASES_OWNER],
