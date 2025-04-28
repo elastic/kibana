@@ -20,16 +20,16 @@ import { escapeQuotes } from '@kbn/es-query/src/kuery/utils/escape_kuery';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
-import {
+import type {
   CaseCustomField,
   CaseSeverity,
   CaseStatuses,
   CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
-  CustomFieldTypes,
   ListCustomFieldConfiguration,
 } from '../../common/types/domain';
+import { CustomFieldTypes } from '../../common/types/domain';
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
