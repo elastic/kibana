@@ -67,7 +67,6 @@ export interface TableProps {
  * It leverages a lot of configurations and constants from the Alert summary page alerts table, and renders the ResponseOps AlertsTable.
  */
 export const Table = memo(({ dataView, id, packages, query, ruleResponse }: TableProps) => {
-  console.log('//////////////////// rendering Table');
   const {
     services: { application, cases, data, fieldFormats, http, licensing, notifications, settings },
   } = useKibana();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { AlertTags } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -33,8 +33,6 @@ export type ReturnSetAlertTags = SetAlertTagsFunc | null;
 export const useSetAlertTags = (): ReturnSetAlertTags => {
   const { addSuccess, addError } = useAppToasts();
 
-  const [ignore, setIgnore] = useState<boolean>(false);
-
   const abortCtrl = useRef<AbortController>(new AbortController());
 
   const onUpdateSuccess = useCallback(
@@ -54,25 +52,20 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
       try {
         setTableLoading(true);
         const response = await setAlertTags({ tags, ids, signal: abortCtrl.current.signal });
-        if (!ignore) {
-          onSuccess();
-          setTableLoading(false);
-          onUpdateSuccess(response.updated);
-        }
+        onSuccess();
+        setTableLoading(false);
+        onUpdateSuccess(response.updated);
       } catch (error) {
-        if (!ignore) {
-          setTableLoading(false);
-          onUpdateFailure(error);
-        }
+        setTableLoading(false);
+        onUpdateFailure(error);
       }
     },
-    [ignore, onUpdateFailure, onUpdateSuccess]
+    [onUpdateFailure, onUpdateSuccess]
   );
 
   useEffect(() => {
     const currentAbortCtrl = abortCtrl.current;
     return (): void => {
-      setIgnore(true);
       currentAbortCtrl.abort();
     };
   }, [abortCtrl]);
