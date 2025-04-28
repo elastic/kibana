@@ -22,7 +22,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ElasticAssistantRequestHandlerContext } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,
@@ -33,8 +33,7 @@ import {
 import { isOpenSourceModel } from './utils';
 
 export const postActionsConnectorExecuteRoute = (
-  router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
+  router: IRouter<ElasticAssistantRequestHandlerContext>
 ) => {
   router.versioned
     .post({
@@ -152,7 +151,6 @@ export const postActionsConnectorExecuteRoute = (
             isOssModel,
             conversationId,
             context: ctx,
-            getElser,
             logger,
             inference,
             messages: (newMessage ? [newMessage] : messages) ?? [],
