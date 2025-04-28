@@ -10,20 +10,29 @@ import type {
   Message,
   ToolOptions,
   InferenceConnector,
+  Prompt,
 } from '@kbn/inference-common';
 
-export type ChatCompleteRequestBody = {
+export interface ChatCompleteRequestBodyBase {
   connectorId: string;
-  system?: string;
   temperature?: number;
   modelName?: string;
-  messages: Message[];
   functionCalling?: FunctionCallingMode;
   maxRetries?: number;
   retryConfiguration?: {
     retryOn?: 'all' | 'auto';
   };
+}
+
+export type ChatCompleteRequestBody = ChatCompleteRequestBodyBase & {
+  system?: string;
+  messages: Message[];
 } & ToolOptions;
+
+export type PromptRequestBody = ChatCompleteRequestBodyBase & {
+  prompt: Omit<Prompt, 'input'>;
+  input?: unknown;
+};
 
 export interface GetConnectorsResponseBody {
   connectors: InferenceConnector[];

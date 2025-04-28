@@ -27,6 +27,9 @@ import {
   TOOL_CALL_FUNCTION_ARGUMENTS_JSON,
   TOOL_CALL_FUNCTION_NAME,
   TOOL_CALL_ID,
+  PROMPT_ID,
+  PROMPT_TEMPLATE_VARIABLES,
+  PROMPT_TEMPLATE_TEMPLATE,
 } from '@arizeai/openinference-semantic-conventions';
 import { ReadableSpan } from '@opentelemetry/sdk-trace-base';
 import { omit, partition } from 'lodash';
@@ -60,6 +63,14 @@ export function getChatSpan(span: ReadableSpan) {
   span.attributes[LLM_TOKEN_COUNT_TOTAL] =
     Number(span.attributes[LLM_TOKEN_COUNT_COMPLETION] ?? 0) +
     Number(span.attributes[LLM_TOKEN_COUNT_PROMPT] ?? 0);
+
+  span.attributes[PROMPT_ID] = span.attributes['gen_ai.prompt.id'];
+  span.attributes[PROMPT_TEMPLATE_TEMPLATE] = span.attributes['gen_ai.prompt.template.template'];
+
+  // double stringify for Phoenix
+  span.attributes[PROMPT_TEMPLATE_VARIABLES] = span.attributes['gen_ai.prompt.template.variables']
+    ? JSON.stringify(span.attributes['gen_ai.prompt.template.variables'])
+    : undefined;
 
   span.attributes[INPUT_VALUE] = JSON.stringify(
     inputEvents.map((event) => {

@@ -11,6 +11,8 @@ import type {
   BoundOutputAPI,
   OutputAPI,
   InferenceConnector,
+  PromptAPI,
+  BoundPromptAPI,
 } from '@kbn/inference-common';
 
 /**
@@ -28,6 +30,12 @@ export interface InferenceClient {
    * response based on a schema and a prompt or conversation.
    */
   output: OutputAPI;
+  /**
+   * `prompt` allows the consumer to pass model-specific prompts
+   * which the inference plugin will match against the used model
+   * and execute the most appropriate version.
+   */
+  prompt: PromptAPI;
   /**
    * `getConnectorById` returns an inference connector by id.
    * Non-inference connectors will throw an error.
@@ -50,6 +58,12 @@ export interface BoundInferenceClient {
    * response based on a schema and a prompt or conversation.
    */
   output: BoundOutputAPI;
+  /**
+   * `prompt` allows the consumer to pass model-specific prompts
+   * which the inference plugin will match against the used model
+   * and execute the most appropriate version.
+   */
+  prompt: BoundPromptAPI;
   /**
    * `getConnectorById` returns an inference connector by id.
    * Non-inference connectors will throw an error.

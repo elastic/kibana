@@ -10,6 +10,7 @@ import {
   ChatCompleteCompositeResponse,
   Message,
   MessageRole,
+  Model,
   ToolCall,
   ToolMessage,
   ToolOptions,
@@ -63,8 +64,7 @@ function setTokens(span: Span, { prompt, completion }: { prompt: number; complet
 }
 
 interface InferenceGenerationOptions {
-  provider?: string;
-  model?: string;
+  model?: Model;
   system?: string;
   messages: Message[];
 }
@@ -141,15 +141,15 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse<ToolOptions, boolean>
 ): ChatCompleteCompositeResponse<ToolOptions, boolean> {
-  const { system, messages, model, provider, ...attributes } = options;
+  const { system, messages, model, ...attributes } = options;
 
   const next = withInferenceSpan(
     {
       name: 'chatComplete',
       ...attributes,
       [GenAISemanticConventions.GenAIOperationName]: 'chat',
-      [GenAISemanticConventions.GenAIResponseModel]: model ?? 'unknown',
-      [GenAISemanticConventions.GenAISystem]: provider ?? 'unknown',
+      [GenAISemanticConventions.GenAIResponseModel]: model?.family ?? 'unknown',
+      [GenAISemanticConventions.GenAISystem]: model?.provider ?? 'unknown',
       [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
     },
     (span) => {
@@ -184,7 +184,7 @@ export function withChatCompleteSpan(
           addEvent(span, event);
         });
 
-      const result = cb();
+      const result = cb(span);
 
       if (isObservable(result)) {
         return result.pipe(
