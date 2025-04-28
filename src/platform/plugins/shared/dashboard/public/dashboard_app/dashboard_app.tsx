@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SharedDashboardState } from '../../common/types';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
@@ -17,6 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { SharedDashboardState } from '../../common/types';
 import { DashboardApi, DashboardCreationOptions } from '..';
 import { DASHBOARD_APP_ID } from '../../common/constants';
 import { loadDashboardHistoryLocationState } from '../../common/locator/load_dashboard_history_location_state';

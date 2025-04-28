@@ -230,7 +230,7 @@ export const getLinksEmbeddableFactory = () => {
           const newState = await openEditorFlyout({
             initialState: {
               ...stateManager.getLatestState(),
-              savedObjectId
+              savedObjectId,
             },
             parentDashboard: parentApi,
           });

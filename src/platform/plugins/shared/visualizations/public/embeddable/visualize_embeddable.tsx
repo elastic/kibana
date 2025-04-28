@@ -444,12 +444,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
-        const [hideTitle, title, defaultTitle] =
-          useBatchedPublishingSubjects(
-            api.hideTitle$,
-            api.title$,
-            api.defaultTitle$
-          );
+        const [hideTitle, title, defaultTitle] = useBatchedPublishingSubjects(
+          api.hideTitle$,
+          api.title$,
+          api.defaultTitle$
+        );
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
         const errorTextStyle = useErrorTextStyle();
