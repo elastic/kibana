@@ -1,0 +1,74 @@
+import { fixOpenApiSpecIteratively, formatToolName, isOperation, OperationOrWebhook } from "./utils";
+
+describe("utils", () => {
+    describe("isOperation", () => {
+        it("returns true for operation", () => {
+            expect(isOperation({
+                isWebhook: () => false,
+            } as unknown as OperationOrWebhook)).toBe(true);
+        });
+
+        it("returns false webhook", () => {
+            expect(isOperation({
+                isWebhook: () => true,
+            } as unknown as OperationOrWebhook)).toBe(false);
+        });
+    });
+
+    describe("formatToolName", () => {
+        it.each([
+            ["tool name", "tool_name"],
+            ["tool/name", "tool_name"],
+            ["tool?name", "tool_name"],
+            ["tool  name", "tool__name"],
+            ["tool name ", "tool_name_"],
+        ])("formats tool name '%s' to '%s'", (input: string, expected: string) => {
+            expect(formatToolName(input)).toEqual(expected);
+        });
+    });
+
+    describe("fixOpenApiSpecIteratively", () => {
+        it("rectifies empty arrays", () => {
+            const input = {
+                type: "array",
+                items: {},
+            }
+
+            const expected = {
+                type: "array",
+                items: {
+                    anyOf: [
+                        { type: "string" },
+                        { type: "number" },
+                        { type: "boolean" },
+                        { type: "object" },
+                    ],
+                },
+            };
+
+            expect(fixOpenApiSpecIteratively(input)).toStrictEqual(expected);
+        });
+
+        it("does not rectify filled arrays", () => {
+            const input = {
+                type: "array",
+                items: {
+                    anyOf: [
+                        { type: "string" },
+                    ]
+                },
+            }
+
+            const expected = {
+                type: "array",
+                items: {
+                    anyOf: [
+                        { type: "string" },
+                    ],
+                },
+            };
+
+            expect(fixOpenApiSpecIteratively(input)).toStrictEqual(expected);
+        });
+    });
+})

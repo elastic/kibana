@@ -8,7 +8,7 @@
 import type Oas from 'oas';
 
 export type Operation = ReturnType<Oas['operation']>;
-type OperationOrWebhook = ReturnType<Oas['getOperationById']>;
+export type OperationOrWebhook = ReturnType<Oas['getOperationById']>;
 
 export const isOperation = (operation: OperationOrWebhook): operation is Operation => {
   return operation.isWebhook() === false;
