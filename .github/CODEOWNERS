@@ -1585,7 +1585,6 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/accessibility/apps/group2/ml_* @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
 /x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
-/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
 /x-pack/test/functional/apps/ml/  @elastic/ml-ui
 /x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
 /x-pack/test/functional/services/ml/  @elastic/ml-ui
@@ -1605,8 +1604,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
 /x-pack/platform/test/api_integration/apis/aiops/ @elastic/ml-ui
 /x-pack/platform/test/api_integration/apis/transform/ @elastic/ml-ui
-/x-pack/test/api_integration_basic/apis/aiops @elastic/ml-ui
-/x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
+/x-pack/platform/test/api_integration_basic/apis/aiops @elastic/ml-ui
+/x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration/services/aiops.ts @elastic/ml-ui
 /x-pack/test/api_integration/services/transform.ts @elastic/ml-ui
 /x-pack/test/functional/apps/aiops @elastic/ml-ui
@@ -1992,7 +1991,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/accessibility/apps/group1/spaces.ts @elastic/kibana-security
 /x-pack/test/accessibility/apps/group1/users.ts @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
+/x-pack/platform/test/api_integration/apis/security/ @elastic/kibana-security
 /x-pack/platform/test/api_integration/apis/spaces/ @elastic/kibana-security
+/x-pack/platform/test/api_integration_basic/apis/security/ @elastic/kibana-security
 /x-pack/test/ui_capabilities/ @elastic/kibana-security
 /x-pack/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
 /x-pack/test/functional/apps/security/ @elastic/kibana-security
