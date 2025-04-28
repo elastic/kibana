@@ -1,11 +1,18 @@
-import moment from "moment";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment from 'moment';
 
 const timestampRegex = /(\d{6}) (\d{6}) (\d{1,3})/;
 
 export function getTimestamp(logLine: string): number {
   const match = logLine.match(timestampRegex);
   if (!match) {
-    throw new Error("Invalid log line format");
+    throw new Error('Invalid log line format');
   }
 
   const [date, time, milliseconds] = match.slice(1);
@@ -23,25 +30,25 @@ export function getTimestamp(logLine: string): number {
 export function replaceTimestamp(logLine: string, timestamp: number): string {
   const match = logLine.match(timestampRegex);
   if (!match) {
-    throw new Error("Invalid log line format");
+    throw new Error('Invalid log line format');
   }
 
-  const date = moment.utc(timestamp).format("YYMMDD HHmmss");
+  const date = moment.utc(timestamp).format('YYMMDD HHmmss');
   const milliseconds = String(timestamp % 1000).padStart(3, '0');
 
   return logLine.replace(timestampRegex, `${date} ${milliseconds}`);
 }
 
 export function getFakeMetadata(logLine: string): object {
-  const hostNames = ["node1.example.com", "node2.example.com", "node3.example.com"];
-  const userNames = ["user1", "user2", "user3"];
-  const processNames = ["processA", "processB", "processC"];
+  const hostNames = ['node1.example.com', 'node2.example.com', 'node3.example.com'];
+  const userNames = ['user1', 'user2', 'user3'];
+  const processNames = ['processA', 'processB', 'processC'];
 
   return {
-    "host.name": hostNames[Math.floor(Math.random() * hostNames.length)],
-    "user.name": userNames[Math.floor(Math.random() * userNames.length)],
-    "process.name": processNames[Math.floor(Math.random() * processNames.length)],
-    "process.pid": Math.floor(Math.random() * 10000),
-    "kubernetes.pod.name": `pod-${Math.floor(Math.random() * 1000)}`,
+    'host.name': hostNames[Math.floor(Math.random() * hostNames.length)],
+    'user.name': userNames[Math.floor(Math.random() * userNames.length)],
+    'process.name': processNames[Math.floor(Math.random() * processNames.length)],
+    'process.pid': Math.floor(Math.random() * 10000),
+    'kubernetes.pod.name': `pod-${Math.floor(Math.random() * 1000)}`,
   };
 }

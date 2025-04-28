@@ -1,4 +1,11 @@
-import moment from "moment";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment from 'moment';
 
 const timestampRegex = /\[(\w{3}) (\w{3}) (\d{2}) (\d{2}:\d{2}:\d{2}) (\d{4})\]/;
 
@@ -29,14 +36,14 @@ export function getFakeMetadata(logLine: string): object {
 
   return {
     host: {
-      name: hostNames[Math.floor(Math.random() * hostNames.length)]
+      name: hostNames[Math.floor(Math.random() * hostNames.length)],
     },
     user: {
-      name: userNames[Math.floor(Math.random() * userNames.length)]
+      name: userNames[Math.floor(Math.random() * userNames.length)],
     },
     process: {
       name: processNames[Math.floor(Math.random() * processNames.length)],
-      pid: Math.floor(Math.random() * 10000)
-    }
+      pid: Math.floor(Math.random() * 10000),
+    },
   };
 }
