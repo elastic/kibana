@@ -50,7 +50,8 @@ import { dataService } from '../services/kibana_services';
 import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { DashboardCreationOptions, DashboardState } from './types';
+import { DashboardCreationOptions } from './types';
+import { DashboardState } from '../../common';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,

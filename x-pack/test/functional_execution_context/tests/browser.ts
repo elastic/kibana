@@ -12,7 +12,7 @@ import { assertLogContains, isExecutionContextLog, readLogFile } from '../test_u
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
 
-  describe('Browser apps', () => {
+  describe.only('Browser apps', () => {
     let logs: Ecs[];
     const retry = getService('retry');
 

@@ -8,8 +8,9 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import { DashboardState } from '../../common';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { DashboardCreationOptions, DashboardState } from './types';
+import { DashboardCreationOptions } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { coreServices } from '../services/kibana_services';

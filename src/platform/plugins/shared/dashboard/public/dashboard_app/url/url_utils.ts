@@ -16,10 +16,12 @@ import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { serializeRuntimeState } from '@kbn/controls-plugin/public';
-import { DashboardPanelMap, convertPanelsArrayToPanelMap } from '../../../common';
+import { convertPanelsArrayToPanelMap } from '../../../common/lib/dashboard_panel_converters';
+import type { DashboardState, SharedDashboardState } from '../../../common/types';
+import type { DashboardPanelMap } from '../../../common/dashboard_container/types';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
-import { DashboardApi, DashboardState, SharedDashboardState } from '../../dashboard_api/types';
+import { DashboardApi } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';

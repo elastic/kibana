@@ -18,7 +18,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions } from '..';
-import { DASHBOARD_APP_ID } from '../plugin_constants';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
   coreServices,
@@ -30,7 +30,7 @@ import {
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
-import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
+import { loadDashboardHistoryLocationState } from '../../common/locator/load_dashboard_history_location_state';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -46,7 +46,7 @@ import {
 import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
-import { SharedDashboardState } from '../dashboard_api/types';
+import { SharedDashboardState } from '../../common';
 
 export interface DashboardAppProps {
   history: History;

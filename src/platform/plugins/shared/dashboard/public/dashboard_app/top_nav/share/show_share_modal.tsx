@@ -19,13 +19,13 @@ import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { convertPanelMapToPanelsArray } from '../../../../common';
+import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { coreServices, dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
-import { DashboardLocatorParams, SharedDashboardState } from '../../../dashboard_api/types';
+import type { DashboardLocatorParams, SharedDashboardState } from '../../../../common';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 
 const showFilterBarId = 'showFilterBar';

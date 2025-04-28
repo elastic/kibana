@@ -16,7 +16,7 @@ import { set } from '@kbn/safer-lodash-set';
 
 import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 import { coreServices, spacesService } from './kibana_services';
-import { DashboardState } from '../dashboard_api/types';
+import { DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from '../dashboard_api/default_dashboard_state';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';

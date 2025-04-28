@@ -33,7 +33,8 @@ import { filter, map as lodashMap, max } from 'lodash';
 import { BehaviorSubject, Observable, merge, map, combineLatestWith, debounceTime } from 'rxjs';
 import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
-import { DashboardPanelMap, prefixReferencesFromPanel } from '../../common';
+import { DashboardPanelMap, DashboardState } from '../../common';
+import { prefixReferencesFromPanel } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
@@ -51,7 +52,6 @@ import {
   DashboardChildren,
   DashboardLayout,
   DashboardLayoutItem,
-  DashboardState,
 } from './types';
 
 export function initializePanelsManager(

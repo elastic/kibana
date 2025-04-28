@@ -15,7 +15,7 @@ import {
   titleComparators,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
-import { DashboardSettings, DashboardState } from './types';
+import { DashboardSettings, DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
 // SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
