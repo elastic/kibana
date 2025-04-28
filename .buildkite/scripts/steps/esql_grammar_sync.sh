@@ -76,6 +76,9 @@ main () {
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
 
+  cd "$PARENT_DIR/elasticsearch"
+  git checkout 8.19
+
   cd "$KIBANA_DIR"
 
   license_header=$(cat "$KIBANA_DIR/licenses/ELASTIC-LICENSE-2.0-HEADER.txt")
@@ -136,7 +139,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base 8.19 --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
 }
 
 main
