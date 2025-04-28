@@ -13,13 +13,13 @@ import { PackageNotFoundError } from '../../../errors';
 
 import { dataStreamService } from '../../data_streams';
 
-import { getInstalledPackageWithAssets } from './get';
+import { getInstalledPackageWithAssets, getInstallation } from './get';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import {
   installAssetsForInputPackagePolicy,
   removeAssetsForInputPackagePolicy,
 } from './input_type_packages';
-import { removeInstallation } from './remove';
+import { cleanupAssets } from './remove';
 
 jest.mock('../../data_streams');
 jest.mock('./get');
@@ -27,9 +27,7 @@ jest.mock('./install_index_template_pipeline');
 jest.mock('./es_assets_reference');
 jest.mock('./remove');
 
-const removeInstallationsMock = removeInstallation as jest.MockedFunction<
-  typeof removeInstallation
->;
+const cleanupAssetsMock = cleanupAssets as jest.MockedFunction<typeof cleanupAssets>;
 
 jest.mock('../../app_context', () => {
   const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
@@ -151,7 +149,7 @@ describe('installAssetsForInputPackagePolicy', () => {
 
 describe('removeAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
-    jest.mocked(removeInstallationsMock).mockReset();
+    jest.mocked(cleanupAssetsMock).mockReset();
   });
 
   it('should do nothing for non input package', async () => {
@@ -164,7 +162,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(removeInstallationsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toBeCalled();
   });
 
   it('should do nothing for input packages with status !== than installed', async () => {
@@ -178,11 +176,16 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(removeInstallationsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toBeCalled();
   });
 
-  it('should remove installation for input packages with status = installed', async () => {
+  it('should clean up assets for input packages with status = installed', async () => {
     const mockedLogger = jest.mocked(appContextService.getLogger());
+    jest.mocked(getInstallation).mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+    } as any);
+
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
         type: 'input',
@@ -194,17 +197,17 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(removeInstallationsMock).toBeCalledWith({
-      esClient: expect.anything(),
-      savedObjectsClient: expect.anything(),
-      pkgName: 'logs',
-      pkgVersion: '1.0.0',
-    });
+    expect(cleanupAssetsMock).toBeCalledWith(
+      { name: 'logs', version: '1.0.0' },
+      expect.anything(),
+      expect.anything()
+    );
   });
 
-  it('should log error if removeInstallation failed', async () => {
+  it('should not clean up assets for input packages with status not installed', async () => {
     const mockedLogger = jest.mocked(appContextService.getLogger());
-    removeInstallationsMock.mockRejectedValueOnce('error');
+    jest.mocked(getInstallation).mockResolvedValue(undefined);
+
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
         type: 'input',
@@ -216,6 +219,29 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(cleanupAssetsMock).not.toBeCalled();
+  });
+
+  it('should log error if cleanupAssets failed', async () => {
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+    jest.mocked(getInstallation).mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+    } as any);
+
+    cleanupAssetsMock.mockRejectedValueOnce('error');
+
+    await removeAssetsForInputPackagePolicy({
+      packageInfo: {
+        type: 'input',
+        status: 'installed',
+        name: 'logs',
+        version: '1.0.0',
+      } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      logger: mockedLogger,
+    });
+    expect(mockedLogger.error).toBeCalled();
   });
 });
