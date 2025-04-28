@@ -1,6 +1,6 @@
 name: Evaluate Dependency Health Score
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
     branches:
