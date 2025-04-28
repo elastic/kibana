@@ -82,7 +82,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexLifecycleManagement: `${OBSERVABILITY_DOCS}apm-ilm-how-to.html`,
     },
     canvas: {
-      guide: `${KIBANA_DOCS}canvas.html`,
+      guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
     },
     cloud: {
       beatsAndLogstashConfiguration: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-cloud-id.html`,
@@ -95,19 +95,19 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       serverlessGuide: `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`,
     },
     dashboard: {
-      guide: `${KIBANA_DOCS}dashboard.html`,
-      drilldowns: `${KIBANA_DOCS}drilldowns.html`,
-      drilldownsTriggerPicker: `${KIBANA_DOCS}drilldowns.html#create-url-drilldowns`,
-      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}drilldowns.html#url-templating-language`,
-      urlDrilldownVariables: `${KIBANA_DOCS}drilldowns.html#url-template-variable`,
+      guide: `${ELASTIC_DOCS}explore-analyze/dashboards`,
+      drilldowns: `${ELASTIC_DOCS}explore-analyze/dashboards/drilldowns`,
+      drilldownsTriggerPicker: `${ELASTIC_DOCS}explore-analyze/dashboards/drilldowns#create-url-drilldowns`,
+      urlDrilldownTemplateSyntax: `${ELASTIC_DOCS}explore-analyze/dashboards/drilldowns#url-templating-language`,
+      urlDrilldownVariables: `${ELASTIC_DOCS}explore-analyze/dashboards/drilldowns#url-template-variable`,
     },
     discover: {
-      guide: `${KIBANA_DOCS}discover.html`,
-      fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
-      fieldTypeHelp: `${ELASTICSEARCH_DOCS}mapping-types.html`,
-      dateFieldTypeDocs: `${ELASTICSEARCH_DOCS}date.html`,
-      dateFormatsDocs: `${ELASTICSEARCH_DOCS}mapping-date-format.html`,
-      documentExplorer: `${KIBANA_DOCS}document-explorer.html`,
+      guide: `${ELASTIC_DOCS}explore-analyze/discover`,
+      fieldStatistics: `${ELASTIC_DOCS}explore-analyze/discover/show-field-statistics`,
+      fieldTypeHelp: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/field-data-types`,
+      dateFieldTypeDocs: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/date`,
+      dateFormatsDocs: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/mapping-date-format`,
+      documentExplorer: `${ELASTIC_DOCS}explore-analyze/discover/document-explorer`,
     },
     filebeat: {
       base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
@@ -563,12 +563,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       alertingRules: `${ELASTIC_DOCS}explore-analyze/transforms/transform-alerts`,
     },
     visualize: {
-      guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
+      guide: `${ELASTIC_DOCS}explore-analyze/visualize`,
       lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
-      lensPanels: `${KIBANA_DOCS}lens.html`,
+      lensPanels: `${ELASTIC_DOCS}explore-analyze/visualize/lens`,
       maps: `${ELASTIC_WEBSITE_URL}maps`,
-      vega: `${KIBANA_DOCS}vega.html`,
-      tsvbIndexPatternMode: `${KIBANA_DOCS}legacy-editors.html#tsvb-index-patterns-mode`,
+      vega: `${ELASTIC_DOCS}explore-analyze/visualize/custom-visualizations-with-vega`,
+      tsvbIndexPatternMode: `${ELASTIC_DOCS}explore-analyze/visualize/legacy-editors/tsvb#tsvb-data-view-mode`,
     },
     observability: {
       guide: isServerless
@@ -649,11 +649,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       healthMonitoring: `${ELASTIC_DOCS}deploy-manage/monitor/kibana-task-manager-health-monitoring`,
     },
     maps: {
-      connectToEms: `${KIBANA_DOCS}maps-connect-to-ems.html`,
-      guide: isServerless ? `${SERVERLESS_DOCS}maps.html` : `${KIBANA_DOCS}maps.html`,
-      importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
+      connectToEms: `${ELASTIC_DOCS}explore-analyze/visualize/maps/maps-connect-to-ems`,
+      guide: `${ELASTIC_DOCS}explore-analyze/visualize/maps`,
+      importGeospatialPrivileges: `${ELASTIC_DOCS}explore-analyze/visualize/maps/import-geospatial-data#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
-      termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
+      termJoinsExample: `${ELASTIC_DOCS}explore-analyze/visualize/maps/terms-join#_example_term_join`,
     },
     monitoring: {
       alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
