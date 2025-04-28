@@ -14,8 +14,8 @@ import type { PresentationContainer } from '@kbn/presentation-containers';
 import {
   initializeTimeRange,
   initializeTitleManager,
-  useBatchedPublishingSubjects,
   useFetchContext,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -93,7 +93,7 @@ export const getAlertsTableEmbeddableFactory = (
       api,
       Component: () => {
         const { timeRange: selectedTimeRange } = useFetchContext(api);
-        const [tableConfig] = useBatchedPublishingSubjects(tableConfig$);
+        const tableConfig = useStateFromPublishingSubject(tableConfig$);
 
         return (
           <KibanaContextProvider services={services}>
