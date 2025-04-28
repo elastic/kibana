@@ -21,7 +21,11 @@ const unitMap = new Map([
 
 export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) => {
   if (!dateString) return;
-  const match = dateString.match(/^now([+-]\d+)([smhdwMy])$/);
+
+  const mathPart = dateString.split('/')[0]; // Ignore rounding part for matching
+  const roundingPart = dateString.includes('/') ? dateString.split('/')[1] : undefined;
+
+  const match = mathPart.match(/^now([+-]\d+)([smhdwMy])$/);
   if (!match) return;
 
   const [, signAndNumber, unit] = match;
@@ -29,6 +33,7 @@ export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) =
   return {
     value: Number(signAndNumber),
     unit: unitMap.get(unit),
+    roundingUnit: roundingPart ? unitMap.get(roundingPart) : undefined,
   };
 };
 

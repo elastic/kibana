@@ -56,13 +56,30 @@ const AbsoluteTimeText = ({ date }: { date: string }) => {
   );
 };
 
-const RelativeTimeText = ({ value, unit }: { value?: number; unit?: string }) => (
+const RelativeTimeText = ({
+  value,
+  unit,
+  roundingUnit,
+}: {
+  value?: number;
+  unit?: string;
+  roundingUnit?: string;
+}) => (
   <BoldText>
     <FormattedRelativeTime
       value={value}
       // @ts-expect-error - RelativeTimeFormatSingularUnit expected here is not exported so a cast from string is not possible
       unit={unit}
     />
+    {roundingUnit && (
+      <FormattedMessage
+        id="share.link.timeRange.relativeTimeInfoText.roundingUnit"
+        defaultMessage=" rounded to the {roundingUnit}"
+        values={{
+          roundingUnit,
+        }}
+      />
+    )}
   </BoldText>
 );
 
@@ -72,10 +89,7 @@ interface TimeRange {
 }
 
 interface Props {
-  timeRange?: {
-    from: string;
-    to: string;
-  };
+  timeRange?: TimeRange;
   isAbsoluteTime: boolean;
   changeTimeType: (e: EuiSwitchEvent) => void;
 }
@@ -92,7 +106,9 @@ const getRelativeTimeText = (timeRange: TimeRange) => {
           id="share.link.timeRange.relativeTimeInfoText.fromNow"
           defaultMessage="The users will see all data from <bold>now</bold> to {to}, based on when they view it."
           values={{
-            to: <RelativeTimeText value={to?.value} unit={to?.unit} />,
+            to: (
+              <RelativeTimeText value={to?.value} unit={to?.unit} roundingUnit={to?.roundingUnit} />
+            ),
             bold: (chunks) => <BoldText>{chunks}</BoldText>,
           }}
         />
@@ -107,7 +123,13 @@ const getRelativeTimeText = (timeRange: TimeRange) => {
           id="share.link.timeRange.relativeTimeInfoText"
           defaultMessage="The users will see all data from {from} to <bold>now</bold>, based on when they view it."
           values={{
-            from: <RelativeTimeText value={from?.value} unit={from?.unit} />,
+            from: (
+              <RelativeTimeText
+                value={from?.value}
+                unit={from?.unit}
+                roundingUnit={from?.roundingUnit}
+              />
+            ),
             bold: (chunks) => <BoldText>{chunks}</BoldText>,
           }}
         />
@@ -121,8 +143,16 @@ const getRelativeTimeText = (timeRange: TimeRange) => {
         id="share.link.timeRange.relativeTimeInfoText.default"
         defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
         values={{
-          from: <RelativeTimeText value={from?.value} unit={from?.unit} />,
-          to: <RelativeTimeText value={to?.value} unit={to?.unit} />,
+          from: (
+            <RelativeTimeText
+              value={from?.value}
+              unit={from?.unit}
+              roundingUnit={from?.roundingUnit}
+            />
+          ),
+          to: (
+            <RelativeTimeText value={to?.value} unit={to?.unit} roundingUnit={to?.roundingUnit} />
+          ),
         }}
       />
     </div>

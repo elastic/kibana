@@ -30,10 +30,10 @@ describe('TimeTypeSection', () => {
     jest
       .spyOn(timeUtils, 'getRelativeTimeValueAndUnitFromTimeString')
       .mockImplementation((time) => {
-        if (time === 'now') return { value: 0, unit: 'second' };
-        if (time === 'now-1m') return { value: -1, unit: 'minute' };
-        if (time === 'now-30m') return { value: -30, unit: 'minute' };
-        return { value: 0, unit: 'second' };
+        if (time === 'now') return { value: 0, unit: 'second', roundingUnit: undefined };
+        if (time === 'now-1m') return { value: -1, unit: 'minute', roundingUnit: undefined };
+        if (time === 'now-30m') return { value: -30, unit: 'minute', roundingUnit: undefined };
+        return { value: 0, unit: 'second', roundingUnit: undefined };
       });
     jest.spyOn(timeUtils, 'isTimeRangeAbsoluteTime').mockReturnValue(false);
   });

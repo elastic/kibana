@@ -46,6 +46,20 @@ describe('Time Utils', () => {
       const result = getRelativeTimeValueAndUnitFromTimeString(date);
       expect(result).toBeUndefined();
     });
+
+    it('returns rounding unit if its valid', () => {
+      const date = 'now-1m/h';
+
+      const result = getRelativeTimeValueAndUnitFromTimeString(date);
+      expect(result).toEqual({ value: -1, unit: 'minute', roundingUnit: 'hour' });
+    });
+
+    it('returns undefined for invalid rounding unit', () => {
+      const date = 'now-1m/invalid-unit';
+
+      const result = getRelativeTimeValueAndUnitFromTimeString(date);
+      expect(result).toEqual({ value: -1, unit: 'minute', roundingUnit: undefined });
+    });
   });
 
   describe('convertRelativeTimeStringToAbsoluteTimeDate', () => {
