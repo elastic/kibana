@@ -112,9 +112,7 @@ xpack.features.overrides:
   observabilityAIAssistant:
     name: "AI Assistant"
     category: "enterpriseSearch"
-  ### AI Assistant enables the Inventory feature, moving to Search
-  inventory:
-    category: "enterpriseSearch"
+
   ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
   visualize:
     ### The short URL sub-feature privilege should be always granted.
