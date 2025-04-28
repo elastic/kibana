@@ -7750,6 +7750,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/upgrade-assistant@link:x-pack/platform/packages/private/upgrade-assistant":
+  version "0.0.0"
+  uid ""
+
 "@kbn/uptime-plugin@link:x-pack/solutions/observability/plugins/uptime":
   version "0.0.0"
   uid ""
