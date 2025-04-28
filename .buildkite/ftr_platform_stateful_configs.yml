@@ -9,6 +9,7 @@ disabled:
   - src/platform/test/server_integration/config.base.js
   - x-pack/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
+  - x-pack/platform/test/api_integration/config.ts
   - x-pack/test/fleet_api_integration/config.base.ts
   - x-pack/test/functional_basic/apps/ml/config.base.ts
   - x-pack/test/functional_basic/apps/transform/config.base.ts
@@ -153,29 +154,17 @@ enabled:
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/content_management/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
-  - x-pack/test/api_integration/apis/es/config.ts
-  - x-pack/test/api_integration/apis/features/config.ts
-  - x-pack/test/api_integration/apis/file_upload/config.ts
-  - x-pack/test/api_integration/apis/grok_debugger/config.ts
-  - x-pack/test/api_integration/apis/kibana/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
-  - x-pack/test/api_integration/apis/logs_ui/config.ts
   - x-pack/test/api_integration/apis/logstash/config.ts
   - x-pack/test/api_integration/apis/management/config.ts
   - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/test/api_integration/apis/maps/config.ts
-  - x-pack/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/test/api_integration/apis/ml/config.ts
   - x-pack/test/api_integration/apis/monitoring/config.ts
-  - x-pack/test/api_integration/apis/monitoring_collection/config.ts
-  - x-pack/test/api_integration/apis/osquery/config.ts
   - x-pack/test/api_integration/apis/search/config.ts
-  - x-pack/test/api_integration/apis/searchprofiler/config.ts
+  - x-pack/test/api_integration/apis/search_playground/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
-  - x-pack/test/api_integration/apis/stats/config.ts
-  - x-pack/test/api_integration/apis/status/config.ts
-  - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
   - x-pack/test/api_integration/apis/transform/config.ts
   - x-pack/test/api_integration/apis/upgrade_assistant/config.ts
@@ -388,3 +377,13 @@ enabled:
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
   - x-pack/test/api_integration/apis/cloud/config.ts
   - x-pack/test/api_integration/apis/cloud/saml.config.ts
+  # configs migrated to the new Kibana architecture
+  - x-pack/platform/test/api_integration/apis/features/config.ts
+  - x-pack/platform/test/api_integration/apis/es/config.ts
+  - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
+  - x-pack/platform/test/api_integration/apis/file_upload/config.ts
+  - x-pack/platform/test/api_integration/apis/kibana/config.ts
+  - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
+  - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
+  - x-pack/platform/test/api_integration/apis/stats/config.ts
+  - x-pack/platform/test/api_integration/apis/status/config.ts
