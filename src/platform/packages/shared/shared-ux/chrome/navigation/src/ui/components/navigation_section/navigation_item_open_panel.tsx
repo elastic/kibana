@@ -48,8 +48,12 @@ const panelOpenerStyles = {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
       }
 
-      &.hasIcon {
-        margin-left: -2px;
+      /* get the spacing of panel opener's title and icons to match the spacing from other nav subitems */
+      .panelIcon {
+        margin-left: -${euiTheme.size.xxs};
+      }
+      .hasIcon {
+        padding-left: calc(${euiTheme.size.xxs} / 2);
       }
     `,
   flexGroup: ({ euiTheme }: Theme) => css`
@@ -97,20 +101,19 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       iconType="arrowRight"
       size="s"
       fullWidth
-      className={classNames([
-        icon ? 'hasIcon' : undefined,
-        isSelected ? 'isSelected' : isExpanded ? 'isExpanded' : undefined,
-      ])}
+      className={classNames([isSelected ? 'isSelected' : isExpanded ? 'isExpanded' : undefined])}
       css={panelOpenerStyles.button}
       data-test-subj={dataTestSubj}
     >
       <EuiFlexGroup gutterSize="none" alignItems="center" css={panelOpenerStyles.flexGroup}>
         {icon && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="panelIcon">
             <EuiIcon type={icon} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+        <EuiFlexItem grow={false} className={classNames([icon && 'hasIcon'])}>
+          {title}
+        </EuiFlexItem>
         {withBadge && (
           <EuiFlexItem grow={false}>
             <SubItemBadge icon={badgeOptions?.icon} tooltip={badgeOptions?.tooltip} />
