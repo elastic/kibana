@@ -137,7 +137,6 @@ export const PresentationPanelTitle = ({
                 </span>
               </EuiScreenReaderOnly>
               {panelTitleElement}
-              {/* Removed space that was breaking the layout.*/}
             </h2>
           ) : null}
           <EuiIcon
