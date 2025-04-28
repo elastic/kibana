@@ -17,7 +17,7 @@ import { useElasticsearchUrl } from './use_elasticsearch_url';
 import { AvailableLanguages, Languages } from '../code_examples';
 import { SearchCodeExample } from '../code_examples/search';
 
-const DEFAULT_QUERY_STRING = 'Your query';
+const DEFAULT_QUERY_STRING = 'REPLACE WITH YOUR QUERY';
 const DEFAULT_QUERY_OBJECT = {
   retriever: {
     standard: {
