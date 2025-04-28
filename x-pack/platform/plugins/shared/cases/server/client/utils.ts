@@ -29,6 +29,7 @@ import type {
   TemplatesConfiguration,
   ListCustomFieldConfiguration,
 } from '../../common/types/domain';
+import { CustomFieldTypes } from '../../common/types/domain';
 import {
   CustomFieldTypes,
   ActionsAttachmentPayloadRt,
