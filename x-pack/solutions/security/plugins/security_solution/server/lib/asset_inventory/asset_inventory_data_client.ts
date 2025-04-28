@@ -176,7 +176,7 @@ export class AssetInventoryDataClient {
 
     // Determine the asset inventory status based on the entity engine status
     if (entityEngineStatus === 'not_installed') {
-      return { status: ASSET_INVENTORY_STATUS.NOT_INSTALLED };
+      return { status: ASSET_INVENTORY_STATUS.DISABLED };
     }
     if (entityEngineStatus === 'installing') {
       return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
