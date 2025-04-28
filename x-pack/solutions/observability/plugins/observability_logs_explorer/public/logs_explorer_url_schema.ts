@@ -6,19 +6,32 @@
  */
 
 import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
-import { Filter } from '@kbn/es-query';
-
-interface Column {
-  field: string;
-  type: string;
-}
+import { DiscoverAppState } from '@kbn/discover-plugin/public';
+import { SMART_FALLBACK_FIELDS } from '@kbn/discover-utils';
+import { ExistsFilter, Filter, PhrasesFilter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
+import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
+import type {
+  Column,
+  DataSourceSelectionPlain,
+  DataViewSelectionPayload,
+  SingleDatasetSelectionPayload,
+  UnresolvedDatasetSelectionPayload,
+  DataViewSpecWithId,
+  UrlSchemaV1,
+  UrlSchemaV2,
+  ControlsState,
+  DisplayOptions,
+  OptionsListControl,
+  ControlOptions,
+} from './logs_explorer_schema_types';
 
 export interface LogsExplorerPublicState {
   chart?: {
     breakdownField?: string | null;
   };
   controls?: ControlsState;
-  dataSourceSelection?: DataSourceSelection;
+  dataSourceSelection?: DataSourceSelectionPlain;
   filters?: Filter[];
   grid?: {
     columns?: Column[];
@@ -32,53 +45,50 @@ export interface LogsExplorerPublicState {
   time?: TimeRange;
 }
 
-interface BaseUrlSchema {
-  breakdownField?: string | null;
-  columns?: Column[];
-  filters?: Filter[];
-  query?: Query;
-  refreshInterval?: RefreshInterval;
-  rowHeight?: number;
-  rowsPerPage?: number;
-  time?: TimeRange;
-  controls?: ControlsState;
-}
+export const hydrateDataSourceSelection = (
+  dataSourceSelection: DataSourceSelectionPlain,
+  allSelection: { selectionType: 'all' }
+): DataViewSpecWithId => {
+  if (dataSourceSelection.selectionType === 'all') {
+    return {
+      id: 'discover-observability-solution-all-logs',
+      name: 'All logs',
+      title: 'logs-*,dataset-logs-*-*',
+      timeFieldName: '@timestamp',
+    };
+  } else if (dataSourceSelection.selectionType === 'single' && dataSourceSelection.selection) {
+    const selection = dataSourceSelection.selection as SingleDatasetSelectionPayload;
+    return {
+      id: `dataset-${selection.dataset.name}`,
+      name: selection.title || selection.dataset.name,
+      title: selection.dataset.indexPattern || selection.dataset.name,
+      timeFieldName: '@timestamp',
+    };
+  } else if (dataSourceSelection.selectionType === 'dataView' && dataSourceSelection.selection) {
+    const selection = dataSourceSelection.selection as DataViewSelectionPayload;
+    return {
+      id: selection.dataView.id,
+      name: selection.dataView.title,
+      title: selection.dataView.indexPattern || selection.dataView.title,
+      timeFieldName: '@timestamp',
+    };
+  } else if (dataSourceSelection.selectionType === 'unresolved' && dataSourceSelection.selection) {
+    const selection = dataSourceSelection.selection as UnresolvedDatasetSelectionPayload;
+    return {
+      id: `dataset-${selection.dataset.name}`,
+      name: selection.name || selection.dataset.name,
+      title: selection.dataset.indexPattern || selection.dataset.name,
+      timeFieldName: '@timestamp',
+    };
+  }
 
-export interface UrlSchemaV1 extends BaseUrlSchema {
-  v?: 1;
-  datasetSelection?: DataSourceSelection;
-}
-
-export interface UrlSchemaV2 extends BaseUrlSchema {
-  v?: 2;
-  dataSourceSelection?: DataSourceSelection;
-}
-
-export interface ControlsState {
-  namespace?: {
-    mode: 'exclude' | 'include';
-    selection: FilterSelection;
+  return {
+    id: 'discover-observability-solution-all-logs',
+    name: 'All logs',
+    title: 'logs-*,dataset-logs-*-*',
+    timeFieldName: '@timestamp',
   };
-}
-
-export type FilterSelection = { type: 'exists' } | { type: 'options'; selectedOptions: string[] };
-
-export type DataSourceSelection =
-  | { selectionType: 'all' }
-  | { selectionType: 'dataView'; selection: { dataView: unknown } }
-  | { selectionType: 'single'; selection: SingleDatasetSelection }
-  | { selectionType: 'unresolved'; selection: UnresolvedDatasetSelection };
-
-interface SingleDatasetSelection {
-  name?: string;
-  title?: string;
-  version?: string;
-  dataset: Record<string, unknown>;
-}
-
-interface UnresolvedDatasetSelection {
-  dataset: Record<string, unknown>;
-}
+};
 
 export const normalizeUrlState = (input: unknown): LogsExplorerPublicState | null => {
   try {
@@ -110,7 +120,7 @@ const normalizeVersions = (schema: UrlSchemaV1 | UrlSchemaV2): UrlSchemaV2 => {
 };
 
 const convertToPublicState = (schema: UrlSchemaV2): LogsExplorerPublicState => ({
-  chart: { breakdownField: schema.breakdownField },
+  chart: schema.breakdownField ? { breakdownField: schema.breakdownField } : undefined,
   controls: schema.controls,
   dataSourceSelection: schema.dataSourceSelection,
   filters: schema.filters,
@@ -125,3 +135,95 @@ const convertToPublicState = (schema: UrlSchemaV2): LogsExplorerPublicState => (
   refreshInterval: schema.refreshInterval,
   time: schema.time,
 });
+
+export const getDiscoverColumnsWithFallbackFieldsFromDisplayOptions = (
+  displayOptions: DisplayOptions
+): DiscoverAppState['columns'] =>
+  displayOptions?.grid.columns?.flatMap((column) => {
+    if (column.type === 'document-field' && column.field) {
+      return column.field;
+    } else if (column.type === 'smart-field' && column.smartField) {
+      return SMART_FALLBACK_FIELDS[column.smartField].fallbackFields;
+    }
+    return [];
+  });
+
+const createDiscoverPhrasesFilter = ({
+  key,
+  values,
+  negate,
+  index,
+}: {
+  index: string;
+  key: string;
+  values: PhraseFilterValue[];
+  negate?: boolean;
+}): PhrasesFilter => ({
+  meta: {
+    index,
+    type: FILTERS.PHRASES,
+    key,
+    params: values.map((value) => value.toString()),
+    negate,
+  },
+  query: {
+    bool: {
+      should: values.map((value) => ({ match_phrase: { [key]: value.toString() } })),
+      minimum_should_match: 1,
+    },
+  },
+});
+
+const createDiscoverExistsFilter = ({
+  index,
+  key,
+  negate,
+}: {
+  key: string;
+  index: string;
+  negate?: boolean;
+}): ExistsFilter => ({
+  meta: {
+    index,
+    type: FILTERS.EXISTS,
+    value: FILTERS.EXISTS,
+    key,
+    negate,
+  },
+  query: { exists: { field: key } },
+});
+
+export const getDiscoverFiltersFromState = (
+  index: string,
+  filters: Filter[] = [],
+  controls?: ControlOptions
+) => {
+  return [
+    ...filters,
+    ...(controls
+      ? (Object.entries(controls) as Array<[keyof ControlOptions, OptionsListControl]>).reduce<
+          Filter[]
+        >((acc, [key, control]) => {
+          if (control.selection.type === 'exists') {
+            acc.push(
+              createDiscoverExistsFilter({
+                index,
+                key,
+                negate: control.mode === 'exclude',
+              })
+            );
+          } else if (control.selection.selectedOptions.length > 0) {
+            acc.push(
+              createDiscoverPhrasesFilter({
+                index,
+                key,
+                values: control.selection.selectedOptions,
+                negate: control.mode === 'exclude',
+              })
+            );
+          }
+          return acc;
+        }, [])
+      : []),
+  ];
+};

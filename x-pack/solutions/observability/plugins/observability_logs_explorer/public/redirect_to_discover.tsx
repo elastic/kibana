@@ -13,7 +13,15 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { safeDecode } from '@kbn/rison';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { normalizeUrlState } from './logs_explorer_url_schema';
+import {
+  normalizeUrlState,
+  hydrateDataSourceSelection,
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
+  getDiscoverFiltersFromState,
+} from './logs_explorer_url_schema';
+import { DisplayOptions } from './logs_explorer_schema_types';
+
+const DEFAULT_ALL_SELECTION = { selectionType: 'all' as const };
 
 export const renderDiscoverRedirect = (
   core: CoreStart,
@@ -43,17 +51,22 @@ export const DiscoverRedirect = ({
   const searchParams = new URLSearchParams(location.search);
   const pageStateEncoded = searchParams.get('pageState') || '';
   const rawPageState = safeDecode(pageStateEncoded) || {};
-
   const parsedState = normalizeUrlState(rawPageState);
-
   if (parsedState) {
+    const dataViewSpec = parsedState.dataSourceSelection
+      ? hydrateDataSourceSelection(parsedState.dataSourceSelection, DEFAULT_ALL_SELECTION)
+      : hydrateDataSourceSelection(DEFAULT_ALL_SELECTION, DEFAULT_ALL_SELECTION);
+
     const discoverParams: DiscoverAppLocatorParams = {
+      indexPatternId: dataViewSpec.id,
       timeRange: parsedState.time,
       refreshInterval: parsedState.refreshInterval,
-      filters: parsedState.filters,
+      filters: getDiscoverFiltersFromState(dataViewSpec.id, parsedState.filters),
       query: parsedState.query,
       breakdownField: parsedState.chart?.breakdownField ?? undefined,
-      columns: parsedState.grid?.columns?.map((column) => column.field),
+      columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(
+        parsedState as DisplayOptions
+      ),
       grid: {
         rowHeight: parsedState.grid?.rows?.rowHeight,
         rowsPerPage: parsedState.grid?.rows?.rowsPerPage,
