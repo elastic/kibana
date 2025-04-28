@@ -10,7 +10,11 @@ import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  BulkUpdateTaskResult,
+  Frequency,
+} from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
@@ -251,7 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
       const dailyTask = await scheduleTask({
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
-        schedule: { rrule: { freq: 3, tzid: 'UTC', interval: 1 } },
+        schedule: { rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 } },
         params: {},
       });
 
@@ -276,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
         schedule: {
-          rrule: { freq: 3, tzid: 'UTC', interval: 1, byhour: [15], byminute: [27] },
+          rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1, byhour: [15], byminute: [27] },
         },
         params: {},
       });
@@ -302,7 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
           taskType: 'sampleRecurringTask',
           schedule: {
             rrule: {
-              freq: 3,
+              freq: Frequency.DAILY,
               interval: 1,
               byhour: [30], // invalid
               byminute: [27],
