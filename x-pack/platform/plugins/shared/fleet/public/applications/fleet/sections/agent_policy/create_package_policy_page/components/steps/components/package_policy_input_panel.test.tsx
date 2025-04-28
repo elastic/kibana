@@ -464,6 +464,8 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isServerless: false,
+        isCloud: true,
       });
     });
 
@@ -497,6 +499,8 @@ describe('PackagePolicyInputPanel', () => {
         isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isServerless: false,
+        isCloud: false,
       });
     });
 
