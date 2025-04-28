@@ -10156,6 +10156,11 @@
     "@statoscope/types" "5.28.1"
     "@types/md5" "^2.3.2"
 
+"@std-uritemplate/std-uritemplate@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@std-uritemplate/std-uritemplate/-/std-uritemplate-2.0.3.tgz#cb84f412f7855d324da17af05990a8d0da9867e7"
+  integrity sha512-oN5BHB81TMdasLZLkcdmVDFajo3CxrdeYWFKbeVw1MVZcd4jWZX6cbxm0Iq91wt/o2zsJjmefUaYrLInvZ3/DQ==
+
 "@storybook/addon-a11y@^8.6.3":
   version "8.6.3"
   resolved "https://registry.yarnpkg.com/@storybook/addon-a11y/-/addon-a11y-8.6.3.tgz#f017e9183138be2dddc88172b43e4b275a39f282"
@@ -25378,11 +25383,6 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-pct-encode@~1.0.0:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/pct-encode/-/pct-encode-1.0.3.tgz#27c35c1e7b009ac30fff4c487aae93ed6ca372d0"
-  integrity sha512-+ojEvSHApoLWF2YYxwnOM4N9DPn5e5fG+j0YJ9drKNaYtrZYOq5M9ESOaBYqOHCXOAALODJJ4wkqHAXEuLpwMw==
-
 pdfmake@^0.2.15:
   version "0.2.15"
   resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.15.tgz#86bbc2c854e8a1cc98d4d6394b39dae00cc3a3b0"
@@ -30963,13 +30963,6 @@ uri-js@^4.2.2:
   integrity sha512-KY9Frmirql91X2Qgjry0Wd4Y+YTdrdZheS8TFwvkbLWf/G5KNJDCh6pKL5OZctEW4+0Baa5idK2ZQuELRwPznQ==
   dependencies:
     punycode "^2.1.0"
-
-uri-template@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/uri-template/-/uri-template-2.0.0.tgz#0ed7b34f8dd6f48b9774048336d2bcf2b7f55724"
-  integrity sha512-r/i44nPoo0ktEZDjx+hxp9PSjQuBBfsd6RgCRuuMqCP0FZEp+YE0SpihThI4UGc5ePqQEFsdyZc7UVlowp+LLw==
-  dependencies:
-    pct-encode "~1.0.0"
 
 urix@^0.1.0:
   version "0.1.0"

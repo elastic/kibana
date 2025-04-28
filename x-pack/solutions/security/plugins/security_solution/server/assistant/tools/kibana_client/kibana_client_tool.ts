@@ -13,7 +13,7 @@ import { KibanaClientTool } from './kibana_client_open_api';
 export type KibanaClientToolParams = AssistantToolParams &
   RequiredDefined<Pick<AssistantToolParams, 'createLlmInstance' | 'assistantContext'>>;
 
-const getKibanaClientTool = memoize(KibanaClientTool.create, (args) => {
+const getKibanaClientTool = memoize((...args: Parameters<typeof KibanaClientTool.create>) => KibanaClientTool.create(...args), (...[args]) => {
   return args?.options?.apiSpecPath;
 });
 

@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import { pickBy } from 'lodash';
-import { parse as parseTemplate } from 'uri-template';
+import { StdUriTemplate } from '@std-uritemplate/std-uritemplate';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
@@ -20,6 +20,7 @@ import type { BuildFlavor } from '@kbn/config';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
+import axios from 'axios';
 
 export const kibanaServerlessOpenApiSpec = path.join(
   __dirname,
@@ -93,7 +94,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     const fixedJsonOpenApiSpec = super.fixOpenApiSpecIteratively(jsonOpenApiSpec);
     const dereferencedOas = new Oas(fixedJsonOpenApiSpec);
     await dereferencedOas.dereference();
-    return new KibanaClientTool({
+    return new this({
       options,
       dereferencedOas,
     });
@@ -108,18 +109,20 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         const { request, assistantContext } = assistantToolParams;
         const { origin } = request.rewrittenUrl || request.url;
 
+
+        const pathname = StdUriTemplate.expand(operation.path, input.path)
+
+        const pathnameWithBasePath = path.posix.join(
+          assistantContext.getServerBasePath(),
+          pathname
+        );
+
         const serializedQuery = Object.entries(input.query ?? {}).map(([key, value]) => {
           const shouldStringify = typeof value === 'object' && value !== null;
           return [key, shouldStringify ? JSON.stringify(value) : value] as [string, string];
         });
 
         const params = new URLSearchParams(serializedQuery);
-        const pathname = parseTemplate(operation.path).expand(input.path);
-        const pathnameWithBasePath = path.posix.join(
-          assistantContext.getServerBasePath(),
-          pathname
-        );
-
         const url = new URL(pathnameWithBasePath, origin);
         url.search = params.toString();
 
@@ -130,13 +133,18 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           );
         });
 
-        const requestOptions = {
+        return axios({
           method: operation.method.toUpperCase(),
           headers: { ...input.header, ...headers },
-          body: JSON.stringify(input.body),
-        };
-
-        return fetch(url.toString(), requestOptions).then((res) => res.text());
+          url: url.toString(),
+          data: input.body ? JSON.stringify(input.body) : undefined,
+        })
+          .then((response) => {
+            return { content: response.data };
+          })
+          .catch((error) => {
+            throw new Error(`Error: ${error.message}`);
+          })
       },
       {
         name: operation.getOperationId(),

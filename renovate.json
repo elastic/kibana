@@ -3793,7 +3793,7 @@
         "@aws-sdk/client-bedrock-runtime",
         "@aws-sdk/client-kendra",
         "@aws-sdk/credential-provider-node",
-        "uri-template"
+        "@std-uritemplate/std-uritemplate"
       ],
       "reviewers": [
         "team:security-generative-ai"
