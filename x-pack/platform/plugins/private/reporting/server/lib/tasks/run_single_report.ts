@@ -72,7 +72,7 @@ interface GetHeadersOpts {
   requestFromTask?: KibanaRequest;
   spaceId: string | undefined;
 }
-interface ReportingExecuteTaskInstance {
+interface TaskInstance {
   state: object;
   taskType: string;
   params: ReportTaskParams;
@@ -95,7 +95,7 @@ function parseError(error: unknown): ExecutionError | unknown {
   return error;
 }
 
-export class ExecuteReportTask implements ReportingTask {
+export class RunSingleReportTask implements ReportingTask {
   public TYPE = REPORTING_EXECUTE_TYPE;
 
   private logger: Logger;
@@ -667,7 +667,7 @@ export class ExecuteReportTask implements ReportingTask {
     const reportingHealth = await this.reporting.getHealthInfo();
     const shouldScheduleWithApiKey =
       reportingHealth.hasPermanentEncryptionKey && reportingHealth.isSufficientlySecure;
-    const taskInstance: ReportingExecuteTaskInstance = {
+    const taskInstance: TaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params,

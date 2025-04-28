@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import { RruleSchedule, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
 import { BasePayload, ReportSource } from '@kbn/reporting-common/types';
 
 export const REPORTING_EXECUTE_TYPE = 'report:execute';
+export const SCHEDULED_REPORTING_EXECUTE_TYPE = 'report:execute-scheduled';
 
 export const TIME_BETWEEN_ATTEMPTS = 10 * 1000; // 10 seconds
 
-export { ExecuteReportTask } from './execute_report';
+export { RunSingleReportTask } from './run_single_report';
+export { RunScheduledReportTask } from './run_scheduled_report';
 
 export interface ReportTaskParams<JobPayloadType = BasePayload> {
   id: string;
@@ -25,6 +27,12 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   meta: ReportSource['meta'];
 }
 
+export interface ScheduledReportTaskParams {
+  id: string;
+  jobtype: ReportSource['jobtype'];
+  schedule: RruleSchedule;
+}
+
 export enum ReportingTaskStatus {
   UNINITIALIZED = 'uninitialized',
   INITIALIZED = 'initialized',
@@ -35,7 +43,7 @@ export interface ReportingTask {
     type: string;
     title: string;
     createTaskRunner: TaskRunCreatorFunction;
-    maxAttempts: number;
+    maxAttempts?: number;
     timeout: string;
   };
   getStatus: () => ReportingTaskStatus;

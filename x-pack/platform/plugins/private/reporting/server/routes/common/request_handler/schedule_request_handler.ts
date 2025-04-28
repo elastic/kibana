@@ -16,7 +16,10 @@ import { ScheduledReportingJobResponse } from '../../../types';
 import { RawScheduledReport } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RequestHandler, RequestParams } from './request_handler';
-import { transformRawScheduledReportToReport } from './lib';
+import {
+  transformRawScheduledReportToReport,
+  transformRawScheduledReportToTaskParams,
+} from './lib';
 
 const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
@@ -103,7 +106,14 @@ export class ScheduleRequestHandler extends RequestHandler<
     );
     logger.debug(`Successfully created scheduled report: ${report.id}`);
 
-    // TODO - Schedule the report with Task Manager
+    // Schedule the report with Task Manager
+    const task = await reporting.scheduleRecurringTask(
+      req,
+      transformRawScheduledReportToTaskParams(report)
+    );
+    logger.info(
+      `Scheduled "${name}" reporting task. Task ID: task:${task.id}. Report ID: ${report.id}`
+    );
 
     return transformRawScheduledReportToReport(report);
   }
