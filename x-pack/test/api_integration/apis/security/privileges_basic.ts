@@ -70,7 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-            streams: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -206,7 +205,6 @@ export default function ({ getService }: FtrProviderContext) {
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read', 'endpoint_security_execute'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
-            streams: ['all', 'read', 'minimal_all', 'minimal_read'],
             ml: ['all', 'read', 'minimal_all', 'minimal_read'],
             siem: [
               'actions_log_management_all',
