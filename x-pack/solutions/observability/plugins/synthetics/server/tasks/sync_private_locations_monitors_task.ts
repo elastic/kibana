@@ -6,7 +6,6 @@
  */
 
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
@@ -29,8 +28,8 @@ import {
 } from '../synthetics_service/formatters/public_formatters/format_configs';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
-export const VERSION = '1.0.0';
-const taskId = `${TASK_TYPE}:${VERSION}`;
+const VERSION = '1.0.0';
+const TASK_ID = `${TASK_TYPE}:${VERSION}`;
 
 export class SyncPrivateLocationMonitorsTask {
   constructor(
@@ -45,10 +44,10 @@ export class SyncPrivateLocationMonitorsTask {
           'This task is executed so that we can sync private location monitors for example when global params are updated',
         timeout: '1m',
         maxAttempts: 3,
-        createTaskRunner: (context) => {
+        createTaskRunner: () => {
           return {
             run: async () => {
-              return this.runTask(context.taskInstance);
+              return this.runTask();
             },
           };
         },
@@ -56,7 +55,7 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask(taskInstance: ConcreteTaskInstance) {
+  public async runTask() {
     const {
       coreStart: { savedObjects },
       encryptedSavedObjects,
@@ -67,15 +66,13 @@ export class SyncPrivateLocationMonitorsTask {
       logger.debug(`Syncing private location monitors`);
       const soClient = savedObjects.createInternalRepository();
       const allPrivateLocations = await getPrivateLocations(soClient);
-      if (allPrivateLocations.length === 0) {
-        return;
+      if (allPrivateLocations.length !== 0) {
+        await this.syncGlobalParams({
+          allPrivateLocations,
+          soClient,
+          encryptedSavedObjects,
+        });
       }
-
-      await this.syncGlobalParams({
-        allPrivateLocations,
-        soClient,
-        encryptedSavedObjects,
-      });
       logger.debug(`Sync of private location monitors succeeded`);
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
@@ -89,8 +86,8 @@ export class SyncPrivateLocationMonitorsTask {
       pluginsStart: { taskManager },
     } = this.serverSetup;
     logger.debug(`Scheduling private location task`);
-    const task = await taskManager.ensureScheduled({
-      id: taskId,
+    await taskManager.ensureScheduled({
+      id: TASK_ID,
       state: {},
       schedule: {
         interval: '10m',
@@ -98,7 +95,7 @@ export class SyncPrivateLocationMonitorsTask {
       taskType: TASK_TYPE,
       params: {},
     });
-    await taskManager.runSoon(task.id);
+    await taskManager.runSoon(TASK_ID);
     logger.debug(`Sync private location monitors task scheduled successfully`);
   };
 
@@ -223,7 +220,7 @@ export const runSynPrivateLocationMonitorsTaskSoon = async ({
   } = server;
   try {
     logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
-    await taskManager.runSoon(taskId);
+    await taskManager.runSoon(TASK_ID);
     logger.debug(`Synthetics sync private location task scheduled successfully`);
   } catch (error) {
     logger.error(
