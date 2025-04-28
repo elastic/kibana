@@ -148,4 +148,79 @@ describe('TabbedContent', () => {
       expect(tab).toHaveFocus();
     });
   });
+
+  it('correctly numbers duplicate tabs when multiple copies exist', async () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 1 (copy)' },
+      { id: 'tab3', label: 'Tab 1 (copy) 2' },
+      { id: 'tab4', label: 'Tab 2' },
+    ];
+    const firstTab = initialItems[0];
+    const onChanged = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={firstTab.id}
+        onChanged={onChanged}
+      />
+    );
+
+    screen.getByTestId(`unifiedTabs_tabMenuBtn_${firstTab.id}`).click();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
+    });
+
+    screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
+
+    const duplicatedTab = { ...NEW_TAB, label: 'Tab 1 (copy) 3' };
+
+    await waitFor(() => {
+      expect(onChanged).toHaveBeenCalledWith({
+        items: [firstTab, duplicatedTab, ...initialItems.slice(1)],
+        selectedItem: duplicatedTab,
+      });
+      expect(screen.getByText(`Content for tab: ${duplicatedTab.label}`)).toBeInTheDocument();
+      const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${duplicatedTab.id}`);
+      expect(tab.getAttribute('aria-selected')).toBe('true');
+      expect(tab).toHaveFocus();
+    });
+  });
+
+  it('correctly duplicates tabs with regex special characters in the label', async () => {
+    const tabWithSpecialChars = { id: 'tab1', label: 'Tab (1+2)*.?' };
+    const initialItems = [tabWithSpecialChars, { id: 'tab2', label: 'Regular Tab' }];
+    const onChanged = jest.fn();
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={tabWithSpecialChars.id}
+        onChanged={onChanged}
+      />
+    );
+
+    screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabWithSpecialChars.id}`).click();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
+    });
+
+    screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
+
+    const duplicatedTab = { ...NEW_TAB, label: 'Tab (1+2)*.? (copy)' };
+
+    await waitFor(() => {
+      expect(onChanged).toHaveBeenCalledWith({
+        items: [tabWithSpecialChars, duplicatedTab, initialItems[1]],
+        selectedItem: duplicatedTab,
+      });
+      expect(screen.getByText(`Content for tab: ${duplicatedTab.label}`)).toBeInTheDocument();
+      const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${duplicatedTab.id}`);
+      expect(tab.getAttribute('aria-selected')).toBe('true');
+      expect(tab).toHaveFocus();
+    });
+  });
 });
