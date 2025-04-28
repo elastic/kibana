@@ -10,7 +10,7 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  assets = 'assets',
+  assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
   /*
@@ -51,10 +51,8 @@ export enum SecurityPageName {
   hostsEvents = 'hosts-events',
   hostsSessions = 'hosts-sessions',
   hostsUncommonProcesses = 'hosts-uncommon_processes',
-  investigations = 'investigations',
   kubernetes = 'kubernetes',
   landing = 'get_started',
-  mlLanding = 'machine_learning-landing', // serverless only
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
