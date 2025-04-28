@@ -102,7 +102,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
               fullWidth
               isClearable={true}
               options={dynamicOptions}
-              customOptionText="Use custom field (not recommended)"
+              customOptionText="Use custom field"
               singleSelection={{ asPlainText: true }}
               {...inputs.kafkaDynamicTopicInput.props}
             />
