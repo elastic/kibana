@@ -35,7 +35,7 @@ export const useSearchCodeExamples = (indexName: string, mappings?: Mappings) =>
   const { apiKey } = useSearchApiKey();
 
   return useMemo(() => {
-    let queryObject: {} = DEFAULT_QUERY_OBJECT;
+    let queryObject: ReturnType<typeof generateSearchQuery> = DEFAULT_QUERY_OBJECT;
     if (mappings) {
       try {
         const fields = buildFieldDescriptorForIndex(indexName, mappings);
