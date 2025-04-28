@@ -12,7 +12,7 @@ import type { EuiDataGridSorting } from '@elastic/eui';
 import { useInspector } from '../../../hooks/use_inspector';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useTIDataView } from './use_ti_data_view';
 import type { FetchParams, Pagination } from '../services/fetch_indicators';
 import { createFetchIndicators } from '../services/fetch_indicators';
 
@@ -65,7 +65,7 @@ export const useIndicators = ({
       data: { search: searchService },
     },
   } = useKibana();
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns } = useTIDataView();
   const { inspectorAdapters } = useInspector();
 
   const onChangeItemsPerPage = useCallback(

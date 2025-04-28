@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useTIDataView } from './use_ti_data_view';
 import type { RawIndicatorsResponse } from '../services/fetch_indicators';
 
 export const useIndicatorsTotalCount = () => {
@@ -21,7 +21,7 @@ export const useIndicatorsTotalCount = () => {
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { selectedPatterns, loading: loadingDataView } = useSourcererDataView();
+  const { selectedPatterns, loading: loadingDataView } = useTIDataView();
 
   useEffect(() => {
     const query = {

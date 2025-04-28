@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
-import { useSecurityContext } from '../../../hooks/use_security_context';
 import { DESCRIPTION } from './translations';
 
 /**
@@ -23,8 +23,8 @@ const indicatorNameField = {
   esTypes: ['keyword'],
 } as const;
 
-export const useSourcererDataView = () => {
-  const { sourcererDataView } = useSecurityContext();
+export const useTIDataView = () => {
+  const sourcererDataView = useSourcererDataView();
 
   const browserFields = useMemo(() => {
     const { threat = { fields: {} } } = sourcererDataView.browserFields;

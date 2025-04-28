@@ -7,14 +7,14 @@
 
 import { renderHook } from '@testing-library/react';
 import { useCurrentDataViewFields } from './use_current_data_view_fields';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useTIDataView } from './use_ti_data_view';
 
 jest.mock('./use_sourcerer_data_view');
 
 describe('useFields', () => {
   it('should return fields from sourcererDataView', () => {
     const mockFields = { field1: {}, field2: {} };
-    (useSourcererDataView as jest.Mock).mockReturnValue({
+    (useTIDataView as jest.Mock).mockReturnValue({
       sourcererDataView: { fields: mockFields },
     });
 
@@ -24,7 +24,7 @@ describe('useFields', () => {
   });
 
   it('should return an empty array if fields are undefined', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
+    (useTIDataView as jest.Mock).mockReturnValue({
       sourcererDataView: { fields: undefined },
     });
 

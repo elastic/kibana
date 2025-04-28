@@ -12,7 +12,7 @@ import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import type { FilterIn, FilterOut } from '../utils/filter';
 import { updateFiltersArray } from '../utils/filter';
-import { useSourcererDataView } from '../../indicators/hooks/use_sourcerer_data_view';
+import { useTIDataView } from '../../indicators/hooks/use_ti_data_view';
 
 export interface UseFilterInParam {
   /**
@@ -46,7 +46,7 @@ export const useFilterInOut = ({
   filterType,
 }: UseFilterInParam): UseFilterInValue => {
   const { filterManager } = useIndicatorsFiltersContext();
-  const { sourcererDataView } = useSourcererDataView();
+  const { sourcererDataView } = useTIDataView();
 
   const { key, value } =
     typeof indicator === 'string'

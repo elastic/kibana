@@ -7,8 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { getStore } from '../../../../../common/store';
 import { CopyToClipboardContextMenu } from '../common/copy_to_clipboard';
 import { FilterInContextMenu } from '../../../query_bar/components/filter_in';
 import { FilterOutContextMenu } from '../../../query_bar/components/filter_out';
@@ -67,6 +69,12 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
     />,
   ];
 
+  const store = getStore();
+
+  if (!store) {
+    return null;
+  }
+
   return (
     <EuiPopover
       data-test-subj={POPOVER_BUTTON_TEST_ID}
@@ -78,7 +86,7 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
             iconSize="s"
             size="xs"
             onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
-            style={{ height: '100%' }}
+            css={{ height: '100%' }}
           />
         </EuiToolTip>
       }
@@ -87,7 +95,9 @@ export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProp
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={popoverItems} />
+      <ReduxProvider store={store}>
+        <EuiContextMenuPanel size="s" items={popoverItems} />
+      </ReduxProvider>
     </EuiPopover>
   );
 };

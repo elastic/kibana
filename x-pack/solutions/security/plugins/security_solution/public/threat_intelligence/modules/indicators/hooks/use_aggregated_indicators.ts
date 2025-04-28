@@ -13,7 +13,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useInspector } from '../../../hooks/use_inspector';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useTIDataView } from './use_ti_data_view';
 import type {
   ChartSeries,
   FetchAggregatedIndicatorsParams,
@@ -79,7 +79,7 @@ export const useAggregatedIndicators = ({
   } = useKibana();
   const userTimeZone = useTimeZone();
   const userFormat = useDateFormat();
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns } = useTIDataView();
   const { inspectorAdapters } = useInspector();
 
   const [field, setField] = useState<EuiComboBoxOptionOption<string>>({

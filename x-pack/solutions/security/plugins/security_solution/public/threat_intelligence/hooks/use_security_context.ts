@@ -6,18 +6,16 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import type { Store } from 'redux';
+import { useSelector, useDispatch } from 'react-redux';
 
-import type { SecuritySolutionPluginContext, SelectedDataView } from '../types';
+import type { SecuritySolutionPluginContext } from '../types';
 import { useKibana } from '../../common/lib/kibana';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSetUrlParams } from '../../management/components/artifact_list_page/hooks/use_set_url_params';
 import { BlockListForm } from '../../management/pages/blocklist/view/components/blocklist_form';
 import { BlocklistsApiClient } from '../../management/pages/blocklist/services';
-import { getStore, inputsSelectors } from '../../common/store';
+import { inputsSelectors } from '../../common/store';
 import { licenseService } from '../../common/hooks/use_license';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { deleteOneQuery, setQuery } from '../../common/store/inputs/actions';
@@ -33,18 +31,14 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
 
   const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
-  const sourcererDataView = useSourcererDataView();
-
-  const securitySolutionStore = getStore() as Store;
+  const dispatch = useDispatch();
 
   const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
 
-  return useMemo(
-    () => ({
-      securitySolutionStore,
+  return useMemo(() => {
+    return {
       getPageWrapper: () => SecuritySolutionPageWrapper,
       licenseService,
-      sourcererDataView: sourcererDataView as unknown as SelectedDataView,
       hasAccessToTimeline,
 
       blockList: {
@@ -62,7 +56,7 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
       useGlobalTime,
 
       registerQuery: (query) =>
-        securitySolutionStore.dispatch(
+        dispatch(
           setQuery({
             inputId: InputsModelId.global,
             id: query.id,
@@ -72,13 +66,12 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
           })
         ),
       deregisterQuery: (query) =>
-        securitySolutionStore.dispatch(
+        dispatch(
           deleteOneQuery({
             inputId: InputsModelId.global,
             id: query.id,
           })
         ),
-    }),
-    [canWriteBlocklist, http, securitySolutionStore, sourcererDataView, hasAccessToTimeline]
-  );
+    };
+  }, [hasAccessToTimeline, canWriteBlocklist, http, dispatch]);
 };

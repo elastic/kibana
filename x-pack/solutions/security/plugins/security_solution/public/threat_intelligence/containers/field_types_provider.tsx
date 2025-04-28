@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useMemo } from 'react';
-import { useSourcererDataView } from '../modules/indicators/hooks/use_sourcerer_data_view';
+import { useTIDataView } from '../modules/indicators/hooks/use_ti_data_view';
 
 export type FieldTypesContextValue = Record<string, string | undefined>;
 
@@ -19,7 +19,7 @@ export const FieldTypesContext = createContext<FieldTypesContextValue | undefine
 export const FieldTypesProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     sourcererDataView: { fields = {} },
-  } = useSourcererDataView();
+  } = useTIDataView();
 
   // field name to field type map to allow the cell_renderer to format dates
   const fieldTypes: FieldTypesContextValue = useMemo(

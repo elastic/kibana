@@ -9,7 +9,6 @@ import type { ComponentType, NamedExoticComponent, ReactNode } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { type DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -21,6 +20,7 @@ import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Policy } from './modules/block_list/hooks/use_policies';
+import type { SelectedDataView } from '../sourcerer/store/model';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ThreatIntelligencePluginSetup {}
@@ -48,13 +48,6 @@ export interface LicenseAware {
 }
 
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
-
-export interface SelectedDataView {
-  sourcererDataView: DataViewSpec;
-  browserFields: BrowserFields;
-  selectedPatterns: string[];
-  loading: boolean;
-}
 
 export interface UseInvestigateInTimelineProps {
   dataProviders: DataProvider[];
@@ -99,16 +92,6 @@ export interface SecuritySolutionPluginContext {
    * Get the user's license to drive the Threat Intelligence plugin's visibility.
    */
   licenseService: LicenseAware;
-
-  /**
-   * Gets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView.
-   */
-  sourcererDataView: SelectedDataView;
-
-  /**
-   * Security Solution store
-   */
-  securitySolutionStore: Store;
 
   /**
    * Whether the current user has access to timeline

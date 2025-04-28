@@ -17,7 +17,7 @@ import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
 import { IndicatorsTable } from '../components/table/table';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
 import { useIndicators } from '../hooks/use_indicators';
-import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
+import { useTIDataView } from '../hooks/use_ti_data_view';
 import { DefaultPageLayout } from '../../../components/layout';
 import { useFilters } from '../../query_bar/hooks/use_filters';
 import { FieldTypesProvider } from '../../../containers/field_types_provider';
@@ -39,7 +39,7 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
 const IndicatorsPageContent: FC = () => {
   const { blockListIndicatorValue } = useBlockListContext();
 
-  const { sourcererDataView, browserFields } = useSourcererDataView();
+  const { sourcererDataView, browserFields } = useTIDataView();
 
   const columnSettings = useColumnSettings();
 
@@ -54,7 +54,6 @@ const IndicatorsPageContent: FC = () => {
     isLoading: isLoadingIndicators,
     isFetching: isFetchingIndicators,
     dataUpdatedAt,
-    // query: indicatorListQuery,
   } = useIndicators({
     filters,
     filterQuery,
@@ -69,7 +68,6 @@ const IndicatorsPageContent: FC = () => {
     onFieldChange,
     isLoading: isLoadingAggregatedIndicators,
     isFetching: isFetchingAggregatedIndicators,
-    // query: indicatorChartQuery,
   } = useAggregatedIndicators({
     timeRange,
     filters,
