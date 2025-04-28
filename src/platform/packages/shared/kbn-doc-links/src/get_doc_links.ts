@@ -882,8 +882,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgradeElasticAgent: `${ELASTIC_DOCS}reference/fleet/upgrade-elastic-agent`,
       learnMoreBlog: `https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: isServerless
-      ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`
-      : `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
+        ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`
+        : `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
       onPremRegistry: `${ELASTIC_DOCS}reference/fleet/air-gapped`,
       packageSignatures: `${ELASTIC_DOCS}reference/fleet/package-signatures`,
       secureLogstash: `${ELASTIC_DOCS}reference/fleet/secure-logstash-connections`,
