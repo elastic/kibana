@@ -71,7 +71,7 @@ exports[`ExceptionItemCardComments should render comments panel closed 1`] = `
                     >
                       <span
                         class="euiAvatar__icon"
-                        data-euiicon-type="userAvatar"
+                        data-euiicon-type="user"
                       />
                     </div>
                   </div>
@@ -110,7 +110,7 @@ exports[`ExceptionItemCardComments should render comments panel closed 1`] = `
                     >
                       <span
                         class="euiAvatar__icon"
-                        data-euiicon-type="userAvatar"
+                        data-euiicon-type="user"
                       />
                     </div>
                   </div>
@@ -209,7 +209,7 @@ exports[`ExceptionItemCardComments should render comments panel opened when acco
                     >
                       <span
                         class="euiAvatar__icon"
-                        data-euiicon-type="userAvatar"
+                        data-euiicon-type="user"
                       />
                     </div>
                   </div>
@@ -248,7 +248,7 @@ exports[`ExceptionItemCardComments should render comments panel opened when acco
                     >
                       <span
                         class="euiAvatar__icon"
-                        data-euiicon-type="userAvatar"
+                        data-euiicon-type="user"
                       />
                     </div>
                   </div>
