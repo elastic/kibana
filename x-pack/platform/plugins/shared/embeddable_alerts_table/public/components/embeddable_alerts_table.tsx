@@ -145,6 +145,7 @@ export const EmbeddableAlertsTable = ({
       emptyStateHeight="flex"
       emptyStateVariant="transparent"
       openLinksInNewTab={true}
+      flyoutOwnsFocus={true}
       casesConfiguration={{
         featureId: 'alerts',
         owner: [GENERAL_CASES_OWNER],

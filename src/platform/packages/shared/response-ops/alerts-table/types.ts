@@ -251,6 +251,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderFlyoutFooter?: FlyoutSectionRenderer<AC>;
   /**
+   * Passed to the alerts preview flyout's `ownFocus` prop
+   * @default false
+   */
+  flyoutOwnsFocus?: boolean;
+  /**
    * Timestamp of the last data refetch request
    */
   lastReloadRequestTime?: number;
@@ -366,6 +371,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'services'
     | 'casesConfiguration'
     | 'openLinksInNewTab'
+    | 'flyoutOwnsFocus'
   >,
   'columns' | 'openLinksInNewTab'
 > &

@@ -54,6 +54,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
     renderFlyoutHeader: Header = DefaultAlertsFlyoutHeader,
     renderFlyoutBody: Body = DefaultAlertsFlyoutBody,
     renderFlyoutFooter,
+    flyoutOwnsFocus,
   } = renderContext;
   const Footer: FlyoutSectionRenderer<AC> | undefined = renderFlyoutFooter;
   const prevAlert = usePrevious(alert);
@@ -99,7 +100,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={false}>
+    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={flyoutOwnsFocus}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <FlyoutHeader />
