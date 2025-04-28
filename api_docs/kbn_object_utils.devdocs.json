@@ -169,6 +169,66 @@
           "An object containing all the flattened properties."
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/object-utils",
+        "id": "def-common.unflattenObject",
+        "type": "Function",
+        "tags": [],
+        "label": "unflattenObject",
+        "description": [],
+        "signature": [
+          "(source: T, target: Record<string, any>) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof T as string]: string extends TKey ? Record<TKey, T[TKey]> : {} extends Pick<T, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<T, TKey, Exclude<T[TKey], undefined>>> : DedotKey<T, TKey, T[TKey]>; }>, undefined>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.unflattenObject.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.unflattenObject.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

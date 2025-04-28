@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { StoryObj } from '@storybook/react';
 import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
-import FiltersBuilder from '../filters_builder';
+import { FiltersBuilder } from '../filters_builder';
 
 export default {
   title: 'Filters Builder',

@@ -17,8 +17,8 @@ import { DescriptionWithPrefix } from './types';
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
 export interface Meta {
-  rangeFrom: string;
-  rangeTo: string;
+  rangeFrom?: string;
+  rangeTo?: string;
   description?: DescriptionWithPrefix;
 }
 

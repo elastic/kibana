@@ -28,8 +28,6 @@ import {
   formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';
@@ -39,11 +37,9 @@ import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_an
 export function IlmSummary({
   definition,
   lifecycle,
-  ilmLocator,
 }: {
   definition: IngestStreamGetResponse;
   lifecycle: IngestStreamLifecycleILM;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }) {
   const {
     dependencies: {
@@ -55,8 +51,6 @@ export function IlmSummary({
 
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition) return;
-
       return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
         params: { path: { name: definition.stream.name } },
         signal,
@@ -106,7 +100,7 @@ export function IlmSummary({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
+            <IlmLink lifecycle={lifecycle} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -196,7 +190,7 @@ function IlmPhase({
           >
             <EuiText size="xs">
               <p>
-                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 b')}
+                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 ib')}
               </p>
             </EuiText>
           </EuiPanel>

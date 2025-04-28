@@ -39,6 +39,8 @@ export {
   mapVariableToColumn,
   getValuesFromQueryField,
   getESQLQueryVariables,
+  fixESQLQueryWithVariables,
+  replaceESQLQueryIndexPattern,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

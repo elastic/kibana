@@ -20,16 +20,16 @@ export function registerKqlTelemetryRoute(
     .post({
       path: '/internal/kql_opt_in_stats',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {
           request: {
             body: schema.object({

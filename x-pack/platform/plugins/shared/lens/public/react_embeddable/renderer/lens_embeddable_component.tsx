@@ -7,11 +7,11 @@
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
-import { LensApi } from '../..';
 import { ExpressionWrapper } from '../expression_wrapper';
-import { LensInternalApi } from '../types';
+import { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
+import { getViewMode } from '../helper';
 import { addLog } from '../logger';
 
 export function LensEmbeddableComponent({
@@ -42,7 +42,7 @@ export function LensEmbeddableComponent({
     // just call the Lens API to know whether it's in edit mode
     api.viewMode$
   );
-  const canEdit = Boolean(api.isEditingEnabled?.());
+  const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(api) === 'edit');
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 

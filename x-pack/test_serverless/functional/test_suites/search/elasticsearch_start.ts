@@ -211,33 +211,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await deleteAllTestIndices();
       });
       beforeEach(async () => {
-        await svlSearchNavigation.navigateToElasticsearchStartPage();
-      });
-      after(async () => {
-        await deleteAllTestIndices();
+        await svlSearchNavigation.navigateToElasticsearchStartPage(true);
       });
 
-      it('should default to code view when lacking create index permissions', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
-        await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
-      });
-
-      it('should not create an API key if the user only has viewer permissions', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyFormNotAvailable();
-        const apiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
-        expect(apiKey).to.be(null);
-      });
-
-      it('should redirect to index details when index is created via API', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
-        await es.indices.create({ index: 'test-my-api-index' });
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+      it('should navigate to the discover page', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnDiscoverPage();
       });
     });
   });

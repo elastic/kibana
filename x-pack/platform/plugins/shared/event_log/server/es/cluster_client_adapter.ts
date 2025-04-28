@@ -9,20 +9,22 @@ import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
 import { reject, isUndefined, isNumber, pick, isEmpty, get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type { estypes } from '@elastic/elasticsearch';
-import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
-import { BulkResponse, long } from '@elastic/elasticsearch/lib/api/types';
-import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
-import {
+import type { KueryNode } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, nodeBuilder } from '@kbn/es-query';
+import type { BulkResponse, long } from '@elastic/elasticsearch/lib/api/types';
+import type { IEvent, IValidatedEvent } from '../types';
+import { SAVED_OBJECT_REL_PRIMARY } from '../types';
+import type {
   AggregateOptionsType,
   FindOptionsType,
   QueryOptionsType,
   FindOptionsSearchAfterType,
 } from '../event_log_client';
-import { ParsedIndexAlias } from './init';
-import { EsNames } from './names';
+import type { ParsedIndexAlias } from './init';
+import type { EsNames } from './names';
 
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
@@ -337,13 +339,10 @@ export class ClusterClientAdapter<
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.putTemplate({
         name: indexTemplateName,
-        body: {
-          ...currentIndexTemplate,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          settings: {
-            ...currentIndexTemplate.settings,
-            'index.hidden': true,
-          },
+        ...currentIndexTemplate,
+        settings: {
+          ...currentIndexTemplate.settings,
+          'index.hidden': true,
         },
       });
     } catch (err) {
@@ -459,8 +458,7 @@ export class ClusterClientAdapter<
       const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
       if (simulatedMapping != null) {
-        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-        await esClient.indices.putMapping({ index: name, body: simulatedMapping });
+        await esClient.indices.putMapping({ index: name, ...simulatedMapping });
         this.logger.debug(`Successfully updated concrete index mappings for ${name}`);
       }
     } catch (err) {
@@ -933,7 +931,7 @@ export function getQueryBodyWithAuthFilter(
   };
 }
 
-function getNamespaceQuery(namespace?: string) {
+function getNamespaceQuery(namespace?: string): estypes.QueryDslQueryContainer {
   const defaultNamespaceQuery = {
     bool: {
       must_not: {
@@ -946,7 +944,7 @@ function getNamespaceQuery(namespace?: string) {
   const namedNamespaceQuery = {
     term: {
       'kibana.saved_objects.namespace': {
-        value: namespace,
+        value: namespace!,
       },
     },
   };

@@ -21,13 +21,17 @@ export const convertFromMaintenanceWindowToForm = (
   const endDate = moment(startDate).add(maintenanceWindow.duration);
   // maintenance window is considered recurring if interval is defined
   const recurring = has(maintenanceWindow, 'rRule.interval');
+  const hasScopedQuery = !!maintenanceWindow.scopedQuery;
   const form: FormProps = {
     title: maintenanceWindow.title,
     startDate,
     endDate: endDate.toISOString(),
     timezone: [maintenanceWindow.rRule.tzid],
     recurring,
-    categoryIds: maintenanceWindow.categoryIds || [],
+    solutionId:
+      maintenanceWindow.categoryIds && maintenanceWindow.categoryIds.length === 1 && hasScopedQuery
+        ? maintenanceWindow.categoryIds[0]
+        : undefined,
     scopedQuery: maintenanceWindow.scopedQuery,
   };
   if (!recurring) return form;

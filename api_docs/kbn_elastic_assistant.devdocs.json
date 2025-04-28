@@ -51,6 +51,38 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.AlertSummary",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertSummary",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<Props> & { readonly type: ({ alertId, canSeeAdvancedSettings, defaultConnectorId, isContextReady, promptContext, setHasAlertSummary, showAnonymizedValues, }: Props) => React.JSX.Element; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/alert_summary/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AlertSummary.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.analyzeMarkdown",
         "type": "Function",
         "tags": [],
@@ -166,7 +198,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, navigateToApp, nameSpace, productDocBase, spaceId, title, toasts, currentAppId, userProfileService, chrome, }: ",
+          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, navigateToApp, nameSpace, productDocBase, title, toasts, currentAppId, userProfileService, chrome, }: ",
           "AssistantProviderProps",
           ") => React.JSX.Element"
         ],
@@ -179,7 +211,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  spaceId,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
+            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
             "description": [],
             "signature": [
               "AssistantProviderProps"
@@ -191,6 +223,71 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.AssistantSpaceIdProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "AssistantSpaceIdProvider",
+        "description": [],
+        "signature": [
+          "({ children, spaceId }: SpaceIdProviderProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_space_id.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantSpaceIdProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, spaceId }",
+            "description": [],
+            "signature": [
+              "SpaceIdProviderProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_space_id.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.AttackDiscoveryWidget",
+        "type": "Function",
+        "tags": [],
+        "label": "AttackDiscoveryWidget",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<Props> & { readonly type: ({ id }: Props) => React.JSX.Element; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/attack_discovery/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AttackDiscoveryWidget.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -295,7 +392,7 @@
           "HttpSetup",
           ", prompts: { create?: { name: string; content: string; promptType: \"system\" | \"quick\"; consumer?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; update?: { id: string; consumer?: string | undefined; content?: string | undefined; color?: string | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[] | undefined; delete?: { ids?: string[] | undefined; query?: string | undefined; } | undefined; }, toasts?: ",
           "IToasts",
-          " | undefined) => Promise<{ attributes: { results: { created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | undefined>"
+          " | undefined) => Promise<{ attributes: { results: { created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | { success: false; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
         "deprecated": false,
@@ -391,6 +488,38 @@
             "description": [],
             "signature": [
               "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.Conversations",
+        "type": "Function",
+        "tags": [],
+        "label": "Conversations",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<Props> & { readonly type: ({ id }: Props) => React.JSX.Element; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/conversations.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.Conversations.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
@@ -644,11 +773,11 @@
         "tags": [],
         "label": "NewChatByTitle",
         "description": [
-          "\n`NewChatByTitle` displays a _New chat_ icon button by providing only the `promptContextId`\nof a context that was (already) registered by the `useAssistantOverlay` hook. You may\noptionally style the button icon, or override the default _New chat_ text with custom\ncontent, like {'🪄✨'}\n\nUSE THIS WHEN: all the data necessary to start a new chat is NOT available\nin the same part of the React tree as the _New chat_ button. When paired\nwith the `useAssistantOverlay` hook, this option enables context to be be\nregistered where the data is available, and then the _New chat_ button can be displayed\nin another part of the tree."
+          "\n`NewChatByTitle` displays a button by providing only the `promptContextId`\nof a context that was (already) registered by the `useAssistantOverlay` hook. You may\noptionally override the default text.\n\nUSE THIS WHEN: all the data necessary to start a new chat is NOT available\nin the same part of the React tree as the button. When paired\nwith the `useAssistantOverlay` hook, this option enables context to be\nregistered where the data is available, and then the button can be displayed\nin another part of the tree."
         ],
         "signature": [
           "React.NamedExoticComponent<",
-          "Props",
+          "NewChatByTitleComponentProps",
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/new_chat_by_title/index.tsx",
@@ -659,6 +788,86 @@
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.NewChatByTitle.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.SearchAILakeConfigurationsSettingsManagement",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchAILakeConfigurationsSettingsManagement",
+        "description": [
+          "\nModal for overall Assistant Settings, including conversation settings, quick prompts, system prompts,\nanonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag."
+        ],
+        "signature": [
+          "React.FunctionComponent<Props>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/search_ai_lake_configurations_settings_management.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.SearchAILakeConfigurationsSettingsManagement.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.SearchAILakeConfigurationsSettingsManagement.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.SuggestedPrompts",
+        "type": "Function",
+        "tags": [],
+        "label": "SuggestedPrompts",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<Props> & { readonly type: ({ getPromptContext, ruleName, timestamp }: Props) => React.JSX.Element; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/suggested_prompts.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.SuggestedPrompts.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -720,6 +929,68 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.useAssistantLastConversation",
+        "type": "Function",
+        "tags": [],
+        "label": "useAssistantLastConversation",
+        "description": [],
+        "signature": [
+          "({ nameSpace, spaceId, }: { nameSpace?: string | undefined; spaceId: string; }) => { getLastConversation: (selectedConversation?: ",
+          "SelectedConversation",
+          " | undefined) => ",
+          "LastConversation",
+          "; setLastConversation: (lastConversation: ",
+          "LastConversation",
+          ") => void; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.useAssistantLastConversation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  spaceId,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.useAssistantLastConversation.$1.nameSpace",
+                "type": "string",
+                "tags": [],
+                "label": "nameSpace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.useAssistantLastConversation.$1.spaceId",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -929,7 +1200,13 @@
           ") => ",
           "UseQueryResult",
           "<",
-          "AIConnector",
+          {
+            "pluginId": "@kbn/elastic-assistant",
+            "scope": "public",
+            "docId": "kibKbnElasticAssistantPluginApi",
+            "section": "def-public.AIConnector",
+            "text": "AIConnector"
+          },
           "[], ",
           "IHttpFetchError",
           "<unknown>>"
@@ -970,6 +1247,17 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.hasSearchAILakeConfigurations",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasSearchAILakeConfigurations",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.AssistantAvailability.isAssistantEnabled",
@@ -2270,6 +2558,30 @@
     "misc": [
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.AIConnector",
+        "type": "Type",
+        "tags": [],
+        "label": "AIConnector",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.ActionConnector",
+            "text": "ActionConnector"
+          },
+          "<Record<string, unknown>, Record<string, unknown>> & { apiProvider?: ",
+          "OpenAiProviderType",
+          " | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/connectorland/connector_selector/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.ATTACK_DISCOVERY_STORAGE_KEY",
         "type": "string",
         "tags": [],
@@ -2279,6 +2591,21 @@
           "\"attackDiscovery\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.CONVERSATIONS_TAB",
+        "type": "string",
+        "tags": [],
+        "label": "CONVERSATIONS_TAB",
+        "description": [],
+        "signature": [
+          "\"conversations\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/const.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2433,6 +2760,51 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_END_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_END_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyEnd\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_QUERY_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_QUERY_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyQuery\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_START_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_START_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyStart\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.KNOWLEDGE_BASE_LOCAL_STORAGE_KEY",
         "type": "string",
         "tags": [],
@@ -2442,6 +2814,21 @@
           "\"knowledgeBase\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.ManagementSettingsTabs",
+        "type": "Type",
+        "tags": [],
+        "label": "ManagementSettingsTabs",
+        "description": [],
+        "signature": [
+          "\"connectors\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\" | \"anonymization\" | \"knowledge_base\" | \"evaluation\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

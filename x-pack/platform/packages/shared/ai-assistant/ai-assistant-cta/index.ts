@@ -7,13 +7,29 @@
 
 export { AssistantCallToAction, type AssistantCallToActionProps } from './call_to_action';
 
-export { AddConnector, type AddConnectorProps } from './add_connector';
+export {
+  AddConnector,
+  type AddConnectorProps,
+  DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON,
+} from './add_connector';
 
-export { InstallKnowledgeBase, type InstallKnowledgeBaseProps } from './install_knowledge_base';
+export {
+  InstallKnowledgeBase,
+  type InstallKnowledgeBaseProps,
+  DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON,
+} from './install_knowledge_base';
 
-export { NeedTierUpgrade, type NeedTierUpgradeProps } from './need_tier_upgrade';
+export {
+  NeedTierUpgrade,
+  type NeedTierUpgradeProps,
+  DATA_TEST_SUBJ_MANAGE_SUBSCRIPTION_BUTTON,
+} from './need_tier_upgrade';
 
-export { NeedLicenseUpgrade, type NeedLicenseUpgradeProps } from './need_license_upgrade';
+export {
+  NeedLicenseUpgrade,
+  type NeedLicenseUpgradeProps,
+  DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON,
+} from './need_license_upgrade';
 
 export { NoConnectorAccess } from './no_connector_access';
 

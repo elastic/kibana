@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes } from '../../definitions/types';
+import { FunctionDefinition, FunctionDefinitionTypes, Location } from '../../definitions/types';
 import { setTestFunctions } from '../../shared/test_functions';
 import { setup } from './helpers';
 
@@ -25,7 +25,7 @@ describe('function validation', () => {
               name: 'test',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [{ name: 'arg1', type: 'integer' }],
@@ -41,7 +41,7 @@ describe('function validation', () => {
               name: 'returns_integer',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [],
@@ -53,7 +53,7 @@ describe('function validation', () => {
               name: 'returns_double',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [],
@@ -147,7 +147,7 @@ describe('function validation', () => {
             name: 'test',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'any' }],
@@ -172,7 +172,7 @@ describe('function validation', () => {
             name: 'in',
             type: FunctionDefinitionTypes.OPERATOR,
             description: '',
-            supportedCommands: ['row'],
+            locationsAvailable: [Location.ROW],
             signatures: [
               {
                 params: [
@@ -200,7 +200,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -271,7 +271,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -290,7 +290,7 @@ describe('function validation', () => {
           name: 'variadic_fn',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'integer' }],
@@ -329,7 +329,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -356,7 +356,7 @@ describe('function validation', () => {
           name: 'supports_all',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword', supportsWildcard: true }],
@@ -368,7 +368,7 @@ describe('function validation', () => {
           name: 'does_not_support_all',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword', supportsWildcard: false }],
@@ -399,7 +399,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -430,7 +430,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'integer', constantOnly: true }],
@@ -442,7 +442,7 @@ describe('function validation', () => {
           name: 'test2',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -478,7 +478,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword', acceptedValues: ['ASC', 'DESC'] }],
@@ -512,7 +512,7 @@ describe('function validation', () => {
           name: 'test1',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -524,7 +524,7 @@ describe('function validation', () => {
           name: 'test2',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -536,7 +536,7 @@ describe('function validation', () => {
           name: 'test3',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'long' }],
@@ -563,7 +563,7 @@ describe('function validation', () => {
             name: 'eval_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [],
@@ -575,7 +575,7 @@ describe('function validation', () => {
             name: 'stats_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [],
@@ -587,7 +587,7 @@ describe('function validation', () => {
             name: 'row_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['row'],
+            locationsAvailable: [Location.ROW],
             signatures: [
               {
                 params: [],
@@ -599,7 +599,7 @@ describe('function validation', () => {
             name: 'where_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['where'],
+            locationsAvailable: [Location.WHERE],
             signatures: [
               {
                 params: [],
@@ -611,7 +611,7 @@ describe('function validation', () => {
             name: 'sort_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['sort'],
+            locationsAvailable: [Location.SORT],
             signatures: [
               {
                 params: [],
@@ -651,8 +651,7 @@ describe('function validation', () => {
             name: 'supports_by_option',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
-            supportedOptions: ['by'],
+            locationsAvailable: [Location.EVAL, Location.STATS_BY],
             signatures: [
               {
                 params: [],
@@ -664,8 +663,7 @@ describe('function validation', () => {
             name: 'does_not_support_by_option',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
-            supportedOptions: [],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [],
@@ -678,8 +676,7 @@ describe('function validation', () => {
             name: 'agg_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
-            supportedOptions: [],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [],
@@ -705,7 +702,7 @@ describe('function validation', () => {
             name: 'test',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],
@@ -717,7 +714,7 @@ describe('function validation', () => {
             name: 'test2',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'integer' }],
@@ -738,7 +735,7 @@ describe('function validation', () => {
             name: 'agg_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],
@@ -750,7 +747,7 @@ describe('function validation', () => {
             name: 'scalar_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],

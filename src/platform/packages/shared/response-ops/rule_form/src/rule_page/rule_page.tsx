@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '../hooks';
@@ -45,9 +46,10 @@ export const RulePage = (props: RulePageProps) => {
 
   const { actions } = formData;
 
-  const styles = {
-    backgroundColor: 'transparent',
-  };
+  const inLineContainerCss = css`
+    container-type: inline-size;
+    background-color: transparent;
+  `;
 
   const onSaveInternal = useCallback(() => {
     onSave({
@@ -87,10 +89,9 @@ export const RulePage = (props: RulePageProps) => {
         grow
         bottomBorder
         offset={0}
-        css={styles}
+        css={inLineContainerCss}
         onClick={onInteraction}
         onKeyDown={onInteraction}
-        className="ruleForm__container"
         data-test-subj="ruleForm"
       >
         <EuiPageTemplate.Header>

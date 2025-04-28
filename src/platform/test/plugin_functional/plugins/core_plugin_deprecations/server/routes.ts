@@ -15,6 +15,12 @@ export function registerRoutes(http: HttpServiceSetup) {
   router.post(
     {
       path: '/api/core_deprecations_resolve/',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           mockFail: schema.maybe(schema.boolean()),

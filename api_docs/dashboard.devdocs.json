@@ -786,7 +786,7 @@
             "label": "hits",
             "description": [],
             "signature": [
-              "Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{} & { title: string; description: string; timeRestore: boolean; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>[]"
+              "Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ tags?: string[] | undefined; } & { title: string; description: string; timeRestore: boolean; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>[]"
             ],
             "path": "src/platform/plugins/shared/dashboard/public/services/dashboard_content_management_service/lib/find_dashboards.ts",
             "deprecated": false,
@@ -1465,7 +1465,15 @@
         "label": "DashboardAttributes",
         "description": [],
         "signature": [
-          "Omit<Readonly<{ version?: number | undefined; refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; timeFrom?: string | undefined; timeTo?: string | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; } & { chainingSystem: ",
+          "Omit<Readonly<{ version?: number | undefined; tags?: string[] | undefined; refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; timeFrom?: string | undefined; timeTo?: string | undefined; controlGroupInput?: Readonly<{ enhancements?: Record<string, any> | undefined; } & { controls: Readonly<{ id?: string | undefined; controlConfig?: Record<string, any> | undefined; } & { type: string; order: number; grow: boolean; width: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlWidth",
+            "text": "ControlWidth"
+          },
+          "; }>[]; chainingSystem: ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -1481,15 +1489,7 @@
             "section": "def-common.ControlLabelPosition",
             "text": "ControlLabelPosition"
           },
-          "; autoApplySelections: boolean; ignoreParentSettings: Readonly<{} & { ignoreFilters: boolean; ignoreQuery: boolean; ignoreTimerange: boolean; ignoreValidations: boolean; }>; controls: Readonly<{ id?: string | undefined; controlConfig?: Record<string, any> | undefined; } & { type: string; order: number; grow: boolean; width: ",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlWidth",
-            "text": "ControlWidth"
-          },
-          "; }>[]; }> | undefined; } & { options: Readonly<{} & { hidePanelTitles: boolean; useMargins: boolean; syncColors: boolean; syncTooltips: boolean; syncCursor: boolean; }>; title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSource?: Readonly<{ type?: string | undefined; sort?: Record<string, ",
+          "; autoApplySelections: boolean; ignoreParentSettings: Readonly<{} & { ignoreFilters: boolean; ignoreQuery: boolean; ignoreTimerange: boolean; ignoreValidations: boolean; }>; }> | undefined; } & { options: Readonly<{} & { hidePanelTitles: boolean; useMargins: boolean; syncColors: boolean; syncTooltips: boolean; syncCursor: boolean; }>; title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSource?: Readonly<{ type?: string | undefined; sort?: Record<string, ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1522,7 +1522,13 @@
             "text": "FilterStateStore"
           },
           "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; } & {}> | undefined; } & {}>; timeRestore: boolean; panels: Readonly<{ id?: string | undefined; version?: string | undefined; title?: string | undefined; panelRefName?: string | undefined; panelIndex?: string | undefined; } & { type: string; panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}>; gridData: Readonly<{ i?: string | undefined; } & { y: number; w: number; h: number; x: number; }>; }>[]; }>, \"panels\"> & { panels: ",
-          "DashboardPanel",
+          {
+            "pluginId": "dashboard",
+            "scope": "server",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-server.DashboardPanel",
+            "text": "DashboardPanel"
+          },
           "[]; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/content_management/v3/types.ts",
@@ -1541,6 +1547,23 @@
           "{ readonly version?: number | undefined; readonly timeRestore?: boolean | undefined; readonly refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; readonly hits?: number | undefined; readonly timeFrom?: string | undefined; readonly timeTo?: string | undefined; readonly controlGroupInput?: Readonly<{ chainingSystem?: string | undefined; panelsJSON?: string | undefined; controlStyle?: string | undefined; ignoreParentSettingsJSON?: string | undefined; showApplySelections?: boolean | undefined; } & {}> | undefined; readonly optionsJSON?: string | undefined; readonly title: string; readonly description: string; readonly kibanaSavedObjectMeta: Readonly<{ searchSourceJSON?: string | undefined; } & {}>; readonly panelsJSON: string; }"
         ],
         "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/schema/v2/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-server.DashboardPanel",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardPanel",
+        "description": [],
+        "signature": [
+          "Omit<Readonly<{ id?: string | undefined; version?: string | undefined; title?: string | undefined; panelRefName?: string | undefined; panelIndex?: string | undefined; } & { type: string; panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}>; gridData: Readonly<{ i?: string | undefined; } & { y: number; w: number; h: number; x: number; }>; }>, \"panelConfig\"> & { panelConfig: Readonly<{ version?: string | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; enhancements?: Record<string, any> | undefined; savedObjectId?: string | undefined; } & {}> & { [key: string]: any; }; gridData: ",
+          "GridData",
+          "; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/content_management/v3/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1589,15 +1612,15 @@
       "children": [
         {
           "parentPluginId": "dashboard",
-          "id": "def-server.DashboardPluginStart.contentClient",
-          "type": "Object",
+          "id": "def-server.DashboardPluginStart.getContentClient",
+          "type": "Function",
           "tags": [],
-          "label": "contentClient",
+          "label": "getContentClient",
           "description": [
-            "\nUse contentClient.getForRequest to get a scoped client to perform CRUD and search operations for dashboards using the methods available in the {@link DashboardStorage} class.\n"
+            "\nUse getContentClient().getForRequest to get a scoped client to perform CRUD and search operations for dashboards using the methods available in the {@link DashboardStorage} class.\n"
           ],
           "signature": [
-            "{ getForRequest: <T = unknown>({ requestHandlerContext, version, }: { requestHandlerContext: ",
+            "() => { getForRequest: <T = unknown>({ requestHandlerContext, version, }: { requestHandlerContext: ",
             "RequestHandlerContext",
             "; request: ",
             "KibanaRequest",
@@ -1607,7 +1630,9 @@
           ],
           "path": "src/platform/plugins/shared/dashboard/server/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -1690,7 +1715,13 @@
         "description": [],
         "signature": [
           "(panels?: ",
-          "DashboardPanel",
+          {
+            "pluginId": "dashboard",
+            "scope": "server",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-server.DashboardPanel",
+            "text": "DashboardPanel"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "dashboard",
@@ -1712,7 +1743,13 @@
             "label": "panels",
             "description": [],
             "signature": [
-              "DashboardPanel",
+              {
+                "pluginId": "dashboard",
+                "scope": "server",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-server.DashboardPanel",
+                "text": "DashboardPanel"
+              },
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/dashboard/common/lib/dashboard_panel_converters.ts",

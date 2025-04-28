@@ -9,15 +9,17 @@ export const LOGSTASH_CONFIG_PIPELINES = `- pipeline.id: elastic-agent-pipeline
   path.config: "/etc/path/to/elastic-agent-pipeline.conf"
 `;
 
-export function getLogstashPipeline(apiKey?: string) {
-  return `input {
-  elastic_agent {
-    port => 5044
+const inputSSLConfig = `
     ssl_enabled => true
     ssl_certificate_authorities => ["<ca_path>"]
     ssl_certificate => "<server_cert_path>"
     ssl_key => "<server_cert_key_in_pkcs8>"
-    ssl_client_authentication => "required"
+    ssl_client_authentication => "required"`;
+
+export function getLogstashPipeline(isSSLEnabled: boolean, apiKey?: string) {
+  return `input {
+  elastic_agent {
+    port => 5044 ${isSSLEnabled ? inputSSLConfig : ''}
   }
 }
 

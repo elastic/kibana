@@ -85,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
+      searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchInferenceEndpoints: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: [
         'all',
@@ -279,6 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
         'readFlappingSettings',
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
+      streams: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
       inventory: ['all', 'read', 'minimal_all', 'minimal_read'],

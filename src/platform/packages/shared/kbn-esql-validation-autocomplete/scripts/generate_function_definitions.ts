@@ -18,6 +18,7 @@ import {
   FunctionReturnType,
   Signature,
   FunctionDefinitionTypes,
+  Location,
 } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
@@ -79,18 +80,21 @@ const bucketParameterTypes: Array<
   ['long', 'integer', 'long', 'long', 'double'],
 ];
 
-const scalarSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
-};
+const defaultScalarFunctionLocations: Location[] = [
+  Location.EVAL,
+  Location.ROW,
+  Location.SORT,
+  Location.WHERE,
+  Location.STATS,
+  Location.STATS_BY,
+  Location.STATS_WHERE,
+];
 
-const aggregationSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'inlinestats', 'metrics'],
-};
+const defaultAggFunctionLocations: Location[] = [Location.STATS];
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['case']);
+const excludedFunctions = new Set(['case', 'cast']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
@@ -98,7 +102,7 @@ const extraFunctions: FunctionDefinition[] = [
     name: 'case',
     description:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
-    ...scalarSupportedCommandsAndOptions,
+    locationsAvailable: defaultScalarFunctionLocations,
     signatures: [
       {
         params: [
@@ -306,26 +310,20 @@ const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
  * @returns
  */
 function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
-  let supportedCommandsAndOptions: Pick<
-    FunctionDefinition,
-    'supportedCommands' | 'supportedOptions'
-  > =
+  let locationsAvailable =
     ESFunctionDefinition.type === FunctionDefinitionTypes.SCALAR
-      ? scalarSupportedCommandsAndOptions
-      : aggregationSupportedCommandsAndOptions;
+      ? defaultScalarFunctionLocations
+      : defaultAggFunctionLocations;
 
   // MATCH and QSRT has limited supported for where commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    supportedCommandsAndOptions = {
-      supportedCommands: ['where'],
-      supportedOptions: [],
-    };
+    locationsAvailable = [Location.WHERE];
   }
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     operator: ESFunctionDefinition.operator,
-    ...supportedCommandsAndOptions,
+    locationsAvailable,
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     ignoreAsSuggestion: ESFunctionDefinition.snapshot_only,
@@ -690,13 +688,13 @@ const enrichGrouping = (
       ];
       return {
         ...op,
+        locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
         signatures,
-        supportedOptions: ['by'],
       };
     }
     return {
       ...op,
-      supportedOptions: ['by'],
+      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
     };
   });
 };
@@ -711,36 +709,54 @@ const enrichOperators = (
     const isComparisonOperator =
       Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
+    // IS NULL | IS NOT NULL
+    const arePredicates =
+      op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
+
     const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
     const isNotOperator =
-      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isInOperator);
+      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isLikeOperator);
 
     let signatures = op.signatures.map((s) => ({
       ...s,
       // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
       params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
     }));
-    let supportedCommands = op.supportedCommands;
-    let supportedOptions = op.supportedOptions;
+
+    let locationsAvailable = op.locationsAvailable;
+
     if (isComparisonOperator) {
-      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
-      supportedOptions = ['by'];
+      locationsAvailable = _.uniq([
+        ...op.locationsAvailable,
+        Location.EVAL,
+        Location.WHERE,
+        Location.ROW,
+        Location.SORT,
+        Location.STATS_WHERE,
+        Location.STATS_BY,
+      ]);
     }
     if (isMathOperator) {
-      supportedCommands = _.uniq([
-        ...op.supportedCommands,
-        'eval',
-        'where',
-        'row',
-        'stats',
-        'metrics',
-        'sort',
+      locationsAvailable = _.uniq([
+        ...op.locationsAvailable,
+        Location.EVAL,
+        Location.WHERE,
+        Location.ROW,
+        Location.SORT,
+        Location.STATS,
+        Location.STATS_WHERE,
+        Location.STATS_BY,
       ]);
-      supportedOptions = ['by'];
     }
-    if (isInOperator || isLikeOperator || isNotOperator) {
-      supportedCommands = ['eval', 'where', 'row', 'sort'];
+    if (isInOperator || isLikeOperator || isNotOperator || arePredicates) {
+      locationsAvailable = [
+        Location.EVAL,
+        Location.WHERE,
+        Location.SORT,
+        Location.ROW,
+        Location.STATS_WHERE,
+      ];
     }
     if (isInOperator) {
       // Override the signatures to be array types instead of singular
@@ -766,8 +782,7 @@ const enrichOperators = (
       signatures,
       // Elasticsearch docs does not include the full supported commands for math operators
       // so we are overriding to add proper support
-      supportedCommands,
-      supportedOptions,
+      locationsAvailable,
       type: FunctionDefinitionTypes.OPERATOR,
       validate: validators[op.name],
       ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
@@ -823,24 +838,29 @@ function printGeneratedFunctionsFile(
       functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
-    if (functionName.includes('not')) {
+    if (functionName.includes('not') && functionName !== 'is not null') {
       functionName = name;
     }
     if (name.toLowerCase() === 'match') {
       functionName = 'match';
     }
+
+    // Map locationsAvailable to enum names
+    const locationsAvailable = functionDefinition.locationsAvailable.map(
+      (location) => `Location.${location.toUpperCase()}`
+    );
+
     return `// Do not edit this manually... generated by scripts/generate_function_definitions.ts
     const ${getDefinitionName(name)}: FunctionDefinition = {
     type: FunctionDefinitionTypes.${type.toUpperCase()},
     name: '${functionName}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
+    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}
     preview: ${functionDefinition.preview || 'false'},
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
-    supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
-    supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
+    locationsAvailable: [${locationsAvailable.join(', ')}],
     validate: ${functionDefinition.validate || 'undefined'},
     examples: ${JSON.stringify(functionDefinition.examples || [])},${
       customParametersSnippet
@@ -870,7 +890,7 @@ function printGeneratedFunctionsFile(
  */
 
 import { i18n } from '@kbn/i18n';
-import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
+import { type FunctionDefinition, FunctionDefinitionTypes, Location } from '../types';
 ${
   functionsType === FunctionDefinitionTypes.SCALAR
     ? `import type { ESQLFunction } from '@kbn/esql-ast';
@@ -943,6 +963,10 @@ ${
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
+    const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
+    if (arePredicates) {
+      continue;
+    }
 
     if (functionDefinition.name.toLowerCase() === 'match') {
       scalarFunctionDefinitions.push({
@@ -951,6 +975,7 @@ ${
       });
       continue;
     }
+
     if (functionDefinition.type === FunctionDefinitionTypes.OPERATOR || isLikeOperator) {
       operatorDefinitions.push(functionDefinition);
     }

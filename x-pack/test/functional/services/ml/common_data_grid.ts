@@ -63,11 +63,13 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
     },
 
     async assertEuiDataGridNotEmpty(tableSubj: string) {
-      const dataGridCells = await this.getDataGridCells(tableSubj);
-      expect(dataGridCells.length).to.be.greaterThan(
-        0,
-        `EuiDataGrid '${tableSubj}' should have at least one cell (got '${dataGridCells.length}')`
-      );
+      await retry.tryForTime(5 * 1000, async () => {
+        const dataGridCells = await this.getDataGridCells(tableSubj);
+        expect(dataGridCells.length).to.be.greaterThan(
+          0,
+          `EuiDataGrid '${tableSubj}' should have at least one cell (got '${dataGridCells.length}')`
+        );
+      });
     },
 
     async assertEuiDataGridEmpty(tableSubj: string) {

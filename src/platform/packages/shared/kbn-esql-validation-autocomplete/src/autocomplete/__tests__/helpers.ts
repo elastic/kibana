@@ -8,13 +8,16 @@
  */
 
 import { camelCase } from 'lodash';
-import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
-import { FunctionDefinitionTypes } from '../../definitions/types';
+import {
+  FunctionDefinitionTypes,
+  Location,
+  getLocationFromCommandOrOptionName,
+} from '../../definitions/types';
 import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
@@ -132,7 +135,7 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string | string[],
+  location: Location | Location[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
@@ -174,15 +177,17 @@ export function getFunctionSignaturesByReturnType(
 
   const deduped = Array.from(new Set(list));
 
-  const commands = Array.isArray(command) ? command : [command];
+  const locations = Array.isArray(location) ? location : [location];
+
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
+    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
       if (
-        !commands.some((c) => supportedCommands.includes(c)) &&
-        !supportedOptions?.includes(option || '')
+        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+          (loc) => locationsAvailable.includes(loc)
+        )
       ) {
         return false;
       }
@@ -321,6 +326,17 @@ export interface SuggestOptions {
   callbacks?: ESQLCallbacks;
 }
 
+export type AssertSuggestionsFn = (
+  query: string,
+  expected: Array<string | PartialSuggestionWithText>,
+  opts?: SuggestOptions
+) => Promise<void>;
+
+export type SuggestFn = (
+  query: string,
+  opts?: SuggestOptions
+) => Promise<SuggestionRawDefinition[]>;
+
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
     throw new Error('Caret must be a single character');
@@ -328,7 +344,7 @@ export const setup = async (caret = '/') => {
 
   const callbacks = createCustomCallbackMocks();
 
-  const suggest = async (query: string, opts: SuggestOptions = {}) => {
+  const suggest: SuggestFn = async (query, opts = {}) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
@@ -336,20 +352,10 @@ export const setup = async (caret = '/') => {
       ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
       : { triggerKind: 0 };
 
-    return await autocomplete.suggest(
-      querySansCaret,
-      pos,
-      ctx,
-      (_query: string | undefined) => parse(_query, { withFormatting: true }),
-      opts.callbacks ?? callbacks
-    );
+    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
   };
 
-  const assertSuggestions = async (
-    query: string,
-    expected: Array<string | PartialSuggestionWithText>,
-    opts?: SuggestOptions
-  ) => {
+  const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
     try {
       const result = await suggest(query, opts);
       const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();

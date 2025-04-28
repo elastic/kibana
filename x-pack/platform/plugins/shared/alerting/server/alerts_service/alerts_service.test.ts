@@ -174,6 +174,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
             }),
         'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
       mappings: {
         dynamic: false,
@@ -473,14 +474,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
             name: existingIndexTemplate.name,
-            body: {
-              ...existingIndexTemplate.index_template,
-              template: {
-                ...existingIndexTemplate.index_template.template,
-                settings: {
-                  ...existingIndexTemplate.index_template.template?.settings,
-                  'index.mapping.total_fields.limit': 2500,
-                },
+            ...existingIndexTemplate.index_template,
+            template: {
+              ...existingIndexTemplate.index_template.template,
+              settings: {
+                ...existingIndexTemplate.index_template.template?.settings,
+                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
           });
@@ -901,6 +901,7 @@ describe('Alerts Service', () => {
                       },
                     }),
                 'index.mapping.ignore_malformed': true,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                 'index.mapping.total_fields.limit': 2500,
               },
               mappings: {

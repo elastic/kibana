@@ -4,36 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AsApiContract } from '@kbn/actions-plugin/common';
 import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import type {
-  LoadRuleAggregationsProps,
-  LoadRuleTagsProps,
-  GetRuleTagsResponse,
-  AggregateRulesResponse,
-} from './aggregate_helpers';
-import { rewriteBodyRes, rewriteTagsBodyRes } from './aggregate_helpers';
-
-export async function loadRuleTags({
-  http,
-  search,
-  perPage,
-  page,
-}: LoadRuleTagsProps): Promise<GetRuleTagsResponse> {
-  const res = await http.get<AsApiContract<GetRuleTagsResponse>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_tags`,
-    {
-      query: {
-        search,
-        per_page: perPage,
-        page,
-      },
-    }
-  );
-  return rewriteTagsBodyRes(res);
-}
+import type { LoadRuleAggregationsProps, AggregateRulesResponse } from './aggregate_helpers';
+import { rewriteBodyRes } from './aggregate_helpers';
 
 export async function loadRuleAggregations({
   http,

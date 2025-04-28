@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import React from 'react';
+import type {
+  ReactNode,
+  ChangeEvent,
+  FormEvent,
+  Dispatch as ReactDispatch,
+  SetStateAction as ReactSetStateAction,
+} from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -28,7 +34,7 @@ import type {
   UserConfiguredActionConnector,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ChatRequestData, MessageRole, LLMs } from '../common/types';
 
 export * from '../common/types';
@@ -65,12 +71,14 @@ export interface AppPluginStartDependencies {
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
 
-export enum ChatFormFields {
+export enum PlaygroundFormFields {
   question = 'question',
   citations = 'citations',
   prompt = 'prompt',
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
+  userElasticsearchQuery = 'user_elasticsearch_query',
+  userElasticsearchQueryValidations = 'user_elasticsearch_query_validations',
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'doc_size',
@@ -78,22 +86,30 @@ export enum ChatFormFields {
   searchQuery = 'search_query',
 }
 
-export interface ChatForm {
-  [ChatFormFields.question]: string;
-  [ChatFormFields.prompt]: string;
-  [ChatFormFields.citations]: boolean;
-  [ChatFormFields.indices]: string[];
-  [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
-  [ChatFormFields.sourceFields]: { [index: string]: string[] };
-  [ChatFormFields.docSize]: number;
-  [ChatFormFields.queryFields]: { [index: string]: string[] };
-  [ChatFormFields.searchQuery]: string;
+export interface PlaygroundForm {
+  [PlaygroundFormFields.question]: string;
+  [PlaygroundFormFields.prompt]: string;
+  [PlaygroundFormFields.citations]: boolean;
+  [PlaygroundFormFields.indices]: string[];
+  [PlaygroundFormFields.summarizationModel]: LLMModel;
+  [PlaygroundFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
+  [PlaygroundFormFields.sourceFields]: { [index: string]: string[] };
+  [PlaygroundFormFields.docSize]: number;
+  [PlaygroundFormFields.queryFields]: { [index: string]: string[] };
+  [PlaygroundFormFields.searchQuery]: string;
+  [PlaygroundFormFields.userElasticsearchQuery]: string | null | undefined;
+  [PlaygroundFormFields.userElasticsearchQueryValidations]: UserQueryValidations | undefined;
+}
+
+export interface UserQueryValidations {
+  isValid: boolean;
+  isUserCustomized: boolean;
+  userQueryErrors?: string[];
 }
 
 export interface Message {
   id: string;
-  content: string | React.ReactNode;
+  content: string | ReactNode;
   createdAt?: Date;
   annotations?: Annotation[];
   role: MessageRole;
@@ -205,14 +221,9 @@ export interface UseChatHelpers {
   stop: () => void;
   setMessages: (messages: Message[]) => void;
   input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
-  handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
-  ) => void;
-  handleSubmit: (
-    e: React.FormEvent<HTMLFormElement>,
-    chatRequestOptions?: ChatRequestOptions
-  ) => void;
+  setInput: ReactDispatch<ReactSetStateAction<string>>;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
+  handleSubmit: (e: FormEvent<HTMLFormElement>, chatRequestOptions?: ChatRequestOptions) => void;
   isLoading: boolean;
 }
 

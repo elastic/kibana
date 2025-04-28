@@ -14,10 +14,8 @@ An index connector indexes a document into {{es}}.
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/index-connector.png
-:alt: Index connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Index connector](../images/index-connector.png)
 
 
 ### Connector configuration [index-connector-configuration]
@@ -29,10 +27,8 @@ Index connectors must have a name and an {{es}} index. You can optionally choose
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/index-params-test.png
-:alt: Index params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Index params test](../images/index-params-test.png)
 
 Index connector actions contain a document in JSON format. For example, if you have an index with the following properties:
 

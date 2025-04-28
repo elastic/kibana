@@ -121,14 +121,14 @@ class Package {
 
     /**
      * the group to which this package belongs
-     * @type {import('@kbn/repo-info/types').ModuleGroup}
+     * @type {import('@kbn/projects-solutions-groups').ModuleGroup}
      * @readonly
      */
 
     this.group = group;
     /**
      * the visibility of this package, i.e. whether it can be accessed by everybody or only modules in the same group
-     * @type {import('@kbn/repo-info/types').ModuleVisibility}
+     * @type {import('@kbn/projects-solutions-groups').ModuleVisibility}
      * @readonly
      */
     this.visibility = visibility;
@@ -159,7 +159,7 @@ class Package {
   /**
    * Returns the group to which this package belongs
    * @readonly
-   * @returns {import('@kbn/repo-info/types').ModuleGroup}
+   * @returns {import('@kbn/projects-solutions-groups').ModuleGroup}
    */
   getGroup() {
     return this.group;
@@ -168,7 +168,7 @@ class Package {
   /**
    * Returns the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
    * @readonly
-   * @returns {import('@kbn/repo-info/types').ModuleVisibility}
+   * @returns {import('@kbn/projects-solutions-groups').ModuleVisibility}
    */
   getVisibility() {
     return this.visibility;
@@ -203,17 +203,19 @@ class Package {
   determineGroupAndVisibility() {
     const dir = this.normalizedRepoRelativeDir;
 
-    /** @type {import('@kbn/repo-info/types').ModuleGroup} */
+    /** @type {import('@kbn/projects-solutions-groups').ModuleGroup} */
     let group = 'common';
-    /** @type {import('@kbn/repo-info/types').ModuleVisibility} */
+    /** @type {import('@kbn/projects-solutions-groups').ModuleVisibility} */
     let visibility = 'shared';
 
+    // the following checks will only work in dev mode, as production builds create NPM packages under 'node_modules/@kbn-...'
     if (dir.startsWith('src/platform/') || dir.startsWith('x-pack/platform/')) {
       group = 'platform';
       visibility =
         /src\/platform\/[^\/]+\/shared/.test(dir) || /x-pack\/platform\/[^\/]+\/shared/.test(dir)
           ? 'shared'
           : 'private';
+      // BOOKMARK - List of Kibana solutions
     } else if (dir.startsWith('x-pack/solutions/search/')) {
       group = 'search';
       visibility = 'private';
@@ -223,10 +225,15 @@ class Package {
     } else if (dir.startsWith('x-pack/solutions/observability/')) {
       group = 'observability';
       visibility = 'private';
+    } else if (dir.startsWith('x-pack/solutions/chat/')) {
+      group = 'chat';
+      visibility = 'private';
     } else {
+      // this conditional branch is the only one that applies in production
       group = this.manifest.group ?? 'common';
       // if the group is 'private-only', enforce it
-      visibility = ['search', 'security', 'observability'].includes(group)
+      //  BOOKMARK - List of Kibana solutions - FIXME we could use KIBANA_SOLUTIONS array here once we modernize this / get rid of Bazel
+      visibility = ['search', 'security', 'observability', 'chat'].includes(group)
         ? 'private'
         : this.manifest.visibility ?? 'shared';
     }

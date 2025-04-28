@@ -14,10 +14,8 @@ The Tines connector uses Tines’s [Webhook actions](https://www.tines.com/docs/
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/tines-connector.png
-:alt: Tines connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Tines connector](../images/tines-connector.png)
 
 
 ### Connector configuration [tines-connector-configuration]
@@ -38,10 +36,8 @@ API Token
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/tines-params-test.png
-:alt: Tines params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Tines params test](../images/tines-params-test.png)
 
 If you create a rule action that uses the Tines connector, you can likewise configure the POST request that is sent to the Tines webhook action when the rule conditions are met.
 
@@ -52,20 +48,16 @@ It is possible that requests to the Tines API to get the stories and webhooks fo
 
 When the webhook URL is defined, the connector will use it directly when an action runs, and the story and webhook selectors will be disabled and ignored. To re-enable the story and webhook selectors, remove the webhook URL value.
 
-:::{image} ../../images/tines-webhook-url-fallback.png
-:alt: Tines Webhook URL fallback
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Tines Webhook URL fallback](../images/tines-webhook-url-fallback.png)
 
 
 ## Tines story library [tines-story-library]
 
 In order to simplify the integration with Elastic, Tines offers a set of pre-defined Elastic stories in the Story library. They can be found by searching for "Elastic" in the [Tines Story library](https://www.tines.com/story-library?s=elastic):
 
-:::{image} ../../images/tines_elastic_stories.png
-:alt: Tines Elastic stories
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Tines Elastic stories](../images/tines_elastic_stories.png)
 
 They can be imported directly into your Tines tenant.
 

@@ -14,13 +14,14 @@ import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
 import { RecalledEntry } from '../../service/knowledge_base_service';
 
-export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
+export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'esScore'>;
 
 export async function recallAndScore({
   recall,
   chat,
   analytics,
   userPrompt,
+  userMessageFunctionName,
   context,
   messages,
   logger,
@@ -30,13 +31,14 @@ export async function recallAndScore({
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
+  userMessageFunctionName?: string;
   context: string;
   messages: Message[];
   logger: Logger;
   signal: AbortSignal;
 }): Promise<{
   relevantDocuments?: RecalledSuggestion[];
-  scores?: Array<{ id: string; score: number }>;
+  llmScores?: Array<{ id: string; llmScore: number }>;
   suggestions: RecalledSuggestion[];
 }> {
   const queries = [
@@ -45,41 +47,40 @@ export async function recallAndScore({
   ].filter((query) => query.text.trim());
 
   const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
-    ({ id, text, score }) => ({ id, text, score })
+    ({ id, text, esScore }) => ({ id, text, esScore })
   );
 
   if (!suggestions.length) {
     return {
       relevantDocuments: [],
-      scores: [],
+      llmScores: [],
       suggestions: [],
     };
   }
 
   try {
-    const { scores, relevantDocuments } = await scoreSuggestions({
+    const { llmScores, relevantDocuments } = await scoreSuggestions({
       suggestions,
       logger,
       messages,
       userPrompt,
+      userMessageFunctionName,
       context,
       signal,
       chat,
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
-      prompt: queries.map((query) => query.text).join('\n\n'),
       scoredDocuments: suggestions.map((suggestion) => {
-        const llmScore = scores.find((score) => score.id === suggestion.id);
+        const llmScore = llmScores.find((score) => score.id === suggestion.id);
         return {
-          content: suggestion.text,
-          elserScore: suggestion.score ?? -1,
-          llmScore: llmScore ? llmScore.score : -1,
+          esScore: suggestion.esScore ?? -1,
+          llmScore: llmScore ? llmScore.llmScore : -1,
         };
       }),
     });
 
-    return { scores, relevantDocuments, suggestions };
+    return { llmScores, relevantDocuments, suggestions };
   } catch (error) {
     logger.error(`Error scoring documents: ${error.message}`, { error });
     return {

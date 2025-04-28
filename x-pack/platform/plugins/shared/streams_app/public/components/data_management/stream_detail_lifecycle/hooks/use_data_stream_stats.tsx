@@ -16,39 +16,42 @@ export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][
   bytesPerDay: number;
 };
 
-export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGetResponse }) => {
+export const useDataStreamStats = ({ definition }: { definition: IngestStreamGetResponse }) => {
   const {
     services: { dataStreamsClient },
   } = useKibana();
 
-  const statsFetch = useStreamsAppFetch(async () => {
-    if (!definition) {
-      return;
+  const statsFetch = useStreamsAppFetch(
+    async () => {
+      const client = await dataStreamsClient;
+      const {
+        dataStreamsStats: [dsStats],
+      } = await client.getDataStreamsStats({
+        datasetQuery: definition.stream.name,
+        includeCreationDate: true,
+      });
+
+      if (!dsStats || !dsStats.creationDate) {
+        return undefined;
+      }
+      const daysSinceCreation = Math.max(
+        1,
+        Math.round(moment().diff(moment(dsStats.creationDate), 'days'))
+      );
+
+      return {
+        ...dsStats,
+        bytesPerDay: dsStats.sizeBytes ? dsStats.sizeBytes / daysSinceCreation : 0,
+        bytesPerDoc:
+          dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0,
+      };
+    },
+    [dataStreamsClient, definition],
+    {
+      withTimeRange: false,
+      withRefresh: true,
     }
-
-    const client = await dataStreamsClient;
-    const {
-      dataStreamsStats: [dsStats],
-    } = await client.getDataStreamsStats({
-      datasetQuery: definition.stream.name,
-      includeCreationDate: true,
-    });
-
-    if (!dsStats || !dsStats.creationDate) {
-      return undefined;
-    }
-    const daysSinceCreation = Math.max(
-      1,
-      Math.round(moment().diff(moment(dsStats.creationDate), 'days'))
-    );
-
-    return {
-      ...dsStats,
-      bytesPerDay: dsStats.sizeBytes ? dsStats.sizeBytes / daysSinceCreation : 0,
-      bytesPerDoc:
-        dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0,
-    };
-  }, [dataStreamsClient, definition]);
+  );
 
   return {
     stats: statsFetch.value,

@@ -16,6 +16,7 @@ import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
+import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
 import type { AgentlessApiResponse } from '../../../common/types';
@@ -38,6 +39,7 @@ import { fleetServerHostService } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
 import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
 import {
+  AGENTLESS_API_ERROR_CODES,
   MAXIMUM_RETRIES,
   RETRYABLE_HTTP_STATUSES,
   RETRYABLE_SERVER_CODES,
@@ -100,6 +102,12 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
     );
 
+    if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
+      logger.debug(
+        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${policyId}`
+      );
+    }
+
     logger.debug(
       `[Agentless API] Creating agentless agent with TLS cert: ${
         agentlessConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
@@ -117,6 +125,7 @@ class AgentlessAgentService {
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
         resources: agentlessAgentPolicy.agentless?.resources,
+        cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
         labels,
       },
       method: 'POST',
@@ -211,10 +220,11 @@ class AgentlessAgentService {
     return response;
   }
 
-  public async upgradeAgentlessDeployment(policyId: string, version: string) {
+  public async upgradeAgentlessDeployment(policyId: string) {
     const logger = appContextService.getLogger();
     const traceId = apm.currentTransaction?.traceparent;
     const agentlessConfig = appContextService.getConfig()?.agentless;
+    const kibanaVersion = appContextService.getKibanaVersion();
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const urlEndpoint = prependAgentlessApiBasePathToEndpoint(
       agentlessConfig,
@@ -227,7 +237,7 @@ class AgentlessAgentService {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, `/deployments/${policyId}`),
       method: 'PUT',
       data: {
-        stack_version: version,
+        stack_version: kibanaVersion,
       },
       ...this.getHeaders(tlsConfig, traceId),
     };
@@ -419,32 +429,22 @@ class AgentlessAgentService {
       this.getErrorHandlingMessages(agentlessPolicyId);
 
     if (error.response) {
-      if (error.response.status in ERROR_HANDLING_MESSAGES) {
-        const handledResponseErrorMessage = ERROR_HANDLING_MESSAGES[error.response.status][action];
-        this.handleResponseError(
-          action,
-          error.response,
-          logger,
-          errorMetadataWithRequestConfig,
-          requestConfigDebugStatus,
-          handledResponseErrorMessage.log,
-          handledResponseErrorMessage.message,
-          traceId
-        );
-      } else {
-        const unhandledResponseErrorMessage = ERROR_HANDLING_MESSAGES.unhandled_response[action];
-        // The request was made and the server responded with a status code and error data
-        this.handleResponseError(
-          action,
-          error.response,
-          logger,
-          errorMetadataWithRequestConfig,
-          requestConfigDebugStatus,
-          unhandledResponseErrorMessage.log,
-          unhandledResponseErrorMessage.message,
-          traceId
-        );
-      }
+      // The request was made and the server responded with a status code and error data
+      const responseErrorMessage =
+        error.response.status in ERROR_HANDLING_MESSAGES
+          ? ERROR_HANDLING_MESSAGES[error.response.status][action]
+          : ERROR_HANDLING_MESSAGES.unhandled_response[action];
+
+      this.handleResponseError(
+        action,
+        error.response,
+        logger,
+        errorMetadataWithRequestConfig,
+        requestConfigDebugStatus,
+        responseErrorMessage.log,
+        responseErrorMessage.message,
+        traceId
+      );
     } else if (error.request) {
       // The request was made but no response was received
       const requestErrorMessage = ERROR_HANDLING_MESSAGES.request_error[action];
@@ -497,7 +497,12 @@ class AgentlessAgentService {
       }
     );
 
-    throw this.getAgentlessAgentError(action, userMessage, traceId);
+    const responseData = {
+      code: response?.data?.code,
+      error: response?.data?.error,
+    };
+
+    throw this.getAgentlessAgentError(action, userMessage, traceId, responseData);
   }
 
   private convertCauseErrorsToString = (error: AxiosError) => {
@@ -507,8 +512,25 @@ class AgentlessAgentService {
     return error.cause;
   };
 
-  private getAgentlessAgentError(action: string, userMessage: string, traceId: string | undefined) {
+  private getAgentlessAgentError(
+    action: string,
+    userMessage: string,
+    traceId: string | undefined,
+    responseData?: {
+      code?: string;
+      error?: string;
+    }
+  ) {
     if (action === 'create') {
+      if (responseData?.code === AGENTLESS_API_ERROR_CODES.OVER_PROVISIONED) {
+        const limitMatches = responseData?.error?.match(/limit: ([0-9]+)/);
+        const limit = limitMatches ? parseInt(limitMatches[1], 10) : undefined;
+
+        return new AgentlessAgentCreateOverProvisionedError(
+          this.withRequestIdMessage(userMessage, traceId),
+          limit
+        );
+      }
       return new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId));
     }
     if (action === 'delete') {

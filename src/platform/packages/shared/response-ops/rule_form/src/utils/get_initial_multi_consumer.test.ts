@@ -43,6 +43,7 @@ describe('getInitialMultiConsumer', () => {
     },
     enabledInLicense: true,
     category: 'test',
+    isExportable: true,
   } as RuleTypeWithDescription;
 
   const ruleTypes = [
@@ -100,6 +101,7 @@ describe('getInitialMultiConsumer', () => {
       name: 'Index threshold',
       category: 'management',
       producer: 'stackAlerts',
+      isExportable: true,
     },
   ] as RuleTypeWithDescription[];
 

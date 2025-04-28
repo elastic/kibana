@@ -914,14 +914,6 @@
           {
             "plugin": "observabilityShared",
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
           }
         ],
         "children": [
@@ -1397,20 +1389,20 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/platform/plugins/private/observability_ai_assistant_management/public/app.tsx"
+          },
+          {
+            "plugin": "observabilityAiAssistantManagement",
+            "path": "x-pack/platform/plugins/private/observability_ai_assistant_management/public/app.tsx"
+          },
+          {
             "plugin": "aiAssistantManagementSelection",
             "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
           },
           {
             "plugin": "aiAssistantManagementSelection",
             "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/management_section/mount_section.tsx"
-          },
-          {
-            "plugin": "observabilityAiAssistantManagement",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_management/public/app.tsx"
-          },
-          {
-            "plugin": "observabilityAiAssistantManagement",
-            "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_management/public/app.tsx"
           }
         ],
         "children": [
@@ -2444,6 +2436,8 @@
           "SecurityServiceStart",
           " | undefined; userProfile?: ",
           "UserProfileService",
+          " | undefined; rendering?: ",
+          "RenderingService",
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
@@ -2864,16 +2858,16 @@
         "signature": [
           "(storyFn: ",
           "PartialStoryFn",
-          "<ReturnTypeFramework<",
-          "StoryFnReactReturnType",
-          ">, ",
-          "Args",
+          "<",
+          "R",
+          ", ",
+          "StrictArgs",
           ">, { globals }: ",
           "StoryContext",
-          "<ReturnTypeFramework<",
-          "StoryFnReactReturnType",
-          ">, ",
-          "Args",
+          "<",
+          "R",
+          ", ",
+          "StrictArgs",
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
@@ -2895,10 +2889,10 @@
             "description": [],
             "signature": [
               "PartialStoryFn",
-              "<ReturnTypeFramework<",
-              "StoryFnReactReturnType",
-              ">, ",
-              "Args",
+              "<",
+              "R",
+              ", ",
+              "StrictArgs",
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
@@ -2909,16 +2903,16 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-common.KibanaStyledComponentsThemeProviderDecorator.$2",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ globals }",
             "description": [],
             "signature": [
               "StoryContext",
-              "<ReturnTypeFramework<",
-              "StoryFnReactReturnType",
-              ">, ",
-              "Args",
+              "<",
+              "R",
+              ", ",
+              "StrictArgs",
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",

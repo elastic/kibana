@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { get, pick } from 'lodash';
 import stats from 'stats-lite';
-import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
-import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
+import type { Observable } from 'rxjs';
+import { combineLatest, filter, map, startWith } from 'rxjs';
+import type { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import { mapOk, unwrap } from '../lib/result_type';
-import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
-import { ConcreteTaskInstance } from '../task';
-import {
-  isTaskManagerWorkerUtilizationStatEvent,
-  isTaskRunEvent,
-  TaskRun,
-  TaskTiming,
-} from '../task_events';
-import { MonitoredStat } from './monitoring_stats_stream';
-import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import type { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
+import type { ConcreteTaskInstance } from '../task';
+import type { TaskRun, TaskTiming } from '../task_events';
+import { isTaskManagerWorkerUtilizationStatEvent, isTaskRunEvent } from '../task_events';
+import type { MonitoredStat } from './monitoring_stats_stream';
+import type { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calculators';
 import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from '../config';
 

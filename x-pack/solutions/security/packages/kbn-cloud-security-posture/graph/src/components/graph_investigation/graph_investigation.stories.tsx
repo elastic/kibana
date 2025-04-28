@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { GraphInvestigation, type GraphInvestigationProps } from './graph_investigation';
 import {
@@ -96,4 +96,6 @@ const Template: StoryFn<Partial<GraphInvestigationProps>> = (props) => {
   return <GraphInvestigation {...defaultProps} {...props} />;
 };
 
-export const Investigation = Template.bind({});
+export const Investigation: StoryObj<Partial<GraphInvestigationProps>> = {
+  render: Template,
+};

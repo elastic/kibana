@@ -16,10 +16,8 @@ To create this connector, you must have a valid PagerDuty integration key. For c
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/pagerduty-connector.png
-:alt: PagerDuty connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![PagerDuty connector](../images/pagerduty-connector.png)
 
 
 ### Connector configuration [pagerduty-connector-configuration]
@@ -51,30 +49,24 @@ When you create a rule that uses a PagerDuty connector, you can use any of these
 
 When you test the acknowlege action, you must provide the de-duplication key for a PagerDuty alert:
 
-:::{image} ../../images/pagerduty-acknowledge-test.png
-:alt: PagerDuty params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![PagerDuty params test](../images/pagerduty-acknowledge-test.png)
 
 
 ### Resolve action [pagerduty-action-resolve]
 
 Likewise when you test the resolve action, you must provide the de-duplication key:
 
-:::{image} ../../images/pagerduty-resolve-test.png
-:alt: PagerDuty params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![PagerDuty params test](../images/pagerduty-resolve-test.png)
 
 
 ### Trigger action [pagerduty-action-trigger]
 
 When you test the trigger action, you must provide a summary for the PagerDuty alert:
 
-:::{image} ../../images/pagerduty-trigger-test.png
-:alt: PagerDuty params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![PagerDuty params test](../images/pagerduty-trigger-test.png)
 
 This action has the following properties:
 
@@ -144,10 +136,8 @@ To set up PagerDuty:
 
     You will be redirected to the **Integrations** tab for your service. An Integration Key is generated on this screen.
 
-    :::{image} ../../images/pagerduty-integration.png
-    :alt: PagerDuty Integrations tab
-    :class: screenshot
-    :::
+% TO DO: Use `:class: screenshot`
+![PagerDuty Integrations tab](../images/pagerduty-integration.png)
 
 5. Save this key for use when you configure the connector in {{kib}}.
 

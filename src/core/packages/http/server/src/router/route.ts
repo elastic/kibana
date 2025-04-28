@@ -202,6 +202,9 @@ interface DeprecateApiDeprecationType {
   type: 'deprecate';
 }
 
+export type AllRequiredCondition = Array<Privilege | { anyOf: Privilege[] }>;
+export type AnyRequiredCondition = Array<Privilege | { allOf: Privilege[] }>;
+
 /**
  * A set of privileges that can be used to define complex authorization requirements.
  *
@@ -209,14 +212,14 @@ interface DeprecateApiDeprecationType {
  * - `allRequired`: An array of privileges where all listed privileges must be satisfied to meet the authorization requirement.
  */
 export interface PrivilegeSet {
-  anyRequired?: Privilege[];
-  allRequired?: Privilege[];
+  anyRequired?: AnyRequiredCondition;
+  allRequired?: AllRequiredCondition;
 }
 
 /**
  * An array representing a combination of simple privileges or complex privilege sets.
  */
-type Privileges = Array<Privilege | PrivilegeSet>;
+export type Privileges = Array<Privilege | PrivilegeSet>;
 
 /**
  * Describes the authorization requirements when authorization is enabled.
@@ -557,7 +560,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Defines the security requirements for a route, including authorization and authentication.
    */
-  security?: RouteSecurity;
+  security: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

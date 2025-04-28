@@ -19,9 +19,9 @@ import {
   type ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import {
-  ESQLCommandMode,
   ESQLIdentifier,
   ESQLInlineCast,
+  ESQLLocation,
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
@@ -34,16 +34,7 @@ import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
-  byOption,
-  metadataOption,
-  asOption,
-  onOption,
-  withOption,
-  appendSeparatorOption,
-} from '../definitions/options';
-import {
   CommandDefinition,
-  CommandOptionsDefinition,
   FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
@@ -51,6 +42,7 @@ import {
   ArrayType,
   SupportedDataType,
   FunctionDefinitionTypes,
+  getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -66,10 +58,6 @@ export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
-/** @deprecated — a "setting" is a concept we will be getting rid of soon */
-export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
-  return isSingleItem(arg) && arg.type === 'mode';
-}
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
   return isSingleItem(arg) && arg.type === 'function';
 }
@@ -111,7 +99,10 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
 
-export function isMathFunction(query: string, offset: number) {
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
+
+function isMathFunction(query: string) {
   const queryTrimmed = query.trimEnd();
   // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
   // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
@@ -136,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
+  return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -178,9 +169,7 @@ export function isSupportedFunction(
   }
   const fn = buildFunctionLookup().get(name);
   const isSupported = Boolean(
-    option == null
-      ? fn?.supportedCommands.includes(parentCommand)
-      : fn?.supportedOptions?.includes(option)
+    fn?.locationsAvailable.includes(getLocationFromCommandOrOptionName(option ?? parentCommand))
   );
   return {
     supported: isSupported,
@@ -209,27 +198,27 @@ function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
       memo.set(def.name, def);
-      if (def.alias) {
-        memo.set(def.alias, def);
-      }
       return memo;
     }, new Map<string, CommandDefinition<string>>());
   }
   return commandLookups!;
 }
 
-export function getCommandDefinition(name: string): CommandDefinition<string> {
-  return buildCommandLookup().get(name.toLowerCase())!;
+export function getCommandDefinition<CommandName extends string>(
+  name: CommandName
+): CommandDefinition<CommandName> {
+  return buildCommandLookup().get(name.toLowerCase()) as unknown as CommandDefinition<CommandName>;
 }
 
 export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
 }
 
-export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
-  return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
-    ({ name }) => name === optionName
-  );
+export function getCommandsByName(names: string[]): Array<CommandDefinition<string>> {
+  const commands = buildCommandLookup();
+  return names.map((name) => commands.get(name)).filter((command) => command) as Array<
+    CommandDefinition<string>
+  >;
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
@@ -764,8 +753,8 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
     (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
     // monaco.editor.CompletionTriggerKind['Invoke'] === 0
     (context.triggerKind === 0 && unclosedRoundBracketCount === 0) ||
-    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
-    isComma(query.trimEnd()[query.trimEnd().length - 1])
+    isMathFunction(query) ||
+    /,\s+$/.test(query)
   ) {
     query += EDITOR_MARKER;
   }

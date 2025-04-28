@@ -147,6 +147,8 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
+          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
+          "StreamsFeatureRenderDeps",
           ") => JSX.Element) | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer_logs_overview.tsx",
@@ -215,7 +217,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & React.RefAttributes<{}>>"
+          " & { tracesIndexPattern: string; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview.tsx",
         "deprecated": false,
@@ -249,7 +251,7 @@
           "\nCustom react hook for querying a single doc in ElasticSearch"
         ],
         "signature": [
-          "({\n  id,\n  index,\n  dataView,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}: ",
+          "({\n  id,\n  index,\n  dataView,\n  esqlHit,\n  onBeforeFetch,\n  onProcessRecord,\n}: ",
           "EsDocSearchProps",
           ") => [",
           {
@@ -278,7 +280,7 @@
             "id": "def-public.useEsDocSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  index,\n  dataView,\n  textBasedHits,\n  onBeforeFetch,\n  onProcessRecord,\n}",
+            "label": "{\n  id,\n  index,\n  dataView,\n  esqlHit,\n  onBeforeFetch,\n  onProcessRecord,\n}",
             "description": [],
             "signature": [
               "EsDocSearchProps"
@@ -313,6 +315,8 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
+          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
+          "StreamsFeatureRenderDeps",
           ") => JSX.Element) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",

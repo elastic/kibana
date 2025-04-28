@@ -1,18 +1,13 @@
 # Security Project config
 
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'security']
+
+# Ess plugins
+xpack.securitySolutionEss.enabled: false
+
 ## Disable plugins
-xpack.search.enabled: false
-xpack.apm.enabled: false
-xpack.infra.enabled: false
-xpack.observabilityLogsExplorer.enabled: false
-xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
-xpack.searchNotebooks.enabled: false
-xpack.searchPlayground.enabled: false
-xpack.searchInferenceEndpoints.enabled: false
-xpack.inventory.enabled: false
-xpack.searchIndices.enabled: false
-xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -142,9 +137,6 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Unsupported in serverless
     'cloud_defend',
-
-    # Search connectors
-    'elastic_connectors',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
@@ -175,12 +167,8 @@ console.ui.embeddedEnabled: false
 # Enable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: true
 
-# Experimental Security Solution features
-
-# These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental:
-  - entityStoreDisabled
-  - siemMigrationsDisabled
-
 # Increase task manager capacity because security projects have more resources (Memory and CPU)
 xpack.task_manager.capacity: 20
+
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true

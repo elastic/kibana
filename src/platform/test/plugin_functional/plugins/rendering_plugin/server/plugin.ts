@@ -16,6 +16,7 @@ export class RenderingPlugin implements Plugin {
     core.http.resources.register(
       {
         path: '/render/{id}',
+        security: { authz: { enabled: false, reason: '' } },
         validate: {
           query: schema.object(
             {

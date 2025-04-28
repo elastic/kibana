@@ -2012,6 +2012,13 @@ export default function (providerContext: FtrProviderContext) {
           state: 'UPG_FAILED',
           target_version: '8.16.3',
         });
+        await generateAgent(
+          providerContext,
+          'uninstalled',
+          'agent-3',
+          policyWithAgents.id,
+          '8.16.1'
+        );
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
           .set('kbn-xsrf', 'xxx')
@@ -2035,6 +2042,100 @@ export default function (providerContext: FtrProviderContext) {
 
         await supertest.delete(`/api/fleet/agents/agent-1`).set('kbn-xsrf', 'xx').expect(200);
         await supertest.delete(`/api/fleet/agents/agent-2`).set('kbn-xsrf', 'xx').expect(200);
+      });
+    });
+
+    describe('fleet server policies validate output', () => {
+      let esOutputId: string;
+      let logstashOutputId: string;
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+
+        const { body: esApiResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Elastic output',
+            type: 'elasticsearch',
+            hosts: ['http://localhost'],
+          })
+          .expect(200);
+        esOutputId = esApiResponse.item.id;
+
+        const { body: logstashApiResponse } = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default logstash',
+            type: 'logstash',
+            hosts: ['logstash'],
+            ssl: { certificate: 'CERTIFICATE', key: 'KEY', certificate_authorities: [] },
+            is_default: true,
+            is_default_monitoring: true,
+          })
+          .expect(200);
+
+        logstashOutputId = logstashApiResponse.item.id;
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
+
+      async function assertPolicyDoNotExists(id: string) {
+        await supertest.get(`/api/fleet/agent_policies/${id}`).expect(404);
+      }
+
+      it('should not allow to create a fleet server policies if default output is not an ES output', async () => {
+        const policyId = `fleet-server-${Date.now()}`;
+        const { statusCode } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            id: policyId,
+            name: 'Fleet Server policy ' + Date.now(),
+            namespace: 'default',
+            has_fleet_server: true,
+          });
+
+        expect(statusCode).to.eql(400);
+
+        await assertPolicyDoNotExists(policyId);
+      });
+
+      it('should not allow to create a fleet server policies if provided output is not an ES output', async () => {
+        const policyId = `fleet-server-${Date.now()}`;
+        const { statusCode, body } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            id: policyId,
+            name: 'Fleet Server policy ' + Date.now(),
+            namespace: 'default',
+            has_fleet_server: true,
+            data_output_id: logstashOutputId,
+          });
+
+        expect(statusCode).to.eql(400);
+        expect(body.message).to.match(/Output of type "logstash" is not usable with policy/);
+
+        await assertPolicyDoNotExists(policyId);
+      });
+
+      it('should allow to create a fleet server policies if provided output is an ES output', async () => {
+        const policyId = `fleet-server-${Date.now()}`;
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            id: policyId,
+            name: 'Fleet Server policy ' + Date.now(),
+            namespace: 'default',
+            has_fleet_server: true,
+            data_output_id: esOutputId,
+          })
+          .expect(200);
       });
     });
 

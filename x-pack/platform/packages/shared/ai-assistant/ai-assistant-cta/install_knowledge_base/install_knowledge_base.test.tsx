@@ -9,7 +9,11 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 
-import { InstallKnowledgeBase, InstallKnowledgeBaseProps } from './install_knowledge_base';
+import {
+  DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON,
+  InstallKnowledgeBase,
+  InstallKnowledgeBaseProps,
+} from './install_knowledge_base';
 import { translations } from './install_knowledge_base.translations';
 
 describe('InstallKnowledgeBase', () => {
@@ -26,9 +30,9 @@ describe('InstallKnowledgeBase', () => {
   });
 
   it('calls onInstallKnowledgeBase when the button is clicked', () => {
-    const { getByText } = renderComponent({ onInstallKnowledgeBase });
+    const { getByTestId } = renderComponent({ onInstallKnowledgeBase });
 
-    fireEvent.click(getByText(translations.installButton));
+    fireEvent.click(getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON));
     expect(onInstallKnowledgeBase).toHaveBeenCalled();
   });
 
@@ -36,5 +40,38 @@ describe('InstallKnowledgeBase', () => {
     renderComponent({ onInstallKnowledgeBase });
 
     expect(screen.queryByText(translations.installButton)).toBeInTheDocument();
+  });
+
+  it('disables the button when isInstallAvailable is false', () => {
+    renderComponent({ onInstallKnowledgeBase, isInstallAvailable: false });
+
+    const button = screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON);
+    expect(button).toBeDisabled();
+  });
+
+  it('shows the unavailable tooltip when isInstallAvailable is false', () => {
+    renderComponent({ onInstallKnowledgeBase, isInstallAvailable: false });
+
+    expect(screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON)).toBeInTheDocument();
+  });
+
+  it('disables the button and shows loading state when isInstalling is true', () => {
+    renderComponent({ onInstallKnowledgeBase, isInstalling: true });
+
+    const button = screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON);
+    expect(button).toBeDisabled();
+  });
+
+  it('renders the button with the correct text when isInstalling is true', () => {
+    renderComponent({ onInstallKnowledgeBase, isInstalling: true });
+
+    expect(screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON)).toBeInTheDocument();
+  });
+
+  it('renders the button as enabled when isInstallAvailable is true and isInstalling is false', () => {
+    renderComponent({ onInstallKnowledgeBase, isInstallAvailable: true, isInstalling: false });
+
+    const button = screen.getByTestId(DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON);
+    expect(button).not.toBeDisabled();
   });
 });

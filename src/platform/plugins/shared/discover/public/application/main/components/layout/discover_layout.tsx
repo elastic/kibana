@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './discover_layout.scss';
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -17,13 +16,13 @@ import {
   EuiProgress,
   EuiDelayRender,
   useEuiTheme,
+  useEuiBreakpoint,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
-import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
@@ -33,6 +32,7 @@ import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { kibanaFullBodyHeightCss } from '@kbn/core/public';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -57,7 +57,8 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView, useInternalStateSelector } from '../../state_management/redux';
+import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
+import { TABS_ENABLED } from '../../../../constants';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -102,7 +103,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const dataView = useCurrentDataView();
-  const dataViewLoading = useInternalStateSelector((state) => state.isDataViewLoading);
+  const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
   const fetchCounter = useRef<number>(0);
@@ -359,10 +360,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   return (
     <EuiPage
-      className="dscPage"
+      className="dscPage" // class is used in tests and other styles
       data-fetch-counter={fetchCounter.current}
+      direction="column"
       css={css`
+        overflow: hidden;
+        padding: 0;
         background-color: ${pageBackgroundColor};
+
+        ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+          ${kibanaFullBodyHeightCss(TABS_ENABLED ? 32 : undefined)}
+        }
       `}
     >
       <h1
@@ -390,7 +398,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
-      <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
+      <EuiPageBody
+        aria-describedby="savedSearchTitle"
+        css={css`
+          overflow: hidden;
+        `}
+      >
         <div
           ref={setSidebarContainer}
           css={css`
@@ -428,11 +441,15 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               />
             }
             mainPanel={
-              <div className="dscPageContent__wrapper">
+              <div css={dscPageContentWrapperCss}>
                 {resultState === 'none' ? (
                   <>
                     {React.isValidElement(panelsToggle) ? (
-                      <div className="dscPageContent__panelsToggleWhenNoResults">
+                      <div
+                        css={css`
+                          padding: ${euiTheme.size.s};
+                        `}
+                      >
                         {React.cloneElement(panelsToggle, {
                           renderedFor: 'prompt',
                           isChartAvailable: false,
@@ -470,9 +487,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                     hasShadow={false}
                     hasBorder={false}
                     color="transparent"
-                    className={classNames('dscPageContent', {
-                      'dscPageContent--centered': contentCentered,
-                    })}
+                    css={[dscPageContentCss, contentCentered && dscPageContentCenteredCss]}
                   >
                     {mainDisplay}
                   </EuiPanel>
@@ -500,3 +515,25 @@ const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') =
 
   return operation;
 };
+
+const dscPageContentWrapperCss = css`
+  overflow: hidden; // Ensures horizontal scroll of table
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const dscPageContentCss = css`
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+`;
+
+const dscPageContentCenteredCss = css`
+  width: auto;
+  height: auto;
+  align-self: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-grow: 0;
+`;

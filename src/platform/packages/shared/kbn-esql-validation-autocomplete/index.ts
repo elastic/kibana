@@ -8,21 +8,13 @@
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
-export type {
-  FunctionDefinition,
-  CommandDefinition,
-  CommandOptionsDefinition,
-  CommandModeDefinition,
-  Literals,
-} from './src/definitions/types';
+export type { FunctionDefinition, CommandDefinition, Literals } from './src/definitions/types';
 export type { ESQLCallbacks } from './src/shared/types';
 
 /**
  * High level functions
  */
 
-// Given an the query string, its AST and the cursor position, it returns the node and some context information
-export { getAstContext } from './src/shared/context';
 // Validation function
 export { validateQuery } from './src/validation/validation';
 // Autocomplete function
@@ -45,13 +37,11 @@ export {
   getFunctionDefinition,
   getCommandDefinition,
   getAllCommands,
-  getCommandOption,
   getColumnForASTNode as lookupColumn,
   shouldBeQuotedText,
   printFunctionSignature,
   checkFunctionArgMatchesDefinition as isEqualType,
   isSourceItem,
-  isSettingItem,
   isFunctionItem,
   isOptionItem,
   isColumnItem,
@@ -61,7 +51,6 @@ export {
   isAssignmentComplete,
   isSingleItem,
 } from './src/shared/helpers';
-export { ENRICH_MODES } from './src/definitions/settings';
 export { timeUnits } from './src/definitions/literals';
 export { aggFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
 export { getFunctionSignatures } from './src/definitions/helpers';

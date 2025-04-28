@@ -9,7 +9,7 @@
 
 import { getCodeOwnersForFile, getPathsWithOwnersReversed } from './code_owners.ts';
 
-interface DependencyByOwnerEntry<T = string[]> {
+export interface DependencyByOwnerEntry<T = string[]> {
   modules: T;
   deps: T;
   teams: T;

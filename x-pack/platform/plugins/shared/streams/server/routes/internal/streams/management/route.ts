@@ -10,11 +10,18 @@ import {
   conditionSchema,
   conditionToQueryDsl,
   getFields,
+  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { checkAccess } from '../../../../lib/streams/stream_crud';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
+import {
+  checkAccess,
+  getUnmanagedElasticsearchAssetDetails,
+  getUnmanagedElasticsearchAssets,
+} from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 
 export const sampleStreamRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/_sample',
@@ -23,9 +30,7 @@ export const sampleStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -43,7 +48,7 @@ export const sampleStreamRoute = createServerRoute({
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
 
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
     const { if: condition, start, end, size } = params.body;
@@ -98,6 +103,51 @@ export const sampleStreamRoute = createServerRoute({
   },
 });
 
+export const unmanagedAssetDetailsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/_unmanaged_assets',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+  }),
+  handler: async ({ params, request, getScopedClients }) => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+    }
+
+    const stream = await streamsClient.getStream(params.path.name);
+
+    if (!isUnwiredStreamDefinition(stream)) {
+      throw new WrongStreamTypeError(
+        `Stream definition for ${params.path.name} is not an unwired stream`
+      );
+    }
+
+    const dataStream = await streamsClient.getDataStream(params.path.name);
+
+    const assets = await getUnmanagedElasticsearchAssets({
+      dataStream,
+      scopedClusterClient,
+    });
+
+    return getUnmanagedElasticsearchAssetDetails({
+      assets,
+      scopedClusterClient,
+    });
+  },
+});
+
 export const internalManagementRoutes = {
   ...sampleStreamRoute,
+  ...unmanagedAssetDetailsRoute,
 };

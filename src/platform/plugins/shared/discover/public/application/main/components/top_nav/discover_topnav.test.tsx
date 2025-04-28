@@ -73,7 +73,9 @@ function getProps(
     mockDiscoverService.capabilities = capabilities as typeof mockDiscoverService.capabilities;
   }
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataViewMock));
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView: dataViewMock })
+  );
 
   return {
     stateContainer,

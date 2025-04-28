@@ -37,24 +37,17 @@ export const createLogsContextService = async ({
   logsDataAccess,
 }: LogsContextServiceDeps): Promise<LogsContextService> => {
   let allLogsIndexPattern: string | undefined;
-  let logSources: string[] | undefined;
+  let allowedDataSources: Array<string | RegExp> = [DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP];
 
   if (logsDataAccess) {
     const logSourcesService = logsDataAccess.services.logSourcesService;
-    allLogsIndexPattern = (await logSourcesService.getLogSources())
-      .map((logSource) => logSource.indexPattern)
-      .join(','); // TODO: Will be replaced by helper in: https://github.com/elastic/kibana/pull/192003
-    logSources = allLogsIndexPattern.split(',');
+    allLogsIndexPattern = await logSourcesService.getFlattenedLogSources();
+    allowedDataSources = allowedDataSources.concat(allLogsIndexPattern.split(','));
   }
-
-  const ALLOWED_LOGS_DATA_SOURCES = [
-    DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP,
-    ...(logSources ? logSources : []),
-  ];
 
   return getLogsContextService({
     allLogsIndexPattern,
-    allowedDataSources: ALLOWED_LOGS_DATA_SOURCES,
+    allowedDataSources,
   });
 };
 
@@ -66,12 +59,10 @@ export const getLogsContextService = ({
   allowedDataSources: Array<string | RegExp>;
 }): LogsContextService => {
   const getAllLogsIndexPattern = () => allLogsIndexPattern;
-  const isLogsIndexPattern = (indexPattern: unknown) => {
-    return (
-      typeof indexPattern === 'string' &&
-      testPatternAgainstAllowedList(allowedDataSources)(indexPattern)
-    );
-  };
+  const isLogsIndexPattern = testPatternAgainstAllowedList(allowedDataSources);
 
-  return { getAllLogsIndexPattern, isLogsIndexPattern };
+  return {
+    getAllLogsIndexPattern,
+    isLogsIndexPattern,
+  };
 };

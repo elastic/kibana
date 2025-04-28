@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionParameterType, FunctionDefinitionTypes } from '../../definitions/types';
+import { FunctionParameterType, FunctionDefinitionTypes, Location } from '../../definitions/types';
 import { setTestFunctions } from '../../shared/test_functions';
 import { setup } from './helpers';
 
@@ -119,7 +119,7 @@ describe('variable support', () => {
         {
           type: FunctionDefinitionTypes.SCALAR,
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           name: 'test',
           signatures: [
             { params: [{ name: 'arg', type: 'cartesian_point' }], returnType: 'cartesian_point' },
@@ -130,7 +130,7 @@ describe('variable support', () => {
         {
           type: FunctionDefinitionTypes.SCALAR,
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           name: 'return_value',
           signatures: [
             { params: [{ name: 'arg', type: 'text' }], returnType: 'text' },

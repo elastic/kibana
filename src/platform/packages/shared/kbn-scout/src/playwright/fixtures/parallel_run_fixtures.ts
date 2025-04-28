@@ -9,14 +9,14 @@
 
 import { mergeTests } from 'playwright/test';
 import {
-  apiFixtures,
+  apiServicesFixture,
   coreWorkerFixtures,
   esArchiverFixture,
   scoutSpaceParallelFixture,
   synthtraceFixture,
 } from './worker';
 import type {
-  ApiParallelWorkerFixtures,
+  ApiServicesFixture,
   EsClient,
   KbnClient,
   KibanaUrl,
@@ -36,7 +36,7 @@ export const scoutParallelFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   scoutSpaceParallelFixture,
-  apiFixtures,
+  apiServicesFixture,
   // test scope fixtures
   browserAuthFixture,
   scoutPageParallelFixture,
@@ -50,18 +50,19 @@ export interface ScoutParallelTestFixtures {
   pageObjects: PageObjects;
 }
 
-export interface ScoutParallelWorkerFixtures extends ApiParallelWorkerFixtures {
+export interface ScoutParallelWorkerFixtures {
   log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   kbnClient: KbnClient;
   esClient: EsClient;
   scoutSpace: ScoutSpaceParallelFixture;
+  apiServices: ApiServicesFixture;
 }
 
 export const globalSetup = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   synthtraceFixture,
-  apiFixtures
+  apiServicesFixture
 );

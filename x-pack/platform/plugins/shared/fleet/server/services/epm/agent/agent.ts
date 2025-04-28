@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
@@ -15,6 +15,11 @@ import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { appContextService } from '../..';
 
+import {
+  getHandlebarsCompiledTemplateCache,
+  setHandlebarsCompiledTemplateCache,
+} from '../packages/cache';
+
 const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
@@ -22,7 +27,13 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
-    const template = handlebars.compile(templateStr, { noEscape: true });
+    let template = getHandlebarsCompiledTemplateCache(templateStr);
+
+    if (!template) {
+      template = handlebars.compileAST(templateStr, { noEscape: true });
+      setHandlebarsCompiledTemplateCache(templateStr, template);
+    }
+
     compiledTemplate = template(vars);
   } catch (err) {
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
@@ -79,7 +90,6 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
     // support variables with . like key.patterns
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
-    logger.debug(`Building agent template variables`);
 
     if (!lastKeyPart || !isValidKey(lastKeyPart)) {
       throw new PackageInvalidArchiveError(
@@ -105,7 +115,11 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
-      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      if (recordEntry.value.ids) {
+        varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
+      } else {
+        varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }

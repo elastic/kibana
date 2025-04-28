@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Condition,
   SampleDocument,
   WiredStreamGetResponse,
   conditionToQueryDsl,
   getFields,
+  isAlwaysCondition,
 } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
@@ -22,8 +23,8 @@ import { emptyEqualsToAlways } from '../../util/condition';
 
 interface Options {
   condition?: Condition;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
   size?: number;
   streamDefinition: WiredStreamGetResponse;
 }
@@ -51,8 +52,12 @@ export const useAsyncSample = (options: Options) => {
 
   const convertedCondition = useMemo(() => {
     const condition = options.condition ? emptyEqualsToAlways(options.condition) : undefined;
-    return condition && 'always' in condition ? undefined : condition;
+    return condition && isAlwaysCondition(condition) ? undefined : condition;
   }, [options.condition]);
+
+  const refresh = useCallback(() => {
+    return setRefreshId((id) => id + 1);
+  }, []);
 
   useEffect(() => {
     if (!options.start || !options.end) {
@@ -174,7 +179,7 @@ export const useAsyncSample = (options: Options) => {
     isLoadingDocumentCounts,
     documentCountsError,
     approximateMatchingPercentage,
-    refresh: () => setRefreshId((id) => id + 1),
+    refresh,
   };
 };
 

@@ -137,6 +137,7 @@ const mockRequest = {
   events: {
     aborted$: NEVER,
   },
+  query: {},
 };
 
 const mockResponse = {
@@ -145,8 +146,6 @@ const mockResponse = {
 };
 
 describe('chatCompleteRoute', () => {
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockAppendAssistantMessageToConversation.mockResolvedValue(true);
@@ -235,10 +234,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('returns the expected error when executeCustomLlmChain fails', async () => {
@@ -268,8 +264,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -303,8 +298,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -337,8 +331,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -368,8 +361,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -398,8 +390,7 @@ describe('chatCompleteRoute', () => {
       },
     };
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -433,10 +424,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('should not add assistant reply to existing conversation when `persist=false`', async () => {
@@ -465,10 +453,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('should add assistant reply to new conversation when `persist=true`', async () => {
@@ -502,10 +487,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 
   it('should not create a new conversation when `persist=false`', async () => {
@@ -534,9 +516,6 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
+    chatCompleteRoute(mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>);
   });
 });

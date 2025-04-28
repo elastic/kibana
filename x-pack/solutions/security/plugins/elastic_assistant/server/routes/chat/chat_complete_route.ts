@@ -18,11 +18,13 @@ import {
   ConversationResponse,
   newContentReferencesStore,
   pruneContentReferences,
+  ChatCompleteRequestQuery,
+  INVOKE_LLM_SERVER_TIMEOUT,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
@@ -39,10 +41,7 @@ export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
 };
 
-export const chatCompleteRoute = (
-  router: ElasticAssistantPluginRouter,
-  getElser: GetElser
-): void => {
+export const chatCompleteRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
@@ -53,6 +52,11 @@ export const chatCompleteRoute = (
           requiredPrivileges: ['elasticAssistant'],
         },
       },
+      options: {
+        timeout: {
+          idleSocket: INVOKE_LLM_SERVER_TIMEOUT,
+        },
+      },
     })
     .addVersion(
       {
@@ -60,12 +64,14 @@ export const chatCompleteRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(ChatCompleteProps),
+            query: buildRouteValidationWithZod(ChatCompleteRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const assistantResponse = buildResponse(response);
+        const { content_references_disabled: contentReferencesDisabled } = request.query;
         let telemetry;
         let actionTypeId;
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
@@ -182,7 +188,9 @@ export const chatCompleteRoute = (
             ? existingConversationId ?? newConversation?.id
             : undefined;
 
-          const contentReferencesStore = newContentReferencesStore();
+          const contentReferencesStore = newContentReferencesStore({
+            disabled: contentReferencesDisabled ?? false,
+          });
 
           const onLlmResponse = async (
             content: string,
@@ -190,16 +198,19 @@ export const chatCompleteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationId && conversationsDataClient) {
-              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+              const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
+                content,
+                contentReferencesStore
+              );
 
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
-                messageContent: content,
+                messageContent: prunedContent,
                 replacements: latestReplacements,
                 isError,
                 traceData,
-                contentReferences,
+                contentReferences: prunedContentReferencesStore,
               });
             }
           };
@@ -213,7 +224,6 @@ export const chatCompleteRoute = (
             isOssModel,
             conversationId,
             context: ctx,
-            getElser,
             logger,
             inference,
             messages: messages ?? [],

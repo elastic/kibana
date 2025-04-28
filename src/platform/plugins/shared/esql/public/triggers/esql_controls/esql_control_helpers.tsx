@@ -72,7 +72,7 @@ export async function executeAction({
               <LazyControlFlyout
                 queryString={queryString}
                 search={search}
-                variableType={variableType}
+                initialVariableType={variableType}
                 closeFlyout={() => {
                   handle.close();
                 }}

@@ -1107,8 +1107,7 @@ const updateExistingDataStream = async ({
       () =>
         esClient.indices.putMapping({
           index: dataStreamName,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          body: mappings,
+          ...mappings,
           write_index_only: true,
         }),
       { logger }

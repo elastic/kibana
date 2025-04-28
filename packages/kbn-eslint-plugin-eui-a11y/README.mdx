@@ -1,0 +1,84 @@
+---
+id: kibDevDocsOpsEslintPluginEuiA11y
+slug: /kibana-dev-docs/ops/kbn-eslint-plugin-eui-a11y
+title: '@kbn/eslint-plugin-eui-a11y'
+description: Custom ESLint rules to support a11y on Eui components in the Kibana repository
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'eui-a11y']
+---
+
+`@kbn/eslint-plugin-eui-a11y` is an ESLint plugin providing custom rules for validating JSXCode in the Kibana repo for accessibility (a11y) (i.e. aria) tags on Eui components.
+
+## `@kbn/eui-a11y/eui_elements_should_have_aria_label_or_aria_labelledby_props`
+
+This rule warns engineers to add `aria-label` to certain EUI components, and offers a suggestion for a value.
+
+If an `aria-label` or `aria-labelledby` prop is already found, the rule does not warn. Existing values are never overwritten.
+
+It is currently set to respond to a subset of EUI components which reasonably need an `aria-label`: `EuiButtonIcon`, `EuiButtonEmpty`, `EuiSelect`, `EuiSuperSelect`.
+
+The rule attempts to create a reasonable suggestion for a value depending on the context of the component (i.e. app name, filename, function name, values inside children).
+
+It then create a i18.translate function and uses the suggestion for a defaultMessage.
+
+### Examples:
+
+```
+/* file is in `x-pack/solutions/observability/plugins/apm/public/components/fleet_integration/apm_agents/runtime_attachment/discovery_rule.tsx` */
+
+<EuiButtonIcon
+    iconType="pencil"
+    onClick={() => {
+        onEdit(id);
+    }}
+/>
+```
+
+turns into:
+
+```
+<EuiButtonIcon
+    aria-label={i18n.translate('xpack.apm.discoveryRule.pencilButton.ariaLabel', {
+        defaultMessage: 'Pencil',
+    })}
+    iconType="pencil"
+    onClick={() => {
+        onEdit(id);
+    }}
+/>
+```
+
+Another example:
+
+```
+/* file is in: `x-pack/solutions/observability/plugins/infra/public/components/foo.tsx` */
+
+const Foo = ({ ... }: Props) => (
+  <EuiFormRow>
+    <EuiComboBox
+      ...
+    />
+  </EuiFormRow>
+);
+```
+
+gets transformed into:
+
+```
+const Foo = ({ ... }: Props) => (
+  <EuiFormRow aria-label={i18n.translate('xpack.infra.foo.ariaLabel', {
+      defaultMessage: 'Foo',
+    })}>
+    <EuiComboBox
+      ...
+    />
+  </EuiFormRow>
+);
+```
+
+### I want to add / remove this behavior for a particular EuiElement
+
+See the `EUI_ELEMENTS` array in `packages/kbn-eslint-plugin-eui-a11y/rules/eui_elements_should_have_aria_label_or_aria_labelledby_props.ts` to see or adjust the list.
+
+### The autofix provided is not 100% correct!
+
+The autofix is provided as a time saver to save you from typing. Feel free to adjust it after applying.

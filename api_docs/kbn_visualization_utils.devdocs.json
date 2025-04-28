@@ -21,6 +21,82 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.computeInterval",
+        "type": "Function",
+        "tags": [],
+        "label": "computeInterval",
+        "description": [],
+        "signature": [
+          "(timeRange: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          ", data: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataPluginApi",
+            "section": "def-public.DataPublicPluginStart",
+            "text": "DataPublicPluginStart"
+          },
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-visualization-utils/src/compute_interval.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.computeInterval.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/compute_interval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.computeInterval.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-visualization-utils/src/compute_interval.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
         "id": "def-common.getDatasourceId",
         "type": "Function",
         "tags": [],

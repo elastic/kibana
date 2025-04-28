@@ -515,6 +515,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'banners:linkColor': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:backgroundColor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },

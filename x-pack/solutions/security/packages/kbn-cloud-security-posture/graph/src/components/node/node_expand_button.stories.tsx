@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { NodeShapeContainer } from './styles';
 import { NodeExpandButton, type NodeExpandButtonProps } from './node_expand_button';
@@ -37,4 +37,6 @@ const Template: StoryFn<NodeExpandButtonProps> = (args) => (
   </ThemeProvider>
 );
 
-export const ExpandButton = Template.bind({});
+export const ExpandButton: StoryObj<NodeExpandButtonProps> = {
+  render: Template,
+};

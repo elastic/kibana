@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';
@@ -49,10 +49,12 @@ const Template: StoryFn<ControlsProps> = (props) => {
   );
 };
 
-export const Controls = Template.bind({});
+export const Controls: StoryObj<ControlsProps> = {
+  render: Template,
 
-Controls.args = {
-  showZoom: true,
-  showFitView: true,
-  showCenter: true,
+  args: {
+    showZoom: true,
+    showFitView: true,
+    showCenter: true,
+  },
 };

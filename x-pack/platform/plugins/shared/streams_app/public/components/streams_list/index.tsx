@@ -24,6 +24,7 @@ import {
   StreamDefinition,
   getSegments,
   isDescendantOf,
+  isRootStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -39,26 +40,31 @@ export interface StreamTree {
   children: StreamTree[];
 }
 
-function asTrees(streams: StreamDefinition[]) {
+export function asTrees(streams: StreamDefinition[]) {
   const trees: StreamTree[] = [];
-  const wiredStreams = streams.filter(isWiredStreamDefinition);
-  wiredStreams.sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
+  const sortedStreams = streams
+    .slice()
+    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
 
-  wiredStreams.forEach((stream) => {
+  sortedStreams.forEach((stream) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
-    const segments = getSegments(stream.name);
     // traverse the tree following the prefix of the current name.
     // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
     while ((existingNode = currentTree.find((node) => isDescendantOf(node.name, stream.name)))) {
       currentTree = existingNode.children;
     }
+
     if (!existingNode) {
       const newNode: StreamTree = {
         name: stream.name,
         children: [],
         stream,
-        type: segments.length === 1 ? 'root' : 'wired',
+        type: isUnwiredStreamDefinition(stream)
+          ? 'classic'
+          : isRootStreamDefinition(stream)
+          ? 'root'
+          : 'wired',
       };
       currentTree.push(newNode);
     }
@@ -88,20 +94,7 @@ export function StreamsList({
       .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
-  const classicStreams = useMemo(() => {
-    return filteredItems.filter((item) => isUnwiredStreamDefinition(item));
-  }, [filteredItems]);
-
-  const treeView = useMemo(() => {
-    const trees = asTrees(filteredItems);
-    const classicList = classicStreams.map((stream) => ({
-      name: stream.name,
-      type: 'classic' as const,
-      stream,
-      children: [],
-    }));
-    return [...trees, ...classicList];
-  }, [filteredItems, classicStreams]);
+  const treeView = useMemo(() => asTrees(filteredItems), [filteredItems]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -305,7 +298,9 @@ function StreamNode({
               aria-label={i18n.translate('xpack.streams.streamsTable.management', {
                 defaultMessage: 'Management',
               })}
-              href={router.link('/{key}/management', { path: { key: node.name } })}
+              href={router.link('/{key}/management/{tab}', {
+                path: { key: node.name, tab: 'route' },
+              })}
             />
           </EuiToolTip>
         </EuiFlexGroup>
