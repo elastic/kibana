@@ -138,9 +138,17 @@ const serializeNavNode = (
 const isEuiCollapsibleNavItemProps = (
   props: EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps
 ): props is EuiCollapsibleNavItemProps => {
-  return (
-    props.title !== undefined && (props as EuiCollapsibleNavSubItemProps).renderItem === undefined
-  );
+  // collapsible nav item should not have renderItem
+  if ('renderItem' in props) {
+    return false;
+  }
+
+  if (!(props.title || props.items?.length)) {
+    // title is not needed if nav item has sub-items
+    return false;
+  }
+
+  return true;
 };
 
 const renderBlockTitle: (
@@ -486,7 +494,6 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       basePath,
     });
   }, [navNode, navigateToUrl, closePanel, getIsCollapsed, activeNodes, eventTracker, basePath]);
-
   const { items: topLevelItems } = props;
 
   // Serializer to add recursively the accordionProps to each of the items
@@ -549,9 +556,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   }, [topLevelItems, serializeAccordionItems]);
 
   if (!isEuiCollapsibleNavItemProps(props)) {
-    throw new Error(
-      `Invalid EuiCollapsibleNavItem props for node ${(props as EuiCollapsibleNavSubItemProps).id}`
-    );
+    throw new Error(`Invalid EuiCollapsibleNavItem props for node ${_navNode.id}`);
   }
 
   if (!isVisible) {

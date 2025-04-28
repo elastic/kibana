@@ -17,7 +17,7 @@ export const logsIndexCreateRequest: IndicesCreateRequest = {
       destination: {
         properties: {
           ip: { type: 'ip' },
-          port: { type: 'integer' },
+          port: { type: 'long' },
           address: { type: 'keyword' },
         },
       },
@@ -62,6 +62,7 @@ export const logsIndexCreateRequest: IndicesCreateRequest = {
       network: {
         properties: {
           bytes: { type: 'long' },
+          direction: { type: 'keyword' },
         },
       },
       process: {

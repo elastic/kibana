@@ -21,11 +21,12 @@ import {
 import { FunctionDefinitionTypes } from '../definitions/types';
 import { EDITOR_MARKER } from './constants';
 import {
-  getFunctionDefinition,
   isColumnItem,
-  isOptionItem,
   isSourceItem,
   pipePrecedesCurrentWord,
+  getFunctionDefinition,
+  isOptionItem,
+  within,
 } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {
@@ -154,7 +155,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let inComment = false;
 
   Walker.visitComments(ast, (node) => {
-    if (node.location && node.location.min <= offset && node.location.max >= offset) {
+    if (within(offset, node.location)) {
       inComment = true;
     }
   });
@@ -168,7 +169,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let withinStatsWhereClause = false;
   Walker.walk(ast, {
     visitFunction: (fn) => {
-      if (fn.name === 'where' && fn.location.min <= offset) {
+      if (fn.name === 'where' && within(offset, fn.location)) {
         withinStatsWhereClause = true;
       }
     },

@@ -128,7 +128,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // Retry until the documentation is loaded
             await retry.try(async () => {
               const url = await browser.getCurrentUrl();
-              expect(url).to.contain('search-search.html');
+              // The url that is open is https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html
+              // but it redirects to https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search
+              expect(url).to.contain('operation-search');
             });
           });
         });

@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type {
   IKibanaSearchRequest,
@@ -345,31 +345,36 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           const appliedTimeRange = input?.timeRange
             ? {
-                from: DateMath.parse(input.timeRange.from),
-                to: DateMath.parse(input.timeRange.to, { roundUp: true }),
+                from: DateMath.parse(input.timeRange.from)?.toISOString(),
+                to: DateMath.parse(input.timeRange.to, { roundUp: true })?.toISOString(),
               }
             : undefined;
 
           const allColumns =
-            (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
-              id: name,
-              name,
-              meta: {
-                type: esFieldTypeToKibanaFieldType(type),
-                esType: type,
-                sourceParams:
-                  type === 'date'
-                    ? {
-                        appliedTimeRange,
-                        params: {},
-                        indexPattern,
-                      }
-                    : {
-                        indexPattern,
-                      },
-              },
-              isNull: hasEmptyColumns ? !lookup.has(name) : false,
-            })) ?? [];
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+              const originalTypes = original_types ?? [];
+              const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              return {
+                id: name,
+                name,
+                meta: {
+                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
+                  esType: type,
+                  sourceParams:
+                    type === 'date'
+                      ? {
+                          appliedTimeRange,
+                          params: {},
+                          indexPattern,
+                        }
+                      : {
+                          indexPattern,
+                        },
+                },
+                isNull: hasEmptyColumns ? !lookup.has(name) : false,
+              };
+            }) ?? [];
 
           const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const updatedWithVariablesColumns = mapVariableToColumn(

@@ -10,7 +10,7 @@ check_for_changed_files "$cmd" true
 
 if [[ "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" != "" ]]; then
   echo --- Check if all new pipelines are valid
-  AFFECTED_PIPELINES=$(git diff "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" --name-only | \
+  AFFECTED_PIPELINES=$(gh pr view "$BUILDKITE_PULL_REQUEST" --json files --jq '.files.[].path' | \
     grep -E '^.buildkite/pipeline-resource-definitions/.*\.yml$' | \
     grep -Ev '(/locations.yml|_templates)' || true)
   echo "Pipelines affected by this PR: $AFFECTED_PIPELINES"

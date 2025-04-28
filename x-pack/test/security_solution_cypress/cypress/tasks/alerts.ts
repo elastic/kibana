@@ -489,7 +489,7 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  const ALERTS_DATA_GRID = '[data-test-subj="alertsTable"]';
+  const ALERTS_DATA_GRID = '[data-test-subj="alertsTableIsLoaded"]';
   cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).scrollIntoView();
   cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).click({ force: true });
 };

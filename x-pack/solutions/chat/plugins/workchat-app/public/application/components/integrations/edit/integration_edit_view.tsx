@@ -56,7 +56,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
   useBreadcrumb(breadcrumb);
 
   const handleCancel = useCallback(() => {
-    navigateToWorkchatUrl(appPaths.integrations.list);
+    navigateToWorkchatUrl(appPaths.integrations.catalog);
   }, [navigateToWorkchatUrl]);
 
   const onSaveSuccess = useCallback(() => {
@@ -125,8 +125,14 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     setIsDeleteModalVisible(false);
   };
 
+  const params = new URLSearchParams(location.search);
+  const type = params.get('type');
+
   const formMethods = useForm<IntegrationEditState>({
-    values: state,
+    values: {
+      ...state,
+      type: type || state.type,
+    },
   });
 
   const {

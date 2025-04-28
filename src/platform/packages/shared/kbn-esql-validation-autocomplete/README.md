@@ -25,7 +25,7 @@ For instance, not passing the `getSources` callback will report all index mentio
 ##### Usage
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define all callbacks
@@ -35,13 +35,13 @@ const myCallbacks = {
 };
 
 // Full validation performed
-const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", getAstAndSyntaxErrors, undefined, myCallbacks);
+const { errors, warnings } = await validateQuery("from index | stats 1 + avg(myColumn)", parse, undefined, myCallbacks);
 ```
 
 If not all callbacks are available it is possible to gracefully degrade the validation experience with the `ignoreOnMissingCallbacks` option:
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define only the getSources callback
@@ -52,7 +52,7 @@ const myCallbacks = {
 // ignore errors that might be triggered by the lack of some callbacks (i.e. "Unknown columns", etc...)
 const { errors, warnings } = await validateQuery(
   'from index | stats 1 + avg(myColumn)',
-  getAstAndSyntaxErrors,
+  parse,
   { ignoreOnMissingCallbacks: true },
   myCallbacks
 );
@@ -63,7 +63,7 @@ const { errors, warnings } = await validateQuery(
 This is the complete logic for the ES|QL autocomplete language, it is completely independent from the actual editor (i.e. Monaco) and the suggestions reported need to be wrapped against the specific editor shape.
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { suggest } from '@kbn/esql-validation-autocomplete';
 
 const queryString = "from index | stats 1 + avg(myColumn) ";
@@ -76,7 +76,7 @@ const suggestions = await suggest(
   queryString,
   queryString.length - 1, // the cursor position in a single line context
   { triggerCharacter: " "; triggerKind: 1 }, // kind = 0 is a programmatic trigger, while other values are ignored
-  getAstAndSyntaxErrors,
+  parse,
   myCallbacks
 );
 
@@ -102,7 +102,7 @@ This feature provides a list of suggestions to propose as fixes for a subset of 
 The feature works in combination with the validation service.
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
 
 const queryString = "from index2 | stats 1 + avg(myColumn)"
@@ -111,12 +111,12 @@ const myCallbacks = {
   getSources: async () => [{name: 'index', hidden: false}],
   ...
 };
-const { errors, warnings } = await validateQuery(queryString, getAstAndSyntaxErrors, undefined, myCallbacks);
+const { errors, warnings } = await validateQuery(queryString, parse, undefined, myCallbacks);
 
 const {title, edits} = await getActions(
   queryString,
   errors,
-  getAstAndSyntaxErrors,
+  parse,
   undefined,
   myCallbacks
 );
@@ -129,7 +129,7 @@ console.log({ title, edits });
 Like with validation also `getActions` can 'relax' its internal checks when no callbacks, either all or specific ones, are passed.
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
 
 const queryString = "from index2 | keep unquoted-field"
@@ -138,12 +138,12 @@ const myCallbacks = {
   getSources: async () => [{name: 'index', hidden: false}],
   ...
 };
-const { errors, warnings } = await validateQuery(queryString, getAstAndSyntaxErrors, undefined, myCallbacks);
+const { errors, warnings } = await validateQuery(queryString, parse, undefined, myCallbacks);
 
 const {title, edits} = await getActions(
   queryString,
   errors,
-  getAstAndSyntaxErrors,
+  parse,
   { relaxOnMissingCallbacks: true },
   myCallbacks
 );
@@ -159,13 +159,13 @@ This is an important function in order to build more features on top of the exis
 For instance to show contextual information on Hover the `getAstContext` function can be leveraged to get the correct context for the cursor position:
 
 ```js
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { getAstContext } from '@kbn/esql-validation-autocomplete';
 
 const queryString = 'from index2 | stats 1 + avg(myColumn)';
 const offset = queryString.indexOf('avg');
 
-const astContext = getAstContext(queryString, getAstAndSyntaxErrors(queryString), offset);
+const astContext = getAstContext(queryString, parse(queryString), offset);
 
 if (astContext.type === 'function') {
   const fnNode = astContext.node;
