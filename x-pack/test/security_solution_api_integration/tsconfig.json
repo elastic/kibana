@@ -55,5 +55,7 @@
     "@kbn/openapi-common",
     "@kbn/scout-info",
     "@kbn/security-plugin-types-common",
+    "@kbn/babel-register",
+    "@kbn/config-schema",
   ]
 }

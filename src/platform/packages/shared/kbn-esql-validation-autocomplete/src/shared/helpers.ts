@@ -21,6 +21,7 @@ import {
 import {
   ESQLIdentifier,
   ESQLInlineCast,
+  ESQLLocation,
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
@@ -97,6 +98,9 @@ export function isAssignmentComplete(node: ESQLFunction | undefined) {
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
+
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
 
 function isMathFunction(query: string) {
   const queryTrimmed = query.trimEnd();
