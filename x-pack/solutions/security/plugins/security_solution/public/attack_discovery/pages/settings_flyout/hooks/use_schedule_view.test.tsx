@@ -81,7 +81,7 @@ describe('useScheduleView', () => {
       isLoading: false,
     } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
-    const { result } = renderHook(() => useScheduleView(null));
+    const { result } = renderHook(() => useScheduleView());
 
     render(<TestProviders>{result.current.scheduleView}</TestProviders>);
 
@@ -94,7 +94,7 @@ describe('useScheduleView', () => {
       isLoading: false,
     } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
-    const { result } = renderHook(() => useScheduleView(null));
+    const { result } = renderHook(() => useScheduleView());
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
@@ -102,7 +102,7 @@ describe('useScheduleView', () => {
   });
 
   it('should return the `attack discovery schedules table` if there are existing schedules', () => {
-    const { result } = renderHook(() => useScheduleView(null));
+    const { result } = renderHook(() => useScheduleView());
 
     render(<TestProviders>{result.current.scheduleView}</TestProviders>);
 
@@ -110,7 +110,7 @@ describe('useScheduleView', () => {
   });
 
   it('should return `create new schedule` action button if there are existing schedules', () => {
-    const { result } = renderHook(() => useScheduleView(null));
+    const { result } = renderHook(() => useScheduleView());
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
@@ -118,7 +118,7 @@ describe('useScheduleView', () => {
   });
 
   it('should show create schedule flyout on `create new schedule` action button click', async () => {
-    const { result } = renderHook(() => useScheduleView(null));
+    const { result } = renderHook(() => useScheduleView());
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
