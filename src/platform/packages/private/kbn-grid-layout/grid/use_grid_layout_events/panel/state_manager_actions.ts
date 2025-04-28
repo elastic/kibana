@@ -59,7 +59,7 @@ export const moveAction = (
     // if no interaction event return early
     return;
   }
-  // console.log(interactionEvent.targetRow);
+
   const targetRowIsMain = interactionEvent.targetRow.includes('main');
   const currentPanelData: GridPanelData = targetRowIsMain
     ? (currentLayout[interactionEvent.id] as GridPanelData)
@@ -70,7 +70,6 @@ export const moveAction = (
   }
 
   const isResize = interactionEvent.type === 'resize';
-  // console.log(interactionEvent, pointerPixel);
 
   const previewRect = (() => {
     if (isResize) {
@@ -192,13 +191,12 @@ export const moveAction = (
       }
     }
     if (currentLayout && !isLayoutEqual(currentLayout, nextLayout)) {
-      // console.log({ nextLayout });
       gridLayout$.next(nextLayout);
     }
 
-    // if (hasChangedGridRow) {
-    //   debugger;
-    // }
+    if (hasChangedGridRow) {
+      debugger;
+    }
   }
 };
 

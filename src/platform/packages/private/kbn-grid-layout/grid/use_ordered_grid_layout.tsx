@@ -92,6 +92,5 @@ const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
       sectionCount++;
     }
   }
-  // console.log({ orderedLayout });
   return orderedLayout;
 };

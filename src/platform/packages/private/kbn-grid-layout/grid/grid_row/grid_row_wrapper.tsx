@@ -23,9 +23,14 @@ export const GridRowWrapper = React.memo(({ rowId, start, end }: GridRowProps) =
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   useEffect(() => {
+    console.log('REMOUNT', rowId);
     return () => {
-      // remove reference on unmount
-      delete gridLayoutStateManager.rowRefs.current[rowId];
+      console.log('UMMOUNT', rowId);
+      // remove reference on unmount\
+      const { [rowId]: dropMe, ...references } = gridLayoutStateManager.rowRefs.current;
+      gridLayoutStateManager.rowRefs.current = references;
+
+      // delete gridLayoutStateManager.rowRefs.current[rowId];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -54,20 +59,23 @@ export const GridRowWrapper = React.memo(({ rowId, start, end }: GridRowProps) =
     [rowId]
   );
 
+  useEffect(() => {
+    console.log({ rowId, start, end });
+    const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
+    if (!rowRef) return;
+    rowRef.style.gridColumn = `1 / -1`;
+    rowRef.style.gridRowStart = start;
+    rowRef.style.gridRowEnd = end;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowId, start, end]);
+
   return (
     <span
-      ref={(element: HTMLDivElement | null) =>
-        (gridLayoutStateManager.rowRefs.current[rowId] = element)
-      }
-      className={'kbnGridRowBackground'}
-      css={() => {
-        return css`
-          grid-column-start: 1;
-          grid-column-end: -1;
-          grid-row-start: ${start}; // first grid row in this row of panels
-          grid-row-end: ${end};
-        `;
+      ref={(element: HTMLDivElement | null) => {
+        if (rowId === 'main-1') console.log('SET REF', rowId, element);
+        gridLayoutStateManager.rowRefs.current[rowId] = element;
       }}
+      className={'kbnGridRowBackground'}
     />
   );
 });

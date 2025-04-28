@@ -116,7 +116,6 @@ export const GridLayout = ({
         })
         .forEach((section) => {
           const { id } = section;
-          // console.log(section);
           gridRowTemplateString += `[start-${id}] `;
           if (!section.isMainSection) {
             /** Header */
@@ -151,7 +150,6 @@ export const GridLayout = ({
           }
           gridRowTemplateString += `[end-${section.id}] `;
         });
-      // console.log(currentElementsInOrder);
       setElementsInOrder(currentElementsInOrder);
       gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
       if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;

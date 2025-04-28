@@ -137,12 +137,8 @@ export const resolveMainGrid = (
   dragRequest?: GridPanelData
 ): GridLayoutData => {
   const nextLayoutData = { ...gridLayout };
-  // apply drag request
-  if (dragRequest) {
-    nextLayoutData[dragRequest.id] = { type: 'panel', ...dragRequest };
-  }
-
   const sortedLayout = getMainLayoutInOrder(nextLayoutData);
+
   const sectionsAsPanels: GridRowData['panels'] = sortedLayout.reduce((prev, widget) => {
     return {
       ...prev,
@@ -151,7 +147,7 @@ export const resolveMainGrid = (
           ? (nextLayoutData[widget.id] as GridPanelData)
           : ({
               id: widget.id,
-              row: nextLayoutData[widget.id].row,
+              row: nextLayoutData[widget.id].row - 1,
               column: 0,
               height: 1,
               width: 48,
@@ -162,7 +158,10 @@ export const resolveMainGrid = (
   const newLayoutData: GridLayoutData = Object.values(
     resolveGridRow(sectionsAsPanels, dragRequest)
   ).reduce((prev, sectionOrPanel) => {
-    const { type, id } = nextLayoutData[sectionOrPanel.id];
+    const { type, id } =
+      dragRequest && sectionOrPanel.id === dragRequest.id
+        ? dragRequest
+        : nextLayoutData[sectionOrPanel.id];
     return {
       ...prev,
       [id]:
@@ -172,7 +171,6 @@ export const resolveMainGrid = (
     };
   }, {} as GridLayoutData);
 
-  // console.log('newLayoutData', newLayoutData);
   return newLayoutData;
 };
 
@@ -194,7 +192,6 @@ export const resolveGridRow = (
     nextRowData = resolvePanelCollisions(nextRowData, nextRowData[collision], sortedKeys);
     collision = getFirstCollision(nextRowData, sortedKeys);
   }
-  // console.log('COMPACT', compactGridRow(nextRowData));
   return compactGridRow(nextRowData); // compact the grid to close any gaps
 };
 

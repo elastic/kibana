@@ -63,6 +63,5 @@ const getPanelState = (layout: OrderedLayout, panelId: string) => {
       flattenedPanels[panel.id] = { ...panel, rowId: section.id, row: panel.row - startingRow };
     });
   });
-  // console.log({ flattenedPanels });
   return flattenedPanels[panelId];
 };
