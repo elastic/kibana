@@ -42,14 +42,17 @@ const client = new Client({
   }
 });
 
-client.indices.create({
-  index: "${indexName ?? INDEX_PLACEHOLDER}",
-  mappings: {
-    properties: {
-      text: { type: "text"}
+async function run() {
+  await client.indices.create({
+    index: "${indexName ?? INDEX_PLACEHOLDER}",
+    mappings: {
+      properties: {
+        text: { type: "text"}
+      },
     },
-  },
-});`,
+  });
+}
+run().catch(console.log);`,
   },
   dense_vector: {
     installCommand: INSTALL_CMD,
@@ -66,15 +69,18 @@ const client = new Client({
   }
 });
 
-client.indices.create({
-  index: "${indexName ?? INDEX_PLACEHOLDER}",
-  mappings: {
-    properties: {
-      vector: { type: "dense_vector", dims: 3 },
-      text: { type: "text"}
+async function run() {
+  await client.indices.create({
+    index: "${indexName ?? INDEX_PLACEHOLDER}",
+    mappings: {
+      properties: {
+        vector: { type: "dense_vector", dims: 3 },
+        text: { type: "text"}
+      },
     },
-  },
-});`,
+  });
+}
+run().catch(console.log);`,
   },
   semantic: {
     installCommand: INSTALL_CMD,
@@ -91,14 +97,17 @@ const client = new Client({
   }
 });
 
-client.indices.create({
-  index: "${indexName ?? INDEX_PLACEHOLDER}",
-  mappings: {
-    properties: {
-      text: { type: "semantic_text"}
+async function run() {
+  await client.indices.create({
+    index: "${indexName ?? INDEX_PLACEHOLDER}",
+    mappings: {
+      properties: {
+        text: { type: "semantic_text"}
+      },
     },
-  },
-});`,
+  });
+}
+run().catch(console.log);`,
   },
 };
 
@@ -121,16 +130,19 @@ const client = new Client({
 const index = "${indexName}";
 const docs = ${JSON.stringify(sampleDocuments, null, 2)};
 
-const bulkIngestResponse = await client.helpers.bulk({
-  index,
-  datasource: docs,
-  onDocument() {
-    return {
-      index: {},
-    };
-  }
-});
-console.log(bulkIngestResponse);`,
+async function run() {}
+  const bulkIngestResponse = await client.helpers.bulk({
+    index,
+    datasource: docs,
+    onDocument() {
+      return {
+        index: {},
+      };
+    }
+  });
+  console.log(bulkIngestResponse);
+}
+run().catch(console.log);`,
   updateMappingsCommand: ({
     apiKey,
     elasticsearchURL,
@@ -145,14 +157,17 @@ auth: {
 }
 });
 
-const index = "${indexName}";
-const mapping = ${JSON.stringify(mappingProperties, null, 2)};
+async function run() {
+  const index = "${indexName}";
+  const mapping = ${JSON.stringify(mappingProperties, null, 2)};
 
-const updateMappingResponse = await client.indices.putMapping({
-  index,
-  properties: mapping,
-});
-console.log(updateMappingResponse);`,
+  const updateMappingResponse = await client.indices.putMapping({
+    index,
+    properties: mapping,
+  });
+  console.log(updateMappingResponse);
+}
+run().catch(console.log);`,
 };
 
 const searchCommand: SearchCodeSnippetFunction = ({
@@ -172,13 +187,15 @@ const client = new Client({
 const index = "${indexName}";
 const query = ${JSON.stringify(queryObject, null, 2)};
 
-const result = await client.search({
-  index,
-  query,
-});
+async function run() {
+  const result = await client.search({
+    index,
+    query,
+  });
 
-console.log(result.hits.hits);
-`;
+  console.log(result.hits.hits);
+}
+run().catch(console.log);`;
 
 export const JavascriptSearchExample: SearchCodeDefinition = {
   searchCommand,
