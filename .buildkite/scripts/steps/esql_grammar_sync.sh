@@ -1,9 +1,52 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VALIDATION_PACKAGE_DIR="src/platform/packages/shared/kbn-esql-validation-autocomplete"
-EDITOR_PACKAGE_DIR="src/platform/packages/private/kbn-language-documentation"
-GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
+synchronize_lexer_grammar () {
+  license_header="$1"
+  source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseLexer.g4"
+  destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_lexer.g4"
+
+  # Copy the file
+  cp "$source_file" "$destination_file"
+
+  # Insert the license header
+  temp_file=$(mktemp)
+  printf "// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat $destination_file)" > "$temp_file"
+  mv "$temp_file" "$destination_file"
+
+  # Replace the line containing "lexer grammar" with "lexer grammar esql_lexer;"
+  sed -i -e 's/lexer grammar.*$/lexer grammar esql_lexer;/' "$destination_file"
+
+  # Replace the line containing "superClass" with "superClass=lexer_config;"
+  sed -i -e 's/superClass.*$/superClass=lexer_config;/' "$destination_file"
+
+  echo "File copied and modified successfully."
+}
+
+synchronize_parser_grammar () {
+  license_header="$1"
+  source_file="$PARENT_DIR/elasticsearch/x-pack/plugin/esql/src/main/antlr/EsqlBaseParser.g4"
+  destination_file="./src/platform/packages/shared/kbn-esql-ast/src/antlr/esql_parser.g4"
+
+  # Copy the file
+  cp "$source_file" "$destination_file"
+
+  # Insert the license header
+  temp_file=$(mktemp)
+  printf "// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat ${destination_file})" > "$temp_file"
+  mv "$temp_file" "$destination_file"
+
+  # Replace the line containing "parser grammar" with "parser grammar esql_parser;"
+  sed -i -e 's/parser grammar.*$/parser grammar esql_parser;/' "$destination_file"
+
+  # Replace tokenVocab=EsqlBaseLexer; with tokenVocab=esql_lexer;
+  sed -i -e 's/tokenVocab=EsqlBaseLexer;/tokenVocab=esql_lexer;/' "$destination_file"
+
+  # Replace the line containing "superClass" with "superClass=parser_config;"
+  sed -i -e 's/superClass.*$/superClass=parser_config;/' "$destination_file"
+
+  echo "File copied and modified successfully."
+}
 
 report_main_step () {
   echo "--- $1"
@@ -12,45 +55,33 @@ report_main_step () {
 main () {
   cd "$PARENT_DIR"
 
-  report_main_step "Cloning Elasticsearch repository"
+  report_main_step "Cloning repositories"
 
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
-  cd "$PARENT_DIR/elasticsearch"
+
   
+  cd "$PARENT_DIR/elasticsearch"
   echo "FETCHING 8.19 branch"
   git fetch origin 8.19
 
   echo "CHECKING OUT 8.19 branch"
   git checkout FETCH_HEAD -b 8.19
 
-  report_main_step "Bootstrapping Kibana"
 
   cd "$KIBANA_DIR"
 
-  .buildkite/scripts/bootstrap.sh
+  license_header=$(cat "$KIBANA_DIR/licenses/ELASTIC-LICENSE-2.0-HEADER.txt")
 
-  cd "$KIBANA_DIR/$VALIDATION_PACKAGE_DIR"
+  report_main_step "Synchronizing lexer grammar..."
+  synchronize_lexer_grammar "$license_header"
 
-  report_main_step "Generate function definitions"
-
-  yarn make:defs $PARENT_DIR/elasticsearch
-
-  report_main_step "Generate inline function docs"
-
-  cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"
-
-  yarn make:docs $PARENT_DIR/elasticsearch
-
-  report_main_step "Run i18n check"
-
-  cd "$KIBANA_DIR"
-
-  node scripts/i18n_check.js --fix
+  report_main_step "Synchronizing parser grammar..."
+  synchronize_parser_grammar "$license_header"
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet $GIT_SCOPE 
+  git diff --exit-code --quiet "$destination_file"
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
@@ -63,26 +94,25 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update function metadata'
-  PR_BODY='This PR updates the function definitions and inline docs based on the latest metadata from Elasticsearch.'
+  PR_TITLE='[ES|QL] Update grammars'
+  PR_BODY='This PR updates the ES|QL grammars (lexer and parser) to match the latest version in Elasticsearch.'
 
-  # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
+  report_main_step "Building ANTLR artifacts."
 
-  if [ "$pr_search_result" == "$PR_TITLE" ]; then
-    echo "PR already exists. Exiting."
-    exit
-  fi
+  # Bootstrap Kibana
+  .buildkite/scripts/bootstrap.sh
 
-  echo "No existing PR found. Committing changes."
+  # Build ANTLR stuff
+  cd ./src/platform/packages/shared/kbn-esql-ast/src
+  yarn build:antlr4:esql
 
   # Make a commit
-  BRANCH_NAME="esql_generate_function_metadata_$(date +%s)"
+  BRANCH_NAME="esql_grammar_sync_$(date +%s)"
 
   git checkout -b "$BRANCH_NAME"
 
-  git add $GIT_SCOPE
-  git commit -m "Update function metadata"
+  git add antlr/*
+  git commit -m "Update ES|QL grammars"
 
   report_main_step "Changes committed. Creating pull request."
 
