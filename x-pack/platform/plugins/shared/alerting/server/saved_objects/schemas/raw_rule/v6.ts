@@ -6,19 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { rawRuleSchema as rawRuleSchemaV5, rawRuleDashboardsSchema } from './v5';
+import { rawRuleSchema as rawRuleSchemaV5, artifactsSchema as artifactsSchemaV5 } from './v5';
 
 export const rawRuleInvestigationGuideSchema = schema.object({
   blob: schema.string(),
 });
 
-export const artifactsSchema = schema.object({
-  dashboards: schema.maybe(rawRuleDashboardsSchema),
-  investigation_guide: schema.maybe(
-    schema.object({
-      blob: schema.string(),
-    })
-  ),
+export const artifactsSchema = artifactsSchemaV5.extends({
+  investigation_guide: schema.maybe(rawRuleInvestigationGuideSchema),
 });
 
 export const rawRuleSchema = rawRuleSchemaV5.extends({
