@@ -532,6 +532,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             refId: 'dashboard_1',
           },
         ]);
+        expect((esUpdateResponse.body._source as any)?.alert.artifacts.investigation_guide).to.eql({
+          blob: '## Summary',
+        });
       });
     });
   });
