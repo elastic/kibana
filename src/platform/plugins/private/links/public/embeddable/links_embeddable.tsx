@@ -228,7 +228,10 @@ export const getLinksEmbeddableFactory = () => {
         onEdit: async () => {
           const { openEditorFlyout } = await import('../editor/open_editor_flyout');
           const newState = await openEditorFlyout({
-            initialState: stateManager.getLatestState(),
+            initialState: {
+              ...stateManager.getLatestState(),
+              savedObjectId
+            },
             parentDashboard: parentApi,
           });
           if (!newState) return;
