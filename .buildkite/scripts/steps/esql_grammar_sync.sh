@@ -77,6 +77,7 @@ main () {
   git clone https://github.com/elastic/elasticsearch --depth 1
 
   cd "$PARENT_DIR/elasticsearch"
+  git fetch 8.19
   git checkout 8.19
 
   cd "$KIBANA_DIR"
