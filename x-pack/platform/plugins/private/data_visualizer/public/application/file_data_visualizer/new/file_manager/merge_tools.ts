@@ -6,7 +6,7 @@
  */
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingPropertyBase, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { FileAnalysis, FileWrapper } from './file_wrapper';
 
 export enum CLASH_TYPE {
@@ -363,7 +363,7 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
 export function getFieldsFromMappings(mappings: MappingTypeMapping) {
   const fields: Array<{ name: string; value: { type: string } }> = [];
 
-  function traverseProperties(properties: Record<string, any>, parentKey: string = '') {
+  function traverseProperties(properties: MappingPropertyBase, parentKey: string = '') {
     for (const [key, value] of Object.entries(properties)) {
       const fullKey = parentKey ? `${parentKey}.${key}` : key;
 
