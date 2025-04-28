@@ -79,11 +79,13 @@ const getTestUtils = (
                 notify_when: 'onThrottleInterval',
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
-                ...describeType === 'internal' ? {
-                  artifacts: {
-                    dashboards: [],
-                  },
-                } : {},
+                ...(describeType === 'internal'
+                  ? {
+                      artifacts: {
+                        dashboards: [],
+                      },
+                    }
+                  : {}),
                 api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
@@ -386,34 +388,33 @@ const getTestUtils = (
         .send(
           getTestRuleData({
             enabled: true,
-            ...describeType === 'internal' 
-            ? {
-              artifacts: {
-                dashboards: [
-                  {
-                    id: 'dashboard-1'
+            ...(describeType === 'internal'
+              ? {
+                  artifacts: {
+                    dashboards: [
+                      {
+                        id: 'dashboard-1',
+                      },
+                      {
+                        id: 'dashboard-2',
+                      },
+                    ],
                   },
-                  {
-                    id: 'dashboard-2'
-                  }
-                ],
-              }
-            } 
-            : {},
+                }
+              : {}),
           })
         )
         .expect(200);
-        
 
       objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
       const response = await supertestWithoutAuth
-      .get(
-        `${getUrlPrefix(space.id)}/${
-          describeType === 'public' ? 'api' : 'internal'
-        }/alerting/rule/${createdAlert.id}`
-      )
-      .auth(user.username, user.password);
+        .get(
+          `${getUrlPrefix(space.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rule/${createdAlert.id}`
+        )
+        .auth(user.username, user.password);
 
       if (describeType === 'public') {
         expect(response.body.artifacts).to.be(undefined);
@@ -421,11 +422,11 @@ const getTestUtils = (
         expect(response.body.artifacts).to.eql({
           dashboards: [
             {
-              id: 'dashboard-1'
+              id: 'dashboard-1',
             },
             {
-              id: 'dashboard-2'
-            }
+              id: 'dashboard-2',
+            },
           ],
         });
       }
