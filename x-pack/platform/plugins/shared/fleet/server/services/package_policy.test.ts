@@ -56,6 +56,8 @@ import { packageToPackagePolicy } from '../../common/services';
 
 import { FleetError, PackagePolicyValidationError } from '../errors';
 
+import { removeAssetsForInputPackagePolicy } from './epm/packages/input_type_packages';
+
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
 import {
@@ -78,10 +80,15 @@ import { licenseService } from './license';
 jest.mock('./spaces/helpers');
 
 jest.mock('./license');
+jest.mock('./epm/packages/input_type_packages');
 
 const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents
 >;
+const mockedRemoveAssetsForInputPackagePolicy =
+  removeAssetsForInputPackagePolicy as jest.MockedFunction<
+    typeof removeAssetsForInputPackagePolicy
+  >;
 
 const ASSETS_MAP_FIXTURES = new Map([
   [
@@ -162,6 +169,20 @@ async function mockedGetPackageInfo(params: any) {
       ],
     };
   }
+  // if (params.pkgName === 'test-input') {
+  //   pkg = {
+  //     version: '1.0.1',
+  //     name: 'test-input',
+  //     type: 'input',
+  //     inputs: [
+  //       {
+  //         title: 'test',
+  //         type: 'logs',
+  //         description: 'test',
+  //       },
+  //     ],
+  //   };
+  // }
 
   return Promise.resolve(pkg);
 }
@@ -3154,6 +3175,9 @@ describe('Package policy service', () => {
   });
 
   describe('delete', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
     // TODO: Add tests
     it('should allow to delete a package policy', async () => {});
 
@@ -3187,6 +3211,91 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should remove assets for input type packages if the package has no other policies', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackageInputInfo = {
+        version: '1.0.1',
+        name: 'test-input',
+        type: 'input',
+        inputs: [
+          {
+            title: 'test',
+            type: 'logs',
+            description: 'test',
+          },
+        ],
+      };
+      (getPackageInfo as jest.Mock).mockResolvedValueOnce(mockPackageInputInfo);
+
+      const mockPackagePolicy = {
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {},
+        references: [],
+        saved_objects: [],
+      };
+
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [{ ...mockPackagePolicy }],
+      });
+
+      soClient.find.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      } as any);
+
+      await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
+
+      expect(mockedRemoveAssetsForInputPackagePolicy).toHaveBeenCalledWith({
+        packageInfo: mockPackageInputInfo,
+        logger: expect.anything(),
+        esClient: expect.anything(),
+        soClient: expect.anything(),
+      });
+    });
+
+    it('should not remove assets for input type packages if the package has other policies', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackageInputInfo = {
+        version: '1.0.1',
+        name: 'test-input',
+        type: 'input',
+        inputs: [
+          {
+            title: 'test',
+            type: 'logs',
+            description: 'test',
+          },
+        ],
+      };
+      (getPackageInfo as jest.Mock).mockResolvedValueOnce(mockPackageInputInfo);
+
+      const mockPackagePolicy = {
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {},
+        references: [],
+        saved_objects: [
+          {
+            name: 'packagePolicy 1',
+          } as any,
+        ],
+      };
+
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [{ ...mockPackagePolicy }],
+      });
+
+      soClient.find.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      } as any);
+
+      await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
+
+      expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
     });
   });
 
