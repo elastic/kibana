@@ -216,6 +216,11 @@ const fetchIntegrationPolicyIds = async (
     ...Object.keys(MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION),
   ];
   const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (${packageNames.join(' OR ')})`;
+
+  fleetServices.logger.debug(
+    () => `fetchIntegrationPolicyIds(): fetching from fleet using kuery:\n${kuery}`
+  );
+
   const packagePolicyIterable = await fleetServices.packagePolicy.fetchAllItemIds(
     fleetServices.getSoClient(),
     { kuery }
