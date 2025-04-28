@@ -19,9 +19,8 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
     obj.forEach((value) => {
       getFlattenedKeys(value, parentKey, keys);
     });
-  } else {
-    keys.add(parentKey);
   }
+  keys.add(parentKey);
   return keys;
 }
 
@@ -34,8 +33,8 @@ function parseStrict<TSchema extends z.Schema>(
     return next;
   }
 
-  const allInputKeys = Array.from(getFlattenedKeys(input.data).values());
-  const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>).values());
+  const allInputKeys = Array.from(getFlattenedKeys(input.data));
+  const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>));
 
   const excessKeys = difference(allInputKeys, allOutputKeys);
 

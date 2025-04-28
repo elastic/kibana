@@ -123,7 +123,8 @@ describe('StreamActiveRecord', () => {
 
     const validationResult = await stream.validate(stateMock, stateMock);
 
-    expect(validationResult).toEqual({ isValid: false, errors: ['test_error'] });
+    expect(validationResult.isValid).toEqual(false);
+    expect(validationResult.errors.map((error) => error.message)).toEqual(['test_error']);
   });
 
   it('calls doDetermineCreateActions hook on stream that was added to the state', async () => {
