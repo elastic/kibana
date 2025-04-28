@@ -29,7 +29,7 @@ import type {
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
-import { registerProductFeatures, getSecurityProductTier } from './product_features';
+import { registerProductFeatures, getSecurityAiSocProductTier } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
 import {
@@ -160,7 +160,7 @@ export class SecuritySolutionServerlessPlugin
     this.nlpCleanupTask = new NLPCleanupTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
-      productTier: getSecurityProductTier(this.config, this.logger),
+      productTier: getSecurityAiSocProductTier(this.config, this.logger),
       taskManager: pluginsSetup.taskManager,
     });
 
