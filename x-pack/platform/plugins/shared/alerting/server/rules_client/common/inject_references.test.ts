@@ -16,6 +16,15 @@ describe('injectReferencesIntoArtifacts', () => {
     });
   });
 
+  it('includes investigation guide fields', () => {
+    expect(
+      injectReferencesIntoArtifacts('test-id', { investigation_guide: { blob: '# Summary' } }, [])
+    ).toEqual({
+      dashboards: [],
+      investigation_guide: { blob: '# Summary' },
+    });
+  });
+
   it('throws an error if references are not provided', () => {
     const artifacts = {
       dashboards: [
