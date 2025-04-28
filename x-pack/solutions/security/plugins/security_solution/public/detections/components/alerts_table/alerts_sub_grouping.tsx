@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -32,6 +33,8 @@ import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];
@@ -98,7 +101,16 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
+    useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.detections);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
