@@ -26,6 +26,7 @@ import {
   isDefendInsightsEnabled,
   invokeDefendInsightsGraph,
   handleGraphError,
+  runExternalCallbacks,
 } from './helpers';
 import { CallbackIds, appContextService } from '../../services/app_context';
 
@@ -109,6 +110,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
               statusCode: 500,
             });
           }
+
+          await runExternalCallbacks(CallbackIds.DefendInsightsPreCreate, request);
 
           const {
             endpointIds,

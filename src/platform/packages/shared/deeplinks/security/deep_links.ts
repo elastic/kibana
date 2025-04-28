@@ -65,6 +65,7 @@ export enum SecurityPageName {
   rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
+  rulesManagement = 'rules-management',
   siemMigrationsRules = 'siem_migrations-rules',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -84,7 +85,7 @@ export enum SecurityPageName {
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',
   entityAnalyticsLanding = 'entity_analytics-landing',
-  privilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
+  entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',

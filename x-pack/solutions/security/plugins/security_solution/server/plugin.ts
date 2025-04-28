@@ -356,6 +356,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const securityRuleTypeOptions = {
       lists: plugins.lists,
+      docLinks: core.docLinks,
       actions: plugins.actions,
       logger: this.logger,
       config: this.config,
