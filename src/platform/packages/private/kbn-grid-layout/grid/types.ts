@@ -114,13 +114,25 @@ export interface ActiveRowEvent {
   };
 }
 
+/** This is translated from GridLayoutData */
+export interface OrderedLayout {
+  [key: string]: Omit<GridRowData, 'isCollapsed' | 'title'> &
+    (
+      | Partial<Pick<GridRowData, 'isCollapsed' | 'title'>>
+      | {
+          isMainSection: boolean;
+        }
+    ) & { order: number };
+}
+
 export interface GridLayoutStateManager {
-  gridLayout$: BehaviorSubject<GridLayoutData>;
+  gridLayout$: BehaviorSubject<OrderedLayout>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+
   activePanel$: BehaviorSubject<ActivePanelEvent | undefined>;
   activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
 

@@ -58,7 +58,6 @@ export const GridLayout = ({
     accessMode,
   });
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
-  const orderedSections$ = useOrderedSections(gridLayoutStateManager);
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -106,7 +105,7 @@ export const GridLayout = ({
   // }, [onLayoutChange]);
 
   useEffect(() => {
-    const renderSubscription = orderedSections$.subscribe((sections) => {
+    const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((sections) => {
       const currentElementsInOrder: GridLayoutElementsInOrder = [];
       let gridRowTemplateString = '';
 
@@ -117,18 +116,18 @@ export const GridLayout = ({
         .forEach((section) => {
           const { id } = section;
           gridRowTemplateString += `[start-${id}] `;
-          if (!section.isMainSection) {
+          const isMainSection = 'isMainSection' in section && section.isMainSection;
+          if (!isMainSection) {
             /** Header */
             currentElementsInOrder.push({ type: 'header', id });
             gridRowTemplateString += `auto `;
           }
 
           /** Panels */
-          const startingRow = section.isMainSection && section.order !== 0 ? section.row + 1 : 0;
           if (!section.isCollapsed) {
             let maxRow = -Infinity;
             Object.values((section as GridRowData).panels).forEach((panel) => {
-              maxRow = Math.max(maxRow, panel.row + panel.height - startingRow);
+              maxRow = Math.max(maxRow, panel.row + panel.height);
               currentElementsInOrder.push({
                 type: 'panel',
                 id: panel.id,
@@ -141,7 +140,7 @@ export const GridLayout = ({
             });
           }
 
-          if (!section.isMainSection) {
+          if (!isMainSection) {
             /** Footer */
             currentElementsInOrder.push({ type: 'footer', id });
             gridRowTemplateString += `auto `;
@@ -149,6 +148,7 @@ export const GridLayout = ({
           gridRowTemplateString += `[end-${section.id}] `;
         });
       setElementsInOrder(currentElementsInOrder);
+      console.log({ currentElementsInOrder });
       gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
       if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
     });
@@ -188,9 +188,9 @@ export const GridLayout = ({
       ({
         renderPanelContents,
         useCustomDragHandle,
-        gridLayoutStateManager: { ...gridLayoutStateManager, orderedSections$ },
+        gridLayoutStateManager,
       } as GridLayoutContextType),
-    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager, orderedSections$]
+    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 
   return (

@@ -8,6 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
 import { GridLayoutStateManager, GridPanelData, GridRowData } from '../../types';
 import { isGridDataEqual, isLayoutEqual } from '../../utils/equality_checks';
@@ -50,7 +51,7 @@ export const moveAction = (
     activePanel$,
     gridLayout$,
     layoutRef: { current: gridLayoutElement },
-    orderedSections$: { value: orderedSections },
+    headerRefs: { current: gridHeaderElements },
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   const activePanel = activePanel$.value;
@@ -60,15 +61,13 @@ export const moveAction = (
     return;
   }
 
-  const targetRowIsMain = activePanel.targetRow.includes('main');
-  const currentPanelData: GridPanelData = targetRowIsMain
-    ? (currentLayout[activePanel.id] as GridPanelData)
-    : (currentLayout[activePanel.targetRow] as GridRowData).panels[activePanel.id];
-
+  const currentPanelData = currentLayout[activePanel.targetRow].panels[activePanel.id];
   if (!currentPanelData) {
     return;
   }
+  console.log({ currentLayout, activePanel, currentPanelData });
 
+  const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
   const isResize = activePanel.type === 'resize';
 
   const previewRect = (() => {
@@ -81,80 +80,68 @@ export const moveAction = (
     }
   })();
 
-  const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
-
   // find the grid that the preview rect is over
   const lastRowId = activePanel.targetRow;
+  let previousSection;
   const targetRowId = (() => {
     // TODO: temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
     if (isResize || isKeyboardEvent(e)) return lastRowId;
-    const previewBottom = previewRect.top + rowHeight;
 
+    const previewBottom = previewRect.top + rowHeight;
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries({ ...gridRowElements, main: gridLayoutElement }).forEach(([id, row]) => {
+    console.log('elements', { ...gridRowElements });
+    Object.keys(currentLayout).forEach((rowId) => {
+      const row = currentLayout[rowId].isCollapsed
+        ? gridHeaderElements[rowId]
+        : gridRowElements[rowId];
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
       const overlap =
         Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
       if (overlap > highestOverlap) {
         highestOverlap = overlap;
-        highestOverlapRowId = id;
+        highestOverlapRowId = rowId;
       }
     });
+    console.log('highestOverlapRowId', highestOverlapRowId);
+    if (currentLayout[highestOverlapRowId].isCollapsed) {
+      previousSection = highestOverlapRowId;
+      // skip past collapsed section into next "main" section
+      const previousOrder = currentLayout[highestOverlapRowId].order;
+      highestOverlapRowId = `main-${previousOrder}`;
+    }
     return highestOverlapRowId;
   })();
-  const hasChangedGridRow = targetRowId !== lastRowId;
-
-  // re-render
-  activePanel$.next({
-    ...activePanel,
-    id: activePanel.id,
-    position: previewRect,
-    targetRow: targetRowId,
-  });
 
   // calculate the requested grid position
-  const targetedGridRow = gridRowElements[targetRowId];
-  const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
-
-  const targetedGridLeft = targetedGridRowRect?.left ?? 0;
-  const targetedGridTop = targetedGridRowRect?.top ?? 0;
-
-  const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
-
-  const localXCoordinate = isResize
-    ? previewRect.right - targetedGridLeft
-    : previewRect.left - targetedGridLeft;
-  let localYCoordinate = isResize
-    ? previewRect.bottom - targetedGridTop
-    : previewRect.top - targetedGridTop;
-  // if (targetRowId === 'main') {
-  //   const subtracted = false;
-
-  //   Object.keys(gridLayoutStateManager.headerRefs.current).forEach((rowId) => {
-  //     const headerElement = gridLayoutStateManager.headerRefs.current[rowId];
-  //     const footerElement = gridLayoutStateManager.footerRefs.current[rowId];
-  //     const headerRect = headerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
-  //     const footerRect = footerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
-
-  //     if (headerRect.top < previewRect.top) {
-  //       console.log('SUBTRACT HEADER');
-  //       localYCoordinate -= headerRect.height;
-  //       localYCoordinate += rowHeight + gutterSize;
-  //     }
-  //     if (footerRect.top < previewRect.top) {
-  //       localYCoordinate -= footerRect.height;
-  //     }
-  //   });
-  // }
-
-  const targetColumn = Math.min(
-    Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
-    maxColumn
-  );
-
-  const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+  const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
+  const targetColumn = (() => {
+    const targetedGridLeft = gridLayoutRect?.left ?? 0;
+    const localXCoordinate = isResize
+      ? previewRect.right - targetedGridLeft
+      : previewRect.left - targetedGridLeft;
+    const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
+    return Math.min(
+      Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
+      maxColumn
+    );
+  })();
+  const targetRow = (() => {
+    if (currentLayout[targetRowId]) {
+      // this section already exists, so use the wrapper element to figure out target row
+      const targetedGridRow = gridRowElements[targetRowId];
+      const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
+      const targetedGridTop = targetedGridRowRect?.top ?? 0;
+      const localYCoordinate = isResize
+        ? previewRect.bottom - targetedGridTop
+        : previewRect.top - targetedGridTop;
+      return Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+    } else {
+      // this section doesn't exist yet, so we have to get creative
+      return currentLayout[previousSection!].row + 1;
+    }
+  })();
 
   const requestedPanelData = { ...currentPanelData };
   if (isResize) {
@@ -164,12 +151,14 @@ export const moveAction = (
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;
   }
-  if (targetRowId === 'main') {
-    // main section but wrapper element doesn't exist yet
-    // requestedPanelData.row = 0;
-  } else if (targetRowId.includes('main')) {
-    requestedPanelData.row += orderedSections[targetRowId].row;
-  }
+  console.log({
+    targetRowId,
+    targetColumn,
+    targetRow,
+    requestedPanelData: { ...requestedPanelData },
+  });
+
+  const hasChangedGridRow = targetRowId !== lastRowId;
 
   // resolve the new grid layout
   if (
@@ -178,43 +167,63 @@ export const moveAction = (
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
-    let nextLayout = cloneDeep(currentLayout) ?? {};
-    if (targetRowIsMain) {
-      const { [activePanel.id]: interactingPanel, ...otherWidgets } = nextLayout;
-      nextLayout = { ...otherWidgets };
-    } else {
-      const row = nextLayout[activePanel.targetRow] as GridRowData;
-      const { [activePanel.id]: interactingPanel, ...otherPanels } = row.panels;
-      nextLayout[activePanel.targetRow] = {
-        ...row,
-        type: 'section',
-        panels: { ...otherPanels },
+    const nextLayout = cloneDeep(currentLayout) ?? {};
+    if (!nextLayout[targetRowId]) {
+      // section doesn't exist, so add it
+      const { row: nextRow, order: nextOrder } = nextLayout[previousSection!];
+      // push other rows down
+      Object.keys(nextLayout).forEach((rowId) => {
+        if (nextLayout[rowId].row > nextRow) {
+          nextLayout[rowId].row += requestedPanelData.height;
+          nextLayout[rowId].order += 2;
+        }
+      });
+      nextLayout[targetRowId] = {
+        id: targetRowId,
+        isMainSection: true,
+        panels: {},
+        row: nextRow + 1,
+        order: nextOrder + 1,
       };
+      requestedPanelData.row = 0;
     }
 
+    // const interactingPanel = { ...nextLayout[activePanel.targetRow].panels[activePanel.id] };
+    delete nextLayout[lastRowId].panels[activePanel.id];
+
+    console.log('BEFORE', { lastRowId, nextLayout: cloneDeep(nextLayout) });
+
     // resolve destination grid
-    if (targetRowId.includes('main')) {
-      nextLayout = resolveMainGrid(nextLayout, requestedPanelData);
-    } else {
-      const destinationGrid = nextLayout[targetRowId] as GridRowData;
-      const resolvedDestinationGrid = resolveGridRow(destinationGrid.panels, requestedPanelData);
-      (nextLayout[targetRowId] as GridRowData).panels = resolvedDestinationGrid;
-    }
+    const destinationGrid = nextLayout[targetRowId] as GridRowData;
+    const resolvedDestinationGrid = resolveGridRow(destinationGrid.panels, requestedPanelData);
+    (nextLayout[targetRowId] as GridRowData).panels = resolvedDestinationGrid;
 
     // resolve origin grid
     if (hasChangedGridRow) {
-      if (lastRowId.includes('main')) {
-        nextLayout = resolveMainGrid(nextLayout);
-      } else {
-        const originGrid = nextLayout[lastRowId] as GridRowData;
-        const resolvedOriginGrid = resolveGridRow(originGrid.panels);
-        (nextLayout[lastRowId] as GridRowData).panels = resolvedOriginGrid;
+      const originGrid = nextLayout[lastRowId] as GridRowData;
+      const resolvedOriginGrid = resolveGridRow(originGrid.panels);
+      (nextLayout[lastRowId] as GridRowData).panels = resolvedOriginGrid;
+
+      if (
+        nextLayout[lastRowId].isMainSection &&
+        !Object.keys(nextLayout[lastRowId].panels).length
+      ) {
+        delete nextLayout[lastRowId];
       }
     }
-    if (currentLayout && !isLayoutEqual(currentLayout, nextLayout)) {
+    if (currentLayout && !deepEqual(currentLayout, nextLayout)) {
+      console.log({ nextLayout });
       gridLayout$.next(nextLayout);
     }
   }
+
+  // re-render the active panel
+  activePanel$.next({
+    ...activePanel,
+    id: activePanel.id,
+    position: previewRect,
+    targetRow: targetRowId,
+  });
 };
 
 export const commitAction = ({ activePanel$, panelRefs }: GridLayoutStateManager) => {

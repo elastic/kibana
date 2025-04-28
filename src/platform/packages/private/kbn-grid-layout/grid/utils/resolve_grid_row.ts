@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData, GridLayoutWidget, GridPanelData, GridRowData } from '../types';
+import {
+  GridLayoutData,
+  GridLayoutWidget,
+  GridPanelData,
+  GridRowData,
+  OrderedLayout,
+} from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
   if (panelA.id === panelB.id) return false; // same panel
@@ -133,7 +139,7 @@ const compactGridRow = (originalLayout: GridRowData['panels']) => {
 };
 
 export const resolveMainGrid = (
-  gridLayout: GridLayoutData,
+  gridLayout: OrderedLayout,
   dragRequest?: GridPanelData
 ): GridLayoutData => {
   const nextLayoutData = { ...gridLayout };

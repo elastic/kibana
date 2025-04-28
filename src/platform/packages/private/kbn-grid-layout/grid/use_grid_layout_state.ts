@@ -21,11 +21,12 @@ import {
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
-  PanelInteractionEvent,
+  OrderedLayout,
   RuntimeGridSettings,
 } from './types';
 import { shouldShowMobileView } from './utils/mobile_view';
 import { resolveGridRow } from './utils/resolve_grid_row';
+import { getOrderedLayout } from './use_ordered_grid_layout';
 
 export const useGridLayoutState = ({
   layout,
@@ -86,12 +87,12 @@ export const useGridLayoutState = ({
   }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
-    const resolvedLayout = cloneDeep(layout);
-    Object.values(resolvedLayout).forEach((row) => {
-      resolvedLayout[row.id] = resolveGridRow(row);
-    });
+    const resolvedLayout = getOrderedLayout(layout);
+    // Object.values(resolvedLayout).forEach((row) => {
+    //   resolvedLayout[row.id] = resolveGridRow(row);
+    // });
 
-    const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
+    const gridLayout$ = new BehaviorSubject<OrderedLayout>(resolvedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const activePanel$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);

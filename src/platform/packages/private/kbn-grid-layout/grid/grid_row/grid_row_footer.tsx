@@ -20,6 +20,7 @@ export interface GridRowProps {
 export const GridRowFooter = React.memo(({ rowId }: GridRowProps) => {
   return (
     <span
+      data-row-id={rowId}
       className={'kbnGridRowFooter'}
       css={({ euiTheme }: UseEuiTheme) => {
         return css`
