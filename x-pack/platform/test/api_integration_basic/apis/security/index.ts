@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security (basic license)', function () {
     this.tags('skipFIPS');
-    // Updates here should be mirrored from `../../../api_integration/apis/security/index.js` if tests
+    // Updates here should be mirrored from `../../../api_integration/apis/security/index.ts` if tests
     // should also run under a basic license.
 
     loadTestFile(require.resolve('../../../api_integration/apis/security/api_keys'));
