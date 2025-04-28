@@ -63,7 +63,6 @@
     "@kbn/alerting-types",
     "@kbn/zod-helpers",
     "@kbn/config",
-    "@kbn/core-feature-flags-server",
   ],
   "exclude": [
     "target/**/*",
