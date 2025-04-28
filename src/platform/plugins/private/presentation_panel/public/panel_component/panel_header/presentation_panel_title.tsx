@@ -93,6 +93,18 @@ export const PresentationPanelTitle = ({
       return panelTitleElement;
     }
 
+    const innerTitleBoxStyles = css`
+      display: flex;
+      flex-wrap: nowrap;
+      column-gap: ${euiTheme.size.xs};
+      align-items: center;
+    `;
+
+    // Styles necessary for applying ellipsis on the h2 and showing the info icon if description is present
+    const innerTitleStyles = css`
+      overflow: hidden;
+    `;
+
     return (
       <EuiToolTip
         title={panelTitle}
@@ -101,18 +113,15 @@ export const PresentationPanelTitle = ({
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',
-          css: css`
-            max-width: 100%;
-            display: flex;
-            flex-wrap: nowrap;
-            column-gap: ${euiTheme.size.xs};
-            align-items: center;
-          `,
         }}
       >
-        <div data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
+        <div
+          data-test-subj="embeddablePanelTitleInner"
+          className="embPanel__titleInner"
+          css={innerTitleBoxStyles}
+        >
           {!hideTitle ? (
-            <h2>
+            <h2 css={innerTitleStyles}>
               <EuiScreenReaderOnly>
                 <span id={headerId}>
                   {panelTitle
@@ -127,7 +136,8 @@ export const PresentationPanelTitle = ({
                       })}
                 </span>
               </EuiScreenReaderOnly>
-              {panelTitleElement}&nbsp;
+              {panelTitleElement}
+              {/* Removed space that was breaking the layout.*/}
             </h2>
           ) : null}
           <EuiIcon
