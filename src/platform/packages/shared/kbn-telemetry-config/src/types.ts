@@ -13,6 +13,6 @@ export interface TracingConfig {
 }
 
 export interface TelemetryConfig {
-  tracing: TracingConfig;
-  enabled: boolean;
+  tracing?: TracingConfig;
+  enabled?: boolean;
 }
