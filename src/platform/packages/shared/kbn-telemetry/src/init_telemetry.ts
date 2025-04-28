@@ -32,8 +32,10 @@ export const initTelemetry = (
 
   const telemetryEnabled = telemetryConfig?.enabled === true;
 
+  const tracing = telemetryConfig?.tracing;
+
   // tracing is enabled only when telemetry is enabled and tracing is not disabled
-  const tracingEnabled = telemetryEnabled && telemetryConfig.tracing.enabled;
+  const tracingEnabled = !!telemetryEnabled && !!tracing?.enabled;
 
   if (!tracingEnabled) {
     return async () => {};
@@ -50,7 +52,7 @@ export const initTelemetry = (
     // by default, base sampling on parent context,
     // or for root spans, based on the configured sample rate
     sampler: new ParentBasedSampler({
-      root: new TraceIdRatioBasedSampler(telemetryConfig.tracing.sample_rate),
+      root: new TraceIdRatioBasedSampler(tracing.sample_rate),
     }),
     spanProcessors: [processor],
     resource: resourceFromAttributes({
