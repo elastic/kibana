@@ -40,10 +40,10 @@ export interface NLPCleanupTaskStartContract {
  * This task is responsible for periodically cleaning up all NLP model deployments, specifically, trained models where
  * the `model_type` is `pytorch`.
  *
- * NLP is only intended to be enabled for the Security `complete` productTier, however due to current capabilities
- * (see: https://github.com/elastic/ml-team/issues/1139), it will remain enabled at the ES level for all productTiers,
- * so we must periodically check for any NLP models that may have been manually deployed via the ES API and clean them
- * up.
+ * NLP is only intended to be enabled for the Security `complete` and `searchAiLake` productTiers, however due to
+ * current capabilities (see: https://github.com/elastic/ml-team/issues/1139), it will remain enabled at the ES level
+ * for all productTiers, so we must periodically check for any NLP models that may have been manually deployed via the
+ * ES API and clean them up.
  *
  * Note: Models cannot be deployed via the Kibana UI as NLP will be disabled on the Kibana side by project-controller
  * based on the productTier, so no additional UI gating is necessary.
@@ -51,7 +51,7 @@ export interface NLPCleanupTaskStartContract {
  * See https://github.com/elastic/security-team/issues/7995 for further details.
  *
  * Task Details: after discussion with ResponseOps, it is preferred for the task to always be registered regardless of
- * the productTier, and to only schedule it if the productTier is `complete`.
+ * the productTier, and to only schedule it if the productTier is `complete` or `searchAiLake`.
  *
  * See `x-pack/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task` for API integration tests.
  */
@@ -77,7 +77,10 @@ export class NLPCleanupTask {
           createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
             return {
               run: async () => {
-                if (this.productTier === ProductTier.complete) {
+                if (
+                  this.productTier === ProductTier.complete ||
+                  this.productTier === ProductTier.searchAiLake
+                ) {
                   this.logger.info(
                     `Task ${taskInstance.id} no longer needed for current productTier, disabling...`
                   );
@@ -113,7 +116,10 @@ export class NLPCleanupTask {
         params: { version: NLPCleanupTaskConstants.VERSION },
       });
 
-      if (this.productTier !== ProductTier.complete) {
+      if (
+        this.productTier !== ProductTier.complete &&
+        this.productTier !== ProductTier.searchAiLake
+      ) {
         // In case the task was previously ran and is scheduled for later in the future, run now
         this.logger.info('Scheduling for immediate run');
         await taskManager.runSoon(this.taskId);
