@@ -49,7 +49,7 @@ interface OptionListWithFieldStatsProps
   isClearable?: boolean;
   isInvalid?: boolean;
   'data-test-subj'?: string;
-  titleId: string;
+  titleId?: string;
 }
 
 export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({

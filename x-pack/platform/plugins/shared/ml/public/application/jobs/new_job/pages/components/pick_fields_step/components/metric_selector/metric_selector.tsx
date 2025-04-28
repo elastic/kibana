@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { DropDownLabel, DropDownProps } from '../agg_select';
 import { AggSelect } from '../agg_select';
@@ -32,20 +31,12 @@ export const MetricSelector: FC<Props> = ({
 }) => {
   return (
     <EuiFlexGroup style={{ maxWidth: maxWidth !== undefined ? maxWidth : MAX_WIDTH }}>
-      <EuiFlexItem>
-        <EuiFormRow
-          label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric', {
-            defaultMessage: 'Add metric',
-          })}
-        >
-          <AggSelect
-            fields={fields}
-            changeHandler={detectorChangeHandler}
-            selectedOptions={selectedOptions}
-            removeOptions={removeOptions}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
+      <AggSelect
+        fields={fields}
+        changeHandler={detectorChangeHandler}
+        selectedOptions={selectedOptions}
+        removeOptions={removeOptions}
+      />
     </EuiFlexGroup>
   );
 };

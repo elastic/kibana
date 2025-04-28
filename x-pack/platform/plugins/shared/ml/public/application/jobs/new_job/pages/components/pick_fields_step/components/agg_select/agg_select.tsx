@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +37,9 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(createLabel);
   const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
-
+  const aggregationSelectTitleId = useGeneratedHtmlId({
+    prefix: 'aggregationSelecttitleId',
+  });
   const options: DropDownLabel[] = useMemo(
     () => {
       const opts: DropDownLabel[] = [];
@@ -93,26 +95,37 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   }, [jobValidatorUpdated]);
 
   return (
-    <EuiFormRow
-      error={validation.message}
-      isInvalid={validation.valid === false}
-      data-test-subj="mlJobWizardAggSelection"
+    <EuiDescribedFormGroup
+      title={
+        <h3 id={aggregationSelectTitleId}>
+          {i18n.translate('xpack.ml.newJob.wizard.aggSelect.title', {
+            defaultMessage: 'Select an aggregation',
+          })}
+        </h3>
+      }
     >
-      <OptionListWithFieldStats
-        aria-label={i18n.translate('xpack.ml.newJob.wizard.aggSelect.ariaLabel', {
-          defaultMessage: 'Select an aggregation',
-        })}
-        singleSelection={true}
-        options={options}
-        selectedOptions={selectedOptions}
-        onChange={changeHandler}
-        isClearable={false}
+      <EuiFormRow
+        error={validation.message}
         isInvalid={validation.valid === false}
-      />
-    </EuiFormRow>
+        data-test-subj="mlJobWizardAggSelection"
+        label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric', {
+          defaultMessage: 'Add metric',
+        })}
+      >
+        <OptionListWithFieldStats
+          singleSelection={true}
+          options={options}
+          selectedOptions={selectedOptions}
+          onChange={changeHandler}
+          isClearable={false}
+          isInvalid={validation.valid === false}
+          titleId={aggregationSelectTitleId}
+        />
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
   );
 };
 
 export function createLabel(pair: AggFieldPair): string {
-  return `${pair.agg.title}(${pair.field.name})`;
+  return `${pair.agg.title}(${pair.field.name}) here`;
 }
