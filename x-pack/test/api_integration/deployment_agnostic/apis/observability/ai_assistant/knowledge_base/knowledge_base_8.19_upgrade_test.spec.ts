@@ -60,7 +60,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return res.hits.hits;
   }
 
-  describe('when the knowledge base index was created before 8.15', function () {
+  // In 8.19 / 9.1 the custom inference endpoint ("obs_ai_assistant_kb_inference") is replaced with the preconfigured endpoint ".elser-2-elasticsearch"
+  // We need to make sure that the custom inference endpoint is removed and the preconfigured one is used instead
+
+  describe('when the knowledge base index was created in 8.17 or 8.18', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);

@@ -32,6 +32,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const ml = getService('ml');
 
+  // Sparse vector field was introduced in Elasticsearch 8.11
+  // Indices created prior to this does not support semantic text, and will need to be reindexed
   describe('when the knowledge base index was created before 8.11', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
