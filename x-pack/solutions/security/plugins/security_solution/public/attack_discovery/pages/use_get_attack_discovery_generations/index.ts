@@ -19,6 +19,8 @@ import type {
   GetAttackDiscoveryGenerationsResponse,
 } from '@kbn/elastic-assistant-common';
 
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+
 interface Props extends GetAttackDiscoveryGenerationsRequestQuery {
   http: HttpSetup;
   isAssistantEnabled: boolean;
@@ -44,6 +46,7 @@ export const useGetAttackDiscoveryGenerations = ({
   start,
   refetchOnWindowFocus = false,
 }: Props): UseGetAttackDiscoveryGenerations => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
   const cancelRequest = useCallback(() => {
@@ -68,7 +71,7 @@ export const useGetAttackDiscoveryGenerations = ({
     ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, size, start],
     queryFn,
     {
-      enabled: isAssistantEnabled,
+      enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
       refetchOnWindowFocus,
     }
   );
@@ -93,7 +96,7 @@ export const useInvalidateGetAttackDiscoveryGenerations = () => {
 
   return useCallback(() => {
     queryClient.invalidateQueries(['GET', ATTACK_DISCOVERY_GENERATIONS], {
-      refetchType: 'active',
+      refetchType: 'all',
     });
   }, [queryClient]);
 };
