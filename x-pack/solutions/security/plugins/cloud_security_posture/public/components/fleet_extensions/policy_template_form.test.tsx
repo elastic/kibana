@@ -54,7 +54,6 @@ import {
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
 } from '../test_subjects';
-import { ExperimentalFeaturesService } from '@kbn/fleet-plugin/public/services';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
