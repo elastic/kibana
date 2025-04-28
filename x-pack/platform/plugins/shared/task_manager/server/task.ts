@@ -264,10 +264,20 @@ export interface RruleSchedule {
   interval?: never;
 }
 
+export type Rrule = RruleMonthly | RruleWeekly | RruleDaily | RruleMinutely;
+
 interface RruleCommon {
   freq: Frequency;
   interval: number;
   tzid: string;
+}
+
+interface RruleMinutely extends RruleCommon {
+  freq: Frequency.MINUTELY;
+  bymonthday?: number[];
+  byhour?: number[];
+  byminute?: number[];
+  byweekday?: Weekday[];
 }
 
 interface RruleMonthly extends RruleCommon {

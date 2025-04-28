@@ -10,18 +10,18 @@ import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting } from '../../common';
-import { GenerateRequestHandler } from '../../common/request_handler';
+import { ScheduleRequestHandler } from '../../common/request_handler';
 
-const { GENERATE_PREFIX } = INTERNAL_ROUTES;
+const { SCHEDULE_PREFIX } = INTERNAL_ROUTES;
 
-export function registerGenerationRoutesInternal(reporting: ReportingCore, logger: Logger) {
+export function registerScheduleRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
 
   const kibanaAccessControlTags = ['generateReport'];
 
-  const registerInternalPostGenerationEndpoint = () => {
-    const path = `${GENERATE_PREFIX}/{exportType}`;
+  const registerInternalPostScheduleEndpoint = () => {
+    const path = `${SCHEDULE_PREFIX}/{exportType}`;
     router.post(
       {
         path,
@@ -30,7 +30,7 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
             requiredPrivileges: kibanaAccessControlTags,
           },
         },
-        validate: GenerateRequestHandler.getValidation(),
+        validate: ScheduleRequestHandler.getValidation(),
         options: {
           tags: kibanaAccessControlTags.map((accessControlTag) => `access:${accessControlTag}`),
           access: 'internal',
@@ -38,7 +38,7 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
-          const requestHandler = new GenerateRequestHandler({
+          const requestHandler = new ScheduleRequestHandler({
             reporting,
             user,
             context,
@@ -48,9 +48,12 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
             logger,
           });
           const jobParams = requestHandler.getJobParams();
+          const schedule = requestHandler.getSchedule();
+
           return await requestHandler.handleRequest({
             exportTypeId: req.params.exportType,
             jobParams,
+            schedule,
           });
         } catch (err) {
           if (err instanceof KibanaResponse) {
@@ -62,5 +65,5 @@ export function registerGenerationRoutesInternal(reporting: ReportingCore, logge
     );
   };
 
-  registerInternalPostGenerationEndpoint();
+  registerInternalPostScheduleEndpoint();
 }

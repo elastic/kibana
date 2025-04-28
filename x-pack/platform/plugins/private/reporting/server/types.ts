@@ -12,7 +12,7 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
+import type { ScheduledReportApiJSON, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
@@ -88,6 +88,14 @@ export interface ReportingJobResponse {
    * @public
    */
   job: ReportApiJSON;
+}
+
+export interface ScheduledReportingJobResponse {
+  /**
+   * Details of a new report job that was requested
+   * @public
+   */
+  job: ScheduledReportApiJSON;
 }
 
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {

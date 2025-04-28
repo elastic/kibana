@@ -915,6 +915,7 @@
     "installCount",
     "unInstallCount"
   ],
+  "scheduled_report": [],
   "search": [
     "description",
     "title"

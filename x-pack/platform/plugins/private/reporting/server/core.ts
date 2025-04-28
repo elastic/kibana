@@ -23,6 +23,7 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -54,6 +55,7 @@ import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
+import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -369,6 +371,15 @@ export class ReportingCore {
     const dataViews = await indexPatterns.dataViewsServiceFactory(savedObjectsClient, esClient);
 
     return dataViews;
+  }
+
+  public async getSoClient(request: KibanaRequest) {
+    const { savedObjects } = await this.getPluginStartDeps();
+    const savedObjectsClient = savedObjects.getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE],
+    });
+    return savedObjectsClient;
   }
 
   public async getDataService() {
