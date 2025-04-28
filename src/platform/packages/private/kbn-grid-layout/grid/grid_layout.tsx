@@ -138,8 +138,6 @@ export const GridLayout = ({
             currentElementsInOrder.push({
               type: 'wrapper',
               id,
-              start: `gridRow-${id} 1`,
-              end: `end-${id}`,
             });
           }
 
@@ -219,14 +217,7 @@ export const GridLayout = ({
               case 'panel':
                 return <GridPanel key={element.id} panelId={element.id} />;
               case 'wrapper':
-                return (
-                  <GridRowWrapper
-                    key={`${element.id}--wrapper`}
-                    rowId={element.id}
-                    start={element.start}
-                    end={element.end}
-                  />
-                );
+                return <GridRowWrapper key={`${element.id}--wrapper`} rowId={element.id} />;
               case 'footer':
                 return <GridRowFooter key={`${element.id}--footer`} rowId={element.id} />;
             }

@@ -8,51 +8,51 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { GridLayoutStateManager, PanelInteractionEvent } from '../../types';
-import type { UserInteractionEvent, PointerPosition } from '../types';
+import type { GridLayoutStateManager, PanelactivePanel } from '../../types';
+import type { UseractivePanel, PointerPosition } from '../types';
 import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
 import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
 import { updateClientY } from '../keyboard_utils';
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
-  interactionEvent,
+  activePanel,
   pointerPixel,
   maxRight,
 }: {
   pointerPixel: PointerPosition;
-  interactionEvent: PanelInteractionEvent;
+  activePanel: PanelactivePanel;
   maxRight: number;
 }) => {
-  const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
+  const panelRect = activePanel.panelDiv.getBoundingClientRect();
 
   return {
     left: panelRect.left,
     top: panelRect.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
-    right: Math.min(pointerPixel.clientX - interactionEvent.sensorOffsets.right, maxRight),
+    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
+    right: Math.min(pointerPixel.clientX - activePanel.sensorOffsets.right, maxRight),
   };
 };
 
 // Calculates the preview rect coordinates for a dragged panel
 export const getDragPreviewRect = ({
   pointerPixel,
-  interactionEvent,
+  activePanel,
 }: {
   pointerPixel: PointerPosition;
-  interactionEvent: PanelInteractionEvent;
+  activePanel: PanelactivePanel;
 }) => {
   return {
-    left: pointerPixel.clientX - interactionEvent.sensorOffsets.left,
-    top: pointerPixel.clientY - interactionEvent.sensorOffsets.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
-    right: pointerPixel.clientX - interactionEvent.sensorOffsets.right,
+    left: pointerPixel.clientX - activePanel.sensorOffsets.left,
+    top: pointerPixel.clientY - activePanel.sensorOffsets.top,
+    bottom: pointerPixel.clientY - activePanel.sensorOffsets.bottom,
+    right: pointerPixel.clientX - activePanel.sensorOffsets.right,
   };
 };
 
 // Calculates the sensor's offset relative to the active panel's edges (top, left, right, bottom).
 // This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
+export function getSensorOffsets(e: UseractivePanel, { top, left, right, bottom }: DOMRect) {
   if (!isTouchEvent(e) && !isMouseEvent(e) && !isKeyboardEvent(e)) {
     throw new Error('Unsupported event type: only mouse, touch, or keyboard events are handled.');
   }
@@ -73,15 +73,14 @@ export const getNextKeyboardPositionForPanel = (
   handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
-    interactionEvent$: { value: interactionEvent },
     activePanel$: { value: activePanel },
     runtimeSettings$: {
       value: { columnPixelWidth, rowHeight, gutterSize, keyboardDragTopLimit },
     },
   } = gridLayoutStateManager;
 
-  const { type } = interactionEvent || {};
-  const panelPosition = activePanel?.position || interactionEvent?.panelDiv.getBoundingClientRect();
+  const { type } = activePanel || {};
+  const panelPosition = activePanel?.position || activePanel?.panelDiv.getBoundingClientRect();
 
   if (!panelPosition) return handlePosition;
 

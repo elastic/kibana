@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { GridPanelData, PanelInteractionEvent } from '../../types';
+import { GridPanelData, PanelactivePanel } from '../../types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import { commitAction, moveAction, startAction, cancelAction } from './state_manager_actions';
 import {
@@ -20,7 +20,7 @@ import {
   startKeyboardInteraction,
   isKeyboardEvent,
 } from '../sensors';
-import { UserInteractionEvent } from '../types';
+import { UseractivePanel } from '../types';
 import { getNextKeyboardPositionForPanel } from './utils';
 import {
   hasPanelInteractionStartedWithKeyboard,
@@ -37,7 +37,7 @@ export const useGridLayoutPanelEvents = ({
   rowId,
   panelId,
 }: {
-  interactionType: PanelInteractionEvent['type'];
+  interactionType: PanelactivePanel['type'];
   rowId: string;
   panelId: string;
 }) => {
@@ -46,7 +46,7 @@ export const useGridLayoutPanelEvents = ({
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
 
   const onStart = useCallback(
-    (ev: UserInteractionEvent) => {
+    (ev: UseractivePanel) => {
       startAction(ev, gridLayoutStateManager, interactionType, rowId, panelId);
     },
     [gridLayoutStateManager, interactionType, rowId, panelId]
@@ -58,7 +58,7 @@ export const useGridLayoutPanelEvents = ({
 
   const onBlur = useCallback(() => {
     const {
-      interactionEvent$: { value: { id, type, targetRow } = {} },
+      activePanel$: { value: { id, type, targetRow } = {} },
     } = gridLayoutStateManager;
     // make sure the user hasn't started another interaction in the meantime
     if (id === panelId && rowId === targetRow && type === interactionType) {
@@ -71,7 +71,7 @@ export const useGridLayoutPanelEvents = ({
   }, [gridLayoutStateManager]);
 
   const onMove = useCallback(
-    (ev: UserInteractionEvent) => {
+    (ev: UseractivePanel) => {
       if (isMouseEvent(ev) || isTouchEvent(ev)) {
         return moveAction(
           ev,
@@ -95,7 +95,7 @@ export const useGridLayoutPanelEvents = ({
   );
 
   const startInteraction = useCallback(
-    (e: UserInteractionEvent) => {
+    (e: UseractivePanel) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
       if (isMouseEvent(e)) {
         startMouseInteraction({
@@ -112,7 +112,7 @@ export const useGridLayoutPanelEvents = ({
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
-        const isEventActive = gridLayoutStateManager.interactionEvent$.value !== undefined;
+        const isEventActive = gridLayoutStateManager.activePanel$.value !== undefined;
         startKeyboardInteraction({
           e,
           isEventActive,

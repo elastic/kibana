@@ -13,12 +13,12 @@ import { GridLayoutStateManager, GridPanelData, GridRowData } from '../../types'
 import { isGridDataEqual, isLayoutEqual } from '../../utils/equality_checks';
 import { resolveGridRow, resolveMainGrid } from '../../utils/resolve_grid_row';
 import { getSensorType, isKeyboardEvent } from '../sensors';
-import { PointerPosition, UserInteractionEvent } from '../types';
+import { PointerPosition, UseractivePanel } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 import { GridLayoutContextType } from '../../use_grid_layout_context';
 
 export const startAction = (
-  e: UserInteractionEvent,
+  e: UseractivePanel,
   gridLayoutStateManager: GridLayoutStateManager,
   type: 'drag' | 'resize',
   rowId: string,
@@ -28,65 +28,63 @@ export const startAction = (
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
-
-  gridLayoutStateManager.interactionEvent$.next({
+  gridLayoutStateManager.activePanel$.next({
     type,
     id: panelId,
     panelDiv: panelRef,
     targetRow: rowId,
     sensorType: getSensorType(e),
+    position: panelRect,
     sensorOffsets: getSensorOffsets(e, panelRect),
   });
 };
 
 export const moveAction = (
-  e: UserInteractionEvent,
+  e: UseractivePanel,
   gridLayoutStateManager: GridLayoutContextType['gridLayoutStateManager'],
   pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
 ) => {
   const {
     runtimeSettings$: { value: runtimeSettings },
-    interactionEvent$,
-    gridLayout$,
     activePanel$,
+    gridLayout$,
+    layoutRef: { current: gridLayoutElement },
     orderedSections$: { value: orderedSections },
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
-  const interactionEvent = interactionEvent$.value;
+  const activePanel = activePanel$.value;
   const currentLayout = gridLayout$.value;
-  if (!interactionEvent || !runtimeSettings || !gridRowElements || !currentLayout) {
+  if (!activePanel || !runtimeSettings || !gridRowElements || !currentLayout) {
     // if no interaction event return early
     return;
   }
 
-  const targetRowIsMain = interactionEvent.targetRow.includes('main');
+  const targetRowIsMain = activePanel.targetRow.includes('main');
   const currentPanelData: GridPanelData = targetRowIsMain
-    ? (currentLayout[interactionEvent.id] as GridPanelData)
-    : (currentLayout[interactionEvent.targetRow] as GridRowData).panels[interactionEvent.id];
+    ? (currentLayout[activePanel.id] as GridPanelData)
+    : (currentLayout[activePanel.targetRow] as GridRowData).panels[activePanel.id];
 
   if (!currentPanelData) {
     return;
   }
 
-  const isResize = interactionEvent.type === 'resize';
+  const isResize = activePanel.type === 'resize';
 
   const previewRect = (() => {
     if (isResize) {
       const layoutRef = gridLayoutStateManager.layoutRef.current;
       const maxRight = layoutRef ? layoutRef.getBoundingClientRect().right : window.innerWidth;
-      return getResizePreviewRect({ interactionEvent, pointerPixel, maxRight });
+      return getResizePreviewRect({ activePanel, pointerPixel, maxRight });
     } else {
-      return getDragPreviewRect({ interactionEvent, pointerPixel });
+      return getDragPreviewRect({ activePanel, pointerPixel });
     }
   })();
-
-  activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
   // find the grid that the preview rect is over
-  const lastRowId = interactionEvent.targetRow;
+  const lastRowId = activePanel.targetRow;
   const targetRowId = (() => {
     // TODO: temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
     if (isResize || isKeyboardEvent(e)) return lastRowId;
@@ -94,7 +92,7 @@ export const moveAction = (
 
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries(gridRowElements).forEach(([id, row]) => {
+    Object.entries({ ...gridRowElements, main: gridLayoutElement }).forEach(([id, row]) => {
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
       const overlap =
@@ -107,14 +105,16 @@ export const moveAction = (
     return highestOverlapRowId;
   })();
   const hasChangedGridRow = targetRowId !== lastRowId;
+  console.log({ orderedSections, targetRowId, lastRowId, elements: { ...gridRowElements } });
 
-  // re-render when the target row changes
-  if (hasChangedGridRow) {
-    interactionEvent$.next({
-      ...interactionEvent,
-      targetRow: targetRowId,
-    });
-  }
+  // re-render
+  activePanel$.next({
+    ...activePanel,
+    id: activePanel.id,
+    position: previewRect,
+    targetRow: targetRowId,
+  });
+
   // calculate the requested grid position
   const targetedGridRow = gridRowElements[targetRowId];
   const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
@@ -127,9 +127,28 @@ export const moveAction = (
   const localXCoordinate = isResize
     ? previewRect.right - targetedGridLeft
     : previewRect.left - targetedGridLeft;
-  const localYCoordinate = isResize
+  let localYCoordinate = isResize
     ? previewRect.bottom - targetedGridTop
     : previewRect.top - targetedGridTop;
+  if (targetRowId === 'main') {
+    const subtracted = false;
+
+    Object.keys(gridLayoutStateManager.headerRefs.current).forEach((rowId) => {
+      const headerElement = gridLayoutStateManager.headerRefs.current[rowId];
+      const footerElement = gridLayoutStateManager.footerRefs.current[rowId];
+      const headerRect = headerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
+      const footerRect = footerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
+
+      if (headerRect.top < previewRect.top) {
+        console.log('SUBTRACT HEADER');
+        localYCoordinate -= headerRect.height;
+        localYCoordinate += rowHeight + gutterSize;
+      }
+      if (footerRect.top < previewRect.top) {
+        localYCoordinate -= footerRect.height;
+      }
+    });
+  }
 
   const targetColumn = Math.min(
     Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
@@ -146,10 +165,13 @@ export const moveAction = (
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;
   }
-  if (targetRowId.includes('main')) {
+  if (targetRowId === 'main') {
+    // main section but wrapper element doesn't exist yet
+    // requestedPanelData.row = 0;
+  } else if (targetRowId.includes('main')) {
     requestedPanelData.row += orderedSections[targetRowId].row;
   }
-
+  console.log({ requestedPanelData: { ...requestedPanelData } });
   // resolve the new grid layout
   if (
     hasChangedGridRow ||
@@ -159,12 +181,12 @@ export const moveAction = (
 
     let nextLayout = cloneDeep(currentLayout) ?? {};
     if (targetRowIsMain) {
-      const { [interactionEvent.id]: interactingPanel, ...otherWidgets } = nextLayout;
+      const { [activePanel.id]: interactingPanel, ...otherWidgets } = nextLayout;
       nextLayout = { ...otherWidgets };
     } else {
-      const row = nextLayout[interactionEvent.targetRow] as GridRowData;
-      const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
-      nextLayout[interactionEvent.targetRow] = {
+      const row = nextLayout[activePanel.targetRow] as GridRowData;
+      const { [activePanel.id]: interactingPanel, ...otherPanels } = row.panels;
+      nextLayout[activePanel.targetRow] = {
         ...row,
         type: 'section',
         panels: { ...otherPanels },
@@ -200,14 +222,9 @@ export const moveAction = (
   }
 };
 
-export const commitAction = ({
-  activePanel$,
-  interactionEvent$,
-  panelRefs,
-}: GridLayoutStateManager) => {
-  const event = interactionEvent$.getValue();
+export const commitAction = ({ activePanel$, panelRefs }: GridLayoutStateManager) => {
+  const event = activePanel$.getValue();
   activePanel$.next(undefined);
-  interactionEvent$.next(undefined);
 
   if (!event) return;
   panelRefs.current[event.id]?.scrollIntoView({
@@ -216,7 +233,6 @@ export const commitAction = ({
   });
 };
 
-export const cancelAction = ({ activePanel$, interactionEvent$ }: GridLayoutStateManager) => {
+export const cancelAction = ({ activePanel$ }: GridLayoutStateManager) => {
   activePanel$.next(undefined);
-  interactionEvent$.next(undefined);
 };

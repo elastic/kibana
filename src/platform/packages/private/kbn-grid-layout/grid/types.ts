@@ -37,13 +37,10 @@ export type GridLayoutWidget =
   | (GridPanelData & { type: 'panel' })
   | (GridRowData & { type: 'section' });
 
-export type GridLayoutElementsInOrder = Array<
-  | {
-      type: 'header' | 'footer' | 'panel';
-      id: string;
-    }
-  | { type: 'wrapper'; id: string; start: string; end: string }
->;
+export type GridLayoutElementsInOrder = Array<{
+  type: 'header' | 'footer' | 'panel' | 'wrapper';
+  id: string;
+}>;
 
 export interface GridLayoutData {
   [key: string]: GridLayoutWidget;
@@ -64,49 +61,6 @@ export interface GridSettings {
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
 export interface ActivePanelEvent {
-  id: string;
-  position: {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-  };
-}
-
-export interface ActiveRowEvent {
-  id: string;
-  sensorType: 'mouse' | 'touch' | 'keyboard';
-  startingPosition: {
-    top: number;
-    left: number;
-  };
-  translate: {
-    top: number;
-    left: number;
-  };
-}
-
-export interface GridLayoutStateManager {
-  gridLayout$: BehaviorSubject<GridLayoutData>;
-  expandedPanelId$: BehaviorSubject<string | undefined>;
-  isMobileView$: BehaviorSubject<boolean>;
-  accessMode$: BehaviorSubject<GridAccessMode>;
-  gridDimensions$: BehaviorSubject<ObservedSize>;
-  runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
-  activePanel$: BehaviorSubject<ActivePanelEvent | undefined>;
-  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
-  interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
-
-  layoutRef: React.MutableRefObject<HTMLDivElement | null>;
-  rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
-  headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
-  panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
-}
-
-/**
- * The information required to start a panel interaction.
- */
-export interface PanelInteractionEvent {
   /**
    * The type of interaction being performed.
    */
@@ -138,6 +92,43 @@ export interface PanelInteractionEvent {
     bottom: number;
   };
   sensorType: 'mouse' | 'touch' | 'keyboard';
+
+  position: {
+    top: number;
+    left: number;
+    bottom: number;
+    right: number;
+  };
+}
+
+export interface ActiveRowEvent {
+  id: string;
+  sensorType: 'mouse' | 'touch' | 'keyboard';
+  startingPosition: {
+    top: number;
+    left: number;
+  };
+  translate: {
+    top: number;
+    left: number;
+  };
+}
+
+export interface GridLayoutStateManager {
+  gridLayout$: BehaviorSubject<GridLayoutData>;
+  expandedPanelId$: BehaviorSubject<string | undefined>;
+  isMobileView$: BehaviorSubject<boolean>;
+  accessMode$: BehaviorSubject<GridAccessMode>;
+  gridDimensions$: BehaviorSubject<ObservedSize>;
+  runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+  activePanel$: BehaviorSubject<ActivePanelEvent | undefined>;
+  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
+
+  layoutRef: React.MutableRefObject<HTMLDivElement | null>;
+  rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  footerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
 }
 
 /**

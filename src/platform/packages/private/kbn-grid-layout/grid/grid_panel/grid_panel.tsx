@@ -70,7 +70,6 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
         .pipe(skip(1))
         .subscribe((activePanel) => {
           const ref = gridLayoutStateManager.panelRefs.current[panelId];
-          const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
           const currentPanel = panel$.getValue();
           const isPanelActive = activePanel?.id === currentPanel?.id;
           if (!ref || !currentPanel) return;
@@ -83,7 +82,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
             ref.style.zIndex = `${euiTheme.levels.modal}`;
-            if (currentInteractionEvent?.type === 'resize') {
+            if (activePanel.type === 'resize') {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               ref.style.width = `${Math.max(
                 draggingPosition.right - draggingPosition.left,

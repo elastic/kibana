@@ -40,6 +40,7 @@ export const useOrderedSections = (
         distinctUntilChanged(deepEqual)
       )
       .subscribe((layout) => {
+        console.log('orderedLayout', { layout });
         layoutSubject.next(layout);
       });
 

@@ -46,6 +46,7 @@ export const useGridLayoutState = ({
   const rowRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
   const headerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
   const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
+  const footerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
   const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(
@@ -92,7 +93,6 @@ export const useGridLayoutState = ({
 
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
-    const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
@@ -100,6 +100,7 @@ export const useGridLayoutState = ({
       layoutRef,
       rowRefs,
       headerRefs,
+      footerRefs,
       panelRefs,
       gridLayout$,
       activePanel$,
@@ -107,7 +108,6 @@ export const useGridLayoutState = ({
       accessMode$,
       gridDimensions$,
       runtimeSettings$,
-      interactionEvent$,
       expandedPanelId$,
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)

@@ -50,7 +50,6 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     rowRefs: { current: {} },
     headerRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
-    interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),
     activePanel$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
     activeRowEvent$: new BehaviorSubject<ActiveRowEvent | undefined>(undefined),
     gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
