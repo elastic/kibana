@@ -16,6 +16,9 @@ export async function installIndexTemplate(
   client: Client,
   logger: ToolingLog
 ): Promise<void> {
+  if (config.indexing.slashLogs) {
+    return Promise.resolve();
+  }
   const { dataset } = config.indexing;
   const templates = indexTemplates[dataset];
   const templateNames = templates.map((templateDef) => templateDef.name).join(',');

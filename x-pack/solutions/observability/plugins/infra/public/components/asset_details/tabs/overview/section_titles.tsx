@@ -16,6 +16,12 @@ import { ContainerMetricsExplanationContent } from '../../../lens/metric_explana
 export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemType }) => {
   return (
     <TitleWithTooltip
+      tooltipAriaLabel={i18n.translate(
+        'xpack.infra.assetDetails.overview.metricsSectionTitle.areaLabel',
+        {
+          defaultMessage: 'Metrics information',
+        }
+      )}
       title={i18n.translate('xpack.infra.assetDetails.overview.metricsSectionTitle', {
         defaultMessage: 'Metrics',
       })}
@@ -29,6 +35,12 @@ export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemTyp
 export const AlertsSectionTitle = () => {
   return (
     <TitleWithTooltip
+      tooltipAriaLabel={i18n.translate(
+        'xpack.infra.assetDetails.overview.alertsSectionTitle.areaLabel',
+        {
+          defaultMessage: 'Alerts information',
+        }
+      )}
       title={i18n.translate('xpack.infra.assetDetails.overview.alertsSectionTitle', {
         defaultMessage: 'Alerts',
       })}
@@ -41,6 +53,12 @@ export const AlertsSectionTitle = () => {
 
 export const ServicesSectionTitle = () => (
   <TitleWithTooltip
+    tooltipAriaLabel={i18n.translate(
+      'xpack.infra.assetDetails.overview.servicesSectionTitle.areaLabel',
+      {
+        defaultMessage: 'Services information',
+      }
+    )}
     title={i18n.translate('xpack.infra.assetDetails.overview.servicesSectionTitle', {
       defaultMessage: 'Services',
     })}

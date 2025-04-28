@@ -5,24 +5,20 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '../../app/types';
-import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-
-const PAGE_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle',
-  {
-    defaultMessage: 'Privileged User Monitoring',
-  }
-);
+import { PrivilegedUserMonitoringSampleDashboardsPanel } from '../components/privileged_user_monitoring_onboarding/sample_dashboards_panel';
+import { PrivilegedUserMonitoringOnboardingPanel } from '../components/privileged_user_monitoring_onboarding/onboarding_panel';
 
 export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   return (
     <SecuritySolutionPageWrapper>
-      <HeaderPage title={PAGE_TITLE} />
-      <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
+      <PrivilegedUserMonitoringOnboardingPanel />
+      <EuiSpacer size="l" />
+      <PrivilegedUserMonitoringSampleDashboardsPanel />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsPrivilegedUserMonitoring} />
     </SecuritySolutionPageWrapper>
   );
 };
