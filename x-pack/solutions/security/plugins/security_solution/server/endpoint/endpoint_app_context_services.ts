@@ -369,6 +369,7 @@ export class EndpointAppContextService {
       endpointService: this,
       esClient: this.startDependencies.esClient,
       username,
+      spaceId: DEFAULT_SPACE_ID,
       isAutomated: true,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),
