@@ -45,6 +45,7 @@ describe('EndpointAgentStatusClient', () => {
       metadataMocks.endpointMetadataService
     );
     constructorOptions = {
+      spaceId: 'default',
       endpointService: endpointAppContextServiceMock,
       esClient: metadataMocks.esClient,
       soClient,
