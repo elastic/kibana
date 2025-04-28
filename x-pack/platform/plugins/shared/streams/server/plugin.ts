@@ -20,7 +20,11 @@ import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { STREAMS_FEATURE_ID } from '../common/constants';
+import {
+  STREAMS_API_PRIVILEGES,
+  STREAMS_FEATURE_ID,
+  STREAMS_UI_PRIVILEGES,
+} from '../common/constants';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
 import { StreamsService } from './lib/streams/service';
@@ -80,21 +84,22 @@ export class StreamsPlugin
       consumers: [STREAMS_FEATURE_ID],
     }));
 
+    const assetService = new AssetService(core, this.logger);
+    const streamsService = new StreamsService(core, this.logger, this.isDev);
+
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
-      name: i18n.translate('xpack.streams.kibanaFeature', {
+      name: i18n.translate('xpack.streams.featureRegistry.streamsFeatureName', {
         defaultMessage: 'Streams',
       }),
-      order: 1300,
+      order: 600,
       category: DEFAULT_APP_CATEGORIES.observability,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: [STREAMS_FEATURE_ID, 'kibana'],
-      catalogue: [STREAMS_FEATURE_ID, 'observability'],
+      app: [STREAMS_FEATURE_ID],
       alerting: alertingFeatures,
       privileges: {
         all: {
-          app: [STREAMS_FEATURE_ID, 'kibana'],
-          catalogue: [STREAMS_FEATURE_ID, 'observability'],
+          app: [STREAMS_FEATURE_ID],
           savedObject: {
             all: [],
             read: [],
@@ -107,11 +112,11 @@ export class StreamsPlugin
               all: alertingFeatures,
             },
           },
-          ui: ['read', 'write'],
+          api: [STREAMS_API_PRIVILEGES.read, STREAMS_API_PRIVILEGES.manage],
+          ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
         },
         read: {
-          app: [STREAMS_FEATURE_ID, 'kibana'],
-          catalogue: [STREAMS_FEATURE_ID, 'observability'],
+          app: [STREAMS_FEATURE_ID],
           savedObject: {
             all: [],
             read: [],
@@ -124,13 +129,11 @@ export class StreamsPlugin
               read: alertingFeatures,
             },
           },
-          ui: ['read'],
+          api: [STREAMS_API_PRIVILEGES.read],
+          ui: [STREAMS_UI_PRIVILEGES.show],
         },
       },
     });
-
-    const assetService = new AssetService(core, this.logger);
-    const streamsService = new StreamsService(core, this.logger, this.isDev);
 
     registerRoutes({
       repository: streamsRouteRepository,

@@ -6,13 +6,12 @@
  */
 
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { Logger } from '@kbn/core/server';
-import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
+import { STREAMS_FEATURE_ID, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 import { StreamsPluginSetupDependencies } from '../../types';
 import { esqlRuleType } from './esql/register';
-import { STREAMS_FEATURE_ID, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 interface Props {
   plugins: StreamsPluginSetupDependencies;
@@ -24,11 +23,11 @@ export function registerRules({ plugins, logger }: Props) {
     feature: STREAMS_FEATURE_ID,
     registrationContext: STREAMS_RULE_REGISTRATION_CONTEXT,
     dataset: Dataset.alerts,
-    componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+    componentTemplateRefs: [],
     componentTemplates: [
       {
         name: 'mappings',
-        mappings: mappingFromFieldMap(technicalRuleFieldMap, false),
+        mappings: mappingFromFieldMap(alertFieldMap, false),
       },
     ],
   });

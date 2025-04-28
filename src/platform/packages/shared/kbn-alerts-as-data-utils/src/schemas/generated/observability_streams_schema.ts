@@ -12,8 +12,6 @@
 import * as rt from 'io-ts';
 import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
-import { EcsSchema } from './ecs_schema';
-import { LegacyAlertSchema } from './legacy_alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
   'IsoDateString',
@@ -85,7 +83,6 @@ const ObservabilityStreamsAlertRequired = rt.type({
 });
 // prettier-ignore
 const ObservabilityStreamsAlertOptional = rt.partial({
-  'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
   'event.original': schemaString,
@@ -102,51 +99,23 @@ const ObservabilityStreamsAlertOptional = rt.partial({
   'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
-  'kibana.alert.risk_score': schemaNumber,
-  'kibana.alert.rule.author': schemaString,
-  'kibana.alert.rule.created_at': schemaDate,
-  'kibana.alert.rule.created_by': schemaString,
-  'kibana.alert.rule.description': schemaString,
-  'kibana.alert.rule.enabled': schemaString,
   'kibana.alert.rule.execution.timestamp': schemaDate,
   'kibana.alert.rule.execution.type': schemaString,
   'kibana.alert.rule.execution.uuid': schemaString,
-  'kibana.alert.rule.from': schemaString,
-  'kibana.alert.rule.interval': schemaString,
-  'kibana.alert.rule.license': schemaString,
-  'kibana.alert.rule.note': schemaString,
   'kibana.alert.rule.parameters': schemaUnknown,
-  'kibana.alert.rule.references': schemaStringArray,
-  'kibana.alert.rule.rule_id': schemaString,
-  'kibana.alert.rule.rule_name_override': schemaString,
   'kibana.alert.rule.tags': schemaStringArray,
-  'kibana.alert.rule.to': schemaString,
-  'kibana.alert.rule.type': schemaString,
-  'kibana.alert.rule.updated_at': schemaDate,
-  'kibana.alert.rule.updated_by': schemaString,
-  'kibana.alert.rule.version': schemaString,
-  'kibana.alert.severity': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,
-  'kibana.alert.suppression.docs_count': schemaStringOrNumber,
-  'kibana.alert.suppression.end': schemaDate,
-  'kibana.alert.suppression.start': schemaDate,
-  'kibana.alert.suppression.terms.field': schemaStringArray,
-  'kibana.alert.suppression.terms.value': schemaStringArray,
-  'kibana.alert.system_status': schemaString,
   'kibana.alert.time_range': schemaDateRange,
   'kibana.alert.url': schemaString,
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
-  'kibana.alert.workflow_reason': schemaString,
   'kibana.alert.workflow_status': schemaString,
-  'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
-  'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
   tags: schemaStringArray,
 });
 
 // prettier-ignore
-export const ObservabilityStreamsAlertSchema = rt.intersection([ObservabilityStreamsAlertRequired, ObservabilityStreamsAlertOptional, AlertSchema, EcsSchema, LegacyAlertSchema]);
+export const ObservabilityStreamsAlertSchema = rt.intersection([ObservabilityStreamsAlertRequired, ObservabilityStreamsAlertOptional, AlertSchema]);
 // prettier-ignore
 export type ObservabilityStreamsAlert = rt.TypeOf<typeof ObservabilityStreamsAlertSchema>;

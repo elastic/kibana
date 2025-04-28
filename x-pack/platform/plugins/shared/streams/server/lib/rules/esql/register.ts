@@ -6,16 +6,16 @@
  */
 
 import { AlertInstanceContext, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
-import { getRuleExecutor } from './executor';
-import { EsqlRuleParams, esqlRuleParams } from './types';
 import {
   STREAMS_FEATURE_ID,
   STREAMS_RULE_REGISTRATION_CONTEXT,
 } from '../../../../common/constants';
+import { getRuleExecutor } from './executor';
+import { EsqlRuleParams, esqlRuleParams } from './types';
 
 export function esqlRuleType(): PersistenceAlertType<
   EsqlRuleParams,
@@ -53,9 +53,7 @@ export function esqlRuleType(): PersistenceAlertType<
     autoRecoverAlerts: false,
     alerts: {
       context: STREAMS_RULE_REGISTRATION_CONTEXT,
-      mappings: { dynamic: false, fieldMap: { ...technicalRuleFieldMap } },
-      useEcs: true,
-      useLegacyAlerts: true,
+      mappings: { dynamic: false, fieldMap: { ...alertFieldMap } },
       shouldWrite: false,
       isSpaceAware: true,
     },
