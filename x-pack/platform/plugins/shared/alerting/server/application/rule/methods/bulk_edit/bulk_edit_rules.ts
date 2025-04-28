@@ -39,6 +39,7 @@ import {
   getBulkUnsnooze,
   verifySnoozeScheduleLimit,
   injectReferencesIntoActions,
+  injectReferencesIntoArtifacts,
 } from '../../../../rules_client/common';
 import {
   alertingAuthorizationFilterOpts,
@@ -331,7 +332,6 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     );
   }
   await rulesFinder.close();
-
   const updatedInterval = rules
     .filter((rule) => rule.attributes.enabled)
     .map((rule) => rule.attributes.schedule?.interval)
@@ -467,6 +467,12 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       rule.references || []
     );
 
+    const ruleArtifacts = injectReferencesIntoArtifacts(
+      rule.id,
+      rule.attributes.artifacts,
+      rule.references
+    );
+
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
       rule.attributes,
       {
@@ -550,11 +556,13 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       references,
       params: updatedParams,
       actions: actionsWithRefs,
+      artifacts: artifactsWithRefs,
     } = await extractReferences(
       context,
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
-      validatedMutatedAlertTypeParams
+      validatedMutatedAlertTypeParams,
+      ruleArtifacts ?? {}
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({
@@ -564,6 +572,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         legacyId: rule.attributes.legacyId,
         paramsWithRefs: updatedParams,
       },
+      artifactsWithRefs,
     });
 
     const { apiKeyAttributes } = await prepareApiKeys(

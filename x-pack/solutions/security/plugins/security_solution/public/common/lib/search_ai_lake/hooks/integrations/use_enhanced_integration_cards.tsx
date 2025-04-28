@@ -13,6 +13,12 @@ import { CONFIGURATIONS_PATH } from '../../../../../../common/constants';
 import { IntegrationsFacets } from '../../../../../configurations/constants';
 import { RETURN_APP_ID, RETURN_PATH } from './constants';
 
+export interface EnhancedCardOptions {
+  showInstallationStatus?: boolean;
+  showCompressedInstallationStatus?: boolean;
+  returnPath?: string;
+}
+
 const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:splunk',
   'epr:google_secops',
@@ -38,16 +44,20 @@ export const getCategoryBadgeIfAny = (categories: string[]): string | null => {
 
 export const applyCategoryBadgeAndStyling = (
   card: IntegrationCardItem,
-  callerView: IntegrationsFacets
+  callerView: IntegrationsFacets,
+  options?: EnhancedCardOptions
 ): IntegrationCardItem => {
-  const returnPath = `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
+  const returnPath = options?.returnPath ?? `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
   const url = addPathParamToUrl(card.url, returnPath);
   const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
     ...card,
     url,
+    showInstallationStatus: options?.showInstallationStatus,
+    showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
     showReleaseBadge: false,
+    isUnverified: false, // temporarily hiding the 'unverified' badge from the integration card
     extraLabelsBadges: categoryBadge
       ? ([
           <EuiFlexItem grow={false}>
@@ -62,7 +72,9 @@ export const applyCategoryBadgeAndStyling = (
   };
 };
 
-const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
+const applyCustomDisplayOrder = (
+  integrationsList: IntegrationCardItem[]
+): IntegrationCardItem[] => {
   return integrationsList.sort(
     (a, b) =>
       FEATURED_INTEGRATION_SORT_ORDER.indexOf(a.id) - FEATURED_INTEGRATION_SORT_ORDER.indexOf(b.id)
@@ -70,13 +82,17 @@ const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
 };
 
 export const useEnhancedIntegrationCards = (
-  integrationsList: IntegrationCardItem[]
+  integrationsList: IntegrationCardItem[],
+  options?: EnhancedCardOptions
 ): { available: IntegrationCardItem[]; installed: IntegrationCardItem[] } => {
   const sorted = applyCustomDisplayOrder(integrationsList);
 
   const available = useMemo(
-    () => sorted.map((card) => applyCategoryBadgeAndStyling(card, IntegrationsFacets.available)),
-    [sorted]
+    () =>
+      sorted.map((card) =>
+        applyCategoryBadgeAndStyling(card, IntegrationsFacets.available, options)
+      ),
+    [sorted, options]
   );
 
   const installed = useMemo(
