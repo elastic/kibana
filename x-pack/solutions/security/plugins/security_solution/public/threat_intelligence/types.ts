@@ -14,13 +14,11 @@ import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { BrowserField } from '@kbn/rule-registry-plugin/common';
-import type { Store } from 'redux';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Policy } from './modules/block_list/hooks/use_policies';
-import type { SelectedDataView } from '../sourcerer/store/model';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ThreatIntelligencePluginSetup {}
