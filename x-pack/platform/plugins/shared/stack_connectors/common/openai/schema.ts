@@ -32,7 +32,7 @@ export const ConfigSchema = schema.oneOf([
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
     apiUrl: schema.string(),
     defaultModel: schema.string(),
-     certificateFile: schema.maybe(
+    certificateFile: schema.maybe(
       schema.oneOf([
         schema.string({ minLength: 1 }),
         schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
@@ -47,11 +47,10 @@ export const ConfigSchema = schema.oneOf([
     ),
     privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
     verificationMode: schema.maybe(
-      schema.oneOf([
-        schema.literal('full'),
-        schema.literal('certificate'),
-        schema.literal('none'),
-      ], { defaultValue: 'full' })
+      schema.oneOf(
+        [schema.literal('full'), schema.literal('certificate'), schema.literal('none')],
+        { defaultValue: 'full' }
+      )
     ),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
