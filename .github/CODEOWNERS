@@ -2625,6 +2625,7 @@ x-pack/solutions/security/plugins/security_solution/public/common/components/ses
 x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/universal_right @elastic/kibana-cloud-security-posture
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
