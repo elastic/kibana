@@ -10,7 +10,7 @@ import type { StartServices } from '../../../../../../types';
 import {
   getAgentsData,
   getCompleteBadgeText,
-  getInstalledIntegrationList,
+  getActiveIntegrationList,
 } from './integrations_check_complete_helpers';
 
 jest.mock('rxjs', () => ({
@@ -48,13 +48,13 @@ describe('getCompleteBadgeText', () => {
   });
 });
 
-describe('getInstalledIntegrationList', () => {
+describe('getActiveIntegrationList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns installed integrations according to the provided card names', async () => {
-    const installedIntegrations = [
+    const activeIntegrations = [
       {
         name: 'test',
         version: '1.0.0',
@@ -70,16 +70,16 @@ describe('getInstalledIntegrationList', () => {
     ];
 
     mockHttpGet.mockResolvedValue({
-      items: installedIntegrations,
+      items: activeIntegrations,
     });
 
     const cardNames = ['test'];
-    const { installedPackages } = await getInstalledIntegrationList(mockService, cardNames);
-    expect(installedPackages).toEqual([installedIntegrations[0]]);
+    const { activePackages } = await getActiveIntegrationList(mockService, cardNames);
+    expect(activePackages).toEqual([activeIntegrations[0]]);
   });
 
   it('returns all installed integrations when no card names are provided', async () => {
-    const installedIntegrations = [
+    const activeIntegrations = [
       {
         name: 'test',
         version: '1.0.0',
@@ -101,11 +101,11 @@ describe('getInstalledIntegrationList', () => {
     ];
 
     mockHttpGet.mockResolvedValue({
-      items: installedIntegrations,
+      items: activeIntegrations,
     });
 
-    const { installedPackages } = await getInstalledIntegrationList(mockService);
-    expect(installedPackages).toEqual(installedIntegrations);
+    const { activePackages } = await getActiveIntegrationList(mockService);
+    expect(activePackages).toEqual(activeIntegrations);
   });
 
   it('return isComplete as false when no packages are installed', async () => {
@@ -113,11 +113,11 @@ describe('getInstalledIntegrationList', () => {
       items: [],
     });
 
-    const result = await getInstalledIntegrationList(mockService);
+    const result = await getActiveIntegrationList(mockService);
 
     expect(result).toEqual({
       isComplete: false,
-      installedPackages: [],
+      activePackages: [],
     });
   });
 });

@@ -28,7 +28,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   if (!isComplete) {
     return {
       isComplete,
-      metadata: { ...DEFAULT_CHECK_COMPLETE_METADATA },
+      metadata: DEFAULT_CHECK_COMPLETE_METADATA,
     };
   }
 

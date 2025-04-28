@@ -63,11 +63,11 @@ const getCalloutText = ({
   }
   if (installStatus === 'installed') {
     return {
-      color: 'success' as const,
+      color: 'warning' as const,
       iconType: 'check',
       title: (
         <EuiToolTip position="bottom" content={activeTooltip}>
-          <>{activeLabel}</>
+          <>{installedLabel}</>
         </EuiToolTip>
       ),
     };
@@ -82,7 +82,7 @@ interface InstallationStatusProps {
   hasDataStreams?: boolean;
 }
 
-const useInstallationStatusStyles = () => {
+const useInstallationStatusStyles = ({ hasDataStreams }: { hasDataStreams?: boolean }) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
@@ -107,16 +107,23 @@ const useInstallationStatusStyles = () => {
       justify-content: center;
       align-items: center;
       height: 100%;
-      background-color: ${isDarkMode ? euiTheme.colors.success : successBackgroundColor};
+      background-color: ${isDarkMode
+        ? hasDataStreams
+          ? euiTheme.colors.success
+          : euiTheme.colors.warning
+        : successBackgroundColor};
     `,
-    compressedInstallationStatusIcon: css`
+    compressedInstalledStatusIcon: css`
+      color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textWarning};
+    `,
+    compressedActiveStatusIcon: css`
       color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
     `,
-    installationStatusCallout: css`
+    installedCallout: css`
       padding: ${euiTheme.size.s} ${euiTheme.size.m};
       text-align: center;
     `,
-    installationStatusSpacer: css`
+    installedSpacer: css`
       background: ${euiTheme.colors.emptyShade};
     `,
   };
@@ -141,7 +148,7 @@ export const shouldShowInstallationStatus = ({
 
 export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
   ({ installStatus, showInstallationStatus, compressed, hasDataStreams }) => {
-    const styles = useInstallationStatusStyles();
+    const styles = useInstallationStatusStyles({ hasDataStreams });
 
     const cardPanelClassName = compressed
       ? styles.compressedInstallationStatus
@@ -155,15 +162,12 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
       compressed ? (
         <div className={cardPanelClassName}>
           {hasDataStreams ? (
-            <EuiIcon
-              type="checkInCircleFilled"
-              className={styles.compressedInstallationStatusIcon}
-            />
+            <EuiIcon type="checkInCircleFilled" className={styles.compressedActiveStatusIcon} />
           ) : (
             <EuiToolTip position="bottom" content={installedTooltip}>
               <EuiIcon
                 type="checkInCircleFilled"
-                className={styles.compressedInstallationStatusIcon}
+                className={styles.compressedInstalledStatusIcon}
               />
             </EuiToolTip>
           )}
@@ -173,11 +177,11 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
           <EuiSpacer
             data-test-subj="installation-status-spacer"
             size="m"
-            className={styles.installationStatusSpacer}
+            className={styles.installedSpacer}
           />
           <EuiCallOut
             data-test-subj="installation-status-callout"
-            className={styles.installationStatusCallout}
+            className={styles.installedCallout}
             {...(installStatus ? getCalloutText({ installStatus, hasDataStreams }) : {})}
           />
         </div>

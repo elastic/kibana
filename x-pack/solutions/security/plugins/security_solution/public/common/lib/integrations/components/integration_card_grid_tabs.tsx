@@ -10,7 +10,6 @@ import { useIntegrationCardList } from '../hooks/use_integration_card_list';
 import { IntegrationsCardGridTabsComponent } from './integration_card_grid_tabs_component';
 
 export const DEFAULT_CHECK_COMPLETE_METADATA: IntegrationCardMetadata = {
-  isAgentRequired: false,
   activeIntegrations: [],
 };
 

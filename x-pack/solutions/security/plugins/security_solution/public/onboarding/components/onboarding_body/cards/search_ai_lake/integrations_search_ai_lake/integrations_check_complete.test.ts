@@ -5,17 +5,14 @@
  * 2.0.
  */
 import { installationStatuses } from '@kbn/fleet-plugin/public';
-import { lastValueFrom } from 'rxjs';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import type { StartServices } from '../../../../../../types';
 
 jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
-  lastValueFrom: jest.fn(),
 }));
 
 describe('checkIntegrationsCardComplete', () => {
-  const mockLastValueFrom = lastValueFrom as jest.Mock;
   const mockHttpGet: jest.Mock = jest.fn();
   const mockSearch: jest.Mock = jest.fn();
   const mockService = {
@@ -43,12 +40,6 @@ describe('checkIntegrationsCardComplete', () => {
       items: [],
     });
 
-    mockLastValueFrom.mockResolvedValue({
-      rawResponse: {
-        hits: { total: 0 },
-      },
-    });
-
     const result = await checkIntegrationsCardComplete(mockService);
 
     expect(result).toEqual({
@@ -60,14 +51,17 @@ describe('checkIntegrationsCardComplete', () => {
   });
 
   it('returns isComplete as true when packages are installed but no agent data is available', async () => {
-    mockHttpGet.mockResolvedValue({
-      items: [{ status: installationStatuses.Installed }],
-    });
-
-    mockLastValueFrom.mockResolvedValue({
-      rawResponse: {
-        hits: { total: 0 },
+    const mockActiveIntegrations = [
+      {
+        name: 'test-package',
+        title: 'Test Package',
+        version: '1.0.0',
+        status: installationStatuses.Installed,
+        dataStreams: [{ name: 'test-data-stream', title: 'Test Data Stream' }],
       },
+    ];
+    mockHttpGet.mockResolvedValue({
+      items: mockActiveIntegrations,
     });
 
     const result = await checkIntegrationsCardComplete(mockService);
@@ -76,27 +70,35 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '1 integration added',
       metadata: {
-        activeIntegrations: [
-          {
-            status: installationStatuses.Installed,
-          },
-        ],
+        activeIntegrations: mockActiveIntegrations,
       },
     });
   });
 
   it('returns isComplete as true when packages are available', async () => {
-    mockHttpGet.mockResolvedValue({
-      items: [
-        { status: installationStatuses.Installed },
-        { status: installationStatuses.InstallFailed },
-      ],
-    });
-
-    mockLastValueFrom.mockResolvedValue({
-      rawResponse: {
-        hits: { total: 1 },
+    const mockActiveIntegrations = [
+      {
+        name: 'test-package1',
+        title: 'Test Package1',
+        version: '1.0.0',
+        status: installationStatuses.Installed,
+        dataStreams: [{ name: 'test-data-stream 1', title: 'Test Data Stream 1' }],
       },
+      {
+        name: 'test-package2',
+        title: 'Test Package2',
+        version: '1.0.0',
+        status: installationStatuses.InstallFailed,
+        dataStreams: [
+          {
+            name: 'test-data-stream 2',
+            title: 'Test Data Stream 2',
+          },
+        ],
+      },
+    ];
+    mockHttpGet.mockResolvedValue({
+      items: mockActiveIntegrations,
     });
 
     const result = await checkIntegrationsCardComplete(mockService);
@@ -105,10 +107,7 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '2 integrations added',
       metadata: {
-        activeIntegrations: [
-          { status: installationStatuses.Installed },
-          { status: installationStatuses.InstallFailed },
-        ],
+        activeIntegrations: mockActiveIntegrations,
       },
     });
   });

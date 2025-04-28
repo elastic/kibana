@@ -61,8 +61,19 @@ describe('checkIntegrationsCardComplete', () => {
   });
 
   it('returns isComplete as true when packages are installed but no agent data is available', async () => {
+    const mockActiveIntegrations = [
+      {
+        status: installationStatuses.Installed,
+        dataStreams: [
+          {
+            name: 'test-data-stream',
+            title: 'Test Data Stream',
+          },
+        ],
+      },
+    ];
     mockHttpGet.mockResolvedValue({
-      items: [{ status: installationStatuses.Installed }],
+      items: mockActiveIntegrations,
     });
 
     mockLastValueFrom.mockResolvedValue({
@@ -78,21 +89,35 @@ describe('checkIntegrationsCardComplete', () => {
       completeBadgeText: '1 integration added',
       metadata: {
         isAgentRequired: true,
-        activeIntegrations: [
-          {
-            status: installationStatuses.Installed,
-          },
-        ],
+        activeIntegrations: mockActiveIntegrations,
       },
     });
   });
 
   it('returns isComplete as true and isAgentRequired as false when both packages and agent data are available', async () => {
+    const mockActiveIntegrations = [
+      {
+        status: installationStatuses.Installed,
+        dataStreams: [
+          {
+            name: 'test-data-stream 1',
+            title: 'Test Data Stream 1',
+          },
+        ],
+      },
+      {
+        status: installationStatuses.InstallFailed,
+        dataStreams: [
+          {
+            name: 'test-data-stream 2',
+            title: 'Test Data Stream 2',
+          },
+        ],
+      },
+    ];
+
     mockHttpGet.mockResolvedValue({
-      items: [
-        { status: installationStatuses.Installed },
-        { status: installationStatuses.InstallFailed },
-      ],
+      items: mockActiveIntegrations,
     });
 
     mockLastValueFrom.mockResolvedValue({
@@ -108,10 +133,7 @@ describe('checkIntegrationsCardComplete', () => {
       completeBadgeText: '2 integrations added',
       metadata: {
         isAgentRequired: false,
-        activeIntegrations: [
-          { status: installationStatuses.Installed },
-          { status: installationStatuses.InstallFailed },
-        ],
+        activeIntegrations: mockActiveIntegrations,
       },
     });
   });

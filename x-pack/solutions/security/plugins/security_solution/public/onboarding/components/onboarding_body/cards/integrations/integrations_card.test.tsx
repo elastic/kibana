@@ -36,7 +36,7 @@ describe('IntegrationsCard', () => {
       <IntegrationsCard
         {...props}
         checkCompleteMetadata={{
-          installedIntegrations: [
+          activeIntegrations: [
             {
               name: 'test',
               version: '1.0.0',

@@ -90,6 +90,17 @@ describe('InstallationStatus', () => {
     expect(screen.getByText('Installed')).toBeInTheDocument();
   });
 
+  it('renders the Active status correctly', () => {
+    render(
+      <InstallationStatus
+        installStatus={installationStatuses.Installed}
+        showInstallationStatus={true}
+        hasDataStreams={true}
+      />
+    );
+    expect(screen.getByText('Active')).toBeInTheDocument();
+  });
+
   it('renders the Install Failed status correctly', () => {
     render(
       <InstallationStatus
