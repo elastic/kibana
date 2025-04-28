@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useCurrentDataViewFields } from './use_current_data_view_fields';
 import { useTIDataView } from './use_ti_data_view';
 
-jest.mock('./use_sourcerer_data_view');
+jest.mock('./use_ti_data_view');
 
 describe('useFields', () => {
   it('should return fields from sourcererDataView', () => {
