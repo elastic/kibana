@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiLink,
   EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
@@ -16,6 +15,8 @@ import {
   EuiAvatar,
   EuiPanel,
   EuiText,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -47,7 +48,44 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
   }
 
   const recentConversations = conversationGroups.map(
-    ({ conversations: groupConversations, dateLabel }) => {
+    ({ dateLabel, conversations: groupConversations }) => {
+      const conversationItems = groupConversations.map((conversation) => {
+        const agent = agentMap[conversation.agentId];
+        if (!agent) {
+          return null;
+        }
+        return (
+          <EuiListGroupItem
+            key={conversation.id}
+            label={
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiAvatar
+                    name={agent.name}
+                    initials={agent.avatar.text}
+                    color={agent.avatar.color}
+                    size="s"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem direction="column" grow={false}>
+                  <EuiText size="s">{conversation.title}</EuiText>
+                  <EuiText size="xs">{agent.name}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            onClick={() => {
+              navigateToWorkchatUrl(
+                appPaths.chat.conversation({
+                  agentId: agent.id,
+                  conversationId: conversation.id,
+                })
+              );
+            }}
+            size="s"
+          />
+        );
+      });
+
       return (
         <EuiFlexItem grow={false} key={dateLabel}>
           <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
@@ -55,46 +93,9 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
               <h4>{dateLabel}</h4>
             </EuiText>
           </EuiPanel>
-          <EuiFlexGroup direction={'column'}>
-            {groupConversations.map((conversation) => {
-              const agent = agentMap[conversation.agentId];
-              if (!agent) {
-                return null;
-              }
-              return (
-                <EuiFlexItem key={conversation.id}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiAvatar
-                        name={agent.name}
-                        initials={agent.avatar.text}
-                        color={agent.avatar.color}
-                        size="s"
-                      />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem direction="column" grow={false}>
-                      <EuiLink
-                        onClick={() => {
-                          navigateToWorkchatUrl(
-                            appPaths.chat.conversation({
-                              agentId: agent.id,
-                              conversationId: conversation.id,
-                            })
-                          );
-                        }}
-                      >
-                        {conversation.title}
-                      </EuiLink>
-                      <EuiText size="xs" onClick={() => {}}>
-                        {agent.name}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
+          <EuiListGroup flush maxWidth={false} gutterSize="s">
+            {conversationItems}
+          </EuiListGroup>
           <EuiSpacer size="s" />
         </EuiFlexItem>
       );
@@ -102,7 +103,7 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
   );
 
   return (
-    <EuiFlexItem grow={false} style={{ maxWidth: 400 }}>
+    <EuiFlexItem grow>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiIcon type="list" size="m" />
         <EuiTitle size="xxs">

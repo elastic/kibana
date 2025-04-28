@@ -13,11 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiFlexGrid,
   EuiText,
   EuiAvatar,
-  EuiPanel,
-  EuiButtonIcon,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -25,66 +24,68 @@ import { useAgentList } from '../../hooks/use_agent_list';
 import { appPaths } from '../../app_paths';
 
 export const HomeAssistantsSection: React.FC<{}> = () => {
-  const { createWorkchatUrl, navigateToWorkchatUrl } = useNavigation();
+  const { navigateToWorkchatUrl } = useNavigation();
   const { agents } = useAgentList();
 
-  const assistantTiles = agents.map((assistant) => {
-    return (
-      <EuiPanel key={assistant.id} paddingSize="m" hasBorder={true}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+  const assistantItems = agents.map((assistant) => (
+    <EuiListGroupItem
+      key={assistant.id}
+      label={
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiAvatar
-              size="l"
               name={assistant.name}
               initials={assistant.avatar?.text}
               color={assistant.avatar?.color}
+              size="s"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="gear"
-              color="text"
-              onClick={() => {
-                navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: assistant.id }));
-              }}
-            />
+          <EuiFlexItem direction="column" grow={false}>
+            <EuiText size="s">{assistant.name}</EuiText>
+            <EuiText size="xs">{assistant.description}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiLink
-              href={createWorkchatUrl(appPaths.chat.new({ agentId: assistant.id }))}
-              style={{ fontWeight: 'bold' }}
-            >
-              {assistant.name}
-            </EuiLink>
-            <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              {assistant.description}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
-  });
+      }
+      onClick={() => {
+        navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: assistant.id }));
+      }}
+      size="s"
+    />
+  ));
 
   return (
     <EuiFlexItem>
       <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiIcon type="users" size="m" />
-        <EuiTitle size="xxs">
-          <h4>
-            {i18n.translate('workchatApp.home.assistants.title', {
-              defaultMessage: 'Assistants',
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiIcon type="users" size="m" />
+            <EuiTitle size="xxs">
+              <h4>
+                {i18n.translate('workchatApp.home.assistants.title', {
+                  defaultMessage: 'Assistants',
+                })}
+              </h4>
+            </EuiTitle>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            onClick={() => {
+              navigateToWorkchatUrl(appPaths.assistants.list);
+            }}
+          >
+            {i18n.translate('workchatApp.home.assistants.viewAll', {
+              defaultMessage: 'View all',
             })}
-          </h4>
-        </EuiTitle>
+          </EuiLink>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer />
-      <EuiFlexGrid columns={3}>{assistantTiles}</EuiFlexGrid>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
+
+      <EuiListGroup flush maxWidth={false} gutterSize="s">
+        {assistantItems}
+      </EuiListGroup>
     </EuiFlexItem>
   );
 };

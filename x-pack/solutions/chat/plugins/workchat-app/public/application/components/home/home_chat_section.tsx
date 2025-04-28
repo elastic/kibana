@@ -19,13 +19,13 @@ import {
 } from '@elastic/eui';
 import { getDefaultConnector } from '@kbn/wc-genai-utils';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useInitialMessage } from '../../context/initial_message_context';
 import { useConnectors } from '../../hooks/use_connectors';
 import { appPaths } from '../../app_paths';
 import { ChatInputForm } from '../chat/chat_input_form';
-import { css } from '@emotion/css';
 
 export const HomeChatSection: React.FC = () => {
   const { agents, isLoading: isAgentListLoading } = useAgentList();
