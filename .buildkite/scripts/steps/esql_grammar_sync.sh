@@ -97,16 +97,6 @@ main () {
   PR_TITLE='[ES|QL] Update grammars'
   PR_BODY='This PR updates the ES|QL grammars (lexer and parser) to match the latest version in Elasticsearch.'
 
-  # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
-
-  if [ "$pr_search_result" == "$PR_TITLE" ]; then
-    echo "PR already exists. Exiting."
-    exit
-  fi
-
-  echo "No existing PR found. Proceeding."
-
   report_main_step "Building ANTLR artifacts."
 
   # Bootstrap Kibana
