@@ -45,7 +45,7 @@ describe('When using `getActionDetailsById()', () => {
     (
       endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
     ).mockResolvedValue([
-      new FleetAgentGenerator().generate({
+      new FleetAgentGenerator('seed').generate({
         id: 'agent-a',
         local_metadata: {
           host: {
