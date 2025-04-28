@@ -41,7 +41,7 @@ export const TryInConsoleButton = ({
   sharePlugin,
   content = RUN_IN_CONSOLE,
   showIcon = true,
-  iconType = 'play',
+  iconType = 'console',
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,

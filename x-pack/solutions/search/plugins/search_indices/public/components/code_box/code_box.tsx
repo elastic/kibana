@@ -167,7 +167,6 @@ export const CodeBox = (props: CodeBoxProps) => {
                     application={application}
                     consolePlugin={consolePlugin}
                     sharePlugin={sharePlugin}
-                    iconType="console"
                     data-test-subj={`${dataTestSubj}-run-in-console-btn`}
                   />
                 </EuiFlexItem>
