@@ -1,41 +1,31 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
+import moment from "moment";
 
-import moment from 'moment';
-
-const TIMESTAMP_REGEX_1 = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
-const TIMESTAMP_REGEX_2 = /\d{4}\/\d{1,2}\/\d{1,2}:\d{2}:\d{2}:\d{2}\.\d{3}/;
+const TIMESTAMP_REGEX = /^(\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2})/;
 
 export function getTimestamp(logLine: string): number {
-  const match1 = logLine.match(TIMESTAMP_REGEX_1);
-  if (match1) {
-    return moment.utc(match1[0], 'YYYY-MM-DD HH:mm:ss').valueOf();
+  const match = logLine.match(TIMESTAMP_REGEX);
+  if (!match) {
+    throw new Error("Invalid log line format");
   }
-
-  const match2 = logLine.match(TIMESTAMP_REGEX_2);
-  if (match2) {
-    return moment.utc(match2[0], 'YYYY/M/D:HH:mm:ss.SSS').valueOf();
-  }
-
-  throw new Error('No valid timestamp found in log line');
+  const timestamp = match[1];
+  return moment.utc(timestamp, "YYYY-MM-DD HH:mm:ss").valueOf();
 }
 
 export function replaceTimestamp(logLine: string, timestamp: number): string {
-  const match1 = logLine.match(TIMESTAMP_REGEX_1);
-  if (match1) {
-    const newTimestamp = moment.utc(timestamp).format('YYYY-MM-DD HH:mm:ss');
-    return logLine.replace(TIMESTAMP_REGEX_1, newTimestamp);
-  }
+  const formattedTimestamp = moment.utc(timestamp).format("YYYY-MM-DD HH:mm:ss");
+  return logLine.replace(TIMESTAMP_REGEX, formattedTimestamp);
+}
 
-  const match2 = logLine.match(TIMESTAMP_REGEX_2);
-  if (match2) {
-    const newTimestamp = moment.utc(timestamp).format('YYYY/M/D:HH:mm:ss.SSS');
-    return logLine.replace(TIMESTAMP_REGEX_2, newTimestamp);
-  }
+export function getFakeMetadata(logLine: string): object {
+  const randomHost = `host-${Math.floor(Math.random() * 1000)}`;
+  const randomProcessId = Math.floor(Math.random() * 10000);
+  const randomUser = `user${Math.floor(Math.random() * 100)}`;
 
-  throw new Error('No valid timestamp found in log line');
+  return {
+    "host.name": randomHost,
+    "process.pid": randomProcessId,
+    "user.name": randomUser,
+    "os.platform": "windows",
+    "service.name": "CBS",
+  };
 }
