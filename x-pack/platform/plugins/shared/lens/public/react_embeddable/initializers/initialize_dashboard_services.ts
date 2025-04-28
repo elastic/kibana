@@ -139,9 +139,11 @@ export function initializeDashboardServices(
         return attributeService.extractReferences(byValueRuntimeState);
       },
     },
-    anyStateChange$: merge(internalApi.overrides$, internalApi.disableTriggers$).pipe(
-      map(() => undefined)
-    ),
+    anyStateChange$: merge(
+      titleManager.anyStateChange$,
+      internalApi.overrides$,
+      internalApi.disableTriggers$
+    ).pipe(map(() => undefined)),
     getLatestState: () => {
       const { style, className } = apiHasLensComponentProps(parentApi)
         ? parentApi
@@ -164,6 +166,7 @@ export function initializeDashboardServices(
       };
     },
     reinitializeState: (lastSaved?: LensSerializedState) => {
+      titleManager.reinitializeState(lastSaved);
       internalApi.updateDisabledTriggers(lastSaved?.disableTriggers);
       internalApi.updateOverrides(lastSaved?.overrides);
     },
