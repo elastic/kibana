@@ -35,6 +35,8 @@ export const CustomAssetsDataSchema = schema.object({
     schema.literal(SyncStatus.SYNCHRONIZING),
     schema.literal(SyncStatus.FAILED),
   ]),
+  error: schema.maybe(schema.string()),
+  is_deleted: schema.maybe(schema.boolean()),
 });
 
 export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
