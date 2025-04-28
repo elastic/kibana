@@ -18,7 +18,10 @@ describe('TakeAction', () => {
 
     render(
       <TestProviders>
-        <TakeAction attackDiscoveries={[mockAttackDiscovery]} />
+        <TakeAction
+          attackDiscoveries={[mockAttackDiscovery]}
+          setSelectedAttackDiscoveries={jest.fn()}
+        />
       </TestProviders>
     );
 
