@@ -19,7 +19,7 @@ export const fetchSearchResults = async (
   query?: string,
   from: number = 0,
   size: number = DEFAULT_DOCS_PER_PAGE,
-  trackTotalHits: boolean = false
+  trackTotalHits?: boolean
 ): Promise<Paginate<SearchHit>> => {
   const result = await fetchWithPagination(
     async () =>
