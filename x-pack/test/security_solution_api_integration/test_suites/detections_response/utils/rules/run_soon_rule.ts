@@ -14,5 +14,6 @@ export const runSoonRule = async (supertest: SuperTest.Agent, ruleId: string): P
   await supertest
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'kibana')
     .set('elastic-api-version', '2023-10-31');
 };
