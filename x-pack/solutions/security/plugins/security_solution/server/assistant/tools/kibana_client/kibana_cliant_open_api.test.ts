@@ -22,17 +22,16 @@ const assistantToolParams = {
       origin: 'http://localhost:5601',
     },
     headers: {
-      "kbn-version": "8.0.0",
-    }
+      'kbn-version': '8.0.0',
+    },
   },
   assistantContext: {
     getServerBasePath: jest.fn().mockReturnValue('basepath'),
-  }
+  },
 } as unknown as KibanaClientToolParams;
 
 jest.mock('axios');
 const mockedAxios = axios as jest.MockedFunction<typeof axios>;
-
 
 const mockPostOperation = {
   path: '/api/actions/connector/{id}',
@@ -42,67 +41,62 @@ const mockPostOperation = {
   getTags: () => [
     {
       name: 'connectors',
-      description: 'Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.\n',
+      description:
+        'Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.\n',
       externalDocs: {
         description: 'Connector documentation',
-        url: 'https://www.elastic.co/docs/reference/kibana/connectors-kibana'
+        url: 'https://www.elastic.co/docs/reference/kibana/connectors-kibana',
       },
-      'x-displayName': 'Connectors'
-    }
+      'x-displayName': 'Connectors',
+    },
   ],
   getParametersAsJSONSchema: () => [
     {
-      "type": "path",
-      "label": "Path Params",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "description": "An identifier for the connector."
-          }
+      type: 'path',
+      label: 'Path Params',
+      schema: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+            description: 'An identifier for the connector.',
+          },
         },
-        "required": [
-          "id"
-        ]
-      }
+        required: ['id'],
+      },
     },
     {
-      "type": "query",
-      "label": "query Params",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "test-query-param": {
-            "type": "string",
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "description": "A test query param",
-          }
+      type: 'query',
+      label: 'query Params',
+      schema: {
+        type: 'object',
+        properties: {
+          'test-query-param': {
+            type: 'string',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+            description: 'A test query param',
+          },
         },
-        "required": [
-          "test-query-param"
-        ]
-      }
+        required: ['test-query-param'],
+      },
     },
     {
-      "type": "body",
-      "label": "Body Params",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "test": {
-            "type": "string",
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "description": "A test query param",
-          }
+      type: 'body',
+      label: 'Body Params',
+      schema: {
+        type: 'object',
+        properties: {
+          test: {
+            type: 'string',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+            description: 'A test query param',
+          },
         },
-        "required": [
-          "test"
-        ]
-      }
-    }
-  ]
+        required: ['test'],
+      },
+    },
+  ],
 } as unknown as Operation;
 
 class TestableKibanaClientTool extends KibanaClientTool {
@@ -110,7 +104,6 @@ class TestableKibanaClientTool extends KibanaClientTool {
     return this.getToolForOperation(...args);
   }
 }
-
 
 describe('kibana_client_open_api', () => {
   beforeEach(() => {
@@ -176,7 +169,10 @@ describe('kibana_client_open_api', () => {
       throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
     }
 
-    const toolForOperation = await kibanaClientTool.callGetToolForOperation({ "assistantToolParams": assistantToolParams, "operation": mockPostOperation });
+    const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+      assistantToolParams,
+      operation: mockPostOperation,
+    });
 
     await toolForOperation.invoke({
       path: {
@@ -188,18 +184,20 @@ describe('kibana_client_open_api', () => {
       body: {
         test: 'test',
       },
-    })
+    });
 
-    expect(mockedAxios).toHaveBeenCalledWith(expect.objectContaining({
-      method: 'POST',
-      url: 'http://localhost:5601/basepath/api/actions/connector/123?test-query-param=test',
-      headers: expect.objectContaining({
-        "kbn-version": "8.0.0",
-      }),
-      data: JSON.stringify({
-        test: 'test',
-      }),
-    }));
+    expect(mockedAxios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'POST',
+        url: 'http://localhost:5601/basepath/api/actions/connector/123?test-query-param=test',
+        headers: expect.objectContaining({
+          'kbn-version': '8.0.0',
+        }),
+        data: JSON.stringify({
+          test: 'test',
+        }),
+      })
+    );
   });
 
   it('getToolForOperation fails for mockPostOperation when body is missing', async () => {
@@ -210,15 +208,20 @@ describe('kibana_client_open_api', () => {
       throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
     }
 
-    const toolForOperation = await kibanaClientTool.callGetToolForOperation({ "assistantToolParams": assistantToolParams, "operation": mockPostOperation });
+    const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+      assistantToolParams,
+      operation: mockPostOperation,
+    });
 
-    await expect(toolForOperation.invoke({
-      path: {
-        id: '123',
-      },
-      query: {
-        'test-query-param': 'test',
-      },
-    })).rejects.toThrow();
+    await expect(
+      toolForOperation.invoke({
+        path: {
+          id: '123',
+        },
+        query: {
+          'test-query-param': 'test',
+        },
+      })
+    ).rejects.toThrow();
   });
 });

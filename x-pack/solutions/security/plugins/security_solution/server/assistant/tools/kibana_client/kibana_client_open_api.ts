@@ -17,10 +17,10 @@ import path from 'path';
 import Oas from 'oas';
 import { parse } from 'yaml';
 import type { BuildFlavor } from '@kbn/config';
+import axios from 'axios';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
-import axios from 'axios';
 
 export const kibanaServerlessOpenApiSpec = path.join(
   __dirname,
@@ -109,8 +109,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         const { request, assistantContext } = assistantToolParams;
         const { origin } = request.rewrittenUrl || request.url;
 
-
-        const pathname = StdUriTemplate.expand(operation.path, input.path)
+        const pathname = StdUriTemplate.expand(operation.path, input.path);
 
         const pathnameWithBasePath = path.posix.join(
           assistantContext.getServerBasePath(),
@@ -144,7 +143,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           })
           .catch((error) => {
             throw new Error(`Error: ${error.message}`);
-          })
+          });
       },
       {
         name: operation.getOperationId(),
