@@ -77,7 +77,7 @@ export const DetectionEngineFilters = ({
 
   return (
     <AlertFilterControls
-      disableCacheManagement={newDataViewPickerEnabled}
+      preventCacheClearOnUnmount={newDataViewPickerEnabled}
       controlsUrlState={filterControlsUrlState}
       setControlsUrlState={setFilterControlsUrlState}
       spaceId={spaceId}
