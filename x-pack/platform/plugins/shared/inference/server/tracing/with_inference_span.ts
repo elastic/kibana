@@ -15,19 +15,26 @@ export type InferenceSpanAttributes = GenAISemConvAttributes;
 
 export function withInferenceSpan<T>(
   options: string | ({ name: string } & InferenceSpanAttributes),
-  cb: (span?: Span) => T
+  cb: (span: Span) => T
 ): T {
   const parentContext = context.active();
   return createActiveInferenceSpan(options, (span) => {
-    const res = cb(span);
-    if (isObservable(res)) {
-      return withInferenceSpan$(span, parentContext, res) as T;
-    }
+    try {
+      const res = cb(span);
+      if (isObservable(res)) {
+        return withInferenceSpan$(span, parentContext, res) as T;
+      }
 
-    if (isPromise(res)) {
-      return withInferenceSpanPromise(span, res) as T;
+      if (isPromise(res)) {
+        return withInferenceSpanPromise(span, res) as T;
+      }
+      return res;
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      span.end();
+      throw error;
     }
-    return res;
   });
 }
 

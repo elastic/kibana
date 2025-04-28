@@ -138,7 +138,7 @@ export class Root {
       // always read the logging config when the underlying config object is re-read
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
       tap((config) => {
-        const telemetry = config.loggers.find((loggerConfig) => loggerConfig.name === 'telemetry');
+        const telemetry = config.loggers?.find((loggerConfig) => loggerConfig.name === 'telemetry');
         setDiagLogger(this.loggingSystem.get('telemetry'), telemetry?.level);
       }),
       concatMap((config) => this.loggingSystem.upgrade(config)),

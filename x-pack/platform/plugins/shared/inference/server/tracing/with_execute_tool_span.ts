@@ -31,13 +31,17 @@ export function withExecuteToolSpan<T>(
       const res = cb(span);
 
       if (isPromise(res)) {
-        void res.then((value) => {
-          try {
-            span?.setAttribute('output.value', JSON.stringify(value));
-          } catch (err) {
-            // oh well
-          }
-        });
+        res.then(
+          (value) => {
+            try {
+              span?.setAttribute('output.value', JSON.stringify(value));
+            } catch (err) {
+              // oh well
+            }
+          },
+          // if the promise fails, we catch it and noop
+          () => {}
+        );
         return res;
       }
 
