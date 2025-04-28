@@ -91,13 +91,10 @@ export const Chat: React.FC<ChatProps> = ({
 
   const onSubmit = useCallback(
     (message: string) => {
-      if (!agentId || !connectorId) {
-        return;
-      }
       setStickToBottom(true);
       sendMessage(message);
     },
-    [sendMessage, setStickToBottom, agentId, connectorId]
+    [sendMessage, setStickToBottom]
   );
 
   if (!conversationId && conversationEvents.length === 0) {
