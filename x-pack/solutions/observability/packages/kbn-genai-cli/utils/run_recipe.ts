@@ -44,7 +44,7 @@ export function runRecipe(callback: RunRecipeCallback) {
     },
     {
       flags: {
-        boolean: ['connectorId'],
+        string: ['connectorId'],
         help: `
           --connectorId  Use a specific connector id
         `,

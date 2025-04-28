@@ -8,19 +8,20 @@
 import type {
   CoreSetup,
   IRouter,
+  KibanaRequest,
   Logger,
   RequestHandlerContext,
-  KibanaRequest,
 } from '@kbn/core/server';
 import { InferenceTaskEventType, isInferenceError } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import type { ChatCompleteRequestBody } from '../../common/http_apis';
+import { z } from '@kbn/zod';
+import { PromptRequestBody } from '../../common/http_apis';
 import { createClient as createInferenceClient } from '../inference_client';
 import { InferenceServerStart, InferenceStartDependencies } from '../types';
-import { chatCompleteBodySchema } from './schemas';
+import { promptBodySchema } from './schemas';
 import { getRequestAbortedSignal } from './get_request_aborted_signal';
 
-export function registerChatCompleteRoute({
+export function registerPromptRoute({
   coreSetup,
   router,
   logger,
@@ -29,11 +30,11 @@ export function registerChatCompleteRoute({
   router: IRouter<RequestHandlerContext>;
   logger: Logger;
 }) {
-  async function callChatComplete<T extends boolean>({
+  async function callPrompt<T extends boolean>({
     request,
     stream,
   }: {
-    request: KibanaRequest<unknown, unknown, ChatCompleteRequestBody>;
+    request: KibanaRequest<unknown, unknown, PromptRequestBody>;
     stream: T;
   }) {
     const actions = await coreSetup
@@ -47,10 +48,8 @@ export function registerChatCompleteRoute({
 
     const {
       connectorId,
-      messages,
-      system,
-      toolChoice,
-      tools,
+      prompt,
+      input,
       functionCalling,
       maxRetries,
       modelName,
@@ -58,12 +57,14 @@ export function registerChatCompleteRoute({
       temperature,
     } = request.body;
 
-    return client.chatComplete({
+    return client.prompt({
       connectorId,
-      messages,
-      system,
-      toolChoice,
-      tools,
+      prompt: {
+        ...prompt,
+        // validation should have happened on the client
+        input: z.any(),
+      },
+      input,
       functionCalling,
       stream,
       abortSignal: abortController.signal,
@@ -76,7 +77,7 @@ export function registerChatCompleteRoute({
 
   router.post(
     {
-      path: '/internal/inference/chat_complete',
+      path: '/internal/inference/prompt',
       security: {
         authz: {
           enabled: false,
@@ -84,14 +85,14 @@ export function registerChatCompleteRoute({
         },
       },
       validate: {
-        body: chatCompleteBodySchema,
+        body: promptBodySchema,
       },
     },
     async (context, request, response) => {
       try {
-        const chatCompleteResponse = await callChatComplete({ request, stream: false });
+        const promptResponse = await callPrompt({ request, stream: false });
         return response.ok({
-          body: chatCompleteResponse,
+          body: promptResponse,
         });
       } catch (e) {
         return response.custom({
@@ -109,7 +110,7 @@ export function registerChatCompleteRoute({
 
   router.post(
     {
-      path: '/internal/inference/chat_complete/stream',
+      path: '/internal/inference/prompt/stream',
       security: {
         authz: {
           enabled: false,
@@ -117,13 +118,13 @@ export function registerChatCompleteRoute({
         },
       },
       validate: {
-        body: chatCompleteBodySchema,
+        body: promptBodySchema,
       },
     },
     async (context, request, response) => {
-      const chatCompleteEvents$ = await callChatComplete({ request, stream: true });
+      const promptResponse$ = await callPrompt({ request, stream: true });
       return response.ok({
-        body: observableIntoEventSourceStream(chatCompleteEvents$, {
+        body: observableIntoEventSourceStream(promptResponse$, {
           logger,
           signal: getRequestAbortedSignal(request),
         }),

@@ -9,6 +9,7 @@ import type { BoundChatCompleteOptions } from '@kbn/inference-common';
 import { bindChatComplete } from '../../common/chat_complete';
 import { bindOutput } from '../../common/output';
 import type { InferenceClient, BoundInferenceClient } from './types';
+import { bindPrompt } from '../../common/prompt';
 
 export const bindClient = (
   unboundClient: InferenceClient,
@@ -17,6 +18,7 @@ export const bindClient = (
   return {
     ...unboundClient,
     chatComplete: bindChatComplete(unboundClient.chatComplete, boundParams),
+    prompt: bindPrompt(unboundClient.prompt, boundParams),
     output: bindOutput(unboundClient.output, boundParams),
   };
 };

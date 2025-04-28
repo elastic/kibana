@@ -112,6 +112,8 @@ export {
   isSupportedConnector,
   getConnectorDefaultModel,
   getConnectorModel,
+  getConnectorFamily,
+  getConnectorPlatform,
   getConnectorProvider,
   connectorToInference,
   type InferenceConnector,
@@ -129,3 +131,21 @@ export type {
 } from './src/tracing';
 
 export { Tokenizer } from './src/utils/tokenizer';
+
+export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
+
+export {
+  type BoundPromptAPI,
+  type BoundPromptOptions,
+  type Prompt,
+  type PromptAPI,
+  type PromptCompositeResponse,
+  type PromptFactory,
+  type PromptOptions,
+  type PromptResponse,
+  type PromptStreamResponse,
+  type PromptVersion,
+  type ToolOptionsOfPrompt,
+  type UnboundPromptOptions,
+  createPrompt,
+} from './src/prompt';
