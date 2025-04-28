@@ -90,7 +90,7 @@ pageLoadAssetSize:
   lens: 76079
   licenseManagement: 41817
   licensing: 29004
-  links: 8000
+  links: 8200
   lists: 22900
   logsDataAccess: 16759
   logsShared: 281060
@@ -195,3 +195,4 @@ pageLoadAssetSize:
   wciIndexSource: 40000
   wciSalesforce: 25000
   workchatApp: 25000
+  workchatFramework: 25000
