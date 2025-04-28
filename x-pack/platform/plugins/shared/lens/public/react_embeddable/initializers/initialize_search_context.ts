@@ -38,6 +38,7 @@ export const searchContextComparators: StateComparators<LensUnifiedSearchContext
 export interface SearchContextConfig {
   api: PublishesUnifiedSearch & PublishesSearchSession;
   anyStateChange$: Observable<void>;
+  cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
   reinitializeState: (lastSaved?: LensSerializedState) => void;
 }

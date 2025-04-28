@@ -207,6 +207,7 @@ export const createLensEmbeddableFactory = (
       const onUnmount = () => {
         expressionConfig.cleanup();
         actionsConfig.cleanup();
+        searchContextConfig.cleanup();
       };
 
       return {
