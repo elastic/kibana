@@ -12,11 +12,7 @@ import type {
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type {
-  ConnectorTypeFields,
-  CustomFieldConfiguration,
-  ListCustomFieldConfiguration,
-} from '../../common/types/domain';
+import type { ConnectorTypeFields, CustomFieldConfiguration } from '../../common/types/domain';
 import { ConnectorTypes, CustomFieldTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
@@ -251,7 +247,6 @@ export const convertCustomFieldValue = ({
 
   if (config.type === CustomFieldTypes.LIST) {
     const listValue = config.options.find((option) => option.key === value);
-    if (!listValue) return null;
     return { [value as string]: listValue?.label ?? '' };
   }
 
@@ -296,8 +291,7 @@ export function removeEmptyFields<T extends Record<string, unknown>>(obj: T): Pa
 }
 
 export const customFieldsFormDeserializer = (
-  customFields?: CaseUI['customFields'],
-  customFieldsConfiguration?: CasesConfigurationUI['customFields']
+  customFields?: CaseUI['customFields']
 ): Record<string, string | boolean> | null => {
   if (!customFields || !customFields.length) {
     return null;
@@ -305,18 +299,9 @@ export const customFieldsFormDeserializer = (
 
   return customFields.reduce((acc, customField) => {
     if (customField.type === CustomFieldTypes.LIST) {
-      const configCustomField = customFieldsConfiguration?.find(
-        (item) => item.key === customField.key
-      ) as ListCustomFieldConfiguration;
-      const { options = [] } = configCustomField ?? {};
-      const selectedKey = customField.value ? Object.keys(customField.value)[0] : null;
-      const isSelectedKeyInOptions = selectedKey
-        ? Boolean(options.find(({ key }) => key === selectedKey))
-        : false;
-
       return {
         ...acc,
-        [customField.key]: isSelectedKeyInOptions ? selectedKey : null,
+        [customField.key]: customField.value ? Object.keys(customField.value)[0] : '',
       };
     }
 

@@ -215,11 +215,7 @@ describe('utils', () => {
 
   describe('templateDeserializer', () => {
     it('deserialzies initial data correctly', () => {
-      const res = templateDeserializer(casesConfigurationsMock, {
-        key: 'temlate_1',
-        name: 'Template 1',
-        caseFields: null,
-      });
+      const res = templateDeserializer({ key: 'temlate_1', name: 'Template 1', caseFields: null });
 
       expect(res).toEqual({
         key: 'temlate_1',
@@ -234,7 +230,7 @@ describe('utils', () => {
     });
 
     it('deserialzies template data correctly', () => {
-      const res = templateDeserializer(casesConfigurationsMock, {
+      const res = templateDeserializer({
         key: 'temlate_1',
         name: 'Template 1',
         description: 'This is first template',
@@ -255,7 +251,7 @@ describe('utils', () => {
     });
 
     it('deserialzies case fields data correctly', () => {
-      const res = templateDeserializer(casesConfigurationsMock, {
+      const res = templateDeserializer({
         key: 'temlate_1',
         name: 'Template 1',
         caseFields: {
@@ -286,7 +282,7 @@ describe('utils', () => {
     });
 
     it('deserialzies custom fields data correctly', () => {
-      const res = templateDeserializer(casesConfigurationsMock, {
+      const res = templateDeserializer({
         key: 'temlate_1',
         name: 'Template 1',
         caseFields: {
@@ -321,7 +317,7 @@ describe('utils', () => {
     });
 
     it('deserialzies connector data correctly', () => {
-      const res = templateDeserializer(casesConfigurationsMock, {
+      const res = templateDeserializer({
         key: 'temlate_1',
         name: 'Template 1',
         caseFields: {
