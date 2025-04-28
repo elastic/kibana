@@ -186,7 +186,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
       inferenceApisConfigureChunking: `${ELASTIC_DOCS}explore-analyze/elastic-inference/inference-api#infer-chunking-config`,
       ingestionApis: `${ELASTIC_DOCS}solutions/search`,
-      ingestPipelines: `${ELASTIC_DOCS}solutions/search/ingest-for-search`,
+      ingestPipelines: `${ELASTIC_DOCS}solutions/search/search-pipelines`,
       knnSearch: `${ELASTIC_DOCS}solutions/search/vector/knn`,
       knnSearchCombine: `${ELASTIC_DOCS}solutions/search/vector/knn#_combine_approximate_knn_with_other_features`,
       languageAnalyzers: `${ELASTIC_DOCS}reference/text-analysis/analysis-lang-analyzer`,
