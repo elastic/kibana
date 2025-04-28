@@ -12,11 +12,12 @@ import {
   getUnchangingComparator,
   initializeTimeRange,
 } from '@kbn/presentation-publishing';
-import { noop } from 'lodash';
 import {
   PublishesSearchSession,
   apiPublishesSearchSession,
 } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { map, distinctUntilChanged } from 'rxjs';
+import { isEqual } from 'lodash';
 import { buildObservableVariable } from '../helper';
 import {
   LensEmbeddableStartServices,
@@ -58,6 +59,22 @@ export function initializeSearchContext(
   const [timeslice$] = buildObservableVariable<[number, number] | undefined>(undefined);
 
   const timeRange = initializeTimeRange(initialState);
+
+  const subscriptions = [
+    internalApi.attributes$
+      .pipe(
+        map((attrs) => attrs.state.query),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(query$),
+    internalApi.attributes$
+      .pipe(
+        map((attrs) => attrs.state.filters),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(filters$),
+  ];
+
   return {
     api: {
       searchSessionId$,
@@ -78,7 +95,9 @@ export function initializeSearchContext(
       >(),
       ...timeRange.comparators,
     },
-    cleanup: noop,
+    cleanup: () => {
+      subscriptions.forEach((sub) => sub.unsubscribe());
+    },
     serialize: () => ({
       searchSessionId: searchSessionId$.getValue(),
       filters: filters$.getValue(),
