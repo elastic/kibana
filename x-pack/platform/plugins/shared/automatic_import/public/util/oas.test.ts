@@ -116,14 +116,6 @@ describe('oas util', () => {
     });
   });
 
-  describe('full test', () => {
-    it('reduceSpecComponents', () => {
-      const reducedSpec = reduceSpecComponents(testSpec, '/v1/device_tasks');
-      expect(reducedSpec).toBeDefined();
-      // only will return the top level refs mentioned in the response object
-      expect(Object.keys(Object.keys(reducedSpec?.schemas ?? [])).length).toBe(2);
-    });
-  });
   describe('getAuthDetails', () => {
     it('should return Basic auth details when auth type is basic', () => {
       const mockSpecAuthDetails: Record<string, any[]> = {
@@ -203,6 +195,15 @@ describe('oas util', () => {
       expect(() => {
         getAuthDetails('unsupported' as CelAuthType, mockSpecAuthDetails);
       }).toThrow('unsupported auth method');
+    });
+  });
+
+  describe('full test', () => {
+    it('reduceSpecComponents', () => {
+      const reducedSpec = reduceSpecComponents(testSpec, '/v1/device_tasks');
+      expect(reducedSpec).toBeDefined();
+      // only will return the top level refs mentioned in the response object
+      expect(Object.keys(Object.keys(reducedSpec?.schemas ?? [])).length).toBe(2);
     });
   });
 });
