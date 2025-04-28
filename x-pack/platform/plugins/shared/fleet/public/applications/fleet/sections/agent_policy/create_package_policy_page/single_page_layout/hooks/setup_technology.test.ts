@@ -15,7 +15,7 @@ import { useStartServices, useConfig } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 
-import { useAgentless, useSetupTechnology } from './setup_technology';
+import { isAgentlessSetupDefault, useAgentless, useSetupTechnology } from './setup_technology';
 
 jest.mock('../../../../../services');
 jest.mock('../../../../../hooks', () => ({
@@ -1400,5 +1400,135 @@ describe('useSetupTechnology', () => {
         ],
       });
     });
+  });
+});
+
+describe('isAgentlessSetupDefault', () => {
+  it('should return true if there is only agentless default deployment', () => {
+    const isAgentlessDefault = false;
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+          deployment_modes: {
+            agentless: {
+              is_default: true,
+            },
+          },
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return true if the integration to enable matches an agentless default deployment', () => {
+    const isAgentlessDefault = false;
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+          deployment_modes: {
+            agentless: {
+              is_default: true,
+            },
+          },
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo, 'template1');
+
+    expect(result).toBe(true);
+  });
+
+  it('should return true if isAgentlessDefault is true and there is an agentless deployment', () => {
+    const isAgentlessDefault = true;
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+          title: 'Template 1',
+          description: '',
+          deployment_modes: {
+            agentless: {},
+          },
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false if there is no agentless default deployment and isAgentlessDefault is false', () => {
+    const isAgentlessDefault = false;
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+          deployment_modes: {
+            agentless: {},
+          },
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false if the integration to enable does not match any agentless default deployment', () => {
+    const isAgentlessDefault = false;
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+          deployment_modes: {
+            agentless: {
+              is_default: true,
+            },
+          },
+        },
+        {
+          name: 'template2',
+          deployment_modes: {},
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo, 'template2');
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false if packageInfo is undefined', () => {
+    const isAgentlessDefault = true;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false if deployment_modes is undefined in all policy templates', () => {
+    const isAgentlessDefault = true;
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+        },
+        {
+          name: 'template2',
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo);
+
+    expect(result).toBe(false);
   });
 });
