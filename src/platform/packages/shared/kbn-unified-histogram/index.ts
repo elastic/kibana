@@ -26,6 +26,7 @@ export {
   useUnifiedHistogram,
   type UseUnifiedHistogramProps,
   type UnifiedHistogramApi,
+  type UnifiedHistogramPartialLayoutProps,
 } from './hooks/use_unified_histogram';
 
 export type { UnifiedHistogramState } from './services/state_service';

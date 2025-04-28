@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import type { UnifiedHistogramLayoutProps } from '@kbn/unified-histogram';
+import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
@@ -19,11 +19,6 @@ import type { ConnectedCustomizationService } from '../../../../customizations';
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
 }
-
-type UnifiedHistogramPartialLayoutProps = Omit<
-  UnifiedHistogramLayoutProps,
-  'container' | 'unifiedHistogramChart'
->;
 
 interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;

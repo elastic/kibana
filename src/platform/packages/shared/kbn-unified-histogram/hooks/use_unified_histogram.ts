@@ -134,13 +134,18 @@ export type UnifiedHistogramApi = {
   'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTimeInterval' | 'setTotalHits'
 >;
 
+export type UnifiedHistogramPartialLayoutProps = Omit<
+  UnifiedHistogramLayoutProps,
+  'container' | 'unifiedHistogramChart'
+>;
+
 export type UseUnifiedHistogramResult =
   | { isInitialized: false; api?: undefined; chartProps?: undefined; layoutProps?: undefined }
   | {
       isInitialized: true;
       api: UnifiedHistogramApi;
       chartProps: UnifiedHistogramChartProps;
-      layoutProps: Omit<UnifiedHistogramLayoutProps, 'container' | 'unifiedHistogramChart'>;
+      layoutProps: UnifiedHistogramPartialLayoutProps;
     };
 
 const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = of({
@@ -289,9 +294,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
         }
       : undefined;
   }, [chart, input$, isChartAvailable, lensVisService, props, requestParams, stateProps]);
-  const layoutProps = useMemo<
-    Omit<UnifiedHistogramLayoutProps, 'container' | 'unifiedHistogramChart'>
-  >(
+  const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
       chart,
       isChartAvailable,
