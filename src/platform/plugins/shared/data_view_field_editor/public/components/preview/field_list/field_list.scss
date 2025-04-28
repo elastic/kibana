@@ -33,11 +33,11 @@ $previewShowMoreHeight: 40px; /* [2] */
       pointer-events: none;
     }
 
-    &--pinned .indexPatternFieldEditor__previewFieldList__item__actionsBtn,
-    &:hover .indexPatternFieldEditor__previewFieldList__item__actionsBtn,
-    &:focus-within .indexPatternFieldEditor__previewFieldList__item__actionsBtn {
-      opacity: 1;
-      pointer-events: auto;
+    &--pinned, &:hover, &:focus-within {
+      .indexPatternFieldEditor__previewFieldList__item__actionsBtn {
+        opacity: 1;
+        pointer-events: auto;
+      }
     }
 
     &__value .euiToolTipAnchor {
