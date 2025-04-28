@@ -499,30 +499,13 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     validateScheduleInterval(context, updatedRule.schedule.interval, ruleType.id, rule.id);
 
-    const {
-      modifiedParams: ruleParams,
-      modifiedAttributes,
-      isParamsUpdateSkipped,
-    } = paramsModifier
+    const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
       ? // TODO (http-versioning): Remove the cast when all rule types are fixed
         await paramsModifier(updatedRule as Rule<Params>)
       : {
           modifiedParams: updatedRule.params,
-          modifiedAttributes: undefined,
           isParamsUpdateSkipped: true,
         };
-
-    if (modifiedAttributes) {
-      updatedRule.name = modifiedAttributes.name ?? updatedRule.name;
-      updatedRule.tags = modifiedAttributes.tags ?? updatedRule.tags;
-      updatedRule.throttle = modifiedAttributes.throttle ?? updatedRule.throttle;
-      updatedRule.schedule = modifiedAttributes.schedule ?? updatedRule.schedule;
-      // updatedRule.actions = modifiedAttributes.actions ?? updatedRule.actions;
-      // updatedRule.systemActions = modifiedAttributes.systemActions ?? updatedRule.systemActions;
-      updatedRule.notifyWhen = modifiedAttributes.notifyWhen ?? updatedRule.notifyWhen;
-      updatedRule.alertDelay = modifiedAttributes.alertDelay ?? updatedRule.alertDelay;
-      updatedRule.flapping = modifiedAttributes.flapping ?? updatedRule.flapping;
-    }
 
     // Increment revision if params ended up being modified AND it wasn't already incremented as part of attribute update
     if (
