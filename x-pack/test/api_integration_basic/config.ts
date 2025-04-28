@@ -24,6 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'xpack.security.authc.api_key.enabled=true',
       ],
     },
+    testFiles: [require.resolve('./apis')],
     junit: {
       ...xpackApiIntegrationConfig.get('junit'),
       reportName: 'X-Pack API Integration Tests Basic License',
