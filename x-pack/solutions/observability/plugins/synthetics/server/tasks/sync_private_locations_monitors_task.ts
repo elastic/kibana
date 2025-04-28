@@ -11,6 +11,10 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { RunContext } from '@kbn/task-manager-plugin/server';
+import moment from 'moment';
+import { syntheticsParamType } from '../../common/types/saved_objects';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import {
@@ -28,7 +32,7 @@ import {
 } from '../synthetics_service/formatters/public_formatters/format_configs';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const TASK_ID = `${TASK_TYPE}:${VERSION}`;
 
 export class SyncPrivateLocationMonitorsTask {
@@ -42,12 +46,12 @@ export class SyncPrivateLocationMonitorsTask {
         title: 'Synthetics Sync Global Params Task',
         description:
           'This task is executed so that we can sync private location monitors for example when global params are updated',
-        timeout: '1m',
+        timeout: '3m',
         maxAttempts: 3,
-        createTaskRunner: () => {
+        createTaskRunner: (taskInstance) => {
           return {
             run: async () => {
-              return this.runTask();
+              return this.runTask(taskInstance);
             },
           };
         },
@@ -55,29 +59,59 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask() {
+  public async runTask(context: RunContext) {
     const {
       coreStart: { savedObjects },
       encryptedSavedObjects,
       logger,
     } = this.serverSetup;
-
+    const lastStartedAt =
+      context.taskInstance.state?.lastStartedAt || moment().subtract(10, 'minute');
+    const startedAt = context.taskInstance.startedAt || moment();
+    let lastTotalParams = context.taskInstance.state?.lastTotalParams || 0;
     try {
-      logger.debug(`Syncing private location monitors`);
+      logger.debug(
+        `Syncing private location monitors, last total params ${lastTotalParams}, last run ${lastStartedAt}`
+      );
       const soClient = savedObjects.createInternalRepository();
       const allPrivateLocations = await getPrivateLocations(soClient);
-      if (allPrivateLocations.length !== 0) {
-        await this.syncGlobalParams({
-          allPrivateLocations,
-          soClient,
-          encryptedSavedObjects,
-        });
+      const { updatedParams, totalParams } = await this.hasAnyParamChanged(soClient, lastStartedAt);
+      if (updatedParams > 0 || totalParams !== lastTotalParams) {
+        lastTotalParams = totalParams;
+        logger.debug(
+          `Syncing private location monitors because params changed, updated params ${updatedParams}, total params ${totalParams}`
+        );
+
+        if (allPrivateLocations.length === 0) {
+          await this.syncGlobalParams({
+            allPrivateLocations,
+            soClient,
+            encryptedSavedObjects,
+          });
+        }
+        logger.debug(`Sync of private location monitors succeeded`);
+      } else {
+        lastTotalParams = totalParams;
+        logger.debug(
+          `No params changed since last run ${lastStartedAt}, skipping sync of private location monitors`
+        );
       }
-      logger.debug(`Sync of private location monitors succeeded`);
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
-      return { error, state: {} };
+      return {
+        error,
+        state: {
+          lastStartedAt: startedAt.toISOString(),
+          lastTotalParams,
+        },
+      };
     }
+    return {
+      state: {
+        lastStartedAt: startedAt.toISOString(),
+        lastTotalParams,
+      },
+    };
   }
 
   start = async () => {
@@ -90,7 +124,7 @@ export class SyncPrivateLocationMonitorsTask {
       id: TASK_ID,
       state: {},
       schedule: {
-        interval: '10m',
+        interval: '1m',
       },
       taskType: TASK_TYPE,
       params: {},
@@ -143,13 +177,15 @@ export class SyncPrivateLocationMonitorsTask {
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const { syntheticsService } = this.syntheticsMonitorClient;
-    const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId: '*' });
+    const paramsBySpacePromise = syntheticsService.getSyntheticsParams({ spaceId: ALL_SPACES_ID });
     const monitorConfigRepository = new MonitorConfigRepository(
       soClient,
       encryptedSavedObjects.getClient()
     );
 
-    const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({ spaceId: '*' });
+    const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({
+      spaceId: ALL_SPACES_ID,
+    });
 
     const [paramsBySpace, monitors] = await Promise.all([paramsBySpacePromise, monitorsPromise]);
 
@@ -206,7 +242,29 @@ export class SyncPrivateLocationMonitorsTask {
     return { configsBySpaces, spaceIds };
   }
 
-  async hasAnyParamChanged() {}
+  async hasAnyParamChanged(soClient: SavedObjectsClientContract, lastStartedAt: string) {
+    const { logger } = this.serverSetup;
+    const [editedParams, totalParams] = await Promise.all([
+      soClient.find({
+        type: syntheticsParamType,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        filter: `synthetics-param.updated_at > "${lastStartedAt}"`,
+        fields: [],
+      }),
+      soClient.find({
+        type: syntheticsParamType,
+        perPage: 0,
+        namespaces: [ALL_SPACES_ID],
+        fields: [],
+      }),
+    ]);
+    logger.debug(`Found ${editedParams.total} params and ${totalParams.total} total params`);
+    return {
+      updatedParams: editedParams.total,
+      totalParams: totalParams.total,
+    };
+  }
 }
 
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
