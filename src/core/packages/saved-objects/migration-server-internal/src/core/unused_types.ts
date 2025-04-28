@@ -54,6 +54,8 @@ export const REMOVED_TYPES: string[] = [
   'endpoint:user-artifact',
   // Removed in 9.1 https://github.com/elastic/kibana/pull/216342
   'investigation',
+  // Removed in 9.1 https://github.com/elastic/kibana/pull/219068
+  'infra-custom-dashboards',
 ].sort();
 
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
