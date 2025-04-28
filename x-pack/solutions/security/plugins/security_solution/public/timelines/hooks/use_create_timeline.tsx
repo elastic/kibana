@@ -54,19 +54,18 @@ export const useCreateTimeline = ({
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
 
-  let { id: dataViewId, patternList: selectedPatterns } = useSelector(
+  const { id: oldDataViewId, patternList: oldSelectedPatterns } = useSelector(
     sourcererSelectors.defaultDataView
   ) ?? { id: '', patternList: [] };
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
   const { dataViewSpec: experimentalDataView } = useDataViewSpec(DataViewManagerScopeName.default);
-
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
 
-  if (newDataViewPickerEnabled) {
-    dataViewId = experimentalDataView.id ?? '';
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
