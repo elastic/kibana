@@ -136,7 +136,7 @@ export const postAttackDiscoveryRoute = (
 
           const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
             ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-            false
+            true
           );
 
           const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(

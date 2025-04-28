@@ -112,7 +112,7 @@ export class ElasticAssistantPlugin
       .then(([{ featureFlags }]) => {
         // read all feature flags:
         void Promise.all([
-          featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
+          featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, true),
           // add more feature flags here
         ]).then(([assistantAttackDiscoverySchedulingEnabled]) => {
           if (assistantAttackDiscoverySchedulingEnabled) {

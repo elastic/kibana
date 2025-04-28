@@ -229,6 +229,8 @@ xpack.alerting.rules.run.ruleTypeOverrides:
     timeout: 10m
   - id: siem.eqlRule
     timeout: 5m
+  - id: attack-discovery
+    timeout: 30m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
