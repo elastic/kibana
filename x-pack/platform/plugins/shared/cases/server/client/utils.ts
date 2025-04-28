@@ -20,7 +20,7 @@ import { escapeQuotes } from '@kbn/es-query/src/kuery/utils/escape_kuery';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
-import type {
+import {
   CaseCustomField,
   CaseSeverity,
   CaseStatuses,
@@ -28,6 +28,7 @@ import type {
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
   CustomFieldTypes,
+  ListCustomFieldConfiguration,
 } from '../../common/types/domain';
 import {
   ActionsAttachmentPayloadRt,
@@ -644,9 +645,29 @@ export const transformTemplateCustomFields = ({
     }
 
     // remove deleted custom field from template
-    const transformedTemplateCustomFields = templateCustomFields.filter((templateCustomField) =>
-      customFields?.find((customField) => customField.key === templateCustomField.key)
-    );
+    const transformedTemplateCustomFields = templateCustomFields
+      .filter((templateCustomField) =>
+        customFields?.find((customField) => customField.key === templateCustomField.key)
+      )
+      // From list fields, remove deleted options
+      .map((templateCustomField) => {
+        if (templateCustomField.type === CustomFieldTypes.LIST && templateCustomField.value) {
+          const configuration = customFields.find(
+            (customField) => customField.key === templateCustomField.key
+          ) as ListCustomFieldConfiguration;
+          const valueExistsInConfig = !!configuration.options.find(
+            ({ key }) =>
+              templateCustomField.value && Object.keys(templateCustomField.value)[0] === key
+          );
+          if (!valueExistsInConfig) {
+            return {
+              ...templateCustomField,
+              value: null,
+            };
+          }
+        }
+        return templateCustomField;
+      });
 
     // add new custom fields to template
     if (customFields.length >= transformedTemplateCustomFields.length) {

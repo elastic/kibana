@@ -210,6 +210,7 @@ export const mimeTypeString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 
+// Store list value as { optionId: option text }
 export const customFieldListValueSchema = new rt.Type<{ [x: string]: string }>(
   'CustomFieldListValue',
   rt.record(rt.string, rt.string).is,
