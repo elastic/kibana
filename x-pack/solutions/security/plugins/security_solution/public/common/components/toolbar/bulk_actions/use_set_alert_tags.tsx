@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AlertTags } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -33,9 +31,11 @@ export type ReturnSetAlertTags = SetAlertTagsFunc | null;
  * @throws An error if response is not OK
  */
 export const useSetAlertTags = (): ReturnSetAlertTags => {
-  const { http } = useKibana<CoreStart>().services;
   const { addSuccess, addError } = useAppToasts();
-  const setAlertTagsRef = useRef<SetAlertTagsFunc | null>(null);
+
+  const [ignore, setIgnore] = useState<boolean>(false);
+
+  const abortCtrl = useRef<AbortController>(new AbortController());
 
   const onUpdateSuccess = useCallback(
     (updated: number = 0) => addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated)),
@@ -49,14 +49,11 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
     [addError]
   );
 
-  useEffect(() => {
-    let ignore = false;
-    const abortCtrl = new AbortController();
-
-    const onSetAlertTags: SetAlertTagsFunc = async (tags, ids, onSuccess, setTableLoading) => {
+  const onSetAlertTags: SetAlertTagsFunc = useCallback(
+    async (tags, ids, onSuccess, setTableLoading) => {
       try {
         setTableLoading(true);
-        const response = await setAlertTags({ tags, ids, signal: abortCtrl.signal });
+        const response = await setAlertTags({ tags, ids, signal: abortCtrl.current.signal });
         if (!ignore) {
           onSuccess();
           setTableLoading(false);
@@ -68,14 +65,17 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
           onUpdateFailure(error);
         }
       }
-    };
+    },
+    [ignore, onUpdateFailure, onUpdateSuccess]
+  );
 
-    setAlertTagsRef.current = onSetAlertTags;
+  useEffect(() => {
+    const currentAbortCtrl = abortCtrl.current;
     return (): void => {
-      ignore = true;
-      abortCtrl.abort();
+      setIgnore(true);
+      currentAbortCtrl.abort();
     };
-  }, [http, onUpdateFailure, onUpdateSuccess]);
+  }, [abortCtrl]);
 
-  return setAlertTagsRef.current;
+  return onSetAlertTags;
 };
