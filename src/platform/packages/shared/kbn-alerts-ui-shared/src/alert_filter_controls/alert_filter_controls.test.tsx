@@ -92,7 +92,7 @@ describe('AlertFilterControls', () => {
   });
 
   it('does not clear the cache on removal when cache management is disabled', async () => {
-    const result = render(<AlertFilterControls {...props} disableCacheManagement={true} />);
+    const result = render(<AlertFilterControls {...props} preventCacheClearOnUnmount={true} />);
     act(() => result.unmount());
 
     expect(mockServices.dataViews.clearInstanceCache).not.toHaveBeenCalled();
