@@ -7,6 +7,7 @@
 
 import { render, shallow } from 'enzyme';
 import React from 'react';
+import 'jest-styled-components';
 
 import { MapToolTip } from './map_tooltip';
 
