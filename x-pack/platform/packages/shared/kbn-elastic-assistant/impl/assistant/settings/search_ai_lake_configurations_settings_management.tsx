@@ -29,12 +29,14 @@ import {
   ANONYMIZATION_TAB,
   CONNECTORS_TAB,
   CONVERSATIONS_TAB,
+  EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
 import { ManagementSettingsTabs } from './types';
+import { EvaluationSettings } from './evaluation_settings/evaluation_settings';
 
 interface Props {
   dataViews: DataViewsContract;
@@ -48,7 +50,12 @@ interface Props {
  */
 export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = React.memo(
   ({ dataViews, onTabChange, currentTab }) => {
-    const { http, selectedSettingsTab, setSelectedSettingsTab } = useAssistantContext();
+    const {
+      assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
+      http,
+      selectedSettingsTab,
+      setSelectedSettingsTab,
+    } = useAssistantContext();
 
     useEffect(() => {
       if (selectedSettingsTab) {
@@ -90,8 +97,16 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
           id: KNOWLEDGE_BASE_TAB,
           label: i18n.KNOWLEDGE_BASE_MENU_ITEM,
         },
+        ...(modelEvaluatorEnabled
+          ? [
+              {
+                id: EVALUATION_TAB,
+                label: i18n.EVALUATION_MENU_ITEM,
+              },
+            ]
+          : []),
       ],
-      []
+      [modelEvaluatorEnabled]
     );
 
     const tabs = useMemo(() => {
@@ -121,6 +136,15 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
           return <AnonymizationSettingsManagement />;
         case KNOWLEDGE_BASE_TAB:
           return <KnowledgeBaseSettingsManagement dataViews={dataViews} />;
+        case EVALUATION_TAB:
+          return modelEvaluatorEnabled ? (
+            <EvaluationSettings />
+          ) : (
+            <ConversationSettingsManagement
+              connectors={connectors}
+              defaultConnector={defaultConnector}
+            />
+          );
         case CONVERSATIONS_TAB:
         default:
           return (
@@ -130,7 +154,7 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
             />
           );
       }
-    }, [connectors, currentTab, dataViews, defaultConnector]);
+    }, [connectors, currentTab, dataViews, defaultConnector, modelEvaluatorEnabled]);
     return (
       <EuiFlexGroup
         data-test-subj="SearchAILakeConfigurationsSettingsManagement"

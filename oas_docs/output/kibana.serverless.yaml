@@ -24962,6 +24962,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -24994,6 +24996,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -25097,6 +25101,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
@@ -25223,6 +25229,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
@@ -44083,7 +44091,7 @@ paths:
         - system
   /api/streams:
     get:
-      description: Fetches list of all streams
+      description: 'Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams
       parameters: []
       requestBody:
@@ -44105,7 +44113,7 @@ paths:
       x-state: Technical Preview
   /api/streams/_disable:
     post:
-      description: Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.
+      description: 'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44134,7 +44142,7 @@ paths:
       x-state: Technical Preview
   /api/streams/_enable:
     post:
-      description: Enables wired streams
+      description: 'Enables wired streams<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44163,7 +44171,7 @@ paths:
       x-state: Technical Preview
   /api/streams/_resync:
     post:
-      description: Resyncs all streams, making sure that Elasticsearch assets are up to date
+      description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-resync
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44192,7 +44200,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}:
     delete:
-      description: Deletes a stream definition and the underlying data stream
+      description: 'Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44225,7 +44233,7 @@ paths:
         - streams
       x-state: Technical Preview
     get:
-      description: Fetches a stream definition and associated dashboards
+      description: 'Fetches a stream definition and associated dashboards<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name
       parameters:
         - in: path
@@ -44251,7 +44259,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Creates or updates a stream definition. Classic streams can not be created through this API, only updated
+      description: 'Creates or updates a stream definition. Classic streams can not be created through this API, only updated<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48419,7 +48427,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/_fork:
     post:
-      description: Forks a wired stream and creates a child stream
+      description: 'Forks a wired stream and creates a child stream<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-fork
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48537,7 +48545,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/_group:
     get:
-      description: Fetches the group settings of a group stream definition
+      description: 'Fetches the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-group
       parameters:
         - in: path
@@ -48563,7 +48571,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Upserts the group settings of a group stream definition
+      description: 'Upserts the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-group
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48604,7 +48612,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/_ingest:
     get:
-      description: Fetches the ingest settings of an ingest stream definition
+      description: 'Fetches the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-ingest
       parameters:
         - in: path
@@ -48630,7 +48638,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Upserts the ingest settings of an ingest stream definition
+      description: 'Upserts the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-ingest
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50594,7 +50602,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/content/export:
     post:
-      description: Exports the content associated to a stream.
+      description: 'Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-content-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50664,7 +50672,7 @@ paths:
         - streams
   /api/streams/{name}/content/import:
     post:
-      description: Links content objects to a stream.
+      description: 'Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-content-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50698,7 +50706,7 @@ paths:
         - streams
   /api/streams/{name}/dashboards:
     get:
-      description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
+      description: 'Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-dashboards
       parameters:
         - in: path
@@ -50725,7 +50733,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/dashboards/_bulk:
     post:
-      description: Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.
+      description: 'Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-dashboards-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50786,7 +50794,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/dashboards/{dashboardId}:
     delete:
-      description: Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.
+      description: 'Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name-dashboards-dashboardid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50824,7 +50832,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.
+      description: 'Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-dashboards-dashboardid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50863,7 +50871,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/queries:
     get:
-      description: Fetches all queries linked to a stream that are visible to the current user in the current space.
+      description: 'Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-queries
       parameters:
         - in: path
@@ -50890,7 +50898,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/queries/_bulk:
     post:
-      description: Bulk update queries of a stream. Can add new queries and delete existing ones.
+      description: 'Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-queries-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50969,7 +50977,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/queries/{queryId}:
     delete:
-      description: Remove a query from a stream. Noop if the query is not found on the stream.
+      description: 'Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51007,7 +51015,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Adds a query to a stream. Noop if the query is already present on the stream.
+      description: 'Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51056,7 +51064,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/significant_events:
     get:
-      description: Read the significant events
+      description: 'Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-significant-events
       parameters:
         - in: path
@@ -51919,6 +51927,91 @@ paths:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
       summary: Create an SLO
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete:
+    post:
+      description: |
+        Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the `GET /api/slo/_bulk_delete/{taskId}` endpoint.
+      operationId: bulkDeleteOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_delete_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Bulk delete SLO definitions and their associated summary and rollup data.
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}:
+    get:
+      description: |
+        Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
+      operationId: bulkDeleteStatusOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: The task id of the bulk delete operation
+          in: path
+          name: taskId
+          required: true
+          schema:
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_status_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Retrieve the status of the bulk deletion
       tags:
         - slo
   /s/{spaceId}/api/observability/slos/_bulk_purge_rollup:
@@ -67795,6 +67888,62 @@ components:
       example: occurrences
       title: Budgeting method
       type: string
+    SLOs_bulk_delete_request:
+      description: |
+        The bulk delete SLO request takes a list of SLOs Definition id to delete.
+      properties:
+        list:
+          description: An array of SLO Definition id
+          items:
+            description: The SLO Definition id
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+          type: array
+      required:
+        - list
+      title: Bulk delete SLO request
+      type: object
+    SLOs_bulk_delete_response:
+      description: |
+        The bulk delete SLO response returns a taskId that can be used to poll for its status
+      properties:
+        taskId:
+          description: The taskId of the bulk delete operation
+          example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+          type: string
+      title: Bulk delete SLO response
+      type: object
+    SLOs_bulk_delete_status_response:
+      description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
+      properties:
+        error:
+          description: The error message if the bulk deletion operation failed
+          example: Task not found
+          type: string
+        isDone:
+          description: Indicates if the bulk deletion operation is completed
+          example: true
+          type: boolean
+        results:
+          description: The results of the bulk deletion operation, including the success status and any errors for each SLO
+          items:
+            type: object
+            properties:
+              error:
+                description: The error message if the deletion operation failed for this SLO
+                example: SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found
+                type: string
+              id:
+                description: The ID of the SLO that was deleted
+                example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+                type: string
+              success:
+                description: The result of the deletion operation for this SLO
+                example: true
+                type: boolean
+          type: array
+      title: The status of the bulk deletion
+      type: object
     SLOs_bulk_purge_rollup_request:
       description: |
         The bulk purge rollup data request takes a list of SLO ids and a purge policy, then deletes the rollup data according to the purge policy. This API can be used to remove the staled data of an instance SLO that no longer get updated.
