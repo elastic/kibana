@@ -136,6 +136,7 @@ export const Table = memo(
           id={id}
           onLoaded={onLoaded}
           query={query}
+          ref={refetchRef}
           renderActionsCell={ActionsCell}
           renderCellValue={CellValue}
           rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
