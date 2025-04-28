@@ -8,7 +8,6 @@
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { CheckPipelineRequestBody, CheckPipelineResponse, CHECK_PIPELINE_PATH } from '../../common';
 import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
   FLEET_ALL_ROLE,
   INTEGRATIONS_ALL_ROLE,
   ROUTE_HANDLER_TIMEOUT,
@@ -40,7 +39,6 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
             requiredPrivileges: [
               FLEET_ALL_ROLE,
               INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
             ],
           },
         },
