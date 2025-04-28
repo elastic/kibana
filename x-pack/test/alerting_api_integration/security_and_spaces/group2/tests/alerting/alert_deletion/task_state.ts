@@ -145,8 +145,10 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
       const taskStateAfter = JSON.parse(taskResultAfter._source?.task?.state!);
 
       // instance1 should have been cleared but instance2 should still be there
-      expect(get(taskStateAfter, 'alertInstances.instance1')).to.be(undefined);
-      expect(get(taskStateAfter, 'alertInstances.instance2')).not.to.be(undefined);
+      await retry.try(async () => {
+        expect(get(taskStateAfter, 'alertInstances.instance1')).to.be(undefined);
+        expect(get(taskStateAfter, 'alertInstances.instance2')).not.to.be(undefined);
+      });
 
       // get last run date should be defined
       const lastRunResponsePost = await supertestWithoutAuth
