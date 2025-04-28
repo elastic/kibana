@@ -157,7 +157,7 @@ function transformBucketToResults(buckets: EvaluationBucket[], params: BurnRateR
 function transformGroupings(
   groupings: SearchResponse<TopHitsAggResults>
 ): Record<string, unknown> | undefined {
-  if (groupings.hits && groupings.hits.hits && groupings.hits.hits.length > 0) {
+  if (groupings && groupings.hits && groupings.hits.hits && groupings.hits.hits.length > 0) {
     const topHit = groupings.hits.hits[0];
     return topHit._source?.slo?.groupings;
   }

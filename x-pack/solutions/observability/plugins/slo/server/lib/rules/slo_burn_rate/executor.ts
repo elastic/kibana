@@ -240,7 +240,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         sloId: slo.id,
         sloName: slo.name,
         sloInstanceId: alertId,
-        grouping: recoveredAlertState.grouping,
+        grouping: recoveredAlertState?.grouping,
       };
 
       alertsClient.setAlertData({

@@ -127,7 +127,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
 
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
-    const groupingObject = unflattenObject(result.groupingObject ?? {});
+    const groupingObject = result.groupingObject
+      ? unflattenObject(result.groupingObject)
+      : undefined;
     const alertId = result.group;
     const value = result.value ?? result.count;
 
@@ -224,7 +226,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
       sourceFields: [],
-      grouping: recoveredAlertState.grouping,
+      grouping: recoveredAlertState?.grouping,
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
