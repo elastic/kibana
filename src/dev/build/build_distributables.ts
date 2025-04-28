@@ -109,7 +109,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   const run = createRunner({ config, log });
   // Since the artifact tasks run in parallel the indention is additive, so we'll indent in printArtifactLogs
-  const artifactRun = createRunner({ config, log, indent: 0 });
+  const artifactRun = createRunner({ config, log, bufferLogs: true });
 
   /**
    * verify, reset, and initialize the build environment
@@ -244,11 +244,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     artifactTasks.push(Tasks.CreateDockerContexts);
   }
 
-  const artifactResults = await Promise.allSettled(
-    artifactTasks.map((task) => captureArtifactLogs(task, artifactRun))
-  );
+  await Promise.allSettled(artifactTasks.map(async (task) => await artifactRun(task)));
 
-  artifactResults.forEach((result) => printArtifactLogs(result, log));
+  // const artifactResults = await Promise.allSettled(
+  //   artifactTasks.map((task) => captureArtifactLogs(task, artifactRun))
+  // );
+
+  // artifactResults.forEach((result) => printArtifactLogs(result, log));
 
   /**
    * finalize artifacts by writing sha1sums of each into the target directory

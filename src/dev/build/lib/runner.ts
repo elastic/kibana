@@ -17,7 +17,7 @@ import { Config } from './config';
 interface Options {
   config: Config;
   log: ToolingLog;
-  indent?: number;
+  bufferLogs?: boolean;
 }
 
 export interface GlobalTask {
@@ -32,11 +32,13 @@ export interface Task {
   run(config: Config, log: ToolingLog, build: Build): Promise<void>;
 }
 
-export function createRunner({ config, log, indent = 4 }: Options) {
+export function createRunner({ config, log, bufferLogs = false }: Options) {
   async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
-    log.info(desc);
+    if (!bufferLogs) {
+      log.info(desc);
+    }
     try {
-      await log.indent(indent, async () => {
+      await log.indent(bufferLogs ? 0 : 4, async () => {
         const start = Date.now();
         const time = () => {
           const secs = Math.round((Date.now() - start) / 1000);
@@ -64,7 +66,7 @@ export function createRunner({ config, log, indent = 4 }: Options) {
   }
 
   const builds: Build[] = [];
-  builds.push(new Build(config));
+  builds.push(new Build(config, bufferLogs, [log.info(desc)]));
 
   /**
    * Run a task by calling its `run()` method with three arguments:

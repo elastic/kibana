@@ -18,13 +18,14 @@ interface Options {
   cwd?: string;
   env?: Record<string, string>;
   exitAfter?: RegExp;
+  bufferLogs?: boolean;
 }
 
 export async function exec(
   log: ToolingLog,
   cmd: string,
   args: string[],
-  { level = 'debug', cwd, env, exitAfter }: Options = {}
+  { level = 'debug', cwd, env, exitAfter, bufferLogs = true }: Options = {}
 ) {
   log[level](chalk.dim('$'), cmd, ...args);
 
@@ -35,5 +36,5 @@ export async function exec(
     preferLocal: true,
   });
 
-  await watchStdioForLine(proc, (line) => log[level](line), exitAfter);
+  await watchStdioForLine(proc, (line) => log[level](line), exitAfter, bufferLogs);
 }

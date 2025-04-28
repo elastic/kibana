@@ -37,10 +37,17 @@ function skipLastEmptyLineStream() {
 export async function watchStdioForLine(
   proc: ExecaChildProcess,
   logFn: (line: string) => void,
-  exitAfter?: RegExp
+  exitAfter?: RegExp,
+  bufferLogs?: boolean
 ) {
+  const output: string[] = [];
+
   function onLogLine(line: string) {
-    logFn(line);
+    if (bufferLogs) {
+      output.push(line);
+    } else {
+      logFn(line);
+    }
 
     if (exitAfter && exitAfter.test(line)) {
       proc.kill('SIGINT');
@@ -66,5 +73,9 @@ export async function watchStdioForLine(
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
-  ]);
+  ]).finally(() => {
+    if (bufferLogs) {
+      output.forEach(logFn);
+    }
+  });
 }
