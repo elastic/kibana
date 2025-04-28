@@ -39,7 +39,12 @@ export function initializeAlertRules(
           : { timeRange$: undefined };
         const timeRange = timeRange$?.getValue();
 
-        let initialValues = { ...passedInitialValues };
+        let initialValues = {
+          params: {
+            ...passedInitialValues.params,
+            linkedVisId: uuid,
+          },
+        };
 
         if (timeRange) {
           initialValues = {

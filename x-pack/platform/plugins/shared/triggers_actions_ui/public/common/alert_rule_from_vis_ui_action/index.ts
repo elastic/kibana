@@ -55,6 +55,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public shouldAutoExecute = async () => true;
 
   public async execute({ embeddable, data }: Context) {
+    console.log('EXECUTE');
     const { query, thresholdValues, splitValues, usesPlaceholderValues } = data?.query
       ? data
       : data
