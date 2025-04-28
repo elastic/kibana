@@ -26,6 +26,7 @@ interface IndexDetailsDataProps {
   indexName: string;
   indexDocuments?: IndexDocumentsType;
   isInitialLoading: boolean;
+  navigateToPlayground: () => void;
   userPrivileges?: UserStartPrivilegesResponse;
 }
 
@@ -33,6 +34,7 @@ export const IndexDetailsData = ({
   indexName,
   indexDocuments,
   isInitialLoading,
+  navigateToPlayground,
   userPrivileges,
 }: IndexDetailsDataProps) => {
   const { data: mappingData } = useIndexMapping(indexName);
@@ -58,6 +60,7 @@ export const IndexDetailsData = ({
                 indexName={indexName}
                 documents={documents}
                 mappings={mappingData}
+                navigateToPlayground={navigateToPlayground}
               />
             </EuiFlexItem>
             <EuiHorizontalRule />

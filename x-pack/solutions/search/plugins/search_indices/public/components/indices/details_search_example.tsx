@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { SearchHit } from '@kbn/es-types';
 
 import {
@@ -21,7 +21,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../common/doc_links';
-import { useKibana } from '../../hooks/use_kibana';
 import { Mappings } from '../../types';
 
 import { CodeBox } from '../code_box/code_box';
@@ -31,16 +30,14 @@ export interface IndexSearchExampleProps {
   indexName: string;
   documents: SearchHit[];
   mappings?: Mappings;
+  navigateToPlayground: () => void;
 }
 
-export const IndexSearchExample = ({ indexName, mappings }: IndexSearchExampleProps) => {
-  const { share } = useKibana().services;
-  const navigateToPlayground = useCallback(async () => {
-    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
-    if (playgroundLocator && indexName) {
-      await playgroundLocator.navigate({ 'default-index': indexName });
-    }
-  }, [share, indexName]);
+export const IndexSearchExample = ({
+  indexName,
+  mappings,
+  navigateToPlayground,
+}: IndexSearchExampleProps) => {
   const codeExamples = useSearchCodeExamples(indexName, mappings);
 
   return (
