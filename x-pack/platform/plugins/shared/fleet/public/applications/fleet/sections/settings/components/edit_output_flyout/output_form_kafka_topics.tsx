@@ -88,7 +88,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                     >
                       <FormattedMessage
                         id="xpack.fleet.settings.kafkaGuideLink"
-                        defaultMessage="docs."
+                        defaultMessage="docs"
                       />
                     </EuiLink>
                   ),
