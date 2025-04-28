@@ -19,7 +19,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
-import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
@@ -62,17 +62,14 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const dispatch = useDispatch();
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.detections);
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
-  // eslint-disable-next-line prefer-const
-  let [dataView, setDataView] = useState<DataViewSpec | undefined>();
+  const [oldDataView, setDataView] = useState<DataViewSpec | undefined>();
 
-  if (newDataViewPickerEnabled) {
-    dataView = experimentalDataView;
-  }
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 

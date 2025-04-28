@@ -97,23 +97,25 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-  let {
-    browserFields,
-    dataViewId,
-    loading: loadingSourcerer,
+  const {
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    loading: oldLoadingSourcerer,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
-    selectedPatterns,
-    sourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  if (newDataViewPickerEnabled) {
-    loadingSourcerer = sourcererStatus !== 'ready';
-    sourcererDataView = experimentalDataView;
-    browserFields = experimentalBrowserFields;
-    selectedPatterns = experimentalSelectedPatterns;
-    dataViewId = experimentalDataView.id ?? '';
-  }
+  const loadingSourcerer = newDataViewPickerEnabled
+    ? sourcererStatus !== 'ready'
+    : oldLoadingSourcerer;
+  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
 
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently

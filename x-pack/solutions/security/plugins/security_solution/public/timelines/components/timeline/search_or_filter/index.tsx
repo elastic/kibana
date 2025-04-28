@@ -75,14 +75,16 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       services: { data },
     } = useKibana();
 
-    let { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+      SourcererScopeName.timeline
+    );
 
     const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    if (newDataViewPickerEnabled) {
-      sourcererDataView = experimentalDataView;
-    }
+    const sourcererDataView = newDataViewPickerEnabled
+      ? experimentalDataView
+      : oldSourcererDataView;
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),
@@ -94,6 +96,12 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     );
 
     useEffect(() => {
+      // TODO: (new data view picker) - this should not be necessary since the data view creation is managed in a centralized location
+      // with the new picker - eg. top level of the app, in data view picker state listener.
+      if (newDataViewPickerEnabled) {
+        return;
+      }
+
       let dv: DataView;
       const createDataView = async () => {
         try {
@@ -110,7 +118,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, filterQuery, addError, sourcererDataView]);
+    }, [data.dataViews, filterQuery, addError, sourcererDataView, newDataViewPickerEnabled]);
 
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 
