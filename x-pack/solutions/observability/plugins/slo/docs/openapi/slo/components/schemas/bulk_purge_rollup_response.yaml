@@ -1,0 +1,9 @@
+title: Bulk Purge Rollup data response
+description: >
+  The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+type: object
+properties:
+  taskId:
+    type: string
+    description: The task id of the purge operation
+    example: 8853df00-ae2e-11ed-90af-09bb6422b258
