@@ -24,7 +24,6 @@ import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 export const SetupTechnologySelector = ({
   disabled,
-  setupTechnology,
   isAgentless,
   onSetupTechnologyChange,
   showLimitationsMessage = true,

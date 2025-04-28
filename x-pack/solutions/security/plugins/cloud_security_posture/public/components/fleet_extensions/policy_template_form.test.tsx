@@ -1638,7 +1638,7 @@ describe('<CspPolicyTemplateForm />', () => {
         'aws.credentials.type': { value: 'direct_access_keys' },
       });
 
-      const { getByTestId, queryByLabelText, getByLabelText } = render(
+      const { getByTestId, queryByLabelText } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
