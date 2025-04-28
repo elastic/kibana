@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
@@ -74,7 +75,14 @@ export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) =>
     <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
         <EuiToolTip
-          content={`Last ${intervalAsString} of data for the selected time`}
+          content={i18n.translate('xpack.infra.waffleDatePicker.showingLastOneMinuteDataText', {
+            defaultMessage: 'Last {duration} of data for the selected time',
+            values: { duration: intervalAsString },
+          })}
+          aria-label={i18n.translate('xpack.infra.waffleDatePicker.showingLastOneMinuteDataText', {
+            defaultMessage: 'Last {duration} of data for the selected time',
+            values: { duration: intervalAsString },
+          })}
           delay="long"
           display="inlineBlock"
           position="top"
