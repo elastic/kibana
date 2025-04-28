@@ -678,6 +678,55 @@ export default function ({ getService }: FtrProviderContext) {
       await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
     });
 
+    it('should only run as many instances of a task as its shared maxConcurrency will allow', async () => {
+      // should run as maxConcurrency on this taskType is 1
+      const firstWithSharedConcurrency = await scheduleTask({
+        taskType: 'sampleTaskSharedConcurrencyType1',
+        params: {
+          waitForEvent: 'releaseFirstWaveOfTasks',
+        },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs(firstWithSharedConcurrency.id)).length).to.eql(1);
+      });
+
+      // should not run as there is a task with shared concurrency running
+      const secondWithSharedConcurrency = await scheduleTask({
+        taskType: 'sampleTaskSharedConcurrencyType2',
+        params: {
+          waitForEvent: 'releaseSecondWaveOfTasks',
+        },
+      });
+
+      // schedule a task that should get picked up before the blocked task
+      const taskWithUnlimitedConcurrency = await scheduleTask({
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs(taskWithUnlimitedConcurrency.id)).length).to.eql(1);
+        expect((await currentTask(secondWithSharedConcurrency.id)).status).to.eql('idle');
+      });
+
+      // release the running SingleConcurrency task and only one of the LimitedConcurrency tasks
+      await releaseTasksWaitingForEventToComplete('releaseFirstWaveOfTasks');
+
+      await retry.try(async () => {
+        // ensure the completed tasks were deleted
+        expect((await currentTaskError(firstWithSharedConcurrency.id)).message).to.eql(
+          `Saved object [task/${firstWithSharedConcurrency.id}] not found`
+        );
+
+        // ensure the blocked tasks begin running
+        expect((await currentTask(secondWithSharedConcurrency.id)).status).to.eql('running');
+      });
+
+      // release blocked task
+      await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
+    });
+
     it('should return a task run error result when trying to run a non-existent task', async () => {
       // runSoon should fail
       const failedRunSoonResult = await runTaskSoon({

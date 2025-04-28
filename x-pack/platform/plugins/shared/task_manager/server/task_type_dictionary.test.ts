@@ -13,7 +13,11 @@ import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
 jest.mock('./constants', () => ({
-  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+    'foo',
+    'sampleTaskSharedConcurrencyType1',
+    'sampleTaskSharedConcurrencyType2',
+  ],
 }));
 
 interface Opts {
@@ -327,6 +331,51 @@ describe('taskTypeDictionary', () => {
         });
       }).toThrowErrorMatchingInlineSnapshot(
         `"maxConcurrency setting isn't allowed for task type: foo2"`
+      );
+    });
+
+    it('throws error when registering shared concurrency tasks with different max concurrencies', () => {
+      definitions.registerTaskDefinitions({
+        sampleTaskSharedConcurrencyType1: {
+          title: 'Shared 1',
+          maxConcurrency: 2,
+          createTaskRunner: jest.fn(),
+        },
+      });
+
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          sampleTaskSharedConcurrencyType2: {
+            title: 'Shared 2',
+            maxConcurrency: 1,
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"sampleTaskSharedConcurrencyType2\\" shares concurrency limits with sampleTaskSharedConcurrencyType1 but has a different maxConcurrency."`
+      );
+    });
+
+    it('throws error when registering shared concurrency tasks with different task costs', () => {
+      definitions.registerTaskDefinitions({
+        sampleTaskSharedConcurrencyType1: {
+          title: 'Shared 1',
+          maxConcurrency: 1,
+          cost: TaskCost.ExtraLarge,
+          createTaskRunner: jest.fn(),
+        },
+      });
+
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          sampleTaskSharedConcurrencyType2: {
+            title: 'Shared 2',
+            maxConcurrency: 1,
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"sampleTaskSharedConcurrencyType2\\" shares concurrency limits with sampleTaskSharedConcurrencyType1 but has a different cost."`
       );
     });
   });
