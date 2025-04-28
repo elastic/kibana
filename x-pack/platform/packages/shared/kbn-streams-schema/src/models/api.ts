@@ -20,16 +20,24 @@ import {
   GroupStreamUpsertRequest,
   groupStreamUpsertRequestSchema,
 } from './group';
+import {
+  FilterStreamGetResponse,
+  FilterStreamUpsertRequest,
+  filterStreamGetResponseSchema,
+  filterStreamUpsertRequestSchema,
+} from './filter';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 
 export const streamGetResponseSchema: z.Schema<StreamGetResponse> = z.union([
   ingestStreamGetResponseSchema,
   groupStreamGetResponseSchema,
+  filterStreamGetResponseSchema,
 ]);
 
 export const streamUpsertRequestSchema: z.Schema<StreamUpsertRequest> = z.union([
   ingestStreamUpsertRequestSchema,
   groupStreamUpsertRequestSchema,
+  filterStreamUpsertRequestSchema,
 ]);
 
 export const isWiredStreamGetResponse = createIsNarrowSchema(
@@ -40,6 +48,11 @@ export const isWiredStreamGetResponse = createIsNarrowSchema(
 export const isUnwiredStreamGetResponse = createIsNarrowSchema(
   streamGetResponseSchema,
   unwiredStreamGetResponseSchema
+);
+
+export const isFilterStreamGetResponse = createIsNarrowSchema(
+  streamGetResponseSchema,
+  filterStreamGetResponseSchema
 );
 
 export const asWiredStreamGetResponse = createAsSchemaOrThrow(
@@ -57,5 +70,11 @@ export const asIngestStreamGetResponse = createAsSchemaOrThrow(
   ingestStreamGetResponseSchema
 );
 
-export type StreamGetResponse = IngestStreamGetResponse | GroupStreamGetResponse;
-export type StreamUpsertRequest = IngestStreamUpsertRequest | GroupStreamUpsertRequest;
+export type StreamGetResponse =
+  | IngestStreamGetResponse
+  | GroupStreamGetResponse
+  | FilterStreamGetResponse;
+export type StreamUpsertRequest =
+  | IngestStreamUpsertRequest
+  | GroupStreamUpsertRequest
+  | FilterStreamUpsertRequest;

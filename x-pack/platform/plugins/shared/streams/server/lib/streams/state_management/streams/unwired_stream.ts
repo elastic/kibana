@@ -23,7 +23,7 @@ import { getProcessingPipelineName } from '../../ingest_pipelines/name';
 import { getUnmanagedElasticsearchAssets } from '../../stream_crud';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
-import type { StateDependencies, StreamChange } from '../types';
+import type { StreamChange } from '../types';
 import type {
   StreamChangeStatus,
   ValidationResult,
@@ -33,10 +33,6 @@ import { StreamActiveRecord, PrintableStream } from '../stream_active_record/str
 export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   private _processingChanged: boolean = false;
   private _lifeCycleChanged: boolean = false;
-
-  constructor(definition: UnwiredStreamDefinition, dependencies: StateDependencies) {
-    super(definition, dependencies);
-  }
 
   clone(): StreamActiveRecord<UnwiredStreamDefinition> {
     return new UnwiredStream(cloneDeep(this._definition), this.dependencies);

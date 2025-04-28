@@ -61,6 +61,7 @@ export function ControlBar() {
           if: emptyEqualsToAlways(routingAppState.childUnderEdit.child.if),
           stream: {
             name: routingAppState.childUnderEdit.child.destination,
+            type: routingAppState.childUnderEdit.type,
           },
         },
       },

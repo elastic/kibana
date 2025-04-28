@@ -13,6 +13,7 @@ import {
   unwiredStreamDefinitionSchema,
   wiredStreamDefinitionSchema,
 } from './ingest';
+import { filterStreamDefinitionSchema } from './filter';
 
 export const isIngestStreamDefinition = createIsNarrowSchema(
   streamDefinitionSchema,
@@ -42,6 +43,11 @@ export const isUnwiredStreamDefinition = createIsNarrowSchema(
 export const isGroupStreamDefinition = createIsNarrowSchema(
   streamDefinitionSchema,
   groupStreamDefinitionSchema
+);
+
+export const isFilterStreamDefinition = createIsNarrowSchema(
+  streamDefinitionSchema,
+  filterStreamDefinitionSchema
 );
 
 export const isGroupStreamDefinitionBase = createIsNarrowSchema(

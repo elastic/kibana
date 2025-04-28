@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { FilterStreamGetResponse, IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
   ContentPackEntry,
   ContentPackManifest,
@@ -43,7 +43,7 @@ export function ExportContentPackFlyout({
   onExport,
   onClose,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse | FilterStreamGetResponse;
   onClose: () => void;
   onExport: () => void;
 }) {

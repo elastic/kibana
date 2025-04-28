@@ -41,7 +41,7 @@ import { generateReroutePipeline } from '../../ingest_pipelines/generate_reroute
 import { getProcessingPipelineName, getReroutePipelineName } from '../../ingest_pipelines/name';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
-import type { StateDependencies, StreamChange } from '../types';
+import type { StreamChange } from '../types';
 import type {
   PrintableStream,
   StreamChangeStatus,
@@ -55,10 +55,6 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   private _routingChanged: boolean = false;
   private _processingChanged: boolean = false;
   private _lifeCycleChanged: boolean = false;
-
-  constructor(definition: WiredStreamDefinition, dependencies: StateDependencies) {
-    super(definition, dependencies);
-  }
 
   clone(): StreamActiveRecord<WiredStreamDefinition> {
     return new WiredStream(cloneDeep(this._definition), this.dependencies);

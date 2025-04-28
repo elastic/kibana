@@ -85,7 +85,8 @@ export function StreamsTreeTable({
             defaultMessage: 'Retention',
           }),
           width: '20%',
-          render: (_, item) => <RetentionColumn lifecycle={item.effective_lifecycle} />,
+          render: (_, item) =>
+            item.data_stream ? <RetentionColumn lifecycle={item.effective_lifecycle} /> : null,
         },
       ]}
       itemId="name"

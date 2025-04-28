@@ -12,7 +12,7 @@ import {
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
-import { isNotFoundError } from '@kbn/es-errors';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import {
   Condition,
   StreamDefinition,
@@ -27,6 +27,8 @@ import {
   isWiredStreamDefinition,
   streamDefinitionSchema,
   asWiredStreamDefinition,
+  FilterStreamDefinition,
+  isFilterStreamDefinition,
 } from '@kbn/streams-schema';
 import { AssetClient } from './assets/asset_client';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
@@ -40,6 +42,7 @@ import { SecurityError } from './errors/security_error';
 import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import type { StreamChange } from './state_management/types';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -247,15 +250,19 @@ export class StreamsClient {
     parent,
     name,
     if: condition,
+    type,
   }: {
     parent: string;
     name: string;
     if: Condition;
+    type: 'wired' | 'filter';
   }): Promise<ForkStreamResponse> {
     const parentDefinition = asWiredStreamDefinition(await this.getStream(parent));
+    const changes: StreamChange[] = [];
 
-    const result = await State.attemptChanges(
-      [
+    if (type === 'wired') {
+      // Fork Wired stream
+      changes.push(
         {
           type: 'upsert',
           definition: {
@@ -282,10 +289,26 @@ export class StreamsClient {
               wired: { fields: {}, routing: [] },
             },
           },
+        }
+      );
+    } else if (type === 'filter') {
+      // Fork Filter stream
+      changes.push({
+        type: 'upsert',
+        definition: {
+          name,
+          filter: {
+            source: parentDefinition.name,
+            filter: condition,
+          },
         },
-      ],
-      { ...this.dependencies, streamsClient: this }
-    );
+      });
+    }
+
+    const result = await State.attemptChanges(changes, {
+      ...this.dependencies,
+      streamsClient: this,
+    });
 
     if (result.status === 'failed_with_rollback') {
       throw result.error;
@@ -394,26 +417,47 @@ export class StreamsClient {
   async getDataStream(name: string): Promise<IndicesDataStream> {
     return wrapEsCall(
       this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({ name })
-    ).then((response) => {
-      if (response.data_streams.length === 0) {
-        throw new errors.ResponseError({
-          meta: {
-            aborted: false,
-            attempts: 1,
-            connection: null,
-            context: null,
-            name: 'resource_not_found_exception',
-            request: {} as unknown as DiagnosticResult['meta']['request'],
-          },
-          warnings: [],
-          body: 'resource_not_found_exception',
-          statusCode: 404,
-        });
-      }
+    )
+      .then((response) => {
+        if (response.data_streams.length === 0) {
+          throw new errors.ResponseError({
+            meta: {
+              aborted: false,
+              attempts: 1,
+              connection: null,
+              context: null,
+              name: 'resource_not_found_exception',
+              request: {} as unknown as DiagnosticResult['meta']['request'],
+            },
+            warnings: [],
+            body: 'resource_not_found_exception',
+            statusCode: 404,
+          });
+        }
 
-      const dataStream = response.data_streams[0];
-      return dataStream;
-    });
+        const dataStream = response.data_streams[0];
+        return dataStream;
+      })
+      .catch((error) => {
+        if (isResponseError(error) && error.message.includes('illegal_argument_exception')) {
+          // We might be trying to load an alias name as a data stream
+          throw new errors.ResponseError({
+            meta: {
+              aborted: false,
+              attempts: 1,
+              connection: null,
+              context: null,
+              name: 'resource_not_found_exception',
+              request: {} as unknown as DiagnosticResult['meta']['request'],
+            },
+            warnings: [],
+            body: 'resource_not_found_exception',
+            statusCode: 404,
+          });
+        }
+
+        throw error;
+      });
   }
 
   /**
@@ -592,13 +636,12 @@ export class StreamsClient {
       throw new StatusError('Cannot delete root stream', 400);
     }
 
-    const access =
-      definition && isGroupStreamDefinition(definition)
-        ? { write: true, read: true }
-        : await checkAccess({
-            name,
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-          });
+    const access = isGroupStreamDefinition(definition)
+      ? { write: true, read: true }
+      : await checkAccess({
+          name,
+          scopedClusterClient: this.dependencies.scopedClusterClient,
+        });
 
     // Can/should State manage access control as well?
     if (!access.write) {
@@ -646,7 +689,9 @@ export class StreamsClient {
     }).then((streams) => streams.filter(isWiredStreamDefinition));
   }
 
-  async getDescendants(name: string): Promise<WiredStreamDefinition[]> {
+  async getDescendants(
+    name: string
+  ): Promise<Array<WiredStreamDefinition | FilterStreamDefinition>> {
     return this.getManagedStreams({
       query: {
         bool: {
@@ -666,6 +711,11 @@ export class StreamsClient {
           ],
         },
       },
-    }).then((streams) => streams.filter(isWiredStreamDefinition));
+    }).then((streams) =>
+      streams.filter(
+        (stream): stream is WiredStreamDefinition | FilterStreamDefinition =>
+          isWiredStreamDefinition(stream) || isFilterStreamDefinition(stream)
+      )
+    );
   }
 }
