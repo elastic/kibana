@@ -106,7 +106,7 @@ describe('Handle request to schedule', () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',
         jobParams: mockJobParams,
-        schedule: { rrule: { freq: 1, interval: 2 } },
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
       });
 
       const { id, created_at: _created_at, payload, ...snapObj } = report;
@@ -124,6 +124,7 @@ describe('Handle request to schedule', () => {
             "rrule": Object {
               "freq": 1,
               "interval": 2,
+              "tzid": "UTC",
             },
           },
         }
