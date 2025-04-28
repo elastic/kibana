@@ -9,6 +9,7 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
+import { EntityType } from '../../../common/api/entity_analytics';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
@@ -87,9 +88,31 @@ export class AssetInventoryDataClient {
         throw new Error('uiSetting');
       }
 
-      const entityStoreEnableResponse = await secSolutionContext
-        .getEntityStoreDataClient()
-        .enable(requestBodyOverrides);
+      // Retrieve entity store status
+      const entityStoreStatus = await secSolutionContext.getEntityStoreDataClient().status({
+        include_components: true,
+      });
+
+      const entityEngineStatus = entityStoreStatus.status;
+
+      let entityStoreEnablementResponse;
+      // If the entity store is not installed, we need to install it.
+      if (entityEngineStatus === 'not_installed') {
+        entityStoreEnablementResponse = await secSolutionContext
+          .getEntityStoreDataClient()
+          .enable(requestBodyOverrides);
+      } else {
+        // If the entity store is already installed, we need to check if the generic engine is installed.
+        const genericEntityEngine = entityStoreStatus.engines.find(this.isGenericEntityEngine);
+
+        // If the generic engine is not installed or is stopped, we need to start it.
+        if (!genericEntityEngine) {
+          entityStoreEnablementResponse = await secSolutionContext
+            .getEntityStoreDataClient()
+            // @ts-ignore-next-line TS2345
+            .init(EntityType.enum.generic, requestBodyOverrides);
+        }
+      }
 
       await installDataView(
         secSolutionContext.getSpaceId(),
@@ -102,7 +125,7 @@ export class AssetInventoryDataClient {
 
       logger.debug(`Enabled asset inventory`);
 
-      return entityStoreEnableResponse;
+      return entityStoreEnablementResponse;
     } catch (err) {
       logger.error(`Error enabling asset inventory: ${err.message}`);
       throw err;
@@ -153,7 +176,7 @@ export class AssetInventoryDataClient {
 
     // Determine the asset inventory status based on the entity engine status
     if (entityEngineStatus === 'not_installed') {
-      return { status: ASSET_INVENTORY_STATUS.DISABLED };
+      return { status: ASSET_INVENTORY_STATUS.NOT_INSTALLED };
     }
     if (entityEngineStatus === 'installing') {
       return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
