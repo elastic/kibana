@@ -20,6 +20,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { css, Global } from '@emotion/react';
 import { useKibana } from '../../lib/kibana';
 import { convertToQueryType } from './convert_to_query_type';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
@@ -87,6 +88,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     isDisabled,
     bubbleSubmitEvent,
   }) => {
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const { data } = useKibana().services;
     const [dataView, setDataView] = useState<DataView>();
     const onQuerySubmit = useCallback(
@@ -158,11 +160,11 @@ export const QueryBar = memo<QueryBarComponentProps>(
         createDataView();
       }
       return () => {
-        if (dv?.id) {
+        if (dv?.id && !newDataViewPickerEnabled) {
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, isEsql]);
+    }, [data.dataViews, indexPattern, isEsql, newDataViewPickerEnabled]);
 
     const searchBarFilters = useMemo(() => {
       if (isDataView(indexPattern) || isEsql) {

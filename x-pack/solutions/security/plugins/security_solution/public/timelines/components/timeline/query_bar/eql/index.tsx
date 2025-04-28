@@ -62,10 +62,10 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);
   const eqlOptions = useDeepEqualSelector((state) => getOptionsSelected(state, timelineId));
 
-  let {
-    loading: indexPatternsLoading,
-    sourcererDataView,
-    selectedPatterns,
+  const {
+    loading: oldIndexPatternsLoading,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
@@ -75,11 +75,13 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-  if (newDataViewPickerEnabled) {
-    indexPatternsLoading = status !== 'ready';
-    sourcererDataView = experimentalDataView;
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const indexPatternsLoading = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIndexPatternsLoading;
+  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const initialState = useMemo(
     () => ({

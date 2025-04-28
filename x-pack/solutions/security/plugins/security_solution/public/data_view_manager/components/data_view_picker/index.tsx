@@ -20,6 +20,7 @@ import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
+import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
 
 interface DataViewPickerProps {
   /**
@@ -30,9 +31,13 @@ interface DataViewPickerProps {
    * Optional callback when the data view picker is closed
    */
   onClosePopover?: () => void;
+  /**
+   * Force disable picker
+   */
+  disabled?: boolean;
 }
 
-export const DataViewPicker = memo(({ scope, onClosePopover }: DataViewPickerProps) => {
+export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataViewPickerProps) => {
   const dispatch = useDispatch();
   const selectDataView = useSelectDataView();
 
@@ -88,8 +93,6 @@ export const DataViewPicker = memo(({ scope, onClosePopover }: DataViewPickerPro
     [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
   );
 
-  const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
-
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
    */
@@ -100,14 +103,16 @@ export const DataViewPicker = memo(({ scope, onClosePopover }: DataViewPickerPro
     [scope, selectDataView]
   );
 
+  const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
+
   const triggerConfig = useMemo(() => {
     if (status === 'loading') {
-      return { label: 'Loading' };
+      return { label: LOADING };
     }
 
     if (dataViewSpec.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
       return {
-        label: 'Default Security Data View',
+        label: DEFAULT_SECURITY_DATA_VIEW,
       };
     }
 
@@ -128,7 +133,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover }: DataViewPickerPro
   return (
     <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
       <UnifiedDataViewPicker
-        isDisabled={status !== 'ready'}
+        isDisabled={status !== 'ready' || disabled}
         currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
         trigger={triggerConfig}
         onChangeDataView={handleChangeDataView}

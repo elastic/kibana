@@ -80,7 +80,10 @@ export const GlobalHeader = React.memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataViewPicker = newDataViewPickerEnabled ? (
-    <DataViewPicker scope={sourcererScope} />
+    <DataViewPicker
+      scope={sourcererScope}
+      disabled={sourcererScope === DataViewManagerScopeName.detections}
+    />
   ) : (
     <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
   );
