@@ -10,12 +10,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { RELATED_GRAPH_PATH, RelatedRequestBody, RelatedResponse } from '../../common';
-import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
@@ -35,6 +30,11 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
+        },
+      },
     })
     .addVersion(
       {
@@ -44,7 +44,6 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
             requiredPrivileges: [
               FLEET_ALL_ROLE,
               INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
             ],
           },
         },

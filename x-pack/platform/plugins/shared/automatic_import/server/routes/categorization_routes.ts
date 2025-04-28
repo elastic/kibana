@@ -14,12 +14,7 @@ import {
   CategorizationRequestBody,
   CategorizationResponse,
 } from '../../common';
-import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
@@ -39,6 +34,11 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
+        },
+      },
     })
     .addVersion(
       {
@@ -48,7 +48,6 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
             requiredPrivileges: [
               FLEET_ALL_ROLE,
               INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
             ],
           },
         },

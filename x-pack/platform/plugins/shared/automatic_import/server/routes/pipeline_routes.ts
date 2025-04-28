@@ -7,12 +7,7 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { CheckPipelineRequestBody, CheckPipelineResponse, CHECK_PIPELINE_PATH } from '../../common';
-import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import type { AutomaticImportRouteHandlerContext } from '../plugin';
 import { testPipeline } from '../util/pipeline';
 import { buildRouteValidationWithZod } from '../util/route_validation';
@@ -31,6 +26,11 @@ export function registerPipelineRoutes(router: IRouter<AutomaticImportRouteHandl
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
+        },
+      },
     })
     .addVersion(
       {
@@ -40,7 +40,6 @@ export function registerPipelineRoutes(router: IRouter<AutomaticImportRouteHandl
             requiredPrivileges: [
               FLEET_ALL_ROLE,
               INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
             ],
           },
         },
