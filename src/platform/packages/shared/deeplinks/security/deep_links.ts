@@ -25,7 +25,6 @@ export enum SecurityPageName {
    * Warning: Computed values are not permitted in an enum with string valued members
    * All cloud security posture page names must match `CloudSecurityPosturePageId` in x-pack/solutions/security/plugins/cloud_security_posture/public/common/navigation/types.ts
    */
-  cloudSecurityPosture = 'cloud_security_posture',
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
   cloudSecurityPostureVulnerabilityDashboard = 'cloud_security_posture-vulnerability_dashboard',

@@ -49,9 +49,10 @@ export const routes: SecuritySubPluginRoutes = [
     path: CLOUD_SECURITY_POSTURE_BASE_PATH,
     component: withSecurityRoutePageWrapper(
       CloudSecurityPosture,
-      SecurityPageName.cloudSecurityPosture,
+      SecurityPageName.cloudSecurityPostureDashboard,
       {
         redirectOnMissing: true,
+        omitSpyRoute: true,
       }
     ),
   },
