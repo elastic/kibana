@@ -42,13 +42,11 @@ describe('Post Evaluate Route', () => {
     },
   } as AuthenticatedUser;
 
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
-
   beforeEach(() => {
     jest.clearAllMocks();
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
 
-    postEvaluateRoute(server.router, mockGetElser);
+    postEvaluateRoute(server.router);
   });
 
   describe('Capabilities', () => {

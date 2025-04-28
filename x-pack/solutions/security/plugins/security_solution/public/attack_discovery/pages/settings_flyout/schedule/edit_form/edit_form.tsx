@@ -26,6 +26,7 @@ import {
   useForm,
   useFormData,
 } from '../../../../../shared_imports';
+import { getMessageVariables } from './message_variables';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -52,7 +53,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     schema: getSchema({ actionTypeRegistry }),
   });
 
-  const [{ value }] = useFormData({ form });
+  const [{ value }] = useFormData<{ value: AttackDiscoveryScheduleSchema }>({ form });
   const { isValid, setFieldValue, submit } = form;
 
   useEffect(() => {
@@ -92,16 +93,12 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     onConnectorIdSelected,
     onSettingsChanged,
     settings,
-    showConnectorSelector: true,
+    showConnectorSelector: false,
     stats: null,
   });
 
   const messageVariables = useMemo(() => {
-    return {
-      state: [],
-      params: [],
-      context: [],
-    };
+    return getMessageVariables();
   }, []);
 
   return (
@@ -141,7 +138,6 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
             component={RuleActionsField}
             componentProps={{
               messageVariables,
-              summaryMessageVariables: messageVariables,
             }}
           />
         </EuiFlexItem>
