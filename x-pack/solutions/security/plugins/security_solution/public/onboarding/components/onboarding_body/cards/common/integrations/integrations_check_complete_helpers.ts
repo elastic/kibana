@@ -19,7 +19,7 @@ export const getCompleteBadgeText = (installedCount: number) =>
     values: { count: installedCount },
   });
 
-export const getInstalledIntegrationList = async (
+export const getActiveIntegrationList = async (
   services: StartServices,
   /**
    * The list of available integrations to check against.
@@ -28,7 +28,7 @@ export const getInstalledIntegrationList = async (
    */
   availableIntegrationNames?: Array<IntegrationCardItem['name']>
 ) => {
-  const installedPackageData = await services.http
+  const activePackageData = await services.http
     .get<GetInstalledPackagesResponse>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
       version: '2023-10-31',
       query: {
@@ -48,7 +48,7 @@ export const getInstalledIntegrationList = async (
       return { items: emptyItems };
     });
 
-  const installedPackages = installedPackageData?.items?.filter((installedPkg) => {
+  const activePackages = activePackageData?.items?.filter((installedPkg) => {
     const isInstalled =
       (installedPkg.status === installationStatuses.Installed ||
         installedPkg.status === installationStatuses.InstallFailed) &&
@@ -60,9 +60,9 @@ export const getInstalledIntegrationList = async (
           )
       : isInstalled;
   });
-  const isComplete = installedPackages && installedPackages.length > 0;
+  const isComplete = activePackages && activePackages.length > 0;
 
-  return { isComplete, installedPackages };
+  return { isComplete, activePackages };
 };
 
 export const getAgentsData = async (services: StartServices, isComplete: boolean) => {

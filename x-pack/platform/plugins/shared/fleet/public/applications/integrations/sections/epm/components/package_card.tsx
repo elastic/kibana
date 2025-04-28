@@ -71,6 +71,7 @@ export function PackageCard({
   maxCardHeight,
   showDescription = true,
   showReleaseBadge = true,
+  hasDataStreams,
 }: PackageCardProps) {
   const theme = useEuiTheme();
 
@@ -213,7 +214,11 @@ export function PackageCard({
             [class*='euiCard__description'] {
               flex-grow: 1;
               ${descriptionLineClamp
-                ? shouldShowInstallationStatus({ installStatus, showInstallationStatus })
+                ? shouldShowInstallationStatus({
+                    installStatus,
+                    showInstallationStatus,
+                    hasDataStreams,
+                  })
                   ? getLineClampStyles(1) // Show only one line of description if installation status is shown
                   : getLineClampStyles(descriptionLineClamp)
                 : ''}

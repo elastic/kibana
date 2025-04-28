@@ -12,16 +12,18 @@ import type { StartServices } from '../../../../../../types';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import {
   getCompleteBadgeText,
-  getInstalledIntegrationList,
+  getActiveIntegrationList,
 } from '../../common/integrations/integrations_check_complete_helpers';
 
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
-  const { isComplete, installedPackages: installedIntegrations } =
-    await getInstalledIntegrationList(services, AI_FOR_SOC_INTEGRATIONS);
+  const { isComplete, activePackages: activeIntegrations } = await getActiveIntegrationList(
+    services,
+    AI_FOR_SOC_INTEGRATIONS
+  );
 
-  const installedIntegrationsCount = installedIntegrations.length;
+  const installedIntegrationsCount = activeIntegrations.length;
 
   if (!isComplete) {
     return {
@@ -34,7 +36,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
     isComplete,
     completeBadgeText: getCompleteBadgeText(installedIntegrationsCount),
     metadata: {
-      installedIntegrations,
+      activeIntegrations,
     },
   };
 };

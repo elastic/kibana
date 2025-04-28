@@ -7,40 +7,79 @@
 
 import React from 'react';
 
-import { COLOR_MODES_STANDARD, EuiCallOut, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  COLOR_MODES_STANDARD,
+  EuiCallOut,
+  EuiIcon,
+  EuiSpacer,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 
 import { installationStatuses } from '../../../../../../common/constants';
 import type { EpmPackageInstallStatus } from '../../../../../../common/types';
 
+const installedLabel = i18n.translate('xpack.fleet.packageCard.installedLabel', {
+  defaultMessage: 'Installed',
+});
+
+const installedTooltip = i18n.translate('xpack.fleet.packageCard.installedTooltip', {
+  defaultMessage: 'This package is installed but no data streams exist.',
+});
+
 /**
  * "Active" here means that the package is installed AND their data streams Exist
  **/
-const installedLabel = i18n.translate('xpack.fleet.packageCard.activeLabel', {
+const activeLabel = i18n.translate('xpack.fleet.packageCard.activeLabel', {
   defaultMessage: 'Active',
 });
 
-const installStatusMapToColor: Record<
-  string,
-  { color: 'success' | 'warning'; iconType: string; title: string }
-> = {
-  installed: {
-    color: 'success',
-    iconType: 'check',
-    title: installedLabel,
-  },
-  install_failed: {
-    color: 'warning',
-    iconType: 'warning',
-    title: installedLabel,
-  },
+const activeTooltip = i18n.translate('xpack.fleet.packageCard.activeTooltip', {
+  defaultMessage: 'This package is installed and has data streams.',
+});
+
+const getCalloutText = ({
+  installStatus,
+  hasDataStreams,
+}: {
+  installStatus: EpmPackageInstallStatus | null | undefined;
+  hasDataStreams?: boolean;
+}) => {
+  if (installStatus === 'install_failed') {
+    return {
+      color: 'warning' as const,
+      iconType: 'warning' as const,
+      title: installedLabel,
+    };
+  }
+  if (hasDataStreams) {
+    return {
+      color: 'success' as const,
+      iconType: 'check',
+      title: activeLabel,
+    };
+  }
+  if (installStatus === 'installed') {
+    return {
+      color: 'success' as const,
+      iconType: 'check',
+      title: (
+        <EuiToolTip position="bottom" content={activeTooltip}>
+          <>{activeLabel}</>
+        </EuiToolTip>
+      ),
+    };
+  }
+  return {};
 };
 
 interface InstallationStatusProps {
   installStatus: EpmPackageInstallStatus | null | undefined;
   showInstallationStatus?: boolean;
   compressed?: boolean;
+  hasDataStreams?: boolean;
 }
 
 const useInstallationStatusStyles = () => {
@@ -69,7 +108,6 @@ const useInstallationStatusStyles = () => {
       align-items: center;
       height: 100%;
       background-color: ${isDarkMode ? euiTheme.colors.success : successBackgroundColor};
-      color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
     `,
     compressedInstallationStatusIcon: css`
       color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
@@ -91,24 +129,44 @@ export const getLineClampStyles = (lineClamp?: number) =>
 
 export const shouldShowInstallationStatus = ({
   installStatus,
+  hasDataStreams,
   showInstallationStatus,
-}: InstallationStatusProps) =>
-  showInstallationStatus &&
-  (installStatus === installationStatuses.Installed ||
-    installStatus === installationStatuses.InstallFailed);
+}: InstallationStatusProps) => {
+  const installedStatus =
+    installStatus === installationStatuses.Installed ||
+    installStatus === installationStatuses.InstallFailed;
+
+  return showInstallationStatus && (hasDataStreams || installedStatus);
+};
 
 export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
-  ({ installStatus, showInstallationStatus, compressed }) => {
+  ({ installStatus, showInstallationStatus, compressed, hasDataStreams }) => {
     const styles = useInstallationStatusStyles();
 
     const cardPanelClassName = compressed
       ? styles.compressedInstallationStatus
       : styles.installationStatus;
 
-    return shouldShowInstallationStatus({ installStatus, showInstallationStatus }) ? (
+    return shouldShowInstallationStatus({
+      installStatus,
+      showInstallationStatus,
+      hasDataStreams,
+    }) ? (
       compressed ? (
         <div className={cardPanelClassName}>
-          <EuiIcon type="checkInCircleFilled" className={styles.compressedInstallationStatusIcon} />
+          {hasDataStreams ? (
+            <EuiIcon
+              type="checkInCircleFilled"
+              className={styles.compressedInstallationStatusIcon}
+            />
+          ) : (
+            <EuiToolTip position="bottom" content={installedTooltip}>
+              <EuiIcon
+                type="checkInCircleFilled"
+                className={styles.compressedInstallationStatusIcon}
+              />
+            </EuiToolTip>
+          )}
         </div>
       ) : (
         <div className={cardPanelClassName}>
@@ -120,7 +178,7 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
           <EuiCallOut
             data-test-subj="installation-status-callout"
             className={styles.installationStatusCallout}
-            {...(installStatus ? installStatusMapToColor[installStatus] : {})}
+            {...(installStatus ? getCalloutText({ installStatus, hasDataStreams }) : {})}
           />
         </div>
       )

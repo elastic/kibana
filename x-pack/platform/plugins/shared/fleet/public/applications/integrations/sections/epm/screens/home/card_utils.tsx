@@ -45,6 +45,7 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
   installStatus?: EpmPackageInstallStatus;
@@ -143,6 +144,10 @@ export const mapToCard = ({
 
   if (item.type === 'integration') {
     cardResult.installStatus = item.installationInfo?.install_status;
+  }
+
+  if (item.data_streams?.length > 0) {
+    cardResult.hasDataStreams = true;
   }
 
   return cardResult;

@@ -7,7 +7,6 @@
 import { useMemo } from 'react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
-import type { InstalledPackage } from '@kbn/fleet-plugin/common/types';
 import { useNavigation } from '../../kibana';
 import { APP_INTEGRATIONS_PATH, ONBOARDING_PATH } from '../../../../../common/constants';
 
@@ -38,7 +37,6 @@ const getFilteredCards = ({
   getAppUrl,
   integrationsList,
   navigateTo,
-  installedIntegrations,
   trackLinkClick,
 }: {
   featuredCardIds?: string[];
@@ -46,14 +44,12 @@ const getFilteredCards = ({
   integrationsList: IntegrationCardItem[];
   navigateTo: NavigateTo;
   trackLinkClick?: TrackLinkClick;
-  installedIntegrations: InstalledPackage[];
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
     addSecuritySpecificProps({
       navigateTo,
       getAppUrl,
       card,
-      installedIntegrations,
       trackLinkClick,
     })
   );
@@ -71,13 +67,11 @@ export const addSecuritySpecificProps = ({
   navigateTo,
   getAppUrl,
   card,
-  installedIntegrations,
   trackLinkClick,
 }: {
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
-  installedIntegrations: InstalledPackage[];
   trackLinkClick?: TrackLinkClick;
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
@@ -88,15 +82,12 @@ export const addSecuritySpecificProps = ({
       ? addPathParamToUrl(card.url, ONBOARDING_PATH)
       : card.url;
 
-  const isInstalled = installedIntegrations?.some(
-    (installedList) => installedList.name === card.name
-  );
   return {
     ...card,
     titleLineClamp: CARD_TITLE_LINE_CLAMP,
     descriptionLineClamp: CARD_DESCRIPTION_LINE_CLAMP,
     maxCardHeight: MAX_CARD_HEIGHT_IN_PX,
-    showInstallationStatus: isInstalled,
+    showInstallationStatus: true,
     url,
     onCardClick: () => {
       const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
@@ -119,11 +110,9 @@ export const addSecuritySpecificProps = ({
 export const useIntegrationCardList = ({
   integrationsList,
   featuredCardIds,
-  installedIntegrations = [],
 }: {
   integrationsList: IntegrationCardItem[];
   featuredCardIds?: string[] | undefined;
-  installedIntegrations?: InstalledPackage[];
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
 
@@ -138,16 +127,8 @@ export const useIntegrationCardList = ({
         integrationsList,
         featuredCardIds,
         trackLinkClick,
-        installedIntegrations,
       }),
-    [
-      navigateTo,
-      getAppUrl,
-      integrationsList,
-      featuredCardIds,
-      trackLinkClick,
-      installedIntegrations,
-    ]
+    [navigateTo, getAppUrl, integrationsList, featuredCardIds, trackLinkClick]
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {

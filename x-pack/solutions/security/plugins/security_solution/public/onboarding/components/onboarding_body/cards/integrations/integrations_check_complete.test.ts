@@ -55,7 +55,7 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: false,
       metadata: {
         isAgentRequired: false,
-        installedIntegrations: [],
+        activeIntegrations: [],
       },
     });
   });
@@ -78,7 +78,7 @@ describe('checkIntegrationsCardComplete', () => {
       completeBadgeText: '1 integration added',
       metadata: {
         isAgentRequired: true,
-        installedIntegrations: [
+        activeIntegrations: [
           {
             status: installationStatuses.Installed,
           },
@@ -108,7 +108,7 @@ describe('checkIntegrationsCardComplete', () => {
       completeBadgeText: '2 integrations added',
       metadata: {
         isAgentRequired: false,
-        installedIntegrations: [
+        activeIntegrations: [
           { status: installationStatuses.Installed },
           { status: installationStatuses.InstallFailed },
         ],
@@ -129,7 +129,7 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: false,
       metadata: {
         isAgentRequired: false,
-        installedIntegrations: [],
+        activeIntegrations: [],
       },
     });
   });
@@ -150,7 +150,7 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: false,
       metadata: {
         isAgentRequired: false,
-        installedIntegrations: [],
+        activeIntegrations: [],
       },
     });
   });

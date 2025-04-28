@@ -8,7 +8,6 @@
 import { renderHook } from '@testing-library/react';
 import { useIntegrationCardList } from './use_integration_card_list';
 import { mockTrackLinkClick } from './__mocks__/mocks';
-import type { InstalledPackage } from '@kbn/fleet-plugin/common/types';
 
 jest.mock('./integration_context');
 
@@ -41,20 +40,6 @@ describe('useIntegrationCardList', () => {
     },
   ];
 
-  const mockInstalledIntegrations: InstalledPackage[] = [
-    {
-      name: 'endpoint',
-      version: '1.0.0',
-      status: 'installed',
-      dataStreams: [
-        {
-          name: 'endpoint',
-          title: 'Endpoint Data Stream',
-        },
-      ],
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -68,7 +53,6 @@ describe('useIntegrationCardList', () => {
     const { result } = renderHook(() =>
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
-        installedIntegrations: mockInstalledIntegrations,
       })
     );
 
@@ -88,7 +72,6 @@ describe('useIntegrationCardList', () => {
       useIntegrationCardList({
         integrationsList: mockIntegrationsList,
         featuredCardIds,
-        installedIntegrations: mockInstalledIntegrations,
       })
     );
 

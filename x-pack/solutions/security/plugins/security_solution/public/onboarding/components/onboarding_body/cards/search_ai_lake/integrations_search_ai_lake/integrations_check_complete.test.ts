@@ -54,7 +54,7 @@ describe('checkIntegrationsCardComplete', () => {
     expect(result).toEqual({
       isComplete: false,
       metadata: {
-        installedIntegrations: [],
+        activeIntegrations: [],
       },
     });
   });
@@ -76,7 +76,7 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '1 integration added',
       metadata: {
-        installedIntegrations: [
+        activeIntegrations: [
           {
             status: installationStatuses.Installed,
           },
@@ -105,7 +105,7 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '2 integrations added',
       metadata: {
-        installedIntegrations: [
+        activeIntegrations: [
           { status: installationStatuses.Installed },
           { status: installationStatuses.InstallFailed },
         ],
@@ -125,7 +125,7 @@ describe('checkIntegrationsCardComplete', () => {
     expect(res).toEqual({
       isComplete: false,
       metadata: {
-        installedIntegrations: [],
+        activeIntegrations: [],
       },
     });
   });

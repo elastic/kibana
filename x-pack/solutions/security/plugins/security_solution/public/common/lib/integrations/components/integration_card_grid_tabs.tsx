@@ -11,7 +11,7 @@ import { IntegrationsCardGridTabsComponent } from './integration_card_grid_tabs_
 
 export const DEFAULT_CHECK_COMPLETE_METADATA: IntegrationCardMetadata = {
   isAgentRequired: false,
-  installedIntegrations: [],
+  activeIntegrations: [],
 };
 
 export const IntegrationsCardGridTabs: RenderChildrenType = ({
@@ -21,14 +21,13 @@ export const IntegrationsCardGridTabs: RenderChildrenType = ({
   checkCompleteMetadata = DEFAULT_CHECK_COMPLETE_METADATA,
   selectedTabResult,
 }) => {
-  const { isAgentRequired, installedIntegrations } = checkCompleteMetadata;
+  const { isAgentRequired, activeIntegrations } = checkCompleteMetadata;
 
   const list = useIntegrationCardList({
     integrationsList: allowedIntegrations,
     featuredCardIds: selectedTabResult.selectedTab?.featuredCardIds,
-    installedIntegrations,
   });
-  const installedIntegrationsCount = installedIntegrations?.length ?? 0;
+  const installedIntegrationsCount = activeIntegrations?.length ?? 0;
 
   return (
     <IntegrationsCardGridTabsComponent
