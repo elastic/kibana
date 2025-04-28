@@ -83,8 +83,6 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
   schema: configSchema,
   exposeToBrowser: {
     rules: { run: { alerts: { max: true } } },
-    rulesSettings: { cacheInterval: true },
-    maintenanceWindow: { enabled: true },
     disabledRuleTypes: true,
   },
   deprecations: ({ renameFromRoot, deprecate }) => [
