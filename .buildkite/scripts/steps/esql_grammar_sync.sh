@@ -81,7 +81,7 @@ main () {
   git fetch origin 8.19
   
   echo "CHECKING OUT 8.19 branch"
-  git checkout -b 8.19 origin/8.19
+  git checkout FETCH_HEAD -b 8.19
 
   cd "$KIBANA_DIR"
 
