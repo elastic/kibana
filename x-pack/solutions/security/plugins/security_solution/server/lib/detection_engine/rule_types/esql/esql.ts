@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
+  getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
@@ -85,6 +86,7 @@ export const esqlExecutor = async ({
       uiSettingsClient: services.uiSettingsClient,
     });
     const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
+    const hasMvExpand = getMvExpandFields(ruleParams.query).length > 0;
 
     /**
      * ES|QL returns results as a single page, max size of 10,000
@@ -95,11 +97,12 @@ export const esqlExecutor = async ({
      * Since aggregating queries do not produce event ids, we will not exclude them.
      * All alerts for aggregating queries are unique anyway
      */
-    const excludedDocuments: ExcludedDocument[] = initiateExcludedDocuments(
+    const excludedDocuments: ExcludedDocument[] = initiateExcludedDocuments({
       state,
       isRuleAggregating,
-      tuple
-    );
+      tuple,
+      hasMvExpand,
+    });
 
     let iteration = 0;
     try {
@@ -160,7 +163,7 @@ export const esqlExecutor = async ({
           licensing,
         });
 
-        const { expandedFieldsInResponse: expandedFields, hasMvExpand } = getMvExpandUsage(
+        const { expandedFieldsInResponse: expandedFields } = getMvExpandUsage(
           response.columns,
           completeRule.ruleParams.query
         );
@@ -279,7 +282,7 @@ export const esqlExecutor = async ({
 
     return {
       ...result,
-      state: { ...state, excludedDocuments },
+      state: { ...state, excludedDocuments: hasMvExpand ? [] : excludedDocuments },
       ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };
   });

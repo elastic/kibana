@@ -8,12 +8,18 @@
 import type { ExcludedDocument, EsqlState } from '../types';
 import type { RuleRangeTuple } from '../../types';
 
-export const initiateExcludedDocuments = (
-  state: EsqlState | undefined,
-  isRuleAggregating: boolean,
-  tuple: RuleRangeTuple
-): ExcludedDocument[] => {
-  if (isRuleAggregating || !state?.excludedDocuments) {
+export const initiateExcludedDocuments = ({
+  state,
+  isRuleAggregating,
+  tuple,
+  hasMvExpand,
+}: {
+  state: EsqlState | undefined;
+  isRuleAggregating: boolean;
+  tuple: RuleRangeTuple;
+  hasMvExpand: boolean;
+}): ExcludedDocument[] => {
+  if (isRuleAggregating || !state?.excludedDocuments || hasMvExpand) {
     return [];
   }
   return (
