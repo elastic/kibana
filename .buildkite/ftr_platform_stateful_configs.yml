@@ -132,7 +132,6 @@ enabled:
   - x-pack/test/localization/config.ja_jp.ts
   - x-pack/test/localization/config.fr_fr.ts
   - x-pack/test/localization/config.zh_cn.ts
-  - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
@@ -149,6 +148,7 @@ enabled:
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group4/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/actions/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/action_task_params/config.ts
+  - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
   - x-pack/test/api_integration/apis/management/config.ts
