@@ -82,7 +82,7 @@ export class SyncPrivateLocationMonitorsTask {
           `Syncing private location monitors because params changed, updated params ${updatedParams}, total params ${totalParams}`
         );
 
-        if (allPrivateLocations.length === 0) {
+        if (allPrivateLocations.length > 0) {
           await this.syncGlobalParams({
             allPrivateLocations,
             soClient,
