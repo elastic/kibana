@@ -17,6 +17,7 @@ export interface DocLinksMeta {
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
   searchLabsUrl: string;
+  apiDocsUrl: string;
 }
 
 /**
@@ -381,7 +382,6 @@ export interface DocLinks {
     simulatePipeline: string;
     tasks: string;
     timeUnits: string;
-    unfreezeIndex: string;
     updateTransform: string;
   }>;
   readonly observability: Readonly<{

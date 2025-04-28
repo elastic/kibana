@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
+  TRACE_ID_FIELD,
   TRANSACTION_ID_FIELD,
   getTraceDocumentOverview,
 } from '@kbn/discover-utils';
@@ -22,6 +24,7 @@ import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
+import { Trace } from '../components/trace';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
@@ -35,14 +38,13 @@ export function SpanOverview({
   onRemoveColumn,
   transactionIndexPattern,
 }: SpanOverviewProps) {
-  const parsedDoc = getTraceDocumentOverview(hit);
+  const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
+  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
+  const fieldConfigurations = useMemo(() => getSpanFieldConfiguration(parsedDoc), [parsedDoc]);
 
   return (
-    <TransactionProvider
-      transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
-      indexPattern={transactionIndexPattern}
-    >
+    <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
       <FieldActionsProvider
         columns={columns}
         filter={filter}
@@ -59,22 +61,30 @@ export function SpanOverview({
             </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          {spanFields.map((fieldId) => {
-            const fieldConfiguration = getSpanFieldConfiguration(parsedDoc)[fieldId];
-
-            return (
-              <SpanSummaryField
-                key={fieldId}
-                fieldId={fieldId}
-                fieldConfiguration={fieldConfiguration}
-              />
-            );
-          })}
+          {spanFields.map((fieldId) => (
+            <SpanSummaryField
+              key={fieldId}
+              fieldId={fieldId}
+              fieldConfiguration={fieldConfigurations[fieldId]}
+            />
+          ))}
 
           {spanDuration && (
             <>
               <EuiSpacer size="m" />
               <SpanDurationSummary duration={spanDuration} />
+            </>
+          )}
+          {transactionId && (
+            <>
+              <EuiSpacer size="m" />
+              <Trace
+                fields={fieldConfigurations}
+                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                traceId={parsedDoc[TRACE_ID_FIELD]}
+                transactionId={transactionId}
+                displayType="span"
+              />
             </>
           )}
         </EuiPanel>

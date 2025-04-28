@@ -14,11 +14,13 @@
 export const mockReportCardOpen = jest.fn();
 export const mockReportCardComplete = jest.fn();
 export const mockReportCardLinkClicked = jest.fn();
+export const mockReportCardSelectorClicked = jest.fn();
 
 export const telemetry = {
   reportCardOpen: mockReportCardOpen,
   reportCardComplete: mockReportCardComplete,
   reportCardLinkClicked: mockReportCardLinkClicked,
+  reportCardSelectorClicked: mockReportCardSelectorClicked,
 };
 export const mockTelemetry = jest.fn(() => telemetry);
 
