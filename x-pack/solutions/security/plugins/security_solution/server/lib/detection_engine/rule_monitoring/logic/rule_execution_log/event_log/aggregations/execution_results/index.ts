@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
@@ -315,7 +315,7 @@ export const formatAggExecutionEventFromBucket = (
   const backfill = getBackfill(bucket);
 
   return {
-    execution_uuid: bucket?.key ?? '',
+    execution_uuid: bucket?.key ? `${bucket.key}` : '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / ONE_MILLISECOND_AS_NANOSECONDS,
     status: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome,

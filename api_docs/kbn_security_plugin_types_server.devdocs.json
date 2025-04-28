@@ -529,13 +529,7 @@
             "description": [],
             "signature": [
               "{ (operation: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
-                "text": "ApiOperation"
-              },
+              "ApiOperation",
               ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
@@ -550,13 +544,7 @@
                 "label": "operation",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.ApiOperation",
-                    "text": "ApiOperation"
-                  }
+                  "ApiOperation"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
@@ -592,13 +580,7 @@
             "description": [],
             "signature": [
               "{ (operation: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
-                "text": "ApiOperation"
-              },
+              "ApiOperation",
               ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
@@ -667,6 +649,10 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/epm/kibana_assets_handler.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
               },
               {
@@ -728,6 +714,14 @@
               {
                 "plugin": "@kbn/security-authorization-core",
                 "path": "x-pack/platform/packages/private/security/authorization_core/src/actions/api.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
@@ -4287,16 +4281,16 @@
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/client/factory.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4403,6 +4397,22 @@
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
               },
@@ -4417,22 +4427,6 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
               },
               {
                 "plugin": "entityManager",
@@ -4457,6 +4451,10 @@
               {
                 "plugin": "entityManager",
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
               },
               {
                 "plugin": "fleet",
@@ -5200,20 +5198,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "@kbn/security-plugin-types-server",
-        "id": "def-server.ApiOperation",
-        "type": "Enum",
-        "tags": [],
-        "label": "ApiOperation",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/security-plugin-types-server",

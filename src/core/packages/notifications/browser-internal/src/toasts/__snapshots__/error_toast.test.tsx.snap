@@ -1,46 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders matching snapshot 1`] = `
-<KibanaRenderContextProvider
-  analytics={
-    Object {
-      "optIn": [MockFunction],
-      "reportEvent": [MockFunction],
-      "telemetryCounter$": Subject {
-        "closed": false,
-        "currentObservers": null,
-        "hasError": false,
-        "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-    }
-  }
-  i18n={
-    Object {
-      "Context": [MockFunction],
-    }
-  }
-  theme={
-    Object {
-      "getTheme": [MockFunction],
-      "theme$": Observable {
-        "_subscribe": [Function],
-      },
-    }
-  }
-  userProfile={
-    Object {
-      "bulkGet": [MockFunction],
-      "getCurrent": [MockFunction],
-      "getEnabled$": [MockFunction],
-      "getUserProfile$": [MockFunction],
-      "partialUpdate": [MockFunction],
-      "suggest": [MockFunction],
-      "update": [MockFunction],
-    }
-  }
->
+<Fragment>
   <p
     data-test-subj="errorToastMessage"
   >
@@ -61,5 +22,5 @@ exports[`renders matching snapshot 1`] = `
       />
     </EuiButton>
   </div>
-</KibanaRenderContextProvider>
+</Fragment>
 `;

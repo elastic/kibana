@@ -30,7 +30,6 @@ import {
   RunnableSequence,
   RunnableLambda,
 } from '@langchain/core/runnables';
-import type { Logger } from '@kbn/logging';
 import {
   InferenceConnector,
   ChatCompleteAPI,
@@ -60,10 +59,10 @@ import {
 export interface InferenceChatModelParams extends BaseChatModelParams {
   connector: InferenceConnector;
   chatComplete: ChatCompleteAPI;
-  logger: Logger;
   functionCallingMode?: FunctionCallingMode;
   temperature?: number;
   model?: string;
+  signal?: AbortSignal;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -99,16 +98,17 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
   protected model?: string;
+  protected signal?: AbortSignal;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
-    this.logger = args.logger;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
+    this.signal = args.signal;
   }
 
   static lc_name() {
@@ -182,7 +182,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       temperature: options.temperature ?? this.temperature,
       tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
       toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
-      abortSignal: options.signal,
+      abortSignal: options.signal ?? this.signal,
     };
   }
 

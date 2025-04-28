@@ -5,49 +5,55 @@
  * 2.0.
  */
 
-import { Subject, Observable, withLatestFrom, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map as mapOptional, none } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/pipeable';
+import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
 
-import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
+import type { Result } from './lib/result_type';
+import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
+import type { TaskManagerConfig } from './config';
 import {
-  TaskManagerConfig,
   CLAIM_STRATEGY_UPDATE_BY_QUERY,
   WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
 } from './config';
 
-import {
+import type {
   TaskMarkRunning,
   TaskRun,
   TaskClaim,
   TaskRunRequest,
-  asTaskRunRequestEvent,
   TaskPollingCycle,
-  asTaskPollingCycleEvent,
   TaskManagerStat,
-  asTaskManagerStatEvent,
   TaskManagerMetric,
 } from './task_events';
-import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
-import { Middleware } from './lib/middleware';
+import {
+  asTaskRunRequestEvent,
+  asTaskPollingCycleEvent,
+  asTaskManagerStatEvent,
+} from './task_events';
+import type { TimedFillPoolResult } from './lib/fill_pool';
+import { fillPool, FillPoolResult } from './lib/fill_pool';
+import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
-import { TaskManagerRunner, TaskRunner } from './task_running';
-import { TaskStore } from './task_store';
+import type { TaskRunner } from './task_running';
+import { TaskManagerRunner } from './task_running';
+import type { TaskStore } from './task_store';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
-import { ClaimOwnershipResult } from './task_claimers';
-import { TaskPartitioner } from './lib/task_partitioner';
-import { TaskPoller } from './polling/task_poller';
+import type { ClaimOwnershipResult } from './task_claimers';
+import type { TaskPartitioner } from './lib/task_partitioner';
+import type { TaskPoller } from './polling/task_poller';
 import {
   createCapacityScan,
   createPollIntervalScan,
@@ -63,6 +69,7 @@ export interface ITaskEventEmitter<T> {
 }
 
 export interface TaskPollingLifecycleOpts {
+  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
@@ -93,10 +100,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private store: TaskStore;
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
+  private readonly basePathService: IBasePath;
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
+  private started = false;
 
   public pool: TaskPool;
 
@@ -119,11 +128,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
    * mechanism.
    */
   constructor({
+    basePathService,
     logger,
     middleware,
+    config,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
-    config,
     taskStore,
     definitions,
     executionContext,
@@ -131,6 +141,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     taskPartitioner,
     startingCapacity,
   }: TaskPollingLifecycleOpts) {
+    this.basePathService = basePathService;
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
@@ -223,15 +234,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (areESAndSOAvailable) {
-        // start polling for work
+      if (areESAndSOAvailable && !this.started) {
         this.poller.start();
-      } else if (!areESAndSOAvailable) {
-        this.logger.info(
-          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
-        );
-        this.poller.stop();
-        this.pool.cancelRunningTasks();
+        this.started = true;
       }
     });
   }
@@ -250,6 +255,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
+      basePathService: this.basePathService,
       logger: this.logger,
       instance,
       store: this.bufferedStore,

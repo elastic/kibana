@@ -16,7 +16,7 @@
     "./api_integration/apis/telemetry/fixtures/*.json",
     "./monitoring_api_integration/fixtures/**/*.json",
     "../../typings/**/*",
-    "../../packages/kbn-test/types/ftr_globals/**/*"
+    "../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": [
     "security_solution_cypress/cypress/**/*",
@@ -133,7 +133,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
-    "@kbn/apm-data-access-plugin",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
     "@kbn/es",
@@ -143,7 +142,6 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-common",
-    "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",
@@ -161,9 +159,7 @@
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
-    "@kbn/ml-trained-models-utils",
     "@kbn/observability-synthetics-test-data",
-    "@kbn/ml-trained-models-utils",
     "@kbn/openapi-common",
     "@kbn/securitysolution-lists-common",
     "@kbn/securitysolution-exceptions-common",
@@ -191,5 +187,11 @@
     "@kbn/server-route-repository-utils",
     "@kbn/streams-plugin",
     "@kbn/response-ops-rule-params",
+    "@kbn/scout-info",
+    "@kbn/inference-common",
+    "@kbn/apm-sources-access-plugin",
+    "@kbn/aiops-change-point-detection",
+    "@kbn/es-errors",
+    "@kbn/content-packs-schema",
   ]
 }

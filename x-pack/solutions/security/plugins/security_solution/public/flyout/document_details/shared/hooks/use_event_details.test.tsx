@@ -64,7 +64,6 @@ describe('useEventDetails', () => {
     expect(hookResult.result.current.dataAsNestedObject).toEqual({});
     expect(hookResult.result.current.dataFormattedForFieldBrowser).toEqual([]);
     expect(hookResult.result.current.getFieldsData('test')).toEqual('test');
-    expect('indexPattern' in hookResult.result.current).toEqual(true);
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.refetchFlyoutData()).toEqual(undefined);
     expect(hookResult.result.current.searchHit).toEqual({});

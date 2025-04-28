@@ -6,19 +6,15 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { getEuiTableColumn } from './get_eui_table_column';
 
 describe('getEuiTableColumn ', () => {
-  let appMockRender: AppMockRenderer;
   const key = 'test_key_1';
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -43,7 +39,7 @@ describe('getEuiTableColumn ', () => {
       const label = 'MockLabel';
       const column = getEuiTableColumn({ label });
 
-      appMockRender.render(<div>{column.render(customField)}</div>);
+      render(<div>{column.render(customField)}</div>);
 
       expect(
         screen.getByTestId(`toggle-custom-field-column-view-${key}-${expectedResult}`)

@@ -12,17 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  /*
-   * Enables experimental feature flag for eql sequence alert suppression.
-   *
-   * Ticket: https://github.com/elastic/security-team/issues/9608
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-engine
-   * Added: on October 1st, 2024 in https://github.com/elastic/kibana/pull/189725
-   * Turned: on (TBD)
-   * Expires: on (TBD)
-   */
-  alertSuppressionForSequenceEqlRuleEnabled: true,
-
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
@@ -115,14 +104,9 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables filtering of Attack Discovery alerts in a flyout
+   * Enables advanced ESQL generation for the Assistant.
    */
-  attackDiscoveryAlertFiltering: false,
-
-  /**
-   * Enables content references (citations) in the AI Assistant
-   */
-  contentReferencesEnabled: false,
+  advancedEsqlGeneration: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -190,17 +174,6 @@ export const allowedExperimentalValues = Object.freeze({
   jamfDataInAnalyzerEnabled: true,
 
   /**
-   * Enables an ability to customize Elastic prebuilt rules.
-   *
-   * Ticket: https://github.com/elastic/kibana/issues/174168
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
-   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
-   * Turned: TBD
-   * Expires: TBD
-   */
-  prebuiltRulesCustomizationEnabled: false,
-
-  /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: true,
@@ -242,6 +215,11 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
 
   /**
+   * Enables Privilege Monitoring
+   */
+  privilegeMonitoringEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
@@ -252,26 +230,20 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsights: true,
 
   /**
-   * Enables flyout history and new preview navigation
+   * Disables flyout history and new preview navigation
    */
-  newExpandableFlyoutNavigationEnabled: false,
+  newExpandableFlyoutNavigationDisabled: false,
+
+  /**
+   * Enables the ability to edit highlighted fields in the alertflyout
+   */
+  editHighlightedFieldsEnabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enables the Asset Inventory Entity Store feature.
-   * Allows initializing the Universal Entity Store via the API.
-   */
-  assetInventoryStoreEnabled: false,
-
-  /**
-   * Enables the Asset Inventory feature
-   */
-  assetInventoryUXEnabled: false,
 
   /**
    * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
@@ -282,7 +254,10 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables banner for informing users about changes in data collection.
    */
-  eventCollectionDataReductionBannerEnabled: false,
+  eventCollectionDataReductionBannerEnabled: true,
+
+  /** Enables new Data View Picker */
+  newDataViewPickerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -290,9 +265,12 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
+const disableExperimentalPrefix = 'disable:' as const;
+
 /**
  * Parses the string value used in `xpack.securitySolution.enableExperimental` kibana configuration,
- * which should be a string of values delimited by a comma (`,`)
+ * which should be an array of strings corresponding to allowedExperimentalValues keys.
+ * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
@@ -303,11 +281,15 @@ export const parseExperimentalConfigValue = (
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
   const invalidKeys: string[] = [];
 
-  for (const value of configValue) {
+  for (let value of configValue) {
+    const isDisabled = value.startsWith(disableExperimentalPrefix);
+    if (isDisabled) {
+      value = value.replace(disableExperimentalPrefix, '');
+    }
     if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
       invalidKeys.push(value);
     } else {
-      enabledFeatures[value as keyof ExperimentalFeatures] = true;
+      enabledFeatures[value as keyof ExperimentalFeatures] = !isDisabled;
     }
   }
 

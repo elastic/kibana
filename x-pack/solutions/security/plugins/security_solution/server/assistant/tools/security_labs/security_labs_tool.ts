@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicStructuredTool } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
@@ -35,36 +35,35 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     const { kbDataClient, contentReferencesStore } = params as AssistantToolParams;
     if (kbDataClient == null) return null;
 
-    return new DynamicStructuredTool({
-      name: toolDetails.name,
-      description: params.description || toolDetails.description,
-      schema: z.object({
-        question: z
-          .string()
-          .describe(
-            `Key terms to retrieve Elastic Security Labs content for, like specific malware names or attack techniques.`
-          ),
-      }),
-      func: async (input) => {
+    return tool(
+      async (input) => {
         const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
           kbResource: SECURITY_LABS_RESOURCE,
           query: input.question,
         });
 
-        const reference =
-          contentReferencesStore &&
-          contentReferencesStore.add((p) =>
-            knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
-          );
+        const reference = contentReferencesStore.add((p) =>
+          knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
+        );
 
         // TODO: Token pruning
         const result = JSON.stringify(docs).substring(0, 20000);
 
-        const citation = reference ? `\n${contentReferenceString(reference)}` : '';
-        return `${result}${citation}`;
+        const citation = contentReferenceString(reference);
+        return `${result}\n${citation}`;
       },
-      tags: ['security-labs', 'knowledge-base'],
-      // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
-    }) as unknown as DynamicStructuredTool;
+      {
+        name: toolDetails.name,
+        description: params.description || toolDetails.description,
+        schema: z.object({
+          question: z
+            .string()
+            .describe(
+              `Key terms to retrieve Elastic Security Labs content for, like specific malware names or attack techniques.`
+            ),
+        }),
+        tags: ['security-labs', 'knowledge-base'],
+      }
+    );
   },
 };

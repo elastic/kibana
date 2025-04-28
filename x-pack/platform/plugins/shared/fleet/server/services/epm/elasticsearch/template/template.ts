@@ -1063,7 +1063,6 @@ const updateExistingDataStream = async ({
   const existingDsConfig = Object.values(existingDs);
   const currentBackingIndexConfig = existingDsConfig.at(-1);
   const currentIndexMode = currentBackingIndexConfig?.settings?.index?.mode;
-  // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
   const currentSourceType = currentBackingIndexConfig?.settings?.index?.mapping?.source?.mode;
 
   let settings: IndicesIndexSettings;
@@ -1108,7 +1107,7 @@ const updateExistingDataStream = async ({
       () =>
         esClient.indices.putMapping({
           index: dataStreamName,
-          body: mappings || {},
+          ...mappings,
           write_index_only: true,
         }),
       { logger }
@@ -1163,7 +1162,6 @@ const updateExistingDataStream = async ({
   // Trigger a rollover if the index mode or source type has changed
   if (
     currentIndexMode !== settings?.index?.mode ||
-    // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
     currentSourceType !== settings?.index?.mapping?.source?.mode ||
     dynamicDimensionMappingsChanged
   ) {
@@ -1212,19 +1210,22 @@ const updateExistingDataStream = async ({
   }
 
   try {
-    logger.debug(`Updating settings for ${dataStreamName}`);
+    logger.debug(`Updating index settings of data stream  ${dataStreamName}`);
 
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({
           index: dataStreamName,
-          body: { default_pipeline: settings!.index!.default_pipeline },
+          settings: { default_pipeline: settings!.index!.default_pipeline },
         }),
       { logger }
     );
   } catch (err) {
+    logger.error(`Error updating index settings of data stream ${dataStreamName}: ${err}`);
     // Same as above - Check if this error can happen because of invalid settings;
     // We are returning a 500 but in that case it should be a 400 instead
-    throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
+    throw new PackageESError(
+      `Could not update index settings of data stream ${dataStreamName}: ${err.message}`
+    );
   }
 };

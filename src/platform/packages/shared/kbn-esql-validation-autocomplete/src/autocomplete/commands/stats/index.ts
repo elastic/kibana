@@ -6,62 +6,107 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { ESQLAstItem, ESQLCommand } from '@kbn/esql-ast';
-import { SupportedDataType } from '../../../definitions/types';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLFunction } from '@kbn/esql-ast';
+import { isSingleItem } from '../../../..';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
+import type { SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
   getNewVariableSuggestion,
   getFunctionSuggestions,
+  getControlSuggestionIfSupported,
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { pushItUpInTheList } from '../../helper';
-import { byCompleteItem, getDateHistogramCompletionItem, getPosition } from './util';
+import { isExpressionComplete, pushItUpInTheList, suggestForExpression } from '../../helper';
+import {
+  byCompleteItem,
+  getDateHistogramCompletionItem,
+  getPosition,
+  whereCompleteItem,
+} from './util';
+import { ESQL_VARIABLES_PREFIX } from '../../../shared/constants';
+import { isMarkerNode } from '../../../shared/context';
 
-export async function suggest(
-  innerText: string,
-  command: ESQLCommand<'stats'>,
-  getColumnsByType: GetColumnsByTypeFn,
-  _columnExists: (column: string) => boolean,
-  getSuggestedVariableName: () => string,
-  _getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
-): Promise<SuggestionRawDefinition[]> {
+export async function suggest({
+  innerText,
+  command,
+  getColumnsByType,
+  getSuggestedVariableName,
+  getPreferences,
+  getVariables,
+  supportsControls,
+  getExpressionType,
+}: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
   const columnSuggestions = pushItUpInTheList(
     await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
     true
   );
+  const lastCharacterTyped = innerText[innerText.length - 1];
+  const controlSuggestions = getControlSuggestionIfSupported(
+    Boolean(supportsControls),
+    ESQLVariableType.FUNCTIONS,
+    getVariables,
+    lastCharacterTyped !== ESQL_VARIABLES_PREFIX
+  );
 
   switch (pos) {
     case 'expression_without_assignment':
       return [
-        ...getFunctionSuggestions({ command: 'stats' }),
+        ...controlSuggestions,
+        ...getFunctionSuggestions({ location: Location.STATS }),
         getNewVariableSuggestion(getSuggestedVariableName()),
       ];
 
     case 'expression_after_assignment':
-      return [...getFunctionSuggestions({ command: 'stats' })];
+      return [...controlSuggestions, ...getFunctionSuggestions({ location: Location.STATS })];
 
     case 'expression_complete':
       return [
+        whereCompleteItem,
         byCompleteItem,
         pipeCompleteItem,
         { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
       ];
 
+    case 'after_where':
+      const whereFn = command.args[command.args.length - 1] as ESQLFunction;
+      const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
+
+      if (expressionRoot && !isSingleItem(expressionRoot)) {
+        return [];
+      }
+
+      const suggestions = await suggestForExpression({
+        expressionRoot,
+        getExpressionType,
+        getColumnsByType,
+        location: Location.STATS_WHERE,
+        innerText,
+        preferredExpressionType: 'boolean',
+      });
+
+      // Is this a complete boolean expression?
+      // If so, we can call it done and suggest a pipe
+      const expressionType = getExpressionType(expressionRoot);
+      if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+        suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
+      }
+
+      return suggestions;
+
     case 'grouping_expression_after_assignment':
       return [
-        ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
+        ...getFunctionSuggestions({ location: Location.STATS_BY }),
         getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
         ...columnSuggestions,
       ];
 
     case 'grouping_expression_without_assignment':
       return [
-        ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
+        ...getFunctionSuggestions({ location: Location.STATS_BY }),
         getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
         ...columnSuggestions,
         getNewVariableSuggestion(getSuggestedVariableName()),

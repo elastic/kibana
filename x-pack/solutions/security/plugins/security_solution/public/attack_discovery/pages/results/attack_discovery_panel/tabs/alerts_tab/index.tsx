@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import React, { useMemo } from 'react';
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../../../../common/constants';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { AiForSOCAlertsTab } from './ai_for_soc/wrapper';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { SECURITY_FEATURE_ID } from '../../../../../../../common';
+import { DetectionEngineAlertsTable } from '../../../../../../detections/components/alerts_table';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
@@ -20,7 +21,14 @@ interface Props {
 }
 
 const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) => {
-  const { triggersActionsUi } = useKibana().services;
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/218731
+  //  For the AI for SOC we need to show the Alert summary page alerts table
+  const AIForSOC = capabilities[SECURITY_FEATURE_ID].configurations;
 
   const originalAlertIds = useMemo(
     () =>
@@ -39,28 +47,26 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
     [originalAlertIds]
   );
 
-  const configId = ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE; // show the same row-actions as in the case view
-
-  const alertStateProps: AlertsTableStateProps = useMemo(
-    () => ({
-      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-      configurationId: configId,
-      id: `attack-discovery-alerts-${attackDiscovery.id}`,
-      ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
-      consumers: [AlertConsumers.SIEM],
-      query: alertIdsQuery,
-      showAlertStatusWithFlapping: false,
-    }),
-    [
-      alertIdsQuery,
-      attackDiscovery.id,
-      configId,
-      triggersActionsUi.alertsTableConfigurationRegistry,
-    ]
-  );
+  const id = useMemo(() => `attack-discovery-alerts-${attackDiscovery.id}`, [attackDiscovery.id]);
 
   return (
-    <div data-test-subj="alertsTab">{triggersActionsUi.getAlertsStateTable(alertStateProps)}</div>
+    <div data-test-subj="alertsTab">
+      {AIForSOC ? (
+        <div data-test-subj="ai4dsoc-alerts-table">
+          <AiForSOCAlertsTab id={id} query={alertIdsQuery} />
+        </div>
+      ) : (
+        <div data-test-subj="detection-engine-alerts-table">
+          <DetectionEngineAlertsTable
+            id={id}
+            tableType={TableId.alertsOnCasePage}
+            ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
+            query={alertIdsQuery}
+            showAlertStatusWithFlapping={false}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

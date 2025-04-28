@@ -10,12 +10,15 @@ import { useEffect, useState } from 'react';
 import type { IndicesStatusResponse } from '../../../../common';
 
 import { useKibana } from '../../../hooks/use_kibana';
-
 import { navigateToIndexDetails } from '../../utils';
+import type { UserStartPrivilegesResponse } from '../../../../common';
 import { useUsageTracker } from '../../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../../analytics/constants';
 
-export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
+export const useIndicesRedirect = (
+  indicesStatus?: IndicesStatusResponse,
+  userPrivileges?: UserStartPrivilegesResponse
+) => {
   const { application, http } = useKibana().services;
   const [lastStatus, setLastStatus] = useState<IndicesStatusResponse | undefined>(() => undefined);
   const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
@@ -24,6 +27,17 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
     if (hasDoneRedirect) {
       return;
     }
+
+    if (!userPrivileges) {
+      return;
+    }
+
+    if (userPrivileges?.privileges?.canManageIndex === false) {
+      application.navigateToApp('discover');
+      setHasDoneRedirect(true);
+      return;
+    }
+
     if (!indicesStatus) {
       return;
     }
@@ -32,7 +46,7 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
       return;
     }
     if (lastStatus === undefined && indicesStatus.indexNames.length > 0) {
-      application.navigateToApp('management', { deepLinkId: 'index_management' });
+      application.navigateToApp('elasticsearchIndexManagement');
       setHasDoneRedirect(true);
       return;
     }
@@ -42,7 +56,7 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
       usageTracker.click(AnalyticsEvents.startCreateIndexCreatedRedirect);
       return;
     }
-    application.navigateToApp('management', { deepLinkId: 'index_management' });
+    application.navigateToApp('elasticsearchIndexManagement');
     setHasDoneRedirect(true);
   }, [
     application,
@@ -52,5 +66,6 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
     setHasDoneRedirect,
     usageTracker,
     hasDoneRedirect,
+    userPrivileges,
   ]);
 };

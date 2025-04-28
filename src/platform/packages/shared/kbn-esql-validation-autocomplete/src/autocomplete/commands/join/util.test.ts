@@ -69,6 +69,7 @@ describe('joinIndicesToSuggestions()', () => {
     expect(labels).toEqual([
       'join_index',
       'join_index_with_alias',
+      'lookup_index',
       'join_index_alias_1',
       'join_index_alias_2',
     ]);

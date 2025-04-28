@@ -21,20 +21,20 @@ interface Props {
   eventId: string;
   primary: string | null | undefined;
   secondary: string | null | undefined;
-  isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const PrimarySecondary = React.memo<Props>(
-  ({ contextId, eventId, primary, secondary, isDraggable }) => {
+  ({ contextId, eventId, primary, secondary, scopeId }) => {
     if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return null;
     } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return (
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="auditd.summary.actor.primary"
-          isDraggable={isDraggable}
           value={primary}
           iconType="user"
           isAggregatable={true}
@@ -44,10 +44,10 @@ export const PrimarySecondary = React.memo<Props>(
     } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
       return (
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="auditd.summary.actor.secondary"
-          isDraggable={isDraggable}
           value={secondary}
           iconType="user"
           isAggregatable={true}
@@ -57,10 +57,10 @@ export const PrimarySecondary = React.memo<Props>(
     } else if (primary === secondary) {
       return (
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="auditd.summary.actor.secondary"
-          isDraggable={isDraggable}
           value={secondary}
           iconType="user"
           isAggregatable={true}
@@ -72,10 +72,10 @@ export const PrimarySecondary = React.memo<Props>(
         <EuiFlexGroup gutterSize="none">
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="auditd.summary.actor.primary"
-              isDraggable={isDraggable}
               value={primary}
               iconType="user"
               isAggregatable={true}
@@ -87,10 +87,10 @@ export const PrimarySecondary = React.memo<Props>(
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="auditd.summary.actor.secondary"
-              isDraggable={isDraggable}
               value={secondary}
               iconType="user"
               isAggregatable={true}
@@ -111,11 +111,11 @@ interface PrimarySecondaryUserInfoProps {
   userName: string | null | undefined;
   primary: string | null | undefined;
   secondary: string | null | undefined;
-  isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps>(
-  ({ contextId, eventId, userName, primary, secondary, isDraggable }) => {
+  ({ contextId, eventId, userName, primary, secondary, scopeId }) => {
     if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return null;
     } else if (
@@ -127,10 +127,10 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
     ) {
       return (
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="user.name"
-          isDraggable={isDraggable}
           value={userName}
           iconType="user"
           isAggregatable={true}
@@ -140,10 +140,10 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
     } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return (
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="user.name"
-          isDraggable={isDraggable}
           value={userName}
           iconType="user"
           isAggregatable={true}
@@ -153,9 +153,9 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
     } else {
       return (
         <PrimarySecondary
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
-          isDraggable={isDraggable}
           primary={primary}
           secondary={secondary}
         />

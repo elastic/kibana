@@ -9,10 +9,12 @@ import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
 import { getLinksWithHiddenTimeline } from '../../links';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
+
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useEnableExperimental } from '../../hooks/use_experimental_features';
 
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
@@ -21,7 +23,6 @@ const isTimelinePathVisible = (currentPath: string): boolean => {
 };
 
 export const useShowTimelineForGivenPath = () => {
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
   const {
     services: {
       application: { capabilities },
@@ -29,10 +30,18 @@ export const useShowTimelineForGivenPath = () => {
   } = useKibana();
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  const isTimelineAllowed = useMemo(
-    () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
-    [indicesExist, dataViewId, userHasSecuritySolutionVisible]
-  );
+  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+
+  const isTimelineAllowed = useMemo(() => {
+    // NOTE: with new Data View Picker, data view is always defined
+    if (newDataViewPickerEnabled) {
+      return userHasSecuritySolutionVisible;
+    }
+
+    return userHasSecuritySolutionVisible && (indicesExist || dataViewId === null);
+  }, [newDataViewPickerEnabled, userHasSecuritySolutionVisible, indicesExist, dataViewId]);
 
   const getIsTimelineVisible = useCallback(
     (pathname: string) => {

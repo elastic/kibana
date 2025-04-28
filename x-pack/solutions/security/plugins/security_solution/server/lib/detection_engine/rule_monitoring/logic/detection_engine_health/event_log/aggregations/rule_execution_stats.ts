@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { mapValues } from 'lodash';
 
-import type {
-  AggregatedMetric,
-  HealthOverviewStats,
-  LogLevel,
-  NumberOfDetectedGaps,
-  NumberOfExecutions,
-  NumberOfLoggedMessages,
-  RuleExecutionStatus,
-  TopMessages,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevelEnum,
   RuleExecutionEventTypeEnum,
@@ -31,6 +22,14 @@ import {
 import * as f from '../../../event_log/event_log_fields';
 import { DEFAULT_PERCENTILES } from '../../../utils/es_aggregations';
 import type { RawData } from '../../../utils/normalization';
+import type {
+  AggregatedMetric,
+  HealthOverviewStats,
+  NumberOfDetectedGaps,
+  NumberOfExecutions,
+  NumberOfLoggedMessages,
+  TopMessages,
+} from './types';
 
 export type RuleExecutionStatsAggregationLevel = 'whole-interval' | 'histogram';
 

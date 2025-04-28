@@ -6,22 +6,23 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from '@kbn/core/server';
-import { RawRule, RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { omit } from 'lodash';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
   getUnauthorizedErrorMessage,
-  TaskManagerDoc,
   resetRulesSettings,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
@@ -749,6 +750,102 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(400);
+        });
+      });
+    });
+
+    describe('artifacts', () => {
+      describe('create rule with dashboards artifacts correctly', function () {
+        this.tags('skipFIPS');
+
+        it('should not return dashboards artifacts in the rule response', async () => {
+          const response = await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                artifacts: {
+                  dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+                },
+              })
+            );
+          expect(response.status).to.eql(200);
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+          expect(response.body.artifacts).to.be(undefined);
+        });
+
+        it('should store references correctly for dashboard artifacts', async () => {
+          const dashboardId = 'dashboard-1';
+          const response = await supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                artifacts: {
+                  dashboards: [
+                    {
+                      id: dashboardId,
+                    },
+                  ],
+                },
+              })
+            );
+          expect(response.status).to.eql(200);
+
+          objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+          expect(response.body).to.eql({
+            id: response.body.id,
+            name: 'abc',
+            tags: ['foo'],
+            actions: [],
+            enabled: true,
+            rule_type_id: 'test.noop',
+            revision: 0,
+            running: false,
+            consumer: 'alertsFixture',
+            params: {},
+            created_by: null,
+            schedule: { interval: '1m' },
+            scheduled_task_id: response.body.scheduled_task_id,
+            updated_by: null,
+            api_key_owner: null,
+            api_key_created_by_user: null,
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            mute_all: false,
+            muted_alert_ids: [],
+            created_at: response.body.created_at,
+            updated_at: response.body.updated_at,
+            execution_status: response.body.execution_status,
+            ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+            ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
+          });
+
+          const esResponse = await es.get<SavedObject<RawRule>>(
+            {
+              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+              id: `alert:${response.body.id}`,
+            },
+            { meta: true }
+          );
+
+          const rawDashboards = (esResponse.body._source as any)?.alert.artifacts.dashboards ?? [];
+          expect(rawDashboards).to.eql([
+            {
+              refId: 'dashboard_0',
+            },
+          ]);
+
+          const references = esResponse.body._source?.references ?? [];
+
+          expect(references.length).to.eql(1);
+          expect(references[0]).to.eql({
+            id: dashboardId,
+            name: 'dashboard_0',
+            type: 'dashboard',
+          });
         });
       });
     });

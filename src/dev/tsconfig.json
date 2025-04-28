@@ -46,5 +46,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/core-i18n-server-internal",
     "@kbn/code-owners",
+    "@kbn/projects-solutions-groups",
   ]
 }

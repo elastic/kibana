@@ -5,24 +5,65 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import { MultiRowInput } from '../multi_row_input';
 
 import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
+import { SSLFormSection, type FormType } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
+  useSecretsStorage: boolean;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
 export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs } = props;
+  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const { cloud } = useStartServices();
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+  const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
+    sslKey: false,
+  });
+  const { enableSSLSecrets } = ExperimentalFeaturesService.get();
+
+  useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
+    // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+    if (useSecretsStorage && enableSSLSecrets) {
+      if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+        inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+        inputs.sslKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
+      }
+    }
+  }, [
+    useSecretsStorage,
+    inputs.sslKeyInput,
+    inputs.sslKeySecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+    isConvertedToSecret,
+    enableSSLSecrets,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.sslKeyInput.clear();
+    } else {
+      inputs.sslKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret({ sslKey: false });
+    onToggleSecretStorage(secretEnabled);
+  };
 
   return (
     <>
@@ -69,6 +110,14 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
           )}
         />
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      <SSLFormSection
+        type={inputs.typeInput.value as FormType}
+        inputs={inputs}
+        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+        isConvertedToSecret={isConvertedToSecret.sslKey}
+        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+      />
     </>
   );
 };

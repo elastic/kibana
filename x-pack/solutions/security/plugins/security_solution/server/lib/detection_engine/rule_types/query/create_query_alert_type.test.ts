@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
@@ -18,6 +16,7 @@ import { sampleDocNoSortId } from '../__mocks__/es_results';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
@@ -44,24 +43,32 @@ jest.mock('../utils/get_list_client', () => ({
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
   const licensing = licensingMock.createSetup();
+  const docLinks = docLinksServiceMock.createSetupContract();
   const publicBaseUrl = 'http://somekibanabaseurl.com';
   const mockedStatusLogger = ruleExecutionLogMock.forExecutors.create();
   const ruleStatusLogger = () => Promise.resolve(mockedStatusLogger);
 
   const { dependencies, executor, services } = mocks;
   const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
+
+  const eventsTelemetry = createMockTelemetryEventsSender(true);
+
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     actions,
+    docLinks,
     lists,
     logger,
     config: createMockConfig(),
     ruleDataClient,
     ruleExecutionLoggerFactory: ruleStatusLogger,
     version: '8.3',
+    experimentalFeatures: allowedExperimentalValues,
     publicBaseUrl,
     alerting,
+    eventsTelemetry,
+    licensing,
+    scheduleNotificationResponseActionsService: () => null,
   });
-  const eventsTelemetry = createMockTelemetryEventsSender(true);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -70,12 +77,6 @@ describe('Custom Query Alerts', () => {
   it('does not send an alert when no events found', async () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -83,27 +84,23 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 0,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = getQueryRuleParams();
 
@@ -119,12 +116,6 @@ describe('Custom Query Alerts', () => {
     (hasTimestampFields as jest.Mock).mockImplementationOnce(actualHasTimestampFields); // default behavior will produce a 'no indices found' result from this helper
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -132,27 +123,23 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [sampleDocNoSortId()],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [sampleDocNoSortId()],
+        total: {
+          relation: 'eq',
+          value: 1,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = getQueryRuleParams();
 
@@ -172,12 +159,6 @@ describe('Custom Query Alerts', () => {
   it('sends an alert when events are found', async () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -205,27 +186,23 @@ describe('Custom Query Alerts', () => {
       },
     });
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [sampleDocNoSortId()],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [sampleDocNoSortId()],
+        total: {
+          relation: 'eq',
+          value: 1,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     await executor({ params });
 
@@ -239,12 +216,6 @@ describe('Custom Query Alerts', () => {
     });
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -252,27 +223,23 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [sampleDocNoSortId()],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [sampleDocNoSortId()],
+        total: {
+          relation: 'eq',
+          value: 1,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = getQueryRuleParams();
 
@@ -286,7 +253,9 @@ describe('Custom Query Alerts', () => {
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          "Check privileges failed to execute Error: hastTimestampFields test error, The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
+          'Check privileges failed to execute Error: hastTimestampFields test error\n' +
+          '\n' +
+          "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
       })
     );
   });

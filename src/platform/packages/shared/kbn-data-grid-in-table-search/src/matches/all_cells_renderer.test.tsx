@@ -17,6 +17,8 @@ describe('AllCellsRenderer', () => {
   const testData = generateMockData(100, 2);
 
   const originalRenderCellValue = jest.fn(getRenderCellValueMock(testData));
+  const getRenderCellValueWrappedMock = () =>
+    jest.fn(wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue, 'black', 'green'));
 
   beforeEach(() => {
     originalRenderCellValue.mockClear();
@@ -24,9 +26,7 @@ describe('AllCellsRenderer', () => {
 
   it('processes all cells in all rows', async () => {
     const onFinish = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = 'cell';
 
@@ -54,9 +54,7 @@ describe('AllCellsRenderer', () => {
 
   it('counts multiple matches correctly', async () => {
     const onFinish = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = '-';
 
@@ -84,9 +82,7 @@ describe('AllCellsRenderer', () => {
 
   it('counts a single match correctly', async () => {
     const onFinish = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = 'cell-in-row-10-col-0';
 
@@ -122,9 +118,7 @@ describe('AllCellsRenderer', () => {
 
   it('skips cells which create exceptions', async () => {
     const onFinish = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const inTableSearchTerm = '50';
 

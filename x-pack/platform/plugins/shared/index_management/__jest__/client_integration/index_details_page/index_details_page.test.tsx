@@ -78,7 +78,7 @@ describe('<IndexDetailsPage />', () => {
         dependencies: {
           url: {
             locators: {
-              get: () => ({ navigate: jest.fn() }),
+              get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }),
             },
           },
         },
@@ -222,13 +222,12 @@ describe('<IndexDetailsPage />', () => {
       expect(tabContent).toEqual(JSON.stringify(testIndexStats, null, 2));
     });
 
-    it('sets the docs link href from the documenation service', async () => {
+    it('sets the docs link href from the documentation service', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       const docsLinkHref = testBed.actions.stats.getDocsLinkHref();
-      // the url from the mocked docs mock
-      expect(docsLinkHref).toEqual(
-        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/indices-stats.html'
-      );
+
+      expect(docsLinkHref).toMatch(/^https:\/\/www\.elastic\.co\//);
+      expect(docsLinkHref).toContain('indices-stats');
     });
 
     it('renders a warning message if an index is not open', async () => {
@@ -533,6 +532,67 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
+  describe('Semantic Text Banner', () => {
+    const mockIndexMappingResponseWithoutSemanticText: any = {
+      ...testIndexMappings.mappings,
+      properties: {
+        ...testIndexMappings.mappings.properties,
+        name: {
+          type: 'text',
+        },
+      },
+    };
+
+    const mockIndexMappingResponseWithSemanticText: any = {
+      ...testIndexMappings.mappings,
+      properties: {
+        ...testIndexMappings.mappings.properties,
+        name: {
+          type: 'text',
+        },
+        sem_text: {
+          type: 'semantic_text',
+          inference_id: '.elser-2-elasticsearch',
+        },
+        title: {
+          type: 'text',
+          copy_to: ['sem_text'],
+        },
+      },
+    };
+
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            core: {
+              application: { capabilities: { ml: { canGetTrainedModels: true } } },
+            },
+          },
+        });
+      });
+    });
+
+    it('semantic text banner is visible if there is no semantic_text field in the mapping', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithoutSemanticText,
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(true);
+    });
+
+    it('semantic text banner is not visible if there exists a semantic_text field in the mapping', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithSemanticText,
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(false);
+    });
+  });
+
   describe('Mappings tab', () => {
     beforeEach(async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
@@ -833,6 +893,8 @@ describe('<IndexDetailsPage />', () => {
                           switch (id) {
                             case INFERENCE_LOCATOR:
                               return mockInferenceManagementLocator;
+                            case 'DISCOVER_APP_LOCATOR':
+                              return createMockLocator('DISCOVER_APP_LOCATOR');
                             default:
                               throw new Error(`Unknown locator id: ${id}`);
                           }

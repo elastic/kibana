@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { type EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import { type InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getDataStreamTypes } from './get_data_stream_types';
@@ -22,13 +22,13 @@ jest.mock('./get_latest_entity', () => ({
 
 describe('getDataStreamTypes', () => {
   let infraMetricsClient: jest.Mocked<InfraMetricsClient>;
-  let obsEsClient: jest.Mocked<ObservabilityElasticsearchClient>;
+  let obsEsClient: jest.Mocked<TracedElasticsearchClient>;
   let entityManagerClient: jest.Mocked<EntityClient>;
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     infraMetricsClient = {} as jest.Mocked<InfraMetricsClient>;
-    obsEsClient = {} as jest.Mocked<ObservabilityElasticsearchClient>;
+    obsEsClient = {} as jest.Mocked<TracedElasticsearchClient>;
     entityManagerClient = {} as jest.Mocked<EntityClient>;
     jest.clearAllMocks();
   });
@@ -136,7 +136,7 @@ describe('getDataStreamTypes', () => {
   it('should return entity source_data_stream types when has no metrics', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(false);
     (getLatestEntity as jest.Mock).mockResolvedValue({
-      sourceDataStreamType: ['logs', 'traces'],
+      sourceDataStreamType: ['logs'],
     });
 
     const params = {
@@ -153,6 +153,29 @@ describe('getDataStreamTypes', () => {
     };
 
     const result = await getDataStreamTypes(params);
-    expect(result).toEqual(['logs', 'traces']);
+    expect(result).toEqual(['logs']);
+  });
+
+  it('should ignore null values returned from latestEntity', async () => {
+    (getHasMetricsData as jest.Mock).mockResolvedValue(false);
+    (getLatestEntity as jest.Mock).mockResolvedValue({
+      sourceDataStreamType: ['logs', null, 'metrics', null],
+    });
+
+    const params = {
+      entityId: 'entity123',
+      entityType: 'built_in_hosts_from_ecs_data',
+      entityFilterType: 'host',
+      entityCentricExperienceEnabled: true,
+      infraMetricsClient,
+      obsEsClient,
+      entityManagerClient,
+      logger,
+      from: '2024-12-09T10:49:15Z',
+      to: '2024-12-10T10:49:15Z',
+    };
+
+    const result = await getDataStreamTypes(params);
+    expect(result).toEqual(['logs', 'metrics']);
   });
 });

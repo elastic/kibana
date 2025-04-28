@@ -4,36 +4,6 @@ info:
   version: '1'
 paths:
   # Rule migrations APIs
-  /internal/siem_migrations/rules:
-    put:
-      summary: Updates rules migrations
-      operationId: UpdateRuleMigration
-      x-codegen-enabled: true
-      x-internal: true
-      description: Updates rules migrations attributes
-      tags:
-        - SIEM Rule Migrations
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/UpdateRuleMigrationData'
-      responses:
-        200:
-          description: Indicates rules migrations have been updated correctly.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - updated
-                properties:
-                  updated:
-                    type: boolean
-                    description: Indicates rules migrations have been updated.
 
   /internal/siem_migrations/rules/stats:
     get:
@@ -113,6 +83,44 @@ paths:
                   migration_id:
                     description: The migration id created.
                     $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    put:
+      summary: Updates rules of a migrations
+      operationId: UpdateRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Updates rules migrations attributes
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to start
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/UpdateRuleMigrationData'
+      responses:
+        200:
+          description: Indicates rules migrations have been updated correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - updated
+                properties:
+                  updated:
+                    type: boolean
+                    description: Indicates rules migrations have been updated.
+
     get:
       summary: Retrieves all the rules of a migration
       operationId: GetRuleMigration
@@ -535,3 +543,35 @@ paths:
                 description: The identified resources missing
                 items:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceBase'
+
+  /internal/siem_migrations/rules/missing_privileges:
+    get:
+      summary: Retrieves the missing privileges for a migration
+      operationId: GetRuleMigrationPrivileges
+      x-codegen-enabled: true
+      x-internal: true
+      description: Identifies the privileges required for a SIEM rules migration and returns the missing privileges
+      tags:
+        - SIEM Rule Migrations
+      responses:
+        200:
+          description: Indicates privileges have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The missing index privileges required for the migration
+                items:
+                  type: object
+                  required:
+                    - indexName
+                    - privileges
+                  properties:
+                    indexName:
+                      type: string
+                      description: The index name of the privilege missing
+                    privileges:
+                      type: array
+                      items:
+                        type: string
+                      description: The index privileges level missing

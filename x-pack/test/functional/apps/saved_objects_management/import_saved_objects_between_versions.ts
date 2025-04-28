@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/getting_started/shakespeare'
+        'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
       );
       await kibanaServer.uiSettings.replace({});
     });
@@ -43,7 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

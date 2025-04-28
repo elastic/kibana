@@ -40,6 +40,7 @@ export enum ExternalPageName {
   // Machine Learning
   // Ref: src/platform/packages/private/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',
+  mlDataVisualizer = 'ml:dataVisualizer',
   mlNotifications = 'ml:notifications',
   mlMemoryUsage = 'ml:memoryUsage',
   mlAnomalyDetection = 'ml:anomalyDetection',
@@ -94,6 +95,7 @@ export enum ExternalPageName {
   managementFiles = 'management:filesManagement',
   managementSpaces = 'management:spaces',
   managementSettings = 'management:settings',
+  managementMonitoring = 'monitoring:',
   // Cloud UI
   // These are links to Cloud UI outside Kibana
   // Special Format: <cloud>:<cloudUrlKey>

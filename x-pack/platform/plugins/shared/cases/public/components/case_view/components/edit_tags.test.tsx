@@ -11,8 +11,7 @@ import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import type { EditTagsProps } from './edit_tags';
 import { EditTags } from './edit_tags';
-import { readCasesPermissions, createAppMockRenderer } from '../../../common/mock';
-import type { AppMockRenderer } from '../../../common/mock';
+import { readCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { MAX_LENGTH_PER_TAG } from '../../../../common/constants';
 
@@ -27,7 +26,6 @@ const defaultProps: EditTagsProps = {
 
 describe('EditTags ', () => {
   let user: UserEvent;
-  let appMockRender: AppMockRenderer;
 
   const sampleTags = ['coke', 'pepsi'];
   const fetchTags = jest.fn();
@@ -52,19 +50,17 @@ describe('EditTags ', () => {
       data: sampleTags,
       refetch: fetchTags,
     }));
-
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders no tags message', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />);
 
     expect(await screen.findByTestId('no-tags')).toBeInTheDocument();
     expect(await screen.findByTestId('tag-list-edit-button')).toBeInTheDocument();
   });
 
   it('edit tag from options on submit', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />);
 
     await user.click(await screen.findByTestId('tag-list-edit-button'));
 
@@ -78,7 +74,7 @@ describe('EditTags ', () => {
   });
 
   it('add new tags on submit', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />);
 
     await user.click(await screen.findByTestId('tag-list-edit-button'));
 
@@ -94,7 +90,7 @@ describe('EditTags ', () => {
   });
 
   it('trims the tags on submit', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />);
 
     await user.click(await screen.findByTestId('tag-list-edit-button'));
 
@@ -110,7 +106,7 @@ describe('EditTags ', () => {
   });
 
   it('cancels on cancel', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />);
 
     await user.click(await screen.findByTestId('tag-list-edit-button'));
 
@@ -130,7 +126,7 @@ describe('EditTags ', () => {
   });
 
   it('shows error when tag is empty', async () => {
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />);
 
     await user.click(await screen.findByTestId('tag-list-edit-button'));
 
@@ -146,7 +142,7 @@ describe('EditTags ', () => {
   it('shows error when tag is too long', async () => {
     const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
 
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />);
 
     await user.click(await screen.findByTestId('tag-list-edit-button'));
 
@@ -164,8 +160,9 @@ describe('EditTags ', () => {
   });
 
   it('does not render when the user does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
-    appMockRender.render(<EditTags {...defaultProps} />);
+    renderWithTestingProviders(<EditTags {...defaultProps} />, {
+      wrapperProps: { permissions: readCasesPermissions() },
+    });
 
     expect(screen.queryByTestId('tag-list-edit')).not.toBeInTheDocument();
   });

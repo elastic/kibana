@@ -12,35 +12,35 @@ import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
-  getListMock,
   getEndpointListMock,
+  getListMock,
 } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import type {
-  DefineStepRuleJson,
-  ScheduleStepRuleJson,
-  AboutStepRuleJson,
-  ActionsStepRuleJson,
   AboutStepRule,
+  AboutStepRuleJson,
   ActionsStepRule,
-  ScheduleStepRule,
+  ActionsStepRuleJson,
   DefineStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
+  DefineStepRuleJson,
+  ScheduleStepRule,
+  ScheduleStepRuleJson,
+} from '../../../common/types';
+import { AlertSuppressionDurationType } from '../../../common/types';
 import {
-  formatDefineStepData,
-  formatScheduleStepData,
+  filterEmptyThreats,
+  filterRuleFieldsForType,
   formatAboutStepData,
   formatActionsStepData,
+  formatDefineStepData,
   formatRule,
-  filterRuleFieldsForType,
-  filterEmptyThreats,
+  formatScheduleStepData,
 } from './helpers';
 import {
+  mockAboutStepRule,
+  mockActionsStepRule,
   mockDefineStepRule,
   mockQueryBar,
   mockScheduleStepRule,
-  mockAboutStepRule,
-  mockActionsStepRule,
 } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';

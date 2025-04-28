@@ -17,11 +17,12 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { ReactNode } from 'react';
 import React, { useMemo, Fragment } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { useLocation } from 'react-router-dom';
 import type { InputsModelId } from '../../store/inputs/constants';
@@ -121,6 +122,8 @@ export const ModalInspectQuery = ({
   const { selectedPatterns } = useSourcererDataView(
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const requests: string[] = useMemo(
     () => [request, ...(additionalRequests != null ? additionalRequests : [])],
@@ -284,9 +287,13 @@ export const ModalInspectQuery = ({
   );
 
   return (
-    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+    <MyEuiModal
+      aria-labelledby={modalTitleId}
+      onClose={closeModal}
+      data-test-subj="modal-inspect-euiModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.INSPECT} {title}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

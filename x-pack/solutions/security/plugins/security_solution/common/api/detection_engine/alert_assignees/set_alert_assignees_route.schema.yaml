@@ -28,10 +28,42 @@ paths:
                   description: Details about the assignees to assign and unassign.
                 ids:
                   $ref: '../../model/alert.schema.yaml#/components/schemas/AlertIds'
-                  description: List of alerts ids to assign and unassign passed assignees.
+            examples:
+              add:
+                value:
+                  assignees:
+                    add: ['u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0']
+                    remove: []
+                  ids: ['681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6']
+              remove:
+                value:
+                  assignees:
+                    add: []
+                    remove: ['u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0']
+                  ids: ['681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6']
       responses:
         200:
           description: Indicates a successful call.
+          content:
+            application/ndjson:
+              examples:
+                add:
+                  value:
+                    took: 76,
+                    timed_out: false,
+                    total: 1,
+                    updated: 1,
+                    deleted: 0,
+                    batches: 1,
+                    version_conflicts: 0,
+                    noops: 0,
+                    retries:
+                      - bulk: 0,
+                      - search: 0
+                    throttled_millis: 0,
+                    requests_per_second: -1,
+                    throttled_until_millis: 0,
+                    failures: []
         400:
           description: Invalid request.
 
@@ -46,10 +78,14 @@ components:
         add:
           type: array
           items:
-            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-          description: A list of users ids to assign.
+            type: string
+            format: nonempty
+            minLength: 1
+            description: A list of users ids to assign.
         remove:
           type: array
           items:
-            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-          description: A list of users ids to unassign.
+            type: string
+            format: nonempty
+            minLength: 1
+            description: A list of users ids to unassign.

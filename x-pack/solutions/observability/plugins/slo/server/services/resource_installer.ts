@@ -15,8 +15,8 @@ import {
   SUMMARY_DESTINATION_INDEX_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
-import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/slI_mappings_template';
-import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/slI_settings_template';
+import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/sli_mappings_template';
+import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/sli_settings_template';
 import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary_mappings_template';
 import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
@@ -42,7 +42,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     try {
       installTimeout = setTimeout(() => (this.isInstalling = false), 60000);
 
-      this.logger.info('Installing SLO shared resources');
+      this.logger.debug('Installing SLO shared resources');
       await Promise.all([
         this.createOrUpdateComponentTemplate(SLI_MAPPINGS_TEMPLATE),
         this.createOrUpdateComponentTemplate(SLI_SETTINGS_TEMPLATE),
@@ -71,9 +71,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       this.esClient
     );
     if (template._meta?.version && currentVersion === template._meta.version) {
-      this.logger.info(`SLO component template found with version [${template._meta.version}]`);
+      this.logger.debug(`SLO component template found with version [${template._meta.version}]`);
     } else {
-      this.logger.info(`Installing SLO component template [${template.name}]`);
+      this.logger.debug(`Installing SLO component template [${template.name}]`);
       return this.execute(() => this.esClient.cluster.putComponentTemplate(template));
     }
   }
@@ -86,9 +86,9 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     );
 
     if (template._meta?.version && currentVersion === template._meta.version) {
-      this.logger.info(`SLO index template found with version [${template._meta.version}]`);
+      this.logger.debug(`SLO index template found with version [${template._meta.version}]`);
     } else {
-      this.logger.info(`Installing SLO index template [${template.name}]`);
+      this.logger.debug(`Installing SLO index template [${template.name}]`);
       return this.execute(() => this.esClient.indices.putIndexTemplate(template));
     }
   }
@@ -114,19 +114,11 @@ async function fetchComponentTemplateVersion(
   esClient: ElasticsearchClient
 ) {
   const getTemplateRes = await retryTransientEsErrors(
-    () =>
-      esClient.cluster.getComponentTemplate(
-        {
-          name,
-        },
-        {
-          ignore: [404],
-        }
-      ),
+    () => esClient.cluster.getComponentTemplate({ name }, { ignore: [404] }),
     { logger }
   );
 
-  return getTemplateRes?.component_templates?.[0]?.component_template?._meta?.version || null;
+  return getTemplateRes?.component_templates?.[0]?.component_template?._meta?.version ?? null;
 }
 
 async function fetchIndexTemplateVersion(
@@ -135,17 +127,9 @@ async function fetchIndexTemplateVersion(
   esClient: ElasticsearchClient
 ) {
   const getTemplateRes = await retryTransientEsErrors(
-    () =>
-      esClient.indices.getIndexTemplate(
-        {
-          name,
-        },
-        {
-          ignore: [404],
-        }
-      ),
+    () => esClient.indices.getIndexTemplate({ name }, { ignore: [404] }),
     { logger }
   );
 
-  return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version || null;
+  return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version ?? null;
 }

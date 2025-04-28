@@ -6,12 +6,10 @@
  */
 
 import { findSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
-import { FindSLO, KibanaSavedObjectsSLORepository } from '../../services';
+import { FindSLO } from '../../services';
 import { DefaultSummarySearchClient } from '../../services/summary_search_client/summary_search_client';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { getSpaceId } from './utils/get_space_id';
 
 export const findSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
@@ -22,17 +20,22 @@ export const findSLORoute = createSloServerRoute({
     },
   },
   params: findSLOParamsSchema,
-  handler: async ({ context, request, params, logger, plugins }) => {
+  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
+    const { scopedClusterClient, repository, soClient, spaceId } = await getScopedClients({
+      request,
+      logger,
+    });
 
-    const spaceId = await getSpaceId(plugins, request);
-    const soClient = (await context.core).savedObjects.client;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const summarySearchClient = new DefaultSummarySearchClient(esClient, soClient, logger, spaceId);
+    const summarySearchClient = new DefaultSummarySearchClient(
+      scopedClusterClient.asCurrentUser,
+      soClient,
+      logger,
+      spaceId
+    );
 
     const findSLO = new FindSLO(repository, summarySearchClient);
 
-    return await executeWithErrorHandler(() => findSLO.execute(params?.query ?? {}));
+    return await findSLO.execute(params?.query ?? {});
   },
 });

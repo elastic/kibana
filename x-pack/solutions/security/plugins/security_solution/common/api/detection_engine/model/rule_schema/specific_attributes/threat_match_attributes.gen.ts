@@ -19,11 +19,21 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '../../../../model/primitives.gen';
 
 /**
- * Query to run
+ * Query used to determine which fields in the Elasticsearch index are used for generating alerts.
  */
 export type ThreatQuery = z.infer<typeof ThreatQuery>;
 export const ThreatQuery = z.string();
 
+/**
+  * Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index. Each entries object must contain these fields:
+
+- field: field from the event indices on which the rule runs
+- type: must be mapping
+- value: field from the Elasticsearch threat index
+  
+You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
+
+  */
 export type ThreatMapping = z.infer<typeof ThreatMapping>;
 export const ThreatMapping = z
   .array(
@@ -39,6 +49,9 @@ export const ThreatMapping = z
   )
   .min(1);
 
+/**
+ * Elasticsearch indices used to check which field values generate alerts.
+ */
 export type ThreatIndex = z.infer<typeof ThreatIndex>;
 export const ThreatIndex = z.array(z.string());
 

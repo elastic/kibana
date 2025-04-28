@@ -21,10 +21,13 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
-const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTableIsLoaded';
+const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsTableEmptyState';
+const ALERTS_TABLE_ERROR_PROMPT_SELECTOR = 'alertsTableErrorPrompt';
 const ALERTS_TABLE_ACTIONS_MENU_SELECTOR = 'alertsTableActionsMenu';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
+const ALERTS_TABLE_LOADING_SELECTOR = 'internalAlertsPageLoading';
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -35,19 +38,20 @@ export function ObservabilityAlertsCommonProvider({
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
-  const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
   const retryOnStale = getService('retryOnStale');
+  const pageObjects = getPageObjects(['common', 'header']);
 
   const navigateToTimeWithData = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+    await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts',
       `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
       { ensureCurrentUrl: false }
     );
+    await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const navigateToRulesPage = async () => {
@@ -101,8 +105,23 @@ export function ObservabilityAlertsCommonProvider({
     });
   };
 
+  // Alert table
+  const waitForAlertsTableLoadingToDisappear = async () => {
+    await testSubjects.missingOrFail(ALERTS_TABLE_LOADING_SELECTOR, { timeout: 30_000 });
+  };
+
+  const waitForAlertTableToLoad = async () => {
+    await waitForAlertsTableLoadingToDisappear();
+    await retry.waitFor('alerts table to appear', async () => {
+      return (
+        (await testSubjects.exists(ALERTS_TABLE_NO_DATA_SELECTOR)) ||
+        (await testSubjects.exists(ALERTS_TABLE_WITH_DATA_SELECTOR))
+      );
+    });
+  };
+
   const getTableColumnHeaders = async () => {
-    const table = await testSubjects.find(ALERTS_TABLE_CONTAINER_SELECTOR);
+    const table = await testSubjects.find(ALERTS_TABLE_WITH_DATA_SELECTOR);
     const tableHeaderRow = await testSubjects.findDescendant('dataGridHeader', table);
     const columnHeaders = await tableHeaderRow.findAllByXpath('./div');
     return columnHeaders;
@@ -131,7 +150,11 @@ export function ObservabilityAlertsCommonProvider({
   });
 
   const getTableOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
+    return await testSubjects.existOrFail(ALERTS_TABLE_WITH_DATA_SELECTOR);
+  };
+
+  const ensureNoTableErrorPrompt = async () => {
+    return await testSubjects.missingOrFail(ALERTS_TABLE_ERROR_PROMPT_SELECTOR);
   };
 
   const getNoDataPageOrFail = async () => {
@@ -139,11 +162,14 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('alertsStateTableEmptyState');
+    return await testSubjects.existOrFail('alertsTableEmptyState');
   };
 
   // Query Bar
   const getQueryBar = async () => {
+    await retry.try(async () => {
+      await testSubjects.existOrFail('queryInput');
+    });
     return await testSubjects.find('queryInput');
   };
 
@@ -404,6 +430,8 @@ export function ObservabilityAlertsCommonProvider({
     getTableCellsInRows,
     getTableColumnHeaders,
     getTableOrFail,
+    waitForAlertTableToLoad,
+    ensureNoTableErrorPrompt,
     navigateToTimeWithData,
     setKibanaTimeZoneToUTC,
     openAlertsFlyout,

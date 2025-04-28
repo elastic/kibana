@@ -8,8 +8,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { escapeRegExp, memoize } from 'lodash';
-import { HIGHLIGHT_COLOR, HIGHLIGHT_CLASS_NAME, CELL_MATCH_INDEX_ATTRIBUTE } from './constants';
+import { escapeRegExp } from 'lodash';
+import { HIGHLIGHT_CLASS_NAME, CELL_MATCH_INDEX_ATTRIBUTE } from './constants';
 import { InTableSearchHighlightsWrapperProps } from './types';
 
 /**
@@ -17,6 +17,8 @@ import { InTableSearchHighlightsWrapperProps } from './types';
  */
 export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWrapperProps> = ({
   inTableSearchTerm,
+  highlightColor,
+  highlightBackgroundColor,
   onHighlightsCountFound,
   children,
 }) => {
@@ -31,7 +33,13 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
       const cellNode = cellValueRef.current;
 
       const searchForMatches = () => {
-        const count = modifyDOMAndAddSearchHighlights(cellNode, inTableSearchTerm, dryRun);
+        const count = modifyDOMAndAddSearchHighlights(
+          cellNode,
+          inTableSearchTerm,
+          highlightColor,
+          highlightBackgroundColor,
+          dryRun
+        );
         if (shouldCallCallbackRef.current) {
           shouldCallCallbackRef.current = false;
           onHighlightsCountFound?.(count);
@@ -44,18 +52,39 @@ export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWra
 
       timerRef.current = setTimeout(searchForMatches, 0);
     }
-  }, [dryRun, inTableSearchTerm, children, onHighlightsCountFound]);
+  }, [
+    dryRun,
+    inTableSearchTerm,
+    highlightColor,
+    highlightBackgroundColor,
+    children,
+    onHighlightsCountFound,
+  ]);
 
   return <div ref={cellValueRef}>{children}</div>;
 };
 
-const getSearchTermRegExp = memoize((searchTerm: string): RegExp => {
-  return new RegExp(`(${escapeRegExp(searchTerm.trim())})`, 'gi');
-});
+const searchTermRegExpCache = new Map<string, RegExp>();
+
+const getSearchTermRegExp = (searchTerm: string): RegExp => {
+  if (searchTermRegExpCache.has(searchTerm)) {
+    return searchTermRegExpCache.get(searchTerm)!;
+  }
+
+  const searchTermRegExp = new RegExp(`(${escapeRegExp(searchTerm.trim())})`, 'gi');
+  searchTermRegExpCache.set(searchTerm, searchTermRegExp);
+  return searchTermRegExp;
+};
+
+export const clearSearchTermRegExpCache = () => {
+  searchTermRegExpCache.clear();
+};
 
 function modifyDOMAndAddSearchHighlights(
   originalNode: Node,
   inTableSearchTerm: string,
+  highlightColor: string,
+  highlightBackgroundColor: string,
   dryRun: boolean
 ): number {
   let matchIndex = 0;
@@ -86,7 +115,8 @@ function modifyDOMAndAddSearchHighlights(
           if (searchTermRegExp.test(part)) {
             const mark = document.createElement('mark');
             mark.textContent = part;
-            mark.style.backgroundColor = HIGHLIGHT_COLOR;
+            mark.style.color = highlightColor;
+            mark.style.backgroundColor = highlightBackgroundColor;
             mark.setAttribute('class', HIGHLIGHT_CLASS_NAME);
             mark.setAttribute(CELL_MATCH_INDEX_ATTRIBUTE, `${matchIndex++}`);
             nodeWithHighlights.appendChild(mark);

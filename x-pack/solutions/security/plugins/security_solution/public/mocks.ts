@@ -24,7 +24,8 @@ export const contractStartServicesMock: ContractStartServices = {
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
-  experimentalFeatures: allowedExperimentalValues, // default values
+  experimentalFeatures: allowedExperimentalValues, // default values,
+  setProductFeatureKeys: jest.fn(),
 });
 
 const startMock = (): PluginStart => ({
@@ -36,10 +37,6 @@ const startMock = (): PluginStart => ({
   getUpselling: () => upselling,
   setOnboardingSettings: onboardingService.setSettings.bind(onboardingService),
   setIsSolutionNavigationEnabled: jest.fn(),
-  getSolutionNavigation: jest.fn(async () => ({
-    navigationTree$: of({ body: [], footer: [] }),
-    panelContentProvider: jest.fn(),
-  })),
 });
 
 export const securitySolutionMock = {

@@ -254,46 +254,18 @@
           {
             "parentPluginId": "slo",
             "id": "def-public.SLOPublicPluginsSetup.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
             "signature": [
-              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuProvider",
-                "text": "ShareMenuProvider"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.AnonymousAccessServiceContract",
-                "text": "AnonymousAccessServiceContract"
-              },
-              ") => void; }"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
@@ -351,7 +323,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -359,7 +331,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; }"
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
@@ -1143,6 +1131,68 @@
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-public.SLOPublicPluginsStart.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-public.SLOPublicPluginsStart.apmSourcesAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "apmSourcesAccess",
+            "description": [],
+            "signature": [
+              "{ getApmIndices: (options?: Omit<",
+              {
+                "pluginId": "apmSourcesAccess",
+                "scope": "public",
+                "docId": "kibApmSourcesAccessPluginApi",
+                "section": "def-public.SourcesApiOptions",
+                "text": "SourcesApiOptions"
+              },
+              ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+              {
+                "pluginId": "apmSourcesAccess",
+                "scope": "public",
+                "docId": "kibApmSourcesAccessPluginApi",
+                "section": "def-public.SourcesApiOptions",
+                "text": "SourcesApiOptions"
+              },
+              ", \"body\"> | undefined) => Promise<",
+              "ApmIndexSettingsResponse",
+              ">; saveApmIndices: (options: ",
+              {
+                "pluginId": "apmSourcesAccess",
+                "scope": "public",
+                "docId": "kibApmSourcesAccessPluginApi",
+                "section": "def-public.SourcesApiOptions",
+                "text": "SourcesApiOptions"
+              },
+              " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+              "SavedObject",
+              "<{}>>; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1378,7 +1428,7 @@
         "label": "sloPaths",
         "description": [],
         "signature": [
-          "{ slos: string; slosSettings: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
+          "{ slos: string; slosSettings: string; slosWelcome: string; slosManagement: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId: string, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
         "deprecated": false,

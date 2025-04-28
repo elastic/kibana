@@ -24,6 +24,12 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
           field: schema.maybe(schema.string()),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization check to es.',
+        },
+      },
     },
     async (context, request, response) => {
       const { index, field } = request.query;
@@ -39,12 +45,10 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
             {
               params: {
                 index,
-                body: {
-                  aggs: {
-                    '1': {
-                      avg: {
-                        field,
-                      },
+                aggs: {
+                  '1': {
+                    avg: {
+                      field,
                     },
                   },
                 },

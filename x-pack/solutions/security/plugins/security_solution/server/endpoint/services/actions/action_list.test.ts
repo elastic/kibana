@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   EndpointActionResponse,
   LogsEndpointAction,
@@ -94,7 +94,7 @@ describe('When using `getActionList()', () => {
           agents: ['agent-a'],
           agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
-          command: 'kill-process',
+          command: 'running-processes',
           alertIds: undefined,
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
@@ -180,7 +180,7 @@ describe('When using `getActionList()', () => {
           agents: ['agent-a'],
           agentType: 'endpoint',
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
-          command: 'kill-process',
+          command: 'running-processes',
           completedAt: '2022-04-30T16:08:47.449Z',
           errors: undefined,
           wasSuccessful: true,
@@ -282,7 +282,7 @@ describe('When using `getActionList()', () => {
             'agent-x': { name: '' },
           },
           alertIds: undefined,
-          command: 'kill-process',
+          command: 'running-processes',
           completedAt: undefined,
           wasSuccessful: false,
           errors: undefined,

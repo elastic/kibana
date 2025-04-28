@@ -14,6 +14,9 @@ export const commonVars = {
     type: 'integer',
     value: 2,
   },
+  maintenance_windows: {
+    type: 'yaml',
+  },
 };
 
 export const getTestProjectSyntheticsPolicyLightweight = (

@@ -124,6 +124,12 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     router.get(
       {
         path: '/api/saved_objects/get-decrypted-as-internal-user/{type}/{id}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { params: (value) => ({ value }) },
       },
       async (context, request, response) => {
@@ -150,6 +156,12 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     router.get(
       {
         path: '/api/saved_objects/create-point-in-time-finder-decrypted-as-internal-user',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { query: schema.object({ type: schema.string() }) },
       },
       async (context, request, response) => {
@@ -305,7 +317,6 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
     hidden: false,
     management: { importableAndExportable: true },
     namespaceType: 'multiple-isolated',
-    switchToModelVersionAt: '8.10.0',
     mappings: {
       properties: {
         nonEncryptedAttribute: {

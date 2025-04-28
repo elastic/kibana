@@ -29,7 +29,7 @@ import {
   useEuiThemeCSSVariables,
   EuiPageSidebar,
   useEuiOverflowScroll,
-  useEuiBreakpoint,
+  useEuiMinBreakpoint,
   euiCanAnimate,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -222,7 +222,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
 
       ${useEuiOverflowScroll('y')};
 
-      ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+      ${useEuiMinBreakpoint('m')} {
         width: ${FLYOUT_SIZE_CSS};
         padding: ${euiTheme.size.l};
       }

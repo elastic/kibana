@@ -65,8 +65,10 @@ const argTypes = {
 
 type Params = Record<keyof typeof argTypes, any>;
 
-export const IconButtonGroup = ({ buttonCount }: Params) => {
-  return <Component legend="Example icon group" buttons={iconButtons.slice(0, buttonCount)} />;
-};
+export const IconButtonGroup = {
+  render: ({ buttonCount }: Params) => {
+    return <Component legend="Example icon group" buttons={iconButtons.slice(0, buttonCount)} />;
+  },
 
-IconButtonGroup.argTypes = argTypes;
+  argTypes,
+};

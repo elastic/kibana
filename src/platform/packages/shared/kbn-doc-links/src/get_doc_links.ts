@@ -24,14 +24,19 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
+  const API_DOCS = meta.apiDocsUrl;
+  const ELASTIC_DOCS = meta.docsWebsiteUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+  const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`;
+  const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
+  const KIBANA_APIS = `${API_DOCS}doc/kibana/`;
+  const KIBANA_SERVERLESS_APIS = `{$API_DOCS}doc/serverless/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
   const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
-  const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
@@ -42,11 +47,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
-    settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+    settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference`,
     elasticStackGetStarted: isServerless
-      ? `${SERVERLESS_DOCS}intro.html`
-      : `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
-    apiReference: `${ELASTIC_WEBSITE_URL}guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/api-reference.html`,
+      ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
+      : `${ELASTIC_DOCS}get-started`,
+    apiReference: `${API_DOCS}`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
@@ -59,22 +64,22 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       customLinks: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-create-custom-links.html`
         : `${KIBANA_DOCS}custom-links.html`,
-      droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
-      upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
-      metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
-      overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
+      droppedTransactionSpans: `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-data-model-dropped-spans`,
+      upgrading: `${OBSERVABILITY_DOCS}apm-upgrade.html`,
+      metaData: `${OBSERVABILITY_DOCS}apm-data-model-metadata.html`,
+      overview: `${OBSERVABILITY_DOCS}apm.html`,
       tailSamplingPolicies: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
         : `${OBSERVABILITY_DOCS}configure-tail-based-sampling.html`,
-      elasticAgent: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade-to-apm-integration.html`,
+      elasticAgent: `${OBSERVABILITY_DOCS}/apm-upgrade-to-apm-integration.html`,
       storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
       spanCompression: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-compress-spans.html`
-        : `${OBSERVABILITY_DOCS}span-compression.html`,
+        : `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-spans-span-compression`,
       transactionSampling: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
         : `${OBSERVABILITY_DOCS}sampling.html`,
-      indexLifecycleManagement: `${APM_DOCS}guide/${DOC_LINK_VERSION}/ilm-how-to.html`,
+      indexLifecycleManagement: `${OBSERVABILITY_DOCS}apm-ilm-how-to.html`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,
@@ -84,7 +89,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexManagement: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-configure-index-management.html`,
     },
     console: {
-      guide: `${KIBANA_DOCS}console-kibana.html`,
+      guide: isServerless
+        ? `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`
+        : `${KIBANA_DOCS}console-kibana.html`,
       serverlessGuide: `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`,
     },
     dashboard: {
@@ -108,6 +115,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
       elasticsearchModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`,
       elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
+      kafkaOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/kafka-output.html`,
       startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
       exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
       suricataModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-suricata.html`,
@@ -126,7 +134,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       behavioralAnalyticsCORS: `${ELASTICSEARCH_DOCS}behavioral-analytics-cors.html`,
       behavioralAnalyticsEvents: `${ELASTICSEARCH_DOCS}behavioral-analytics-event.html`,
       buildConnector: `${ELASTICSEARCH_DOCS}es-build-connector.html`,
-      bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
+      bulkApi: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-bulk`
+        : `${ELASTICSEARCH_APIS}operation/operation-bulk`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ELASTICSEARCH_DOCS}es-connectors.html`,
       connectorsClientDeploy: `${ELASTICSEARCH_DOCS}es-build-connector.html#es-connectors-deploy-connector-service`,
@@ -169,8 +179,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       e5Model: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       elser: `${ELASTICSEARCH_DOCS}semantic-search-semantic-text.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
-      indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
-      inferenceApiCreate: `${ELASTICSEARCH_DOCS}put-inference-api.html`,
+      indexApi: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-create`
+        : `${ELASTICSEARCH_APIS}operation/operation-create`,
+      inferenceApiCreate: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
+        : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
+      inferenceApisConfigureChunking: `${ELASTIC_DOCS}explore-analyze/elastic-inference/inference-api#infer-chunking-config`,
       ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
       knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
@@ -197,6 +212,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
+      upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
     metricbeat: {
@@ -263,7 +279,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
     },
     scriptedFields: {
-      scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
+      scriptFields: `${ELASTICSEARCH_DOCS}search-fields.html#script-fields`,
       scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html`,
       painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
       painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
@@ -291,14 +307,16 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
-      restApis: `${KIBANA_DOCS}api.html`,
+      restApis: isServerless ? `${KIBANA_SERVERLESS_APIS}` : `${KIBANA_APIS}`,
       dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
       upgradeNotes: `${KIBANA_DOCS}breaking-changes-summary.html`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+      indexBlocks: `${ELASTICSEARCH_DOCS}index-modules-blocks.html#index-block-settings`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+      unfreezeApi: `https://www.elastic.co/guide/en/elastic-stack/9.0/release-notes-elasticsearch-9.0.0.html#remove_unfreeze_rest_endpoint`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
@@ -443,6 +461,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html`,
+      updatePrebuiltDetectionRules: isServerless
+        ? `${SERVERLESS_DOCS}security-prebuilt-rules-management.html#update-prebuilt-rules`
+        : `${SECURITY_SOLUTION_DOCS}prebuilt-rules-management.html#update-prebuilt-rules`,
+      prebuiltRuleCustomizationPromoBlog: `${ELASTIC_WEBSITE_URL}blog/security-prebuilt-rules-editing`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -454,7 +476,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
-      legacyBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      siemMigrations: `${SECURITY_SOLUTION_DOCS}siem-migration.html`,
+      llmPerformanceMatrix: `${SECURITY_SOLUTION_DOCS}llm-performance-matrix.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -485,53 +509,62 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
       timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
       generalSettings: `${KIBANA_DOCS}advanced-options.html#kibana-general-settings`,
-      savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
+      savedObjectsApiList: isServerless
+        ? `${KIBANA_SERVERLESS_APIS}group/endpoint-saved-objects`
+        : `${KIBANA_APIS}group/endpoint-saved-objects`,
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
     },
     ml: {
-      guide: `${MACHINE_LEARNING_DOCS}index.html`,
-      aggregations: `${MACHINE_LEARNING_DOCS}ml-configuring-aggregation.html`,
-      anomalyDetection: `${MACHINE_LEARNING_DOCS}ml-ad-overview.html`,
-      anomalyDetectionBucketSpan: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-bucket-span`,
-      anomalyDetectionConfiguringCategories: `${MACHINE_LEARNING_DOCS}ml-configuring-categories.html`,
-      anomalyDetectionCardinality: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-cardinality`,
-      anomalyDetectionCreateJobs: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-create-job`,
-      anomalyDetectionDetectors: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-detectors`,
-      anomalyDetectionFunctions: `${MACHINE_LEARNING_DOCS}ml-functions.html`,
-      anomalyDetectionInfluencers: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-influencers`,
-      anomalyDetectionJobs: `${MACHINE_LEARNING_DOCS}ml-ad-finding-anomalies.html`,
-      anomalyDetectionJobResource: `${ELASTICSEARCH_DOCS}ml-put-job.html#ml-put-job-path-parms`,
-      anomalyDetectionJobResourceAnalysisConfig: `${ELASTICSEARCH_DOCS}ml-put-job.html#put-analysisconfig`,
-      anomalyDetectionJobTips: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-job-tips`,
-      anomalyDetectionScoreExplanation: `${MACHINE_LEARNING_DOCS}ml-ad-explain.html`,
-      alertingRules: `${MACHINE_LEARNING_DOCS}ml-configuring-alerts.html`,
-      anomalyDetectionModelMemoryLimits: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-model-memory-limits`,
-      calendars: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-calendars`,
-      classificationEvaluation: `${MACHINE_LEARNING_DOCS}ml-dfa-classification.html#ml-dfanalytics-classification-evaluation`,
-      customRules: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-rules`,
-      customUrls: `${MACHINE_LEARNING_DOCS}ml-configuring-url.html`,
-      dataFrameAnalytics: `${MACHINE_LEARNING_DOCS}ml-dfanalytics.html`,
-      dFAPrepareData: `${MACHINE_LEARNING_DOCS}ml-dfa-overview.html#prepare-transform-data`,
-      dFAStartJob: `${ELASTICSEARCH_DOCS}start-dfanalytics.html`,
-      dFACreateJob: `${ELASTICSEARCH_DOCS}put-dfanalytics.html`,
-      featureImportance: `${MACHINE_LEARNING_DOCS}ml-feature-importance.html`,
-      outlierDetectionRoc: `${MACHINE_LEARNING_DOCS}ml-dfa-finding-outliers.html#ml-dfanalytics-roc`,
-      regressionEvaluation: `${MACHINE_LEARNING_DOCS}ml-dfa-regression.html#ml-dfanalytics-regression-evaluation`,
-      classificationAucRoc: `${MACHINE_LEARNING_DOCS}ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
-      setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
-      trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
-      startTrainedModelsDeployment: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-model.html`,
-      logsAnomalyDetectionConfigs: `${MACHINE_LEARNING_DOCS}ootb-ml-jobs-logs-ui.html`,
-      metricsAnomalyDetectionConfigs: `${MACHINE_LEARNING_DOCS}ootb-ml-jobs-metrics-ui.html`,
-      nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
-      nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
-      nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
+      guide: `${ELASTIC_DOCS}explore-analyze/machine-learning`,
+      aggregations: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-configuring-aggregation`,
+      anomalyDetection: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection`,
+      anomalyDetectionBucketSpan: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-bucket-span`,
+      anomalyDetectionConfiguringCategories: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-configuring-categories`,
+      anomalyDetectionCardinality: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-cardinality`,
+      anomalyDetectionCreateJobs: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-create-job`,
+      anomalyDetectionDetectors: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-detectors`,
+      anomalyDetectionFunctions: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-functions`,
+      anomalyDetectionInfluencers: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-influencers`,
+      anomalyDetectionJobs: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-finding-anomalies`,
+      anomalyDetectionJobResource: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ml-put-job`
+        : `${ELASTICSEARCH_APIS}operation/operation-ml-put-job`,
+      anomalyDetectionJobResourceAnalysisConfig: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ml-put-job`
+        : `${ELASTICSEARCH_APIS}operation/operation-ml-put-job`,
+      anomalyDetectionJobTips: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs`,
+      anomalyDetectionScoreExplanation: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-explain`,
+      alertingRules: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-configuring-alerts`,
+      anomalyDetectionModelMemoryLimits: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-model-memory-limits`,
+      calendars: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-calendars`,
+      classificationEvaluation: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics/ml-dfa-classification#ml-dfanalytics-classification-evaluation`,
+      customRules: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-ad-run-jobs#ml-ad-rules`,
+      customUrls: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection/ml-configuring-url`,
+      dataFrameAnalytics: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics`,
+      dFAPrepareData: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics/ml-dfa-overview#prepare-transform-data`,
+      dFAStartJob: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ml-start-data-frame-analytics`
+        : `${ELASTICSEARCH_APIS}operation/operation-ml-start-data-frame-analytics`,
+      dFACreateJob: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ml-put-data-frame-analytics`
+        : `${ELASTICSEARCH_APIS}operation/operation-ml-put-data-frame-analytics`,
+      featureImportance: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics/ml-feature-importance`,
+      outlierDetectionRoc: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics/ml-dfa-finding-outliers#ml-dfanalytics-roc`,
+      regressionEvaluation: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics/ml-dfa-regression#ml-dfanalytics-regression-evaluation`,
+      classificationAucRoc: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics/ml-dfa-classification#ml-dfanalytics-class-aucroc`,
+      setUpgradeMode: `${ELASTICSEARCH_APIS}operation/operation-ml-set-upgrade-mode`,
+      trainedModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/data-frame-analytics/ml-trained-models`,
+      startTrainedModelsDeployment: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-deploy-model`,
+      logsAnomalyDetectionConfigs: `${ELASTIC_DOCS}reference/data-analysis/machine-learning/ootb-ml-jobs-logs-ui`,
+      metricsAnomalyDetectionConfigs: `${ELASTIC_DOCS}reference/data-analysis/machine-learning/ootb-ml-jobs-metrics-ui`,
+      nlpElser: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-elser`,
+      nlpE5: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-e5`,
+      nlpImportModel: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-import-model`,
     },
     transforms: {
-      guide: isServerless
-        ? `${SERVERLESS_DOCS}transforms.html`
-        : `${ELASTICSEARCH_DOCS}transforms.html`,
-      alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
+      guide: `https://www.elastic.co/docs/explore-analyze/transforms`,
+      alertingRules: `https://www.elastic.co/docs/explore-analyze/transforms/transform-alerts`,
+      overview: `https://www.elastic.co/docs/explore-analyze/transforms/transform-overview`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
@@ -589,49 +622,35 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
     },
     alerting: {
-      guide: isServerless
-        ? `${SERVERLESS_DOCS}rules.html`
-        : `${KIBANA_DOCS}create-and-manage-rules.html`,
-      actionTypes: isServerless
-        ? `${SERVERLESS_DOCS}action-connectors.html`
-        : `${KIBANA_DOCS}action-types.html`,
-      apmRulesErrorCount: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-error-count-threshold-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      apmRulesTransactionDuration: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-latency-threshold-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      apmRulesTransactionError: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-failed-transaction-rate-threshold-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      apmRulesAnomaly: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-anomaly-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      emailAction: `${KIBANA_DOCS}email-action-type.html`,
-      emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
-      emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
-      emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
-      generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
-      indexAction: `${KIBANA_DOCS}index-action-type.html`,
-      esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
-      indexThreshold: `${KIBANA_DOCS}rule-type-index-threshold.html`,
-      maintenanceWindows: isServerless
-        ? `${SERVERLESS_DOCS}maintenance-windows.html`
-        : `${KIBANA_DOCS}maintenance-windows.html`,
-      pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
-      preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
-      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}pre-configured-connectors.html#preconfigured-connector-alert-history`,
-      serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
-      serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
-      setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
-      slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-webhook`,
-      slackApiAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-web-api`,
-      teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
-      connectors: `${KIBANA_DOCS}action-types.html`,
-      legacyRuleApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201550`,
+      guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
+      actionTypes: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
+      apmRulesErrorCount: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-error-count-threshold-rule`,
+      apmRulesTransactionDuration: `${ELASTIC_DOCS}solutions/observability/incident-management/create-latency-threshold-rule`,
+      apmRulesTransactionError: `${ELASTIC_DOCS}solutions/observability/incident-management/create-failed-transaction-rate-threshold-rule`,
+      apmRulesAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-apm-anomaly-rule`,
+      authorization: `${KIBANA_DOCS}alerting-setup.html#alerting-authorization`,
+      emailAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
+      emailActionConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
+      emailExchangeClientSecretConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type#exchange-client-secret`,
+      emailExchangeClientIdConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type#exchange-client-tenant-id`,
+      generalSettings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/alerting-settings#general-alert-action-settings`,
+      indexAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/index-action-type`,
+      esQuery: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/rule-type-es-query`,
+      indexThreshold: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/rule-type-index-threshold`,
+      maintenanceWindows: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/maintenance-windows`,
+      pagerDutyAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/pagerduty-action-type`,
+      preconfiguredConnectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/pre-configured-connectors`,
+      preconfiguredAlertHistoryConnector: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/pre-configured-connectors#preconfigured-connector-alert-history`,
+      serviceNowAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/servicenow-action-type#configuring-servicenow`,
+      serviceNowSIRAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/servicenow-sir-action-type`,
+      setupPrerequisites: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/alerting-setup#alerting-prerequisites`,
+      slackAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-webhook`,
+      slackApiAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-web-api`,
+      teamsAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/teams-action-type#configuring-teams`,
+      connectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
     },
     taskManager: {
-      healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
+      healthMonitoring: `${ELASTIC_DOCS}deploy-manage/monitor/kibana-task-manager-health-monitoring`,
     },
     maps: {
       connectToEms: `${KIBANA_DOCS}maps-connect-to-ems.html`,
@@ -657,10 +676,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       troubleshootKibana: `${KIBANA_DOCS}monitor-troubleshooting.html`,
     },
     reporting: {
-      cloudMinimumRequirements: `${KIBANA_DOCS}reporting-getting-started.html#reporting-on-cloud-resource-requirements`,
-      grantUserAccess: `${KIBANA_DOCS}secure-reporting.html#grant-user-access`,
-      browserSystemDependencies: `${KIBANA_DOCS}secure-reporting.html#install-reporting-packages`,
-      browserSandboxDependencies: `${KIBANA_DOCS}reporting-troubleshooting-pdf.html#reporting-troubleshooting-sandbox-dependency`,
+      cloudMinimumRequirements: `${ELASTIC_DOCS}explore-analyze/report-and-share#_embed_outside_of_kib`,
+      browserSystemDependencies: `${ELASTIC_DOCS}deploy-manage/kibana-reporting-configuration#install-reporting-packages`,
+      browserSandboxDependencies: `${ELASTIC_DOCS}explore-analyze/report-and-share/reporting-troubleshooting-pdf#reporting-troubleshooting-sandbox-dependency`,
     },
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
@@ -676,6 +694,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
       deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
+      enableElasticSearchSecurityFeatures: `${ELASTICSEARCH_DOCS}security-minimal-setup.html#_enable_elasticsearch_security_features`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
@@ -692,41 +711,78 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       skippingDisconnectedClusters: `${ELASTICSEARCH_DOCS}modules-cross-cluster-search.html#skip-unavailable-clusters`,
     },
     apis: {
-      bulkIndexAlias: `${ELASTICSEARCH_DOCS}indices-aliases.html`,
-      indexStats: `${ELASTICSEARCH_DOCS}indices-stats.html`,
-      byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
-      createAutoFollowPattern: `${ELASTICSEARCH_DOCS}ccr-put-auto-follow-pattern.html`,
-      createFollower: `${ELASTICSEARCH_DOCS}ccr-put-follow.html`,
-      createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
-      createSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
-      createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
-      createRoleMappingTemplates: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html#_role_templates`,
-      createRollupJobsRequest: `${ELASTICSEARCH_DOCS}rollup-put-job.html#rollup-put-job-api-request-body`,
-      createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
-      createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
-      createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
-      cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
-      executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
-      indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
-      inferTrainedModel: `${ELASTICSEARCH_DOCS}infer-trained-model.html`,
-      multiSearch: `${ELASTICSEARCH_DOCS}search-multi-search.html`,
-      openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
-      putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
-      painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
-      painlessExecuteAPIContexts: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html#_contexts`,
-      putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
-      putEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
-      putIndexTemplateV1: `${ELASTICSEARCH_DOCS}indices-templates-v1.html`,
-      putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
-      putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
-      restApis: `${ELASTICSEARCH_DOCS}rest-apis.html`,
-      searchPreference: `${ELASTICSEARCH_DOCS}search-search.html#search-preference`,
-      securityApis: `${ELASTICSEARCH_DOCS}security-api.html`,
-      simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
-      tasks: `${ELASTICSEARCH_DOCS}tasks.html`,
-      timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
-      unfreezeIndex: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
-      updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
+      bulkIndexAlias: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-update-aliases`,
+      indexStats: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-stats`,
+      byteSizeUnits: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#byte-units`,
+      createAutoFollowPattern: `${ELASTICSEARCH_APIS}operation/operation-ccr-put-auto-follow-pattern`,
+      createFollower: `${ELASTICSEARCH_APIS}operation/operation-ccr-follow`,
+      createIndex: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-create`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-create`,
+      createSnapshotLifecyclePolicy: `${ELASTICSEARCH_APIS}operation/operation-slm-put-lifecycle`,
+      createRoleMapping: `${ELASTICSEARCH_APIS}operation/operation-security-put-role-mapping`,
+      createRoleMappingTemplates: `${ELASTICSEARCH_APIS}operation/operation-security-put-role-mapping`,
+      createRollupJobsRequest: `${ELASTICSEARCH_APIS}operation/operation-rollup-put-job#operation-rollup-put-job-body-application-json`,
+      createApiKey: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-security-create-api-key`
+        : `${ELASTICSEARCH_APIS}operation/operation-security-create-api-key`,
+      createPipeline: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-put-pipeline`
+        : `${ELASTICSEARCH_APIS}operation/operation-ingest-put-pipeline`,
+      createTransformRequest: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-put-transform`
+        : `${ELASTICSEARCH_APIS}operation/operation-transform-put-transform`,
+      cronExpressions: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#api-cron-expressions`,
+      executeWatchActionModes: `${ELASTICSEARCH_APIS}operation/operation-watcher-execute-watch#operation-watcher-execute-watch-body-application-json`,
+      indexExists: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-exists`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-exists`,
+      inferTrainedModel: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ml-infer-trained-model`
+        : `${ELASTICSEARCH_APIS}operation/operation-ml-infer-trained-model`,
+      multiSearch: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-msearch`
+        : `${ELASTICSEARCH_APIS}operation/operation-msearch`,
+      openIndex: `${ELASTICSEARCH_APIS}operation/operation-indices-open`,
+      putComponentTemplate: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-cluster-put-component-template`
+        : `${ELASTICSEARCH_APIS}operation/operation-cluster-put-component-template`,
+      painlessExecute: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-scripts-painless-execute`
+        : `${ELASTICSEARCH_APIS}operation/operation-scripts-painless-execute`,
+      painlessExecuteAPIContexts: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-scripts-painless-execute#operation-scripts-painless-execute-body-application-json`
+        : `${ELASTICSEARCH_APIS}operation/operation-scripts-painless-execute#operation-scripts-painless-execute-body-application-json`,
+      putComponentTemplateMetadata: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-cluster-put-component-template#operation-cluster-put-component-template-body-application-json-_meta`
+        : `${ELASTICSEARCH_APIS}operation/operation-cluster-put-component-template#operation-cluster-put-component-template-body-application-json-_meta`,
+      putEnrichPolicy: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-enrich-put-policy`
+        : `${ELASTICSEARCH_APIS}operation/operation-enrich-put-policy`,
+      putIndexTemplateV1: `${ELASTICSEARCH_APIS}operation/operation-indices-put-template`,
+      putSnapshotLifecyclePolicy: `${ELASTICSEARCH_APIS}operation/operation-slm-put-lifecycle`,
+      putWatch: `${ELASTICSEARCH_APIS}operation/operation-watcher-put-watch`,
+      restApis: isServerless ? `${ELASTICSEARCH_SERVERLESS_APIS}` : `${ELASTICSEARCH_APIS}`,
+      searchPreference: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-search#operation-search-preference`
+        : `${ELASTICSEARCH_APIS}operation/operation-search#operation-search-preference`,
+      securityApis: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-security`
+        : `${ELASTICSEARCH_APIS}group/endpoint-security`,
+      simulatePipeline: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-simulate`
+        : `${ELASTICSEARCH_APIS}operation/operation-ingest-simulate`,
+      tasks: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-tasks`
+        : `${ELASTICSEARCH_APIS}group/endpoint-tasks`,
+      timeUnits: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#time-units`,
+      updateTransform: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-update-transform`
+        : `${ELASTICSEARCH_APIS}operation/operation-transform-update-transform`,
     },
     plugins: {
       azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
@@ -741,14 +797,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
       changeIndexSettings: `${ELASTICSEARCH_DOCS}index-modules.html`,
       createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
-      getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
+      getSnapshot: `${ELASTICSEARCH_APIS}operation/operation-snapshot-get`,
       registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-filesystem-repository.html#filesystem-repository-settings`,
       registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-source-only-repository.html#source-only-repository-settings`,
       registerUrl: `${ELASTICSEARCH_DOCS}snapshots-read-only-repository.html#read-only-url-repository-settings`,
       restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
-      restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
+      restoreSnapshotApi: `${ELASTICSEARCH_APIS}operation/operation-snapshot-restore`,
       searchableSnapshotSharedCache: `${ELASTICSEARCH_DOCS}searchable-snapshots.html#searchable-snapshots-shared-cache`,
-      slmStart: `${ELASTICSEARCH_DOCS}slm-api-start.html`,
+      slmStart: `${ELASTICSEARCH_APIS}operation/operation-slm-start`,
     },
     ingest: {
       append: `${ELASTICSEARCH_DOCS}append-processor.html`,
@@ -834,18 +890,20 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       packageSignatures: `${FLEET_DOCS}package-signatures.html`,
       secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
       agentPolicy: `${FLEET_DOCS}agent-policy.html`,
+      agentlessIntegrations: `${ELASTIC_DOCS}solutions/security/get-started/agentless-integrations`,
       api: `${FLEET_DOCS}fleet-api-docs.html`,
       uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
       installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
       elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
       policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
-      remoteESOoutput: `${FLEET_DOCS}monitor-elastic-agent.html#external-elasticsearch-monitoring`,
+      remoteESOoutput: `${FLEET_DOCS}remote-elasticsearch-output.html`,
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,
       proxiesSettings: `${FLEET_DOCS}fleet-agent-proxy-support.html`,
       unprivilegedMode: `${FLEET_DOCS}elastic-agent-unprivileged.html#unprivileged-change-mode`,
       httpMonitoring: `${FLEET_DOCS}agent-policy.html#change-policy-enable-agent-monitoring`,
+      agentLevelLogging: `${FLEET_DOCS}monitor-elastic-agent.html#change-logging-level`,
     },
     integrationDeveloper: {
       upload: `${INTEGRATIONS_DEV_DOCS}upload-a-new-integration.html`,
@@ -960,13 +1018,17 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
     inferenceManagement: {
-      inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
-    },
-    cases: {
-      legacyApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
+      inferenceAPIDocumentation: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
+        : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
     },
     synonyms: {
       synonymsAPIDocumentation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/synonyms-apis.html`,
+    },
+    queryRules: {
+      queryRulesAPIDocumentation: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-query_rules`
+        : `${ELASTICSEARCH_APIS}group/endpoint-query_rules`,
     },
   });
 };

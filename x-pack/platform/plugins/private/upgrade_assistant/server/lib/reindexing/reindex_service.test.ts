@@ -101,20 +101,18 @@ describe('reindexService', () => {
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-        body: {
-          cluster: ['manage'],
-          index: [
-            {
-              names: ['anIndex', `reindexed-v${currentMajor}-anIndex`],
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-            {
-              names: ['.tasks'],
-              privileges: ['read'],
-            },
-          ],
-        },
+        cluster: ['manage'],
+        index: [
+          {
+            names: ['anIndex', `reindexed-v${currentMajor}-anIndex`],
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read'],
+          },
+        ],
       });
     });
 
@@ -127,24 +125,22 @@ describe('reindexService', () => {
       const hasRequired = await service.hasRequiredPrivileges(`reindexed-v${prevMajor}-anIndex`);
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-        body: {
-          cluster: ['manage'],
-          index: [
-            {
-              names: [
-                `reindexed-v${prevMajor}-anIndex`,
-                `reindexed-v${currentMajor}-anIndex`,
-                'anIndex',
-              ],
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-            {
-              names: ['.tasks'],
-              privileges: ['read'],
-            },
-          ],
-        },
+        cluster: ['manage'],
+        index: [
+          {
+            names: [
+              `reindexed-v${prevMajor}-anIndex`,
+              `reindexed-v${currentMajor}-anIndex`,
+              'anIndex',
+            ],
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read'],
+          },
+        ],
       });
     });
   });
@@ -164,6 +160,11 @@ describe('reindexService', () => {
       const reindexWarnings = await service.detectReindexWarnings(indexName);
       expect(reindexWarnings).toEqual([
         {
+          flow: 'readonly',
+          warningType: 'makeIndexReadonly',
+        },
+        {
+          flow: 'reindex',
           warningType: 'replaceIndexWithAlias',
         },
       ]);
@@ -829,7 +830,7 @@ describe('reindexService', () => {
       );
 
       it('moves existing aliases over to new index', async () => {
-        clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
+        clusterClient.asCurrentUser.indices.get.mockResponseOnce({
           myIndex: {
             aliases: {
               myAlias: {},

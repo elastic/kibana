@@ -50,6 +50,8 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from a_index | stats var0 = avg(doubleField), count(*)', []);
             await expectErrors(`from a_index | stats sum(case(false, 0, 1))`, []);
             await expectErrors(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
+            await expectErrors('from a_index | stats ??func(doubleField)', []);
+            await expectErrors('from a_index | stats avg(??field)', []);
 
             // "or" must accept "null"
             await expectErrors('from a_index | stats count(textField == "a" or null)', []);
@@ -117,10 +119,10 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('from a_index | stats doubleField=', [
-              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
             ]);
             await expectErrors('from a_index | stats doubleField=5 by ', [
-              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
             ]);
             await expectErrors('from a_index | stats avg(doubleField) by wrongField', [
               'Unknown column [wrongField]',
@@ -170,6 +172,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               'from a_index | stats avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
               []
             );
+            await expectErrors('from a_index | stats avg(doubleField) by ??field', []);
             for (const op of ['+', '-', '*', '/', '%']) {
               await expectErrors(
                 `from a_index | stats avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,
@@ -182,7 +185,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('from a_index | stats by ', [
-              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'not', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
             ]);
           });
 
@@ -272,18 +275,18 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
 
           for (const nesting of NESTED_DEPTHS) {
             describe(`depth = ${nesting}`, () => {
-              describe('builtin', () => {
-                const builtinWrapping = Array(nesting).fill('+1').join('');
+              describe('operators', () => {
+                const operatorsWrapping = Array(nesting).fill('+1').join('');
 
                 test('no errors', async () => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | stats 5 + avg(doubleField) ${builtinWrapping}`,
+                    `from a_index | stats 5 + avg(doubleField) ${operatorsWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats 5 ${builtinWrapping} + avg(doubleField)`,
+                    `from a_index | stats 5 ${operatorsWrapping} + avg(doubleField)`,
                     []
                   );
                 });
@@ -291,16 +294,16 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                 test('errors', async () => {
                   const { expectErrors } = await setup();
 
-                  await expectErrors(`from a_index | stats 5 ${builtinWrapping} + doubleField`, [
-                    `At least one aggregation function required in [STATS], found [5${builtinWrapping}+doubleField]`,
+                  await expectErrors(`from a_index | stats 5 ${operatorsWrapping} + doubleField`, [
+                    `At least one aggregation function required in [STATS], found [5${operatorsWrapping}+doubleField]`,
                   ]);
-                  await expectErrors(`from a_index | stats 5 + doubleField ${builtinWrapping}`, [
-                    `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
+                  await expectErrors(`from a_index | stats 5 + doubleField ${operatorsWrapping}`, [
+                    `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                   ]);
                   await expectErrors(
-                    `from a_index | stats 5 + doubleField ${builtinWrapping}, var0 = sum(doubleField)`,
+                    `from a_index | stats 5 + doubleField ${operatorsWrapping}, var0 = sum(doubleField)`,
                     [
-                      `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
+                      `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                     ]
                   );
                 });

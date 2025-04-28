@@ -6,24 +6,122 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
+import type { RuleMigrationResourceType } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationRetryFilter } from '../../../../../../common/siem_migrations/constants';
 
 export enum SiemMigrationsEventTypes {
-  TranslatedRuleUpdate = 'Translated Rule Update',
-  TranslatedRuleInstall = 'Translated Rule Install',
-  TranslatedRuleBulkInstall = 'Translated Rule Bulk Install',
+  /**
+   * When new AI Connector is selected
+   * */
+  SetupConnectorSelected = 'siem_migrations_setup_connector_selected',
+  SetupMigrationOpenNew = 'siem_migrations_setup_rules_migration_open_new',
+  /**
+   * When Rule Resources are uploaded
+   */
+  SetupMigrationCreated = 'siem_migrations_setup_rules_migration_created',
+  /**
+   * When new rules are uploaded to create a new migration
+   */
+  SetupResourcesUploaded = 'siem_migrations_setup_rules_resources_uploaded',
+  /**
+   * When there are open resourced to be uploaded
+   */
+  SetupMigrationOpenResources = 'siem_migrations_setup_rules_migration_open_resources',
+  /*
+   * When the query to extract rules is copied
+   */
+  SetupRulesQueryCopied = 'siem_migrations_setup_rules_query_copied',
+  /**
+   * When the query to extract macros is copied
+   */
+  SetupMacrosQueryCopied = 'siem_migrations_setup_rules_macros_query_copied',
+  /**
+   * When the lookup name is copied
+   */
+  SetupLookupNameCopied = 'siem_migrations_setup_rules_lookup_name_copied',
+  /**
+   * When the translation of rules is started
+   */
+  StartMigration = 'siem_migrations_start_rules_migration',
+  /**
+   * When a translated rule is updated
+   */
+  TranslatedRuleUpdate = 'siem_migrations_translated_rule_update',
+  /**
+   * When a translated rule is installed
+   */
+  TranslatedRuleInstall = 'siem_migrations_translated_rule_install',
+  /**
+   * When a translated rules are bulk installed
+   */
+  TranslatedRuleBulkInstall = 'siem_migrations_translated_rule_bulk_install',
 }
 
-export interface BaseReportActionParams {
-  migrationId: string;
+export interface BaseResultActionParams {
   result: 'success' | 'failed';
   errorMessage?: string;
 }
 
-export interface ReportTranslatedRuleUpdateActionParams extends BaseReportActionParams {
+// Setup actions
+
+export interface ReportSetupConnectorSelectedActionParams {
+  eventName: string;
+  connectorType: string;
+  connectorId: string;
+}
+
+export interface ReportSetupMigrationOpenNewActionParams {
+  eventName: string;
+  isFirstMigration: boolean;
+}
+export interface ReportSetupMigrationOpenResourcesActionParams {
+  eventName: string;
+  migrationId: string;
+  missingResourcesCount: number;
+}
+export interface ReportSetupRulesQueryCopiedActionParams {
+  eventName: string;
+  migrationId?: string;
+}
+export interface ReportSetupMigrationCreatedActionParams extends BaseResultActionParams {
+  eventName: string;
+  migrationId?: string;
+  rulesCount: number;
+}
+export interface ReportSetupMacrosQueryCopiedActionParams {
+  eventName: string;
+  migrationId: string;
+}
+export interface ReportSetupLookupNameCopiedActionParams {
+  eventName: string;
+  migrationId: string;
+}
+export interface ReportSetupResourcesUploadedActionParams extends BaseResultActionParams {
+  eventName: string;
+  migrationId: string;
+  type: RuleMigrationResourceType;
+  count: number;
+}
+
+export interface ReportStartMigrationActionParams extends BaseResultActionParams {
+  eventName: string;
+  migrationId: string;
+  connectorId: string;
+  isRetry: boolean;
+  retryFilter?: SiemMigrationRetryFilter;
+}
+
+// Translated rule actions
+
+export interface ReportTranslatedRuleUpdateActionParams {
+  eventName: string;
+  migrationId: string;
   ruleMigrationId: string;
 }
 
-export interface ReportTranslatedRuleInstallActionParams extends BaseReportActionParams {
+export interface ReportTranslatedRuleInstallActionParams {
+  eventName: string;
+  migrationId: string;
   ruleMigrationId: string;
   author: 'elastic' | 'custom';
   enabled: boolean;
@@ -33,12 +131,23 @@ export interface ReportTranslatedRuleInstallActionParams extends BaseReportActio
   };
 }
 
-export interface ReportTranslatedRuleBulkInstallActionParams extends BaseReportActionParams {
+export interface ReportTranslatedRuleBulkInstallActionParams {
+  eventName: string;
+  migrationId: string;
   enabled: boolean;
   count: number;
 }
 
 export interface SiemMigrationsTelemetryEventsMap {
+  [SiemMigrationsEventTypes.SetupConnectorSelected]: ReportSetupConnectorSelectedActionParams;
+  [SiemMigrationsEventTypes.SetupMigrationOpenNew]: ReportSetupMigrationOpenNewActionParams;
+  [SiemMigrationsEventTypes.SetupMigrationOpenResources]: ReportSetupMigrationOpenResourcesActionParams;
+  [SiemMigrationsEventTypes.SetupRulesQueryCopied]: ReportSetupRulesQueryCopiedActionParams;
+  [SiemMigrationsEventTypes.SetupMigrationCreated]: ReportSetupMigrationCreatedActionParams;
+  [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: ReportSetupMacrosQueryCopiedActionParams;
+  [SiemMigrationsEventTypes.SetupLookupNameCopied]: ReportSetupLookupNameCopiedActionParams;
+  [SiemMigrationsEventTypes.SetupResourcesUploaded]: ReportSetupResourcesUploadedActionParams;
+  [SiemMigrationsEventTypes.StartMigration]: ReportStartMigrationActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleUpdate]: ReportTranslatedRuleUpdateActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleInstall]: ReportTranslatedRuleInstallActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: ReportTranslatedRuleBulkInstallActionParams;

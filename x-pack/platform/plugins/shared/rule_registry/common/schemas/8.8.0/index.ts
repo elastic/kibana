@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_RULE_REVISION } from '@kbn/rule-data-utils';
-import { CommonAlertFields870 } from '../8.7.0';
+import type { ALERT_RULE_REVISION } from '@kbn/rule-data-utils';
+import type { CommonAlertFields870 } from '../8.7.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.8.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.8.0.

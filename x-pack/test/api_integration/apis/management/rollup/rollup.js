@@ -134,7 +134,9 @@ export default function ({ getService }) {
           });
 
           it('should handle ES errors', async () => {
-            const payload = { job: { id: 'abc', invalid: 'property' } };
+            const payload = {
+              job: { id: 'abc', ...getJobPayload(indexName).job, invalid: 'property' },
+            };
 
             const { body } = await createJob(payload);
             expect(body.message).to.contain('unknown field [invalid]');

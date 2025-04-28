@@ -22,10 +22,18 @@ export const INTERNAL_API_ACCESS = 'internal';
 export * from './common_attributes.gen';
 
 // Attack discovery Schemas
+export * from './attack_discovery/attack_discovery_alert.gen';
+export * from './attack_discovery/post_attack_discovery_bulk.route.gen';
+export * from './attack_discovery/find_attack_discoveries_route.gen';
 export * from './attack_discovery/common_attributes.gen';
 export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
 export * from './attack_discovery/cancel_attack_discovery_route.gen';
+export * from './attack_discovery/crud_attack_discovery_schedules_route.gen';
+export * from './attack_discovery/get_attack_discovery_generations.route.gen';
+export * from './attack_discovery/post_attack_discovery_generations_dismiss.route.gen';
+export * from './attack_discovery/find_attack_discovery_schedules_route.gen';
+export * from './attack_discovery/schedules.gen';
 
 // Defend insight Schemas
 export * from './defend_insights';

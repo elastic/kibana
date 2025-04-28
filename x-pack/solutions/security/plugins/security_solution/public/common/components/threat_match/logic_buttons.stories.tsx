@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { LogicButtons } from './logic_buttons';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+export default {
+  title: 'ThreatMatching|LogicButtons',
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
+} as Meta;
 
-storiesOf('ThreatMatching|LogicButtons', module)
-  .add('and/or buttons', () => {
+export const AndOrButtons = {
+  render: () => {
     return (
       <LogicButtons
         isAndDisabled={false}
@@ -27,8 +34,13 @@ storiesOf('ThreatMatching|LogicButtons', module)
         onAndClicked={action('onClick')}
       />
     );
-  })
-  .add('and disabled', () => {
+  },
+
+  name: 'and/or buttons',
+};
+
+export const AndDisabled = {
+  render: () => {
     return (
       <LogicButtons
         isAndDisabled
@@ -37,8 +49,13 @@ storiesOf('ThreatMatching|LogicButtons', module)
         onAndClicked={action('onClick')}
       />
     );
-  })
-  .add('or disabled', () => {
+  },
+
+  name: 'and disabled',
+};
+
+export const OrDisabled = {
+  render: () => {
     return (
       <LogicButtons
         isAndDisabled={false}
@@ -47,4 +64,7 @@ storiesOf('ThreatMatching|LogicButtons', module)
         onAndClicked={action('onClick')}
       />
     );
-  });
+  },
+
+  name: 'or disabled',
+};

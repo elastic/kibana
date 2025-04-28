@@ -11,7 +11,8 @@ import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -21,11 +22,12 @@ import {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { RecoveredActionGroup, RuleTypeParams } from '../../../../../common';
+import type { RuleTypeParams } from '../../../../../common';
+import { RecoveredActionGroup } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -38,12 +40,12 @@ import {
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter } from '../../../../connector_adapters/types';
-import { SavedObject } from '@kbn/core/server';
+import type { ConnectorAdapter } from '../../../../connector_adapters/types';
+import type { SavedObject } from '@kbn/core/server';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -159,6 +161,9 @@ describe('bulkEdit()', () => {
       throttle: null,
       notifyWhen: null,
       actions: [],
+      artifacts: {
+        dashboards: [],
+      },
       name: 'my rule name',
       revision: 0,
     },
@@ -261,6 +266,7 @@ describe('bulkEdit()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -649,7 +655,6 @@ describe('bulkEdit()', () => {
           },
         ],
       });
-
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         [
           {
@@ -777,6 +782,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -1091,6 +1097,203 @@ describe('bulkEdit()', () => {
       });
     });
 
+    test('should add system and default actions when there are existing artifacts', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: {
+              ...existingDecryptedRule.attributes,
+              artifacts: {
+                dashboards: [
+                  {
+                    refId: 'dashboard_0',
+                  },
+                ],
+              },
+            } as any,
+            references: [
+              {
+                id: 'dashboard-1',
+                type: 'dashboard',
+                name: 'dashboard_0',
+              },
+            ] as any,
+          },
+        ],
+      });
+
+      const defaultAction = {
+        frequency: {
+          notifyWhen: 'onActiveAlert' as const,
+          summary: false,
+          throttle: null,
+        },
+        group: 'default',
+        id: '1',
+        params: {},
+      };
+
+      const systemAction = {
+        id: 'system_action-id',
+        params: {},
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  frequency: {
+                    notifyWhen: 'onActiveAlert' as const,
+                    summary: false,
+                    throttle: null,
+                  },
+                  group: 'default',
+                  params: {},
+                  actionRef: 'action_0',
+                  actionTypeId: 'test-1',
+                  uuid: '222',
+                },
+                {
+                  params: {},
+                  actionRef: 'system_action:system_action-id',
+                  actionTypeId: 'test-2',
+                  uuid: '222',
+                },
+              ],
+              artifacts: {
+                dashboards: [
+                  {
+                    refId: 'dashboard_0',
+                  },
+                ],
+              },
+            },
+            references: [
+              {
+                name: 'action_0',
+                type: 'action',
+                id: '1',
+              },
+              {
+                name: 'dashboard_0',
+                type: 'dashboard',
+                id: 'dashboard-1',
+              },
+            ],
+          },
+        ],
+      });
+
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test-1',
+          config: {},
+          isMissingSecrets: false,
+          name: 'test default connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: 'system_action-id',
+          actionTypeId: 'test-2',
+          config: {},
+          isMissingSecrets: false,
+          name: 'system action connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ]);
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [defaultAction, systemAction],
+          },
+        ],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              actions: [
+                {
+                  actionRef: 'action_0',
+                  actionTypeId: 'test-1',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
+                  group: 'default',
+                  params: {},
+                  uuid: '105',
+                },
+                {
+                  actionRef: 'system_action:system_action-id',
+                  actionTypeId: 'test-2',
+                  params: {},
+                  uuid: '106',
+                },
+              ],
+              artifacts: {
+                dashboards: [
+                  {
+                    refId: 'dashboard_0',
+                  },
+                ],
+              },
+              apiKey: null,
+              apiKeyOwner: null,
+              apiKeyCreatedByUser: null,
+              meta: { versionApiKeyLastmodified: 'v8.2.0' },
+              name: 'my rule name',
+              enabled: false,
+              updatedAt: '2019-02-12T21:01:22.479Z',
+              updatedBy: 'elastic',
+              tags: ['foo'],
+              revision: 1,
+            },
+            references: [
+              { id: '1', name: 'action_0', type: 'action' },
+              { id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' },
+            ],
+          },
+        ],
+        { overwrite: true }
+      );
+
+      expect(result.rules[0]).toEqual({
+        ...omit(existingRule.attributes, 'legacyId'),
+        createdAt: new Date(existingRule.attributes.createdAt),
+        updatedAt: new Date(existingRule.attributes.updatedAt),
+        executionStatus: {
+          ...existingRule.attributes.executionStatus,
+          lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
+        },
+        actions: [{ ...defaultAction, actionTypeId: 'test-1', uuid: '222' }],
+        systemActions: [{ ...systemAction, actionTypeId: 'test-2', uuid: '222' }],
+        artifacts: {
+          dashboards: [
+            {
+              id: 'dashboard-1',
+            },
+          ],
+        },
+        id: existingRule.id,
+        snoozeSchedule: [],
+      });
+    });
+
     test('should construct the refs correctly and persist the actions correctly', async () => {
       const defaultAction = {
         frequency: {
@@ -1191,13 +1394,13 @@ describe('bulkEdit()', () => {
           frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
           group: 'default',
           params: {},
-          uuid: '105',
+          uuid: '107',
         },
         {
           actionRef: 'system_action:system_action-id',
           actionTypeId: 'test-2',
           params: {},
-          uuid: '106',
+          uuid: '108',
         },
       ]);
     });
@@ -1891,7 +2094,7 @@ describe('bulkEdit()', () => {
       getActiveSnoozeIfExist.mockImplementation(() => false);
     });
 
-    const getSnoozeSchedule = (useId: boolean = true) => {
+    const getSnoozeSchedule = (useId = true) => {
       return {
         ...(useId && { id: uuidv4() }),
         duration: 28800000,
@@ -3121,6 +3324,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         category: 'test',
         validLegacyConsumers: [],
       });
@@ -3167,6 +3371,7 @@ describe('bulkEdit()', () => {
           return { state: {} };
         },
         producer: 'alerts',
+        solution: 'stack',
         category: 'test',
         validLegacyConsumers: [],
       });

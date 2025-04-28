@@ -8,6 +8,9 @@
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
+export const POST_ACTIONS_CONNECTOR_EXECUTE =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/_execute` as const;
+
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL =
   `${ELASTIC_AI_ASSISTANT_URL}/current_user/conversations` as const;
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID =
@@ -56,7 +59,82 @@ export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL =
 export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/evaluate` as const;
 
+// Alert summary
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/alert_summary` as const;
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION =
+  `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_bulk_action` as const;
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND =
+  `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_find` as const;
+
 // Defend insights
-export const DEFEND_INSIGHTS_TOOL_ID = 'defend-insights';
+export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
+
+// Attack Discovery
+export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
+export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
+
+export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+export const ATTACK_DISCOVERY_BULK = `${ATTACK_DISCOVERY}/_bulk` as const;
+export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}` as const;
+export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID =
+  `${ATTACK_DISCOVERY}/cancel/{connectorId}` as const;
+export const ATTACK_DISCOVERY_FIND = `${ATTACK_DISCOVERY}/_find` as const;
+export const ATTACK_DISCOVERY_GENERATIONS = `${ATTACK_DISCOVERY}/generations` as const;
+export const ATTACK_DISCOVERY_GENERATIONS_BY_ID =
+  `${ATTACK_DISCOVERY_GENERATIONS}/{execution_uuid}` as const;
+export const ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS =
+  `${ATTACK_DISCOVERY_GENERATIONS_BY_ID}/_dismiss` as const;
+export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BY_ID = `${ATTACK_DISCOVERY_SCHEDULES}/{id}` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_enable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
+
+/** A fake `kibana.alert.rule.uuid` for ad hock rules */
+export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id' as const;
+
+/** A fake `kibana.alert.rule.rule_type_id` for ad hock rules */
+export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
+
+/**
+ * This feature flag enables the Attack discoveries alerts feature.
+ *
+ * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
+ * ```
+ * feature_flags.overrides:
+ *   securitySolution.attackDiscoveryAlertsEnabled: true
+ * ```
+ */
+export const ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG =
+  'securitySolution.attackDiscoveryAlertsEnabled' as const;
+
+/**
+ * The common prefix for all (ad hoc and scheduled) Attack discovery alerts indices
+ */
+export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
+  '.alerts-security.attack.discovery.alerts' as const;
+
+/**
+ * The prefix for all ad hoc Attack discovery alerts index resources.
+ */
+export const ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX =
+  `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc` as const;
+
+/**
+ * The server timeout is set to 4 minutes to allow for long-running requests.
+ * The allows slower LLMs (like Llama 3.1 70B) and complex tasks such as ESQL generation to complete
+ * without being interrupted.
+ */
+export const INVOKE_LLM_SERVER_TIMEOUT = 4 * 60 * 1000; // 4 minutes
+/**
+ * The client timeout is set to 3 seconds less than the server timeout to prevent
+ * the `core-http-browser` from retrying the request.
+ *
+ */
+export const INVOKE_LLM_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 3 second

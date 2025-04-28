@@ -6,8 +6,7 @@
  */
 
 import { fetchSLOHealthParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
-import { GetSLOHealth, KibanaSavedObjectsSLORepository } from '../../services';
+import { GetSLOHealth } from '../../services';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
@@ -20,17 +19,12 @@ export const fetchSloHealthRoute = createSloServerRoute({
     },
   },
   params: fetchSLOHealthParamsSchema,
-  handler: async ({ context, params, logger, plugins }) => {
+  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const core = await context.core;
-    const scopedClusterClient = core.elasticsearch.client;
-    const soClient = core.savedObjects.client;
-    const esClient = core.elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const { scopedClusterClient, repository } = await getScopedClients({ request, logger });
+    const getSLOHealth = new GetSLOHealth(scopedClusterClient, repository);
 
-    const getSLOHealth = new GetSLOHealth(esClient, scopedClusterClient, repository);
-
-    return await executeWithErrorHandler(() => getSLOHealth.execute(params.body));
+    return await getSLOHealth.execute(params.body);
   },
 });

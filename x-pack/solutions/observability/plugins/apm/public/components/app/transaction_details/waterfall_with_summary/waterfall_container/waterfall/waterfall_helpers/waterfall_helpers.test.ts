@@ -15,15 +15,19 @@ import type {
   IWaterfallSpanOrTransaction,
   IWaterfallNode,
   IWaterfallNodeFlatten,
+  IWaterfallSpan,
 } from './waterfall_helpers';
 import {
   getClockSkew,
   getOrderedWaterfallItems,
   getWaterfall,
-  getOrphanTraceItemsCount,
+  getOrphanItemsIds,
   buildTraceTree,
   convertTreeToList,
   updateTraceTreeNode,
+  reparentOrphanItems,
+  generateLegendsAndAssignColorsToWaterfall,
+  WaterfallLegendType,
 } from './waterfall_helpers';
 import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type {
@@ -716,45 +720,205 @@ describe('waterfall_helpers', () => {
     });
   });
 
-  describe('getOrphanTraceItemsCount', () => {
+  describe('getOrphanItemsIds', () => {
     const myTransactionItem = {
-      processor: { event: 'transaction' },
-      trace: { id: 'myTrace' },
-      transaction: {
-        id: 'myTransactionId1',
-      },
-    } as WaterfallTransaction;
+      doc: {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTrace' },
+        transaction: {
+          id: 'myTransactionId1',
+        },
+      } as WaterfallTransaction,
+      docType: 'transaction',
+      id: 'myTransactionId1',
+    } as IWaterfallTransaction;
 
     it('should return missing items count: 0 if there are no orphan items', () => {
-      const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
+      const traceItems: IWaterfallSpanOrTransaction[] = [
         myTransactionItem,
         {
-          processor: { event: 'span' },
-          span: {
-            id: 'mySpanId',
-          },
-          parent: {
-            id: 'myTransactionId1',
-          },
-        } as WaterfallSpan,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'mySpanId',
+            },
+            parent: {
+              id: 'myTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'mySpanId',
+          parentId: 'myTransactionId1',
+        } as IWaterfallSpan,
       ];
-      expect(getOrphanTraceItemsCount(traceItems)).toBe(0);
+      expect(getOrphanItemsIds(traceItems, traceItems[0].id).length).toBe(0);
+    });
+
+    it('should return missing items count: 0 if first item is orphan', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        {
+          doc: {
+            processor: { event: 'transaction' },
+            trace: { id: 'myTrace' },
+            transaction: {
+              id: 'myTransactionId1',
+            },
+          } as WaterfallTransaction,
+          docType: 'transaction',
+          id: 'myTransactionId1',
+          parentId: 'myNotExistingTransactionId0',
+        } as IWaterfallTransaction,
+        {
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            parent: {
+              id: 'myTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(getOrphanItemsIds(traceItems, traceItems[0].id).length).toBe(0);
     });
 
     it('should return missing items count if there are orphan items', () => {
-      const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
+      const traceItems: IWaterfallSpanOrTransaction[] = [
         myTransactionItem,
         {
-          processor: { event: 'span' },
-          span: {
-            id: 'myOrphanSpanId',
-          },
-          parent: {
-            id: 'myNotExistingTransactionId1',
-          },
-        } as WaterfallSpan,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myNotExistingTransactionId1',
+        } as IWaterfallSpan,
       ];
-      expect(getOrphanTraceItemsCount(traceItems)).toBe(1);
+      expect(getOrphanItemsIds(traceItems, traceItems[0].id).length).toBe(1);
+    });
+  });
+
+  describe('reparentOrphanItems', () => {
+    const myTransactionItem = {
+      duration: 150,
+      doc: {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTrace' },
+        transaction: {
+          id: 'myTransactionId1',
+        },
+        timestamp: { us: 1000000000000050 },
+      } as WaterfallTransaction,
+      docType: 'transaction',
+      id: 'myTransactionId1',
+    } as IWaterfallTransaction;
+
+    it('should not reparent since no orphan items exist', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        myTransactionItem,
+        {
+          duration: 150,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'mySpanId',
+            },
+            parent: {
+              id: 'myTransactionId1',
+            },
+            timestamp: {
+              us: 1000000000000050,
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'mySpanId',
+          parentId: 'myTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(reparentOrphanItems([], traceItems, myTransactionItem)).toEqual(traceItems);
+    });
+
+    it('should not reparent if orphan starts before or the duration is longer than entry transaction', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        myTransactionItem,
+        {
+          duration: 200,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            timestamp: {
+              us: 1000000000000005,
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myNotExistingTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(reparentOrphanItems(['myOrphanSpanId'], traceItems, myTransactionItem)).toEqual([
+        myTransactionItem,
+      ]);
+    });
+
+    it('should reparent orphan items to root transaction', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        myTransactionItem,
+        {
+          duration: 100,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            timestamp: {
+              us: 1000000000000100,
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myNotExistingTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(reparentOrphanItems(['myOrphanSpanId'], traceItems, myTransactionItem)).toEqual([
+        myTransactionItem,
+        {
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            timestamp: {
+              us: 1000000000000100,
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          duration: 100,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myTransactionId1',
+          isOrphan: true,
+        } as IWaterfallSpan,
+      ]);
     });
   });
 
@@ -979,6 +1143,92 @@ describe('waterfall_helpers', () => {
             hasInitializedChildren: false,
           })
         );
+      });
+    });
+  });
+
+  describe('generateLegendsAndAssignColorsToWaterfall', () => {
+    const createWaterfallItem = (overrides: Partial<IWaterfallItem>): IWaterfallItem =>
+      ({
+        docType: 'span',
+        doc: { service: { name: 'default-service' } },
+        legendValues: {
+          [WaterfallLegendType.ServiceName]: 'default-service',
+          [WaterfallLegendType.SpanType]: 'http',
+        },
+        color: '',
+        ...overrides,
+      } as IWaterfallItem);
+
+    describe('generateLegendsAndAssignColorsToWaterfall', () => {
+      it('should generate legends for multiple services', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            doc: { service: { name: 'service-a' } },
+            legendValues: {
+              [WaterfallLegendType.ServiceName]: 'service-a',
+            },
+          } as Partial<IWaterfallSpan>),
+          createWaterfallItem({
+            doc: { service: { name: 'service-b' } },
+            legendValues: {
+              [WaterfallLegendType.ServiceName]: 'service-b',
+            },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+        expect(legends.length).toBeGreaterThanOrEqual(2);
+        expect(colorBy).toBe(WaterfallLegendType.ServiceName);
+      });
+
+      it('should generate legends for span types when only one service exists', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.SpanType]: 'db' },
+          } as Partial<IWaterfallSpan>),
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.SpanType]: 'cache' },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+        expect(legends.length).toBeGreaterThanOrEqual(2);
+        expect(colorBy).toBe(WaterfallLegendType.SpanType);
+      });
+
+      it('should correctly assign colors to items based on legend type', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.ServiceName]: 'service-x' },
+          } as Partial<IWaterfallSpan>),
+          createWaterfallItem({
+            legendValues: { [WaterfallLegendType.ServiceName]: 'service-y' },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+
+        expect(waterfallItems[0].color).toBeDefined();
+        expect(waterfallItems[1].color).toBeDefined();
+        expect(waterfallItems[0].color).not.toBe(waterfallItems[1].color);
+      });
+
+      it('should fall back to service color if span type is missing', () => {
+        const waterfallItems: IWaterfallItem[] = [
+          createWaterfallItem({
+            legendValues: {},
+            doc: { service: { name: 'fallback-service' } },
+          } as Partial<IWaterfallSpan>),
+        ];
+
+        generateLegendsAndAssignColorsToWaterfall(waterfallItems);
+
+        expect(waterfallItems[0].color).toBeDefined();
+      });
+
+      it('should handle empty input without errors', () => {
+        expect(() => generateLegendsAndAssignColorsToWaterfall([])).not.toThrow();
       });
     });
   });

@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'geo_point',
             },
           ],
+          is_partial: false,
           values: [],
         });
       });
@@ -77,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
               type: 'date',
             },
           ],
+          is_partial: false,
           values: [['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z']],
         });
       });

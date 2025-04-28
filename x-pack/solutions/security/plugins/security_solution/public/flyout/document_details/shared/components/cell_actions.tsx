@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { useAlertsContext } from '../../../../detections/components/alerts_table/alerts_context';
 import { useDocumentDetailsContext } from '../context';
 import { getSourcererScopeId } from '../../../../helpers';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
@@ -40,9 +41,13 @@ interface CellActionsProps {
  */
 export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
   const { scopeId, isPreview } = useDocumentDetailsContext();
+  const { alertsTableRef } = useAlertsContext();
 
   const data = useMemo(() => ({ field, value }), [field, value]);
-  const metadata = useMemo(() => ({ scopeId, isObjectArray }), [scopeId, isObjectArray]);
+  const metadata = useMemo(
+    () => ({ scopeId, isObjectArray, alertsTableRef }),
+    [scopeId, isObjectArray, alertsTableRef]
+  );
   const disabledActionTypes = useMemo(
     () => (isPreview ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN] : []),
     [isPreview]

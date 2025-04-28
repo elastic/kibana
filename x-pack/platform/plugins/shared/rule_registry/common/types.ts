@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import * as t from 'io-ts';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 // note: these schemas are not exhaustive. See the `Sort` type of `@elastic/elasticsearch` if you need to enhance it.
 const fieldSchema = t.string;

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   ALERT_INSTANCE_ID,
@@ -14,11 +14,11 @@ import {
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 
+import type { BackendAlertWithSuppressionFields870 } from './create_persistence_rule_type_wrapper';
 import {
   suppressAlertsInMemory,
   isExistingDateGtEqThanAlert,
   getUpdatedSuppressionBoundaries,
-  BackendAlertWithSuppressionFields870,
 } from './create_persistence_rule_type_wrapper';
 
 describe('suppressAlertsInMemory', () => {
