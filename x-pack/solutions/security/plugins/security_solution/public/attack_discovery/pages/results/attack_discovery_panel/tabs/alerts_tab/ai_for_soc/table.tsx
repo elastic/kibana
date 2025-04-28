@@ -119,6 +119,7 @@ export const Table = memo(({ dataView, id, packages, query, ruleResponse }: Tabl
         gridStyle={GRID_STYLE}
         id={id}
         query={query}
+        ref={refetchRef}
         renderActionsCell={ActionsCell}
         renderCellValue={CellValue}
         rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
