@@ -47,24 +47,28 @@ export const routes: SecuritySubPluginRoutes = [
     exact: true,
     component: withSecurityRoutePageWrapper(ExploreLanding, SecurityPageName.exploreLanding, {
       redirectOnMissing: true,
+      omitSpyRoute: true,
     }),
   },
   {
     path: NETWORK_PATH,
     component: withSecurityRoutePageWrapper(NetworkRoutes, SecurityPageName.network, {
       redirectOnMissing: true,
+      omitSpyRoute: true,
     }),
   },
   {
     path: USERS_PATH,
     component: withSecurityRoutePageWrapper(UsersRoutes, SecurityPageName.users, {
       redirectOnMissing: true,
+      omitSpyRoute: true,
     }),
   },
   {
     path: HOSTS_PATH,
     component: withSecurityRoutePageWrapper(HostsRoutes, SecurityPageName.hosts, {
       redirectOnMissing: true,
+      omitSpyRoute: true,
     }),
   },
 ];
