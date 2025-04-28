@@ -18274,13 +18274,13 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -18457,13 +18457,13 @@
                                       "type": "string"
                                     },
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -19579,10 +19579,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "api_key_id",
-                                "type"
-                              ],
                               "type": "object"
                             },
                             "type": "object"
@@ -21677,10 +21673,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -22158,10 +22150,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -23327,6 +23315,9 @@
                           "created_at": {
                             "type": "string"
                           },
+                          "hidden": {
+                            "type": "boolean"
+                          },
                           "id": {
                             "type": "string"
                           },
@@ -23369,6 +23360,9 @@
                           },
                           "created_at": {
                             "type": "string"
+                          },
+                          "hidden": {
+                            "type": "boolean"
                           },
                           "id": {
                             "type": "string"
@@ -23520,6 +23514,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -23708,6 +23705,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -43965,6 +43965,12 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "type": "string"
                           },
@@ -44106,6 +44112,12 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "type": "string"
                           },
@@ -46542,7 +46554,7 @@
     },
     "/api/streams": {
       "get": {
-        "description": "Fetches list of all streams",
+        "description": "Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams",
         "parameters": [],
         "requestBody": {
@@ -46579,7 +46591,7 @@
     },
     "/api/streams/_disable": {
       "post": {
-        "description": "Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.",
+        "description": "Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-disable",
         "parameters": [
           {
@@ -46627,7 +46639,7 @@
     },
     "/api/streams/_enable": {
       "post": {
-        "description": "Enables wired streams",
+        "description": "Enables wired streams<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-enable",
         "parameters": [
           {
@@ -46675,7 +46687,7 @@
     },
     "/api/streams/_resync": {
       "post": {
-        "description": "Resyncs all streams, making sure that Elasticsearch assets are up to date",
+        "description": "Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-resync",
         "parameters": [
           {
@@ -46723,7 +46735,7 @@
     },
     "/api/streams/{name}": {
       "delete": {
-        "description": "Deletes a stream definition and the underlying data stream",
+        "description": "Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "delete-streams-name",
         "parameters": [
           {
@@ -46777,7 +46789,7 @@
         "x-state": "Technical Preview"
       },
       "get": {
-        "description": "Fetches a stream definition and associated dashboards",
+        "description": "Fetches a stream definition and associated dashboards<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams-name",
         "parameters": [
           {
@@ -46821,7 +46833,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Creates or updates a stream definition. Classic streams can not be created through this API, only updated",
+        "description": "Creates or updates a stream definition. Classic streams can not be created through this API, only updated<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "put-streams-name",
         "parameters": [
           {
@@ -50249,7 +50261,7 @@
     },
     "/api/streams/{name}/_fork": {
       "post": {
-        "description": "Forks a wired stream and creates a child stream",
+        "description": "Forks a wired stream and creates a child stream<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-name-fork",
         "parameters": [
           {
@@ -50434,7 +50446,7 @@
     },
     "/api/streams/{name}/_group": {
       "get": {
-        "description": "Fetches the group settings of a group stream definition",
+        "description": "Fetches the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams-name-group",
         "parameters": [
           {
@@ -50478,7 +50490,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Upserts the group settings of a group stream definition",
+        "description": "Upserts the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "put-streams-name-group",
         "parameters": [
           {
@@ -50544,7 +50556,7 @@
     },
     "/api/streams/{name}/_ingest": {
       "get": {
-        "description": "Fetches the ingest settings of an ingest stream definition",
+        "description": "Fetches the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams-name-ingest",
         "parameters": [
           {
@@ -50588,7 +50600,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Upserts the ingest settings of an ingest stream definition",
+        "description": "Upserts the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "put-streams-name-ingest",
         "parameters": [
           {
@@ -53765,7 +53777,7 @@
     },
     "/api/streams/{name}/content/export": {
       "post": {
-        "description": "Exports the content associated to a stream.",
+        "description": "Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-name-content-export",
         "parameters": [
           {
@@ -53872,7 +53884,7 @@
     },
     "/api/streams/{name}/content/import": {
       "post": {
-        "description": "Links content objects to a stream.",
+        "description": "Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-name-content-import",
         "parameters": [
           {
@@ -53923,7 +53935,7 @@
     },
     "/api/streams/{name}/dashboards": {
       "get": {
-        "description": "Fetches all dashboards linked to a stream that are visible to the current user in the current space.",
+        "description": "Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams-name-dashboards",
         "parameters": [
           {
@@ -53969,7 +53981,7 @@
     },
     "/api/streams/{name}/dashboards/_bulk": {
       "post": {
-        "description": "Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.",
+        "description": "Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-name-dashboards-bulk",
         "parameters": [
           {
@@ -54065,7 +54077,7 @@
     },
     "/api/streams/{name}/dashboards/{dashboardId}": {
       "delete": {
-        "description": "Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.",
+        "description": "Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "delete-streams-name-dashboards-dashboardid",
         "parameters": [
           {
@@ -54127,7 +54139,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.",
+        "description": "Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "put-streams-name-dashboards-dashboardid",
         "parameters": [
           {
@@ -54191,7 +54203,7 @@
     },
     "/api/streams/{name}/queries": {
       "get": {
-        "description": "Fetches all queries linked to a stream that are visible to the current user in the current space.",
+        "description": "Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams-name-queries",
         "parameters": [
           {
@@ -54237,7 +54249,7 @@
     },
     "/api/streams/{name}/queries/_bulk": {
       "post": {
-        "description": "Bulk update queries of a stream. Can add new queries and delete existing ones.",
+        "description": "Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "post-streams-name-queries-bulk",
         "parameters": [
           {
@@ -54363,7 +54375,7 @@
     },
     "/api/streams/{name}/queries/{queryId}": {
       "delete": {
-        "description": "Remove a query from a stream. Noop if the query is not found on the stream.",
+        "description": "Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "delete-streams-name-queries-queryid",
         "parameters": [
           {
@@ -54425,7 +54437,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Adds a query to a stream. Noop if the query is already present on the stream.",
+        "description": "Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
         "operationId": "put-streams-name-queries-queryid",
         "parameters": [
           {
@@ -54498,7 +54510,7 @@
     },
     "/api/streams/{name}/significant_events": {
       "get": {
-        "description": "Read the significant events",
+        "description": "Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams-name-significant-events",
         "parameters": [
           {
