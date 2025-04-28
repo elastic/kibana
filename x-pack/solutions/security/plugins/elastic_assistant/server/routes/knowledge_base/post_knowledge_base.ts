@@ -59,9 +59,7 @@ export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => 
 
         try {
           const knowledgeBaseDataClient =
-            await assistantContext.getAIAssistantKnowledgeBaseDataClient({
-              modelIdOverride: request.query.modelId,
-            });
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
