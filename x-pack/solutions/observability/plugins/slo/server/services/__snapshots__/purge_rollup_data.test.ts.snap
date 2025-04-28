@@ -1,0 +1,247 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.sli-v3*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "terms": Object {
+                  "slo.id": Array [
+                    "test5",
+                  ],
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "lte": "now-1d",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`purge rollup data happy path successfully makes a query to remove SLI data based on a timestamp - month 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.sli-v3*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "terms": Object {
+                  "slo.id": Array [
+                    "test3",
+                  ],
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "lte": "2025-03-01T00:00:00.000Z",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`purge rollup data happy path successfully makes a query to remove SLI data based on a timestamp - week 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.sli-v3*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "terms": Object {
+                  "slo.id": Array [
+                    "test4",
+                  ],
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "lte": "2025-04-01T00:00:00.000Z",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`purge rollup data happy path successfully makes a query to remove SLI data older than 30 days 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        "test1",
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`purge rollup data happy path successfully makes a query to remove SLI data older than 30 days 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.sli-v3*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "terms": Object {
+                  "slo.id": Array [
+                    "test1",
+                  ],
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "lte": "now-30d",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`purge rollup data happy path successfully makes a query to remove SLI data older than a week 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        "test2",
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
+
+exports[`purge rollup data happy path successfully makes a query to remove SLI data older than a week 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "conflicts": "proceed",
+        "index": ".slo-observability.sli-v3*",
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "terms": Object {
+                  "slo.id": Array [
+                    "test2",
+                  ],
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "lte": "now-2w",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        "refresh": false,
+        "slices": "auto",
+        "wait_for_completion": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`;
