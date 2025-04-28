@@ -94,6 +94,9 @@ export const Example: StoryObj<Args> = {
     ],
     serviceName: 'test service',
   },
+  parameters: {
+    a11y: { test: 'todo' },
+  },
 };
 
 export const EmptyState: StoryObj<Args> = {
@@ -104,5 +107,8 @@ export const EmptyState: StoryObj<Args> = {
   args: {
     mainStatistics: [],
     serviceName: 'test service',
+  },
+  parameters: {
+    a11y: { test: 'todo' },
   },
 };

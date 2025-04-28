@@ -13,9 +13,7 @@ import { injectAxe, checkA11y } from 'axe-playwright';
  */
 const config: TestRunnerConfig = {
   tags: {
-    // include: ['test-only', 'pages'],
-    // exclude: ['no-tests', 'tokens'],
-    skip: ['skip-test', 'layout'],
+    skip: ['skip-test'],
   },
   async preVisit(page) {
     await injectAxe(page);

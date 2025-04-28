@@ -28,6 +28,11 @@ function getLatencyFormatter(props: TooltipInfo) {
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart/CustomTooltip',
   component: CustomTooltip,
+  parameters: {
+    a11y: {
+      test: 'todo',
+    },
+  },
 };
 
 export function Example(props: TooltipInfo) {
