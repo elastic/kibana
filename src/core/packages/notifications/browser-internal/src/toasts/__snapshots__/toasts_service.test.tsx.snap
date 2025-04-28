@@ -18,7 +18,10 @@ Array [
             "source": Observable {
               "operator": [Function],
               "source": Observable {
-                "_subscribe": [Function],
+                "operator": [Function],
+                "source": Observable {
+                  "_subscribe": [Function],
+                },
               },
             },
           },
