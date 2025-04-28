@@ -308,7 +308,7 @@ export async function getFullAgentPolicy(
 
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
-  if (messageSigningService && fullAgentPolicy.agent) {
+  if (options?.standalone !== true && messageSigningService && fullAgentPolicy.agent) {
     const publicKey = await messageSigningService.getPublicKey();
     const tokenHash =
       (await appContextService
@@ -345,6 +345,11 @@ export async function getFullAgentPolicy(
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }
+  if (options?.standalone) {
+    delete fullAgentPolicy.agent?.protection;
+    delete fullAgentPolicy.signed;
+  }
+
   return fullAgentPolicy;
 }
 

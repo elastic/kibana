@@ -352,7 +352,7 @@ export class StreamsClient {
           scopedClusterClient: this.dependencies.scopedClusterClient,
         });
         if (!privileges.read) {
-          throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
+          throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
       }
       return streamDefinition;
@@ -382,7 +382,7 @@ export class StreamsClient {
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
-            throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
+            throw new SecurityError(`Cannot read stream, insufficient privileges`);
           }
         }
       ),
@@ -495,18 +495,33 @@ export class StreamsClient {
    * Lists both managed and unmanaged streams
    */
   async listStreams(): Promise<StreamDefinition[]> {
+    const streams = await this.listStreamsWithDataStreamExistence();
+    return streams.map((stream) => {
+      const { data_stream_exists: _, ...rest } = stream;
+      return rest;
+    });
+  }
+
+  async listStreamsWithDataStreamExistence(): Promise<
+    Array<StreamDefinition & { data_stream_exists: boolean }>
+  > {
     const [managedStreams, unmanagedStreams] = await Promise.all([
       this.getManagedStreams(),
       this.getUnmanagedDataStreams(),
     ]);
 
-    const allDefinitionsById = new Map<string, StreamDefinition>(
-      managedStreams.map((stream) => [stream.name, stream])
+    const allDefinitionsById = new Map<string, StreamDefinition & { data_stream_exists: boolean }>(
+      managedStreams.map((stream) => [stream.name, { ...stream, data_stream_exists: false }])
     );
 
     unmanagedStreams.forEach((stream) => {
       if (!allDefinitionsById.get(stream.name)) {
-        allDefinitionsById.set(stream.name, stream);
+        allDefinitionsById.set(stream.name, { ...stream, data_stream_exists: true });
+      } else {
+        allDefinitionsById.set(stream.name, {
+          ...allDefinitionsById.get(stream.name)!,
+          data_stream_exists: true,
+        });
       }
     });
 

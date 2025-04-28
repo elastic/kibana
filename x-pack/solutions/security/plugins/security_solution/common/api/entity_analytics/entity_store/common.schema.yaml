@@ -12,6 +12,7 @@ components:
         - user
         - host
         - service
+        - generic
 
     EngineDescriptor:
       type: object

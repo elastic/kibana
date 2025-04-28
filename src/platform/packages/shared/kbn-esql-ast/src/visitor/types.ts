@@ -63,7 +63,9 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitInlineCastExpression'> &
       VisitorInput<Methods, 'visitRenameExpression'> &
       VisitorInput<Methods, 'visitOrderExpression'> &
-      VisitorInput<Methods, 'visitIdentifierExpression'>
+      VisitorInput<Methods, 'visitIdentifierExpression'> &
+      VisitorInput<Methods, 'visitMapExpression'> &
+      VisitorInput<Methods, 'visitMapEntryExpression'>
 >;
 
 /**
@@ -81,7 +83,9 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
   | VisitorOutput<Methods, 'visitRenameExpression'>
   | VisitorOutput<Methods, 'visitOrderExpression'>
-  | VisitorOutput<Methods, 'visitIdentifierExpression'>;
+  | VisitorOutput<Methods, 'visitIdentifierExpression'>
+  | VisitorOutput<Methods, 'visitMapExpression'>
+  | VisitorOutput<Methods, 'visitMapEntryExpression'>;
 
 /**
  * Input that satisfies any command visitor input constraints.
@@ -229,6 +233,12 @@ export interface VisitorMethods<
     any,
     any
   >;
+  visitMapExpression?: Visitor<contexts.MapExpressionVisitorContext<Visitors, Data>, any, any>;
+  visitMapEntryExpression?: Visitor<
+    contexts.MapEntryExpressionVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
 }
 
 /**
@@ -256,6 +266,10 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitInlineCastExpression'
   : Node extends ast.ESQLIdentifier
   ? 'visitIdentifierExpression'
+  : Node extends ast.ESQLMap
+  ? 'visitMapExpression'
+  : Node extends ast.ESQLMapEntry
+  ? 'visitMapEntryExpression'
   : never;
 
 /**

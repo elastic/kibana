@@ -21,6 +21,7 @@ import { onboardingLinks } from './onboarding/links';
 import { findingsLinks } from './cloud_security_posture/links';
 import type { StartPlugins } from './types';
 import { dashboardsLinks } from './dashboards/links';
+import { entityAnalyticsLinks } from './entity_analytics/links';
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
 export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_links';
@@ -36,6 +37,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   timelinesLinks,
   indicatorsLinks,
   exploreLinks,
+  entityAnalyticsLinks,
   assetInventoryLinks,
   rulesLinks,
   onboardingLinks,
@@ -59,6 +61,7 @@ export const getFilteredLinks = async (
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
+    entityAnalyticsLinks,
     assetInventoryLinks,
     rulesLinks,
     onboardingLinks,

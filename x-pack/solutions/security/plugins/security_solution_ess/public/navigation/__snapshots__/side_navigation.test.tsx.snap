@@ -375,6 +375,20 @@ Object {
           ],
         },
         Object {
+          "children": Array [
+            Object {
+              "id": "entity_analytics-privileged_user_monitoring",
+              "link": "securitySolutionUI:entity_analytics-privileged_user_monitoring",
+              "renderAs": "item",
+            },
+          ],
+          "id": "entity_analytics-landing",
+          "link": "securitySolutionUI:entity_analytics-landing",
+          "renderAs": "panelOpener",
+          "spaceBefore": null,
+          "title": "Entity analytics",
+        },
+        Object {
           "breadcrumbStatus": "hidden",
           "children": Array [
             Object {
@@ -465,13 +479,13 @@ Object {
               "id": "entity_analytics-management",
               "link": "securitySolutionUI:entity_analytics-management",
               "sideNavStatus": "hidden",
-              "title": "Entity Risk Score",
+              "title": "Entity risk score",
             },
             Object {
               "id": "entity_analytics-entity_store_management",
               "link": "securitySolutionUI:entity_analytics-entity_store_management",
               "sideNavStatus": "hidden",
-              "title": "Entity Store",
+              "title": "Entity store",
             },
           ],
         },

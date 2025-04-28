@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { IngestUpsertRequest } from '@kbn/streams-schema';
+import { IngestUpsertRequest, isCondition } from '@kbn/streams-schema';
 import React from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -206,7 +206,12 @@ export function ControlBar() {
         >
           <EuiButton
             isLoading={routingAppState.saveInProgress}
-            disabled={routingAppState.saveInProgress || !definition.privileges.manage}
+            disabled={
+              routingAppState.saveInProgress ||
+              !definition.privileges.manage ||
+              (routingAppState.childUnderEdit &&
+                !isCondition(routingAppState.childUnderEdit.child.if))
+            }
             onClick={saveOrUpdateChildren}
             data-test-subj="streamsAppStreamDetailRoutingSaveButton"
           >

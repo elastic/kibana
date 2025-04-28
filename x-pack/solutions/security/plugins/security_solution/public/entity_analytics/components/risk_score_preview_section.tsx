@@ -34,7 +34,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../common';
 import { EntityIconByType } from './entity_store/helpers';
-import { useRiskEngineEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;
@@ -142,7 +142,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   from,
   to,
 }) => {
-  const entityTypes = useRiskEngineEntityTypes();
+  const entityTypes = useEntityAnalyticsTypes();
 
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },

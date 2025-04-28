@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -41,6 +42,7 @@ import {
   ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_ASSET_INVENTORY_SETTING,
+  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -512,3 +514,29 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
+export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
+  connectors.length > 0
+    ? {
+        [DEFAULT_AI_CONNECTOR]: {
+          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
+            defaultMessage: 'Default AI Connector',
+          }),
+          // TODO, make Elastic LLM the default value once fully available in serverless
+          value: connectors[0].id,
+          description: i18n.translate(
+            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
+            {
+              // TODO update this copy, waiting on James Spiteri's input
+              defaultMessage: 'Default AI connector for serverless AI features (AI for SOC)',
+            }
+          ),
+          type: 'select',
+          options: connectors.map(({ id }) => id),
+          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
+          category: [APP_ID],
+          requiresPageReload: true,
+          schema: schema.string(),
+          solution: 'security',
+        },
+      }
+    : null;

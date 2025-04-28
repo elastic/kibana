@@ -14,41 +14,49 @@ export const FIELD_TYPE_MAP = {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableBooleanType', {
       defaultMessage: 'Boolean',
     }),
+    readonly: false,
   },
   date: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableDateType', {
       defaultMessage: 'Date',
     }),
+    readonly: false,
   },
   keyword: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableKeywordType', {
       defaultMessage: 'Keyword',
     }),
+    readonly: false,
   },
   match_only_text: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableTextType', {
       defaultMessage: 'Text (match_only_text)',
     }),
+    readonly: false,
   },
   long: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNumberType', {
       defaultMessage: 'Number (long)',
     }),
+    readonly: false,
   },
   double: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNumberType', {
       defaultMessage: 'Number (double)',
     }),
+    readonly: false,
   },
   ip: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableIpType', {
       defaultMessage: 'IP',
     }),
+    readonly: false,
   },
   system: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableSystemType', {
       defaultMessage: 'System managed',
     }),
+    readonly: true,
   },
 } as const;
 

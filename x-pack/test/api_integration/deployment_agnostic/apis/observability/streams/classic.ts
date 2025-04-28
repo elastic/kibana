@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { asUnwiredStreamGetResponse } from '@kbn/streams-schema';
+import { asUnwiredStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -565,14 +565,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getDetailsResponse.status).to.eql(404);
       });
 
-      after(async () => {
-        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+      it('should still return the stream on public listing API', async () => {
+        const getResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+        expect(getResponse.status).to.eql(200);
+        const classicStream = getResponse.body.streams.find(
+          (stream) => stream.name === ORPHANED_STREAM_NAME
+        );
+        expect(isUnwiredStreamDefinition(classicStream!)).to.be(true);
+      });
+
+      it('should still return the stream on internal listing API', async () => {
+        const getResponse = await apiClient.fetch('GET /internal/streams');
+        expect(getResponse.status).to.eql(200);
+        const classicStream = getResponse.body.streams.find(
+          (stream) => stream.stream.name === ORPHANED_STREAM_NAME
+        );
+        expect(isUnwiredStreamDefinition(classicStream!.stream)).to.be(true);
+      });
+
+      it('should allow deleting', async () => {
+        const response = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {
               name: ORPHANED_STREAM_NAME,
             },
           },
         });
+        expect(response.status).to.eql(200);
       });
     });
   });
