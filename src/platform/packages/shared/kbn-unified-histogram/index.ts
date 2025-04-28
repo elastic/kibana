@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedHistogramPublicPlugin } from './plugin';
-
-export const plugin = () => new UnifiedHistogramPublicPlugin();
-
 export type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
