@@ -10,3 +10,13 @@ export const ASSET_VERSION = 1;
 export const STREAMS_FEATURE_ID = 'streams';
 
 export const STREAMS_RULE_REGISTRATION_CONTEXT = 'observability.streams';
+
+export const STREAMS_API_PRIVILEGES = {
+  read: 'read_stream',
+  manage: 'manage_stream',
+} as const;
+
+export const STREAMS_UI_PRIVILEGES = {
+  manage: 'manage',
+  show: 'show',
+} as const;
