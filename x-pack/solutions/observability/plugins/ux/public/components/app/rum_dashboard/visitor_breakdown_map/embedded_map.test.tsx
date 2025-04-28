@@ -7,6 +7,7 @@
 
 import { render } from 'enzyme';
 import React from 'react';
+import 'jest-styled-components';
 
 import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
