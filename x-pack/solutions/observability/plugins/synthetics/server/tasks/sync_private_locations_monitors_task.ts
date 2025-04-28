@@ -124,7 +124,7 @@ export class SyncPrivateLocationMonitorsTask {
       id: TASK_ID,
       state: {},
       schedule: {
-        interval: '1m',
+        interval: '10m',
       },
       taskType: TASK_TYPE,
       params: {},
