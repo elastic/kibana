@@ -20,7 +20,7 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
 
   if (ruleArtifacts && ruleArtifacts.investigation_guide) {
     artifacts.investigation_guide = {
-      blob: ruleArtifacts.investigation_guide?.blob,
+      blob: ruleArtifacts.investigation_guide.blob,
     };
   }
   if (ruleArtifacts && ruleArtifacts.dashboards) {
