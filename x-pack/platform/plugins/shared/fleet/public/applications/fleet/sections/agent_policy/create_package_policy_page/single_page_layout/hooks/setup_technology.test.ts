@@ -1464,6 +1464,24 @@ describe('isAgentlessSetupDefault', () => {
     expect(result).toBe(true);
   });
 
+  it('should return false if isAgentlessDefault is true and there is no agentless deployment', () => {
+    const isAgentlessDefault = true;
+    const packageInfo = {
+      policy_templates: [
+        {
+          name: 'template1',
+          title: 'Template 1',
+          description: '',
+          deployment_modes: {},
+        },
+      ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo);
+
+    expect(result).toBe(false);
+  });
+
   it('should return false if there is no agentless default deployment and isAgentlessDefault is false', () => {
     const isAgentlessDefault = false;
     const packageInfo = {
@@ -1525,6 +1543,17 @@ describe('isAgentlessSetupDefault', () => {
           name: 'template2',
         },
       ] as RegistryPolicyTemplate[],
+    } as PackageInfo;
+
+    const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false if no policy templates', () => {
+    const isAgentlessDefault = true;
+    const packageInfo = {
+      policy_templates: [] as RegistryPolicyTemplate[],
     } as PackageInfo;
 
     const result = isAgentlessSetupDefault(isAgentlessDefault, packageInfo);
