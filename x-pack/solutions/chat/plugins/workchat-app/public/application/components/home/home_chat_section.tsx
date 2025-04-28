@@ -6,7 +6,17 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle, EuiText, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiFlexGroup,
+  EuiSuperSelect,
+  EuiAvatar,
+  useEuiTheme,
+} from '@elastic/eui';
 import { getDefaultConnector } from '@kbn/wc-genai-utils';
 import { i18n } from '@kbn/i18n';
 import { useAgentList } from '../../hooks/use_agent_list';
@@ -15,14 +25,23 @@ import { useInitialMessage } from '../../context/initial_message_context';
 import { useConnectors } from '../../hooks/use_connectors';
 import { appPaths } from '../../app_paths';
 import { ChatInputForm } from '../chat/chat_input_form';
+import { css } from '@emotion/css';
 
 export const HomeChatSection: React.FC = () => {
-  const { agents } = useAgentList();
+  const { agents, isLoading: isAgentListLoading } = useAgentList();
   const { connectors } = useConnectors();
   const { navigateToWorkchatUrl } = useNavigation();
   const { setInitialMessage } = useInitialMessage();
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
   const [connectorId, setConnectorId] = useState<string | undefined>(undefined);
+
+  const theme = useEuiTheme();
+
+  useEffect(() => {
+    if (agents.length > 0 && !selectedAgentId) {
+      setSelectedAgentId(agents[0].id);
+    }
+  }, [agents, selectedAgentId]);
 
   useEffect(() => {
     if (connectors.length && !connectorId) {
@@ -33,8 +52,8 @@ export const HomeChatSection: React.FC = () => {
     }
   }, [connectorId, connectors]);
 
-  const handleAgentChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedAgentId(e.target.value);
+  const handleAgentChange = useCallback((value: string) => {
+    setSelectedAgentId(value);
   }, []);
 
   const handleSubmit = useCallback(
@@ -52,51 +71,71 @@ export const HomeChatSection: React.FC = () => {
     [selectedAgentId, connectorId, setInitialMessage, navigateToWorkchatUrl]
   );
 
+  const assistantSelectOptionClassName = css`
+    padding: ${theme.euiTheme.size.xs} 0;
+  `;
+
   const agentOptions = [
-    {
-      value: '',
-      text: i18n.translate('workchatApp.home.selectAssistant', {
-        defaultMessage: 'Select an assistant',
-      }),
-    },
     ...agents.map((agent) => ({
       value: agent.id,
-      text: agent.name,
+      inputDisplay: (
+        <EuiFlexGroup gutterSize="s" alignItems="center" className={assistantSelectOptionClassName}>
+          <EuiAvatar
+            size="s"
+            name={agent.name}
+            initials={agent.avatar?.text}
+            color={agent.avatar?.color}
+          />
+          <EuiText size="s">{agent.name}</EuiText>
+        </EuiFlexGroup>
+      ),
     })),
   ];
 
   return (
-    <EuiFlexItem>
+    <EuiFlexItem grow>
       <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l">
         <EuiTitle size="s">
+          <h2>
+            {i18n.translate('workchatApp.home.welcomeWorkchat', {
+              defaultMessage: 'Welcome to Workchat',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiTitle size="l">
           <h2>
             {i18n.translate('workchatApp.home.welcomeTitle', {
               defaultMessage: 'How can we help you today?',
             })}
           </h2>
         </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText size="s" color="subdued">
-          {i18n.translate('workchatApp.home.selectAssistantPrompt', {
-            defaultMessage: 'Select an assistant to start a conversation',
-          })}
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiSelect
-          options={agentOptions}
-          value={selectedAgentId}
-          onChange={handleAgentChange}
-          aria-label={i18n.translate('workchatApp.home.selectAssistantAriaLabel', {
-            defaultMessage: 'Select an assistant',
-          })}
-          fullWidth
-        />
+
         <EuiSpacer size="l" />
         <ChatInputForm
           disabled={!selectedAgentId || !connectorId}
           loading={false}
           onSubmit={handleSubmit}
         />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+          <EuiText color="subdued" size="xs">
+            {i18n.translate('workchatApp.home.selectAssistantLabel', {
+              defaultMessage: 'Chatting with',
+            })}
+          </EuiText>
+          <EuiSuperSelect
+            isLoading={isAgentListLoading}
+            options={agentOptions}
+            valueOfSelected={selectedAgentId}
+            onChange={handleAgentChange}
+            placeholder={i18n.translate('workchatApp.home.selectAssistantPlaceholder', {
+              defaultMessage: 'Select assistant',
+            })}
+            fullWidth
+            hasDividers
+          />
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
   );
