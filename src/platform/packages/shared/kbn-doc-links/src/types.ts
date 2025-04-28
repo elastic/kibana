@@ -492,6 +492,7 @@ export interface DocLinks {
     settings: string;
     logstashSettings: string;
     kafkaSettings: string;
+    kafkaOutputTopicsSettings: string;
     settingsFleetServerHostSettings: string;
     settingsFleetServerProxySettings: string;
     troubleshooting: string;
