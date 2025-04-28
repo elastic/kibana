@@ -16,6 +16,7 @@ import {
   mockedSearchService,
 } from '../../../mocks/test_providers';
 import { useKibana } from '../../../hooks/use_kibana';
+import moment from 'moment';
 
 jest.mock('../services/fetch_aggregated_indicators');
 jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
@@ -96,26 +97,26 @@ describe('useAggregatedIndicators()', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "dateRange": Object {
-          "max": "2025-05-15T22:00:00.000Z",
-          "min": "2025-05-15T22:00:00.000Z",
+    expect(result.current).toMatchObject(
+      expect.objectContaining({
+        dateRange: expect.objectContaining({
+          min: expect.any(moment),
+          max: expect.any(moment),
+        }),
+        isFetching: false,
+        isLoading: false,
+        onFieldChange: expect.any(Function),
+        query: expect.objectContaining({
+          id: 'indicatorsBarchart',
+          loading: false,
+          refetch: expect.any(Function),
+        }),
+        selectedField: {
+          label: 'threat.feed.name',
+          value: 'string',
         },
-        "isFetching": false,
-        "isLoading": false,
-        "onFieldChange": [Function],
-        "query": Object {
-          "id": "indicatorsBarchart",
-          "loading": false,
-          "refetch": [Function],
-        },
-        "selectedField": Object {
-          "label": "threat.feed.name",
-          "value": "string",
-        },
-        "series": Array [],
-      }
-    `);
+        series: [],
+      })
+    );
   });
 });
