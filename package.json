@@ -128,6 +128,7 @@
     "@elastic/eui": "101.3.0",
     "@elastic/eui-theme-borealis": "0.1.0",
     "@elastic/filesaver": "1.1.2",
+    "@elastic/monaco-esql": "^3.0.0",
     "@elastic/node-crypto": "^1.2.3",
     "@elastic/numeral": "^2.5.1",
     "@elastic/react-search-ui": "^1.20.2",
