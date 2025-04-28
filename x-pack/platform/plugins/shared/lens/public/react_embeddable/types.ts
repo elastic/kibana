@@ -64,6 +64,7 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -523,13 +524,9 @@ export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
 
-export interface ControlGroupApi {
-  addNewPanel: (panelState: Record<string, unknown>) => void;
-}
-
 interface ESQLVariablesCompatibleDashboardApi {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 
