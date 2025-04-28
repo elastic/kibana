@@ -468,8 +468,11 @@ export const indexEndpointHostForPolicy = async ({
   // hostMetadataDoc['@timestamp'] = timestamp;
   // hostMetadataDoc.event.created = timestamp;
 
-  const docOverrides: DeepPartial<HostMetadataInterface> = {
+  const docOverrides: DeepPartial<HostMetadataInterface> = merge({
     '@timestamp': timestamp,
+    agent: {
+      version: kibanaVersion,
+    },
     Endpoint: {
       policy: {
         applied: {
@@ -481,7 +484,7 @@ export const indexEndpointHostForPolicy = async ({
       },
     },
     ...overrides,
-  };
+  });
 
   const hostMetadataDoc = merge(
     new EndpointDocGenerator().generateHostMetadata(
