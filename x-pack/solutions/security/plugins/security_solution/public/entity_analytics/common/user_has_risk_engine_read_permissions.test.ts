@@ -22,7 +22,7 @@ describe('userHasRiskEngineReadPermissions', () => {
         isLoading: false,
         hasAllRequiredPrivileges: false,
         missingPrivileges: {
-          clusterPrivileges: [],
+          clusterPrivileges: { enable: ['N/A'], run: ['N/A'] },
           indexPrivileges: [['risk-score.risk-score-*', ['read']]],
         },
       })
@@ -35,7 +35,7 @@ describe('userHasRiskEngineReadPermissions', () => {
         isLoading: false,
         hasAllRequiredPrivileges: false,
         missingPrivileges: {
-          clusterPrivileges: [],
+          clusterPrivileges: { enable: ['N/A'], run: ['N/A'] },
           indexPrivileges: [['other-index.other-index-*', ['read']]],
         },
       })
@@ -48,7 +48,7 @@ describe('userHasRiskEngineReadPermissions', () => {
         isLoading: false,
         hasAllRequiredPrivileges: false,
         missingPrivileges: {
-          clusterPrivileges: [],
+          clusterPrivileges: { enable: ['N/A'], run: ['N/A'] },
           indexPrivileges: [['risk-score.risk-score-*', ['write']]],
         },
       })
