@@ -1,74 +1,77 @@
-import { fixOpenApiSpecIteratively, formatToolName, isOperation, OperationOrWebhook } from "./utils";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-describe("utils", () => {
-    describe("isOperation", () => {
-        it("returns true for operation", () => {
-            expect(isOperation({
-                isWebhook: () => false,
-            } as unknown as OperationOrWebhook)).toBe(true);
-        });
+import type { OperationOrWebhook } from './utils';
+import { fixOpenApiSpecIteratively, formatToolName, isOperation } from './utils';
 
-        it("returns false webhook", () => {
-            expect(isOperation({
-                isWebhook: () => true,
-            } as unknown as OperationOrWebhook)).toBe(false);
-        });
+describe('utils', () => {
+  describe('isOperation', () => {
+    it('returns true for operation', () => {
+      expect(
+        isOperation({
+          isWebhook: () => false,
+        } as unknown as OperationOrWebhook)
+      ).toBe(true);
     });
 
-    describe("formatToolName", () => {
-        it.each([
-            ["tool name", "tool_name"],
-            ["tool/name", "tool_name"],
-            ["tool?name", "tool_name"],
-            ["tool  name", "tool__name"],
-            ["tool name ", "tool_name_"],
-        ])("formats tool name '%s' to '%s'", (input: string, expected: string) => {
-            expect(formatToolName(input)).toEqual(expected);
-        });
+    it('returns false webhook', () => {
+      expect(
+        isOperation({
+          isWebhook: () => true,
+        } as unknown as OperationOrWebhook)
+      ).toBe(false);
+    });
+  });
+
+  describe('formatToolName', () => {
+    it.each([
+      ['tool name', 'tool_name'],
+      ['tool/name', 'tool_name'],
+      ['tool?name', 'tool_name'],
+      ['tool  name', 'tool__name'],
+      ['tool name ', 'tool_name_'],
+    ])("formats tool name '%s' to '%s'", (input: string, expected: string) => {
+      expect(formatToolName(input)).toEqual(expected);
+    });
+  });
+
+  describe('fixOpenApiSpecIteratively', () => {
+    it('rectifies empty arrays', () => {
+      const input = {
+        type: 'array',
+        items: {},
+      };
+
+      const expected = {
+        type: 'array',
+        items: {
+          anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }, { type: 'object' }],
+        },
+      };
+
+      expect(fixOpenApiSpecIteratively(input)).toStrictEqual(expected);
     });
 
-    describe("fixOpenApiSpecIteratively", () => {
-        it("rectifies empty arrays", () => {
-            const input = {
-                type: "array",
-                items: {},
-            }
+    it('does not rectify filled arrays', () => {
+      const input = {
+        type: 'array',
+        items: {
+          anyOf: [{ type: 'string' }],
+        },
+      };
 
-            const expected = {
-                type: "array",
-                items: {
-                    anyOf: [
-                        { type: "string" },
-                        { type: "number" },
-                        { type: "boolean" },
-                        { type: "object" },
-                    ],
-                },
-            };
+      const expected = {
+        type: 'array',
+        items: {
+          anyOf: [{ type: 'string' }],
+        },
+      };
 
-            expect(fixOpenApiSpecIteratively(input)).toStrictEqual(expected);
-        });
-
-        it("does not rectify filled arrays", () => {
-            const input = {
-                type: "array",
-                items: {
-                    anyOf: [
-                        { type: "string" },
-                    ]
-                },
-            }
-
-            const expected = {
-                type: "array",
-                items: {
-                    anyOf: [
-                        { type: "string" },
-                    ],
-                },
-            };
-
-            expect(fixOpenApiSpecIteratively(input)).toStrictEqual(expected);
-        });
+      expect(fixOpenApiSpecIteratively(input)).toStrictEqual(expected);
     });
-})
+  });
+});
