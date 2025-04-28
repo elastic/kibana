@@ -9,9 +9,10 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
-  ATTACK_DISCOVERY_FIND,
-  AttackDiscoveryFindRequestQuery,
-  AttackDiscoveryFindResponse,
+  ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
+  ATTACK_DISCOVERY_BULK,
+  PostAttackDiscoveryBulkRequestBody,
+  PostAttackDiscoveryBulkResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
@@ -19,13 +20,13 @@ import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 
-export const findAttackDiscoveriesRoute = (
+export const postAttackDiscoveryBulkRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ): void => {
   router.versioned
-    .get({
+    .post({
       access: 'internal',
-      path: ATTACK_DISCOVERY_FIND,
+      path: ATTACK_DISCOVERY_BULK,
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
@@ -37,21 +38,26 @@ export const findAttackDiscoveriesRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(AttackDiscoveryFindRequestQuery),
+            body: buildRouteValidationWithZod(PostAttackDiscoveryBulkRequestBody),
           },
           response: {
             200: {
               body: {
-                custom: buildRouteValidationWithZod(AttackDiscoveryFindResponse),
+                custom: buildRouteValidationWithZod(PostAttackDiscoveryBulkResponse),
               },
             },
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryFindResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PostAttackDiscoveryBulkResponse>> => {
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
+        const { featureFlags } = await context.core;
         const logger: Logger = assistantContext.logger;
 
         // Perform license and authenticated user checks:
@@ -65,8 +71,20 @@ export const findAttackDiscoveriesRoute = (
           return checkResponse.response;
         }
 
+        const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
+          ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
+          false
+        );
+
+        if (!attackDiscoveryAlertsEnabled) {
+          return resp.error({
+            body: `Attack discovery alerts feature is disabled`,
+            statusCode: 403,
+          });
+        }
+
         try {
-          const { query } = request;
+          const currentUser = await checkResponse.currentUser;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
           if (!dataClient) {
@@ -76,31 +94,26 @@ export const findAttackDiscoveriesRoute = (
             });
           }
 
-          const currentUser = await checkResponse.currentUser;
+          const kibanaAlertWorkflowStatus = request.body.update?.kibana_alert_workflow_status;
+          const visibility = request.body.update?.visibility;
+          const ids = request.body.update?.ids;
 
-          const result = await dataClient.findAttackDiscoveryAlerts({
+          if (ids == null || ids.length === 0) {
+            return response.ok({
+              body: { data: [] },
+            });
+          }
+
+          const data = await dataClient.bulkUpdateAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
-            findAttackDiscoveryAlertsParams: {
-              alertIds: query.alert_ids,
-              ids: query.ids,
-              search: query.search,
-              shared: query.shared,
-              status: query.status,
-              connectorNames: query.connector_names,
-              start: query.start,
-              end: query.end,
-              page: query.page,
-              perPage: query.per_page,
-              sortField: query.sort_field,
-              sortOrder: query.sort_order,
-            },
+            ids,
+            kibanaAlertWorkflowStatus,
             logger,
+            visibility,
           });
 
           return response.ok({
-            body: {
-              ...result,
-            },
+            body: { data },
           });
         } catch (err) {
           logger.error(err);
