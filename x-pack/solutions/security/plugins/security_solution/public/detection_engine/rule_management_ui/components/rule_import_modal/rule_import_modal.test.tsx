@@ -36,18 +36,18 @@ describe('RuleImportModal', () => {
   });
 
   test('should uncheck the selected checkboxes after importing new file', async () => {
-    const { queryByTestId } = render(
+    const { getByTestId } = render(
       <ReactQueryClientProvider>
         <RuleImportModal isImportModalVisible={true} hideImportModal={hideImportModal} />
       </ReactQueryClientProvider>
     );
-    const overwriteCheckbox: HTMLInputElement = queryByTestId(
+    const overwriteCheckbox: HTMLInputElement = getByTestId(
       'importDataModalCheckboxLabel'
     ) as HTMLInputElement;
-    const exceptionCheckbox: HTMLInputElement = queryByTestId(
+    const exceptionCheckbox: HTMLInputElement = getByTestId(
       'importDataModalExceptionsCheckboxLabel'
     ) as HTMLInputElement;
-    const connectorsCheckbox: HTMLInputElement = queryByTestId(
+    const connectorsCheckbox: HTMLInputElement = getByTestId(
       'importDataModalActionConnectorsCheckbox'
     ) as HTMLInputElement;
 
@@ -56,7 +56,7 @@ describe('RuleImportModal', () => {
     await waitFor(() => fireEvent.click(connectorsCheckbox));
 
     await waitFor(() =>
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
+      fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
         target: { files: [file] },
       })
     );
@@ -65,7 +65,7 @@ describe('RuleImportModal', () => {
     expect(connectorsCheckbox.checked).toBeTruthy();
 
     await waitFor(() => {
-      fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
+      fireEvent.click(getByTestId('import-data-modal-button') as HTMLButtonElement);
     });
     expect(hideImportModal).toHaveBeenCalled();
 
@@ -75,7 +75,7 @@ describe('RuleImportModal', () => {
   });
 
   test('should uncheck the selected checkboxes after closing the Flyout', async () => {
-    const { queryByTestId, getAllByRole } = render(
+    const { getByTestId, getAllByRole } = render(
       <ReactQueryClientProvider>
         <RuleImportModal isImportModalVisible={true} hideImportModal={hideImportModal} />
       </ReactQueryClientProvider>
@@ -83,13 +83,13 @@ describe('RuleImportModal', () => {
 
     const closeButton = getAllByRole('button')[0];
 
-    const overwriteCheckbox: HTMLInputElement = queryByTestId(
+    const overwriteCheckbox: HTMLInputElement = getByTestId(
       'importDataModalCheckboxLabel'
     ) as HTMLInputElement;
-    const exceptionCheckbox: HTMLInputElement = queryByTestId(
+    const exceptionCheckbox: HTMLInputElement = getByTestId(
       'importDataModalExceptionsCheckboxLabel'
     ) as HTMLInputElement;
-    const connectorsCheckbox: HTMLInputElement = queryByTestId(
+    const connectorsCheckbox: HTMLInputElement = getByTestId(
       'importDataModalActionConnectorsCheckbox'
     ) as HTMLInputElement;
 
@@ -98,7 +98,7 @@ describe('RuleImportModal', () => {
     await waitFor(() => fireEvent.click(connectorsCheckbox));
 
     await waitFor(() =>
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
+      fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
         target: { files: [file] },
       })
     );
@@ -115,7 +115,7 @@ describe('RuleImportModal', () => {
     expect(connectorsCheckbox.checked).toBeFalsy();
   });
 
-  test('should import file, with warnings', async () => {
+  test('should import file with warnings', async () => {
     mockedImportRules.mockReturnValue(
       mockImportResponse({
         action_connectors_success_count: 1,
@@ -130,29 +130,27 @@ describe('RuleImportModal', () => {
       })
     );
 
-    const wrapper = render(
+    const { getByTestId } = render(
       <ReactQueryClientProvider>
         <RuleImportModal isImportModalVisible={true} hideImportModal={hideImportModal} />
       </ReactQueryClientProvider>
     );
 
-    const { queryByTestId } = wrapper;
-
     await waitFor(() => {
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
+      fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
         target: { files: [file] },
       });
     });
 
     await waitFor(() => {
-      fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
+      fireEvent.click(getByTestId('import-data-modal-button') as HTMLButtonElement);
     });
 
-    expect(queryByTestId('actionConnectorsWarningsCallOut')).toBeInTheDocument();
+    expect(getByTestId('actionConnectorsWarningsCallOut')).toBeInTheDocument();
     expect(hideImportModal).not.toHaveBeenCalled();
   });
 
-  test('should import file, with warnings but no action_connectors_success_count', async () => {
+  test('should import file with warnings but no action_connectors_success_count', async () => {
     mockedImportRules.mockReturnValue(
       mockImportResponse({
         action_connectors_success_count: 0,
@@ -167,22 +165,20 @@ describe('RuleImportModal', () => {
       })
     );
 
-    const wrapper = render(
+    const { getByTestId, queryByTestId } = render(
       <ReactQueryClientProvider>
         <RuleImportModal isImportModalVisible={true} hideImportModal={hideImportModal} />
       </ReactQueryClientProvider>
     );
 
-    const { queryByTestId } = wrapper;
-
     await waitFor(() => {
-      fireEvent.change(queryByTestId('rule-file-picker') as HTMLInputElement, {
+      fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
         target: { files: [file] },
       });
     });
 
     await waitFor(() => {
-      fireEvent.click(queryByTestId('import-data-modal-button') as HTMLButtonElement);
+      fireEvent.click(getByTestId('import-data-modal-button') as HTMLButtonElement);
     });
 
     expect(queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
