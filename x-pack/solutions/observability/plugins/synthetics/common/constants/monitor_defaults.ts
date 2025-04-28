@@ -269,6 +269,7 @@ export const DEFAULT_TLS_FIELDS: TLSFields = {
   [ConfigKey.TLS_KEY_PASSPHRASE]: '',
   [ConfigKey.TLS_VERIFICATION_MODE]: VerificationMode.FULL,
   [ConfigKey.TLS_VERSION]: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO, TLSVersion.ONE_THREE],
+  [ConfigKey.TLS_CIPHER_SUITES]: [],
 };
 
 export const DEFAULT_FIELDS: MonitorDefaults = {

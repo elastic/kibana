@@ -1285,6 +1285,49 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       readOnly,
     }),
   },
+  [ConfigKey.TLS_CIPHER_SUITES]: {
+    fieldKey: ConfigKey.TLS_CIPHER_SUITES,
+    component: ComboBox,
+    label: i18n.translate('xpack.synthetics.monitorConfig.tlsCipherSuites.label', {
+      defaultMessage: 'Cipher suites',
+    }),
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.tlsCipherSuites.helpText', {
+          defaultMessage: 'Optional. A list of supported TLS cipher suites.',
+        })}
+        <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
+          href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-ssl.html#cipher_suites"
+          target="_blank"
+        >
+          {i18n.translate('xpack.synthetics.monitorConfig.tlsCipherSuites.learnMore', {
+            defaultMessage: 'Learn more.',
+          })}
+        </EuiLink>
+      </span>
+    ),
+    hidden: (dependencies) => {
+      const [isTLSEnabled] = dependencies;
+      return !Boolean(isTLSEnabled);
+    },
+    dependencies: ['isTLSEnabled'],
+    props: ({ field, setValue, trigger }): EuiComboBoxProps<TLSCipherSuite> => {
+      return {
+        selectedOptions: Object.values(field?.value || []).map((version) => ({
+          label: version,
+        })),
+        onChange: async (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
+          setValue(
+            ConfigKey.TLS_CIPHER_SUITES,
+            updatedValues.map((option) => option.label)
+          );
+          await trigger(ConfigKey.TLS_CIPHER_SUITES);
+        },
+        isDisabled: readOnly,
+      };
+    },
+  },
   [ConfigKey.SCREENSHOTS]: {
     fieldKey: ConfigKey.SCREENSHOTS,
     component: ButtonGroup,

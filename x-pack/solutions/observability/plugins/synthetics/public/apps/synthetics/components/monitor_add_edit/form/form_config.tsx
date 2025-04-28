@@ -186,6 +186,7 @@ const TLS_OPTIONS = (readOnly: boolean): AdvancedFieldGroup => ({
     FIELD(readOnly)[ConfigKey.TLS_CERTIFICATE],
     FIELD(readOnly)[ConfigKey.TLS_KEY],
     FIELD(readOnly)[ConfigKey.TLS_KEY_PASSPHRASE],
+    FIELD(readOnly)[ConfigKey.TLS_CIPHER_SUITES],
   ],
 });
 
