@@ -567,9 +567,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     visualize: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize`,
-      lens: `https://www.elastic.co/what-is/kibana-lens`,
+      lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
       lensPanels: `${ELASTIC_DOCS}explore-analyze/visualize/lens`,
-      maps: `https://www.elastic.co/maps`,
+      maps: `${ELASTIC_WEBSITE_URL}maps`,
       vega: `${ELASTIC_DOCS}explore-analyze/visualize/custom-visualizations-with-vega`,
       tsvbIndexPatternMode: `${ELASTIC_DOCS}explore-analyze/visualize/legacy-editors/tsvb#tsvb-data-view-mode`,
     },
@@ -655,7 +655,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       connectToEms: `${ELASTIC_DOCS}explore-analyze/visualize/maps/maps-connect-to-ems`,
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/maps`,
       importGeospatialPrivileges: `${ELASTIC_DOCS}explore-analyze/visualize/maps/import-geospatial-data#import-geospatial-privileges`,
-      gdalTutorial: `https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
+      gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
       termJoinsExample: `${ELASTIC_DOCS}explore-analyze/visualize/maps/terms-join#_example_term_join`,
     },
     monitoring: {
