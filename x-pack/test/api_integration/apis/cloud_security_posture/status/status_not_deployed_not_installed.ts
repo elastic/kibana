@@ -19,10 +19,23 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
+    const savedObjectsTypes = [
+      'ingest-agent-policies',
+      'fleet-agent-policies',
+      'ingest-package-policies',
+      'fleet-package-policies',
+      'cloud-security-posture-settings',
+    ];
+
     describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST', () => {
-      beforeEach(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
+      before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      });
+
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.clean({
+          types: savedObjectsTypes,
+        });
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -37,9 +50,15 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.savedObjects.clean({
+          types: savedObjectsTypes,
+        });
+      });
+
+      after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
+
       it(`Should return not-deployed when installed kspm, no findings on either indices and no healthy agents`, async () => {
         await createPackagePolicy(
           supertest,

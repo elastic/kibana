@@ -24,6 +24,7 @@ describe('syncIntegrationsOnRemote', () => {
   let searchMock: jest.Mock;
   let packageClientMock: any;
   let loggerMock: any;
+  let soClientMock: any;
 
   beforeEach(() => {
     getIndicesMock = jest.fn();
@@ -53,6 +54,9 @@ describe('syncIntegrationsOnRemote', () => {
       info: jest.fn(),
     };
     (installCustomAsset as jest.Mock).mockClear();
+    soClientMock = {
+      update: jest.fn(),
+    };
   });
 
   it('should throw error if multiple synced integrations ccr indices exist', async () => {
@@ -62,7 +66,7 @@ describe('syncIntegrationsOnRemote', () => {
     });
 
     await expect(
-      syncIntegrationsOnRemote(esClientMock, {} as any, {} as any, abortController, loggerMock)
+      syncIntegrationsOnRemote(esClientMock, soClientMock, {} as any, abortController, loggerMock)
     ).rejects.toThrowError(
       'Not supported to sync multiple indices with prefix fleet-synced-integrations-ccr-*'
     );
@@ -125,7 +129,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -153,7 +157,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -184,7 +188,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -226,7 +230,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -261,7 +265,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -309,7 +313,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -354,7 +358,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -390,7 +394,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -418,7 +422,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock
@@ -442,7 +446,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await syncIntegrationsOnRemote(
       esClientMock,
-      {} as any,
+      soClientMock,
       packageClientMock,
       abortController,
       loggerMock

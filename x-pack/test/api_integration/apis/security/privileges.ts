@@ -282,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
         'readAlertDeleteSettings',
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
+      streams: ['all', 'read', 'minimal_all', 'minimal_read'],
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
       inventory: ['all', 'read', 'minimal_all', 'minimal_read'],

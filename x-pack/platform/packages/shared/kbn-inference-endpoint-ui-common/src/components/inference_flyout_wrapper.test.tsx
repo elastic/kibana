@@ -148,7 +148,7 @@ describe('InferenceFlyout', () => {
     });
   }, 10000);
 
-  it('disables submit button for preconfigured endpoints', () => {
+  it('removes submit button for preconfigured endpoints', () => {
     const mockEndpoint = {
       config: {
         inferenceId: '.test-id',
@@ -162,7 +162,7 @@ describe('InferenceFlyout', () => {
     };
 
     renderComponent({ isEdit: true, inferenceEndpoint: mockEndpoint });
-    expect(screen.getByTestId('inference-endpoint-submit-button')).toBeDisabled();
+    expect(screen.queryByTestId('inference-endpoint-submit-button')).not.toBeInTheDocument();
   });
 
   it('disables the num_allocations field for preconfigured endpoints', () => {
