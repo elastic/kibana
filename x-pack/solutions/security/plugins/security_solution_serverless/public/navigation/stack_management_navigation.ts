@@ -18,7 +18,7 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
   spaceBefore: null,
   children: [
     {
-      id: 'stack_management',
+      id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
       title: i18nStrings.stackManagement.title,
       renderAs: 'panelOpener',
       spaceBefore: null,
@@ -100,12 +100,12 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
               breadcrumbStatus: 'hidden',
             },
             {
+              id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
-              breadcrumbStatus: 'hidden',
             },
             {
+              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
               link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-              breadcrumbStatus: 'hidden',
             },
           ],
         },
