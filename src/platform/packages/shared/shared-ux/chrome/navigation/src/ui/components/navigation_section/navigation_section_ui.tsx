@@ -46,36 +46,22 @@ const sectionStyles = {
     .euiAccordion__childWrapper {
       transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
     }
-    &:only-child .euiCollapsibleNavItem__icon {
-      transform: scale(1.33);
-    }
     .euiAccordion__children .euiCollapsibleNavItem__items {
       padding-inline-start: ${euiTheme.size.m};
       margin-inline-start: ${euiTheme.size.m};
     }
+    &:only-child .euiCollapsibleNavItem__icon {
+      transform: scale(1.33);
+    }
   `,
   euiCollapsibleNavSubItem: ({ euiTheme }: Theme) => css`
     &.euiLink,
-    .euiAccordion__triggerWrapper,
-    .euiAccordion__triggerWrapper:hover,
-    .euiAccordion__triggerWrapper:focus-within,
-    .euiCollapsibleNavLink,
-    .euiCollapsibleNavLink:hover,
-    .euiCollapsibleNavLink:focus-within {
-      &:hover {
+    &.euiCollapsibleNavLink {
+      :hover {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
       }
-    }
-
-    &.isSelected {
-      &.euiLink,
-      .euiAccordion__triggerWrapper,
-      .euiAccordion__triggerWrapper:hover,
-      .euiAccordion__triggerWrapper:focus-within,
-      .euiCollapsibleNavLink,
-      .euiCollapsibleNavLink:hover,
-      .euiCollapsibleNavLink:focus-within {
-        &:hover {
+      &.isSelected {
+        :hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
         }
       }
