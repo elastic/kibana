@@ -27,6 +27,8 @@ import { sortAndGroupConversations } from '../../utils/sort_and_group_conversati
 import { sliceRecentConversations } from '../../utils/slice_recent_conversations';
 import { appPaths } from '../../app_paths';
 
+const HOMEPAGE_CONVERSATION_HISTORY_LIMIT = 5;
+
 export const HomeConversationHistorySection: React.FC<{}> = () => {
   const { navigateToWorkchatUrl } = useNavigation();
   const { agents, isLoading: isAgentsLoading } = useAgentList();
@@ -40,7 +42,9 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
   }, [agents]);
 
   const conversationGroups = useMemo(() => {
-    return sortAndGroupConversations(sliceRecentConversations(conversations, 10));
+    return sortAndGroupConversations(
+      sliceRecentConversations(conversations, HOMEPAGE_CONVERSATION_HISTORY_LIMIT)
+    );
   }, [conversations]);
 
   if (isAgentsLoading || isConversationHistoryLoading) {
