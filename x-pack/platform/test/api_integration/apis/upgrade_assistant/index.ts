@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore TS error ignored for package.json import
 import { version as kibanaVersion } from '../../../../../package.json';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
