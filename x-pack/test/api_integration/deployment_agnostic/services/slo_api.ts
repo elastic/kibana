@@ -6,8 +6,13 @@
  */
 
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { CreateSLOInput, FindSLODefinitionsResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
+import {
+  BulkDeleteInput,
+  CreateSLOInput,
+  FindSLODefinitionsResponse,
+  UpdateSLOInput,
+} from '@kbn/slo-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 interface SavedObject<Attributes extends Record<string, any>> {
@@ -86,6 +91,28 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(204);
+    },
+
+    async bulkDelete(params: BulkDeleteInput, roleAuthc: RoleCredentials) {
+      const { body: response } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_bulk_delete`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(params)
+        .expect(200);
+
+      return response;
+    },
+
+    async bulkDeleteStatus(taskId: string, roleAuthc: RoleCredentials) {
+      const { body: response } = await supertestWithoutAuth
+        .get(`/api/observability/slos/_bulk_delete/${taskId}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      return response;
     },
 
     async get(id: string, roleAuthc: RoleCredentials) {
