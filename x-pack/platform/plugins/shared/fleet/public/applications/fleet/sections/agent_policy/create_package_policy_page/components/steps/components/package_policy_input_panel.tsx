@@ -6,6 +6,7 @@
  */
 
 import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -196,7 +197,18 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 }
               }}
             />
+            <EuiSpacer size="s" />
+            {packagePolicyInput.streams.length <= 1 && (
+              <EuiText size="s" color="subdued">
+                <ReactMarkdown>
+                  {typeof inputStreams[0].packageInputStream.description === 'string'
+                    ? inputStreams[0].packageInputStream.description
+                    : ''}
+                </ReactMarkdown>
+              </EuiText>
+            )}
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {hasErrors ? (
