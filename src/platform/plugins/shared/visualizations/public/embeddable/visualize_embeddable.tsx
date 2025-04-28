@@ -34,6 +34,7 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
@@ -440,11 +441,11 @@ export const getVisualizeEmbeddableFactory: (deps: {
     return {
       api,
       Component: () => {
-        const [expressionParams, renderCount, hasRendered, hideTitle, title, defaultTitle] =
+        const expressionParams = useStateFromPublishingSubject(expressionParams$);
+        const renderCount = useStateFromPublishingSubject(renderCount$);
+        const hasRendered = useStateFromPublishingSubject(hasRendered$);
+        const [hideTitle, title, defaultTitle] =
           useBatchedPublishingSubjects(
-            expressionParams$,
-            renderCount$,
-            hasRendered$,
             api.hideTitle$,
             api.title$,
             api.defaultTitle$
