@@ -26,6 +26,33 @@ describe('useGetIntegrationFromRuleId', () => {
     expect(result.current.integration).toBe(undefined);
   });
 
+  it('should return undefined integration when the rule does not have the expected related_integrations', () => {
+    const packages: PackageListItem[] = [
+      {
+        description: '',
+        download: '',
+        id: 'splunk',
+        icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+        name: 'splunk',
+        path: '',
+        status: installationStatuses.NotInstalled,
+        title: 'Splunk',
+        version: '0.1.0',
+      },
+    ];
+    const ruleId = 'rule_id';
+    const rules: RuleResponse[] = [
+      {
+        id: 'rule_id',
+        related_integrations: [{ package: 'wrong_integrations' }],
+      } as RuleResponse,
+    ];
+
+    const { result } = renderHook(() => useGetIntegrationFromRuleId({ packages, ruleId, rules }));
+
+    expect(result.current.integration).toBe(undefined);
+  });
+
   it('should render a matching integration', () => {
     const packages: PackageListItem[] = [
       {
@@ -41,14 +68,22 @@ describe('useGetIntegrationFromRuleId', () => {
       },
     ];
     const ruleId = 'rule_id';
-    const rules: RuleResponse[] = [{ id: 'rule_id', name: 'splunk' } as RuleResponse];
+    const rules: RuleResponse[] = [
+      {
+        id: 'rule_id',
+        related_integrations: [{ package: 'splunk' }],
+      } as RuleResponse,
+    ];
 
     const { result } = renderHook(() => useGetIntegrationFromRuleId({ packages, ruleId, rules }));
 
     expect(result.current.integration).toEqual({
+      description: '',
+      download: '',
       id: 'splunk',
       icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
       name: 'splunk',
+      path: '',
       status: installationStatuses.NotInstalled,
       title: 'Splunk',
       version: '0.1.0',
