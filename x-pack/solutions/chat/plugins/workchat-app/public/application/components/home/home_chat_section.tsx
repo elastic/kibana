@@ -11,18 +11,17 @@ import { getDefaultConnector } from '@kbn/wc-genai-utils';
 import { i18n } from '@kbn/i18n';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { useNavigation } from '../../hooks/use_navigation';
-import { useChat } from '../../hooks/use_chat';
+import { useInitialMessage } from '../../context/initial_message_context';
 import { useConnectors } from '../../hooks/use_connectors';
 import { appPaths } from '../../app_paths';
 import { ChatInputForm } from '../chat/chat_input_form';
-import type { ConversationEventChanges } from '../../../../common/chat_events';
 
 export const HomeChatSection: React.FC = () => {
   const { agents } = useAgentList();
   const { connectors } = useConnectors();
   const { navigateToWorkchatUrl } = useNavigation();
+  const { setInitialMessage } = useInitialMessage();
   const [selectedAgentId, setSelectedAgentId] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [connectorId, setConnectorId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -34,27 +33,6 @@ export const HomeChatSection: React.FC = () => {
     }
   }, [connectorId, connectors]);
 
-  const handleConversationUpdate = useCallback(
-    (changes: ConversationEventChanges) => {
-      if (selectedAgentId) {
-        navigateToWorkchatUrl(
-          appPaths.chat.conversation({
-            agentId: selectedAgentId,
-            conversationId: changes.id,
-          })
-        );
-      }
-    },
-    [selectedAgentId, navigateToWorkchatUrl]
-  );
-
-  const { sendMessage } = useChat({
-    agentId: selectedAgentId,
-    conversationId: undefined,
-    connectorId,
-    onConversationUpdate: handleConversationUpdate,
-  });
-
   const handleAgentChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedAgentId(e.target.value);
   }, []);
@@ -62,11 +40,16 @@ export const HomeChatSection: React.FC = () => {
   const handleSubmit = useCallback(
     (message: string) => {
       if (selectedAgentId && connectorId) {
-        setIsSubmitting(true);
-        sendMessage(message);
+        setInitialMessage(message);
+        navigateToWorkchatUrl(
+          appPaths.chat.conversation({
+            agentId: selectedAgentId,
+            conversationId: 'new',
+          })
+        );
       }
     },
-    [selectedAgentId, connectorId, sendMessage]
+    [selectedAgentId, connectorId, setInitialMessage, navigateToWorkchatUrl]
   );
 
   const agentOptions = [
@@ -107,12 +90,11 @@ export const HomeChatSection: React.FC = () => {
             defaultMessage: 'Select an assistant',
           })}
           fullWidth
-          disabled={isSubmitting}
         />
         <EuiSpacer size="l" />
         <ChatInputForm
-          disabled={!selectedAgentId || !connectorId || isSubmitting}
-          loading={isSubmitting}
+          disabled={!selectedAgentId || !connectorId}
+          loading={false}
           onSubmit={handleSubmit}
         />
       </EuiPanel>
