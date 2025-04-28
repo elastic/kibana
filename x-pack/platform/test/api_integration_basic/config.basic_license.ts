@@ -19,6 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackApiIntegrationConfig.get('esTestCluster'),
       license: 'basic',
       serverArgs: [
+        ...xpackApiIntegrationConfig.get('esTestCluster.serverArgs'),
         'xpack.license.self_generated.type=basic',
         'xpack.security.enabled=true',
         'xpack.security.authc.api_key.enabled=true',
