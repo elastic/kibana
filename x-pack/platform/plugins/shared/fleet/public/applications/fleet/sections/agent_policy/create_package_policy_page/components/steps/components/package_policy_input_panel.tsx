@@ -198,12 +198,11 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               }}
             />
             <EuiSpacer size="s" />
-            {packagePolicyInput.streams.length <= 1 && (
+            {/* show the description under the top level toggle if theres only one stream */}
+            {packagePolicyInput.streams.length === 1 && (
               <EuiText size="s" color="subdued">
                 <ReactMarkdown>
-                  {typeof inputStreams[0].packageInputStream.description === 'string'
-                    ? inputStreams[0].packageInputStream.description
-                    : ''}
+                  {String(inputStreams[0].packageInputStream.description)}
                 </ReactMarkdown>
               </EuiText>
             )}
