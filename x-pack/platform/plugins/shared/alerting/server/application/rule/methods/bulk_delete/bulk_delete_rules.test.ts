@@ -33,27 +33,14 @@ import {
   returnedRuleForBulkOps1,
   returnedRuleForBulkOps2,
   returnedRuleForBulkOps3,
-  siemRuleForBulkOps1,
   enabledRuleForBulkOpsWithActions1,
   enabledRuleForBulkOpsWithActions2,
   returnedRuleForBulkEnableWithActions1,
   returnedRuleForBulkEnableWithActions2,
 } from '../../../../rules_client/tests/test_helpers';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
-(migrateLegacyActions as jest.Mock).mockResolvedValue({
-  hasLegacyActions: false,
-  resultedActions: [],
-  resultedReferences: [],
-});
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -536,48 +523,6 @@ describe('bulkDelete', () => {
         'Successfully deleted schedules for underlying tasks: id1, id2'
       );
       expect(logger.error).toBeCalledTimes(0);
-    });
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockResolvedValueOnce({
-          close: jest.fn(),
-          find: function* asyncGenerator() {
-            yield {
-              saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, siemRuleForBulkOps1],
-            };
-          },
-        });
-
-      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-        statuses: [
-          { id: enabledRuleForBulkOps1.id, type: RULE_SAVED_OBJECT_TYPE, success: true },
-          { id: enabledRuleForBulkOps2.id, type: RULE_SAVED_OBJECT_TYPE, success: true },
-          { id: siemRuleForBulkOps1.id, type: RULE_SAVED_OBJECT_TYPE, success: true },
-        ],
-      });
-
-      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
-
-      expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: enabledRuleForBulkOps1.id,
-        skipActionsValidation: true,
-        attributes: enabledRuleForBulkOps1.attributes,
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: enabledRuleForBulkOps2.id,
-        skipActionsValidation: true,
-        attributes: enabledRuleForBulkOps2.attributes,
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: siemRuleForBulkOps1.id,
-        skipActionsValidation: true,
-        attributes: siemRuleForBulkOps1.attributes,
-      });
     });
   });
 

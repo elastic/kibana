@@ -61,7 +61,7 @@ import type {
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import type {
   BulkEditFields,
   BulkEditOperation,
@@ -310,6 +310,8 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
 
     prevInterval.concat(intervals);
 
+    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+
     await pMap(
       response.saved_objects,
       async (rule: SavedObjectsFindResult<RawRule>) =>
@@ -459,20 +461,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
-    // migrate legacy actions only for SIEM rules
-    // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: rule.id,
-      actions: rule.attributes.actions as RawRuleAction[],
-      references: rule.references,
-      attributes: rule.attributes as RawRule,
-    });
-
-    if (migratedActions.hasLegacyActions) {
-      rule.attributes.actions = migratedActions.resultedActions;
-      rule.references = migratedActions.resultedReferences;
-    }
-
     const ruleActions = injectReferencesIntoActions(
       rule.id,
       rule.attributes.actions || [],
@@ -505,13 +493,30 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     validateScheduleInterval(context, updatedRule.schedule.interval, ruleType.id, rule.id);
 
-    const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
+    const {
+      modifiedParams: ruleParams,
+      modifiedAttributes,
+      isParamsUpdateSkipped,
+    } = paramsModifier
       ? // TODO (http-versioning): Remove the cast when all rule types are fixed
         await paramsModifier(updatedRule as Rule<Params>)
       : {
           modifiedParams: updatedRule.params,
+          modifiedAttributes: undefined,
           isParamsUpdateSkipped: true,
         };
+
+    if (modifiedAttributes) {
+      updatedRule.name = modifiedAttributes.name ?? updatedRule.name;
+      updatedRule.tags = modifiedAttributes.tags ?? updatedRule.tags;
+      updatedRule.throttle = modifiedAttributes.throttle ?? updatedRule.throttle;
+      updatedRule.schedule = modifiedAttributes.schedule ?? updatedRule.schedule;
+      // updatedRule.actions = modifiedAttributes.actions ?? updatedRule.actions;
+      // updatedRule.systemActions = modifiedAttributes.systemActions ?? updatedRule.systemActions;
+      updatedRule.notifyWhen = modifiedAttributes.notifyWhen ?? updatedRule.notifyWhen;
+      updatedRule.alertDelay = modifiedAttributes.alertDelay ?? updatedRule.alertDelay;
+      updatedRule.flapping = modifiedAttributes.flapping ?? updatedRule.flapping;
+    }
 
     // Increment revision if params ended up being modified AND it wasn't already incremented as part of attribute update
     if (

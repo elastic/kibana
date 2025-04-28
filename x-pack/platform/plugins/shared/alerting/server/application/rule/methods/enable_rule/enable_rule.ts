@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import type { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { RawRule, IntervalSchedule } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
@@ -17,7 +17,7 @@ import {
   updateMeta,
   createNewAPIKeySet,
   scheduleTask,
-  migrateLegacyActions,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -49,6 +49,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   }
 
   const { id } = params;
+  let alert: SavedObject<RawRule>;
   try {
     const decryptedAlert =
       await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
@@ -62,13 +63,11 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
     references = decryptedAlert.references;
+    alert = decryptedAlert;
   } catch (e) {
     context.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
-    const alert = await context.unsecuredSavedObjectsClient.get<RawRule>(
-      RULE_SAVED_OBJECT_TYPE,
-      id
-    );
+    alert = await context.unsecuredSavedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id);
     attributes = alert.attributes;
     version = alert.version;
     references = alert.references;
@@ -123,12 +122,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: id,
-      actions: attributes.actions,
-      references,
-      attributes,
-    });
+    const migratedIds = await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     const username = await context.getUserName();
     const now = new Date();
@@ -163,20 +157,15 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     try {
       // to mitigate AAD issues(actions property is not used for encrypting API key in partial SO update)
       // we call create with overwrite=true
-      if (migratedActions.hasLegacyActions) {
+      if (migratedIds.includes(alert.id)) {
         await context.unsecuredSavedObjectsClient.create<RawRule>(
           RULE_SAVED_OBJECT_TYPE,
-          {
-            ...updateAttributes,
-            actions: migratedActions.resultedActions,
-            throttle: undefined,
-            notifyWhen: undefined,
-          },
+          updateAttributes,
           {
             id,
             overwrite: true,
             version,
-            references: migratedActions.resultedReferences,
+            references: alert.references,
           }
         );
       } else {

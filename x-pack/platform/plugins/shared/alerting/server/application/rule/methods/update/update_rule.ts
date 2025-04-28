@@ -27,8 +27,8 @@ import {
   addGeneratedActionValues,
   incrementRevision,
   createNewAPIKeySet,
-  migrateLegacyActions,
   updateMetaAttributes,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -302,11 +302,11 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   isSystemAction: (connectorId: string) => boolean;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
+  await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
   const originalRule = originalRuleSavedObject.attributes;
-  let updatedRule = { ...originalRule };
 
   const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
-  const ruleType = context.ruleTypeRegistry.get(updatedRule.alertTypeId);
+  const ruleType = context.ruleTypeRegistry.get(originalRule.alertTypeId);
 
   // Extract saved object references for this rule
   const {
@@ -329,20 +329,6 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       })
     : originalRule.revision;
 
-  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: originalRuleSavedObject.id,
-    attributes: originalRule as RawRule,
-  });
-
-  if (migratedActions.hasLegacyActions) {
-    updatedRule = {
-      ...updatedRule,
-      notifyWhen: undefined,
-      throttle: undefined,
-    };
-  }
-
   const username = await context.getUserName();
 
   const apiKeyAttributes = await createNewAPIKeySet(context, {
@@ -359,7 +345,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   );
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
-    ...updatedRule,
+    ...originalRule,
     ...omit(updateRuleData, 'actions', 'systemActions'),
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],

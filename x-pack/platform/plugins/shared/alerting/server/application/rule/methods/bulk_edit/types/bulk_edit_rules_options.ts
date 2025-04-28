@@ -14,6 +14,7 @@ import type {
 } from '../schemas';
 import type { RuleParams, RuleDomain } from '../../../types';
 import type { Rule } from '../../../../../../common';
+import type { UpdateRuleData } from '../../update';
 
 export type BulkEditRuleSnoozeSchedule = TypeOf<typeof bulkEditRuleSnoozeScheduleSchema>;
 export type BulkEditOperation = TypeOf<typeof bulkEditOperationSchema>;
@@ -25,6 +26,7 @@ export type ParamsModifier<Params extends RuleParams> = (
 
 interface ParamsModifierResult<Params extends RuleParams> {
   modifiedParams: Params;
+  modifiedAttributes?: Partial<UpdateRuleData<Params>>;
   isParamsUpdateSkipped: boolean;
 }
 
