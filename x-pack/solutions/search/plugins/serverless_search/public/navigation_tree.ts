@@ -27,6 +27,24 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: 'analyze',
+            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
+              defaultMessage: 'Analyze',
+            }),
+            spaceBefore: 'm',
+            children: [
+              {
+                link: 'discover',
+              },
+              {
+                link: 'dashboards',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+                },
+              },
+            ],
+          },
+          {
             id: 'data',
             title: i18n.translate('xpack.serverlessSearch.nav.data', {
               defaultMessage: 'Data',
@@ -116,24 +134,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   defaultMessage: 'Query Rules',
                 }),
                 link: 'searchQueryRules',
-              },
-            ],
-          },
-          {
-            id: 'analyze',
-            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
-              defaultMessage: 'Analyze',
-            }),
-            spaceBefore: 'm',
-            children: [
-              {
-                link: 'discover',
-              },
-              {
-                link: 'dashboards',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                },
               },
             ],
           },

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiSuperDatePicker, EuiSpacer } from '@elastic/eui';
+import type { OnTimeChangeProps, EuiSuperUpdateButtonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -14,17 +14,23 @@ import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { useDataView } from '../use_data_view';
 import type { AlertsSelectionSettings } from '../../types';
+import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;
 export const STEP = 50;
 export const NO_INDEX_PATTERNS: DataView[] = [];
+
+const updateButtonProps: EuiSuperUpdateButtonProps = {
+  fill: false,
+};
 
 interface Props {
   filterManager: FilterManager;
@@ -42,11 +48,19 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
       ui: { SearchBar },
     },
   } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   // get the sourcerer `DataViewSpec` for alerts:
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec, status } = useDataViewSpec(SourcererScopeName.detections);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   // create a `DataView` from the `DataViewSpec`:
   const alertsDataView = useDataView({
@@ -144,14 +158,21 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   );
 
   return (
-    <>
-      <div
+    <EuiFlexGroup
+      css={css`
+        gap: ${euiTheme.size.s};
+      `}
+      data-test-subj="alertSelectionQuery"
+      gutterSize="none"
+      wrap={true}
+    >
+      <EuiFlexItem
         css={css`
           .uniSearchBar {
             padding: 0;
           }
         `}
-        data-test-subj="alertSelectionQuery"
+        grow={2}
       >
         <SearchBar
           appName="siem"
@@ -171,21 +192,26 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           onQuerySubmit={onQuerySubmit}
           query={settings.query}
         />
-      </div>
+      </EuiFlexItem>
 
-      <EuiSpacer size="xs" />
-      <EuiSpacer size="s" />
-
-      <EuiSuperDatePicker
-        commonlyUsedRanges={commonlyUsedRanges}
-        data-test-subj="alertSelectionDatePicker"
-        end={settings.end}
-        isDisabled={false}
-        onTimeChange={onTimeChange}
-        showUpdateButton="iconOnly"
-        start={settings.start}
-      />
-    </>
+      <EuiFlexItem
+        css={css`
+          min-width: 308px;
+        `}
+        grow={1}
+      >
+        <EuiSuperDatePicker
+          commonlyUsedRanges={commonlyUsedRanges}
+          data-test-subj="alertSelectionDatePicker"
+          end={settings.end}
+          isDisabled={false}
+          onTimeChange={onTimeChange}
+          showUpdateButton="iconOnly"
+          start={settings.start}
+          updateButtonProps={updateButtonProps}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

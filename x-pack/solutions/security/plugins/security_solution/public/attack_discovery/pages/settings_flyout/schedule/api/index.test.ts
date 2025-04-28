@@ -20,10 +20,12 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import {
+  ALERTING_RULE_TYPES_URL,
   createAttackDiscoverySchedule,
   deleteAttackDiscoverySchedule,
   disableAttackDiscoverySchedule,
   enableAttackDiscoverySchedule,
+  fetchRuleTypes,
   findAttackDiscoverySchedule,
   getAttackDiscoverySchedule,
   updateAttackDiscoverySchedule,
@@ -112,5 +114,11 @@ describe('Schedule API', () => {
       version: '1',
       query: { ...params },
     });
+  });
+
+  it('should send a fetch rule types GET request', async () => {
+    await fetchRuleTypes();
+
+    expect(mockKibanaServices().http.get).toHaveBeenCalledWith(ALERTING_RULE_TYPES_URL, {});
   });
 });

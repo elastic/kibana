@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import { CardIcon } from '@kbn/fleet-plugin/public';
+import { IntegrationIcon } from '../common/integration_icon';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 const LAST_SYNCED = i18n.translate(
@@ -70,12 +70,10 @@ export const IntegrationCard = memo(
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
-            <CardIcon
-              icons={integration.icons}
-              integrationName={integration.title}
-              packageName={integration.name}
-              size="xl"
-              version={integration.version}
+            <IntegrationIcon
+              data-test-subj={dataTestSubj}
+              iconSize="xl"
+              integration={integration}
             />
           </EuiFlexItem>
           <EuiFlexItem>

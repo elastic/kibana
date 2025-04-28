@@ -9,13 +9,13 @@
 
 import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
   TRANSACTION_ID_FIELD,
+  TRANSACTION_NAME_FIELD,
   getTraceDocumentOverview,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
@@ -26,6 +26,7 @@ import { TransactionDurationSummary } from './sub_components/transaction_duratio
 import { RootTransactionProvider } from './hooks/use_root_transaction';
 import { Trace } from '../components/trace';
 
+import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
 };
@@ -45,13 +46,7 @@ export function TransactionOverview({
     () => getTransactionFieldConfiguration(parsedDoc),
     [parsedDoc]
   );
-
-  const detailTitle = i18n.translate(
-    'unifiedDocViewer.observability.traces.transactionOverview.title',
-    {
-      defaultMessage: 'Transaction detail',
-    }
-  );
+  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
 
   return (
     <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
@@ -63,9 +58,11 @@ export function TransactionOverview({
       >
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
-          <EuiTitle size="s">
-            <h2>{detailTitle}</h2>
-          </EuiTitle>
+          <TransactionSummaryTitle
+            serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+            id={transactionId}
+            name={parsedDoc[TRANSACTION_NAME_FIELD]!}
+          />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (
             <TransactionSummaryField
@@ -81,18 +78,17 @@ export function TransactionOverview({
               <TransactionDurationSummary duration={transactionDuration} />
             </>
           )}
-          {traceId && (
+          {traceId && transactionId ? (
             <>
               <EuiSpacer size="m" />
               <Trace
                 fields={fieldConfigurations}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                 traceId={traceId}
-                transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
+                docId={transactionId}
                 displayType="transaction"
               />
             </>
-          )}
+          ) : null}
         </EuiPanel>
       </FieldActionsProvider>
     </RootTransactionProvider>

@@ -8,6 +8,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { mount } from 'enzyme';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import { SecurityPageName } from '../../../../app/types';
@@ -530,7 +532,9 @@ describe('AlertsHistogramPanel', () => {
       wrapper.setProps({ filters: [] });
       wrapper.update();
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toContain(
+        '999'
+      );
       wrapper.unmount();
     });
 
@@ -564,7 +568,9 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toContain(
+        '999'
+      );
       wrapper.unmount();
     });
 
@@ -584,7 +590,7 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual('');
       wrapper.unmount();
     });
   });

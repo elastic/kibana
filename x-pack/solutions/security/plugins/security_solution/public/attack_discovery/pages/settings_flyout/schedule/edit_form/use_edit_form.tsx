@@ -6,27 +6,25 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonLoading,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
-
-import { getSchema } from './schema';
 import * as i18n from './translations';
 import type { AttackDiscoveryScheduleSchema } from './types';
 
-import { ConnectorSelectorField } from '../form_fields/connector_selector_field';
-import { ScheduleField } from '../form_fields/schedule_field';
-import { useSettingsView } from '../../hooks/use_settings_view';
-import type { AlertsSelectionSettings } from '../../types';
+import type { FormState } from './edit_form';
+import { EditForm } from './edit_form';
 import { getDefaultQuery } from '../../../helpers';
-import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
-import { useKibana } from '../../../../../common/lib/kibana';
-import type { FormSubmitHandler } from '../../../../../shared_imports';
-import { Field, Form, UseField, getUseField, useForm } from '../../../../../shared_imports';
-
-const CommonUseField = getUseField({ component: Field });
 
 const defaultInitialValue: AttackDiscoveryScheduleSchema = {
   name: '',
@@ -47,127 +45,47 @@ export interface UseEditForm {
 }
 
 export interface UseEditFormProps {
+  isLoading: boolean;
   initialValue?: AttackDiscoveryScheduleSchema;
   onSave?: (scheduleData: AttackDiscoveryScheduleSchema) => void;
-  saveButtonDisabled?: boolean;
   saveButtonTitle?: string;
 }
 
 export const useEditForm = (props: UseEditFormProps): UseEditForm => {
-  const {
-    initialValue = defaultInitialValue,
-    onSave,
-    saveButtonDisabled = false,
-    saveButtonTitle,
-  } = props;
+  const { isLoading, initialValue = defaultInitialValue, onSave, saveButtonTitle } = props;
   const { euiTheme } = useEuiTheme();
-  const {
-    triggersActionsUi: { actionTypeRegistry },
-  } = useKibana().services;
 
-  const handleFormSubmit = useCallback<FormSubmitHandler<AttackDiscoveryScheduleSchema>>(
-    async (formData, isValid) => {
-      if (!isValid) {
-        return;
-      }
-      onSave?.(formData);
-    },
-    [onSave]
-  );
-
-  const { form } = useForm<AttackDiscoveryScheduleSchema>({
-    defaultValue: initialValue,
-    options: { stripEmptyFields: false },
-    schema: getSchema({ actionTypeRegistry }),
-    onSubmit: handleFormSubmit,
+  const [formState, setFormState] = useState<FormState>({
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: defaultInitialValue }),
+    value: initialValue,
   });
 
-  const { setFieldValue, submit } = form;
-
-  const [settings, setSettings] = useState<AlertsSelectionSettings>(
-    initialValue.alertsSelectionSettings
-  );
-
-  const onSettingsChanged = useCallback(
-    (newSettings: AlertsSelectionSettings) => {
-      setSettings(newSettings);
-      setFieldValue('alertsSelectionSettings', newSettings);
-    },
-    [setFieldValue]
-  );
-
-  const { settingsView } = useSettingsView({ settings, onSettingsChanged });
-
-  const [connectorId, setConnectorId] = React.useState<string | undefined>(
-    initialValue?.connectorId
-  );
-
-  const onConnectorIdSelected = useCallback(
-    (selectedConnectorId: string) => {
-      setConnectorId(selectedConnectorId);
-      setFieldValue('connectorId', selectedConnectorId);
-    },
-    [setFieldValue]
-  );
-
-  const messageVariables = useMemo(() => {
-    return {
-      state: [],
-      params: [],
-      context: [],
-    };
-  }, []);
+  const onCreate = useCallback(async () => {
+    const { isValid, data } = await formState.submit();
+    if (!isValid) {
+      return;
+    }
+    onSave?.(data);
+  }, [formState, onSave]);
 
   const editForm = useMemo(() => {
-    return (
-      <Form form={form} data-test-subj="attackDiscoveryScheduleForm">
-        <EuiFlexGroup direction="column" responsive={false}>
-          <EuiFlexItem>
-            <CommonUseField
-              path="name"
-              componentProps={{
-                'data-test-subj': 'attackDiscoveryFormNameField',
-                euiFieldProps: {
-                  'data-test-subj': 'attackDiscoveryFormNameInput',
-                  autoFocus: true,
-                },
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField
-              path="connectorId"
-              component={ConnectorSelectorField}
-              componentProps={{
-                connectorId,
-                onConnectorIdSelected,
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField path="alertsSelectionSettings">{() => <>{settingsView}</>}</UseField>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField path="interval" component={ScheduleField} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UseField
-              path="actions"
-              component={RuleActionsField}
-              componentProps={{
-                messageVariables,
-                summaryMessageVariables: messageVariables,
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Form>
-    );
-  }, [connectorId, form, messageVariables, onConnectorIdSelected, settingsView]);
-
-  const onCreate = useCallback(() => {
-    submit();
-  }, [submit]);
+    if (isLoading) {
+      return (
+        <EuiSkeletonLoading
+          isLoading={isLoading}
+          loadingContent={
+            <>
+              <EuiSkeletonTitle />
+              <EuiSkeletonText />
+            </>
+          }
+          loadedContent={null}
+        />
+      );
+    }
+    return <EditForm initialValue={initialValue} onChange={setFormState} />;
+  }, [initialValue, isLoading]);
 
   const actionButtons = useMemo(() => {
     return (
@@ -179,20 +97,14 @@ export const useEditForm = (props: UseEditFormProps): UseEditForm => {
           grow={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="save"
-              fill
-              size="s"
-              onClick={onCreate}
-              disabled={saveButtonDisabled}
-            >
+            <EuiButton data-test-subj="save" fill size="s" onClick={onCreate} disabled={isLoading}>
               {saveButtonTitle ?? i18n.SCHEDULE_SAVE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [euiTheme.size.s, onCreate, saveButtonDisabled, saveButtonTitle]);
+  }, [euiTheme.size.s, isLoading, onCreate, saveButtonTitle]);
 
   return { editForm, actionButtons };
 };
