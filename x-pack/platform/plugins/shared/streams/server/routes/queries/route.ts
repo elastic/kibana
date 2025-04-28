@@ -13,6 +13,7 @@ import {
   upsertStreamQueryRequestSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { createServerRoute } from '../create_server_route';
 export interface ListQueriesResponse {
@@ -47,9 +48,7 @@ const listQueriesRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
@@ -80,12 +79,9 @@ const upsertQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-
   params: z.object({
     path: z.object({
       name: z.string(),
@@ -132,9 +128,7 @@ const deleteQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -175,9 +169,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
