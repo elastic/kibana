@@ -26,6 +26,7 @@ import type {
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import type { MouseEventHandler } from 'react';
+import { SideNavigationSection } from '@kbn/core-chrome-browser/src/project_navigation';
 import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;
@@ -419,7 +420,7 @@ export const parseNavigationTree = (
 
   const onNodeInitiated = (
     navNode: ChromeProjectNavigationNode | RecentlyAccessedDefinition | null,
-    section: 'body' | 'footer' = 'body'
+    section: SideNavigationSection = 'body'
   ) => {
     if (navNode) {
       if (!isRecentlyAccessedDefinition(navNode)) {
@@ -437,7 +438,7 @@ export const parseNavigationTree = (
 
   const parseNodesArray = (
     nodes?: RootNavigationItemDefinition[],
-    section: 'body' | 'footer' = 'body',
+    section: SideNavigationSection = 'body',
     startIndex = 0
   ): void => {
     if (!nodes) return;
@@ -450,6 +451,7 @@ export const parseNavigationTree = (
 
   parseNodesArray(navigationTreeDef.body, 'body');
   parseNodesArray(navigationTreeDef.footer, 'footer', navigationTreeDef.body?.length ?? 0);
+  parseNodesArray(navigationTreeDef.callout, 'callout', navigationTreeDef.body?.length ?? 0);
 
   return { navigationTree, navigationTreeUI };
 };
