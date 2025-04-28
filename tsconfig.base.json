@@ -2060,6 +2060,8 @@
       "@kbn/unsaved-changes-badge/*": ["src/platform/packages/private/kbn-unsaved-changes-badge/*"],
       "@kbn/unsaved-changes-prompt": ["src/platform/packages/shared/kbn-unsaved-changes-prompt"],
       "@kbn/unsaved-changes-prompt/*": ["src/platform/packages/shared/kbn-unsaved-changes-prompt/*"],
+      "@kbn/upgrade-assistant": ["x-pack/platform/packages/private/upgrade-assistant"],
+      "@kbn/upgrade-assistant/*": ["x-pack/platform/packages/private/upgrade-assistant/*"],
       "@kbn/upgrade-assistant-plugin": ["x-pack/platform/plugins/private/upgrade_assistant"],
       "@kbn/upgrade-assistant-plugin/*": ["x-pack/platform/plugins/private/upgrade_assistant/*"],
       "@kbn/uptime-plugin": ["x-pack/solutions/observability/plugins/uptime"],

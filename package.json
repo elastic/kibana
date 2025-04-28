@@ -1002,6 +1002,7 @@
     "@kbn/unified-tabs-examples-plugin": "link:examples/unified_tabs_examples",
     "@kbn/unsaved-changes-badge": "link:src/platform/packages/private/kbn-unsaved-changes-badge",
     "@kbn/unsaved-changes-prompt": "link:src/platform/packages/shared/kbn-unsaved-changes-prompt",
+    "@kbn/upgrade-assistant": "link:x-pack/platform/packages/private/upgrade-assistant",
     "@kbn/upgrade-assistant-plugin": "link:x-pack/platform/plugins/private/upgrade_assistant",
     "@kbn/uptime-plugin": "link:x-pack/solutions/observability/plugins/uptime",
     "@kbn/url-drilldown-plugin": "link:x-pack/platform/plugins/private/drilldowns/url_drilldown",

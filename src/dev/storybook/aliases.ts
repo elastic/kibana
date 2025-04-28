@@ -66,4 +66,5 @@ export const storybookAliases = {
   ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   unified_tabs: 'src/platform/packages/shared/kbn-unified-tabs/.storybook',
+  upgrade_assistant: 'x-pack/platform/packages/private/upgrade-assistant/.storybook',
 };
