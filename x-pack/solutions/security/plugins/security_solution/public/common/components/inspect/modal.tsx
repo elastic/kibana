@@ -17,6 +17,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { ReactNode } from 'react';
@@ -131,6 +132,8 @@ export const ModalInspectQuery = ({
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const requests: string[] = useMemo(
     () => [request, ...(additionalRequests != null ? additionalRequests : [])],
@@ -294,9 +297,13 @@ export const ModalInspectQuery = ({
   );
 
   return (
-    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+    <MyEuiModal
+      aria-labelledby={modalTitleId}
+      onClose={closeModal}
+      data-test-subj="modal-inspect-euiModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.INSPECT} {title}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
