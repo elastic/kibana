@@ -120,7 +120,6 @@ export default function ({ getService }: FtrProviderContext) {
             'ml',
             'apm',
             'stackAlerts',
-            'streams',
             'canvas',
             'generalCasesV3',
             'infrastructure',
