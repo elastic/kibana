@@ -395,6 +395,12 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           }}
           withNext={types.includes('cross_cluster') || types.includes('managed')}
           data-test-subj="personalFilterButton"
+          aria-label={i18n.translate(
+            'xpack.security.accountManagement.apiKeyBadge.personalAriaLabel',
+            {
+              defaultMessage: 'Personal Filter',
+            }
+          )}
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.restTitle"
@@ -415,6 +421,12 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           }}
           withNext={types.includes('managed')}
           data-test-subj="crossClusterFilterButton"
+          aria-label={i18n.translate(
+            'xpack.security.accountManagement.apiKeyBadge.crossClusterAriaLabel',
+            {
+              defaultMessage: 'Cross-Cluster Filter',
+            }
+          )}
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
@@ -434,6 +446,12 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
             });
           }}
           data-test-subj="managedFilterButton"
+          aria-label={i18n.translate(
+            'xpack.security.accountManagement.apiKeyBadge.managedAriaLabel',
+            {
+              defaultMessage: 'Managed Filter',
+            }
+          )}
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
