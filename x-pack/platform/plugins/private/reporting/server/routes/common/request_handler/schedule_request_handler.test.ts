@@ -16,7 +16,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { JobParamsPDFV2, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
 import { createMockReportingCore } from '../../../test_helpers';
@@ -129,8 +129,7 @@ describe('Handle request to schedule', () => {
           },
         }
       `);
-      const { forceNow, ...snapPayload } = payload as TaskPayloadPDFV2;
-      expect(snapPayload).toMatchInlineSnapshot(`
+      expect(payload).toMatchInlineSnapshot(`
         Object {
           "browserTimezone": "UTC",
           "isDeprecated": false,
@@ -144,29 +143,27 @@ describe('Handle request to schedule', () => {
         }
       `);
 
-      expect(soClient.create).toHaveBeenCalledWith(
-        'scheduled_report',
-        {
-          jobType: 'printable_pdf_v2',
-          createdAt: expect.any(String),
-          createdBy: 'testymcgee',
-          title: 'cool_title',
-          payload: expect.any(String),
-          schedule: {
-            rrule: {
-              freq: 1,
-              interval: 2,
-            },
-          },
-          migrationVersion: 'unknown',
-          meta: {
-            objectType: 'cool_object_type',
-            layout: 'preserve_layout',
-            isDeprecated: false,
+      expect(soClient.create).toHaveBeenCalledWith('scheduled_report', {
+        jobType: 'printable_pdf_v2',
+        createdAt: expect.any(String),
+        createdBy: 'testymcgee',
+        title: 'cool_title',
+        enabled: true,
+        payload: JSON.stringify(payload),
+        schedule: {
+          rrule: {
+            freq: 1,
+            interval: 2,
+            tzid: 'UTC',
           },
         },
-        {}
-      );
+        migrationVersion: 'unknown',
+        meta: {
+          objectType: 'cool_object_type',
+          layout: 'preserve_layout',
+          isDeprecated: false,
+        },
+      });
     });
   });
 

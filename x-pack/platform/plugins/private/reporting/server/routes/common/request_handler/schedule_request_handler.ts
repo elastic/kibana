@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { schema } from '@kbn/config-schema';
 import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
 import { ScheduledReportingJobResponse } from '../../../types';
@@ -92,7 +92,7 @@ export class ScheduleRequestHandler extends RequestHandler<
       },
       migrationVersion: version,
       title: job.title,
-      payload: JSON.stringify(payload),
+      payload: JSON.stringify(omit(payload, 'forceNow')),
       schedule: schedule!,
     };
 
@@ -103,14 +103,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     );
     logger.debug(`Successfully created scheduled report: ${report.id}`);
 
-    // Schedule the report with Task Manager
-    // const task = await reporting.scheduleRecurringTask(
-    //   req,
-    //   transformRawScheduledReportToTaskParams(report)
-    // );
-    // logger.info(
-    //   `Scheduled "${name}" reporting task. Task ID: task:${task.id}. Report ID: ${report.id}`
-    // );
+    // TODO - Schedule the report with Task Manager
 
     return transformRawScheduledReportToReport(report);
   }

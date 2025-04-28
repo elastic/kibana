@@ -190,7 +190,13 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+        expect(body.message).toMatchInlineSnapshot(`
+          "[request body.schedule.rrule]: types that failed validation:
+          - [request body.schedule.rrule.0.freq]: expected value to equal [1]
+          - [request body.schedule.rrule.1.freq]: expected value to equal [2]
+          - [request body.schedule.rrule.2.freq]: expected value to equal [3]
+          - [request body.schedule.rrule.3.freq]: expected value to equal [5]"
+        `)
       );
   });
 
@@ -203,7 +209,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
       .send({
         jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
-        schedule: { rrule: { freq: 6, interval: 2 } },
+        schedule: { rrule: { freq: 1, interval: 2 } },
         notification: {
           email: {
             to: 'single@email.com',
@@ -308,7 +314,6 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
             id: 'foo',
             jobtype: 'printable_pdf_v2',
             payload: {
-              forceNow: expect.any(String),
               isDeprecated: false,
               layout: {
                 id: 'test',
