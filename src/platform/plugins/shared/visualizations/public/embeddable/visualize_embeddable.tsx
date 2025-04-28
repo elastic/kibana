@@ -89,22 +89,21 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
-    initialVisInstance.uiState.on('change', onUiStateChange);
-    vis$.subscribe((vis) => vis.uiState.on('change', onUiStateChange));
 
     // When the serialized vis changes, update the vis instance
-    serializedVis$
+    const serializedVisSubscription = serializedVis$
       .pipe(
         switchMap(async (serializedVis) => {
           const currentVis = vis$.getValue();
           if (currentVis) currentVis.uiState.off('change', onUiStateChange);
           const vis = await createVisInstance(serializedVis);
+          vis.uiState.on('change', onUiStateChange);
+          vis$.next(vis);
           const { params, abortController } = await getExpressionParams();
-          return { vis, params, abortController };
+          return { params, abortController };
         })
       )
-      .subscribe(({ vis, params, abortController }) => {
-        vis$.next(vis);
+      .subscribe(({ params, abortController }) => {
         if (params) expressionParams$.next(params);
         expressionAbortController$.next(abortController);
       });
@@ -190,6 +189,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           ...titleComparators,
           ...timeRangeComparators,
           savedObjectId: 'skip',
+          uiState: linkedToLibrary ? 'deepEquality' : 'skip',
           savedVis: linkedToLibrary
             ? 'skip'
             : (a, b) => {
@@ -461,6 +461,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         useEffect(() => {
           return () => {
             fetchSubscription.unsubscribe();
+            serializedVisSubscription.unsubscribe();
             maybeStopDynamicActions?.stopDynamicActions();
           };
         }, []);
