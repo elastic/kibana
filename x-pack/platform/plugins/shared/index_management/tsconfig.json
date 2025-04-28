@@ -59,7 +59,6 @@
     "@kbn/streams-plugin",
     "@kbn/streams-app-plugin",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/ui-actions-plugin",
   ],
   "exclude": ["target/**/*"]
 }

@@ -213,20 +213,6 @@ export class IndexActionsContextMenu extends Component {
         this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
       },
     });
-
-    if (selectedIndexCount === 1) {
-      items.push({
-        'data-test-subj': 'deleteIndexMenuButton',
-        name: i18n.translate('xpack.idxMgmt.indexActionsMenu.deleteIndexLabel', {
-          defaultMessage: 'Upload data',
-        }),
-        onClick: () => {
-          this.closePopover();
-          this.showUploadFlyout(indexNames[0]);
-        },
-      });
-    }
-
     extensionsService.actions.forEach((actionExtension) => {
       const actionExtensionDefinition = actionExtension({
         indices,
@@ -467,18 +453,6 @@ export class IndexActionsContextMenu extends Component {
         {standardIndexModalBody}
       </EuiConfirmModal>
     );
-  };
-
-  showUploadFlyout = (selectedIndex) => {
-    this.context.uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
-      autoAddInference: '.elser-2-elasticsearch',
-      existingIndex: selectedIndex,
-      onUploadComplete: () => {
-        if (typeof this.props.refreshIndices === 'function') {
-          this.props.refreshIndices();
-        }
-      },
-    });
   };
 
   render() {

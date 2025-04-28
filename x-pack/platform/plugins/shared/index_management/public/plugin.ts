@@ -179,7 +179,7 @@ export class IndexMgmtUIPlugin
     plugins: StartDependencies,
     deps: { history: ScopedHistory<unknown> }
   ) {
-    const { fleet, usageCollection, cloud, share, console, ml, licensing, uiActions } = plugins;
+    const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
     const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -219,7 +219,6 @@ export class IndexMgmtUIPlugin
         manageIndexTemplates: !!manageIndexTemplates,
       },
       setBreadcrumbs: () => {},
-      uiActions,
       uiSettings,
       settings,
       url,

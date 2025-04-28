@@ -18,8 +18,7 @@
       "home",
       "management",
       "features",
-      "share",
-      "uiActions"
+      "share"
     ],
     "optionalPlugins": [
       "security",

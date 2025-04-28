@@ -99,7 +99,6 @@ export function getIndexManagementDependencies({
       extensionsService,
     },
     config,
-    uiActions: startDependencies.uiActions,
     history,
     setBreadcrumbs: breadcrumbService.setBreadcrumbs,
     uiSettings,
