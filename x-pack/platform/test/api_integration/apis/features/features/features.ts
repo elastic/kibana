@@ -208,6 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
           'fleet',
           'fleetv2',
           'entityManager',
+          'manageReporting',
         ];
 
         const features = body.filter(

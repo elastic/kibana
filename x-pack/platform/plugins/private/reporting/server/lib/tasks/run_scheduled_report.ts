@@ -5,29 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import * as Rx from 'rxjs';
-import { timeout } from 'rxjs';
-import { Writable } from 'stream';
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  CancellationToken,
-  KibanaShuttingDownError,
-  QueueTimeoutError,
-  ReportingError,
-  durationToNumber,
-  numberToDuration,
-} from '@kbn/reporting-common';
-import type {
-  ExecutionError,
-  ReportDocument,
-  ReportOutput,
-  TaskInstanceFields,
-  TaskRunResult,
-} from '@kbn/reporting-common/types';
-import { decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
+import { CancellationToken, numberToDuration } from '@kbn/reporting-common';
+import type { ExecutionError, ReportDocument } from '@kbn/reporting-common/types';
+import { type ReportingConfigType } from '@kbn/reporting-server';
 import type {
   RunContext,
   TaskManagerStartContract,
@@ -36,11 +18,8 @@ import type {
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
   ReportingTask,
   ReportingTaskStatus,
   SCHEDULED_REPORTING_EXECUTE_TYPE,
@@ -49,31 +28,27 @@ import {
 } from '.';
 import { getContentStream, finishedWithNoPendingCallbacks } from '../content_stream';
 import type { ReportingCore } from '../..';
-import {
-  isExecutionError,
-  mapToReportingError,
-} from '../../../common/errors/map_to_reporting_error';
-import { EventTracker } from '../../usage';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportingStore } from '../store';
-import { Report, SavedReport } from '../store';
-import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
+import { SavedReport } from '../store';
+import type { ReportFailedFields } from '../store/store';
 import { errorLogger } from './error_logger';
 
-type CompletedReportOutput = Omit<ReportOutput, 'content'>;
+// type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
-interface PerformJobOpts {
-  task: ReportTaskParams;
-  taskInstanceFields: TaskInstanceFields;
-  fakeRequest?: KibanaRequest;
-  cancellationToken: CancellationToken;
-  stream: Writable;
-}
+// interface PerformJobOpts {
+//   task: ReportTaskParams;
+//   taskInstanceFields: TaskInstanceFields;
+//   fakeRequest?: KibanaRequest;
+//   cancellationToken: CancellationToken;
+//   stream: Writable;
+// }
 
-interface GetHeadersOpts {
-  encryptedHeaders?: string;
-  requestFromTask?: KibanaRequest;
-  spaceId: string | undefined;
-}
+// interface GetHeadersOpts {
+//   encryptedHeaders?: string;
+//   requestFromTask?: KibanaRequest;
+//   spaceId: string | undefined;
+// }
 interface TaskInstance {
   id: string;
   state: object;
@@ -82,9 +57,9 @@ interface TaskInstance {
   runAt?: Date;
 }
 
-function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
-  return (output as CompletedReportOutput).size != null;
-}
+// function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
+//   return (output as CompletedReportOutput).size != null;
+// }
 
 function parseError(error: unknown): ExecutionError | unknown {
   if (error instanceof Error) {
@@ -103,11 +78,11 @@ export class RunScheduledReportTask implements ReportingTask {
 
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
-  private kibanaId?: string;
-  private kibanaName?: string;
+  // private kibanaId?: string;
+  // private kibanaName?: string;
   private exportTypesRegistry: ExportTypesRegistry;
   private store?: ReportingStore;
-  private eventTracker?: EventTracker;
+  // private eventTracker?: EventTracker;
 
   constructor(
     private reporting: ReportingCore,
@@ -124,10 +99,10 @@ export class RunScheduledReportTask implements ReportingTask {
   public async init(taskManager: TaskManagerStartContract) {
     this.taskManagerStart = taskManager;
 
-    const { reporting } = this;
-    const { uuid, name } = reporting.getServerInfo();
-    this.kibanaId = uuid;
-    this.kibanaName = name;
+    // const { reporting } = this;
+    // const { uuid, name } = reporting.getServerInfo();
+    // this.kibanaId = uuid;
+    // this.kibanaName = name;
   }
 
   /*
@@ -149,139 +124,129 @@ export class RunScheduledReportTask implements ReportingTask {
     return this.taskManagerStart;
   }
 
-  private getEventTracker(report: Report) {
-    if (this.eventTracker) {
-      return this.eventTracker;
-    }
+  // private getEventTracker(report: Report) {
+  //   if (this.eventTracker) {
+  //     return this.eventTracker;
+  //   }
 
-    const eventTracker = this.reporting.getEventTracker(
-      report._id,
-      report.jobtype,
-      report.payload.objectType
-    );
-    this.eventTracker = eventTracker;
-    return this.eventTracker;
-  }
+  //   const eventTracker = this.reporting.getEventTracker(
+  //     report._id,
+  //     report.jobtype,
+  //     report.payload.objectType
+  //   );
+  //   this.eventTracker = eventTracker;
+  //   return this.eventTracker;
+  // }
 
   private getJobContentEncoding(jobType: string) {
     const exportType = this.exportTypesRegistry.getByJobType(jobType);
     return exportType.jobContentEncoding;
   }
 
-  private async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
-    if (this.kibanaId == null) {
-      throw new Error(`Kibana instance ID is undefined!`);
-    }
-    if (this.kibanaName == null) {
-      throw new Error(`Kibana instance name is undefined!`);
-    }
+  // private async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
+  //   if (this.kibanaId == null) {
+  //     throw new Error(`Kibana instance ID is undefined!`);
+  //   }
+  //   if (this.kibanaName == null) {
+  //     throw new Error(`Kibana instance name is undefined!`);
+  //   }
 
-    const store = await this.getStore();
-    const report = await store.findReportFromTask(task); // receives seq_no and primary_term
-    const logger = this.logger.get(report._id);
+  //   const store = await this.getStore();
+  //   const report = await store.findReportFromTask(task); // receives seq_no and primary_term
+  //   const logger = this.logger.get(report._id);
 
-    if (report.status === 'completed') {
-      throw new Error(`Can not claim the report job: it is already completed!`);
-    }
+  //   if (report.status === 'completed') {
+  //     throw new Error(`Can not claim the report job: it is already completed!`);
+  //   }
 
-    const m = moment();
+  //   const m = moment();
 
-    // check if job has exceeded the configured maxAttempts
-    const maxAttempts = this.getMaxAttempts();
-    if (report.attempts >= maxAttempts) {
-      let err: ReportingError;
-      if (report.error && isExecutionError(report.error)) {
-        // We have an error stored from a previous attempts, so we'll use that
-        // error to fail the job and return it to the user.
-        const { error } = report;
-        err = mapToReportingError(error);
-        err.stack = error.stack;
-      } else {
-        if (report.error && report.error instanceof Error) {
-          errorLogger(logger, 'Error executing report', report.error);
-        }
-        err = new QueueTimeoutError(
-          `Max attempts reached (${maxAttempts}). Queue timeout reached.`
-        );
-      }
-      await this._failJob(report, err);
-      throw err;
-    }
+  //   let err: ReportingError;
+  //   if (report.error && isExecutionError(report.error)) {
+  //     // We have an error stored from a previous attempts, so we'll use that
+  //     // error to fail the job and return it to the user.
+  //     const { error } = report;
+  //     err = mapToReportingError(error);
+  //     err.stack = error.stack;
 
-    const queueTimeout = durationToNumber(this.config.queue.timeout);
-    const startTime = m.toISOString();
-    const expirationTime = m.add(queueTimeout).toISOString();
+  //     await this._failJob(report, err);
+  //     throw err;
+  //   }
 
-    const doc: ReportProcessingFields = {
-      kibana_id: this.kibanaId,
-      kibana_name: this.kibanaName,
-      attempts: report.attempts + 1,
-      max_attempts: maxAttempts,
-      started_at: startTime,
-      timeout: queueTimeout,
-      process_expiration: expirationTime,
-    };
+  //   const queueTimeout = durationToNumber(this.config.queue.timeout);
+  //   const startTime = m.toISOString();
+  //   const expirationTime = m.add(queueTimeout).toISOString();
 
-    const claimedReport = new SavedReport({
-      ...report,
-      ...doc,
-    });
+  //   const doc: ReportProcessingFields = {
+  //     kibana_id: this.kibanaId,
+  //     kibana_name: this.kibanaName,
+  //     attempts: report.attempts + 1,
+  //     max_attempts: 1, // maxAttempts,
+  //     started_at: startTime,
+  //     timeout: queueTimeout,
+  //     process_expiration: expirationTime,
+  //   };
 
-    logger.info(
-      `Claiming ${claimedReport.jobtype} ${report._id} ` +
-        `[_index: ${report._index}] ` +
-        `[_seq_no: ${report._seq_no}] ` +
-        `[_primary_term: ${report._primary_term}] ` +
-        `[attempts: ${report.attempts}] ` +
-        `[process_expiration: ${expirationTime}]`
-    );
+  //   const claimedReport = new SavedReport({
+  //     ...report,
+  //     ...doc,
+  //   });
 
-    // event tracking of claimed job
-    const eventTracker = this.getEventTracker(report);
-    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
-    eventTracker?.claimJob({ timeSinceCreation });
+  //   logger.info(
+  //     `Claiming ${claimedReport.jobtype} ${report._id} ` +
+  //       `[_index: ${report._index}] ` +
+  //       `[_seq_no: ${report._seq_no}] ` +
+  //       `[_primary_term: ${report._primary_term}] ` +
+  //       `[attempts: ${report.attempts}] ` +
+  //       `[process_expiration: ${expirationTime}]`
+  //   );
 
-    const resp = await store.setReportClaimed(claimedReport, doc);
-    claimedReport._seq_no = resp._seq_no!;
-    claimedReport._primary_term = resp._primary_term!;
-    return claimedReport;
-  }
+  //   // event tracking of claimed job
+  //   const eventTracker = this.getEventTracker(report);
+  //   const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+  //   eventTracker?.claimJob({ timeSinceCreation });
 
-  private async _failJob(
-    report: SavedReport,
-    error?: ReportingError
-  ): Promise<UpdateResponse<ReportDocument>> {
-    const message = `Failing ${report.jobtype} job ${report._id}`;
-    const logger = this.logger.get(report._id);
+  //   const resp = await store.setReportClaimed(claimedReport, doc);
+  //   claimedReport._seq_no = resp._seq_no!;
+  //   claimedReport._primary_term = resp._primary_term!;
+  //   return claimedReport;
+  // }
 
-    // log the error
-    let docOutput;
-    if (error) {
-      errorLogger(logger, message, error);
-      docOutput = this._formatOutput(error);
-    } else {
-      errorLogger(logger, message);
-    }
+  // private async _failJob(
+  //   report: SavedReport,
+  //   error?: ReportingError
+  // ): Promise<UpdateResponse<ReportDocument>> {
+  //   const message = `Failing ${report.jobtype} job ${report._id}`;
+  //   const logger = this.logger.get(report._id);
 
-    // update the report in the store
-    const store = await this.getStore();
-    const completedTime = moment();
-    const doc: ReportFailedFields = {
-      completed_at: completedTime.toISOString(),
-      output: docOutput ?? null,
-    };
+  //   // log the error
+  //   let docOutput;
+  //   if (error) {
+  //     errorLogger(logger, message, error);
+  //     docOutput = this._formatOutput(error);
+  //   } else {
+  //     errorLogger(logger, message);
+  //   }
 
-    // event tracking of failed job
-    const eventTracker = this.getEventTracker(report);
-    const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
-    eventTracker?.failJob({
-      timeSinceCreation,
-      errorCode: docOutput?.error_code ?? 'unknown',
-      errorMessage: error?.message ?? 'unknown',
-    });
+  //   // update the report in the store
+  //   const store = await this.getStore();
+  //   const completedTime = moment();
+  //   const doc: ReportFailedFields = {
+  //     completed_at: completedTime.toISOString(),
+  //     output: docOutput ?? null,
+  //   };
 
-    return await store.setReportFailed(report, doc);
-  }
+  //   // event tracking of failed job
+  //   const eventTracker = this.getEventTracker(report);
+  //   const timeSinceCreation = Date.now() - new Date(report.created_at).valueOf();
+  //   eventTracker?.failJob({
+  //     timeSinceCreation,
+  //     errorCode: docOutput?.error_code ?? 'unknown',
+  //     errorMessage: error?.message ?? 'unknown',
+  //   });
+
+  //   return await store.setReportFailed(report, doc);
+  // }
 
   private async _saveExecutionError(
     report: SavedReport,
@@ -303,187 +268,187 @@ export class RunScheduledReportTask implements ReportingTask {
     return await store.setReportError(report, doc);
   }
 
-  private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
-    const docOutput = {} as ReportOutput;
-    const unknownMime = null;
+  // private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
+  //   const docOutput = {} as ReportOutput;
+  //   const unknownMime = null;
 
-    if (isOutput(output)) {
-      docOutput.content_type = output.content_type || unknownMime;
-      docOutput.max_size_reached = output.max_size_reached;
-      docOutput.csv_contains_formulas = output.csv_contains_formulas;
-      docOutput.size = output.size;
-      docOutput.warnings =
-        output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
-      docOutput.error_code = output.error_code;
-    } else {
-      const defaultOutput = null;
-      docOutput.content = output.humanFriendlyMessage?.() || output.toString() || defaultOutput;
-      docOutput.content_type = unknownMime;
-      docOutput.warnings = [output.toString()];
-      docOutput.error_code = output.code;
-      docOutput.size = typeof docOutput.content === 'string' ? docOutput.content.length : 0;
-    }
+  //   if (isOutput(output)) {
+  //     docOutput.content_type = output.content_type || unknownMime;
+  //     docOutput.max_size_reached = output.max_size_reached;
+  //     docOutput.csv_contains_formulas = output.csv_contains_formulas;
+  //     docOutput.size = output.size;
+  //     docOutput.warnings =
+  //       output.warnings && output.warnings.length > 0 ? output.warnings : undefined;
+  //     docOutput.error_code = output.error_code;
+  //   } else {
+  //     const defaultOutput = null;
+  //     docOutput.content = output.humanFriendlyMessage?.() || output.toString() || defaultOutput;
+  //     docOutput.content_type = unknownMime;
+  //     docOutput.warnings = [output.toString()];
+  //     docOutput.error_code = output.code;
+  //     docOutput.size = typeof docOutput.content === 'string' ? docOutput.content.length : 0;
+  //   }
 
-    return docOutput;
-  }
+  //   return docOutput;
+  // }
 
-  private async _getRequestToUse({
-    requestFromTask,
-    spaceId,
-    encryptedHeaders,
-  }: GetHeadersOpts): Promise<KibanaRequest> {
-    let useApiKeyAuthentication: boolean = false;
+  // private async _getRequestToUse({
+  //   requestFromTask,
+  //   spaceId,
+  //   encryptedHeaders,
+  // }: GetHeadersOpts): Promise<KibanaRequest> {
+  //   let useApiKeyAuthentication: boolean = false;
 
-    let apiKeyAuthHeaders;
-    if (requestFromTask) {
-      apiKeyAuthHeaders = requestFromTask.headers;
-      useApiKeyAuthentication = true;
-      this.logger.debug(`Using API key authentication with request from task instance`);
-    }
+  //   let apiKeyAuthHeaders;
+  //   if (requestFromTask) {
+  //     apiKeyAuthHeaders = requestFromTask.headers;
+  //     useApiKeyAuthentication = true;
+  //     this.logger.debug(`Using API key authentication with request from task instance`);
+  //   }
 
-    let decryptedHeaders;
-    if (this.config.encryptionKey && encryptedHeaders) {
-      // get decrypted headers
-      decryptedHeaders = await decryptJobHeaders(
-        this.config.encryptionKey,
-        encryptedHeaders,
-        this.logger
-      );
-    }
+  //   let decryptedHeaders;
+  //   if (this.config.encryptionKey && encryptedHeaders) {
+  //     // get decrypted headers
+  //     decryptedHeaders = await decryptJobHeaders(
+  //       this.config.encryptionKey,
+  //       encryptedHeaders,
+  //       this.logger
+  //     );
+  //   }
 
-    if (!decryptedHeaders && !apiKeyAuthHeaders) {
-      throw new Error('No headers found to execute report');
-    }
+  //   if (!decryptedHeaders && !apiKeyAuthHeaders) {
+  //     throw new Error('No headers found to execute report');
+  //   }
 
-    let headersToUse: Headers = {};
+  //   let headersToUse: Headers = {};
 
-    if (useApiKeyAuthentication && apiKeyAuthHeaders) {
-      this.logger.debug(`Merging API key authentication headers with decrypted headers`);
-      const { cookie, authorization, ...restDecryptedHeaders } = decryptedHeaders || {};
+  //   if (useApiKeyAuthentication && apiKeyAuthHeaders) {
+  //     this.logger.debug(`Merging API key authentication headers with decrypted headers`);
+  //     const { cookie, authorization, ...restDecryptedHeaders } = decryptedHeaders || {};
 
-      headersToUse = {
-        ...apiKeyAuthHeaders,
-        ...restDecryptedHeaders,
-      };
-    } else {
-      this.logger.debug(`Using decrypted headers only`);
-      headersToUse = decryptedHeaders || {};
-    }
+  //     headersToUse = {
+  //       ...apiKeyAuthHeaders,
+  //       ...restDecryptedHeaders,
+  //     };
+  //   } else {
+  //     this.logger.debug(`Using decrypted headers only`);
+  //     headersToUse = decryptedHeaders || {};
+  //   }
 
-    return this._getFakeRequest(headersToUse, spaceId, this.logger);
-  }
+  //   return this._getFakeRequest(headersToUse, spaceId, this.logger);
+  // }
 
-  private _getFakeRequest(
-    headers: Headers,
-    spaceId: string | undefined,
-    logger = this.logger
-  ): KibanaRequest {
-    const rawRequest: FakeRawRequest = {
-      headers,
-      path: '/',
-    };
-    const fakeRequest = kibanaRequestFactory(rawRequest);
+  // private _getFakeRequest(
+  //   headers: Headers,
+  //   spaceId: string | undefined,
+  //   logger = this.logger
+  // ): KibanaRequest {
+  //   const rawRequest: FakeRawRequest = {
+  //     headers,
+  //     path: '/',
+  //   };
+  //   const fakeRequest = kibanaRequestFactory(rawRequest);
 
-    const setupDeps = this.reporting.getPluginSetupDeps();
-    const spacesService = setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
-  }
+  //   const setupDeps = this.reporting.getPluginSetupDeps();
+  //   const spacesService = setupDeps.spaces?.spacesService;
+  //   if (spacesService) {
+  //     if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+  //       logger.info(`Generating request for space: ${spaceId}`);
+  //       setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
+  //     }
+  //   }
+  //   return fakeRequest;
+  // }
 
-  private async _performJob({
-    task,
-    fakeRequest,
-    taskInstanceFields,
-    cancellationToken,
-    stream,
-  }: PerformJobOpts): Promise<TaskRunResult> {
-    const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
-    if (!exportType) {
-      throw new Error(`No export type from ${task.jobtype} found to execute report`);
-    }
-    // run the report
-    // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
-    const queueTimeout = durationToNumber(this.config.queue.timeout);
-    const request = await this._getRequestToUse({
-      requestFromTask: fakeRequest,
-      spaceId: task.payload.spaceId,
-      encryptedHeaders: task.payload.headers,
-    });
+  // private async _performJob({
+  //   task,
+  //   fakeRequest,
+  //   taskInstanceFields,
+  //   cancellationToken,
+  //   stream,
+  // }: PerformJobOpts): Promise<TaskRunResult> {
+  //   const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
+  //   if (!exportType) {
+  //     throw new Error(`No export type from ${task.jobtype} found to execute report`);
+  //   }
+  //   // run the report
+  //   // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
+  //   const queueTimeout = durationToNumber(this.config.queue.timeout);
+  //   const request = await this._getRequestToUse({
+  //     requestFromTask: fakeRequest,
+  //     spaceId: task.payload.spaceId,
+  //     encryptedHeaders: task.payload.headers,
+  //   });
 
-    return Rx.lastValueFrom(
-      Rx.from(
-        exportType.runTask({
-          jobId: task.id,
-          payload: task.payload,
-          request,
-          taskInstanceFields,
-          cancellationToken,
-          stream,
-        })
-      ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
-    );
-  }
+  //   return Rx.lastValueFrom(
+  //     Rx.from(
+  //       exportType.runTask({
+  //         jobId: task.id,
+  //         payload: task.payload,
+  //         request,
+  //         taskInstanceFields,
+  //         cancellationToken,
+  //         stream,
+  //       })
+  //     ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
+  //   );
+  // }
 
-  private async _completeJob(
-    report: SavedReport,
-    output: CompletedReportOutput
-  ): Promise<SavedReport> {
-    let docId = `/${report._index}/_doc/${report._id}`;
-    const logger = this.logger.get(report._id);
+  // private async _completeJob(
+  //   report: SavedReport,
+  //   output: CompletedReportOutput
+  // ): Promise<SavedReport> {
+  //   let docId = `/${report._index}/_doc/${report._id}`;
+  //   const logger = this.logger.get(report._id);
 
-    logger.debug(`Saving ${report.jobtype} to ${docId}.`);
+  //   logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
-    const completedTime = moment();
-    const docOutput = this._formatOutput(output);
-    const store = await this.getStore();
-    const doc = {
-      completed_at: completedTime.toISOString(),
-      metrics: output.metrics,
-      output: docOutput,
-    };
-    docId = `/${report._index}/_doc/${report._id}`;
+  //   const completedTime = moment();
+  //   const docOutput = this._formatOutput(output);
+  //   const store = await this.getStore();
+  //   const doc = {
+  //     completed_at: completedTime.toISOString(),
+  //     metrics: output.metrics,
+  //     output: docOutput,
+  //   };
+  //   docId = `/${report._index}/_doc/${report._id}`;
 
-    const resp = await store.setReportCompleted(report, doc);
+  //   const resp = await store.setReportCompleted(report, doc);
 
-    logger.info(`Saved ${report.jobtype} job ${docId}`);
-    report._seq_no = resp._seq_no!;
-    report._primary_term = resp._primary_term!;
+  //   logger.info(`Saved ${report.jobtype} job ${docId}`);
+  //   report._seq_no = resp._seq_no!;
+  //   report._primary_term = resp._primary_term!;
 
-    // event tracking of completed job
-    const eventTracker = this.getEventTracker(report);
-    const byteSize = docOutput.size;
-    const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
+  //   // event tracking of completed job
+  //   const eventTracker = this.getEventTracker(report);
+  //   const byteSize = docOutput.size;
+  //   const timeSinceCreation = completedTime.valueOf() - new Date(report.created_at).valueOf();
 
-    if (output.metrics?.csv != null) {
-      eventTracker?.completeJobCsv({
-        byteSize,
-        timeSinceCreation,
-        csvRows: output.metrics.csv.rows ?? -1,
-      });
-    } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
-      const { width, height } = report.payload.layout?.dimensions ?? {};
-      eventTracker?.completeJobScreenshot({
-        byteSize,
-        timeSinceCreation,
-        screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
-        numPages: output.metrics.pdf?.pages ?? -1,
-        screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
-      });
-    }
+  //   if (output.metrics?.csv != null) {
+  //     eventTracker?.completeJobCsv({
+  //       byteSize,
+  //       timeSinceCreation,
+  //       csvRows: output.metrics.csv.rows ?? -1,
+  //     });
+  //   } else if (output.metrics?.pdf != null || output.metrics?.png != null) {
+  //     const { width, height } = report.payload.layout?.dimensions ?? {};
+  //     eventTracker?.completeJobScreenshot({
+  //       byteSize,
+  //       timeSinceCreation,
+  //       screenshotLayout: report.payload.layout?.id ?? 'preserve_layout',
+  //       numPages: output.metrics.pdf?.pages ?? -1,
+  //       screenshotPixels: Math.round((width ?? 0) * (height ?? 0)),
+  //     });
+  //   }
 
-    return report;
-  }
+  //   return report;
+  // }
 
-  // Generic is used to let TS infer the return type at call site.
-  private async throwIfKibanaShutsDown<T>(): Promise<T> {
-    await Rx.firstValueFrom(this.reporting.getKibanaShutdown$());
-    throw new KibanaShuttingDownError();
-  }
+  // // Generic is used to let TS infer the return type at call site.
+  // private async throwIfKibanaShutsDown<T>(): Promise<T> {
+  //   await Rx.firstValueFrom(this.reporting.getKibanaShutdown$());
+  //   throw new KibanaShuttingDownError();
+  // }
 
   /*
    * Provides a TaskRunner for Task Manager
@@ -495,8 +460,8 @@ export class RunScheduledReportTask implements ReportingTask {
       const cancellationToken = new CancellationToken();
       const {
         params: scheduledReportTaskParams,
-        retryAt: taskRetryAt,
-        startedAt: taskStartedAt,
+        // retryAt: taskRetryAt,
+        // startedAt: taskStartedAt,
       } = taskInstance;
 
       return {
@@ -511,19 +476,18 @@ export class RunScheduledReportTask implements ReportingTask {
           let report: SavedReport | undefined;
 
           // find the job in the store and set status to processing
-          const task = reportTaskParams as ReportTaskParams;
+          const task = scheduledReportTaskParams as ScheduledReportTaskParams;
           jobId = task?.id;
 
           try {
             if (!jobId) {
               throw new Error('Invalid report data provided in scheduled task!');
             }
-            if (!isLastAttempt) {
-              this.reporting.trackReport(jobId);
-            }
+
+            this.reporting.trackReport(jobId);
 
             // Update job status to claimed
-            report = await this._claimJob(task);
+            // report = await this._claimJob(task);
           } catch (failedToClaim) {
             // error claiming report - log the error
             // could be version conflict, or too many attempts or no longer connected to ES
@@ -533,11 +497,6 @@ export class RunScheduledReportTask implements ReportingTask {
           if (!report) {
             this.reporting.untrackReport(jobId);
 
-            if (isLastAttempt) {
-              errorLogger(this.logger, `Job ${jobId} failed too many times. Exiting...`);
-              return;
-            }
-
             const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
             errorLogger(this.logger, errorMessage);
 
@@ -545,18 +504,15 @@ export class RunScheduledReportTask implements ReportingTask {
             throw new Error(errorMessage);
           }
 
-          const { jobtype: jobType, attempts } = report;
-          const maxAttempts = this.getMaxAttempts();
+          const { jobtype: jobType } = report;
           const logger = this.logger.get(jobId);
 
-          logger.debug(
-            `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
-          );
+          logger.debug(`Starting ${jobType} report ${jobId}.`);
           logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
-          const eventLog = this.reporting.getEventLogger(
-            new Report({ ...task, _id: task.id, _index: task.index })
-          );
+          // const eventLog = this.reporting.getEventLogger(
+          //   new Report({ ...task, _id: task.id, _index: task.index })
+          // );
 
           try {
             const jobContentEncoding = this.getJobContentEncoding(jobType);
@@ -572,18 +528,18 @@ export class RunScheduledReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
-            eventLog.logExecutionStart();
+            // eventLog.logExecutionStart();
 
-            const output = await Promise.race<TaskRunResult>([
-              this._performJob({
-                task,
-                fakeRequest,
-                taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                cancellationToken,
-                stream,
-              }),
-              this.throwIfKibanaShutsDown(),
-            ]);
+            // const output = await Promise.race<TaskRunResult>([
+            //   this._performJob({
+            //     task,
+            //     fakeRequest,
+            //     taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+            //     cancellationToken,
+            //     stream,
+            //   }),
+            //   this.throwIfKibanaShutsDown(),
+            // ]);
 
             stream.end();
 
@@ -594,24 +550,24 @@ export class RunScheduledReportTask implements ReportingTask {
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;
 
-            eventLog.logExecutionComplete({
-              ...(output.metrics ?? {}),
-              byteSize: stream.bytesWritten,
-            });
+            // eventLog.logExecutionComplete({
+            //   ...(output.metrics ?? {}),
+            //   byteSize: stream.bytesWritten,
+            // });
 
-            if (output) {
-              logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
-              // Update the job status to "completed"
-              report = await this._completeJob(report, {
-                ...output,
-                size: stream.bytesWritten,
-              });
-            }
+            // if (output) {
+            //   logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+            //   // Update the job status to "completed"
+            //   report = await this._completeJob(report, {
+            //     ...output,
+            //     size: stream.bytesWritten,
+            //   });
+            // }
 
             // untrack the report for concurrency awareness
             logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
-            eventLog.logError(failedToExecuteErr);
+            // eventLog.logError(failedToExecuteErr);
 
             await this._saveExecutionError(report, failedToExecuteErr).catch(
               (failedToSaveError) => {
