@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { RawRule, IntervalSchedule } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
@@ -40,7 +40,6 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   let existingApiKey: string | null = null;
   let attributes: RawRule;
   let version: string | undefined;
-  let references: SavedObjectReference[];
 
   try {
     enableRuleParamsSchema.validate(params);
@@ -62,7 +61,6 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     existingApiKey = decryptedAlert.attributes.apiKey;
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
-    references = decryptedAlert.references;
     alert = decryptedAlert;
   } catch (e) {
     context.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
@@ -70,7 +68,6 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     alert = await context.unsecuredSavedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id);
     attributes = alert.attributes;
     version = alert.version;
-    references = alert.references;
   }
 
   const validationPayload = await validateScheduleLimit({
