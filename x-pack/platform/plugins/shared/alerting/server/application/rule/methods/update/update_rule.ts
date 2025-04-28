@@ -114,6 +114,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
 
   let originalRuleSavedObject: SavedObject<RawRule>;
 
+  console.log('hi from top', originalRuleSavedObject);
   try {
     originalRuleSavedObject = await getDecryptedRuleSo({
       id,
@@ -240,6 +241,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     shouldIncrementRevision,
     isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
   });
+  console.log('update result', updateResult);
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
   if (
@@ -322,6 +324,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     validatedRuleTypeParams,
     artifacts
   );
+  console.log('artifacts with refs', artifactsWithRefs);
 
   // Increment revision if applicable field has changed
   const revision = shouldIncrementRevision(updatedParams as Params)
@@ -373,6 +376,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
   });
+  console.log('updated rule attributes', updatedRuleAttributes);
 
   const mappedParams = getMappedParams(updatedParams);
 
@@ -394,6 +398,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         references: extractedReferences,
       },
     });
+    console.log('updated rule saved object', JSON.stringify(updatedRuleSavedObject));
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
@@ -420,6 +425,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     },
     isSystemAction
   );
+  console.log('rule domain', ruleDomain);
 
   // Try to validate created rule, but don't throw.
   try {
