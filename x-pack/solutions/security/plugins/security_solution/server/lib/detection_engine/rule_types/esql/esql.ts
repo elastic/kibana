@@ -23,7 +23,8 @@ import {
   rowToDocument,
   mergeEsqlResultInSource,
   getMvExpandUsage,
-  updateExcludedIds,
+  updateExcludedDocuments,
+  initiateExcludedDocuments,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -31,6 +32,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
+import type { ExcludedDocument, EsqlState } from './types';
 
 import {
   addToSearchAfterReturn,
@@ -59,7 +61,7 @@ export const esqlExecutor = async ({
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: SecurityRuleServices;
-  state: Record<string, unknown>;
+  state: EsqlState;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   ruleExecutionTimeout?: string;
@@ -82,6 +84,7 @@ export const esqlExecutor = async ({
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
+    const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
 
     /**
      * ES|QL returns results as a single page, max size of 10,000
@@ -92,7 +95,12 @@ export const esqlExecutor = async ({
      * Since aggregating queries do not produce event ids, we will not exclude them.
      * All alerts for aggregating queries are unique anyway
      */
-    const excludedDocumentIds: string[] = [];
+    const excludedDocuments: ExcludedDocument[] = initiateExcludedDocuments(
+      state,
+      isRuleAggregating,
+      tuple
+    );
+
     let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
@@ -105,7 +113,7 @@ export const esqlExecutor = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
-          excludedDocumentIds,
+          excludedDocumentIds: excludedDocuments.map(({ id }) => id),
           ruleExecutionTimeout,
         });
         const esqlQueryString = { drop_null_columns: true };
@@ -134,8 +142,6 @@ export const esqlExecutor = async ({
         ruleExecutionLogger.debug(
           `ES|QL query request for ${iteration} iteration took: ${esqlSearchDuration}ms`
         );
-
-        const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
 
         const results = response.values.map((row) => rowToDocument(response.columns, row));
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
@@ -204,6 +210,14 @@ export const esqlExecutor = async ({
             `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
           );
 
+          updateExcludedDocuments({
+            excludedDocuments,
+            hasMvExpand,
+            sourceDocuments,
+            results: response,
+            isRuleAggregating,
+          });
+
           if (bulkCreateResult.alertsWereTruncated) {
             result.warningMessages.push(getSuppressionMaxSignalsWarning());
             break;
@@ -226,6 +240,14 @@ export const esqlExecutor = async ({
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
           ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
 
+          updateExcludedDocuments({
+            excludedDocuments,
+            hasMvExpand,
+            sourceDocuments,
+            results: response,
+            isRuleAggregating,
+          });
+
           if (bulkCreateResult.alertsWereTruncated) {
             result.warningMessages.push(getMaxSignalsWarning());
             break;
@@ -245,14 +267,6 @@ export const esqlExecutor = async ({
           );
           break;
         }
-
-        updateExcludedIds({
-          excludedDocumentIds,
-          hasMvExpand,
-          sourceDocuments,
-          results: response,
-          isRuleAggregating,
-        });
         iteration++;
       }
     } catch (error) {
@@ -263,6 +277,10 @@ export const esqlExecutor = async ({
       result.success = false;
     }
 
-    return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+    return {
+      ...result,
+      state: { ...state, excludedDocuments },
+      ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
+    };
   });
 };

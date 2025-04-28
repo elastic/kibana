@@ -772,8 +772,8 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             expect(agentTypeCounts).toEqual({
-              auditbeat: 101, // because we use max_signals +1 as ES|QL limit we ending up with 101 alerts
-              filebeat: 99,
+              auditbeat: 100,
+              filebeat: 100,
             });
           });
 
