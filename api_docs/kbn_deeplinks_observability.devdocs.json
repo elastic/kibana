@@ -344,7 +344,7 @@
               "If given, it will load the given onboarding flow\nelse will load the main onboarding screen."
             ],
             "signature": [
-              "\"kubernetes\" | \"auto-detect\" | \"customLogs\" | \"otel-logs\" | \"firehose\" | undefined"
+              "\"kubernetes\" | \"auto-detect\" | \"customLogs\" | \"kubernetes-otel\" | \"otel-logs\" | \"firehose\" | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
@@ -353,12 +353,12 @@
           {
             "parentPluginId": "@kbn/deeplinks-observability",
             "id": "def-common.ObservabilityOnboardingLocatorParams.category",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "category",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"application\" | \"host\" | \"kubernetes\" | \"cloud\" | undefined"
             ],
             "path": "src/platform/packages/shared/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
@@ -496,6 +496,20 @@
             "type": "string",
             "tags": [],
             "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.waterfallItemId",
+            "type": "string",
+            "tags": [],
+            "label": "waterfallItemId",
             "description": [],
             "signature": [
               "string | undefined"
