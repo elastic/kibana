@@ -26,7 +26,7 @@ export const registerApp = ({
     title: 'WorkChat',
     updater$: undefined,
     deepLinks: [
-      { id: 'agents', path: '/agents', title: 'Agents' },
+      { id: 'agents', path: '/assistants', title: 'Assistants' },
       { id: 'integrations', path: '/integrations', title: 'Integrations' },
     ],
     visibleIn: ['sideNav', 'globalSearch'],

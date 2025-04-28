@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { traceFields } from '../doc_viewer_span_overview/resources/fields';
+import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
+import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
 import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
 import { TransactionSummaryField } from '../doc_viewer_transaction_overview/sub_components/transaction_summary_field';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
@@ -19,48 +20,46 @@ import { FieldConfiguration } from '../resources/get_field_configuration';
 
 export interface TraceProps {
   fields: Record<string, FieldConfiguration>;
-  serviceName: string;
   traceId: string;
-  transactionId?: string;
   displayType: 'span' | 'transaction';
-  displayLimit?: number;
+  docId: string;
 }
 
-export const Trace = ({
-  serviceName,
-  traceId,
-  transactionId,
-  fields,
-  displayType,
-  displayLimit = 5,
-}: TraceProps) => {
+export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
-  const { absoluteTimeRange } = data.query.timefilter.timefilter.useTimefilter();
-
-  const { rangeFrom, rangeTo } = useMemo(
-    () => ({
-      rangeFrom: new Date(absoluteTimeRange.start).toISOString(),
-      rangeTo: new Date(absoluteTimeRange.end).toISOString(),
-    }),
-    [absoluteTimeRange]
-  );
+  const {
+    timeState: {
+      asAbsoluteTimeRange: { from: rangeFrom, to: rangeTo },
+    },
+  } = data.query.timefilter.timefilter.useTimefilter();
 
   const getParentApi = useCallback(
     () => ({
       getSerializedStateForChild: () => ({
         rawState: {
-          serviceName,
           traceId,
-          entryTransactionId: transactionId,
           rangeFrom,
           rangeTo,
-          displayLimit,
+          docId,
         },
       }),
     }),
-    [rangeFrom, rangeTo, displayLimit, serviceName, traceId, transactionId]
+    [docId, rangeFrom, rangeTo, traceId]
   );
+
+  const fieldRows =
+    displayType === 'span'
+      ? spanTraceFields.map((fieldId: string) => (
+          <SpanSummaryField key={fieldId} fieldId={fieldId} fieldConfiguration={fields[fieldId]} />
+        ))
+      : transactionTraceFields.map((fieldId: string) => (
+          <TransactionSummaryField
+            key={fieldId}
+            fieldId={fieldId}
+            fieldConfiguration={fields[fieldId]}
+          />
+        ));
 
   return (
     <>
@@ -73,21 +72,7 @@ export const Trace = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          {traceFields.map((fieldId: string) => {
-            const props = {
-              key: fieldId,
-              fieldId,
-              fieldConfiguration: fields[fieldId],
-            };
-
-            return displayType === 'span' ? (
-              <SpanSummaryField {...props} />
-            ) : (
-              <TransactionSummaryField {...props} />
-            );
-          })}
-        </EuiFlexItem>
+        <EuiFlexItem>{fieldRows}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <ReactEmbeddableRenderer

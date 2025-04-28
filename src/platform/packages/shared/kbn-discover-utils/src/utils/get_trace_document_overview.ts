@@ -26,6 +26,7 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
     fieldConstants.TRANSACTION_NAME_FIELD,
     fieldConstants.TRANSACTION_DURATION_FIELD,
     fieldConstants.SPAN_NAME_FIELD,
+    fieldConstants.SPAN_ID_FIELD,
     fieldConstants.SPAN_ACTION_FIELD,
     fieldConstants.SPAN_DURATION_FIELD,
     fieldConstants.SPAN_TYPE_FIELD,

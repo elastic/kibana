@@ -22,3 +22,4 @@ export * from './health_check';
 export * from './fleet_server_hosts';
 export * from './standalone_agent_api_key';
 export * from './remote_synced_integrations';
+export * from './custom_integrations';

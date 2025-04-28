@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   ANALYTICS_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   AI_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -144,7 +144,7 @@ export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 
 export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([
-    { text: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE, path: '/' },
+    { text: ENTERPRISE_SEARCH_DATA_PLUGIN.NAV_TITLE, path: '/' },
     ...breadcrumbs,
   ]);
 
