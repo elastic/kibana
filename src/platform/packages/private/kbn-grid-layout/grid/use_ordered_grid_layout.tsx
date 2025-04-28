@@ -40,7 +40,6 @@ export const useOrderedSections = (
         distinctUntilChanged(deepEqual)
       )
       .subscribe((layout) => {
-        console.log('orderedLayout', { layout });
         layoutSubject.next(layout);
       });
 
@@ -78,6 +77,7 @@ const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
         isMainSection: true,
       };
       while (widgets[i].type === 'panel') {
+        if (i >= widgets.length) break;
         const panel = layout[widgets[i].id] as GridPanelData;
         orderedLayout[`main-${sectionCount}`].panels[panel.id] = panel;
         i++;

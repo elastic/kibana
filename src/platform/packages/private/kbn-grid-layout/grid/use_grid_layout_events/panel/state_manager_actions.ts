@@ -105,7 +105,6 @@ export const moveAction = (
     return highestOverlapRowId;
   })();
   const hasChangedGridRow = targetRowId !== lastRowId;
-  console.log({ orderedSections, targetRowId, lastRowId, elements: { ...gridRowElements } });
 
   // re-render
   activePanel$.next({
@@ -130,25 +129,25 @@ export const moveAction = (
   let localYCoordinate = isResize
     ? previewRect.bottom - targetedGridTop
     : previewRect.top - targetedGridTop;
-  if (targetRowId === 'main') {
-    const subtracted = false;
+  // if (targetRowId === 'main') {
+  //   const subtracted = false;
 
-    Object.keys(gridLayoutStateManager.headerRefs.current).forEach((rowId) => {
-      const headerElement = gridLayoutStateManager.headerRefs.current[rowId];
-      const footerElement = gridLayoutStateManager.footerRefs.current[rowId];
-      const headerRect = headerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
-      const footerRect = footerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
+  //   Object.keys(gridLayoutStateManager.headerRefs.current).forEach((rowId) => {
+  //     const headerElement = gridLayoutStateManager.headerRefs.current[rowId];
+  //     const footerElement = gridLayoutStateManager.footerRefs.current[rowId];
+  //     const headerRect = headerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
+  //     const footerRect = footerElement?.getBoundingClientRect() ?? { top: 0, height: 0 };
 
-      if (headerRect.top < previewRect.top) {
-        console.log('SUBTRACT HEADER');
-        localYCoordinate -= headerRect.height;
-        localYCoordinate += rowHeight + gutterSize;
-      }
-      if (footerRect.top < previewRect.top) {
-        localYCoordinate -= footerRect.height;
-      }
-    });
-  }
+  //     if (headerRect.top < previewRect.top) {
+  //       console.log('SUBTRACT HEADER');
+  //       localYCoordinate -= headerRect.height;
+  //       localYCoordinate += rowHeight + gutterSize;
+  //     }
+  //     if (footerRect.top < previewRect.top) {
+  //       localYCoordinate -= footerRect.height;
+  //     }
+  //   });
+  // }
 
   const targetColumn = Math.min(
     Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
@@ -171,7 +170,7 @@ export const moveAction = (
   } else if (targetRowId.includes('main')) {
     requestedPanelData.row += orderedSections[targetRowId].row;
   }
-  console.log({ requestedPanelData: { ...requestedPanelData } });
+
   // resolve the new grid layout
   if (
     hasChangedGridRow ||
@@ -214,10 +213,6 @@ export const moveAction = (
     }
     if (currentLayout && !isLayoutEqual(currentLayout, nextLayout)) {
       gridLayout$.next(nextLayout);
-    }
-
-    if (hasChangedGridRow) {
-      debugger;
     }
   }
 };

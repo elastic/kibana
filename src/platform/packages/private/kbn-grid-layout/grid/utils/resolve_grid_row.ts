@@ -137,8 +137,8 @@ export const resolveMainGrid = (
   dragRequest?: GridPanelData
 ): GridLayoutData => {
   const nextLayoutData = { ...gridLayout };
-  const sortedLayout = getMainLayoutInOrder(nextLayoutData);
 
+  const sortedLayout = getMainLayoutInOrder(nextLayoutData);
   const sectionsAsPanels: GridRowData['panels'] = sortedLayout.reduce((prev, widget) => {
     return {
       ...prev,
@@ -160,7 +160,7 @@ export const resolveMainGrid = (
   ).reduce((prev, sectionOrPanel) => {
     const { type, id } =
       dragRequest && sectionOrPanel.id === dragRequest.id
-        ? dragRequest
+        ? { ...dragRequest, type: 'panel' }
         : nextLayoutData[sectionOrPanel.id];
     return {
       ...prev,

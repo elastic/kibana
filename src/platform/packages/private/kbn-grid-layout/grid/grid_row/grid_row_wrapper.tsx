@@ -74,10 +74,6 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
     [rowId]
   );
 
-  console.log('HERE!!!!', {
-    rowId,
-    targetRow: gridLayoutStateManager.activePanel$.getValue()?.targetRow,
-  });
   return (
     <span
       css={initialStyles}
