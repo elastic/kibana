@@ -26,6 +26,10 @@ export const createRulesNavigationTree = (): NodeDefinition => ({
           renderAs: 'item',
           children: [
             {
+              id: SecurityPageName.rulesManagement,
+              link: securityLink(SecurityPageName.rulesManagement),
+            },
+            {
               id: SecurityPageName.rulesAdd,
               link: securityLink(SecurityPageName.rulesAdd),
             },
