@@ -10,8 +10,12 @@ import type { SavedObject } from '@kbn/core/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { omit } from 'lodash';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import {
+  MAX_ARTIFACTS_DASHBOARDS_LENGTH,
+  MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH,
+} from '@kbn/alerting-plugin/common/routes/rule/request/schemas/v1';
+import { omit } from 'lodash';
 import { Spaces } from '../../../scenarios';
 import type { TaskManagerDoc } from '../../../../common/lib';
 import {
@@ -894,6 +898,38 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
           expect(rawInvestigationGuide).to.eql(expectedArtifacts.artifacts.investigation_guide);
         });
+
+        it('should deny creating a rule with an investigation guide that exceeds size limits', () =>
+          supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                artifacts: {
+                  investigation_guide: {
+                    // purposefully exceed limit
+                    blob: 'a'.repeat(MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH + 1),
+                  },
+                },
+              })
+            )
+            .expect(400));
+
+        it('should deny creating a rule that exceeds dashboard length limits', () =>
+          supertest
+            .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                artifacts: {
+                  dashboards: Array.from(
+                    { length: MAX_ARTIFACTS_DASHBOARDS_LENGTH + 1 },
+                    (_, idx) => ({ id: `dashboard-${idx}` })
+                  ),
+                },
+              })
+            )
+            .expect(400));
       });
     });
   });
