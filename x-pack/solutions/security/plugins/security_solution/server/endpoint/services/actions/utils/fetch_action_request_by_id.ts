@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { stringify } from '../../../utils/stringify';
 import { NotFoundError } from '../../../errors';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import type {
@@ -52,7 +53,9 @@ export const fetchActionRequestById = async <
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   } else if (endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
     if (!actionRequest.agent.policy || actionRequest.agent.policy.length === 0) {
-      const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine access to it for active space [${spaceId}]`;
+      const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine access to it for active space [${spaceId}]:\n${stringify(
+        actionRequest
+      )}`;
 
       logger.warn(message);
       throw new CustomHttpRequestError(message);
