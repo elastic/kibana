@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { DefineStepRule } from '../../../common/types';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
