@@ -825,10 +825,19 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
-      setIntegrationToEnable?.(input.policy_template);
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading, input.policy_template, isEditPage, setupTechnology]);
+    }, [isLoading, input.policy_template, isEditPage]);
+
+    useEffect(() => {
+      if (isEditPage) {
+        return;
+      }
+
+      setEnabledPolicyInput(input.type);
+      setIntegrationToEnable?.(input.policy_template);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setupTechnology]);
 
     useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 

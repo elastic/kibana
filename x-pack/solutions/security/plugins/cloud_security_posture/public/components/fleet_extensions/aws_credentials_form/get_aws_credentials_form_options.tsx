@@ -108,12 +108,18 @@ export const getAgentlessCredentialsType = (
   showCloudConnectors: boolean
 ): AwsCredentialsType => {
   const credentialsType = getAwsCredentialsType(postureInput);
-
-  if (!credentialsType && showCloudConnectors) {
+  if (
+    (!credentialsType && showCloudConnectors) ||
+    (credentialsType === AWS_CREDENTIALS_TYPE.CLOUD_FORMATION && showCloudConnectors)
+  ) {
     return AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
   }
 
-  return credentialsType || AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+  if (credentialsType === AWS_CREDENTIALS_TYPE.CLOUD_FORMATION || !credentialsType) {
+    return AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+  }
+
+  return credentialsType;
 };
 
 const getAwsCredentialsTypeSelectorOptions = (
