@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { GeneralDatasourceStates } from '../../../state_management';
 import { DatatableVisualizationState } from '../datatable_visualization';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: DatatableVisualizationState,
-  datasourceStates?: GeneralDatasourceStates
+  datasourceStates?: GeneralDatasourceStates,
+  skipClone = false
 ): DatatableVisualizationState {
-  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(datasourceStates).reduce(
+    (newState, fn) => fn(newState),
+    skipClone ? state : cloneDeep(state)
+  );
 }

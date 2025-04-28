@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { GeneralDatasourceStates } from '../../../state_management';
 import { TagcloudState } from '../types';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: TagcloudState,
-  datasourceStates?: GeneralDatasourceStates
+  datasourceStates?: GeneralDatasourceStates,
+  skipClone = false
 ): TagcloudState {
-  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(datasourceStates).reduce(
+    (newState, fn) => fn(newState),
+    skipClone ? state : cloneDeep(state)
+  );
 }
