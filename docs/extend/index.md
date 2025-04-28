@@ -14,5 +14,6 @@ Contributing to {{kib}} can be daunting at first, but it doesn’t have to be. T
 * [External plugin development](./external-plugin-development.md)
 * [Advanced](./advanced.md)
 * [List of {{kib}} plugins](./plugin-list.md)
+* [List of dependencies](./dependencies-versions.md)
 * [Development Telemetry](./development-telemetry.md)
 

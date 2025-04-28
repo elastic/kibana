@@ -96,4 +96,12 @@ describe('config schema', () => {
       )
     ).toThrow();
   });
+
+  it('should not throw error if defaultSolution uses valid value', () => {
+    expect(() => ConfigSchema.validate({ defaultSolution: 'es' })).not.toThrow();
+  });
+
+  it('should throw error if defaultSolution uses invalid value', () => {
+    expect(() => ConfigSchema.validate({ defaultSolution: 'test' })).toThrow();
+  });
 });

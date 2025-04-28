@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/Either';
 import { max_signals } from '../max_signals';
 import { DEFAULT_MAX_SIGNALS } from '../constants';
 

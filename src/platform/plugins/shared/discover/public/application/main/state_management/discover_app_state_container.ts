@@ -181,12 +181,14 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param services
  */
 export const getDiscoverAppStateContainer = ({
+  tabId,
   stateStorage,
   internalState,
   savedSearchContainer,
   services,
   injectCurrentTab,
 }: {
+  tabId: string;
   stateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
@@ -245,7 +247,11 @@ export const getDiscoverAppStateContainer = ({
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...enhancedAppContainer.getState(), ...newPartial } : newPartial;
-    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+    if (internalState.getState().tabs.unsafeCurrentId === tabId) {
+      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+    } else {
+      enhancedAppContainer.set(state);
+    }
   };
 
   const startAppStateUrlSync = () => {
