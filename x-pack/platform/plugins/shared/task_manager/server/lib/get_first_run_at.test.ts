@@ -105,7 +105,7 @@ describe('getFirstRunAt', () => {
     expect(firstRunAtDate).toEqual(new Date('2025-04-16T12:15:00Z'));
   });
 
-  test('should return the calculated runAt when an rrule only with byhour is provided', () => {
+  test('should return the calculated runAt when an rrule with only byhour is provided', () => {
     const taskInstance = {
       id: 'id',
       params: {},
@@ -127,7 +127,7 @@ describe('getFirstRunAt', () => {
     expect(firstRunAtDate).toEqual(new Date('2025-04-16T12:00:00Z'));
   });
 
-  test('should return the calculated runAt when an rrule byminute with byminute is provided', () => {
+  test('should return the calculated runAt when an rrule with byminute is provided', () => {
     const taskInstance = {
       id: 'id',
       params: {},
