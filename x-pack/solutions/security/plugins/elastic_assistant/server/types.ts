@@ -293,9 +293,8 @@ export interface AssistantToolParams {
 }
 
 /**
- * Helper method for working with AssistantToolParams.
+ * Helper type for working with AssistantToolParams when some properties are required.
  *
- * e.g. if you want to use the `assistantContext` property, you can use this method to get the type of the property.
  *
  * ```ts
  * export type MyNewTypeWithAssistantContext = AssistantToolParams & OmitUndefined<Pick<AssistantToolParams, 'assistantContext'>>
