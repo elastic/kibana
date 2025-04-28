@@ -94,7 +94,7 @@ export const HomeChatSection: React.FC = () => {
 
   return (
     <EuiFlexItem grow>
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l">
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l" color="subdued">
         <EuiTitle size="s">
           <h2>
             {i18n.translate('workchatApp.home.welcomeWorkchat', {
