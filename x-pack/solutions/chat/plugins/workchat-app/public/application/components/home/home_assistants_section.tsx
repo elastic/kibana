@@ -47,7 +47,14 @@ export const HomeAssistantsSection: React.FC<{}> = () => {
         </EuiFlexGroup>
       }
       onClick={() => {
-        navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: assistant.id }));
+        navigateToWorkchatUrl(appPaths.chat.new({ agentId: assistant.id }));
+      }}
+      extraAction={{
+        iconType: 'pencil',
+        onClick: (e) => {
+          e.stopPropagation();
+          navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: assistant.id }));
+        },
       }}
       size="s"
     />
