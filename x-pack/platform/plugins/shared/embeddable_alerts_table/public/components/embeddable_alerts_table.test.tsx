@@ -150,12 +150,20 @@ describe('EmbeddableAlertsTable', () => {
         showAlertStatusWithFlapping: true,
         toolbarVisibility: {
           showFullScreenSelector: false,
+          showColumnSelector: false,
+          showSortSelector: false,
+          showKeyboardShortcuts: false,
+          showDisplaySelector: false,
         },
-        emptyStateHeight: 'flex',
         casesConfiguration: {
           featureId: 'alerts',
           owner: [GENERAL_CASES_OWNER],
         },
+        emptyStateHeight: 'flex',
+        emptyStateVariant: 'transparent',
+        flyoutOwnsFocus: true,
+        openLinksInNewTab: true,
+        browserFields: {},
       }),
       {}
     );
