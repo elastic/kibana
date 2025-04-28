@@ -86,7 +86,7 @@ export const bulkMigrateLegacyActions = async ({
       `bulkMigrateLegacyActions(): Failed to bulk migrate legacy actions for SIEM rules: ${e.message}`
     );
     throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.validateLegacyActions.errorSummary', {
+      i18n.translate('xpack.alerting.rulesClient.validateLegacyActions.bulkMigrationError', {
         defaultMessage: 'Failed to bulk migrate legacy actions for SIEM rules: {errorMessage}',
         values: {
           errorMessage: e.message,
