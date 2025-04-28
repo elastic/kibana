@@ -57,9 +57,7 @@ export const combineFindAttackDiscoveryFilters = ({
     ...(connectorNames && connectorNames.length > 0
       ? [
           `(${connectorNames
-            .map(
-              (name) => `${ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME}: "${escapeQueryString(name)}"`
-            )
+            .map((name) => `${ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME}: "${name}"`)
             .join(' OR ')})`,
         ]
       : []),

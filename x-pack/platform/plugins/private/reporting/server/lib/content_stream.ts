@@ -322,6 +322,8 @@ export async function getContentStream(
   );
 }
 
+const MAX_RECURSION = 100;
+
 export async function finishedWithNoPendingCallbacks(stream: Writable) {
   await finished(stream, { readable: false });
 
@@ -330,10 +332,13 @@ export async function finishedWithNoPendingCallbacks(stream: Writable) {
   // This introduces a race condition where the code continues before the writable part has completely finished.
   // The `pendingCallbacks` function is a hack to ensure that all pending callbacks have been called before continuing.
   // For more information, see: https://github.com/nodejs/node/issues/46170
-  await (async function pendingCallbacks(delay = 1) {
+  await (async function pendingCallbacks(delay = 1, attempts = 1) {
     if ((stream as any)._writableState.pendingcb > 0) {
       await setTimeout(delay);
-      await pendingCallbacks(delay < 32 ? delay * 2 : delay);
+
+      if (attempts < MAX_RECURSION) {
+        await pendingCallbacks(delay < 32 ? delay * 2 : delay, attempts + 1);
+      }
     }
   })();
 }
