@@ -238,7 +238,7 @@ describe('Handle request to schedule', () => {
       }
 
       expect(error?.statusCode).toBe(400);
-      expect(error?.body).toBe('A RRULE schedule is required in the POST body');
+      expect(error?.body).toBe('A schedule is required to create a scheduled report.');
     });
 
     test('handles null schedule', () => {
@@ -255,7 +255,7 @@ describe('Handle request to schedule', () => {
       }
 
       expect(error?.statusCode).toBe(400);
-      expect(error?.body).toBe('A RRULE schedule is required in the POST body');
+      expect(error?.body).toBe('A schedule is required to create a scheduled report.');
     });
 
     test('handles empty schedule', () => {
@@ -272,7 +272,7 @@ describe('Handle request to schedule', () => {
       }
 
       expect(error?.statusCode).toBe(400);
-      expect(error?.body).toBe('A RRULE schedule is required in the POST body');
+      expect(error?.body).toBe('A schedule is required to create a scheduled report.');
     });
 
     test('handles null rrule schedule', () => {
@@ -289,7 +289,7 @@ describe('Handle request to schedule', () => {
       }
 
       expect(error?.statusCode).toBe(400);
-      expect(error?.body).toBe('A RRULE schedule is required in the POST body');
+      expect(error?.body).toBe('A schedule is required to create a scheduled report.');
     });
 
     test('handles empty rrule schedule', () => {
@@ -306,7 +306,7 @@ describe('Handle request to schedule', () => {
       }
 
       expect(error?.statusCode).toBe(400);
-      expect(error?.body).toBe('A RRULE schedule is required in the POST body');
+      expect(error?.body).toBe('A schedule is required to create a scheduled report.');
     });
   });
 

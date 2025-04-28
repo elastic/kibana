@@ -75,7 +75,7 @@ export class GenerateRequestHandler extends RequestHandler<
       `Scheduled ${name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
 
-    // 6. Log the action with event log
+    // Log the action with event log
     reporting.getEventLogger(report, task).logScheduleTask();
     return report;
   }

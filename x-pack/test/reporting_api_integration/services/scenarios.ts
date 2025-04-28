@@ -15,8 +15,8 @@ import {
   REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
 } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
-import { RawSchedule } from '@kbn/reporting-plugin/server/saved_objects/scheduled_report/schemas/latest';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -156,7 +156,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username: string,
     password: string,
     job: JobParamsPDFV2,
-    schedule: RawSchedule = { rrule: { freq: 1, interval: 1 } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
   ) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
@@ -177,7 +177,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username: string,
     password: string,
     job: JobParamsPNGV2,
-    schedule: RawSchedule = { rrule: { freq: 1, interval: 1 } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
   ) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
@@ -203,7 +203,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     job: JobParamsCSV,
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme',
-    schedule: RawSchedule = { rrule: { freq: 1, interval: 1 } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
   ) => {
     const jobParams = rison.encode(job);
 

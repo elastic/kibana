@@ -23,17 +23,18 @@ export const rawNotificationSchema = schema.object({
 });
 
 export const rawScheduledReportSchema = schema.object({
-  jobType: schema.string(),
   createdAt: schema.string(),
   createdBy: schema.oneOf([schema.string(), schema.boolean()]),
-  migrationVersion: schema.string(),
-  payload: schema.string(),
-  title: schema.string(),
+  enabled: schema.boolean(),
+  jobType: schema.string(),
   meta: schema.object({
-    objectType: schema.string(),
-    layout: schema.maybe(rawLayoutIdSchema),
     isDeprecated: schema.maybe(schema.boolean()),
+    layout: schema.maybe(rawLayoutIdSchema),
+    objectType: schema.string(),
   }),
-  schedule: scheduleRruleSchema,
+  migrationVersion: schema.string(),
   notification: schema.maybe(rawNotificationSchema),
+  payload: schema.string(),
+  schedule: scheduleRruleSchema,
+  title: schema.string(),
 });

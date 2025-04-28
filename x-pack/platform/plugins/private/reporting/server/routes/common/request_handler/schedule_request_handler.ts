@@ -57,7 +57,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     if (isEmpty(rruleDef)) {
       throw res.customError({
         statusCode: 400,
-        body: 'A RRULE schedule is required in the POST body',
+        body: 'A schedule is required to create a scheduled report.',
       });
     }
 
@@ -80,29 +80,29 @@ export class ScheduleRequestHandler extends RequestHandler<
       spaceId: reporting.getSpaceId(req, logger),
     };
 
-    // TODO - references?
+    // TODO - extract saved object references before persisting
 
     const attributes = {
-      jobType,
       createdAt: moment.utc().toISOString(),
       createdBy: user ? user.username : false,
+      enabled: true,
+      jobType,
+      meta: {
+        // telemetry fields
+        isDeprecated: job.isDeprecated,
+        layout: jobParams.layout?.id,
+        objectType: jobParams.objectType,
+      },
+      migrationVersion: version,
       title: job.title,
       payload: JSON.stringify(payload),
       schedule: schedule!,
-      migrationVersion: version,
-      meta: {
-        // telemetry fields
-        objectType: jobParams.objectType,
-        layout: jobParams.layout?.id,
-        isDeprecated: job.isDeprecated,
-      },
     };
 
     // Create a scheduled report saved object
     const report = await soClient.create<RawScheduledReport>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-      attributes,
-      {}
+      attributes
     );
     logger.debug(`Successfully created scheduled report: ${report.id}`);
 
