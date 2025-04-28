@@ -10,7 +10,7 @@ import type SuperTest from 'supertest';
 /**
  * Triggers a run for a rule using the `_run_soon` API.
  */
-export const runSoonRule = async (supertest: SuperTest, ruleId: string): Promise<void> => {
+export const runSoonRule = async (supertest: SuperTest.Agent, ruleId: string): Promise<void> => {
   await supertest
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
     .set('kbn-xsrf', 'true')
