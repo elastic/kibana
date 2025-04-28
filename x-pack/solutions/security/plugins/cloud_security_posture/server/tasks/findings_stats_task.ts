@@ -347,7 +347,6 @@ const getFindingsScoresDocIndexingPromises = (
         score_by_cluster_id: clustersStats,
         score_by_benchmark_id: benchmarkStats,
         is_enabled_rules_score: isCustomScore,
-        'data_stream.namespace': 'all',
       },
     });
   });
@@ -403,7 +402,7 @@ const getFindingsScoresByNamespaceIndexingPromises = (
           score_by_cluster_id: clustersStats,
           score_by_benchmark_id: benchmarkStats,
           is_enabled_rules_score: isCustomScore,
-          'data_stream.namespace': namespace,
+          namespace,
         },
       });
     });
