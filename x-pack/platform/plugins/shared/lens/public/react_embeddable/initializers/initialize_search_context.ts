@@ -66,7 +66,7 @@ export function initializeSearchContext(
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
   const timeRangeManager = initializeTimeRangeManager(initialState);
-  
+
   const subscriptions = [
     internalApi.attributes$
       .pipe(
@@ -81,7 +81,7 @@ export function initializeSearchContext(
       )
       .subscribe(filters$),
   ];
-  
+
   return {
     api: {
       searchSessionId$,
