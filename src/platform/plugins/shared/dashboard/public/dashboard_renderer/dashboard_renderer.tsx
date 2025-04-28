@@ -18,7 +18,8 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { DashboardApi, DashboardInternalApi, DashboardLocatorParams } from '../dashboard_api/types';
+import type { DashboardLocatorParams } from '../../common';
+import { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import { coreServices, screenshotModeService } from '../services/kibana_services';
 import type { DashboardCreationOptions } from '..';
 import { Dashboard404Page } from './dashboard_404';
