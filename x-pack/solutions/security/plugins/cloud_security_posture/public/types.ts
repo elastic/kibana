@@ -13,7 +13,12 @@ import { CoreStart } from '@kbn/core/public';
 import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FindingMisconfigurationFlyoutProps } from '@kbn/cloud-security-posture';
+import {
+  FindingMisconfigurationFlyoutFooterProps,
+  FindingMisconfigurationFlyoutProps,
+  FindingsMisconfigurationFlyoutContentProps,
+  FindingsMisconfigurationFlyoutHeaderProps,
+} from '@kbn/cloud-security-posture';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -36,10 +41,13 @@ export interface CspClientPluginSetup {}
 export interface CspClientPluginStart {
   /** Gets the cloud security posture router component for embedding in the security solution. */
   getCloudSecurityPostureRouter(): ComponentType<CspRouterProps>;
-  getCloudSecurityPostureMisconfigurationFlyout: ({
-    ruleId,
-    resourceId,
-  }: FindingMisconfigurationFlyoutProps) => React.JSX.Element;
+  // getCloudSecurityPostureMisconfigurationFlyout: () => React.JSX.Element;
+  getCloudSecurityPostureMisconfigurationFlyout: () => {
+    Component: React.FC<FindingMisconfigurationFlyoutProps>;
+    Header: React.FC<FindingsMisconfigurationFlyoutHeaderProps>;
+    Body: React.FC<FindingsMisconfigurationFlyoutContentProps>;
+    Footer: React.FC<FindingMisconfigurationFlyoutFooterProps>;
+  };
 }
 
 export interface CspClientPluginSetupDeps {

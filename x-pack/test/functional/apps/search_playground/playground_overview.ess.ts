@@ -69,7 +69,7 @@ export default function (ftrContext: FtrProviderContext) {
           await browser.refresh();
         });
         it('show success llm button', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
@@ -169,7 +169,7 @@ export default function (ftrContext: FtrProviderContext) {
         it('show edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
             'basic_index',
-            ['baz']
+            ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
           );
         });
 

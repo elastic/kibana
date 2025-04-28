@@ -27,6 +27,6 @@ export const capabilityGroups = {
   },
   api: {
     read: [apiCapabilities.useWorkchat],
-    all: [apiCapabilities.manageWorkchat, apiCapabilities.manageWorkchat],
+    all: [apiCapabilities.useWorkchat, apiCapabilities.manageWorkchat],
   },
 };

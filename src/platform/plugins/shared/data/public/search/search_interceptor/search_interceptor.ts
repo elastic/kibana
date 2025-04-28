@@ -65,6 +65,11 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
+  EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+  EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
+  EVENT_PROPERTY_EXECUTION_CONTEXT,
+} from '../constants';
+import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   getTotalLoaded,
@@ -398,6 +403,10 @@ export class SearchInterceptor {
       catchError((e: Error) => {
         // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
         if (searchAbortController.isTimeout()) {
+          this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
+            [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
+            [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
+          });
           return from(
             this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
           ).pipe(

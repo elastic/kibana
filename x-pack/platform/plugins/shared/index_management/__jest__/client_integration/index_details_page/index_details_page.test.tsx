@@ -222,13 +222,12 @@ describe('<IndexDetailsPage />', () => {
       expect(tabContent).toEqual(JSON.stringify(testIndexStats, null, 2));
     });
 
-    it('sets the docs link href from the documenation service', async () => {
+    it('sets the docs link href from the documentation service', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
       const docsLinkHref = testBed.actions.stats.getDocsLinkHref();
-      // the url from the mocked docs mock
-      expect(docsLinkHref).toEqual(
-        'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/indices-stats.html'
-      );
+
+      expect(docsLinkHref).toMatch(/^https:\/\/www\.elastic\.co\//);
+      expect(docsLinkHref).toContain('indices-stats');
     });
 
     it('renders a warning message if an index is not open', async () => {

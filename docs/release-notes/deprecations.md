@@ -7,7 +7,7 @@ Over time, certain Elastic functionality becomes outdated and is replaced or rem
 
 Review the deprecated functionality for Kibana. While deprecations have no immediate impact, we strongly encourage you update your implementation after you upgrade. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
-% ## Next version [kibana-versionnext-deprecations]
+% ## Next version [kibana-X.X.X-deprecations]
 
 % Use the following template to add entries to this document.
 

@@ -47,5 +47,7 @@
     "@kbn/automatic-import-plugin",
     "@kbn/cloud-security-posture-common",
     "@kbn/dev-utils",
+    "@kbn/inference-common",
+    "@kbn/ai-assistant-icon",
   ]
 }

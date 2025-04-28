@@ -237,7 +237,6 @@ describe('initNavigation()', () => {
       const nodesBody = treeDefinition.body as ChromeProjectNavigationNode[];
       expect(nodesBody[1]).toEqual({
         id: 'node-1', // auto generated
-        title: '',
         path: 'node-1',
         type: 'navGroup',
         isExternalLink: false,
@@ -246,7 +245,6 @@ describe('initNavigation()', () => {
           {
             id: 'node-0', // auto generated
             path: 'node-1.node-0',
-            title: '',
             isExternalLink: false,
             sideNavStatus: 'visible',
             children: [
@@ -283,7 +281,6 @@ describe('initNavigation()', () => {
           {
             id: 'node-0', // auto generated
             path: 'node-4.node-0',
-            title: '',
             isExternalLink: false,
             sideNavStatus: 'visible',
             children: [

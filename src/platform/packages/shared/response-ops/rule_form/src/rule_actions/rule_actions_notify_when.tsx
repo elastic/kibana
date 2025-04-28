@@ -33,8 +33,8 @@ import {
   useEuiTheme,
   EuiSuperSelectOption,
 } from '@elastic/eui';
-import { some, filter, map } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { some, filter, map } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
 import { DEFAULT_FREQUENCY } from '../constants';
 import { getTimeOptions } from '../utils';
 
