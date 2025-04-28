@@ -32,4 +32,5 @@ export const EnrollmentAPIKeySchema = schema.object({
     })
   ),
   created_at: schema.string(),
+  hidden: schema.maybe(schema.boolean()),
 });
