@@ -58,9 +58,11 @@ export const useGridPanelState = ({
 const getPanelState = (layout: OrderedLayout, panelId: string) => {
   const flattenedPanels: { [id: string]: GridPanelData & { rowId: string } } = {};
   Object.values(layout).forEach((section) => {
+    const startingRow = section.isMainSection && section.order !== 0 ? section.row + 1 : 0;
     Object.values((section as GridRowData).panels).forEach((panel) => {
-      flattenedPanels[panel.id] = { ...panel, rowId: section.id };
+      flattenedPanels[panel.id] = { ...panel, rowId: section.id, row: panel.row - startingRow };
     });
   });
+  // console.log({ flattenedPanels });
   return flattenedPanels[panelId];
 };

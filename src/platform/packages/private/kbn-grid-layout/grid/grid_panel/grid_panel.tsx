@@ -96,9 +96,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
               // undo any "lock to grid" styles **except** for the top left corner, which stays locked
               ref.style.gridColumnStart = `${currentPanel.column + 1}`;
-              ref.style.gridRowStart = `${`gridRow-${
-                currentPanel.rowId.includes('main') ? 'main' : currentPanel.rowId
-              }`} ${currentPanel.row + 1}`;
+              ref.style.gridRowStart = `${`gridRow-${currentPanel.rowId}`} ${currentPanel.row + 1}`;
               ref.style.gridColumnEnd = `auto`;
               ref.style.gridRowEnd = `auto`;
             } else {
@@ -129,9 +127,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             // and render the panel locked to the grid
             ref.style.gridColumnStart = `${currentPanel.column + 1}`;
             ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
-            ref.style.gridRowStart = `${`gridRow-${
-              currentPanel.rowId.includes('main') ? 'main' : currentPanel.rowId
-            }`} ${currentPanel.row + 1}`;
+            ref.style.gridRowStart = `${`gridRow-${currentPanel.rowId}`} ${currentPanel.row + 1}`;
             ref.style.gridRowEnd = `span ${currentPanel.height}`;
           }
         });

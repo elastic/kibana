@@ -15,6 +15,7 @@ import { resolveGridRow, resolveMainGrid } from '../../utils/resolve_grid_row';
 import { getSensorType, isKeyboardEvent } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
+import { GridLayoutContextType } from '../../use_grid_layout_context';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -40,7 +41,7 @@ export const startAction = (
 
 export const moveAction = (
   e: UserInteractionEvent,
-  gridLayoutStateManager: GridLayoutStateManager,
+  gridLayoutStateManager: GridLayoutContextType['gridLayoutStateManager'],
   pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
 ) => {
@@ -49,7 +50,7 @@ export const moveAction = (
     interactionEvent$,
     gridLayout$,
     activePanel$,
-    layoutRef: { current: gridLayoutElement },
+    orderedSections$: { value: orderedSections },
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
@@ -102,12 +103,10 @@ export const moveAction = (
       if (overlap > highestOverlap) {
         highestOverlap = overlap;
         highestOverlapRowId = id;
-        // console.log({ highestOverlap, highestOverlapRowId });
       }
     });
-    return highestOverlap > 0 ? highestOverlapRowId : lastRowId;
+    return highestOverlapRowId;
   })();
-  // console.log({ targetRowId, lastRowId });
   const hasChangedGridRow = targetRowId !== lastRowId;
 
   // re-render when the target row changes
@@ -117,10 +116,10 @@ export const moveAction = (
       targetRow: targetRowId,
     });
   }
-
   // calculate the requested grid position
   const targetedGridRow = gridRowElements[targetRowId];
   const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
+
   const targetedGridLeft = targetedGridRowRect?.left ?? 0;
   const targetedGridTop = targetedGridRowRect?.top ?? 0;
 
@@ -148,7 +147,10 @@ export const moveAction = (
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;
   }
-  // console.log('tARGET!!!', { targetRow, targetRowId, currentLayout });
+  if (targetRowId.includes('main')) {
+    requestedPanelData.row += orderedSections[targetRowId].row;
+  }
+
   // resolve the new grid layout
   if (
     hasChangedGridRow ||
@@ -190,8 +192,13 @@ export const moveAction = (
       }
     }
     if (currentLayout && !isLayoutEqual(currentLayout, nextLayout)) {
+      // console.log({ nextLayout });
       gridLayout$.next(nextLayout);
     }
+
+    // if (hasChangedGridRow) {
+    //   debugger;
+    // }
   }
 };
 

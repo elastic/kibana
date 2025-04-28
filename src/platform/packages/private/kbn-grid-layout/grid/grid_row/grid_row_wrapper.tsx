@@ -37,10 +37,8 @@ export const GridRowWrapper = React.memo(({ rowId, start, end }: GridRowProps) =
         // .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe((interactionEvent) => {
           const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
-          console.log(rowId);
           if (!rowRef) return;
           const targetRow = interactionEvent?.targetRow;
-          console.log({ rowId, targetRow });
           if (rowId === targetRow && interactionEvent) {
             rowRef.classList.add('kbnGridRow--targeted');
           } else {

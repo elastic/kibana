@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
-import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { combineLatest } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -24,15 +22,12 @@ import {
   GridAccessMode,
   GridLayoutData,
   GridLayoutElementsInOrder,
-  GridPanelData,
   GridRowData,
   GridSettings,
   UseCustomDragHandle,
 } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { isLayoutEqual } from './utils/equality_checks';
-import { getMainLayoutInOrder, getPanelKeysInOrder } from './utils/resolve_grid_row';
 import { useOrderedSections } from './use_ordered_grid_layout';
 
 export type GridLayoutProps = {
@@ -115,45 +110,48 @@ export const GridLayout = ({
       const currentElementsInOrder: GridLayoutElementsInOrder = [];
       let gridRowTemplateString = '';
 
-      Object.values(sections).forEach((section) => {
-        const { id } = section;
-        gridRowTemplateString += `[gridRow-main start-${id}] `;
-        if (!section.isMainSection) {
-          /** Header */
-          currentElementsInOrder.push({ type: 'header', id });
-          gridRowTemplateString += `auto `;
-        }
+      Object.values(sections)
+        .sort((a, b) => {
+          return a.order - b.order;
+        })
+        .forEach((section) => {
+          const { id } = section;
+          // console.log(section);
+          gridRowTemplateString += `[start-${id}] `;
+          if (!section.isMainSection) {
+            /** Header */
+            currentElementsInOrder.push({ type: 'header', id });
+            gridRowTemplateString += `auto `;
+          }
 
-        /** Panels */
-        const startingRow = section.isMainSection ? section.row - 1 : 0;
-        if (!section.isCollapsed) {
-          let maxRow = -Infinity;
-          Object.values((section as GridRowData).panels).forEach((panel) => {
-            maxRow = Math.max(maxRow, panel.row + panel.height - startingRow);
-            currentElementsInOrder.push({
-              type: 'panel',
-              id: panel.id,
+          /** Panels */
+          const startingRow = section.isMainSection && section.order !== 0 ? section.row + 1 : 0;
+          if (!section.isCollapsed) {
+            let maxRow = -Infinity;
+            Object.values((section as GridRowData).panels).forEach((panel) => {
+              maxRow = Math.max(maxRow, panel.row + panel.height - startingRow);
+              currentElementsInOrder.push({
+                type: 'panel',
+                id: panel.id,
+              });
             });
-          });
-          gridRowTemplateString += `repeat(${maxRow}, [${
-            section.isMainSection ? 'gridRow-main ' : ''
-          } gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
-          currentElementsInOrder.push({
-            type: 'wrapper',
-            id,
-            start: `gridRow-${id} 1`,
-            end: `end-${id}`,
-          });
-        }
+            gridRowTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
+            currentElementsInOrder.push({
+              type: 'wrapper',
+              id,
+              start: `gridRow-${id} 1`,
+              end: `end-${id}`,
+            });
+          }
 
-        if (!section.isMainSection) {
-          /** Footer */
-          currentElementsInOrder.push({ type: 'footer', id });
-          gridRowTemplateString += `auto `;
-        }
-        gridRowTemplateString += `[end-${section.id}] `;
-      });
-      console.log(gridRowTemplateString, currentElementsInOrder);
+          if (!section.isMainSection) {
+            /** Footer */
+            currentElementsInOrder.push({ type: 'footer', id });
+            gridRowTemplateString += `auto `;
+          }
+          gridRowTemplateString += `[end-${section.id}] `;
+        });
+      // console.log(currentElementsInOrder);
       setElementsInOrder(currentElementsInOrder);
       gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
       if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;

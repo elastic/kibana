@@ -15,13 +15,13 @@ import { GridLayoutData, GridLayoutStateManager, GridPanelData, GridRowData } fr
 import { getMainLayoutInOrder } from './utils/resolve_grid_row';
 
 export interface OrderedLayout {
-  [key: number]: Omit<GridRowData, 'isCollapsed' | 'title'> &
+  [key: string]: Omit<GridRowData, 'isCollapsed' | 'title'> &
     (
       | Partial<Pick<GridRowData, 'isCollapsed' | 'title'>>
       | {
           isMainSection: boolean;
         }
-    );
+    ) & { order: number };
 }
 
 export const useOrderedSections = (
@@ -69,15 +69,16 @@ const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
   for (let i = 0; i < widgets.length; i++) {
     const { type, id } = widgets[i];
     if (type === 'panel') {
-      orderedLayout[order] = {
+      orderedLayout[`main-${sectionCount}`] = {
         id: `main-${sectionCount}`,
         panels: {},
-        row: row + 1,
+        order,
+        row,
         isMainSection: true,
       };
       while (widgets[i].type === 'panel') {
-        const panelId = widgets[i].id;
-        orderedLayout[order].panels[panelId] = layout[panelId] as GridPanelData;
+        const panel = layout[widgets[i].id] as GridPanelData;
+        orderedLayout[`main-${sectionCount}`].panels[panel.id] = panel;
         i++;
       }
       i--;
@@ -85,12 +86,12 @@ const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
     } else {
       const sectionId = id;
       const section = layout[sectionId] as GridRowData;
-      orderedLayout[order] = section;
+      orderedLayout[sectionId] = { ...section, order };
       order++;
       row = section.row;
       sectionCount++;
     }
   }
-  console.log({ orderedLayout });
+  // console.log({ orderedLayout });
   return orderedLayout;
 };
