@@ -16,7 +16,8 @@ import {
   PublishesSearchSession,
   apiPublishesSearchSession,
 } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { BehaviorSubject, Observable, merge } from 'rxjs';
+import { BehaviorSubject, Observable, merge, map, distinctUntilChanged } from 'rxjs';
+import { isEqual } from 'lodash';
 import {
   LensEmbeddableStartServices,
   LensInternalApi,
@@ -65,6 +66,22 @@ export function initializeSearchContext(
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
   const timeRangeManager = initializeTimeRangeManager(initialState);
+  
+  const subscriptions = [
+    internalApi.attributes$
+      .pipe(
+        map((attrs) => attrs.state.query),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(query$),
+    internalApi.attributes$
+      .pipe(
+        map((attrs) => attrs.state.filters),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(filters$),
+  ];
+  
   return {
     api: {
       searchSessionId$,
@@ -75,6 +92,9 @@ export function initializeSearchContext(
       ...timeRangeManager.api,
     },
     anyStateChange$: merge(timeRangeManager.anyStateChange$),
+    cleanup: () => {
+      subscriptions.forEach((sub) => sub.unsubscribe());
+    },
     getLatestState: () => ({
       searchSessionId: searchSessionId$.getValue(),
       filters: filters$.getValue(),
