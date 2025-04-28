@@ -673,27 +673,33 @@ And there are 2 different config options for scheduling a task:
 Monthly schedule options:
 
 ```
-  freq: 1, -> Enum for the monthly schedule is 1
-  bymonthday: number[]; -> integer between 1 and 31
-  byhour?: number[]; -> integer between 0 and 23
-  byminute?: number[]; -> integer between 0 and 59
-  byweekday?: Weekday[]; -> integer between 1 and 7. 1 is Monday.
+  freq: 1, -> Enum for the monthly schedule is 1 (Required field)
+  interval: number; -> Any number. 1 means `every 1 month` (Required field)
+  tzid: string; -> Timezone e.g.: 'UTC' (Required field)
+  bymonthday: number[]; -> number between 1 and 31
+  byhour?: number[]; -> number between 0 and 23
+  byminute?: number[]; -> number between 0 and 59
+  byweekday?: Weekday[]; -> number between 1 and 7. 1 is Monday.
 ```
 
 Weekly schedule options:
 
 ```
-  freq: 2, -> Enum for the weekly schedule is 2
-  byhour?: number[]; -> integer between 0 and 23
-  byminute?: number[]; -> integer between 0 and 59
-  byweekday?: Weekday[]; -> integer between 1 and 7. 1 is Monday.
+  freq: 2, -> Enum for the weekly schedule is 2 (Required field)
+  interval: number; -> Any number. 1 means `every 1 week` (Required field)
+  tzid: string; -> Timezone e.g.: 'UTC' (Required field)
+  byhour?: number[]; -> number between 0 and 23
+  byminute?: number[]; -> number between 0 and 59
+  byweekday?: Weekday[]; -> number between 1 and 7. 1 is Monday.
 ```
 
 Daily schedule options:
 
 ```
-  freq: 3, -> Enum for the daily schedule is 3
-  byhour?: number[]; -> integer between 0 and 23
-  byminute?: number[]; -> integer between 0 and 59
-  byweekday?: Weekday[]; -> integer between 1 and 7. 1 is Monday.
+  freq: 3, -> Enum for the daily schedule is 3 (Required field)
+  interval: number; -> Any number. 1 means `every 1 day` (Required field)
+  tzid: string; -> Timezone e.g.: 'UTC' (Required field)
+  byhour?: number[]; -> number between 0 and 23
+  byminute?: number[]; -> number between 0 and 59
+  byweekday?: Weekday[]; -> number between 1 and 7. 1 is Monday.
 ```
