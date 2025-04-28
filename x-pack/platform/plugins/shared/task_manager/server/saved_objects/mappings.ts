@@ -34,6 +34,31 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         interval: {
           type: 'keyword',
         },
+        rrule: {
+          properties: {
+            freq: {
+              type: 'integer',
+            },
+            interval: {
+              type: 'integer',
+            },
+            tzid: {
+              type: 'keyword',
+            },
+            bymonthday: {
+              type: 'integer',
+            },
+            byweekday: {
+              type: 'integer',
+            },
+            byhour: {
+              type: 'integer',
+            },
+            byminute: {
+              type: 'integer',
+            },
+          },
+        },
       },
     },
     attempts: {

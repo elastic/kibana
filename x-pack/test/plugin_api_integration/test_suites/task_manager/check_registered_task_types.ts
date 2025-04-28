@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     'sampleRecurringTaskWhichHangs',
     'sampleRecurringTaskThatDeletesItself',
     'sampleTask',
+    'sampleRecurringTask',
     'sampleTaskWithLimitedConcurrency',
     'sampleTaskWithSingleConcurrency',
     'singleAttemptSampleTask',
