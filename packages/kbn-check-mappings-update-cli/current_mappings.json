@@ -1965,20 +1965,6 @@
       }
     }
   },
-  "infra-custom-dashboards": {
-    "dynamic": false,
-    "properties": {
-      "assetType": {
-        "type": "keyword"
-      },
-      "dashboardFilterAssetIdEnabled": {
-        "type": "boolean"
-      },
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      }
-    }
-  },
   "infrastructure-monitoring-log-view": {
     "dynamic": false,
     "properties": {
