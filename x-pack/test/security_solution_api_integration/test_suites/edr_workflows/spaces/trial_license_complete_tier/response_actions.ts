@@ -16,11 +16,15 @@ import { mergeAndAppendArrays } from '@kbn/security-solution-plugin/common/endpo
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableFleetServerIfNecessary } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_server';
 import { updateAgentPolicy } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
+import TestAgent from 'supertest/lib/agent';
+import { PromiseResolvedValue } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { createSupertestErrorLogger } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const policyTestResources = getService('endpointPolicyTestResources');
   const endpointTestResources = getService('endpointTestResources');
   const kbnServer = getService('kibanaServer');
@@ -28,11 +32,15 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('@ess @skipInServerless, @skipInServerlessMKI Response actions space awareness support', () => {
-    const afterEachDataCleanup: Array<{ cleanup: () => Promise<void> }> = [];
+    let afterEachDataCleanup: Array<{ cleanup: () => Promise<void> }> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
+    let adminSupertest: TestAgent;
+    let testData: PromiseResolvedValue<ReturnType<typeof setupData>>;
 
     before(async () => {
+      adminSupertest = await utils.createSuperTest();
+
       await Promise.all([
         ensureSpaceIdExists(kbnServer, spaceOneId, { log }),
         ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
@@ -116,9 +124,14 @@ export default function ({ getService }: FtrProviderContext) {
         };
       };
 
-      const spaceOne = await indexDataIntoSpace(spaceOneId, '1 - NOT SHARED');
-      const spaceTwo = await indexDataIntoSpace(spaceTwoId, '1 - NOT SHARED');
-      const shared = await indexDataIntoSpace(spaceOneId, `2 - SHARED WITH ${spaceTwoId}`);
+      const uniqueId = Math.random().toString(32);
+
+      const spaceOne = await indexDataIntoSpace(spaceOneId, `1 - NOT SHARED (${uniqueId})`);
+      const spaceTwo = await indexDataIntoSpace(spaceTwoId, `1 - NOT SHARED (${uniqueId})`);
+      const shared = await indexDataIntoSpace(
+        spaceOneId,
+        `2 - SHARED WITH ${spaceTwoId} (${uniqueId})`
+      );
 
       // Make sure the shared policy is shared with space two
       await updateAgentPolicy(
@@ -136,8 +149,8 @@ export default function ({ getService }: FtrProviderContext) {
         integrationPolicyId: sharedIntegrationPolicy.id,
         overrides: {
           host: {
-            name: `${spaceTwoId} host 2 on shared policy`,
-            hostname: `${spaceTwoId} host 2 on shared policy`,
+            name: `${spaceTwoId} host 2 on shared policy (${uniqueId})`,
+            hostname: `${spaceTwoId} host 2 on shared policy (${uniqueId})`,
           },
         },
         logger: log,
@@ -161,18 +174,59 @@ export default function ({ getService }: FtrProviderContext) {
       };
     };
 
-    describe('when creating actions', () => {
-      // FIXME:PT change to `beforeEach()`
-      before(async () => {
-        await setupData();
-      });
+    beforeEach(async () => {
+      afterEachDataCleanup = [];
+      testData = await setupData();
+      afterEachDataCleanup.push(testData);
+    });
 
+    afterEach(async () => {
+      if (testData) {
+        await testData.cleanup();
+        // @ts-expect-error
+        testData = undefined;
+      }
+
+      if (afterEachDataCleanup.length > 0) {
+        await Promise.all(afterEachDataCleanup.map((data) => data.cleanup()));
+      }
+    });
+
+    describe('when creating actions', () => {
       it('should create action if all agent ids are accessible in active space', async () => {
-        throw new Error('TODO: implement');
+        adminSupertest
+          .post(addSpaceIdToPath('/', spaceOneId, ISOLATE_HOST_ROUTE_V2))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .send({
+            agent_type: 'endpoint',
+            endpoint_ids: [
+              testData.spaceOne.hosts[0].agent.id,
+              // Second host on space 2 is on shared policy with space one
+              testData.spaceTwo.hosts[1].agent.id,
+            ],
+          })
+          .expect(200);
       });
 
       it('should error if at least one agent is not accessible in active space', async () => {
-        throw new Error('TODO: implement');
+        adminSupertest
+          .post(addSpaceIdToPath('/', spaceOneId, ISOLATE_HOST_ROUTE_V2))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .send({
+            agent_type: 'endpoint',
+            endpoint_ids: [
+              testData.spaceOne.hosts[0].agent.id,
+              // The first host on space two is not shared, so this should trigger error
+              testData.spaceTwo.hosts[0].agent.id,
+            ],
+          })
+          .expect(404);
       });
     });
 
