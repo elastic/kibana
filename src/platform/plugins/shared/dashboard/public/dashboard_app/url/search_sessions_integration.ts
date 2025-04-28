@@ -7,26 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map } from 'rxjs';
-import { History } from 'history';
-
-import {
-  getQueryParams,
-  IKbnUrlStateStorage,
-  createQueryParamObservable,
-} from '@kbn/kibana-utils-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { SEARCH_SESSION_ID } from '../../plugin_constants';
-import { convertPanelMapToPanelsArray } from '../../../common';
-import { dataService } from '../../services/kibana_services';
+import type { Query } from '@kbn/es-query';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import {
-  DashboardApi,
-  DashboardInternalApi,
-  DashboardLocatorParams,
-} from '../../dashboard_api/types';
+  IKbnUrlStateStorage,
+  createQueryParamObservable,
+  getQueryParams,
+} from '@kbn/kibana-utils-plugin/public';
+import { History } from 'history';
+import { map } from 'rxjs';
+import { SEARCH_SESSION_ID } from '../../../common/constants';
+import { convertPanelMapToPanelsArray } from '../../../common/lib/dashboard_panel_converters';
+import { DashboardLocatorParams } from '../../../common/types';
+import { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
+import { dataService } from '../../services/kibana_services';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
