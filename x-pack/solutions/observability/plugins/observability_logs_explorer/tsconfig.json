@@ -21,6 +21,8 @@
     "@kbn/data-plugin",
     "@kbn/es-query",
     "@kbn/discover-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/discover-utils",
   ],
   "exclude": ["target/**/*"]
 }
