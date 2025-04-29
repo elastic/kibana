@@ -4,6 +4,23 @@ env:
   GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-deploy-cloud-from-pr
 
 steps:
+  - group: 'Notify if missing labels'
+    if: "build.env('GITHUB_PR_LABELS') !~ /(ci:cloud-deploy|ci:cloud-redeploy)/"
+
+    steps:
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Cloud deployments require a Github label, please add \`ci:cloud-deploy\` or \`ci:cloud-redeploy\` and trigger the job through the checkbox again." \
+            --context "cloud-deploy-job" \
+            --clear-previous
+        label: Comment missing labels
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
   - group: 'Cloud Deployment'
     if: "build.env('GITHUB_PR_LABELS') =~ /(ci:cloud-deploy|ci:cloud-redeploy)/"
 

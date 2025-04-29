@@ -48,6 +48,7 @@ export class SLoDataService {
       ephemeralProjectIds: DEFAULTS.EPHEMERAL_PROJECT_IDS,
       alignEventsToInterval: DEFAULTS.ALIGN_EVENTS_TO_INTERVAL,
       scheduleEnd: 'now+10m',
+      slashLogs: false,
     }).then((res) => {
       // eslint-disable-next-line no-console
       console.log(res);
