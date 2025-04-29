@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
+import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -51,5 +53,19 @@ export const getInsightsInputTab = ({
       />
     ),
     content: <InsightsTabCsp value={name} field={fieldName} />,
+  };
+};
+
+export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProps) => {
+  return {
+    id: EntityDetailsLeftPanelTab.FIELDS_TABLE,
+    'data-test-subj': INSIGHTS_TAB_TEST_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.insightsDetails.insights.tabLabel"
+        defaultMessage="Fields"
+      />
+    ),
+    content: <FieldsTableTab document={document} tableStorageKey={tableStorageKey} />,
   };
 };

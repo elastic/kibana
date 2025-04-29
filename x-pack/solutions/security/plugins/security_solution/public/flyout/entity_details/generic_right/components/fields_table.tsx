@@ -61,7 +61,7 @@ const getSortedFlattenedItems = (
   return sortedItems;
 };
 
-interface FieldsTableProps {
+export interface FieldsTableProps {
   /**
    * The document object containing the fields and values to be displayed in the table.
    */

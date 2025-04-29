@@ -9,6 +9,10 @@ import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import {
+  GenericEntityDetailsPanel,
+  GenericEntityDetailsPanelKey,
+} from './entity_details/generic_details_left';
 import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
 import { GenericEntityPanel } from './entity_details/generic_right';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
@@ -194,6 +198,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
         <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
       </DocumentDetailsProvider>
+    ),
+  },
+  {
+    key: GenericEntityDetailsPanelKey,
+    component: (props) => (
+      <GenericEntityDetailsPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
     ),
   },
   {
