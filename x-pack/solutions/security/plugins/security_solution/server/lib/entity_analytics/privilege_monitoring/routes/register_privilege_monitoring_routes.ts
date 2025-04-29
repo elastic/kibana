@@ -11,6 +11,7 @@ import { initPrivilegeMonitoringEngineRoute } from './init';
 import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
 import { padPrecheckAndInstallRoute } from './pad_precheck_and_install';
+import { padRemoveInstallationRoute } from './pad_remove_installation';
 
 export const registerPrivilegeMonitoringRoutes = ({
   router,
@@ -21,5 +22,6 @@ export const registerPrivilegeMonitoringRoutes = ({
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
   padPrecheckAndInstallRoute(router, logger, config);
+  padRemoveInstallationRoute(router, logger, config);
   searchPrivilegeMonitoringIndicesRoute(router, logger, config);
 };

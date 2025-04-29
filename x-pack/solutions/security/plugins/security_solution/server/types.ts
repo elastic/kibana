@@ -42,6 +42,7 @@ import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inven
 import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { PadPrecheckAndInstallClient } from './lib/entity_analytics/privilege_monitoring/pad_precheck_and_install_client';
+import type { PadRemoveInstallationClient } from './lib/entity_analytics/privilege_monitoring/pad_remove_installation';
 import type { ProductFeaturesService } from './lib/product_features_service';
 
 export { AppClient };
@@ -70,6 +71,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getEntityStoreDataClient: () => EntityStoreDataClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getPadPrecheckAndInstallClient: () => PadPrecheckAndInstallClient;
+  getRemovePadInstallationClient: () => PadRemoveInstallationClient;
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;

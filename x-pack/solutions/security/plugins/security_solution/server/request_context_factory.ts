@@ -39,6 +39,7 @@ import type {
 } from './types';
 import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 import { PadPrecheckAndInstallClient } from './lib/entity_analytics/privilege_monitoring/pad_precheck_and_install_client';
+import { PadRemoveInstallationClient } from './lib/entity_analytics/privilege_monitoring/pad_remove_installation';
 
 export interface IRequestContextFactory {
   create(
@@ -273,7 +274,15 @@ export class RequestContextFactory implements IRequestContextFactory {
           soClient: coreContext.savedObjects.client,
           logger: options.logger,
           namespace: getSpaceId(),
-          soTypeRegistry: coreContext.savedObjects.typeRegistry,
+          indexPatterns: startPlugins.dataViews,
+        });
+      }),
+      getRemovePadInstallationClient: memoize(() => {
+        return new PadRemoveInstallationClient({
+          clusterClient: coreContext.elasticsearch.client,
+          soClient: coreContext.savedObjects.client,
+          logger: options.logger,
+          namespace: getSpaceId(),
         });
       }),
       getEntityStoreDataClient: memoize(() => {
