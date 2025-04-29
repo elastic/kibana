@@ -1,0 +1,114 @@
+name: Build and Publish Kibana to GHCR
+
+on:
+  push:
+    branches:
+      - pr-215624  # Runs on your development branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # GitHub-hosted runner
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Read Node.js Version from .node-version
+        id: node_version
+        run: echo "NODE_VERSION=$(cat .node-version | tr -d '[:space:]')" >> $GITHUB_ENV
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y tar gzip build-essential python3 libvips-dev
+
+      - name: Bootstrap Kibana
+        run: yarn kbn bootstrap
+
+      - name: Build Kibana
+        run: yarn build --release --skip-os-packages
+
+      - name: Free Up Disk Space (Remove Unnecessary Builds)
+        run: |
+          echo "Removing unnecessary tarballs to free up space..."
+          rm -v target/kibana-9.0.0-linux-aarch64.tar.gz
+          rm -v target/kibana-9.0.0-darwin-x86_64.tar.gz
+          rm -v target/kibana-9.0.0-darwin-aarch64.tar.gz
+          rm -v target/kibana-9.0.0-windows-x86_64.zip
+          rm -v target/kibana-serverless-9.0.0-linux-x86_64.tar.gz
+          rm -v target/kibana-serverless-9.0.0-linux-aarch64.tar.gz
+          echo "Disk space freed. Only keeping linux-x86_64 tarball."
+
+      - name: Free Up Additional Disk Space
+        run: |
+          echo "Deleting unnecessary Kibana build artifacts..."
+          rm -rf build/default/kibana-9.0.0-linux-aarch64
+          rm -rf build/default/kibana-9.0.0-darwin-x86_64
+          rm -rf build/default/kibana-9.0.0-darwin-aarch64
+          rm -rf build/default/kibana-9.0.0-windows-x86_64
+          rm -rf build/default/kibana-serverless-9.0.0-linux-x86_64
+          rm -rf build/default/kibana-serverless-9.0.0-linux-aarch64
+      
+          echo "Clearing Yarn and npm caches..."
+          yarn cache clean
+          npm cache clean --force
+          
+          echo "Removing unused Docker images and cache..."
+          docker system prune -af
+          
+          echo "Disk space cleanup complete."
+
+      - name: Ensure Required Files Exist
+        run: |
+          echo "Checking required build artifacts..."
+          
+          # Ensure the tarball exists
+          if [ ! -f "target/kibana-9.0.0-linux-x86_64.tar.gz" ]; then
+            echo "ERROR: kibana-9.0.0-linux-x86_64.tar.gz is missing in target/!"
+            exit 1
+          fi
+
+          # Ensure the Docker context directory exists
+          mkdir -p build/kibana-docker/default/bin
+
+          # Move the tarball to the expected Docker build location
+          echo "Copying tarball to Docker build context..."
+          cp -v target/kibana-9.0.0-linux-x86_64.tar.gz build/kibana-docker/default/
+
+          # Extract the `kibana-docker` binary
+          echo "Extracting kibana-docker binary..."
+          tar -xzf target/kibana-9.0.0-linux-x86_64.tar.gz -C build/kibana-docker/default/ --strip-components=1
+          
+          if [ ! -f "build/kibana-docker/default/bin/kibana-docker" ]; then
+            echo "ERROR: kibana-docker binary is missing after extraction!"
+            exit 1
+          fi
+
+          echo "All required files are present."
+
+      - name: Locate Dockerfile
+        run: |
+          if [ -f build/kibana-docker/default/Dockerfile ]; then
+            echo "Using Dockerfile at build/kibana-docker/default/Dockerfile"
+            echo "DOCKERFILE_PATH=build/kibana-docker/default/Dockerfile" >> $GITHUB_ENV
+          else
+            echo "ERROR: Dockerfile not found in expected locations!"
+            exit 1
+          fi
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/kibana:9.0.0 -f $DOCKERFILE_PATH build/kibana-docker/default/
+
+      - name: Push Docker Image to GHCR
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/kibana:9.0.0
