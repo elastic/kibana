@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './cool';
-export * from './gray';
-export * from './red';
-export * from './green';
-export * from './warm';
-export * from './temperature';
-export * from './complementary';
-export * from './status';
-export * from './compare_to';
+import { i18n } from '@kbn/i18n';
+import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import { KbnPalette } from '../../constants';
+
+export const compareToPalette = new KbnColorFnPalette({
+  id: KbnPalette.CompareTo,
+  name: i18n.translate('palettes.compareTo.name', {
+    defaultMessage: 'Trend',
+  }),
+  colorFn: () => ['#F6726A', '#ECF1F9', '#24C292'],
+  standalone: true,
+  type: 'gradient',
+});
