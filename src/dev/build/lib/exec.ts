@@ -41,11 +41,5 @@ export async function exec(
     preferLocal: true,
   });
 
-  const logFn = (line: string) => log[level](line);
-
-  await watchStdioForLine(proc, logFn, exitAfter, build);
-
-  if (build?.getBufferLogs()) {
-    build.getLogBuffer().forEach(logFn);
-  }
+  await watchStdioForLine(proc, (line) => log[level](line), exitAfter, build);
 }

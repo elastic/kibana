@@ -72,5 +72,9 @@ export async function watchStdioForLine(
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
-  ]);
+  ]).finally(() => {
+    if (build?.getBufferLogs()) {
+      build.getLogBuffer().forEach(logFn);
+    }
+  });
 }
