@@ -7,18 +7,8 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { CheckPipelineRequestBody, CheckPipelineResponse, CHECK_PIPELINE_PATH } from '../../common';
-<<<<<<< HEAD:x-pack/platform/plugins/shared/integration_assistant/server/routes/pipeline_routes.ts
-import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
-=======
 import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
-import type { AutomaticImportRouteHandlerContext } from '../plugin';
->>>>>>> db250c45f27 ([Automatic Import] Remove check for unused Connector role (#219358)):x-pack/platform/plugins/shared/automatic_import/server/routes/pipeline_routes.ts
 import { testPipeline } from '../util/pipeline';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
