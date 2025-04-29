@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export const ActionGroupId = 'query matched';
-export const ConditionMetAlertInstanceId = 'query matched';
+export const ASSET_INVENTORY_INDEX_PATTERN = '.entities.*.latest.security_*_';
+export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
+export const ASSET_INVENTORY_DATA_VIEW_NAME = 'Asset Inventory Data View';

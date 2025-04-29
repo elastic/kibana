@@ -10,8 +10,8 @@ import { Logger } from '@kbn/logging';
 import { last } from 'lodash';
 import pRetry from 'p-retry';
 import { CoreSetup } from '@kbn/core/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import { resourceNames } from '..';
-import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import {
   addIndexWriteBlock,

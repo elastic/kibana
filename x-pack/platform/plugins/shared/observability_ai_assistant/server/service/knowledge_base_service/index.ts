@@ -10,6 +10,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -28,12 +29,11 @@ import {
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
-import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
-import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
-import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 import { hasKbWriteIndex } from './has_kb_index';
 import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
+import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
+import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
+import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;

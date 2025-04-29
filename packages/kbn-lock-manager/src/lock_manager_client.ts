@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // eslint-disable-next-line max-classes-per-file
@@ -13,7 +15,7 @@ import prettyMilliseconds from 'pretty-ms';
 import { once } from 'lodash';
 import { duration } from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { LOCKS_CONCRETE_INDEX_NAME, setuplockManagerIndex } from './setup_lock_manager_index';
+import { LOCKS_CONCRETE_INDEX_NAME, setupLockManagerIndex } from './setup_lock_manager_index';
 
 export type LockId = string;
 export interface LockDocument {
@@ -38,9 +40,9 @@ export interface AcquireOptions {
 
 // The index assets should only be set up once
 // For testing purposes, we need to be able to set it up every time
-let runSetupIndexAssetOnce = once(setuplockManagerIndex);
+let runSetupIndexAssetOnce = once(setupLockManagerIndex);
 export function runSetupIndexAssetEveryTime() {
-  runSetupIndexAssetOnce = setuplockManagerIndex;
+  runSetupIndexAssetOnce = setupLockManagerIndex;
 }
 
 export class LockManager {

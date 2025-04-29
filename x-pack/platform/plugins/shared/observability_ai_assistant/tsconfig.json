@@ -54,7 +54,8 @@
     "@kbn/core-http-browser",
     "@kbn/sse-utils",
     "@kbn/core-security-server",
-    "@kbn/ml-trained-models-utils"
+    "@kbn/ml-trained-models-utils",
+    "@kbn/lock-manager"
   ],
   "exclude": ["target/**/*"]
 }
