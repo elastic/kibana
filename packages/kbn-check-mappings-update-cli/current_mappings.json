@@ -3766,31 +3766,6 @@
         "properties": {
           "interval": {
             "type": "keyword"
-          },
-          "rrule": {
-            "properties": {
-              "byhour": {
-                "type": "integer"
-              },
-              "byminute": {
-                "type": "integer"
-              },
-              "bymonthday": {
-                "type": "integer"
-              },
-              "byweekday": {
-                "type": "integer"
-              },
-              "freq": {
-                "type": "integer"
-              },
-              "interval": {
-                "type": "integer"
-              },
-              "tzid": {
-                "type": "keyword"
-              }
-            }
           }
         }
       },
