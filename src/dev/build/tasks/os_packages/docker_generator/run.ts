@@ -204,7 +204,7 @@ export async function runDockerGenerator(
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
       level: 'info',
-      bufferLogs: build.getBufferLogs(),
+      build,
     });
   }
 

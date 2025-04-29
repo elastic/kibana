@@ -11,6 +11,7 @@ import { Transform } from 'stream';
 import { ExecaChildProcess } from 'execa';
 
 import { createPromiseFromStreams, createSplitStream, createMapStream } from '@kbn/utils';
+import { Build } from './build';
 
 // creates a stream that skips empty lines unless they are followed by
 // another line, preventing the empty lines produced by splitStream
@@ -38,13 +39,11 @@ export async function watchStdioForLine(
   proc: ExecaChildProcess,
   logFn: (line: string) => void,
   exitAfter?: RegExp,
-  bufferLogs?: boolean
+  build?: Build
 ) {
-  const output: string[] = [];
-
   function onLogLine(line: string) {
-    if (bufferLogs) {
-      output.push(line);
+    if (build?.getBufferLogs()) {
+      build.pushToLogBuffer(line);
     } else {
       logFn(line);
     }
@@ -74,8 +73,8 @@ export async function watchStdioForLine(
       createMapStream(onLogLine),
     ]),
   ]).finally(() => {
-    if (bufferLogs) {
-      output.forEach(logFn);
+    if (build?.getBufferLogs()) {
+      build.getLogBuffer().forEach(logFn);
     }
   });
 }

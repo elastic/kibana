@@ -12,22 +12,27 @@ import chalk from 'chalk';
 import { ToolingLog, LogLevel } from '@kbn/tooling-log';
 
 import { watchStdioForLine } from './watch_stdio_for_line';
+import { Build } from './build';
 
 interface Options {
   level?: Exclude<LogLevel, 'silent' | 'error'>;
   cwd?: string;
   env?: Record<string, string>;
   exitAfter?: RegExp;
-  bufferLogs?: boolean;
+  build?: Build;
 }
 
 export async function exec(
   log: ToolingLog,
   cmd: string,
   args: string[],
-  { level = 'debug', cwd, env, exitAfter, bufferLogs = true }: Options = {}
+  { level = 'debug', cwd, env, exitAfter, build }: Options = {}
 ) {
-  log[level](chalk.dim('$'), cmd, ...args);
+  if (build?.getBufferLogs()) {
+    build.pushToLogBuffer(`${chalk.dim('$')} ${cmd} ${args.join(' ')}`);
+  } else {
+    log[level](chalk.dim('$'), cmd, ...args);
+  }
 
   const proc = execa(cmd, args, {
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -36,5 +41,5 @@ export async function exec(
     preferLocal: true,
   });
 
-  await watchStdioForLine(proc, (line) => log[level](line), exitAfter, bufferLogs);
+  await watchStdioForLine(proc, (line) => log[level](line), exitAfter, build);
 }
