@@ -35,6 +35,14 @@ export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) =>
   const currentMoment = moment(currentTime);
   const intervalAsString = convertIntervalToString(interval);
 
+  const showingLastOneMinuteDataText = i18n.translate(
+    'xpack.infra.waffleDatePicker.showingLastOneMinuteDataText',
+    {
+      defaultMessage: 'Last {duration} of data for the selected time',
+      values: { duration: intervalAsString },
+    }
+  );
+
   const liveStreamingButton = isAutoReloading ? (
     <EuiButton
       data-test-subj="infraWaffleTimeControlsStopRefreshingButton"
@@ -73,16 +81,13 @@ export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) =>
 
   return (
     <EuiFlexGroup gutterSize="m">
-      <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
+      <EuiFlexItem
+        grow={false}
+        data-test-subj="waffleDatePicker"
+        aria-label={showingLastOneMinuteDataText}
+      >
         <EuiToolTip
-          content={i18n.translate('xpack.infra.waffleDatePicker.showingLastOneMinuteDataText', {
-            defaultMessage: 'Last {duration} of data for the selected time',
-            values: { duration: intervalAsString },
-          })}
-          aria-label={i18n.translate('xpack.infra.waffleDatePicker.showingLastOneMinuteDataText', {
-            defaultMessage: 'Last {duration} of data for the selected time',
-            values: { duration: intervalAsString },
-          })}
+          content={showingLastOneMinuteDataText}
           delay="long"
           display="inlineBlock"
           position="top"
