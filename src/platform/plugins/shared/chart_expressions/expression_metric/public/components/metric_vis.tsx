@@ -31,8 +31,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
@@ -40,8 +39,6 @@ import { VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
 import { SecondaryMetric, TrendConfig } from './secondary_metric';
-
-export const defaultColor = euiThemeVars.euiColorEmptyShade;
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];
@@ -63,7 +60,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} style={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} />;
 
 export interface MetricVisComponentProps {
   data: Datatable;
@@ -83,6 +80,10 @@ export const MetricVis = ({
   overrides,
 }: MetricVisComponentProps) => {
   const grid = useRef<MetricSpec['data']>([[]]);
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
+  const defaultColor = colors.emptyShade;
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -317,9 +318,9 @@ export const MetricVis = ({
               {
                 background: { color: defaultColor },
                 metric: {
-                  barBackground: euiThemeVars.euiColorLightShade,
-                  emptyBackground: euiThemeVars.euiColorEmptyShade,
-                  blendingBackground: euiThemeVars.euiColorEmptyShade,
+                  barBackground: colors.lightShade,
+                  emptyBackground: colors.emptyShade,
+                  blendingBackground: colors.emptyShade,
                   titlesTextAlign: config.metric.titlesTextAlign,
                   valuesTextAlign: config.metric.valuesTextAlign,
                   iconAlign: config.metric.iconAlign,
