@@ -233,10 +233,6 @@ const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest =
       },
       aggs: getScoreAggregationQuery(),
     },
-    all_namespaces: {
-      global: {}, // The global aggregation resets the scope to include all documents, ignoring any filters or bucketing above it.
-      aggs: getScoreAggregationQuery(),
-    },
   },
 });
 
@@ -292,64 +288,6 @@ const getVulnStatsTrendQuery = (): SearchRequest => ({
     },
   },
 });
-
-const getFindingsScoresDocIndexingPromises = (
-  esClient: ElasticsearchClient,
-  scoresByPolicyTemplatesBuckets: ScoreAggregationResponse['all_namespaces']['score_by_policy_template']['buckets'],
-  isCustomScore: boolean
-) =>
-  scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
-    // creating score per cluster id objects
-    const clustersStats = Object.fromEntries(
-      policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
-        const clusterId = clusterStats.key;
-
-        return [
-          clusterId,
-          {
-            total_findings: clusterStats.total_findings.value,
-            passed_findings: clusterStats.passed_findings.doc_count,
-            failed_findings: clusterStats.failed_findings.doc_count,
-          },
-        ];
-      })
-    );
-    // creating score per benchmark id and version
-    const benchmarkStats = Object.fromEntries(
-      policyTemplateTrend.score_by_benchmark_id.buckets.map((benchmarkIdBucket) => {
-        const benchmarkId = benchmarkIdBucket.key;
-        const benchmarkVersions = Object.fromEntries(
-          benchmarkIdBucket.benchmark_versions.buckets.map((benchmarkVersionBucket) => {
-            const benchmarkVersion = toBenchmarkMappingFieldKey(benchmarkVersionBucket.key);
-            return [
-              benchmarkVersion,
-              {
-                total_findings: benchmarkVersionBucket.total_findings.value,
-                passed_findings: benchmarkVersionBucket.passed_findings.doc_count,
-                failed_findings: benchmarkVersionBucket.failed_findings.doc_count,
-              },
-            ];
-          })
-        );
-
-        return [benchmarkId, benchmarkVersions];
-      })
-    );
-
-    // each document contains the policy template and its scores
-    return esClient.index({
-      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-      document: {
-        policy_template: policyTemplateTrend.key,
-        passed_findings: policyTemplateTrend.passed_findings.doc_count,
-        failed_findings: policyTemplateTrend.failed_findings.doc_count,
-        total_findings: policyTemplateTrend.total_findings.value,
-        score_by_cluster_id: clustersStats,
-        score_by_benchmark_id: benchmarkStats,
-        is_enabled_rules_score: isCustomScore,
-      },
-    });
-  });
 
 const getFindingsScoresByNamespaceIndexingPromises = (
   esClient: ElasticsearchClient,
@@ -479,35 +417,14 @@ export const aggregateLatestFindings = async (
       ).toFixed(2)}ms]`
     );
 
-    // getting score per policy template buckets
-    const customScoresByPolicyTemplatesBuckets =
-      customScoreIndexQueryResult.aggregations?.all_namespaces.score_by_policy_template.buckets ||
-      [];
-
     const customScoresByNamespaceBuckets =
       customScoreIndexQueryResult.aggregations?.score_by_namespace.buckets || [];
-
-    const fullScoresByPolicyTemplatesBuckets =
-      fullScoreIndexQueryResult.aggregations?.all_namespaces.score_by_policy_template.buckets || [];
 
     const fullScoresByNamespaceBuckets =
       fullScoreIndexQueryResult.aggregations?.score_by_namespace.buckets || [];
 
-    // iterating over the buckets and return promises which will index a modified document into the scores index
-    const findingsCustomScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
-      esClient,
-      customScoresByPolicyTemplatesBuckets,
-      true
-    );
-
     const findingsCustomScoresByNamespaceDocIndexingPromises =
       getFindingsScoresByNamespaceIndexingPromises(esClient, customScoresByNamespaceBuckets, true);
-
-    const findingsFullScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
-      esClient,
-      fullScoresByPolicyTemplatesBuckets,
-      false
-    );
 
     const findingsFullScoresByNamespaceDocIndexingPromises =
       getFindingsScoresByNamespaceIndexingPromises(esClient, fullScoresByNamespaceBuckets, false);
@@ -522,9 +439,7 @@ export const aggregateLatestFindings = async (
     // executing indexing commands
     await Promise.all(
       [
-        ...findingsCustomScoresDocIndexingPromises,
         findingsCustomScoresByNamespaceDocIndexingPromises,
-        findingsFullScoresDocIndexingPromises,
         findingsFullScoresByNamespaceDocIndexingPromises,
         vulnStatsTrendDocIndexingPromises,
       ].filter(Boolean)
