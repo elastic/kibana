@@ -23,6 +23,7 @@ export const farequoteDataViewTestDataWithQuery: TestData = {
   fieldSelectorSearch: 'airline',
   fieldSelectorApplyAvailable: true,
   query: 'NOT airline:("SWR" OR "ACA" OR "AWE" OR "BAW" OR "JAL" OR "JBU" OR "JZA" OR "KLM")',
+  editedQuery: 'NOT airline:("SWR")',
   expected: {
     totalDocCountFormatted: '48,799',
     analysisGroupsTable: [

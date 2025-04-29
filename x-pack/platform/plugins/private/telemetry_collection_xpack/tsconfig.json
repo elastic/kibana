@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "isolatedModules": true
+  },
+  "include": [
+    "common/**/*",
+    "server/**/*",
+    "../../../../../typings/*",
+    "schema/*.json",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/telemetry-plugin",
+    "@kbn/usage-collection-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}
+

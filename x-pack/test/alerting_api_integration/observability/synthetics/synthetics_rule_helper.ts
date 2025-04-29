@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
-import { RetryService } from '@kbn/ftr-common-functional-services';
-import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import type { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import moment from 'moment';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { PrivateLocationTestService } from '../../../api_integration/apis/synthetics/services/private_location_test_service';
 import { waitForAlertInIndex } from '../helpers/alerting_wait_for_helpers';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { PrivateLocationTestService } from './private_location_test_service';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 
 export const SYNTHETICS_ALERT_ACTION_INDEX = 'alert-action-synthetics';
@@ -43,12 +43,10 @@ export class SyntheticsRuleHelper {
   async createIndexAction() {
     await this.esClient.indices.create({
       index: this.alertActionIndex,
-      body: {
-        mappings: {
-          properties: {
-            'monitor.id': {
-              type: 'keyword',
-            },
+      mappings: {
+        properties: {
+          'monitor.id': {
+            type: 'keyword',
           },
         },
       },
@@ -170,11 +168,6 @@ export class SyntheticsRuleHelper {
     expect(result.status).to.eql(200, JSON.stringify(result.body));
 
     return result.body as EncryptedSyntheticsSavedMonitor;
-  }
-
-  async addPrivateLocation() {
-    await this.locService.installSyntheticsPackage();
-    return this.locService.addTestPrivateLocation();
   }
 
   async waitForStatusAlert({

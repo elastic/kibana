@@ -7,16 +7,13 @@
 
 import path from 'path';
 
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import {
+  deleteAlertsAndRules,
+  deletePrebuiltRulesAssets,
+} from '../../../../../tasks/api_calls/common';
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
+import { TOASTER_BODY, TOASTER } from '../../../../../screens/alerts_detection_rules';
 import {
-  TOASTER_BODY,
-  MODAL_CONFIRMATION_BODY,
-  MODAL_CONFIRMATION_BTN,
-  TOASTER,
-} from '../../../../../screens/alerts_detection_rules';
-import {
-  filterByElasticRules,
   selectAllRules,
   waitForRuleExecution,
   exportRule,
@@ -33,7 +30,6 @@ import { createRule } from '../../../../../tasks/api_calls/rules';
 import { resetRulesTableState } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
-
 import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   createAndInstallMockedPrebuiltRules,
@@ -56,9 +52,12 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   beforeEach(() => {
+    preventPrebuiltRulesPackageInstallation();
+
     login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
+    deletePrebuiltRulesAssets();
     deleteAlertsAndRules();
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
@@ -93,25 +92,8 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
     expectManagementTableRules(['Enabled rule to export']);
   });
 
-  // https://github.com/elastic/kibana/issues/179959
-  it(
-    'shows a modal saying that no rules can be exported if all the selected rules are prebuilt',
-    { tags: ['@skipInServerlessMKI'] },
-    function () {
-      createAndInstallMockedPrebuiltRules(prebuiltRules);
-
-      filterByElasticRules();
-      selectAllRules();
-      bulkExportRules();
-
-      cy.get(MODAL_CONFIRMATION_BODY).contains(
-        `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
-      );
-    }
-  );
-
   // https://github.com/elastic/kibana/issues/179960
-  it('exports only custom rules', { tags: ['@skipInServerless'] }, function () {
+  it('exports all rules', { tags: ['@skipInServerless'] }, function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
     createAndInstallMockedPrebuiltRules(prebuiltRules);
@@ -120,22 +102,11 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
     bulkExportRules();
 
     getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
-      cy.get(MODAL_CONFIRMATION_BODY).contains(
-        `${availablePrebuiltRulesCount} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
-      );
-    });
-
-    // proceed with exporting only custom rules
-    cy.get(MODAL_CONFIRMATION_BTN)
-      .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} custom rule`)
-      .click();
-
-    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
       const totalNumberOfRules =
         expectedNumberCustomRulesToBeExported + availablePrebuiltRulesCount;
       cy.get(TOASTER_BODY).should(
         'contain',
-        `Successfully exported ${expectedNumberCustomRulesToBeExported} of ${totalNumberOfRules} rules. Prebuilt rules were excluded from the resulting file.`
+        `Successfully exported ${totalNumberOfRules} of ${totalNumberOfRules} rules.`
       );
     });
   });
@@ -166,17 +137,12 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
     // https://github.com/elastic/kibana/issues/180029
     it('exports custom rules with exceptions', { tags: ['@skipInServerlessMKI'] }, function () {
       // one rule with exception, one without it
-      const expectedNumberCustomRulesToBeExported = 2;
+      const expectedNumberCustomRulesToBeExported = prebuiltRules.length + 2; // prebuilt rules + a custom rule + a rule with exceptions
 
       createAndInstallMockedPrebuiltRules(prebuiltRules);
       cy.reload();
       selectAllRules();
       bulkExportRules();
-
-      // should display correct number of custom rules when one of them has exceptions
-      cy.get(MODAL_CONFIRMATION_BTN)
-        .should('have.text', `Export ${expectedNumberCustomRulesToBeExported} custom rules`)
-        .click();
 
       cy.get(TOASTER_BODY).should(
         'contain',

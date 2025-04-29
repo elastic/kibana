@@ -17,7 +17,7 @@
         "tags": [],
         "label": "SavedObjectConfig",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "tags": [],
             "label": "maxImportPayloadBytes",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -39,7 +39,7 @@
             "tags": [],
             "label": "maxImportExportSize",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,7 +50,7 @@
             "tags": [],
             "label": "allowHttpApiAccess",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,7 +80,7 @@
               },
               "; readonly scrollDuration: string; readonly retryAttempts: number; }"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -94,7 +94,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -116,7 +116,7 @@
                   },
                   "; maxImportExportSize: number; allowHttpApiAccess: boolean; }>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -147,7 +147,7 @@
                   },
                   "; scrollDuration: string; retryAttempts: number; }>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -171,23 +171,11 @@
         ],
         "signature": [
           "(changes: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsModelChange",
-            "text": "SavedObjectsModelChange"
-          },
+          "SavedObjectsModelChange",
           "[]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsMappingProperties",
-            "text": "SavedObjectsMappingProperties"
-          }
+          "SavedObjectsMappingProperties"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/aggregate_model_changes.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/aggregate_model_changes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -199,16 +187,10 @@
             "label": "changes",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsModelChange",
-                "text": "SavedObjectsModelChange"
-              },
+              "SavedObjectsModelChange",
               "[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/aggregate_model_changes.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/aggregate_model_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -229,7 +211,7 @@
         "signature": [
           "(modelVersion: string | number) => number"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -243,7 +225,7 @@
             "signature": [
               "string | number"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -263,24 +245,12 @@
         ],
         "signature": [
           "(modelChanges: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsModelChange",
-            "text": "SavedObjectsModelChange"
-          },
+          "SavedObjectsModelChange",
           "[]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectModelTransformationFn",
-            "text": "SavedObjectModelTransformationFn"
-          },
+          "SavedObjectModelTransformationFn",
           "<unknown, unknown>"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/build_transform_fn.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/build_transform_fn.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -292,16 +262,10 @@
             "label": "modelChanges",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsModelChange",
-                "text": "SavedObjectsModelChange"
-              },
+              "SavedObjectsModelChange",
               "[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/build_transform_fn.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/build_transform_fn.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -319,23 +283,11 @@
         "description": [],
         "signature": [
           "({ appVersions, indexVersions, deletedTypes, }: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.CompareModelVersionMapParams",
-            "text": "CompareModelVersionMapParams"
-          },
+          "CompareModelVersionMapParams",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.CompareModelVersionResult",
-            "text": "CompareModelVersionResult"
-          }
+          "CompareModelVersionResult"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -347,15 +299,9 @@
             "label": "{\n  appVersions,\n  indexVersions,\n  deletedTypes,\n}",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-server.CompareModelVersionMapParams",
-                "text": "CompareModelVersionMapParams"
-              }
+              "CompareModelVersionMapParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -373,17 +319,11 @@
         "description": [],
         "signature": [
           "(schema: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectModelVersionForwardCompatibilitySchema",
-            "text": "SavedObjectModelVersionForwardCompatibilitySchema"
-          },
+          "SavedObjectModelVersionForwardCompatibilitySchema",
           "<unknown, unknown>) => ",
           "ConvertedSchema"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/backward_conversion_schema.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/backward_conversion_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -395,16 +335,10 @@
             "label": "schema",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectModelVersionForwardCompatibilitySchema",
-                "text": "SavedObjectModelVersionForwardCompatibilitySchema"
-              },
+              "SavedObjectModelVersionForwardCompatibilitySchema",
               "<unknown, unknown>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/backward_conversion_schema.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/backward_conversion_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -425,7 +359,7 @@
         "signature": [
           "(version: string | undefined) => { if_seq_no: number; if_primary_term: number; }"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_request_version.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_request_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -439,7 +373,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_request_version.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_request_version.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -460,7 +394,7 @@
         "signature": [
           "(version: string | undefined) => { _seq_no: number; _primary_term: number; }"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_version.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -474,7 +408,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_version.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/version/decode_version.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -495,7 +429,7 @@
         "signature": [
           "(response: { _seq_no?: number | undefined; _primary_term?: number | undefined; }) => string"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +440,7 @@
             "tags": [],
             "label": "response",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -520,7 +454,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -534,7 +468,7 @@
                 "signature": [
                   "number | undefined"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_hit_version.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -556,7 +490,7 @@
         "signature": [
           "(seqNo: number | undefined, primaryTerm: number | undefined) => string"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_version.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -570,7 +504,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_version.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -585,7 +519,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/version/encode_version.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -601,20 +535,14 @@
         "tags": [],
         "label": "getCurrentVirtualVersion",
         "description": [
-          "\nReturns the current virtual version for the given type.\nIt will either be the latest model version if the type\nalready switched to using them (switchToModelVersionAt is set),\nor the latest migration version for the type otherwise."
+          "\nReturns the current virtual version for the given type.\nIt will either be the latest model version or the latest\nmigration version for the type if model versions have not been declared."
         ],
         "signature": [
           "(type: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>) => string"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -626,16 +554,10 @@
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -655,16 +577,10 @@
         ],
         "signature": [
           "(typeMappings: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsTypeMappingDefinition",
-            "text": "SavedObjectsTypeMappingDefinition"
-          },
+          "SavedObjectsTypeMappingDefinition",
           ") => string[]"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -676,15 +592,9 @@
             "label": "typeMappings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsTypeMappingDefinition",
-                "text": "SavedObjectsTypeMappingDefinition"
-              }
+              "SavedObjectsTypeMappingDefinition"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -706,15 +616,9 @@
           "(mappings: ",
           "SavedObjectsTypeMappingDefinitions",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.FieldListMap",
-            "text": "FieldListMap"
-          }
+          "FieldListMap"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -728,7 +632,7 @@
             "signature": [
               "SavedObjectsTypeMappingDefinitions"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -747,7 +651,7 @@
         "signature": [
           "({ type, typeRegistry, defaultIndex, kibanaVersion, }: GetIndexForTypeOptions) => string"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_index_for_type.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_index_for_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -761,7 +665,7 @@
             "signature": [
               "GetIndexForTypeOptions"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_index_for_type.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_index_for_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -781,23 +685,11 @@
         ],
         "signature": [
           "(types: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>[]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.VirtualVersionMap",
-            "text": "VirtualVersionMap"
-          }
+          "VirtualVersionMap"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -809,16 +701,10 @@
             "label": "types",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -836,16 +722,10 @@
         "description": [],
         "signature": [
           "(type: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>) => string"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -857,16 +737,10 @@
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -886,16 +760,10 @@
         ],
         "signature": [
           "(type: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>) => number"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -907,16 +775,10 @@
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -937,7 +799,7 @@
         "signature": [
           "({ currentVersions, targetVersions, deletedTypes, }: GetModelVersionDeltaOpts) => ModelVersionDeltaResult"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/get_version_delta.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/get_version_delta.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -951,7 +813,7 @@
             "signature": [
               "GetModelVersionDeltaOpts"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/get_version_delta.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/get_version_delta.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -971,23 +833,11 @@
         ],
         "signature": [
           "(types: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>[]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.ModelVersionMap",
-            "text": "ModelVersionMap"
-          }
+          "ModelVersionMap"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -999,16 +849,10 @@
             "label": "types",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1026,26 +870,14 @@
         "description": [],
         "signature": [
           "(mappings: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsFieldMapping",
-            "text": "SavedObjectsFieldMapping"
-          },
+          "SavedObjectsFieldMapping",
           " | ",
           "IndexMapping",
           ", path: string | string[]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsFieldMapping",
-            "text": "SavedObjectsFieldMapping"
-          },
+          "SavedObjectsFieldMapping",
           " | undefined"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_property.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1057,17 +889,11 @@
             "label": "mappings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsFieldMapping",
-                "text": "SavedObjectsFieldMapping"
-              },
+              "SavedObjectsFieldMapping",
               " | ",
               "IndexMapping"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1082,7 +908,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1104,15 +930,9 @@
           "(mapping: ",
           "IndexMapping",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsMappingProperties",
-            "text": "SavedObjectsMappingProperties"
-          }
+          "SavedObjectsMappingProperties"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1126,7 +946,7 @@
             "signature": [
               "IndexMapping"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1146,15 +966,9 @@
           "(mappings: ",
           "IndexMapping",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsMappingProperties",
-            "text": "SavedObjectsMappingProperties"
-          }
+          "SavedObjectsMappingProperties"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1168,7 +982,7 @@
             "signature": [
               "IndexMapping"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1191,7 +1005,7 @@
           "IndexMapping",
           ") => string[]"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1205,7 +1019,7 @@
             "signature": [
               "IndexMapping"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/mappings/lib/get_types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1225,16 +1039,10 @@
         ],
         "signature": [
           "(version: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsModelVersion",
-            "text": "SavedObjectsModelVersion"
-          },
+          "SavedObjectsModelVersion",
           ") => string[]"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1246,15 +1054,9 @@
             "label": "version",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsModelVersion",
-                "text": "SavedObjectsModelVersion"
-              }
+              "SavedObjectsModelVersion"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1274,23 +1076,11 @@
         ],
         "signature": [
           "(version: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsModelVersion",
-            "text": "SavedObjectsModelVersion"
-          },
+          "SavedObjectsModelVersion",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsMappingProperties",
-            "text": "SavedObjectsMappingProperties"
-          }
+          "SavedObjectsMappingProperties"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1302,15 +1092,9 @@
             "label": "version",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsModelVersion",
-                "text": "SavedObjectsModelVersion"
-              }
+              "SavedObjectsModelVersion"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_mapping_changes.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_mapping_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1330,23 +1114,11 @@
         ],
         "signature": [
           "(types: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>[]) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.VirtualVersionMap",
-            "text": "VirtualVersionMap"
-          }
+          "VirtualVersionMap"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1358,16 +1130,10 @@
             "label": "types",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
+              "SavedObjectsType",
               "<any>[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1389,16 +1155,10 @@
           "({ meta, source, knownTypes, }: ",
           "GetModelVersionsFromMappingMetaOpts",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.VirtualVersionMap",
-            "text": "VirtualVersionMap"
-          },
+          "VirtualVersionMap",
           " | undefined"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1412,7 +1172,7 @@
             "signature": [
               "GetModelVersionsFromMappingMetaOpts"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1434,16 +1194,10 @@
           "({ mappings, source, knownTypes, }: ",
           "GetModelVersionsFromMappingsOpts",
           ") => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.VirtualVersionMap",
-            "text": "VirtualVersionMap"
-          },
+          "VirtualVersionMap",
           " | undefined"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1457,7 +1211,7 @@
             "signature": [
               "GetModelVersionsFromMappingsOpts"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/model_version_from_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1478,7 +1232,7 @@
         "signature": [
           "(version: string) => boolean"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1492,7 +1246,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1513,7 +1267,7 @@
         "signature": [
           "(modelVersion: string | number) => string"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1527,7 +1281,7 @@
             "signature": [
               "string | number"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1548,7 +1302,7 @@
         "signature": [
           "(virtualVersion: string) => number"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1562,7 +1316,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1580,7 +1334,7 @@
         "tags": [],
         "label": "CompareModelVersionDetails",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1594,7 +1348,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1608,7 +1362,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1622,7 +1376,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1636,7 +1390,7 @@
         "tags": [],
         "label": "CompareModelVersionMapParams",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1652,7 +1406,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1668,7 +1422,7 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1684,7 +1438,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1698,7 +1452,7 @@
         "tags": [],
         "label": "CompareModelVersionResult",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1712,7 +1466,7 @@
             "signature": [
               "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1724,15 +1478,9 @@
             "label": "details",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-server.CompareModelVersionDetails",
-                "text": "CompareModelVersionDetails"
-              }
+              "CompareModelVersionDetails"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1748,7 +1496,7 @@
         "description": [
           "\nOptions for {@link IDocumentMigrator.migrate}"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1764,7 +1512,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1780,7 +1528,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1796,7 +1544,7 @@
         "description": [
           "\nManages transformations of individual documents."
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1811,32 +1559,14 @@
             ],
             "signature": [
               "(doc: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<unknown>, options?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-server.DocumentMigrateOptions",
-                "text": "DocumentMigrateOptions"
-              },
+              "DocumentMigrateOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<unknown>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1848,16 +1578,10 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<unknown>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1870,16 +1594,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                    "section": "def-server.DocumentMigrateOptions",
-                    "text": "DocumentMigrateOptions"
-                  },
+                  "DocumentMigrateOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1898,24 +1616,12 @@
             ],
             "signature": [
               "(doc: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<unknown>) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<unknown>[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1927,16 +1633,10 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<unknown>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1955,24 +1655,12 @@
             ],
             "signature": [
               "(doc: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<unknown>, options?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                "section": "def-server.IsDowngradeRequiredOptions",
-                "text": "IsDowngradeRequiredOptions"
-              },
+              "IsDowngradeRequiredOptions",
               " | undefined) => boolean"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1984,16 +1672,10 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<unknown>"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2006,16 +1688,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-base-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-                    "section": "def-server.IsDowngradeRequiredOptions",
-                    "text": "IsDowngradeRequiredOptions"
-                  },
+                  "IsDowngradeRequiredOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2035,7 +1711,7 @@
         "description": [
           "\nOptions for {@link IDocumentMigrator.isDowngradeRequired}"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2051,7 +1727,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2073,7 +1749,7 @@
         "signature": [
           "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_compare.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2088,7 +1764,7 @@
         "signature": [
           "{ [x: string]: string[]; }"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/utils/get_field_list.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2105,7 +1781,7 @@
         "signature": [
           "\"8.10.0\""
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2122,7 +1798,7 @@
         "signature": [
           "{ [x: string]: number; }"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2139,7 +1815,7 @@
         "signature": [
           "10"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2162,7 +1838,7 @@
           },
           "; readonly maxImportExportSize: number; readonly allowHttpApiAccess: boolean; }"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2193,7 +1869,7 @@
           },
           "; readonly scrollDuration: string; readonly retryAttempts: number; }"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2210,7 +1886,7 @@
         "signature": [
           "{ [x: string]: string; }"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2226,7 +1902,7 @@
         "description": [
           "\nThis map holds the default breakdown of SO types per index (pre 8.8.0)"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2240,7 +1916,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2254,7 +1930,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2270,7 +1946,7 @@
         "description": [
           "\nIn order to be FIPS compliant, the migration logic has switched\nfrom using hashes (stored in _meta.migrationMappingPropertyHashes)\nto using model versions (stored in _meta.mappingVersions).\n\nThis map holds a breakdown of md5 hashes to model versions.\nThis allows keeping track of changes in mappings for the different SO types:\nWhen upgrading from a Kibana version prior to the introduction of model versions for V2,\nthe V2 logic will map stored hashes to their corresponding model versions.\nThese model versions will then be compared against the ones defined in the typeRegistry,\nin order to determine which types' mappings have changed."
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2281,7 +1957,7 @@
             "tags": [],
             "label": "'action_task_params|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2292,7 +1968,7 @@
             "tags": [],
             "label": "'action|0be88ebcc8560a075b6898236a202eb1'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2303,7 +1979,7 @@
             "tags": [],
             "label": "'alert|96a5a144778243a9f4fece0e71c2197f'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2314,7 +1990,7 @@
             "tags": [],
             "label": "'api_key_pending_invalidation|16f515278a295f6245149ad7c5ddedb7'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2325,7 +2001,7 @@
             "tags": [],
             "label": "'apm-custom-dashboards|561810b957ac3c09fcfc08f32f168e97'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2336,7 +2012,7 @@
             "tags": [],
             "label": "'apm-indices|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2347,7 +2023,7 @@
             "tags": [],
             "label": "'apm-server-schema|b1d71908f324c17bf744ac72af5038fb'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2358,7 +2034,7 @@
             "tags": [],
             "label": "'apm-service-group|2af509c6506f29a858e5a0950577d9fa'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2369,7 +2045,7 @@
             "tags": [],
             "label": "'apm-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2380,7 +2056,7 @@
             "tags": [],
             "label": "'app_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2391,7 +2067,7 @@
             "tags": [],
             "label": "'application_usage_daily|43b8830d5d0df85a6823d290885fc9fd'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2402,7 +2078,7 @@
             "tags": [],
             "label": "'application_usage_totals|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2413,7 +2089,7 @@
             "tags": [],
             "label": "'canvas-element|7390014e1091044523666d97247392fc'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2424,7 +2100,7 @@
             "tags": [],
             "label": "'canvas-workpad-template|ae2673f678281e2c055d764b153e9715'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2435,7 +2111,7 @@
             "tags": [],
             "label": "'canvas-workpad|b0a1706d356228dbdcb4a17e6b9eb231'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2446,7 +2122,7 @@
             "tags": [],
             "label": "'cases-comments|93535d41ca0279a4a2e5d08acd3f28e3'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2457,7 +2133,7 @@
             "tags": [],
             "label": "'cases-configure|c124bd0be4c139d0f0f91fb9eeca8e37'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2468,7 +2144,7 @@
             "tags": [],
             "label": "'cases-connector-mappings|a98c33813f364f0b068e8c592ac6ef6d'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2479,7 +2155,7 @@
             "tags": [],
             "label": "'cases-rules|1cb4b03690489e07aa86f283dcea5ce1'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2490,7 +2166,7 @@
             "tags": [],
             "label": "'cases-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2501,7 +2177,7 @@
             "tags": [],
             "label": "'cases-user-actions|07a6651cf37853dd5d64bfb2c796e102'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2512,7 +2188,7 @@
             "tags": [],
             "label": "'cases|8f7dc53b17c272ea19f831537daa082d'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2523,7 +2199,7 @@
             "tags": [],
             "label": "'cloud-security-posture-settings|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2534,7 +2210,7 @@
             "tags": [],
             "label": "'config-global|c63748b75f39d0c54de12d12c1ccbc20'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2545,7 +2221,7 @@
             "tags": [],
             "label": "'config|c63748b75f39d0c54de12d12c1ccbc20'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2556,7 +2232,7 @@
             "tags": [],
             "label": "'connector_token|740b3fd18387d4097dca8d177e6a35c6'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2567,7 +2243,7 @@
             "tags": [],
             "label": "'core-usage-stats|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2578,7 +2254,7 @@
             "tags": [],
             "label": "'csp-rule-template|6ee70dc06c0ca3ddffc18222f202ab25'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2589,7 +2265,7 @@
             "tags": [],
             "label": "'dashboard|b8aa800aa5e0d975c5e8dc57f03d41f8'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2600,7 +2276,7 @@
             "tags": [],
             "label": "'endpoint:unified-user-artifact-manifest|393c6e4f5f16288c24ef9057e4d76a4c'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2611,7 +2287,7 @@
             "tags": [],
             "label": "'endpoint:user-artifact-manifest|7502b5c5bc923abe8aa5ccfd636e8c3d'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2622,7 +2298,7 @@
             "tags": [],
             "label": "'enterprise_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2633,7 +2309,7 @@
             "tags": [],
             "label": "'epm-packages-assets|44621b2f6052ef966da47b7c3a00f33b'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2644,7 +2320,7 @@
             "tags": [],
             "label": "'epm-packages|8ce219acd0f6f3529237d52193866afb'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2655,7 +2331,7 @@
             "tags": [],
             "label": "'event_loop_delays_daily|5df7e292ddd5028e07c1482e130e6654'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2666,7 +2342,7 @@
             "tags": [],
             "label": "'event-annotation-group|df07b1a361c32daf4e6842c1d5521dbe'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2677,7 +2353,7 @@
             "tags": [],
             "label": "'exception-list-agnostic|8a1defe5981db16792cb9a772e84bb9a'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2688,7 +2364,7 @@
             "tags": [],
             "label": "'exception-list|8a1defe5981db16792cb9a772e84bb9a'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2699,7 +2375,7 @@
             "tags": [],
             "label": "'file-upload-usage-collection-telemetry|a34fbb8e3263d105044869264860c697'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2710,7 +2386,7 @@
             "tags": [],
             "label": "'file|8e9dd7f8a22efdb8fb1c15ed38fde9f6'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2721,7 +2397,7 @@
             "tags": [],
             "label": "'fileShare|aa8f7ac2ddf8ab1a91bd34e347046caa'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2732,7 +2408,7 @@
             "tags": [],
             "label": "'fleet-fleet-server-host|c28ce72481d1696a9aac8b2cdebcecfa'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2743,7 +2419,7 @@
             "tags": [],
             "label": "'fleet-message-signing-keys|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2754,7 +2430,7 @@
             "tags": [],
             "label": "'fleet-preconfiguration-deletion-record|4c36f199189a367e43541f236141204c'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2765,7 +2441,7 @@
             "tags": [],
             "label": "'fleet-proxy|05b7a22977de25ce67a77e44dd8e6c33'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2776,7 +2452,7 @@
             "tags": [],
             "label": "'fleet-uninstall-tokens|cdb2b655f6b468ecb57d132972425f2e'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2787,7 +2463,7 @@
             "tags": [],
             "label": "'graph-workspace|27a94b2edcb0610c6aea54a7c56d7752'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2798,7 +2474,7 @@
             "tags": [],
             "label": "'guided-onboarding-guide-state|a3db59c45a3fd2730816d4f53c35c7d9'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2809,7 +2485,7 @@
             "tags": [],
             "label": "'guided-onboarding-plugin-state|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2820,7 +2496,7 @@
             "tags": [],
             "label": "'index-pattern|83c02d842fe2a94d14dfa13f7dcd6e87'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2831,7 +2507,7 @@
             "tags": [],
             "label": "'infra-custom-dashboards|1eb3c9e1888b8daea8495769e8d3ba2d'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2842,7 +2518,7 @@
             "tags": [],
             "label": "'infrastructure-monitoring-log-view|c50526fc6040c5355ed027d34d05b35c'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2853,7 +2529,7 @@
             "tags": [],
             "label": "'infrastructure-ui-source|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2864,7 +2540,7 @@
             "tags": [],
             "label": "'ingest_manager_settings|b91ffb075799c78ffd7dbd51a279c8c9'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2875,7 +2551,7 @@
             "tags": [],
             "label": "'ingest-agent-policies|0fd93cd11c019b118e93a9157c22057b'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2886,7 +2562,7 @@
             "tags": [],
             "label": "'ingest-download-sources|0b0f6828e59805bd07a650d80817c342'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2897,7 +2573,7 @@
             "tags": [],
             "label": "'ingest-outputs|b1237f7fdc0967709e75d65d208ace05'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2908,7 +2584,7 @@
             "tags": [],
             "label": "'ingest-package-policies|aef7977b81f7930f23cbfd8711ba272e'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2919,7 +2595,7 @@
             "tags": [],
             "label": "'inventory-view|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2930,7 +2606,7 @@
             "tags": [],
             "label": "'kql-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2941,7 +2617,7 @@
             "tags": [],
             "label": "'legacy-url-alias|0750774cf16475f88f2361e99cc5c8f0'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2952,7 +2628,7 @@
             "tags": [],
             "label": "'lens-ui-telemetry|509bfa5978586998e05f9e303c07a327'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2963,7 +2639,7 @@
             "tags": [],
             "label": "'lens|b0da10d5ab9ebd81d61700737ddc76c9'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2974,7 +2650,7 @@
             "tags": [],
             "label": "'links|3378bb9b651572865d9f61f5b448e415'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2985,7 +2661,7 @@
             "tags": [],
             "label": "'maintenance-window|a58ac2ef53ff5103710093e669dcc1d8'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2996,7 +2672,7 @@
             "tags": [],
             "label": "'map|9134b47593116d7953f6adba096fc463'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3007,7 +2683,7 @@
             "tags": [],
             "label": "'metrics-data-source|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3018,7 +2694,7 @@
             "tags": [],
             "label": "'metrics-explorer-view|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3029,7 +2705,7 @@
             "tags": [],
             "label": "'ml-job|3bb64c31915acf93fc724af137a0891b'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3040,7 +2716,7 @@
             "tags": [],
             "label": "'ml-module|f6c6b7b7ebdca4154246923f24d6340d'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3051,7 +2727,7 @@
             "tags": [],
             "label": "'ml-trained-model|d2f03c1a5dd038fa58af14a56944312b'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3062,7 +2738,7 @@
             "tags": [],
             "label": "'monitoring-telemetry|2669d5ec15e82391cf58df4294ee9c68'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3073,7 +2749,7 @@
             "tags": [],
             "label": "'observability-onboarding-state|a4e5c9d018037114140bdb1647c2d568'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3084,7 +2760,7 @@
             "tags": [],
             "label": "'osquery-manager-usage-metric|4dc4f647d27247c002f56f22742175fe'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3095,7 +2771,7 @@
             "tags": [],
             "label": "'osquery-pack-asset|fe0dfa13c4c24ac37ce1aec04c560a81'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3106,7 +2782,7 @@
             "tags": [],
             "label": "'osquery-pack|6bc20973adab06f00156cbc4578a19ac'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3117,7 +2793,7 @@
             "tags": [],
             "label": "'osquery-saved-query|a05ec7031231a4b71bfb4493a07b2dc5'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3128,7 +2804,7 @@
             "tags": [],
             "label": "'policy-settings-protection-updates-note|37d4035a1dc3c5e58f1b519f99093f21'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3139,7 +2815,7 @@
             "tags": [],
             "label": "'query|aa811b49f48906074f59110bfa83984c'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3150,7 +2826,7 @@
             "tags": [],
             "label": "'risk-engine-configuration|431232781a82926aad5b1fd849715c0f'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3161,7 +2837,7 @@
             "tags": [],
             "label": "'rules-settings|001f60645e96c71520214b57f3ea7590'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3172,7 +2848,7 @@
             "tags": [],
             "label": "'sample-data-telemetry|7d3cfeb915303c9641c59681967ffeb4'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3183,7 +2859,7 @@
             "tags": [],
             "label": "'search-session|fea3612a90b81672991617646f229a61'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3194,7 +2870,7 @@
             "tags": [],
             "label": "'search-telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3205,7 +2881,7 @@
             "tags": [],
             "label": "'search|df07b1a361c32daf4e6842c1d5521dbe'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3216,7 +2892,7 @@
             "tags": [],
             "label": "'security-rule|9d9d11b97e3aaa87fbaefbace2b5c25f'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3227,7 +2903,7 @@
             "tags": [],
             "label": "'security-solution-signals-migration|4060b5a63dddfd54d2cd56450882cc0e'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3238,7 +2914,7 @@
             "tags": [],
             "label": "'siem-detection-engine-rule-actions|f5c218f837bac10ab2c3980555176cf9'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3249,7 +2925,7 @@
             "tags": [],
             "label": "'siem-ui-timeline-note|28393dfdeb4e4413393eb5f7ec8c5436'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3260,7 +2936,7 @@
             "tags": [],
             "label": "'siem-ui-timeline-pinned-event|293fce142548281599060e07ad2c9ddb'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3271,7 +2947,7 @@
             "tags": [],
             "label": "'siem-ui-timeline|f6739fd4b17646a6c86321a746c247ef'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3282,7 +2958,7 @@
             "tags": [],
             "label": "'slo-settings|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3293,7 +2969,7 @@
             "tags": [],
             "label": "'slo|dc7f35c0cf07d71bb36f154996fe10c6'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3304,7 +2980,7 @@
             "tags": [],
             "label": "'space|c3aec2a5d4afcb75554fed96411170e1'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3315,7 +2991,7 @@
             "tags": [],
             "label": "'spaces-usage-stats|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3326,7 +3002,7 @@
             "tags": [],
             "label": "'synthetics-monitor|918c09d935b1dcb6a84935b176262c3a'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3337,7 +3013,7 @@
             "tags": [],
             "label": "'synthetics-param|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3348,7 +3024,7 @@
             "tags": [],
             "label": "'synthetics-privates-locations|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3359,7 +3035,7 @@
             "tags": [],
             "label": "'tag|83d55da58f6530f7055415717ec06474'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3370,7 +3046,7 @@
             "tags": [],
             "label": "'task|b4a368fd68cd32ef6990877634639db6'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3381,7 +3057,7 @@
             "tags": [],
             "label": "'telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3392,7 +3068,7 @@
             "tags": [],
             "label": "'threshold-explorer-view|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3403,7 +3079,7 @@
             "tags": [],
             "label": "'ui-metric|0d409297dc5ebe1e3a1da691c6ee32e3'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3414,7 +3090,7 @@
             "tags": [],
             "label": "'upgrade-assistant-ml-upgrade-operation|3caf305ad2da94d80d49453b0970156d'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3425,7 +3101,7 @@
             "tags": [],
             "label": "'upgrade-assistant-reindex-operation|6d1e2aca91767634e1829c30f20f6b16'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3436,7 +3112,7 @@
             "tags": [],
             "label": "'uptime-dynamic-settings|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3447,7 +3123,7 @@
             "tags": [],
             "label": "'uptime-synthetics-api-key|c3178f0fde61e18d3530ba9a70bc278a'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3458,7 +3134,7 @@
             "tags": [],
             "label": "'url|a37dbae7645ad5811045f4dd3dc1c0a8'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3469,7 +3145,7 @@
             "tags": [],
             "label": "'usage-counters|8cc260bdceffec4ffc3ad165c97dc1b4'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3480,7 +3156,7 @@
             "tags": [],
             "label": "'visualization|4891c012863513388881fc109fec4809'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3491,7 +3167,7 @@
             "tags": [],
             "label": "'workplace_search_telemetry|3d1b76c39bfb2cc8296b024d73854724'",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3505,7 +3181,7 @@
         "tags": [],
         "label": "savedObjectsConfig",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3516,7 +3192,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3569,7 +3245,7 @@
               },
               "<true, boolean, boolean>; }>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3583,7 +3259,7 @@
         "tags": [],
         "label": "savedObjectsMigrationConfig",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+        "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3594,7 +3270,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3735,7 +3411,7 @@
               },
               "<string[]>; }>; }>"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
+            "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }

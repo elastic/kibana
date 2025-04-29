@@ -1,0 +1,677 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Inspector Data View component should render empty state 1`] = `
+<div
+  class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
+>
+  <div
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
+  >
+    <div
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+    >
+      <h2
+        class="euiTitle emotion-euiTitle-m"
+      >
+        No data available
+      </h2>
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiText emotion-euiText-m-euiTextColor-subdued"
+      >
+        <p>
+          The element did not provide any data.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Inspector Data View component should render loading state 1`] = `
+<Suspense
+  fallback={
+    <div>
+      loading
+    </div>
+  }
+  intl={
+    Object {
+      "$t": [Function],
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "style": "long",
+          },
+          "hours": Object {
+            "style": "long",
+          },
+          "minutes": Object {
+            "style": "long",
+          },
+          "months": Object {
+            "style": "long",
+          },
+          "seconds": Object {
+            "style": "long",
+          },
+          "years": Object {
+            "style": "long",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "onError": [Function],
+      "onWarn": [Function],
+      "timeZone": undefined,
+    }
+  }
+>
+  <Component
+    adapters={
+      Object {
+        "tables": TablesAdapter {
+          "_events": Object {},
+          "_eventsCount": 0,
+          "_maxListeners": undefined,
+          "allowCsvExport": false,
+          "initialSelectedTable": undefined,
+          Symbol(shapeMode): false,
+          Symbol(kCapture): false,
+        },
+      }
+    }
+    title="Test Data"
+  />
+  <div>
+    loading
+  </div>
+</Suspense>
+`;
+
+exports[`Inspector Data View component should render single table without selector 1`] = `
+Array [
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    />
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="inspectorDownloadData"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Download CSV
+            <span
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />,
+  <div
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
+    data-test-subj="inspectorTable"
+  >
+    <table
+      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_1_0"
+            role="columnheader"
+            scope="col"
+          >
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  column1
+                </span>
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  123
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  />
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div>
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiFlexGroup eui-xScroll emotion-euiFlexGroup-wrap-s-spaceBetween-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Rows per page: 20
+                </span>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <nav
+            aria-label="Pagination for table: "
+            class="euiPagination emotion-euiPagination"
+          >
+            <span
+              aria-atomic="true"
+              aria-relevant="additions text"
+              class="emotion-euiScreenReaderOnly"
+              role="status"
+            >
+              Page 1 of 1
+            </span>
+            <button
+              aria-label="Previous page"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+              data-test-subj="pagination-button-previous"
+              disabled=""
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="arrowLeft"
+              />
+            </button>
+            <ul
+              class="euiPagination__list emotion-euiPagination__list"
+            >
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-controls="__table_generated-id"
+                  aria-current="page"
+                  aria-label="Page 1 of 1"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+                  data-test-subj="pagination-button-0"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      1
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+            <button
+              aria-label="Next page"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+              data-test-subj="pagination-button-next"
+              disabled=""
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="arrowRight"
+              />
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;
+
+exports[`Inspector Data View component should support multiple datatables 1`] = `
+Array [
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiText emotion-euiText-xs"
+      >
+        <p
+          aria-atomic="true"
+          aria-live="polite"
+          role="status"
+        >
+          There are 2 tables in total
+        </p>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
+      />
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <strong>
+            Selected:
+          </strong>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div>
+            <div
+              class="euiPopover emotion-euiPopover-inline-block"
+              id="inspectorTableChooser"
+            >
+              <button
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+                data-test-subj="inspectorTableChooser"
+                type="button"
+              >
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    Table 1
+                  </span>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        id="inspectorDownloadData"
+      >
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
+        >
+          <span
+            class="emotion-euiButtonDisplayContent"
+          >
+            Download CSV
+            <span
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />,
+  <div
+    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
+    data-test-subj="inspectorTable"
+  >
+    <table
+      class="euiTable emotion-euiTable-auto-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            aria-sort="none"
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_1_0"
+            role="columnheader"
+            scope="col"
+          >
+            <button
+              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+              data-test-subj="tableHeaderSortButton"
+              type="button"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              >
+                <span
+                  class="eui-textTruncate"
+                  title="column1"
+                >
+                  column1
+                </span>
+                <span
+                  class="euiTableSortIcon euiTableSortIcon--sortable"
+                  color="subdued"
+                  data-euiicon-type="sortable"
+                />
+              </div>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  123
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                  />
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div>
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiFlexGroup eui-xScroll emotion-euiFlexGroup-wrap-s-spaceBetween-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiPopover emotion-euiPopover-inline-block"
+          >
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  Rows per page: 20
+                </span>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <nav
+            aria-label="Pagination for table: "
+            class="euiPagination emotion-euiPagination"
+          >
+            <span
+              aria-atomic="true"
+              aria-relevant="additions text"
+              class="emotion-euiScreenReaderOnly"
+              role="status"
+            >
+              Page 1 of 1
+            </span>
+            <button
+              aria-label="Previous page"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+              data-test-subj="pagination-button-previous"
+              disabled=""
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="arrowLeft"
+              />
+            </button>
+            <ul
+              class="euiPagination__list emotion-euiPagination__list"
+            >
+              <li
+                class="euiPagination__item"
+              >
+                <button
+                  aria-controls="__table_generated-id"
+                  aria-current="page"
+                  aria-label="Page 1 of 1"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+                  data-test-subj="pagination-button-0"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate euiButtonEmpty__text"
+                    >
+                      1
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+            <button
+              aria-label="Next page"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+              data-test-subj="pagination-button-next"
+              disabled=""
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="arrowRight"
+              />
+            </button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>,
+]
+`;

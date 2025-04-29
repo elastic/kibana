@@ -8,7 +8,7 @@
  */
 
 import type { ImportResolver } from '@kbn/import-resolver';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { KibanaPackageManifest } from '@kbn/repo-packages/modern/types';
 import type { ModuleId } from './module_id';
 import type { ModuleType } from './module_type';
@@ -82,7 +82,7 @@ export class RepoSourceClassifier {
     const segs = path.getSegs();
     if (
       segs.includes('scripts') &&
-      !path.getRepoRel().startsWith('src/plugins/data/server/scripts/')
+      !path.getRepoRel().startsWith('src/platform/plugins/shared/data/server/scripts/')
     ) {
       return true;
     }

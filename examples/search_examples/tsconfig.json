@@ -28,7 +28,6 @@
     "@kbn/utility-types",
     "@kbn/es-query",
     "@kbn/i18n",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/search-types",

@@ -20,6 +20,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const security = getService('security');
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
+
   const to = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
   const apacheAccessDatasetName = 'apache.access';
@@ -112,7 +114,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         it('Estimated data are not available due to underprivileged user', async () => {
           await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`
+            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`,
+            /**
+             * This test was failing periodically because of
+             * poor network conditions in the CI.
+             * In those cases the default timeout of 2 minutes
+             * was not enough to properly load the UI and pass the test.
+             */
+            { timeout: 240000 }
           );
         });
 
@@ -144,15 +153,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const datasetWithMonitorPrivilege = apacheAccessDatasetHumanName;
           const datasetWithoutMonitorPrivilege = 'synth.1';
 
-          // "Size" should be available for `apacheAccessDatasetName`
-          await testSubjects.missingOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithMonitorPrivilege}`
-          );
-
-          // "Size" should not be available for `datasetWithoutMonitorPrivilege`
-          await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithoutMonitorPrivilege}`
-          );
+          await retry.tryForTime(10000, async () => {
+            // "Size" should be available for `apacheAccessDatasetName`
+            await testSubjects.missingOrFail(
+              `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithMonitorPrivilege}`
+            );
+            // "Size" should not be available for `datasetWithoutMonitorPrivilege`
+            await testSubjects.existOrFail(
+              `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithoutMonitorPrivilege}`
+            );
+          });
         });
 
         it('Details page shows insufficient privileges warning for underprivileged data stream', async () => {
@@ -167,18 +177,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.navigateTo();
         });
 
-        it('"View dashboards" and "See integration" are hidden for underprivileged user', async () => {
+        it('"View dashboards" is hidden for underprivileged user', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: apacheAccessDataStreamName,
           });
           await PageObjects.datasetQuality.openIntegrationActionsMenu();
-
-          // "See Integration" is hidden
-          await testSubjects.missingOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
-              'Overview'
-            )
-          );
 
           // "View Dashboards" is hidden
           await testSubjects.missingOrFail(
@@ -214,7 +217,7 @@ async function createDatasetQualityUserWithRole(
         feature: {
           dataQuality: [hasDataQualityPrivileges ? 'all' : 'none'],
           discover: ['all'],
-          fleet: ['none'],
+          fleet: ['read'],
         },
         spaces: ['*'],
       },

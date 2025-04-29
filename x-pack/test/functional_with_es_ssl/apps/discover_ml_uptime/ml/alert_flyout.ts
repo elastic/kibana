@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -134,6 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');
         await pageObjects.triggersActionsUI.setAlertInterval(10, 's');
         await pageObjects.triggersActionsUI.saveAlert();
+        await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList('ml-test-alert');
       });
     });

@@ -68,6 +68,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
      * Login to Kibana using SAML authentication with provided project-specfic role
      */
     async loginWithRole(role: string) {
+      svlUserManager.checkRoleIsSupported(role);
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getInteractiveUserSessionCookieWithRoleScope(role);
       await retry.waitForWithTimeout(
@@ -132,6 +133,21 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
      */
     async loginAsViewer() {
       await this.loginWithRole('viewer');
+    },
+
+    /**
+     *
+     * Login to Kibana using SAML authentication with Editor role (observability, security)
+     */
+    async loginAsEditor() {
+      await this.loginWithRole('editor');
+    },
+
+    /**
+     * Login to Kibana using SAML authentication with Developer role (search)
+     */
+    async loginAsDeveloper() {
+      await this.loginWithRole('developer');
     },
 
     /**

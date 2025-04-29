@@ -32,7 +32,6 @@ import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
@@ -48,6 +47,7 @@ import {
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PLUGIN_ID } from '../../common';
 import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
 
@@ -56,6 +56,7 @@ interface SearchSessionsExampleAppDeps {
   analytics: CoreStart['analytics'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -674,6 +675,7 @@ function doSearch(
     analytics: CoreStart['analytics'];
     i18n: CoreStart['i18n'];
     theme: CoreStart['theme'];
+    userProfile: CoreStart['userProfile'];
   }
 ): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
   if (!dataView) return Promise.reject('Select a data view');
@@ -705,10 +707,8 @@ function doSearch(
   const req = {
     params: {
       index: dataView.title,
-      body: {
-        aggs: aggsDsl,
-        query,
-      },
+      aggs: aggsDsl,
+      query,
     },
   };
 
@@ -735,7 +735,7 @@ function doSearch(
           );
           notifications.toasts.addSuccess({
             title: 'Query result',
-            text: mountReactNode(message),
+            text: toMountPoint(message, startServices),
           });
         }
       }),

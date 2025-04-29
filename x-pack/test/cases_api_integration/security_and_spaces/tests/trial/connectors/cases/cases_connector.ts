@@ -9,30 +9,29 @@ import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { createHash } from 'node:crypto';
 import stringify from 'json-stable-stringify';
-import {
+import type {
   CasesConnectorRunParams,
   OracleRecordAttributes,
 } from '@kbn/cases-plugin/server/connectors/cases/types';
-import { AttachmentType, CasePostRequest } from '@kbn/cases-plugin/common';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { AlertAttachment, Attachments, Case } from '@kbn/cases-plugin/common/types/domain';
 import {
-  AlertAttachment,
-  Attachments,
-  Case,
   CaseStatuses,
   CaseSeverity,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { KbnClient } from '@kbn/test';
-import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import type { KbnClient } from '@kbn/test';
+import type { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import {
   SEVERITY_EXTERNAL_TO_ESMODEL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '@kbn/cases-plugin/server/common/constants';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_RULES_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import { User } from '../../../../../common/lib/authentication/types';
+import type { User } from '../../../../../common/lib/authentication/types';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -50,7 +49,7 @@ import {
   createComment,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { roles as api_int_roles } from '../../../../../../api_integration/apis/cases/common/roles';
 import {
   casesAllUser,
@@ -135,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 for unsupported time units', async () => {
-        for (const unit of ['s', 'm', 'H', 'h']) {
+        for (const unit of ['s', 'H']) {
           const res = await executeSystemConnector({
             supertest,
             connectorId,
@@ -147,6 +146,18 @@ export default ({ getService }: FtrProviderContext): void => {
             'Request validation failed (Error: [timeWindow]: Not a valid time window)'
           );
         }
+      });
+
+      it('returns 400 for timeWindow < 5m ', async () => {
+        const res = await executeSystemConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: '4m' }),
+        });
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [timeWindow]: Time window should be at least 5 minutes)'
+        );
       });
 
       it('returns 400 when maximumCasesToOpen > 10', async () => {
@@ -342,6 +353,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: null,
               username: 'elastic',
             },
+            observables: [],
           });
         });
 
@@ -454,6 +466,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: null,
               username: 'elastic',
             },
+            observables: [],
           });
         });
 
@@ -831,6 +844,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: null,
                 username: 'elastic',
               },
+              observables: [],
             });
 
             expect(secondCase).to.eql({
@@ -878,6 +892,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: null,
                 username: 'elastic',
               },
+              observables: [],
             });
           });
 
@@ -1415,6 +1430,7 @@ const createCaseWithId = async ({
       external_service: null,
       total_alerts: 0,
       total_comments: 0,
+      observables: [],
     },
     overwrite: false,
   });

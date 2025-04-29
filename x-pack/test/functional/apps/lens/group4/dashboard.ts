@@ -27,6 +27,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const queryBar = getService('queryBar');
+  const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
+  const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
@@ -61,7 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('Artistpreviouslyknownaslens');
       await find.clickByButtonText('Artistpreviouslyknownaslens');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
     });
 
@@ -72,9 +73,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await retry.try(async () => {
         await clickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+        const filters = await find.allByCssSelector('.euiCheckbox');
+        expect(filters).length(2);
+        const [timeFilter, ipFilter] = filters;
+        expect(await timeFilter.getVisibleText()).to.be(
+          '@timestamp: Sep 21, 2015 @ 09:00:00.000 to Sep 21, 2015 @ 12:00:00.000'
+        );
+        expect(await ipFilter.getVisibleText()).to.be('ip: 97.220.3.248');
+
         await testSubjects.existOrFail('applyFiltersPopoverButton', { timeout: 2500 });
       });
 
@@ -98,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await retry.try(async () => {
         // show the tooltip actions
         await rightClickInChart(30, 5); // hardcoded position of bar, depends heavy on data and charts implementation
@@ -122,7 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       await dashboard.saveDashboard('lnsDrilldown');
 
       await panelActions.expectMissingPanelAction(
@@ -139,7 +145,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsPieVis');
       await dashboardAddPanel.closeAddPanel();
 
-      await lens.goToTimeRange();
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
 
       await lens.assertExactText(
@@ -189,7 +194,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickCreateNewLink();
       await header.waitUntilLoadingHasFinished();
-      await lens.goToTimeRange();
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -234,11 +238,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsPieVis');
       await dashboardAddPanel.closeAddPanel();
 
-      await panelActions.legacyUnlinkFromLibrary('lnsPieVis');
+      await panelActions.unlinkFromLibrary('lnsPieVis');
     });
 
     it('save lens panel to embeddable library', async () => {
-      await panelActions.legacySaveToLibrary('lnsPieVis - copy', 'lnsPieVis');
+      await panelActions.saveToLibrary('lnsPieVis - copy', 'lnsPieVis');
 
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
@@ -251,7 +255,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboardAddPanel.clickCreateNewLink();
       await header.waitUntilLoadingHasFinished();
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -282,7 +285,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
-      await lens.goToTimeRange();
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
@@ -302,8 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create a new dashboard, then a new visualization in Lens.
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await testSubjects.click('dashboardEditorMenuButton');
-      await testSubjects.click('visType-lens');
+      await dashboardAddPanel.clickAddLensPanel();
       // Configure it and save to return to the dashboard.
       await lens.waitForField('@timestamp');
       await lens.configureDimension({
@@ -327,6 +328,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.closeCurrentWindow();
         await browser.switchToWindow(windowHandlers[0]);
       }
+    });
+
+    it('should add a drilldown to a Lens by-value chart', async () => {
+      await dashboard.navigateToApp();
+      await dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
+      await find.clickByButtonText('lnsPieVis');
+      await dashboardAddPanel.closeAddPanel();
+
+      // add a drilldown to the pie chart
+      await dashboardDrilldownPanelActions.clickCreateDrilldown();
+      await testSubjects.click('actionFactoryItem-OPEN_IN_DISCOVER_DRILLDOWN');
+      await dashboardDrilldownsManage.saveChanges();
+      await dashboardDrilldownsManage.closeFlyout();
+      await header.waitUntilLoadingHasFinished();
+
+      // check that the drilldown is working now
+      await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
+      expect(
+        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
+      ).to.be(true);
+
+      // save the dashboard
+      await dashboard.saveDashboard('dashboardWithDrilldown');
+
+      // re-open the dashboard and check the drilldown is still there
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('dashboardWithDrilldown');
+      await header.waitUntilLoadingHasFinished();
+
+      await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
+      expect(
+        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
+      ).to.be(true);
     });
   });
 }

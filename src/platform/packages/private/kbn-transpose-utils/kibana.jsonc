@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/transpose-utils",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

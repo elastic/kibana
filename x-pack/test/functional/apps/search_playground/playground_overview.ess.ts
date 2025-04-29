@@ -14,7 +14,8 @@ import {
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 
-const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
+const esArchiveIndex =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function (ftrContext: FtrProviderContext) {
   const { getService, getPageObjects } = ftrContext;
@@ -41,7 +42,7 @@ export default function (ftrContext: FtrProviderContext) {
   describe('Playground', () => {
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
+      await pageObjects.common.navigateToApp('searchPlayground');
     });
 
     after(async () => {
@@ -68,7 +69,7 @@ export default function (ftrContext: FtrProviderContext) {
           await browser.refresh();
         });
         it('show success llm button', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
@@ -166,7 +167,10 @@ export default function (ftrContext: FtrProviderContext) {
         });
 
         it('show edit context', async () => {
-          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
+            'basic_index',
+            ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
+          );
         });
 
         it('save selected fields between modes', async () => {

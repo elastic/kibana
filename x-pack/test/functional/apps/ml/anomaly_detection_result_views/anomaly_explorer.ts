@@ -127,11 +127,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           it('opens a job from job list link', async () => {
             await ml.testExecution.logTestStep('navigate to job list');
-            await ml.navigation.navigateToMl();
+            await ml.navigation.navigateToStackManagementMlSection(
+              'anomaly_detection',
+              'ml-jobs-list'
+            );
             // Set debug state has to happen at this point
             // because page refresh happens after navigation to the ML app.
             await elasticChart.setNewChartUiDebugFlag(true);
-            await ml.navigation.navigateToJobManagement();
 
             await ml.testExecution.logTestStep('open job in anomaly explorer');
             await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
@@ -622,7 +624,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // Set debug state has to happen at this point
           // because page refresh happens after navigation to the ML app.
           await elasticChart.setNewChartUiDebugFlag(true);
-          await ml.navigation.navigateToJobManagement();
+          await ml.navigation.navigateToStackManagementMlSection(
+            'anomaly_detection',
+            'ml-jobs-list'
+          );
 
           await ml.testExecution.logTestStep('open job in anomaly explorer');
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);

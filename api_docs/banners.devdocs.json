@@ -27,7 +27,7 @@
         "tags": [],
         "label": "BannerConfiguration",
         "description": [],
-        "path": "x-pack/plugins/banners/common/types.ts",
+        "path": "x-pack/platform/plugins/private/banners/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
             "signature": [
               "\"disabled\" | \"top\""
             ],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,7 +52,7 @@
             "tags": [],
             "label": "textContent",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -63,7 +63,18 @@
             "tags": [],
             "label": "textColor",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "banners",
+            "id": "def-common.BannerConfiguration.linkColor",
+            "type": "string",
+            "tags": [],
+            "label": "linkColor",
+            "description": [],
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -74,7 +85,7 @@
             "tags": [],
             "label": "backgroundColor",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -88,7 +99,7 @@
         "tags": [],
         "label": "BannerInfoResponse",
         "description": [],
-        "path": "x-pack/plugins/banners/common/types.ts",
+        "path": "x-pack/platform/plugins/private/banners/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,7 +110,7 @@
             "tags": [],
             "label": "allowed",
             "description": [],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -119,7 +130,7 @@
                 "text": "BannerConfiguration"
               }
             ],
-            "path": "x-pack/plugins/banners/common/types.ts",
+            "path": "x-pack/platform/plugins/private/banners/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -139,7 +150,7 @@
         "signature": [
           "\"disabled\" | \"top\""
         ],
-        "path": "x-pack/plugins/banners/common/types.ts",
+        "path": "x-pack/platform/plugins/private/banners/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

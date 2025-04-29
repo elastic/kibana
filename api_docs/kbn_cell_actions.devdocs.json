@@ -27,7 +27,7 @@
         "label": "CellActions",
         "description": [],
         "signature": [
-          "({ data, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, }: ",
+          "({ data, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, extraActionsIconType, extraActionsColor, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -37,7 +37,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-cell-actions/src/components/cell_actions.tsx",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/components/cell_actions.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +46,7 @@
             "id": "def-common.CellActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  data,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActionTypes = [],\n  metadata,\n  className,\n}",
+            "label": "{\n  data,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActionTypes = [],\n  metadata,\n  className,\n  extraActionsIconType,\n  extraActionsColor,\n}",
             "description": [],
             "signature": [
               {
@@ -57,7 +57,7 @@
                 "text": "CellActionsProps"
               }
             ],
-            "path": "packages/kbn-cell-actions/src/components/cell_actions.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/components/cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -84,7 +84,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-cell-actions/src/context/cell_actions_context.tsx",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/context/cell_actions_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,7 +104,7 @@
                 "text": "CellActionsProviderProps"
               }
             ],
-            "path": "packages/kbn-cell-actions/src/context/cell_actions_context.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/context/cell_actions_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -133,7 +133,7 @@
           "EuiDataGridColumnCellAction",
           "[][]"
         ],
-        "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,7 +153,7 @@
                 "text": "UseDataGridColumnsCellActionsProps"
               }
             ],
-            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -189,7 +189,7 @@
           },
           "<C>, \"isCompatible\">"
         ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,7 +213,7 @@
               },
               "<C>) => Promise<boolean>"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -234,7 +234,7 @@
                   },
                   "<C>"
                 ],
-                "path": "packages/kbn-cell-actions/src/types.ts",
+                "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -272,7 +272,7 @@
           },
           "<object>"
         ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -288,7 +288,7 @@
             "signature": [
               "Omit<C[\"data\"][number], \"value\">[]"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -304,7 +304,7 @@
             "signature": [
               "C[\"metadata\"] | undefined"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -336,7 +336,7 @@
           },
           "<object>"
         ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -357,7 +357,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -373,7 +373,7 @@
             "signature": [
               "React.MutableRefObject<HTMLElement | null>"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,7 +389,7 @@
             "signature": [
               "Metadata | undefined"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -413,7 +413,7 @@
           },
           "<C>"
         ],
-        "path": "packages/kbn-cell-actions/src/actions/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -427,7 +427,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-cell-actions/src/actions/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -457,7 +457,7 @@
               },
               "<A>"
             ],
-            "path": "packages/kbn-cell-actions/src/actions/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -479,7 +479,7 @@
                   },
                   "<A>>"
                 ],
-                "path": "packages/kbn-cell-actions/src/actions/types.ts",
+                "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -497,7 +497,7 @@
         "tags": [],
         "label": "CellActionsData",
         "description": [],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -546,7 +546,7 @@
               "MappingTimeSeriesMetricType",
               " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -570,7 +570,7 @@
               },
               " | null[]"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -584,7 +584,7 @@
         "tags": [],
         "label": "PartitionedActions",
         "description": [],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,7 +613,7 @@
               },
               ">[]"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -642,7 +642,7 @@
               },
               ">[]"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -674,7 +674,7 @@
           },
           ", \"metadata\" | \"disabledActionTypes\">"
         ],
-        "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -690,7 +690,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -713,7 +713,7 @@
               },
               "[] | undefined"
             ],
-            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -736,7 +736,7 @@
                 "text": "CellActionFieldValue"
               }
             ],
-            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -750,7 +750,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+                "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -765,7 +765,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+                "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -785,9 +785,9 @@
             "signature": [
               "React.MutableRefObject<",
               "EuiDataGridRefProps",
-              " | null>"
+              " | null> | undefined"
             ],
-            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -809,7 +809,7 @@
         "signature": [
           "Partial<C> & { id: string; }"
         ],
-        "path": "packages/kbn-cell-actions/src/actions/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -832,7 +832,7 @@
           },
           " | null[]"
         ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -863,9 +863,11 @@
           },
           "[]; triggerId: string; mode: ",
           "CellActionsMode",
-          "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; } & { children?: React.ReactNode; }"
+          "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; extraActionsIconType?: ",
+          "IconType",
+          " | undefined; extraActionsColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined; } & { children?: React.ReactNode; }"
         ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -888,7 +890,7 @@
           },
           "<object>[]>; } & { children?: React.ReactNode; }"
         ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -905,7 +907,7 @@
         "signature": [
           "{ [P in Exclude<keyof C, \"id\">]: C[P]; }"
         ],
-        "path": "packages/kbn-cell-actions/src/actions/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -920,7 +922,7 @@
         "signature": [
           "string[] | boolean[] | number[]"
         ],
-        "path": "packages/kbn-cell-actions/src/actions/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -967,7 +969,7 @@
           },
           ">[]>"
         ],
-        "path": "packages/kbn-cell-actions/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -997,7 +999,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-cell-actions/src/types.ts",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1023,7 +1025,7 @@
           " | ",
           "SerializableArray"
         ],
-        "path": "packages/kbn-cell-actions/src/actions/types.ts",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1040,7 +1042,7 @@
           "EuiDataGridColumnCellAction",
           "[][]"
         ],
-        "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+        "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1055,7 +1057,7 @@
             "signature": [
               "P"
             ],
-            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

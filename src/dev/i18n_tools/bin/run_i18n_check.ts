@@ -110,7 +110,7 @@ run(
         },
         {
           title: 'Checking Untracked i18n Messages outside defined namespaces',
-          enabled: (_) => !ignoreUntracked || !!(filterNamespaces && filterNamespaces.length),
+          enabled: (_) => !ignoreUntracked && !!(filterNamespaces && filterNamespaces.length),
           task: (context, task) => checkUntrackedNamespacesTask(context, task, { rootPaths }),
         },
         {

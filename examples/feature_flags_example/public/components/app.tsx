@@ -8,24 +8,15 @@
  */
 
 import React from 'react';
-import {
-  EuiHorizontalRule,
-  EuiPageTemplate,
-  EuiTitle,
-  EuiText,
-  EuiLink,
-  EuiListGroup,
-  EuiListGroupItem,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiPageTemplate, EuiTitle, EuiText, EuiLink } from '@elastic/eui';
 import type { CoreStart, FeatureFlagsStart } from '@kbn/core/public';
 
-import useObservable from 'react-use/lib/useObservable';
-import {
-  FeatureFlagExampleBoolean,
-  FeatureFlagExampleNumber,
-  FeatureFlagExampleString,
-} from '../../common/feature_flags';
 import { PLUGIN_NAME } from '../../common';
+import {
+  FeatureFlagsFullList,
+  FeatureFlagsReactiveList,
+  FeatureFlagsStaticList,
+} from './feature_flags_list';
 
 interface FeatureFlagsExampleAppDeps {
   featureFlags: FeatureFlagsStart;
@@ -34,16 +25,6 @@ interface FeatureFlagsExampleAppDeps {
 }
 
 export const FeatureFlagsExampleApp = ({ featureFlags }: FeatureFlagsExampleAppDeps) => {
-  // Fetching the feature flags synchronously
-  const bool = featureFlags.getBooleanValue(FeatureFlagExampleBoolean, false);
-  const str = featureFlags.getStringValue(FeatureFlagExampleString, 'red');
-  const num = featureFlags.getNumberValue(FeatureFlagExampleNumber, 1);
-
-  // Use React Hooks to observe feature flags changes
-  const bool$ = useObservable(featureFlags.getBooleanValue$(FeatureFlagExampleBoolean, false));
-  const str$ = useObservable(featureFlags.getStringValue$(FeatureFlagExampleString, 'red'));
-  const num$ = useObservable(featureFlags.getNumberValue$(FeatureFlagExampleNumber, 1));
-
   return (
     <>
       <EuiPageTemplate>
@@ -67,22 +48,20 @@ export const FeatureFlagsExampleApp = ({ featureFlags }: FeatureFlagsExampleAppD
               .
             </p>
             <EuiHorizontalRule />
-            <EuiListGroup>
-              <p>
-                The feature flags are:
-                <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool}`} />
-                <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str}`} />
-                <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num}`} />
-              </p>
-            </EuiListGroup>
-            <EuiListGroup>
-              <p>
-                The <strong>observed</strong> feature flags are:
-                <EuiListGroupItem label={`${FeatureFlagExampleBoolean}: ${bool$}`} />
-                <EuiListGroupItem label={`${FeatureFlagExampleString}: ${str$}`} />
-                <EuiListGroupItem label={`${FeatureFlagExampleNumber}: ${num$}`} />
-              </p>
-            </EuiListGroup>
+            <h3>Rendered separately</h3>
+            <p>
+              Each list are 2 different components, so only the reactive one is re-rendered when the
+              feature flag is updated and the static one keeps the value until the next refresh.
+            </p>
+            <FeatureFlagsStaticList featureFlags={featureFlags} />
+            <FeatureFlagsReactiveList featureFlags={featureFlags} />
+            <EuiHorizontalRule />
+            <h3>Rendered together</h3>
+            <p>
+              `useObservable` causes a full re-render of the component, updating the{' '}
+              <i>statically</i> evaluated flags as well.
+            </p>
+            <FeatureFlagsFullList featureFlags={featureFlags} />
           </EuiText>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>

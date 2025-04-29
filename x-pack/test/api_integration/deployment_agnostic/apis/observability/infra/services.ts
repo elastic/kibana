@@ -106,10 +106,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
+        useCookieHeader: true,
       });
 
-      const version = (await synthtrace.apmSynthtraceKibanaClient.installApmPackage()).version;
-      synthtraceApmClient = await synthtrace.createApmSynthtraceEsClient(version);
+      synthtraceApmClient = await synthtrace.createApmSynthtraceEsClient();
     });
     after(async () => {
       await synthtrace.apmSynthtraceKibanaClient.uninstallApmPackage();

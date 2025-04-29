@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiMarkdownEditor, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiMarkdownEditor, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  initializeTitles,
-  useInheritedViewMode,
+  getViewModeSubject,
+  initializeTitleManager,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
@@ -41,7 +40,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
     /**
      * initialize state (source of truth)
      */
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const titleManager = initializeTitleManager(state);
     const content$ = new BehaviorSubject(state.content);
 
     /**
@@ -51,11 +50,11 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
      */
     const api = buildApi(
       {
-        ...titlesApi,
+        ...titleManager.api,
         serializeState: () => {
           return {
             rawState: {
-              ...serializeTitles(),
+              ...titleManager.serialize(),
               content: content$.getValue(),
             },
           };
@@ -70,7 +69,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
        */
       {
         content: [content$, (value) => content$.next(value)],
-        ...titleComparators,
+        ...titleManager.comparators,
       }
     );
 
@@ -79,7 +78,10 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
       Component: () => {
         // get state for rendering
         const content = useStateFromPublishingSubject(content$);
-        const viewMode = useInheritedViewMode(api) ?? 'view';
+        const viewMode = useStateFromPublishingSubject(
+          getViewModeSubject(api) ?? new BehaviorSubject('view')
+        );
+        const { euiTheme } = useEuiTheme();
 
         return viewMode === 'edit' ? (
           <EuiMarkdownEditor
@@ -96,7 +98,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
         ) : (
           <EuiMarkdownFormat
             css={css`
-              padding: ${euiThemeVars.euiSizeM};
+              padding: ${euiTheme.size.m};
             `}
           >
             {content ?? ''}

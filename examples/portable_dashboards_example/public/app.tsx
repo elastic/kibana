@@ -9,7 +9,7 @@
 
 import ReactDOM from 'react-dom';
 import React, { useMemo } from 'react';
-import { useAsync } from 'react-use/lib';
+import useAsync from 'react-use/lib/useAsync';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -56,7 +56,7 @@ const PortableDashboardsDemos = ({
   history: AppMountParameters['history'];
 }) => {
   return (
-    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+    <KibanaRenderContextProvider {...coreStart}>
       <Router history={history}>
         <Routes>
           <Route exact path="/">

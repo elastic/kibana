@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+
 /**
  * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
@@ -26,27 +28,27 @@ export const IGNORE_FILE_GLOBS = [
   '**/LICENSE',
   '**/*.txt',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/plugins/canvas/tasks/**/*',
-  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
-  'x-pack/plugins/canvas/server/templates/assets/*.{png,jpg,svg}',
-  'x-pack/plugins/cases/docs/**/*',
-  'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
-  'x-pack/plugins/fleet/cypress/packages/*.zip',
+  'x-pack/platform/plugins/private/canvas/tasks/**/*',
+  'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*',
+  'x-pack/platform/plugins/private/canvas/server/templates/assets/*.{png,jpg,svg}',
+  'x-pack/platform/plugins/shared/cases/docs/**/*',
+  'x-pack/platform/plugins/private/monitoring/public/lib/jquery_flot/**/*',
+  'x-pack/platform/plugins/shared/fleet/cypress/packages/*.zip',
   '**/apm-diagnostics-*.json',
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
-  'packages/core/apps/core-apps-server-internal/assets/fonts/**/*',
+  'src/core/packages/apps/server-internal/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
-  'packages/kbn-utility-types/test-d/**/*',
+  'src/platform/packages/shared/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
   'vars/*',
-  'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/*/jest-preset.js',
-  'test/package/Vagrantfile',
-  'x-pack/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
+  'src/platform/packages/shared/kbn-test/jest-preset.js',
+  'src/platform/packages/shared/kbn-test/*/jest-preset.js',
+  'src/platform/test/package/Vagrantfile',
+  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
-  'packages/kbn-router-to-openapispec/openapi-types.d.ts',
+  'src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts',
 
   // Required to match the name in the docs.elastic.dev repo.
   'dev_docs/nav-kibana-dev.docnav.json',
@@ -62,15 +64,15 @@ export const IGNORE_FILE_GLOBS = [
   '**/preview-head.html',
 
   // filename must match upstream filenames from lodash
-  'packages/kbn-safer-lodash-set/**/*',
+  'src/platform/packages/shared/kbn-safer-lodash-set/**/*',
 
   // filename must match upstream filenames from handlebars
-  'packages/kbn-handlebars/src/upstream/**/*',
-  'packages/kbn-handlebars/.patches/**/*',
+  'src/platform/packages/private/kbn-handlebars/src/upstream/**/*',
+  'src/platform/packages/private/kbn-handlebars/.patches/**/*',
 
-  'x-pack/plugins/maps/server/fonts/**/*',
+  'x-pack/platform/plugins/shared/maps/server/fonts/**/*',
 
-  'x-pack/plugins/observability_solution/profiling/Makefile',
+  'x-pack/solutions/observability/plugins/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
@@ -98,7 +100,18 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack', 'x-pack/packages/*'];
+export const KEBAB_CASE_DIRECTORY_GLOBS = [
+  'packages/*',
+  'x-pack',
+  'x-pack/packages/*',
+  'src/dev/packages/*',
+  'src/core/packages/*/*',
+  'src/platform/packages/private/*',
+  'src/platform/packages/shared/*',
+  'x-pack/platform/packages/private/*',
+  'x-pack/platform/packages/shared/*',
+  ...KIBANA_SOLUTIONS.map((solution) => `x-pack/solutions/${solution}/packages/*`),
+];
 
 /**
  * These patterns are matched against directories and indicate
@@ -118,9 +131,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'packages/core/*/*',
   'x-pack/packages/ai-infra/*',
-  'packages/kbn-pm/src/utils/__fixtures__/*',
   'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
@@ -163,17 +174,17 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/mstile-310x150.png',
   'src/core/server/core_app/assets/favicons/mstile-310x310.png',
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
-  'test/functional/apps/management/exports/_import_objects-conflicts.json',
-  'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
-  'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
-  'x-pack/plugins/monitoring/public/icons/health-gray.svg',
-  'x-pack/plugins/monitoring/public/icons/health-green.svg',
-  'x-pack/plugins/monitoring/public/icons/health-red.svg',
-  'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/screenshotting/server/assets/img/logo-grey.png',
+  'src/platform/test/functional/apps/management/exports/_import_objects-conflicts.json',
+  'x-pack/legacy/platform/plugins/shared/index_management/public/lib/editSettings.js',
+  'x-pack/legacy/platform/plugins/shared/license_management/public/store/reducers/licenseManagement.js',
+  'x-pack/platform/plugins/private/monitoring/public/icons/health-gray.svg',
+  'x-pack/platform/plugins/private/monitoring/public/icons/health-green.svg',
+  'x-pack/platform/plugins/private/monitoring/public/icons/health-red.svg',
+  'x-pack/platform/plugins/private/monitoring/public/icons/health-yellow.svg',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/platform/plugins/shared/screenshotting/server/assets/img/logo-grey.png',
 ];

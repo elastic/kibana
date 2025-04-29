@@ -1,12 +1,14 @@
 # Observability Project config
 
-## Disable plugins
-enterpriseSearch.enabled: false
-xpack.cloudSecurityPosture.enabled: false
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'observability']
+
+## Enabled plugins
 xpack.infra.enabled: true
-xpack.uptime.enabled: true
-xpack.securitySolution.enabled: false
-xpack.search.notebooks.enabled: false
+
+# Disabled Observability plugins
+xpack.ux.enabled: false
+xpack.legacy_uptime.enabled: false
 
 ## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -28,10 +30,20 @@ xpack.features.overrides:
         - feature: "observability"
           privileges: [ "read" ]
   ### Dashboards feature should be moved from Analytics category to the Observability one.
-  dashboard.category: "observability"
+  dashboard_v2.category: "observability"
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover:
+    privileges:
+      # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
+      all.composedOf:
+        - feature: "observability"
+          privileges: [ "all" ]
+      # Discover `Read` feature privilege should implicitly grant `Read` access to Observability app.
+      read.composedOf:
+        - feature: "observability"
+          privileges: [ "read" ]
+  discover_v2:
     category: "observability"
     privileges:
       # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
@@ -123,11 +135,11 @@ uiSettings.overrides.defaultRoute: /app/observability/landing
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
 
-## Set the dev project switch current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
-
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
+
+## Enable event.ingested separately because agentIdVerification is disabled
+xpack.fleet.eventIngestedEnabled: true
 
 ## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
 ## The value need to be a featureId observability Or stackAlerts Or siem
@@ -154,11 +166,20 @@ xpack.fleet.internal.registry.excludePackages: [
     'cloud_defend',
     'security_detection_engine',
 
-    # Removed in 8.11 integrations
+    # Deprecated security integrations
+    'bluecoat',
     'cisco',
-    'microsoft',
-    'symantec',
     'cyberark',
+    'cylance',
+    'f5',
+    'fortinet_forticlient',
+    'juniper_junos',
+    'juniper_netscreen',
+    'microsoft',
+    'netscout',
+    'radware',
+    'symantec',
+    'tomcat',
 
     # ML integrations
     'dga',
@@ -189,7 +210,7 @@ xpack.observabilityAIAssistant.scope: "observability"
 telemetry.labels.serverless: observability
 
 xpack.ml.ad.enabled: true
-xpack.ml.dfa.enabled: false
+xpack.ml.dfa.enabled: true
 xpack.ml.nlp:
   enabled: true
   modelDeployment:

@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-plugin-static-assets-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "corePluginStaticAssets",
+    "server": false,
+    "browser": true
+  }
+}

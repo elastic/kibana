@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
@@ -239,24 +239,13 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('muteAlert', 'test.restricted-noop', 'alerts'),
-                statusCode: 403,
-              });
-              break;
             case 'global_read at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'muteAlert',
-                  'test.restricted-noop',
-                  'alertsRestrictedFixture'
-                ),
+                message: getUnauthorizedErrorMessage('muteAlert', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;

@@ -6,19 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import {
-  Aggregators,
-  InfraRuleType,
-  MetricThresholdParams,
-} from '@kbn/infra-plugin/common/alerting/metrics';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
+import type { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { Aggregators } from '@kbn/infra-plugin/common/alerting/metrics';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { InfraRuleType } from '@kbn/rule-data-utils';
 import {
   waitForDocumentInIndex,
   waitForAlertInIndex,
   waitForRuleStatus,
 } from './helpers/alerting_wait_for_helpers';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { createIndexConnector, createRule } from './helpers/alerting_api_helper';
 
 // eslint-disable-next-line import/no-default-export

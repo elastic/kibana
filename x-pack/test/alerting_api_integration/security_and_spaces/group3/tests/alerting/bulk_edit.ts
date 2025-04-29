@@ -6,10 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from '@kbn/core/server';
-import { RuleNotifyWhen, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SavedObject } from '@kbn/core/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { RawRule } from '@kbn/alerting-plugin/server/types';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
@@ -20,7 +21,7 @@ import {
   ObjectRemover,
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
@@ -388,11 +389,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage(
-                  'bulkEdit',
-                  'test.restricted-noop',
-                  'alertsRestrictedFixture'
-                ),
+                message: getUnauthorizedErrorMessage('bulkEdit', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);

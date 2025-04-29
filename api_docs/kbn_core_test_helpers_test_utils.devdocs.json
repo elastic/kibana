@@ -28,16 +28,10 @@
         "description": [],
         "signature": [
           "(name: string) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_exportable_type.ts",
+        "path": "src/core/packages/test-helpers/test-utils/src/create_exportable_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,7 +45,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_exportable_type.ts",
+            "path": "src/core/packages/test-helpers/test-utils/src/create_exportable_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,16 +63,10 @@
         "description": [],
         "signature": [
           "(createOptions: { name: string; hide?: boolean | undefined; hideFromHttpApis?: boolean | undefined; }) => ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
+          "SavedObjectsType",
           "<any>"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+        "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,7 +77,7 @@
             "tags": [],
             "label": "createOptions",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+            "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -100,7 +88,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -114,7 +102,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -128,7 +116,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "path": "src/core/packages/test-helpers/test-utils/src/create_hidden_type_variants.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -151,74 +139,26 @@
           "; httpSetup: ",
           "InternalHttpServiceSetup",
           "; handlerContext: { savedObjects: { client: jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           ">; typeRegistry: jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.ISavedObjectTypeRegistry",
-            "text": "ISavedObjectTypeRegistry"
-          },
+          "ISavedObjectTypeRegistry",
           " & Pick<",
           "SavedObjectTypeRegistry",
           ", \"registerType\">>; getClient: () => jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           ">; getExporter: () => jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.ISavedObjectsExporter",
-            "text": "ISavedObjectsExporter"
-          },
+          "ISavedObjectsExporter",
           ">; getImporter: () => jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.ISavedObjectsImporter",
-            "text": "ISavedObjectsImporter"
-          },
+          "ISavedObjectsImporter",
           ">; }; elasticsearch: { client: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ScopedClusterClientMock",
-            "text": "ScopedClusterClientMock"
-          },
+          "ScopedClusterClientMock",
           "; }; uiSettings: { client: jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-ui-settings-server",
-            "scope": "server",
-            "docId": "kibKbnCoreUiSettingsServerPluginApi",
-            "section": "def-server.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           ">; }; deprecations: { client: jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-deprecations-server",
-            "scope": "server",
-            "docId": "kibKbnCoreDeprecationsServerPluginApi",
-            "section": "def-server.DeprecationsClient",
-            "text": "DeprecationsClient"
-          },
+          "DeprecationsClient",
           ">; }; }; }>"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/setup_server.ts",
+        "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,7 +172,7 @@
             "signature": [
               "symbol"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/setup_server.ts",
+            "path": "src/core/packages/test-helpers/test-utils/src/setup_server.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

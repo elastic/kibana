@@ -15,7 +15,7 @@ import {
   createComment,
   bulkCreateAttachments,
 } from '../../../common/lib/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should return the corect total number of alerts attached to cases', async () => {
+    it('should return the correct total number of alerts attached to cases', async () => {
       const firstCase = await createCase(supertest, getPostCaseRequest());
       const secondCase = await createCase(supertest, getPostCaseRequest());
 

@@ -18,7 +18,25 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-rule-params",
+        "id": "def-common.createRuleParamsExamples",
+        "type": "Function",
+        "tags": [],
+        "label": "createRuleParamsExamples",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
@@ -32,7 +50,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +65,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +80,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +95,7 @@
         "signature": [
           "{ [x: string]: any; }"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -101,7 +119,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,7 +141,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,7 +163,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,7 +185,7 @@
           },
           "<Record<string, any>>"
         ],
-        "path": "packages/response-ops/rule_params/v1.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_params/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

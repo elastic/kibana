@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import {
+  KIBANA_SOLUTIONS,
+  type ModuleGroup,
+  type ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 
 interface ModuleAttrs {
   group: ModuleGroup;
@@ -19,36 +23,38 @@ const DEFAULT_MODULE_ATTRS: ModuleAttrs = {
   visibility: 'shared',
 };
 
-const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = {
-  'src/platform/plugins/shared': {
-    group: 'platform',
-    visibility: 'shared',
-  },
-  'src/platform/plugins/internal': {
-    group: 'platform',
-    visibility: 'private',
-  },
-  'x-pack/platform/plugins/shared': {
-    group: 'platform',
-    visibility: 'shared',
-  },
-  'x-pack/platform/plugins/internal': {
-    group: 'platform',
-    visibility: 'private',
-  },
-  'x-pack/solutions/observability/plugins': {
-    group: 'observability',
-    visibility: 'private',
-  },
-  'x-pack/solutions/security/plugins': {
-    group: 'security',
-    visibility: 'private',
-  },
-  'x-pack/solutions/search/plugins': {
-    group: 'search',
-    visibility: 'private',
-  },
-};
+const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugins']
+  .map<Record<string, ModuleAttrs>>((type) => ({
+    [`src/platform/${type}/shared`]: {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    [`src/platform/${type}/private`]: {
+      group: 'platform',
+      visibility: 'private',
+    },
+    [`x-pack/platform/${type}/shared`]: {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    [`x-pack/platform/${type}/private`]: {
+      group: 'platform',
+      visibility: 'private',
+    },
+    ...KIBANA_SOLUTIONS.reduce<Record<string, ModuleAttrs>>((acc, solution) => {
+      acc[`x-pack/solutions/${solution}/${type}`] = {
+        group: solution,
+        visibility: 'private',
+      };
+      return acc;
+    }, {}),
+  }))
+  .reduce((acc, current) => ({ ...acc, ...current }), {
+    'src/platform/test': {
+      group: 'platform',
+      visibility: 'shared',
+    },
+  });
 
 /**
  * Determine a plugin's grouping information based on the path where it is defined

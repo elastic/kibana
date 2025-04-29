@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await ml.api.cleanMlIndices();
+      await ml.api.cleanAnomalyDetection();
       await ml.testResources.cleanMLSavedObjects();
     });
 

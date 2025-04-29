@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
@@ -15,6 +16,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
 
   return {
     services,
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     servers: xPackFunctionalTestsConfig.get('servers'),
     security: xPackFunctionalTestsConfig.get('security'),
     junit: {
@@ -30,9 +32,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'assistantKnowledgeBaseByDefault',
-        ])}`,
         '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       ],
     },
@@ -41,7 +40,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode',
-        'path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2,/tmp/cloud-snapshots/',
+        `path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2,/tmp/cloud-snapshots/`,
       ],
     },
   };

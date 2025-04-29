@@ -35,6 +35,23 @@ const taskManagerQuery = {
   },
 };
 
+const taskSchema = schema.object({
+  task: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    taskType: schema.string(),
+    schedule: schema.maybe(
+      schema.object({
+        interval: schema.string(),
+      })
+    ),
+    interval: schema.maybe(schema.string()),
+    params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    id: schema.maybe(schema.string()),
+    timeoutOverride: schema.maybe(schema.string()),
+  }),
+});
+
 export function initRoutes(
   router: IRouter,
   taskManagerStart: Promise<TaskManagerStartContract>,
@@ -49,23 +66,14 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/schedule`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
-        body: schema.object({
-          task: schema.object({
-            enabled: schema.boolean({ defaultValue: true }),
-            taskType: schema.string(),
-            schedule: schema.maybe(
-              schema.object({
-                interval: schema.string(),
-              })
-            ),
-            interval: schema.maybe(schema.string()),
-            params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-            state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-            id: schema.maybe(schema.string()),
-            timeoutOverride: schema.maybe(schema.string()),
-          }),
-        }),
+        body: taskSchema,
       },
     },
     async function (
@@ -88,7 +96,44 @@ export function initRoutes(
 
   router.post(
     {
+      path: `/api/sample_tasks/schedule_with_api_key`,
+      validate: {
+        body: taskSchema,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskManager = await taskManagerStart;
+      const { task: taskFields } = req.body;
+      const task = {
+        ...taskFields,
+        scope: [scope],
+      };
+
+      const taskResult = await taskManager.schedule(task, { request: req });
+
+      return res.ok({ body: taskResult });
+    }
+  );
+
+  router.post(
+    {
       path: `/api/sample_tasks/run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           task: schema.object({
@@ -116,7 +161,47 @@ export function initRoutes(
 
   router.post(
     {
+      path: `/api/sample_tasks/run_mark_removed_tasks_as_unrecognized`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({}),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      try {
+        const taskManager = await taskManagerStart;
+        await taskManager.ensureScheduled({
+          id: 'mark_removed_tasks_as_unrecognized',
+          taskType: 'task_manager:mark_removed_tasks_as_unrecognized',
+          schedule: { interval: '1h' },
+          state: {},
+          params: {},
+        });
+        return res.ok({ body: await taskManager.runSoon('mark_removed_tasks_as_unrecognized') });
+      } catch (err) {
+        return res.ok({ body: { id: 'mark_removed_tasks_as_unrecognized', error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
       path: `/api/sample_tasks/bulk_enable`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
@@ -142,6 +227,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/bulk_disable`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
@@ -166,6 +257,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/bulk_update_schedules`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
@@ -190,46 +287,13 @@ export function initRoutes(
 
   router.post(
     {
-      path: `/api/sample_tasks/ephemeral_run_now`,
-      validate: {
-        body: schema.object({
-          task: schema.object({
-            taskType: schema.string(),
-            state: schema.recordOf(schema.string(), schema.any()),
-            params: schema.recordOf(schema.string(), schema.any()),
-          }),
-        }),
-      },
-    },
-    async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<
-        any,
-        any,
-        {
-          task: {
-            taskType: string;
-            params: Record<string, any>;
-            state: Record<string, any>;
-          };
-        },
-        any
-      >,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      const { task } = req.body;
-      try {
-        const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.ephemeralRunNow(task) });
-      } catch (err) {
-        return res.ok({ body: { task, error: `${err}` } });
-      }
-    }
-  );
-
-  router.post(
-    {
       path: `/api/sample_tasks/ensure_scheduled`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           task: schema.object({
@@ -266,6 +330,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/event`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           event: schema.string(),
@@ -291,6 +361,12 @@ export function initRoutes(
   router.get(
     {
       path: `/api/sample_tasks`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -315,6 +391,12 @@ export function initRoutes(
   router.get(
     {
       path: `/api/sample_tasks/task/{taskId}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           taskId: schema.string(),
@@ -339,6 +421,12 @@ export function initRoutes(
   router.get(
     {
       path: `/api/ensure_tasks_index_refreshed`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -354,6 +442,12 @@ export function initRoutes(
   router.delete(
     {
       path: `/api/sample_tasks`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -382,6 +476,12 @@ export function initRoutes(
   router.get(
     {
       path: '/api/registered_tasks',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (
@@ -403,6 +503,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/update_kibana_node`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           id: schema.string(),

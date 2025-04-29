@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -91,49 +91,6 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
           statusCode: 404,
           error: 'Not Found',
           message: `Saved object [alert/${createdAlert.id}] not found`,
-        });
-      });
-    });
-
-    describe('legacy', function () {
-      this.tags('skipFIPS');
-      it('should handle enable alert request appropriately', async () => {
-        const { body: createdAlert } = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData({ enabled: false }))
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-        await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_enable`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204);
-
-        const { body: updatedAlert } = await supertestWithoutAuth
-          .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-        expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
-        const taskRecord = await getScheduledTask(updatedAlert.scheduled_task_id);
-        expect(taskRecord.type).to.eql('task');
-        expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
-        expect(JSON.parse(taskRecord.task.params)).to.eql({
-          alertId: createdAlert.id,
-          spaceId: Spaces.space1.id,
-          consumer: 'alertsFixture',
-        });
-        expect(taskRecord.task.enabled).to.eql(true);
-
-        // Ensure revision was not updated
-        expect(updatedAlert.revision).to.eql(0);
-
-        // Ensure AAD isn't broken
-        await checkAAD({
-          supertest: supertestWithoutAuth,
-          spaceId: Spaces.space1.id,
-          type: RULE_SAVED_OBJECT_TYPE,
-          id: createdAlert.id,
         });
       });
     });

@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
+<div
+  class="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-block-EuiInputPopover"
+>
+  <input
+    type="hidden"
+    value="source"
+  />
+  <div
+    class="euiFormControlLayout emotion-euiFormControlLayout"
+  >
+    <div
+      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+      style="--euiFormControlRightIconsCount: 1;"
+    >
+      <button
+        aria-haspopup="listbox"
+        class="euiSuperSelectControl emotion-euiSuperSelect__control"
+        type="button"
+      >
+        Source
+      </button>
+      <div
+        class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-absolute-right"
+      >
+        <span
+          class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+        >
+          <span
+            aria-hidden="true"
+            class="euiFormControlLayoutCustomIcon__icon"
+            data-euiicon-type="arrowDown"
+          />
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

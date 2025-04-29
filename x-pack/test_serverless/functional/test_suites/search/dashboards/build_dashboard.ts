@@ -27,6 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Building a new dashboard', function () {
+    // see details: https://github.com/elastic/kibana/issues/207097
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await kibanaServer.savedObjects.cleanStandardList();
@@ -56,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('can edit a Lens panel by value and save changes', async () => {
       await PageObjects.dashboard.waitForRenderComplete();
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.saveAndReturn();
       await PageObjects.dashboard.waitForRenderComplete();

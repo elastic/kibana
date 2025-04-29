@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  data-test-subj="threat-match-row"
+  gutterSize="s"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <MatchDetails
+      contextId="contextId"
+      eventId="eventId"
+      scopeId="some_scope"
+      sourceField="host.name"
+      sourceValue="http://elastic.co"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <IndicatorDetails
+      contextId="contextId"
+      eventId="eventId"
+      feedName="feedName"
+      indicatorReference="http://example.com"
+      indicatorType="domain"
+      scopeId="some_scope"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

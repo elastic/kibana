@@ -52,7 +52,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
   describe('Favorite Timelines', { tags: ['@skipInServerless'] }, () => {
     it('should appear on overview page', () => {
       createTimeline()
-        .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+        .then((response) => response.body.savedObjectId)
         .then((timelineId: string) => {
           favoriteTimeline({ timelineId, timelineType: 'default' }).then(() => {
             visitWithTimeRange(OVERVIEW_URL);

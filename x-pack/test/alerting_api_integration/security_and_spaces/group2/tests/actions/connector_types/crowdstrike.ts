@@ -9,11 +9,11 @@ import {
   CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
-import SuperTest from 'supertest';
+import type { FeaturesPrivileges, Role } from '@kbn/security-plugin/common';
+import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
 import { getUrlPrefix } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createSupertestErrorLogger } from '../../../../../common/lib/log_supertest_errors';
 
 // eslint-disable-next-line import/no-default-export
@@ -208,23 +208,37 @@ export default function createCrowdstrikeTests({ getService }: FtrProviderContex
         });
 
         for (const crowdstrikeSubAction of crowdstrikeSubActions) {
-          it(`should allow execute of ${crowdstrikeSubAction}`, async () => {
+          const isAllowedSubAction = crowdstrikeSubAction === SUB_ACTION.GET_AGENT_DETAILS;
+          it(`should ${
+            isAllowedSubAction ? 'allow' : 'deny'
+          } execute of ${crowdstrikeSubAction}`, async () => {
             const {
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              body: { status, message, connector_id },
+              body: { status, message, connector_id, statusCode, error },
             } = await executeSubAction({
               supertest: supertestWithoutAuth,
               subAction: crowdstrikeSubAction,
               subActionParams: {},
               username: user.username,
               password: user.password,
+              ...(isAllowedSubAction
+                ? {}
+                : { expectedHttpCode: 403, errorLogger: logErrorDetails.ignoreCodes([403]) }),
             });
 
-            expect({ status, message, connector_id }).to.eql({
-              status: 'error',
-              message: 'an error occurred while running the action',
-              connector_id: connectorId,
-            });
+            if (isAllowedSubAction) {
+              expect({ status, message, connector_id }).to.eql({
+                status: 'error',
+                message: 'an error occurred while running the action',
+                connector_id: connectorId,
+              });
+            } else {
+              expect({ statusCode, message, error }).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute a ".crowdstrike" action',
+              });
+            }
           });
         }
       });

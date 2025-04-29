@@ -11,42 +11,86 @@ import type { IRouter } from '@kbn/core/server';
 import { DEPRECATED_ROUTES } from '../../../common';
 
 export const registerVersionedDeprecatedRoute = (router: IRouter) => {
-  const versionedRoute = router.versioned.get({
-    path: DEPRECATED_ROUTES.VERSIONED_ROUTE,
-    description: 'Routing example plugin deprecated versioned route.',
-    access: 'internal',
-    options: {
-      excludeFromOAS: true,
-    },
-    enableQueryVersion: true,
-  });
-
-  versionedRoute.addVersion(
-    {
-      options: {
-        deprecated: {
-          documentationUrl: 'https://elastic.co/',
-          severity: 'warning',
-          reason: { type: 'bump', newApiVersion: '2' },
+  router.versioned
+    .get({
+      path: DEPRECATED_ROUTES.VERSIONED_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
         },
       },
-      validate: false,
-      version: '1',
-    },
-    (ctx, req, res) => {
-      return res.ok({
-        body: { result: 'Called deprecated version of the API. API version 1 -> 2' },
-      });
-    }
-  );
+      description: 'Routing example plugin deprecated versioned route.',
+      access: 'public',
+      options: {
+        excludeFromOAS: true,
+      },
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        options: {
+          deprecated: {
+            documentationUrl: 'https://elastic.co/',
+            severity: 'warning',
+            reason: { type: 'deprecate' },
+          },
+        },
+        validate: false,
+        version: '2023-10-31',
+      },
+      (ctx, req, res) => {
+        return res.ok({
+          body: { result: 'Called deprecated version of the API "2023-10-31"' },
+        });
+      }
+    );
 
-  versionedRoute.addVersion(
-    {
-      version: '2',
-      validate: false,
-    },
-    (ctx, req, res) => {
-      return res.ok({ body: { result: 'Called API version 2' } });
-    }
-  );
+  router.versioned
+    .get({
+      path: DEPRECATED_ROUTES.VERSIONED_INTERNAL_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
+      },
+      description: 'Routing example plugin deprecated versioned route.',
+      access: 'internal',
+      options: {
+        excludeFromOAS: true,
+      },
+      enableQueryVersion: true,
+    })
+    .addVersion(
+      {
+        options: {
+          deprecated: {
+            documentationUrl: 'https://elastic.co/',
+            severity: 'warning',
+            reason: { type: 'bump', newApiVersion: '2' },
+          },
+        },
+        validate: false,
+        version: '1',
+      },
+      (ctx, req, res) => {
+        return res.ok({
+          body: { result: 'Called internal deprecated version of the API 1.' },
+        });
+      }
+    )
+    .addVersion(
+      {
+        validate: false,
+        version: '2',
+      },
+      (ctx, req, res) => {
+        return res.ok({
+          body: { result: 'Called non-deprecated version of the API.' },
+        });
+      }
+    );
 };

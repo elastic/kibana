@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
@@ -19,6 +19,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       await tearDown(getService);
     });
 
+    loadTestFile(require.resolve('./aggregate'));
     loadTestFile(require.resolve('./mute_all'));
     loadTestFile(require.resolve('./mute_instance'));
     loadTestFile(require.resolve('./unmute_all'));

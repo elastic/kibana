@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
   getTestRuleData,
@@ -278,7 +278,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'global_read at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('bulkDisable', 'test.noop', 'alertsFixture'),
+                message: getUnauthorizedErrorMessage('bulkDisable', 'test.noop', 'alerts'),
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);

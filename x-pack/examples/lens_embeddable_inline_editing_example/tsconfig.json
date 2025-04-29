@@ -19,8 +19,8 @@
     "@kbn/developer-examples-plugin",
     "@kbn/data-views-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/ui-theme",
+    "@kbn/react-kibana-context-render",
   ]
 }

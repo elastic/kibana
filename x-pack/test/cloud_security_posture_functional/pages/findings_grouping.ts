@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups findings by resource and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         const grouping = await findings.findingsGrouping();
 
@@ -296,14 +296,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
       });
-      it('groups findings by cloud account and sort by compliance score desc', async () => {
+      it('groups findings by cloud account id and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Cloud account');
-
+        await groupSelector.setValue('Cloud account ID');
         const grouping = await findings.findingsGrouping();
+        const noCloudAccountGroupTitle = 'No cloud account';
 
         const groupCount = await grouping.getGroupCount();
         expect(groupCount).to.be('2 cloud accounts');
@@ -314,12 +314,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const cloudNameOrder = [
           {
             cloudName: 'Account 2',
+            cloudId: '2',
             findingsCount: '1',
             complianceScore: '0%',
             benchmarkName: data[3].rule.benchmark.name,
           },
           {
             cloudName: 'Account 1',
+            cloudId: '1',
             findingsCount: '1',
             complianceScore: '100%',
             benchmarkName: data[2].rule.benchmark.name,
@@ -334,11 +336,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await asyncForEach(
           cloudNameOrder,
-          async ({ cloudName, complianceScore, findingsCount, benchmarkName }, index) => {
+          async ({ cloudName, complianceScore, findingsCount, benchmarkName, cloudId }, index) => {
             const groupRow = await grouping.getRowAtIndex(index);
-            expect(await groupRow.getVisibleText()).to.contain(cloudName);
+            const groupTitle =
+              cloudName === noCloudAccountGroupTitle
+                ? noCloudAccountGroupTitle
+                : `${cloudName} - ${cloudId}`;
+            expect(await groupRow.getVisibleText()).to.contain(groupTitle);
 
-            if (cloudName !== 'No cloud account') {
+            if (cloudName !== noCloudAccountGroupTitle) {
               expect(await groupRow.getVisibleText()).to.contain(benchmarkName);
             }
 
@@ -353,36 +359,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
       });
-      it('groups findings by Kubernetes cluster and sort by compliance score desc', async () => {
+      it('groups findings by Kubernetes cluster id and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Kubernetes cluster');
+        await groupSelector.setValue('Kubernetes cluster ID');
+        const noKuberenetsClusterGroupTitle = 'No Kubernetes cluster';
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('2 kubernetes clusters');
+        expect(groupCount).to.be('1 kubernetes cluster');
 
         const unitCount = await grouping.getUnitCount();
+
         expect(unitCount).to.be('4 findings');
 
         const kubernetesOrder = [
           {
             clusterName: 'Cluster 1',
-            findingsCount: '1',
-            complianceScore: '0%',
+            clusterId: '1',
+            findingsCount: '2',
+            complianceScore: '50%',
             benchmarkName: data[0].rule.benchmark.name,
           },
           {
-            clusterName: 'Cluster 2',
-            findingsCount: '1',
-            complianceScore: '100%',
-            benchmarkName: data[1].rule.benchmark.name,
-          },
-          {
-            clusterName: 'No Kubernetes cluster',
+            clusterName: noKuberenetsClusterGroupTitle,
             findingsCount: '2',
             complianceScore: '50%',
           },
@@ -390,12 +393,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await asyncForEach(
           kubernetesOrder,
-          async ({ clusterName, complianceScore, findingsCount, benchmarkName }, index) => {
+          async (
+            { clusterName, complianceScore, findingsCount, benchmarkName, clusterId },
+            index
+          ) => {
             const groupRow = await grouping.getRowAtIndex(index);
-            expect(await groupRow.getVisibleText()).to.contain(clusterName);
-            if (clusterName !== 'No Kubernetes cluster') {
+            const groupTitle =
+              clusterName === noKuberenetsClusterGroupTitle
+                ? noKuberenetsClusterGroupTitle
+                : `${clusterName} - ${clusterId}`;
+
+            expect(await groupRow.getVisibleText()).to.contain(groupTitle);
+            if (clusterName !== noKuberenetsClusterGroupTitle) {
               expect(await groupRow.getVisibleText()).to.contain(benchmarkName);
             }
+
             expect(
               await (
                 await groupRow.findByTestSubject('cloudSecurityFindingsComplianceScore')
@@ -414,7 +426,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
@@ -515,12 +527,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
-        await groupSelector.setValue('Resource');
+        await groupSelector.setValue('Resource ID');
 
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be(`${resourceGroupCount + 1} resources`);
+        expect(groupCount).to.be(`${resourceGroupCount} resources`);
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be(`${findingsCount + 1} findings`);

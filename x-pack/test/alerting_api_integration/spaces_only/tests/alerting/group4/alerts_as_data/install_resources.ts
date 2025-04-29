@@ -8,7 +8,7 @@
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
@@ -147,6 +147,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndexTemplate.name).to.eql(indexTemplateName);
         expect(contextIndexTemplate.index_template.index_patterns).to.eql([
           '.internal.alerts-test.patternfiring.alerts-default-*',
+          '.reindexed-v8-internal.alerts-test.patternfiring.alerts-default-*',
         ]);
         expect(contextIndexTemplate.index_template.composed_of).to.eql([
           '.alerts-test.patternfiring.alerts-mappings',
@@ -170,6 +171,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
               ignore_malformed: 'true',
               total_fields: {
                 limit: '2500',
+                ignore_dynamic_beyond_limit: 'true',
               },
             },
             hidden: 'true',
@@ -205,6 +207,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           ignore_malformed: 'true',
           total_fields: {
             limit: '2500',
+            ignore_dynamic_beyond_limit: 'true',
           },
         });
 

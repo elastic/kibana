@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/core-fatal-errors-browser-mocks",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

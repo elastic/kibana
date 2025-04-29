@@ -36,22 +36,23 @@ export const waitForPluginInitialized = ({
     logger.debug('CSP plugin is initialized');
   });
 
-export function result(status: number): CallbackHandler {
+export function result(status: number, logger?: ToolingLog): CallbackHandler {
   return (err: any, res: Response) => {
     if ((res?.status || err.status) !== status) {
-      const e = new Error(
+      throw new Error(
         `Expected ${status} ,got ${res?.status || err.status} resp: ${
           res?.body ? JSON.stringify(res.body) : err.text
         }`
       );
-      throw e;
+    } else if (err) {
+      logger?.warning(`Error result ${err.text}`);
     }
   };
 }
 
 export class EsIndexDataProvider {
   private es: EsClient;
-  private index: string;
+  private readonly index: string;
 
   constructor(es: EsClient, index: string) {
     this.es = es;

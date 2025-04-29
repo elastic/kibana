@@ -1,0 +1,35 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  exclude = [
+    "**/test_helpers.ts",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+DEPS = [
+  "@npm//react",
+  "@npm//tslib",
+]
+
+js_library(
+  name = "core-base-common",
+  package_name = "@kbn/core-base-common",
+  srcs = ["package.json"] + SRCS,
+  deps = DEPS,
+  visibility = ["//visibility:public"],
+)

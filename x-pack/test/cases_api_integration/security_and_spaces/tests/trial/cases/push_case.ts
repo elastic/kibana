@@ -7,13 +7,14 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import http from 'http';
+import type http from 'http';
 
 import expect from '@kbn/expect';
-import { CaseStatuses, AttachmentType, User } from '@kbn/cases-plugin/common/types/domain';
-import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
-import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { User } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import type { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import {
@@ -488,7 +489,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path = 409s when case is closed', async () => {
+      it('should push a closed case', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
           serviceNowSimulatorURL,
@@ -511,7 +512,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           connectorId: connector.id,
-          expectedHttpCode: 409,
+          expectedHttpCode: 200,
         });
       });
 
@@ -615,7 +616,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('alerts', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+        const defaultSignalsIndex = 'siem-signals-default-000001';
         const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
         const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
@@ -836,7 +837,6 @@ export default ({ getService }: FtrProviderContext): void => {
           const theCase = await getCase({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            includeComments: false,
             auth: { user: superUser, space: 'space1' },
           });
 

@@ -21,7 +21,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared/src/rule_form';
+import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { AlertsFiltersFormSandbox } from './components/alerts_filters_form_sandbox';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -37,6 +41,7 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -45,6 +50,7 @@ export interface TriggersActionsUiExampleComponentParams {
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
   settings: CoreStart['settings'];
   history: ScopedHistory;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -53,6 +59,9 @@ export interface TriggersActionsUiExampleComponentParams {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -63,12 +72,13 @@ const TriggersActionsUiExampleApp = ({
   notifications,
   settings,
   docLinks,
-  i18n,
-  theme,
   data,
   charts,
   dataViews,
   unifiedSearch,
+  fieldFormats,
+  licensing,
+  ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
     <Router history={history}>
@@ -169,7 +179,17 @@ const TriggersActionsUiExampleApp = ({
             path="/alerts_table"
             render={() => (
               <Page title="Alerts Table">
-                <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+                <AlertsTableSandbox
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    settings,
+                  }}
+                />
               </Page>
             )}
           />
@@ -184,7 +204,7 @@ const TriggersActionsUiExampleApp = ({
           />
           <Route
             exact
-            path={createRuleRoute}
+            path={CREATE_RULE_ROUTE}
             render={() => (
               <Page title="Rule Create">
                 <RuleForm
@@ -193,8 +213,6 @@ const TriggersActionsUiExampleApp = ({
                     application,
                     notifications,
                     docLinks,
-                    i18n,
-                    theme,
                     charts,
                     data,
                     dataViews,
@@ -202,6 +220,7 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
                   }}
                 />
               </Page>
@@ -209,7 +228,7 @@ const TriggersActionsUiExampleApp = ({
           />
           <Route
             exact
-            path={editRuleRoute}
+            path={EDIT_RULE_ROUTE}
             render={() => (
               <Page title="Rule Edit">
                 <RuleForm
@@ -218,8 +237,6 @@ const TriggersActionsUiExampleApp = ({
                     application,
                     notifications,
                     docLinks,
-                    theme,
-                    i18n,
                     charts,
                     data,
                     dataViews,
@@ -227,6 +244,30 @@ const TriggersActionsUiExampleApp = ({
                     settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+                    ...startServices,
+                  }}
+                />
+              </Page>
+            )}
+          />
+          <Route
+            exact
+            path="/task_manager_with_api_key"
+            render={() => (
+              <Page title="Task Manager with API Key">
+                <TaskWithApiKeySandbox http={http} />
+              </Page>
+            )}
+          />
+          <Route
+            exact
+            path="/alerts_filters_form"
+            render={() => (
+              <Page title="Alerts filters form">
+                <AlertsFiltersFormSandbox
+                  services={{
+                    http,
+                    notifications,
                   }}
                 />
               </Page>
@@ -245,7 +286,6 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element, history }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application, i18n, theme, settings } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
@@ -263,19 +303,16 @@ export const renderApp = (
           <IntlProvider locale="en">
             <TriggersActionsUiExampleApp
               history={history}
-              http={http}
-              notifications={notifications}
-              application={application}
-              docLinks={docLinks}
-              i18n={i18n}
-              theme={theme}
-              settings={settings}
               triggersActionsUi={deps.triggersActionsUi}
               data={deps.data}
               charts={deps.charts}
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              fieldFormats={deps.fieldFormats}
+              licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
+              {...core}
             />
           </IntlProvider>
         </QueryClientProvider>

@@ -10,7 +10,7 @@ import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function findBackfillTests({ getService }: FtrProviderContext) {
@@ -278,15 +278,12 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .auth(apiOptions.username, apiOptions.password);
 
           // find backfill with end time that is after one backfill ends
+          const findEnd = moment(end2).utc().add(1, 'hour').toISOString();
           const findWithEndOneRuleResponse = await supertestWithoutAuth
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?end=${moment()
-                .utc()
-                .startOf('day')
-                .subtract(9, 'days')
-                .toISOString()}`
+              )}/internal/alerting/rules/backfill/_find?end=${findEnd}`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);

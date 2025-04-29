@@ -34,6 +34,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
 
   const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share } =
     getPageObjects([
@@ -346,7 +347,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async waitForWorkspaceWithVisualization() {
+    async waitForDatatableVisualization() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`lnsVisualizationContainer`);
       });
@@ -397,7 +398,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
       const field = await find.byCssSelector(
-        `[data-test-subj="lnsFieldListPanelField-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        `[data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       await field.focus();
       await retry.try(async () => {
@@ -432,17 +433,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
       const elements = await find.allByCssSelector(
-        `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       const el = elements[index];
       await el.focus();
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
+        // This needs to be slowed down to avoid flakiness
+        await common.sleep(200);
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       if (metaKey) {
         await this.pressMetaKey(metaKey);
       }
+
+      await common.sleep(200);
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
@@ -464,8 +469,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await el.focus();
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
+        // This needs to be slowed down to avoid flakiness
+        await common.sleep(200);
         await browser.pressKeys(reverse ? browser.keys.ARROW_UP : browser.keys.ARROW_DOWN);
       }
+
+      await common.sleep(200);
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
@@ -914,6 +923,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           throw new Error('Search input value is not the expected value');
         }
       });
+    },
+    async getChartTypeFromChartSwitcher() {
+      const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      return await chartSwitcher.getVisibleText();
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
@@ -1482,10 +1495,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title,
       redirectToOrigin,
       ignoreTimeFilter,
+      useAdHocDataView,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
       ignoreTimeFilter?: boolean;
+      useAdHocDataView?: boolean;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await dashboard.getIsInViewMode();
@@ -1496,6 +1511,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
+      }
+
+      if (useAdHocDataView) {
+        await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
       }
 
       await this.configureDimension({
@@ -1528,10 +1547,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedField(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../..');
-      const focusedElementText = await fieldAncestor.getVisibleText();
-      const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
+      const fieldPopover = await input.findByXpath('./..');
+      const focusedElementText = await fieldPopover.getVisibleText();
       expect(focusedElementText).to.eql(name);
+      const dataTestSubj = await fieldPopover.getAttribute('data-test-subj');
       expect(dataTestSubj).to.eql('lnsFieldListPanelField');
     },
 
@@ -1542,7 +1561,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedDimension(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../../..');
+      const fieldAncestor = await input.findByXpath('./../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       expect(focusedElementText).to.eql(name);
     },
@@ -1938,6 +1957,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openCSVDownloadShare() {
       await this.ensureShareMenuIsOpen('export');
       await testSubjects.click('export');
+      await testSubjects.click('lens_csv-radioOption');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -2039,6 +2059,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       ]);
 
       return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
+    },
+
+    async toggleDebug(enable: boolean = true) {
+      await browser.execute(`window.ELASTIC_LENS_LOGGER = arguments[0];`, enable);
     },
   });
 }

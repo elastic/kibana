@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -568,6 +569,84 @@ export default function ({ getService }: FtrProviderContext) {
                 reference,
                 1
               );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should log api key information from execute request', async () => {
+          const { body: createdApiKey } = await supertest
+            .post(`/internal/security/api_key`)
+            .set('kbn-xsrf', 'foo')
+            .send({ name: 'test user managed key' })
+            .expect(200);
+          const apiKey = createdApiKey.encoded;
+
+          const connectorTypeId = 'test.index-record';
+          const { body: createdConnector } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'My Connector',
+              connector_type_id: connectorTypeId,
+              config: {
+                unencrypted: `This value shouldn't get encrypted`,
+              },
+              secrets: {
+                encrypted: 'This value should be encrypted',
+              },
+            })
+            .expect(200);
+          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
+
+          const reference = `actions-execute-1:${user.username}`;
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${createdConnector.id}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .set('Authorization', `ApiKey ${apiKey}`)
+            .send({
+              params: {
+                reference,
+                index: ES_TEST_INDEX_NAME,
+                message: 'Testing 123',
+              },
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.be.an('object');
+              const searchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              // @ts-expect-error doesnt handle total: number
+              expect(searchResult.body.hits.total.value > 0).to.be(true);
+
+              const events: IValidatedEvent[] = await retry.try(async () => {
+                return await getEventLog({
+                  getService,
+                  spaceId: space.id,
+                  type: 'action',
+                  id: createdConnector.id,
+                  provider: 'actions',
+                  actions: new Map([
+                    ['execute-start', { equal: 1 }],
+                    ['execute', { equal: 1 }],
+                  ]),
+                });
+              });
+              const executeEvent = events[1];
+              expect(executeEvent?.kibana?.user_api_key?.id).to.eql(createdApiKey.id);
+              expect(executeEvent?.kibana?.user_api_key?.name).to.eql(createdApiKey.name);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

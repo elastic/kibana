@@ -5,6 +5,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.ConnectorIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorIcon",
+        "description": [],
+        "signature": [
+          "({ name, serviceType, iconPath, showTooltip, }: ConnectorIconProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.ConnectorIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  serviceType,\n  iconPath,\n  showTooltip = true,\n}",
+            "description": [],
+            "signature": [
+              "ConnectorIconProps"
+            ],
+            "path": "x-pack/solutions/search/packages/shared-ui/src/connector_icon/connector_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.FormInfoField",
         "type": "Function",
         "tags": [],
@@ -13,7 +46,7 @@
         "signature": [
           "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, }: FormInfoFieldProps) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+        "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +60,40 @@
             "signature": [
               "FormInfoFieldProps"
             ],
-            "path": "x-pack/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+            "path": "x-pack/solutions/search/packages/shared-ui/src/form_info_field/form_info_field.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.SearchEmptyPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "SearchEmptyPrompt",
+        "description": [],
+        "signature": [
+          "({ actions, backButton, body, description, icon, isComingSoon, comingSoonLabel, title, }: SearchEmptyPromptProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.SearchEmptyPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  actions,\n  backButton,\n  body,\n  description,\n  icon,\n  isComingSoon,\n  comingSoonLabel,\n  title,\n}",
+            "description": [],
+            "signature": [
+              "SearchEmptyPromptProps"
+            ],
+            "path": "x-pack/solutions/search/packages/shared-ui/src/search_empty_prompt/search_empty_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -39,7 +105,38 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WORKFLOW_LOCALSTORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_LOCALSTORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"search_onboarding_workflow\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WorkflowId",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowId",
+        "description": [],
+        "signature": [
+          "\"default\" | \"vector\" | \"semantic\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

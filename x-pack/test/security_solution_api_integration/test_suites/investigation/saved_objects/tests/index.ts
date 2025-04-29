@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('@ess @serverless SecuritySolution Saved Objects', () => {
+  describe('@ess @serverless @serverlessQA SecuritySolution Saved Objects', () => {
     loadTestFile(require.resolve('./notes'));
     loadTestFile(require.resolve('./pinned_events'));
     loadTestFile(require.resolve('./timeline'));

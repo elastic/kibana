@@ -4,7 +4,32 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-public.PlaygroundPageMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "PlaygroundPageMode",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-public.PlaygroundPageMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "PlaygroundPageMode",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": [],
     "setup": {
@@ -14,7 +39,7 @@
       "tags": [],
       "label": "SearchPlaygroundPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_playground/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,148 +53,10 @@
       "tags": [],
       "label": "SearchPlaygroundPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_playground/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "searchPlayground",
-          "id": "def-public.SearchPlaygroundPluginStart.PlaygroundProvider",
-          "type": "Function",
-          "tags": [],
-          "label": "PlaygroundProvider",
-          "description": [],
-          "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
-          ],
-          "path": "x-pack/plugins/search_playground/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundProvider.$1",
-              "type": "Uncategorized",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundProvider.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
-        },
-        {
-          "parentPluginId": "searchPlayground",
-          "id": "def-public.SearchPlaygroundPluginStart.Playground",
-          "type": "Function",
-          "tags": [],
-          "label": "Playground",
-          "description": [],
-          "signature": [
-            "React.FunctionComponent<",
-            "AppProps",
-            ">"
-          ],
-          "path": "x-pack/plugins/search_playground/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.Playground.$1",
-              "type": "Uncategorized",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.Playground.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
-        },
-        {
-          "parentPluginId": "searchPlayground",
-          "id": "def-public.SearchPlaygroundPluginStart.PlaygroundHeaderDocs",
-          "type": "Function",
-          "tags": [],
-          "label": "PlaygroundHeaderDocs",
-          "description": [],
-          "signature": [
-            "React.FunctionComponent<{}>"
-          ],
-          "path": "x-pack/plugins/search_playground/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundHeaderDocs.$1",
-              "type": "Uncategorized",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "searchPlayground",
-              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundHeaderDocs.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
-        }
-      ],
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -188,7 +75,7 @@
       "tags": [],
       "label": "SearchPlaygroundPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_playground/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_playground/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -202,7 +89,7 @@
       "tags": [],
       "label": "SearchPlaygroundPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_playground/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_playground/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -218,6 +105,33 @@
     "misc": [
       {
         "parentPluginId": "searchPlayground",
+        "id": "def-common.ContextModelLimitError",
+        "type": "string",
+        "tags": [],
+        "label": "ContextModelLimitError",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.PLAYGROUND_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "PLAYGROUND_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"search_playground\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -226,7 +140,7 @@
         "signature": [
           "\"searchPlayground\""
         ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -238,10 +152,7 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": [
-          "\"Playground\""
-        ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -256,7 +167,19 @@
         "signature": [
           "\"/app/search_playground\""
         ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.ROUTE_VERSIONS",
+        "type": "string",
+        "tags": [],
+        "label": "ROUTE_VERSIONS",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -271,7 +194,7 @@
         "signature": [
           "\"searchPlayground:searchModeEnabled\""
         ],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -285,7 +208,7 @@
         "tags": [],
         "label": "DEFAULT_PAGINATION",
         "description": [],
-        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -296,7 +219,7 @@
             "tags": [],
             "label": "from",
             "description": [],
-            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -307,7 +230,7 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -318,7 +241,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "path": "x-pack/solutions/search/plugins/search_playground/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -11,16 +11,18 @@ import {
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
-import {
+import type { Case } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type {
   BulkGetAttachmentsResponse,
   AttachmentRequest,
   BulkCreateAttachmentsRequest,
   AttachmentPatchRequest,
   AttachmentsFindResponse,
+  PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
-import { User } from '../authentication/types';
+import type { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 import { createCase } from './case';
@@ -74,6 +76,33 @@ export const createComment = async ({
     .set('kbn-xsrf', 'true')
     .set(headers)
     .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const createFileAttachment = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: PostFileAttachmentRequest;
+  auth?: { user: User; space: string | null } | null;
+  expectedHttpCode?: number;
+  headers?: Record<string, string | string[]>;
+}): Promise<Case> => {
+  const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/files`);
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: theCase } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .attach('file', Buffer.from(params.file as unknown as string), params.filename)
     .expect(expectedHttpCode);
 
   return theCase;
@@ -192,7 +221,9 @@ export const deleteAllComments = async ({
 
   return comment;
 };
-
+/**
+ * remove this method and use findAttachments instead https://github.com/elastic/kibana/issues/208188
+ */
 export const getAllComments = async ({
   supertest,
   caseId,
@@ -205,7 +236,7 @@ export const getAllComments = async ({
   expectedHttpCode?: number;
 }): Promise<Attachments> => {
   const { body: comments } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .get(`${getSpaceUrlPrefix(auth.space)}/api/cases_fixture/cases/${caseId}/comments`)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
 

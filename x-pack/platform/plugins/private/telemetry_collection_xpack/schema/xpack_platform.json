@@ -1,0 +1,5930 @@
+{
+  "properties": {
+    "actions": {
+      "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "text"
+          }
+        },
+        "alert_history_connector_enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if preconfigured alert history connector is enabled."
+          }
+        },
+        "count_total": {
+          "type": "long"
+        },
+        "count_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_gen_ai_provider_types": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "[Azure OpenAI]": {
+              "type": "long"
+            },
+            "[OpenAI]": {
+              "type": "long"
+            },
+            "[Other]": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_active_alert_history_connectors": {
+          "type": "long",
+          "_meta": {
+            "description": "The total number of preconfigured alert history connectors used by rules."
+          }
+        },
+        "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_executions_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_email_connectors_by_service_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "exchange_server": {
+              "type": "long"
+            },
+            "gmail": {
+              "type": "long"
+            },
+            "outlook365": {
+              "type": "long"
+            },
+            "elastic_cloud": {
+              "type": "long"
+            },
+            "other": {
+              "type": "long"
+            },
+            "ses": {
+              "type": "long"
+            }
+          }
+        },
+        "count_actions_namespaces": {
+          "type": "long"
+        },
+        "count_actions_executions_failed_per_day": {
+          "type": "long"
+        },
+        "count_actions_executions_failed_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__email": {
+              "type": "long"
+            },
+            "__index": {
+              "type": "long"
+            },
+            "[__gen-ai]": {
+              "type": "long"
+            },
+            "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
+              "type": "long"
+            },
+            "__server-log": {
+              "type": "long"
+            },
+            "__slack": {
+              "type": "long"
+            },
+            "__webhook": {
+              "type": "long"
+            },
+            "__servicenow": {
+              "type": "long"
+            },
+            "__jira": {
+              "type": "long"
+            },
+            "__resilient": {
+              "type": "long"
+            },
+            "__teams": {
+              "type": "long"
+            }
+          }
+        },
+        "count_connector_types_by_action_run_outcome_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "success": {
+                  "type": "long"
+                },
+                "failure": {
+                  "type": "long"
+                },
+                "unknown": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "alerts": {
+      "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "text"
+          }
+        },
+        "count_total": {
+          "type": "long"
+        },
+        "count_active_total": {
+          "type": "long"
+        },
+        "count_disabled_total": {
+          "type": "long"
+        },
+        "throttle_time": {
+          "properties": {
+            "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "schedule_time": {
+          "properties": {
+            "min": {
+              "type": "keyword"
+            },
+            "avg": {
+              "type": "keyword"
+            },
+            "max": {
+              "type": "keyword"
+            }
+          }
+        },
+        "throttle_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "schedule_time_number_s": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "connectors_per_alert": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            },
+            "max": {
+              "type": "long"
+            }
+          }
+        },
+        "count_active_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_by_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_namespaces": {
+          "type": "long"
+        },
+        "count_rules_executions_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_failured_by_reason_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "read": {
+              "type": "long"
+            },
+            "decrypt": {
+              "type": "long"
+            },
+            "license": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_executions_failured_by_reason_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "read": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "decrypt": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "license": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "unknown": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "count_rules_executions_timeouts_per_day": {
+          "type": "long"
+        },
+        "count_rules_executions_timeouts_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "count_failed_and_unrecognized_rule_tasks_per_day": {
+          "type": "long"
+        },
+        "count_failed_and_unrecognized_rule_tasks_by_status_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "failed": {
+              "type": "long"
+            },
+            "unrecognized": {
+              "type": "long"
+            }
+          }
+        },
+        "count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "failed": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "unrecognized": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "count_rules_by_execution_status": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            },
+            "warning": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_with_tags": {
+          "type": "long"
+        },
+        "count_rules_by_notify_when": {
+          "properties": {
+            "on_action_group_change": {
+              "type": "long"
+            },
+            "on_active_alert": {
+              "type": "long"
+            },
+            "on_throttle_interval": {
+              "type": "long"
+            }
+          }
+        },
+        "count_rules_snoozed": {
+          "type": "long"
+        },
+        "count_rules_muted": {
+          "type": "long"
+        },
+        "count_mw_total": {
+          "type": "long"
+        },
+        "count_mw_with_repeat_toggle_on": {
+          "type": "long"
+        },
+        "count_mw_with_filter_alert_toggle_on": {
+          "type": "long"
+        },
+        "count_rules_with_muted_alerts": {
+          "type": "long"
+        },
+        "count_connector_types_by_consumers": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "count_rules_by_execution_status_per_day": {
+          "properties": {
+            "success": {
+              "type": "long"
+            },
+            "failure": {
+              "type": "long"
+            },
+            "unknown": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_execution_time_per_day": {
+          "type": "long"
+        },
+        "avg_execution_time_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_es_search_duration_per_day": {
+          "type": "long"
+        },
+        "avg_es_search_duration_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "avg_total_search_duration_per_day": {
+          "type": "long"
+        },
+        "avg_total_search_duration_by_type_per_day": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        },
+        "percentile_num_generated_actions_per_day": {
+          "properties": {
+            "p50": {
+              "type": "long"
+            },
+            "p90": {
+              "type": "long"
+            },
+            "p99": {
+              "type": "long"
+            }
+          }
+        },
+        "percentile_num_generated_actions_by_type_per_day": {
+          "properties": {
+            "p50": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "p90": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "p99": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "percentile_num_alerts_per_day": {
+          "properties": {
+            "p50": {
+              "type": "long"
+            },
+            "p90": {
+              "type": "long"
+            },
+            "p99": {
+              "type": "long"
+            }
+          }
+        },
+        "percentile_num_alerts_by_type_per_day": {
+          "properties": {
+            "p50": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "p90": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            },
+            "p99": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "type": "long"
+                },
+                "__index-threshold": {
+                  "type": "long"
+                },
+                "__es-query": {
+                  "type": "long"
+                },
+                "transform_health": {
+                  "type": "long"
+                },
+                "apm__error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_error_rate": {
+                  "type": "long"
+                },
+                "apm__transaction_duration": {
+                  "type": "long"
+                },
+                "apm__transaction_duration_anomaly": {
+                  "type": "long"
+                },
+                "metrics__alert__threshold": {
+                  "type": "long"
+                },
+                "metrics__alert__inventory__threshold": {
+                  "type": "long"
+                },
+                "logs__alert__document__count": {
+                  "type": "long"
+                },
+                "monitoring_alert_cluster_health": {
+                  "type": "long"
+                },
+                "monitoring_alert_cpu_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_disk_usage": {
+                  "type": "long"
+                },
+                "monitoring_alert_elasticsearch_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_kibana_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_license_expiration": {
+                  "type": "long"
+                },
+                "monitoring_alert_logstash_version_mismatch": {
+                  "type": "long"
+                },
+                "monitoring_alert_nodes_changed": {
+                  "type": "long"
+                },
+                "siem__signals": {
+                  "type": "long"
+                },
+                "siem__notifications": {
+                  "type": "long"
+                },
+                "siem__eqlRule": {
+                  "type": "long"
+                },
+                "siem__indicatorRule": {
+                  "type": "long"
+                },
+                "siem__mlRule": {
+                  "type": "long"
+                },
+                "siem__queryRule": {
+                  "type": "long"
+                },
+                "siem__savedQueryRule": {
+                  "type": "long"
+                },
+                "siem__thresholdRule": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__monitorStatus": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__tls": {
+                  "type": "long"
+                },
+                "xpack__uptime__alerts__durationAnomaly": {
+                  "type": "long"
+                },
+                "__geo-containment": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_alert": {
+                  "type": "long"
+                },
+                "xpack__ml__anomaly_detection_jobs_health": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "count_alerts_total": {
+          "type": "long"
+        },
+        "count_alerts_by_rule_type": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
+            "__index-threshold": {
+              "type": "long"
+            },
+            "__es-query": {
+              "type": "long"
+            },
+            "transform_health": {
+              "type": "long"
+            },
+            "apm__error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_error_rate": {
+              "type": "long"
+            },
+            "apm__transaction_duration": {
+              "type": "long"
+            },
+            "apm__transaction_duration_anomaly": {
+              "type": "long"
+            },
+            "metrics__alert__threshold": {
+              "type": "long"
+            },
+            "metrics__alert__inventory__threshold": {
+              "type": "long"
+            },
+            "logs__alert__document__count": {
+              "type": "long"
+            },
+            "monitoring_alert_cluster_health": {
+              "type": "long"
+            },
+            "monitoring_alert_cpu_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_disk_usage": {
+              "type": "long"
+            },
+            "monitoring_alert_elasticsearch_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_kibana_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_license_expiration": {
+              "type": "long"
+            },
+            "monitoring_alert_logstash_version_mismatch": {
+              "type": "long"
+            },
+            "monitoring_alert_nodes_changed": {
+              "type": "long"
+            },
+            "siem__signals": {
+              "type": "long"
+            },
+            "siem__notifications": {
+              "type": "long"
+            },
+            "siem__eqlRule": {
+              "type": "long"
+            },
+            "siem__indicatorRule": {
+              "type": "long"
+            },
+            "siem__mlRule": {
+              "type": "long"
+            },
+            "siem__queryRule": {
+              "type": "long"
+            },
+            "siem__savedQueryRule": {
+              "type": "long"
+            },
+            "siem__thresholdRule": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__monitorStatus": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__tls": {
+              "type": "long"
+            },
+            "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_alert": {
+              "type": "long"
+            },
+            "xpack__ml__anomaly_detection_jobs_health": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "canvas": {
+      "properties": {
+        "workpads": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Canvas Workpads in the cluster"
+              }
+            }
+          }
+        },
+        "pages": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of pages across all Canvas Workpads"
+              }
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of pages across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of pages found in a Canvas Workpad"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of pages found in a Canvas Workpad"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "elements": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of elements across all Canvas Workpads"
+              }
+            },
+            "per_page": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements per page across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements on a page across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements on a page across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "functions": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of functions in use across all Canvas Workpads"
+              }
+            },
+            "in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in any Canvas Workpad"
+                }
+              }
+            },
+            "in_use_30d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 30 days"
+                }
+              }
+            },
+            "in_use_90d": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "A function in use in a Canvas Workpad that has been modified in the last 90 days"
+                }
+              }
+            },
+            "per_element": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "Average number of functions used per element across all Canvas Workpads"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of functions used in an element across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of functions used in an element across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "variables": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of variables defined across all Canvas Workpads"
+              }
+            },
+            "per_workpad": {
+              "properties": {
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of variables set per Canvas Workpad"
+                  }
+                },
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number variables set across all Canvas Workpads"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of variables set across all Canvas Workpads"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "custom_elements": {
+          "properties": {
+            "count": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of custom Canvas elements"
+              }
+            },
+            "elements": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The minimum number of elements used across all Canvas Custom Elements"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "The maximum number of elements used across all Canvas Custom Elements"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "The average number of elements used in Canvas Custom Element"
+                  }
+                }
+              }
+            },
+            "functions_in_use": {
+              "type": "array",
+              "items": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The functions in use by Canvas Custom Elements"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "cases": {
+      "properties": {
+        "cases": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "syncAlertsOn": {
+                  "type": "long"
+                },
+                "syncAlertsOff": {
+                  "type": "long"
+                },
+                "totalUsers": {
+                  "type": "long"
+                },
+                "totalParticipants": {
+                  "type": "long"
+                },
+                "totalTags": {
+                  "type": "long"
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "totalWithConnectors": {
+                  "type": "long"
+                },
+                "latestDates": {
+                  "properties": {
+                    "createdAt": {
+                      "type": "keyword"
+                    },
+                    "updatedAt": {
+                      "type": "keyword"
+                    },
+                    "closedAt": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "assignees": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    },
+                    "totalWithZero": {
+                      "type": "long"
+                    },
+                    "totalWithAtLeastOne": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        },
+                        "topMimeTypes": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "count": {
+                                "type": "long"
+                              },
+                              "name": {
+                                "type": "keyword"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "userActions": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "comments": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "alerts": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "connectors": {
+          "properties": {
+            "all": {
+              "properties": {
+                "all": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "itsm": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "sir": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "jira": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "resilient": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "swimlane": {
+                  "properties": {
+                    "totalAttached": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "maxAttachedToACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "pushes": {
+          "properties": {
+            "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "configuration": {
+          "properties": {
+            "all": {
+              "properties": {
+                "closure": {
+                  "properties": {
+                    "manually": {
+                      "type": "long"
+                    },
+                    "automatic": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "casesSystemAction": {
+          "properties": {
+            "totalCasesCreated": {
+              "type": "long"
+            },
+            "totalRules": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "cloud": {
+      "properties": {
+        "isCloudEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deployment running in Elastic Cloud (ESS or Serverless)?"
+          }
+        },
+        "trialEndDate": {
+          "type": "date",
+          "_meta": {
+            "description": "End of the trial period"
+          }
+        },
+        "inTrial": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the organization during the trial period?"
+          }
+        },
+        "isElasticStaffOwned": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Is the deploymend owned by an Elastician"
+          }
+        },
+        "organizationId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Elastic Cloud Organization ID that owns the deployment/project"
+          }
+        },
+        "deploymentId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The ESS Deployment ID"
+          }
+        },
+        "projectId": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project ID"
+          }
+        },
+        "projectType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project type"
+          }
+        },
+        "orchestratorTarget": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Orchestrator Target where it is deployed (canary/non-canary)"
+          }
+        }
+      }
+    },
+    "cloudExperiments": {
+      "properties": {
+        "initialized": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Whether the A/B testing client is correctly initialized (identify has been called)"
+          }
+        },
+        "flags": {
+          "type": "pass_through",
+          "_meta": {
+            "description": "Flags received by the client"
+          }
+        },
+        "flagNames": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "Names of the flags received by the client"
+            }
+          }
+        }
+      }
+    },
+    "discoverEnhanced": {
+      "properties": {
+        "exploreDataInChartActionEnabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fileUpload": {
+      "properties": {
+        "file_upload": {
+          "properties": {
+            "index_creation_count": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "fleet": {
+      "properties": {
+        "agents_enabled": {
+          "type": "boolean"
+        },
+        "agents": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents, in any state"
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in a healthy state"
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of of enrolled agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents currently unenrolled"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        },
+        "fleet_server": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents, in any state"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of Fleet Server agents in any state, both enrolled and inactive."
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in a healthy state."
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled Fleet Server agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of unenrolled Fleet Server agents"
+              }
+            },
+            "num_host_urls": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of Fleet Server hosts configured in Fleet settings."
+              }
+            }
+          }
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "agentless_agents": {
+          "properties": {
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents, in any state"
+              }
+            },
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in a healthy state"
+              }
+            },
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an unhealthy state"
+              }
+            },
+            "updating": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an updating state"
+              }
+            },
+            "offline": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "inactive": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of of enrolled agents currently inactive"
+              }
+            },
+            "unenrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents currently unenrolled"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents in any state, both enrolled and inactive"
+              }
+            }
+          }
+        }
+      }
+    },
+    "kibana_settings": {
+      "properties": {
+        "xpack": {
+          "properties": {
+            "default_admin_email": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "logs_data": {
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "pattern_name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Logs pattern name representing the stream of logs"
+                }
+              },
+              "shipper": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Shipper if present, sending the logs"
+                }
+              },
+              "doc_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Total number of documents in the steam of logs"
+                }
+              },
+              "structure_level": {
+                "properties": {
+                  "0": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Total docs at structure level 0"
+                    }
+                  },
+                  "1": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Total docs at structure level 1"
+                    }
+                  },
+                  "2": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Total docs at structure level 2"
+                    }
+                  },
+                  "3": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Total docs at structure level 3"
+                    }
+                  },
+                  "4": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Total docs at structure level 4"
+                    }
+                  },
+                  "5": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Total docs at structure level 5"
+                    }
+                  },
+                  "6": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Total docs at structure level 6"
+                    }
+                  }
+                }
+              },
+              "failure_store_doc_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Total number of documents in the failure store in the stream of logs"
+                }
+              },
+              "index_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Total number of indices in the stream of logs"
+                }
+              },
+              "namespace_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Total number of namespaces in the stream of logs"
+                }
+              },
+              "field_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Total number of fields in mappings of indices of the stream of logs"
+                }
+              },
+              "field_existence": {
+                "properties": {
+                  "DYNAMIC_KEY": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Count of documents having the field represented by the key"
+                    }
+                  }
+                }
+              },
+              "size_in_bytes": {
+                "type": "long",
+                "_meta": {
+                  "description": "Total size in bytes of the stream of logs"
+                }
+              },
+              "managed_by": {
+                "type": "array",
+                "items": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Value captured in _meta.managed_by"
+                  }
+                }
+              },
+              "package_name": {
+                "type": "array",
+                "items": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Value captured in _meta.package.name"
+                  }
+                }
+              },
+              "beat": {
+                "type": "array",
+                "items": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Value captured in _meta.beat.name"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "maps": {
+      "properties": {
+        "mapsTotalCount": {
+          "type": "long"
+        },
+        "timeCaptured": {
+          "type": "date"
+        },
+        "layerTypes": {
+          "properties": {
+            "ems_basemap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers in cluster"
+                  }
+                }
+              }
+            },
+            "ems_region": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems file layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems file layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems file layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of file layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_clusters": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es cluster layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es cluster layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es cluster layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es cluster layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_grids": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es grid layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es grid layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es grid layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es grid layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_hexagons": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es hexagon layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es hexagon layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es hexagon layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es hexagon layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_agg_heatmap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es heatmap layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es heatmap layers  per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es heatmap layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es heatmap layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_top_hits": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es top hits layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es top hits layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es top hits layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es top hits layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_docs": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es document layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es document layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es document layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es document layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_ml_anomalies": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es machine learning anomaly layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es machine learning anomaly layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es machine learning anomaly layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es machine learning anomaly layers in cluster"
+                  }
+                }
+              }
+            },
+            "esql": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ES|QL layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ES|QL layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ES|QL layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ES|QL layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_point_to_point": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es point-to-point layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es point-to-point layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es point-to-point layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es point-to-point layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_tracks": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es track layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es track layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es track layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es track layers in cluster"
+                  }
+                }
+              }
+            },
+            "kbn_tms_raster": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of kbn tms layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of kbn tms layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of kbn tms layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of kbn tms layers in cluster"
+                  }
+                }
+              }
+            },
+            "layer_group": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of layer groups per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of layer groups per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of layer groups per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of layer groups in cluster"
+                  }
+                }
+              }
+            },
+            "ux_tms_mvt": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux tms-mvt layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux tms-mvt layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux tms-mvt layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux tms-mvt layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_tms_raster": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux tms-raster layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux tms-raster layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux tms-raster layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux-tms raster layers in cluster"
+                  }
+                }
+              }
+            },
+            "ux_wms": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ux wms layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ux wms layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ux wms layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ux wms layers in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "scalingOptions": {
+          "properties": {
+            "limit": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with limit scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with limit scaling option in cluster"
+                  }
+                }
+              }
+            },
+            "clusters": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with blended scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with blended scaling option in cluster"
+                  }
+                }
+              }
+            },
+            "mvt": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es doc layers with mvt scaling option per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es doc layers with mvt scaling option in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "resolutions": {
+          "properties": {
+            "coarse": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with coarse resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with coarse resolution"
+                  }
+                }
+              }
+            },
+            "fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with fine resolution"
+                  }
+                }
+              }
+            },
+            "most_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with most_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with most_fine resolution"
+                  }
+                }
+              }
+            },
+            "super_fine": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of grid-agg layers with super_fine resolution"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of grid-agg layers with super_fine resolution"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "joins": {
+          "properties": {
+            "distance": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of distance joins per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of distance joins per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of distance joins per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of distance joins in cluster"
+                  }
+                }
+              }
+            },
+            "term": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of layers with term joins per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of layers with term joins per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of layers with term joins per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of layers with term joins in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "basemaps": {
+          "properties": {
+            "auto": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with auto-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with auto-style in cluster"
+                  }
+                }
+              }
+            },
+            "dark": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with dark-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with dark-style in cluster"
+                  }
+                }
+              }
+            },
+            "roadmap": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with roadmap-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with roadmap-style in cluster"
+                  }
+                }
+              }
+            },
+            "roadmap_desaturated": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ems basemap layers with desaturated-style per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ems basemap layers with desaturated-style in cluster"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "attributesPerMap": {
+          "properties": {
+            "dataSourcesCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layersCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "layerTypesCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "emsVectorLayersCount": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            },
+            "customIconsCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ml": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "xpack.ml.anomaly_detection_alert": {
+              "properties": {
+                "count_by_result_type": {
+                  "properties": {
+                    "record": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using record result type"
+                      }
+                    },
+                    "influencer": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using influencer result type"
+                      }
+                    },
+                    "bucket": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules using bucket result type"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "xpack.ml.anomaly_detection_jobs_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "datafeed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started datafeed health check"
+                      }
+                    },
+                    "mml": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the model memory limit health check"
+                      }
+                    },
+                    "delayedData": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the delayed data health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error messages health check"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "properties": {
+        "hasMonitoringData": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "license": {
+                "type": "keyword"
+              },
+              "clusterUuid": {
+                "type": "keyword"
+              },
+              "metricbeatUsed": {
+                "type": "boolean"
+              },
+              "elasticsearch": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "kibana": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "logstash": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "beats": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "apm": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "count": {
+                    "type": "long"
+                  },
+                  "metricbeatUsed": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "reporting": {
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "rollups": {
+      "properties": {
+        "index_patterns": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
+            }
+          }
+        },
+        "saved_searches": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
+            }
+          }
+        },
+        "visualizations": {
+          "properties": {
+            "saved_searches": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
+                }
+              }
+            },
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
+              }
+            }
+          }
+        }
+      }
+    },
+    "saved_objects_tagging": {
+      "properties": {
+        "usedTags": {
+          "type": "integer"
+        },
+        "taggedObjects": {
+          "type": "integer"
+        },
+        "types": {
+          "properties": {
+            "dashboard": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "lens": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "visualization": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "map": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "search": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-pack": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-pack-asset": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "osquery-saved-query": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "properties": {
+        "auditLoggingEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if audit logging is both enabled and supported by the current license."
+          }
+        },
+        "loginSelectorEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the login selector UI is enabled."
+          }
+        },
+        "accessAgreementEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the access agreement UI is both enabled and supported by the current license."
+          }
+        },
+        "authProviderCount": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of configured auth providers (including disabled auth providers)."
+          }
+        },
+        "enabledAuthProviders": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "The types of enabled auth providers (such as `saml`, `basic`, `pki`, etc)."
+            }
+          }
+        },
+        "fipsModeEnabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if Kibana is being run in FIPS mode."
+          }
+        },
+        "httpAuthSchemes": {
+          "type": "array",
+          "items": {
+            "type": "keyword",
+            "_meta": {
+              "description": "The set of enabled http auth schemes. Used for api-based usage, and when credentials are provided via reverse-proxy."
+            }
+          }
+        },
+        "sessionIdleTimeoutInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session idle timeout expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionLifespanInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The global session lifespan expiration that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionCleanupInMinutes": {
+          "type": "long",
+          "_meta": {
+            "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionConcurrentSessionsMaxSessions": {
+          "type": "long",
+          "_meta": {
+            "description": "The maximum number of the concurrent user sessions (0 if not configured)."
+          }
+        },
+        "anonymousCredentialType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The credential type that is configured for the anonymous authentication provider."
+          }
+        }
+      }
+    },
+    "spaces": {
+      "properties": {
+        "usesFeatureControls": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if at least one feature is disabled in at least one space. This is a signal that space-level feature controls are in use. This does not account for role-based (security) feature controls."
+          }
+        },
+        "solutions": {
+          "properties": {
+            "classic": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to classic."
+              }
+            },
+            "es": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to search."
+              }
+            },
+            "oblt": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to observability."
+              }
+            },
+            "security": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have solution set to security."
+              }
+            },
+            "unset": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces without solution set."
+              }
+            }
+          }
+        },
+        "disabledFeatures": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "stackAlerts": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "actions": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "enterpriseSearch": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "fleet": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "savedObjectsTagging": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "indexPatterns": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "discover": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "canvas": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "maps": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "siem": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "monitoring": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "graph": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "uptime": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "savedObjectsManagement": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "dev_tools": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "advancedSettings": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "infrastructure": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "visualize": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "logs": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "dashboard": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "ml": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            },
+            "apm": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
+            }
+          }
+        },
+        "available": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the Spaces feature is available in this installation."
+          }
+        },
+        "enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the Spaces feature is enabled in this installation."
+          }
+        },
+        "count": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of spaces in this installation."
+          }
+        },
+        "apiCalls.copySavedObjects.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called."
+          }
+        },
+        "apiCalls.copySavedObjects.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called via the Kibana client."
+          }
+        },
+        "apiCalls.copySavedObjects.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called via an API consumer (e.g. curl)."
+          }
+        },
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"createNewCopies\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.copySavedObjects.overwriteEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.overwriteEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to false."
+          }
+        },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.copySavedObjects.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"compatibilityMode\" set to false."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via the Kibana client."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via an API consumer (e.g. curl)."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to true."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.yes": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to true."
+          }
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.compatibilityModeEnabled.no": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"compatibilityMode\" set to false."
+          }
+        },
+        "apiCalls.disableLegacyUrlAliases.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
+          }
+        }
+      }
+    },
+    "task_manager": {
+      "properties": {
+        "task_type_exclusion": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "failed_tasks": {
+          "type": "long"
+        },
+        "recurring_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "adhoc_tasks": {
+          "properties": {
+            "actual_service_time": {
+              "type": "long"
+            },
+            "adjusted_service_time": {
+              "type": "long"
+            }
+          }
+        },
+        "capacity": {
+          "type": "long"
+        }
+      }
+    },
+    "transform": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "transform_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "notStarted": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error message health check"
+                      }
+                    },
+                    "healthCheck": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the health check with the stats API"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "upgrade-assistant-telemetry": {
+      "properties": {
+        "features": {
+          "properties": {
+            "deprecation_logging": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "_meta": {
+                    "description": "Whether user has enabled Elasticsearch deprecation logging"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

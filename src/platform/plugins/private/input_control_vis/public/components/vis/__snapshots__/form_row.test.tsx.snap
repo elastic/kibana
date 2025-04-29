@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders control with warning 1`] = `
+<EuiFormRow
+  data-test-subj="inputControl0"
+  id="controlId"
+  label={
+    <React.Fragment>
+      <EuiToolTip
+        content="This is a warning"
+        delay="regular"
+        disableScreenReaderOutput={false}
+        display="inlineBlock"
+        position="top"
+      >
+        <EuiIcon
+          type="warning"
+        />
+      </EuiToolTip>
+      test control
+    </React.Fragment>
+  }
+>
+  <div>
+    My Control
+  </div>
+</EuiFormRow>
+`;
+
+exports[`renders disabled control with tooltip 1`] = `
+<EuiFormRow
+  data-test-subj="inputControl0"
+  id="controlId"
+  label="test control"
+>
+  <EuiToolTip
+    anchorClassName="eui-displayBlock"
+    content="I am disabled for testing purposes"
+    delay="regular"
+    disableScreenReaderOutput={false}
+    display="inlineBlock"
+    position="top"
+  >
+    <div>
+      My Control
+    </div>
+  </EuiToolTip>
+</EuiFormRow>
+`;
+
+exports[`renders enabled control 1`] = `
+<EuiFormRow
+  data-test-subj="inputControl0"
+  id="controlId"
+  label="test control"
+>
+  <div>
+    My Control
+  </div>
+</EuiFormRow>
+`;

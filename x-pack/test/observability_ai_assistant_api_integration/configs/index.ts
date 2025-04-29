@@ -8,7 +8,6 @@
 import { mapValues } from 'lodash';
 import path from 'path';
 import { createTestConfig, CreateTestConfig } from '../common/config';
-import { SUPPORTED_TRAINED_MODELS } from '../../functional/services/ml/api';
 
 export const observabilityAIAssistantDebugLogger = {
   name: 'plugins.observabilityAIAssistant',
@@ -29,9 +28,8 @@ export const observabilityAIAssistantFtrConfigs = {
       'logging.loggers': [observabilityAIAssistantDebugLogger],
       'plugin-path': path.resolve(
         __dirname,
-        '../../../../test/analytics/plugins/analytics_ftr_helpers'
+        '../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
       ),
-      'xpack.observabilityAIAssistant.modelId': SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
     },
   },
 };

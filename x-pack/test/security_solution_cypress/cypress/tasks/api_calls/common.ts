@@ -14,7 +14,7 @@ import { deleteAllDocuments } from './elasticsearch';
 import { getSpaceUrl } from '../space';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 
-export const API_AUTH = Object.freeze({
+export const ESS_API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),
   pass: Cypress.env(ELASTICSEARCH_PASSWORD),
 });
@@ -25,20 +25,33 @@ export const API_HEADERS = Object.freeze({
   [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
 });
 
-export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
-
 export const rootRequest = <T = unknown>({
-  headers: optionHeaders,
+  headers: optionHeaders = {},
+  role = 'admin',
   ...restOptions
-}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
-  cy.request<T>({
-    auth: API_AUTH,
-    headers: {
-      ...API_HEADERS,
-      ...(optionHeaders || {}),
-    },
-    ...restOptions,
-  });
+}: Partial<Cypress.RequestOptions> & { role?: string }): Cypress.Chainable<Cypress.Response<T>> => {
+  if (Cypress.env('IS_SERVERLESS')) {
+    return cy.task('getApiKeyForRole', role).then((response) => {
+      return cy.request<T>({
+        headers: {
+          ...API_HEADERS,
+          ...optionHeaders,
+          Authorization: `ApiKey ${response}`,
+        },
+        ...restOptions,
+      });
+    });
+  } else {
+    return cy.request<T>({
+      auth: ESS_API_AUTH,
+      headers: {
+        ...API_HEADERS,
+        ...optionHeaders,
+      },
+      ...restOptions,
+    });
+  }
+};
 
 // a helper function to wait for the root request to be successful
 // defaults to 5 second intervals for 3 attempts
@@ -83,46 +96,41 @@ export const getConnectors = () =>
   });
 
 export const deleteConnectors = () => {
+  cy.log('Deleting connectors...');
+
   cy.currentSpace().then((spaceId) => {
     getConnectors().then(($response) => {
-      if ($response.body.length > 0) {
-        const ids = $response.body.map((connector) => {
-          return connector.id;
-        });
-        ids.forEach((id) => {
-          if (!INTERNAL_CLOUD_CONNECTORS.includes(id)) {
-            rootRequest({
-              method: 'DELETE',
-              url: spaceId
-                ? getSpaceUrl(spaceId, `api/actions/connector/${id}`)
-                : `api/actions/connector/${id}`,
-            });
-          }
-        });
-      }
+      const connectors = $response.body;
+      const connectorNames = connectors.map((c) => c.name);
+
+      cy.log(`Found ${connectors.length} connectors`, connectorNames);
+
+      connectors.forEach((connector) => {
+        deleteConnector(spaceId, connector);
+      });
     });
   });
 };
 
-export const deletePrebuiltRulesAssets = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+const deleteConnector = (spaceId: string, connector: AllConnectorsResponse) => {
+  if (connector.is_preconfigured) {
+    // NOTE: Preconfigured connectors can't be deleted.
+    // https://www.elastic.co/guide/en/kibana/current/pre-configured-connectors.html
+    cy.log(`Skipping connector "${connector.name}" as it's preconfigured`);
+    return;
+  }
+
+  cy.log(`Deleting connector "${connector.name}"`);
   rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'security-rule',
-              },
-            },
-          ],
-        },
-      },
-    },
+    method: 'DELETE',
+    url: spaceId
+      ? getSpaceUrl(spaceId, `api/actions/connector/${connector.id}`)
+      : `api/actions/connector/${connector.id}`,
   });
+};
+
+export const deletePrebuiltRulesAssets = () => {
+  cy.task('deleteSecurityRulesFromKibana');
 };
 
 export const postDataView = (indexPattern: string, name?: string, id?: string) => {

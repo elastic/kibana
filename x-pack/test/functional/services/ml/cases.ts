@@ -81,5 +81,26 @@ export function MachineLearningCasesProvider(
         expectedChartsCount
       );
     },
+
+    async assertCaseWithLogPatternAnalysisAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsPatternAnalysisEmbeddable');
+      await testSubjects.existOrFail('aiopsEmbeddablePatternAnalysis');
+      await testSubjects.existOrFail('aiopsLogPatternsTable');
+    },
+
+    async assertCaseWithChangePointDetectionChartsAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsChangePointChart');
+      await testSubjects.existOrFail('aiopsEmbeddableChangePointChart');
+    },
+
+    async assertCaseWithLogRateAnalysisAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsLogRateAnalysisEmbeddable');
+      await testSubjects.existOrFail('aiopsEmbeddableLogRateAnalysis');
+      await testSubjects.existOrFail('aiopsDocumentCountChart');
+      await testSubjects.existOrFail('aiopsLogRateAnalysisResults');
+    },
   };
 }

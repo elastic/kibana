@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { type NodesInfoNodeInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type NodesInfoNodeInfo } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
-      expect(body.length).to.eql(5);
+      expect(body.length).to.eql(6);
 
       expect(body).to.eql([
         {
@@ -128,6 +128,22 @@ export default ({ getService }: FtrProviderContext) => {
           type: ['pytorch', 'text_embedding'],
           model_id: '.multilingual-e5-small_linux-x86_64',
           ...(isIntelBased ? { recommended: true, supported: true } : { supported: false }),
+        },
+        {
+          model_id: '.rerank-v1',
+          techPreview: true,
+          recommended: true,
+          supported: true,
+          hidden: true,
+          modelName: 'rerank',
+          version: 1,
+          config: {
+            input: {
+              field_names: ['input', 'query'],
+            },
+          },
+          description: 'Elastic Rerank v1',
+          type: ['pytorch', 'text_similarity'],
         },
       ]);
     });

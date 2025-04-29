@@ -11,7 +11,7 @@ import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { getScopedApiClient } from './observability_ai_assistant_api_client';
-import { editorUser, viewerUser } from './users/users';
+import { editor, secondaryEditor, unauthorizedUser, viewer } from './users/users';
 
 export interface ObservabilityAIAssistantFtrConfig {
   name: ObservabilityAIAssistantFtrConfigName;
@@ -23,11 +23,25 @@ export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
 export type CreateTest = ReturnType<typeof createObservabilityAIAssistantAPIConfig>;
 
+export type ObservabilityAIAssistantApiClients = Awaited<
+  ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
+>;
+
 export type ObservabilityAIAssistantAPIClient = Awaited<
   ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
 >;
 
 export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
+
+export class ForbiddenApiError extends Error {
+  status: number;
+
+  constructor(message: string = 'Forbidden') {
+    super(message);
+    this.name = 'ForbiddenApiError';
+    this.status = 403;
+  }
+}
 
 export function createObservabilityAIAssistantAPIConfig({
   config,
@@ -46,21 +60,24 @@ export function createObservabilityAIAssistantAPIConfig({
   const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
   const allConfigs = config.getAll() as Record<string, any>;
 
+  const getScopedApiClientForUsername = (username: string) =>
+    getScopedApiClient(kibanaServer, username);
+
   return {
     ...allConfigs,
     servers,
     services: {
       ...services,
-      getScopedApiClientForUsername: () => {
-        return (username: string) => getScopedApiClient(kibanaServer, username);
-      },
+      getScopedApiClientForUsername: () => getScopedApiClientForUsername,
       apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
         return {
-          adminUser: await getScopedApiClient(kibanaServer, 'elastic'),
-          viewerUser: await getScopedApiClient(kibanaServer, viewerUser.username),
-          editorUser: await getScopedApiClient(kibanaServer, editorUser.username),
+          admin: getScopedApiClientForUsername('elastic'),
+          viewer: getScopedApiClientForUsername(viewer.username),
+          editor: getScopedApiClientForUsername(editor.username),
+          secondaryEditor: getScopedApiClientForUsername(secondaryEditor.username),
+          unauthorizedUser: getScopedApiClientForUsername(unauthorizedUser.username),
         };
       },
     },

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix } from '../../../../common/lib/space_test_utils';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function listRuleTypes({ getService }: FtrProviderContext) {
@@ -46,8 +46,9 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
         minimum_license_required: 'basic',
         is_exportable: true,
         enabled_in_license: true,
-        has_fields_for_a_a_d: false,
+        fieldsForAAD: [],
         has_alerts_mappings: false,
+        has_fields_for_a_a_d: true,
         rule_task_timeout: '5m',
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
@@ -101,47 +102,6 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
         state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
         context: [],
         params: [],
-      });
-    });
-
-    describe('legacy', () => {
-      it('should return 200 with list of alert types', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
-        );
-        expect(response.status).to.eql(200);
-        const { authorizedConsumers, ...fixtureAlertType } = response.body.find(
-          (alertType: any) => alertType.id === 'test.noop'
-        );
-        expect(fixtureAlertType).to.eql({
-          actionGroups: [
-            { id: 'default', name: 'Default' },
-            { id: 'recovered', name: 'Recovered' },
-          ],
-          defaultActionGroupId: 'default',
-          doesSetRecoveryContext: false,
-          id: 'test.noop',
-          name: 'Test: Noop',
-          actionVariables: {
-            state: [],
-            params: [],
-            context: [],
-          },
-          recoveryActionGroup: {
-            id: 'recovered',
-            name: 'Recovered',
-          },
-          category: 'kibana',
-          producer: 'alertsFixture',
-          minimumLicenseRequired: 'basic',
-          isExportable: true,
-          enabledInLicense: true,
-          hasFieldsForAAD: false,
-          hasAlertsMappings: false,
-          ruleTaskTimeout: '5m',
-          validLegacyConsumers: ['alerts'],
-        });
-        expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
       });
     });
   });

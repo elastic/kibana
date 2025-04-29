@@ -12,20 +12,21 @@ import {
   HostsOverviewStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/ftr-common-functional-services';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('Overview Host', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/218282
+  describe.skip('Overview Host', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
     describe('With auditbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        bsearch = await utils.createBsearch();
+        search = await utils.createSearch();
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
       });
       after(
@@ -54,7 +55,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       };
 
       it('Make sure that we get OverviewHost data', async () => {
-        const { overviewHost } = await bsearch.send<HostsOverviewStrategyResponse>({
+        const { overviewHost } = await search.send<HostsOverviewStrategyResponse>({
           supertest,
           options: {
             defaultIndex: ['auditbeat-*'],

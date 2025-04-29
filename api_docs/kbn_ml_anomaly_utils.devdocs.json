@@ -31,7 +31,7 @@
         "signature": [
           "(score: number) => number"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -86,7 +86,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,7 +108,7 @@
                 "text": "MlAnomalyRecordDoc"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -137,7 +137,7 @@
           },
           ") => string | undefined"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -159,7 +159,7 @@
                 "text": "MlAnomalyRecordDoc"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,7 +188,7 @@
           },
           ") => string | number | undefined"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,7 +210,7 @@
                 "text": "MlAnomalyRecordDoc"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -231,7 +231,7 @@
         "signature": [
           "(score: number) => string"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/get_formatted_severity_score.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_formatted_severity_score.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,7 +247,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/get_formatted_severity_score.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_formatted_severity_score.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -275,7 +275,7 @@
             "text": "MlSeverityType"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/get_severity.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -291,7 +291,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/get_severity.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -307,12 +307,12 @@
         "tags": [],
         "label": "getSeverityColor",
         "description": [
-          "\nReturns a severity RGB color (one of critical, major, minor, warning, low or blank)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+          "\nReturns a severity RGB color (one of critical, major, minor, warning, low or unknown)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
         ],
         "signature": [
           "(normalizedScore: number) => string"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/get_severity_color.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_color.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -328,7 +328,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/get_severity_color.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_color.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -356,7 +356,7 @@
             "text": "ML_ANOMALY_SEVERITY"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/get_severity_type.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -372,7 +372,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/get_severity_type.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/get_severity_type.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -400,7 +400,7 @@
             "text": "MlSeverityType"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -416,7 +416,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -445,7 +445,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +467,7 @@
                 "text": "MlAnomaliesTableRecord"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -488,7 +488,7 @@
         "signature": [
           "(arg: unknown) => boolean"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -504,7 +504,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -535,7 +535,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -557,7 +557,7 @@
                 "text": "MlAnomalyRecordDoc"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -586,7 +586,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -608,7 +608,7 @@
                 "text": "MlAnomalyRecordDoc"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -629,7 +629,7 @@
         "signature": [
           "(functionDescription: string) => boolean"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -645,7 +645,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -666,7 +666,7 @@
         "signature": [
           "(functionDescription: string) => boolean"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -682,7 +682,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -702,7 +702,7 @@
         "description": [
           "\nDefinition for a pair of aggregation and field name."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -715,7 +715,7 @@
             "description": [
               "\nThe aggregation definition."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,7 +728,7 @@
             "description": [
               "\nThe field name"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -744,7 +744,7 @@
             "signature": [
               "{ field: string | null; value: string | null; } | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -760,7 +760,7 @@
             "signature": [
               "{ field: string | null; value: string | null; } | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -776,7 +776,7 @@
             "signature": [
               "{ field: string | null; value: string | null; } | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,7 +792,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -808,7 +808,7 @@
         "description": [
           "\nDefinition for a pair of aggregation and field."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -830,7 +830,7 @@
                 "text": "Aggregation"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -852,7 +852,7 @@
                 "text": "Field"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -876,7 +876,7 @@
               },
               "; value: string | null; } | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -900,7 +900,7 @@
               },
               "; value: string | null; } | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -924,7 +924,7 @@
               },
               "; value: string | null; } | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -940,7 +940,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -956,7 +956,7 @@
         "description": [
           "\nAggregation definition."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -978,7 +978,7 @@
                 "text": "ML_JOB_AGGREGATION"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -991,7 +991,7 @@
             "description": [
               "\nThe aggregation title."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1014,7 +1014,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1037,7 +1037,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1053,7 +1053,7 @@
             "signature": [
               "\"metrics\""
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1069,7 +1069,7 @@
             "signature": [
               "{ min: string; max: string; }"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1085,7 +1085,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1108,7 +1108,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1124,7 +1124,7 @@
         "description": [
           "\nField definition"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1137,7 +1137,7 @@
             "description": [
               "\nThe field id"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1150,7 +1150,7 @@
             "description": [
               "\nThe field name"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1172,7 +1172,7 @@
                 "text": "ES_FIELD_TYPES"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1185,7 +1185,7 @@
             "description": [
               "\nFlag whether the field is aggregatable."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1198,7 +1198,7 @@
             "description": [
               "\nFlag for counter."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1221,7 +1221,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1244,7 +1244,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1261,7 +1261,7 @@
               "MappingRuntimeField",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1277,7 +1277,7 @@
         "description": [
           "\nAnomaly table record, representing the fields shown in the ML UI anomalies table."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1290,7 +1290,7 @@
             "description": [
               "\nThe start time of the interval for which the anomaly data in the table is being aggregated.\nAnomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1312,7 +1312,7 @@
                 "text": "MlAnomalyRecordDoc"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1325,7 +1325,7 @@
             "description": [
               "\nUnique identifier for the table row."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1338,7 +1338,7 @@
             "description": [
               "\nIdentifier for the anomaly detection job."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1351,7 +1351,7 @@
             "description": [
               "\nA unique identifier for the detector.\nThis identifier is based on the order of the detectors in the analysis configuration, starting at zero."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1364,7 +1364,7 @@
             "description": [
               "\nSeverity of the anomaly displaying the anomaly record_score, a normalized score between 0-100,\nwhich is based on the probability of the anomalousness of this record."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1380,7 +1380,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1396,7 +1396,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1412,7 +1412,7 @@
             "signature": [
               "{ [key: string]: any; }[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1428,7 +1428,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1444,7 +1444,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1460,7 +1460,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1476,7 +1476,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1492,7 +1492,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1515,7 +1515,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1531,7 +1531,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1547,7 +1547,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1563,7 +1563,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1596,7 +1596,7 @@
             "text": "MlAnomaliesTableRecord"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1609,7 +1609,7 @@
             "description": [
               "\nThe detector name."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1625,7 +1625,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1641,7 +1641,7 @@
         "description": [
           "\nAnomaly record document for categorizer stats."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1657,7 +1657,7 @@
             "signature": [
               "[key: string]:  any"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1670,7 +1670,7 @@
             "description": [
               "\nThe identifier for the anomaly detection job."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1686,7 +1686,7 @@
             "signature": [
               "\"categorizer_stats\""
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1702,7 +1702,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1718,7 +1718,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1731,7 +1731,7 @@
             "description": [
               "\nThe number of documents."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1744,7 +1744,7 @@
             "description": [
               "\nThe total number of categories."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1757,7 +1757,7 @@
             "description": [
               "\nThe number of frequent categories."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1770,7 +1770,7 @@
             "description": [
               "\nThe number of rare categories."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1783,7 +1783,7 @@
             "description": [
               "\nThe number of dead categories."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1796,7 +1796,7 @@
             "description": [
               "\nThe number of failed categories."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1812,7 +1812,7 @@
             "signature": [
               "\"ok\" | \"warn\""
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1825,7 +1825,7 @@
             "description": [
               "\nThe log time."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1838,7 +1838,7 @@
             "description": [
               "\nThe start time of the bucket for which these results were calculated."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1854,7 +1854,7 @@
         "description": [
           "\nAnomaly record document. Records contain the detailed analytical results.\nThey describe the anomalous activity that has been identified in the input data based on the detector configuration."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1870,7 +1870,7 @@
             "signature": [
               "[key: string]:  any"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1883,7 +1883,7 @@
             "description": [
               "\nThe identifier for the anomaly detection job."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1896,7 +1896,7 @@
             "description": [
               "\nThe type of the result document, which is 'record' for record level results."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1909,7 +1909,7 @@
             "description": [
               "\nThe probability of the individual anomaly occurring, in the range 0 to 1.\nThis value can be held to a high precision of over 300 decimal places,\nso the record_score is provided as a human-readable and friendly interpretation of this."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1922,7 +1922,7 @@
             "description": [
               "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nUnlike initial_record_score, this value will be updated by a re-normalization process as new data is analyzed."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1935,7 +1935,7 @@
             "description": [
               "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nThis is the initial value that was calculated at the time the bucket was processed."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1948,7 +1948,7 @@
             "description": [
               "\nThe length of the bucket in seconds. This value matches the bucket_span that is specified in the job."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1961,7 +1961,7 @@
             "description": [
               "\nA unique identifier for the detector. This identifier is based on the order of the detectors\nin the analysis configuration, starting at zero."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1974,7 +1974,7 @@
             "description": [
               "\nIf true, this is an interim result. In other words, the results are calculated based on partial input data."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1987,7 +1987,7 @@
             "description": [
               "\nThe start time of the bucket for which these results were calculated."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2003,7 +2003,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2019,7 +2019,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2032,7 +2032,7 @@
             "description": [
               "\nThe function in which the anomaly occurs, as specified in the detector configuration. For example, max."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2045,7 +2045,7 @@
             "description": [
               "\nThe description of the function in which the anomaly occurs, as specified in the detector configuration."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2061,7 +2061,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2077,7 +2077,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2093,7 +2093,7 @@
             "signature": [
               "number[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2116,7 +2116,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2132,7 +2132,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2148,7 +2148,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2164,7 +2164,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2180,7 +2180,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2196,7 +2196,7 @@
             "signature": [
               "{ function: string; function_description: string; probability: number; actual: number[]; typical: number[]; field_name?: string | undefined; over_field_name?: string | undefined; over_field_value?: string | undefined; by_field_name?: string | undefined; by_field_value?: string | undefined; partition_field_name?: string | undefined; partition_field_value?: string | number | undefined; }[] | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2212,7 +2212,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2228,7 +2228,7 @@
             "signature": [
               "{ anomaly_type?: \"spike\" | \"dip\" | undefined; anomaly_length?: number | undefined; single_bucket_impact?: number | undefined; multi_bucket_impact?: number | undefined; anomaly_characteristics_impact?: number | undefined; lower_confidence_bound?: number | undefined; typical_value?: number | undefined; upper_confidence_bound?: number | undefined; high_variance_penalty?: boolean | undefined; incomplete_bucket_penalty?: boolean | undefined; multimodal_distribution?: boolean | undefined; } | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2261,7 +2261,7 @@
             "text": "MlAnomalyRecordDoc"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2274,7 +2274,7 @@
             "description": [
               "\nThe `earliest` timestamp."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2287,7 +2287,7 @@
             "description": [
               "\nThe `latest` timestamp."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2303,7 +2303,7 @@
         "description": [
           "\nInterface of an entity field"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2316,7 +2316,7 @@
             "description": [
               "\nThe field name"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2332,7 +2332,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2355,7 +2355,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2378,7 +2378,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2394,7 +2394,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2410,7 +2410,7 @@
         "description": [
           "\nInfluencers are the entities that have contributed to, or are to blame for, the anomalies.\nInfluencer results are available only if an influencer_field_name is specified in the job configuration."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2423,7 +2423,7 @@
             "description": [
               "\nThe field name of the influencer."
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2439,7 +2439,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2465,7 +2465,7 @@
           },
           " extends BaseUrlConfig"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2481,7 +2481,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2495,7 +2495,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2511,7 +2511,7 @@
         "description": [
           "\nInterface for severity types to be used in ML_ANOMALY_SEVERITY_TYPES."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_severity.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2533,7 +2533,7 @@
                 "text": "ML_ANOMALY_SEVERITY"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_severity.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2546,7 +2546,7 @@
             "description": [
               "\nTranslated ML_ANOMALY_SEVERITY"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_severity.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2562,7 +2562,7 @@
         "description": [
           "\nJob caps for a new job."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2585,7 +2585,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2608,7 +2608,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2624,7 +2624,7 @@
         "description": [
           "\nJob caps response for a new job."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2647,7 +2647,7 @@
                 "text": "NewJobCaps"
               }
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2665,7 +2665,7 @@
         "description": [
           "\nEnum for ES aggregatins."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2679,7 +2679,7 @@
         "description": [
           "\nEnum for Kibana aggregations."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2693,7 +2693,7 @@
         "description": [
           "\nLabels displayed in the ML UI to indicate the severity of the anomaly according\nto the normalized anomaly score."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_severity.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_severity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2707,7 +2707,7 @@
         "description": [
           "\nAnomaly score numeric thresholds to indicate the severity of the anomaly."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_threshold.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_threshold.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2721,7 +2721,7 @@
         "description": [
           "\nEnum ML_DETECTOR_RULE_ACTION"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2735,7 +2735,7 @@
         "description": [
           "\nEnum ML_DETECTOR_RULE_APPLIES_TO"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2749,7 +2749,7 @@
         "description": [
           "\nEnum ML_DETECTOR_RULE_FILTER_TYPE"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2763,7 +2763,7 @@
         "description": [
           "\nEnum ML_DETECTOR_RULE_OPERATOR"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2777,7 +2777,7 @@
         "description": [
           "\nEnum of entity field types"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2791,7 +2791,7 @@
         "description": [
           "\nEnum for ML job aggregations."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2810,7 +2810,7 @@
         "signature": [
           "\"_doc_count\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2833,7 +2833,7 @@
             "text": "ML_JOB_AGGREGATION"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2850,7 +2850,7 @@
         "signature": [
           "\"doc_count\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2867,7 +2867,7 @@
         "signature": [
           "\"__ml_event_rate_count__\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2884,7 +2884,7 @@
         "signature": [
           "string"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2901,7 +2901,7 @@
         "signature": [
           "QueryDslQueryContainer"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/es_client.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/es_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2918,7 +2918,7 @@
         "signature": [
           "\"metrics\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2935,7 +2935,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2949,7 +2949,7 @@
         "description": [
           "\nEnum ML_DETECTOR_RULE_PARAMS"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2963,7 +2963,7 @@
         "description": [
           "\nEnum ML_DETECTOR_RULE_PARAMS_FORCE_TIME_SHIFT"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2980,7 +2980,7 @@
         "signature": [
           "\"job_id\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2997,7 +2997,7 @@
         "signature": [
           "\"partition_field_value\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3022,7 +3022,7 @@
           },
           "; color: string; }[]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3045,7 +3045,7 @@
             "text": "MlAnomalyRecordDoc"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3060,9 +3060,9 @@
           "\nThe type of the anomaly result, such as bucket, influencer or record."
         ],
         "signature": [
-          "\"bucket\" | \"record\" | \"influencer\""
+          "\"record\" | \"bucket\" | \"influencer\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3079,7 +3079,7 @@
         "signature": [
           "\"mlcategory\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3096,7 +3096,7 @@
         "signature": [
           "\"+\" | \"-\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3113,7 +3113,7 @@
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3137,7 +3137,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3161,7 +3161,7 @@
           },
           "[]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3178,7 +3178,7 @@
         "signature": [
           "\"number\" | \"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3195,7 +3195,7 @@
         "signature": [
           "\"partition_field\" | \"over_field\" | \"by_field\""
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3218,7 +3218,7 @@
             "text": "MlAnomalyRecordDoc"
           }
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3242,7 +3242,7 @@
           },
           " | BaseUrlConfig"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/custom_urls.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3259,7 +3259,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3284,7 +3284,7 @@
           },
           ">]; }"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3348,7 +3348,7 @@
           },
           ".LOW_NON_NULL_SUM"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3372,7 +3372,7 @@
           },
           " | null"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3388,7 +3388,7 @@
         "description": [
           "\nTwo functions for converting aggregation type names.\nML and ES use different names for the same function.\nPossible values for ML aggregation type are (defined in lib/model/CAnomalyDetector.cc):\n   count\n   distinct_count\n   rare\n   info_content\n   mean\n   median\n   min\n   max\n   varp\n   sum\n   lat_long\n   time\nThe input to toES and the output from toML correspond to the value of the\nfunction_description field of anomaly records."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3404,7 +3404,7 @@
             "signature": [
               "(oldAggType: string) => string"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3420,7 +3420,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+                "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3440,7 +3440,7 @@
             "signature": [
               "(oldAggType: string) => string"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3456,7 +3456,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+                "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3479,7 +3479,7 @@
         "signature": [
           "{ readonly BUCKET: \"bucket\"; readonly RECORD: \"record\"; readonly INFLUENCER: \"influencer\"; }"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3496,7 +3496,7 @@
         "signature": [
           "{ readonly ADD: \"+\"; readonly REMOVE: \"-\"; }"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3513,7 +3513,7 @@
         "signature": [
           "{ readonly BOOLEAN: \"boolean\"; readonly DATE: \"date\"; readonly GEO_POINT: \"geo_point\"; readonly GEO_SHAPE: \"geo_shape\"; readonly IP: \"ip\"; readonly KEYWORD: \"keyword\"; readonly NUMBER: \"number\"; readonly TEXT: \"text\"; readonly UNKNOWN: \"unknown\"; }"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3530,7 +3530,7 @@
         "signature": [
           "readonly [\"partition_field\", \"over_field\", \"by_field\"]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3544,7 +3544,7 @@
         "description": [
           "\nRGB hex codes used to indicate the severity of an anomaly according to its anomaly score."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/severity_colors.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3557,7 +3557,7 @@
             "description": [
               "/**\n   * Color used in the UI to indicate a critical anomaly, with a score greater than or equal to 75.\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/severity_colors.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3570,7 +3570,7 @@
             "description": [
               "/**\n   * Color used in the UI to indicate a major anomaly, with a score greater than or equal to 50 and less than 75 .\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/severity_colors.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3583,7 +3583,7 @@
             "description": [
               "/**\n   * Color used in the UI to indicate a minor anomaly, with a score greater than or equal to 25 and less than 50.\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/severity_colors.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3596,7 +3596,7 @@
             "description": [
               "/**\n   * Color used in the UI to indicate a warning anomaly, with a score greater than or equal to 3 and less than 25.\n   * Note in some parts of the UI, warning severity is used when the score is greater than or equal to 0.\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/severity_colors.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3609,20 +3609,20 @@
             "description": [
               "/**\n   * Color used in some parts of the UI to indicate a low severity anomaly, with a score greater than or equal to 0 and less than 3.\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/severity_colors.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-anomaly-utils",
-            "id": "def-common.ML_SEVERITY_COLORS.BLANK",
+            "id": "def-common.ML_SEVERITY_COLORS.UNKNOWN",
             "type": "string",
             "tags": [],
-            "label": "BLANK",
+            "label": "UNKNOWN",
             "description": [
               "/**\n   * Color used in the UI to indicate an anomaly for which the score is unknown.\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/severity_colors.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/severity_colors.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3638,7 +3638,7 @@
         "description": [
           "\nDefinition for an ml category."
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3651,7 +3651,7 @@
             "description": [
               "/**\n   * id `mlcategory` id\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3664,7 +3664,7 @@
             "description": [
               "/**\n   * name `mlcategory`\n   */"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3687,7 +3687,7 @@
               },
               ".KEYWORD"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3703,7 +3703,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3719,7 +3719,7 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
+            "path": "x-pack/platform/packages/shared/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3786,7 +3786,7 @@
           },
           ".LOW_NON_NULL_SUM]"
         ],
-        "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
+        "path": "x-pack/platform/packages/shared/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

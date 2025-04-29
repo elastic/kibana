@@ -7,6 +7,9 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -15,11 +18,12 @@ import {
   ObjectRemover,
   resetRulesSettings,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('update', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -179,6 +183,51 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         statusCode: 400,
         error: 'Bad Request',
         message: 'Group is not defined in action test-id',
+      });
+    });
+
+    it('should return 400 if the timezone of an action is not valid', async () => {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData())
+        .expect(200);
+
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+      const updatedData = {
+        name: 'bcd',
+        tags: ['bar'],
+        schedule: { interval: '12s' },
+        throttle: '1m',
+        params: {},
+        actions: [
+          {
+            id: 'test-id',
+            group: 'default',
+            params: {},
+            alerts_filter: {
+              timeframe: {
+                days: [1, 2, 3, 4, 5, 6, 7],
+                timezone: 'invalid',
+                hours: { start: '00:00', end: '01:00' },
+              },
+            },
+          },
+        ],
+      };
+
+      const response = await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send(updatedData);
+
+      expect(response.status).to.eql(400);
+      expect(response.body).to.eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message:
+          '[request body.actions.0.alerts_filter.timeframe.timezone]: string is not a valid timezone: invalid',
       });
     });
 
@@ -409,73 +458,74 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('legacy', function () {
-      this.tags('skipFIPS');
-      it('should handle update alert request appropriately', async () => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-        const updatedData = {
-          name: 'bcd',
-          tags: ['bar'],
-          params: {
-            foo: true,
+    describe('artifacts', () => {
+      it('should not return dashboards in the response', async () => {
+        const expectedArtifacts = {
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+            ],
           },
-          schedule: { interval: '12s' },
-          actions: [],
-          throttle: '1m',
-          notifyWhen: 'onThrottleInterval',
         };
 
-        const response = await supertest
-          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
+        const createResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(updatedData)
+          .send(getTestRuleData(expectedArtifacts))
           .expect(200);
 
-        expect(response.body).to.eql({
-          ...updatedData,
-          id: createdAlert.id,
-          tags: ['bar'],
-          alertTypeId: 'test.noop',
-          consumer: 'alertsFixture',
-          createdBy: null,
-          enabled: true,
-          updatedBy: null,
-          apiKeyOwner: null,
-          apiKeyCreatedByUser: null,
-          muteAll: false,
-          mutedInstanceIds: [],
-          notifyWhen: 'onThrottleInterval',
-          scheduledTaskId: createdAlert.scheduled_task_id,
-          createdAt: response.body.createdAt,
-          updatedAt: response.body.updatedAt,
-          executionStatus: response.body.executionStatus,
-          revision: 1,
-          running: false,
-          ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
-          ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
-        });
-        expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
-        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
-          Date.parse(response.body.createdAt)
+        const esResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${createResponse.body.id}`,
+          },
+          { meta: true }
         );
-        if (response.body.nextRun) {
-          expect(Date.parse(response.body.nextRun)).to.be.greaterThan(0);
-        }
 
-        // Ensure AAD isn't broken
-        await checkAAD({
-          supertest,
-          spaceId: Spaces.space1.id,
-          type: RULE_SAVED_OBJECT_TYPE,
-          id: createdAlert.id,
-        });
+        expect((esResponse.body._source as any)?.alert.artifacts.dashboards ?? []).to.eql([
+          {
+            refId: 'dashboard_0',
+          },
+        ]);
+
+        const updateResponse = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'bcd',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            artifacts: {
+              dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+            },
+          })
+          .expect(200);
+
+        expect(updateResponse.body.artifacts).to.be(undefined);
+
+        const esUpdateResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${updateResponse.body.id}`,
+          },
+          { meta: true }
+        );
+        expect((esUpdateResponse.body._source as any)?.alert.artifacts.dashboards ?? {}).to.eql([
+          {
+            refId: 'dashboard_0',
+          },
+          {
+            refId: 'dashboard_1',
+          },
+        ]);
       });
     });
   });

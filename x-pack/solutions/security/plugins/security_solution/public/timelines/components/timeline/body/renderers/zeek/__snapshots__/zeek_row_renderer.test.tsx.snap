@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
+<span>
+  <RowRendererContainer>
+    <ZeekDetails
+      data={
+        Object {
+          "_id": "1",
+          "destination": Object {
+            "ip": Array [
+              "192.168.0.3",
+            ],
+            "port": Array [
+              6343,
+            ],
+          },
+          "event": Object {
+            "action": Array [
+              "Action",
+            ],
+            "category": Array [
+              "Access",
+            ],
+            "id": Array [
+              "1",
+            ],
+            "kind": Array [
+              "signal",
+            ],
+            "module": Array [
+              "nginx",
+            ],
+            "severity": Array [
+              3,
+            ],
+          },
+          "geo": Object {
+            "country_iso_code": Array [
+              "xx",
+            ],
+            "region_name": Array [
+              "xx",
+            ],
+          },
+          "host": Object {
+            "ip": Array [
+              "192.168.0.1",
+            ],
+            "name": Array [
+              "apache",
+            ],
+          },
+          "source": Object {
+            "ip": Array [
+              "192.168.0.1",
+            ],
+            "port": Array [
+              80,
+            ],
+          },
+          "timestamp": "2018-11-05T19:03:25.937Z",
+          "user": Object {
+            "id": Array [
+              "1",
+            ],
+            "name": Array [
+              "john.dee",
+            ],
+          },
+        }
+      }
+      timelineId="timeline-test"
+    />
+  </RowRendererContainer>
+</span>
+`;

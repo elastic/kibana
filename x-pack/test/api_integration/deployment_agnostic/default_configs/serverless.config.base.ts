@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext, Config, defineDockerServersConfig } from '@kbn/test';
+import {
+  fleetPackageRegistryDockerImage,
+  FtrConfigProviderContext,
+  Config,
+  defineDockerServersConfig,
+} from '@kbn/test';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
-import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -31,6 +36,7 @@ const esServerArgsFromController = {
     'xpack.ml.dfa.enabled=false',
   ],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
+  chat: [],
 };
 
 // include settings from kibana controller
@@ -50,6 +56,7 @@ const kbnServerArgsFromController = {
     // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
   ],
+  chat: [],
 };
 
 export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(
@@ -81,6 +88,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         // services can be customized, but must extend DeploymentAgnosticCommonServices
         ...(options.services || services),
@@ -88,7 +96,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: dockerRegistryPort,
           args: dockerArgs,
@@ -113,11 +121,23 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
+          ...(options.serverlessProject === 'oblt'
+            ? [
+                // defined in MKI control plane. Necessary for Synthetics app testing
+                '--xpack.uptime.service.password=test',
+                '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+                '--xpack.uptime.service.devUrl=mockDevUrl',
+                '--xpack.uptime.service.manifestUrl=mockDevUrl',
+              ]
+            : []),
         ],
       },
       testFiles: options.testFiles,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipServerless'],
+      },
     };
   };
 }

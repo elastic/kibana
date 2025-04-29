@@ -30,12 +30,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/reporting'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+
+      // need reporting privileges in dashboard
+      await security.role.create('test_dashboard_user', {
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { dashboard: ['minimal_read', 'generate_report'] },
+          },
+        ],
+      });
+
       await security.testUser.setRoles(
         [
           'test_logstash_reader',
           'global_dashboard_read',
           'global_visualize_all',
-          'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+          'test_dashboard_user',
         ],
         { skipBrowserRefresh: true }
       );
@@ -43,11 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
       await security.testUser.restoreDefaults();
     });
@@ -78,7 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualize.gotoVisualizationLandingPage();
           await visualize.navigateToNewVisualization();
           await visualize.clickVisType('lens');
-          await lens.goToTimeRange();
 
           await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

@@ -1,0 +1,108 @@
+{
+  "id": "@kbn/core-rendering-browser",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser",
+        "id": "def-public.useAppFixedViewport",
+        "type": "Function",
+        "tags": [],
+        "label": "useAppFixedViewport",
+        "description": [],
+        "signature": [
+          "() => HTMLElement | undefined"
+        ],
+        "path": "src/core/packages/rendering/browser/src/use_app_fixed_viewport.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser",
+        "id": "def-public.RenderingService",
+        "type": "Interface",
+        "tags": [],
+        "label": "RenderingService",
+        "description": [],
+        "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-rendering-browser",
+            "id": "def-public.RenderingService.addContext",
+            "type": "Function",
+            "tags": [],
+            "label": "addContext",
+            "description": [],
+            "signature": [
+              "(element: React.ReactNode) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-rendering-browser",
+                "id": "def-public.RenderingService.addContext.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "src/core/packages/rendering/browser/src/rendering_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-rendering-browser",
+        "id": "def-public.APP_FIXED_VIEWPORT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_FIXED_VIEWPORT_ID",
+        "description": [],
+        "signature": [
+          "\"app-fixed-viewport\""
+        ],
+        "path": "src/core/packages/rendering/browser/src/use_app_fixed_viewport.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

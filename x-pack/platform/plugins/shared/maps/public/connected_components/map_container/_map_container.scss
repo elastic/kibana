@@ -1,0 +1,22 @@
+.mapMapWrapper {
+  position: relative;
+}
+
+.mapMapLayerPanel {
+  background-color: $euiPageBackgroundColor;
+  width: 0;
+  overflow: hidden;
+
+  border-left-width: 1px;
+  border-left-color: $euiColorBackgroundLightText;
+  border-left-style: solid;
+
+  > * {
+    width: $euiSizeXXL * 12;
+  }
+
+  &-isVisible {
+    width: $euiSizeXXL * 12;
+    transition: width $euiAnimSpeedNormal $euiAnimSlightResistance;
+  }
+}

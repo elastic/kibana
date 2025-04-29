@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`graph_visualization should render to svg elements 1`] = `
+<svg
+  css="unknown styles"
+  height="100%"
+  id="graphSvg"
+  pointerEvents="all"
+  width="100%"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <g>
+    <g>
+      <EmotionCssPropInternal
+        __EMOTION_TYPE_PLEASE_DO_NOT_USE__="line"
+        className="gphEdge gphEdge--clickable"
+        onClick={[Function]}
+        style={
+          Object {
+            "strokeWidth": 15,
+          }
+        }
+        x1={5}
+        x2={7}
+        y1={5}
+        y2={9}
+      />
+      <EmotionCssPropInternal
+        __EMOTION_TYPE_PLEASE_DO_NOT_USE__="line"
+        className="gphEdge gphEdge--clickable"
+        onClick={[Function]}
+        style={
+          Object {
+            "strokeWidth": 15,
+          }
+        }
+        x1={7}
+        x2={12}
+        y1={9}
+        y2={2}
+      />
+    </g>
+    <g>
+      <circle
+        css="unknown styles"
+        cx={5}
+        cy={5}
+        r="5"
+        transform="translate(10,10)"
+      />
+      <text
+        css="unknown styles"
+        textAnchor="middle"
+        transform="translate(10,12)"
+        x={5}
+        y={5}
+      >
+        1
+      </text>
+    </g>
+    <EmotionCssPropInternal
+      __EMOTION_TYPE_PLEASE_DO_NOT_USE__="text"
+      className="gphNode__label"
+      textAnchor="middle"
+      transform="translate(0,22)"
+      x={7}
+      y={9}
+    >
+      2
+    </EmotionCssPropInternal>
+    <EmotionCssPropInternal
+      __EMOTION_TYPE_PLEASE_DO_NOT_USE__="text"
+      className="gphNode__label"
+      textAnchor="middle"
+      transform="translate(0,22)"
+      x={12}
+      y={2}
+    >
+      3
+    </EmotionCssPropInternal>
+  </g>
+</svg>
+`;

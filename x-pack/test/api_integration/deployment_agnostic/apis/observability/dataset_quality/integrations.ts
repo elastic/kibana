@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuid } from 'uuid';
 import { APIReturnType } from '@kbn/dataset-quality-plugin/common/rest';
 import { CustomIntegration } from '../../../services/package_api';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -20,17 +21,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   type Integration = APIReturnType<typeof endpoint>['integrations'][0];
 
   const integrationPackages = ['system', 'synthetics'];
-  const customIntegrations: CustomIntegration[] = [
-    {
-      integrationName: 'my.custom.integration',
-      datasets: [
-        {
-          name: 'my.custom.integration',
-          type: 'logs',
-        },
-      ],
-    },
-  ];
+  const customIntegrationId = uuid();
+  const customIntegration: CustomIntegration = {
+    integrationName: `my.custom.integration-${customIntegrationId}`,
+    datasets: [
+      {
+        name: `my.custom.integration-${customIntegrationId}`,
+        type: 'logs',
+      },
+    ],
+  };
 
   async function callApiAs({
     roleScopedSupertestWithCookieCredentials,
@@ -47,6 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Integrations', () => {
     let adminRoleAuthc: RoleCredentials;
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
+    let preExistingIntegrations: string[];
 
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
@@ -65,6 +66,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('gets the installed integrations', () => {
       before(async () => {
+        preExistingIntegrations = (
+          await callApiAs({
+            roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+          })
+        ).integrations.map((integration: Integration) => integration.name);
+
         await Promise.all(
           integrationPackages.map((pkg) =>
             packageApi.installPackage({
@@ -80,13 +87,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
-          'synthetics',
-          'system',
-        ]);
+        expect(
+          new Set(body.integrations.map((integration: Integration) => integration.name))
+        ).to.eql(new Set(preExistingIntegrations.concat(['synthetics', 'system'])));
 
-        expect(body.integrations[0].datasets).not.empty();
-        expect(body.integrations[1].datasets).not.empty();
+        expect(
+          body.integrations.find((integration: Integration) => integration.name === 'synthetics')
+            ?.datasets
+        ).not.empty();
+        expect(
+          body.integrations.find((integration: Integration) => integration.name === 'system')
+            ?.datasets
+        ).not.empty();
       });
 
       after(
@@ -101,11 +113,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('gets the custom installed integrations', () => {
       before(async () => {
-        await Promise.all(
-          customIntegrations.map((customIntegration: CustomIntegration) =>
-            packageApi.installCustomIntegration({ roleAuthc: adminRoleAuthc, customIntegration })
-          )
-        );
+        preExistingIntegrations = (
+          await callApiAs({
+            roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
+          })
+        ).integrations.map((integration: Integration) => integration.name);
+
+        await packageApi.installCustomIntegration({ roleAuthc: adminRoleAuthc, customIntegration });
       });
 
       it('returns custom integrations and its datasets map', async () => {
@@ -113,25 +127,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleScopedSupertestWithCookieCredentials: supertestAdminWithCookieCredentials,
         });
 
-        expect(body.integrations.map((integration: Integration) => integration.name)).to.eql([
-          'my.custom.integration',
-        ]);
+        expect(
+          new Set(body.integrations.map((integration: Integration) => integration.name))
+        ).to.eql(new Set(preExistingIntegrations.concat(customIntegration.integrationName)));
 
-        expect(body.integrations[0].datasets).to.eql({
-          'my.custom.integration': 'My.custom.integration',
-        });
+        expect(
+          Object.entries(
+            body.integrations.find(
+              (integration: Integration) => integration.name === customIntegration.integrationName
+            ).datasets
+          ).sort()
+        ).to.eql(
+          Object.entries({
+            [customIntegration.integrationName]: `My.custom.integration-${customIntegrationId}`,
+          }).sort()
+        );
       });
 
       after(
         async () =>
-          await Promise.all(
-            customIntegrations.map((customIntegration: CustomIntegration) =>
-              packageApi.uninstallPackage({
-                roleAuthc: adminRoleAuthc,
-                pkg: customIntegration.integrationName,
-              })
-            )
-          )
+          await packageApi.uninstallPackage({
+            roleAuthc: adminRoleAuthc,
+            pkg: customIntegration.integrationName,
+          })
       );
     });
   });

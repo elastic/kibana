@@ -6,7 +6,7 @@
  */
 
 import { User } from '../../../../cases_api_integration/common/lib/authentication/types';
-import { casesAll, casesNoDelete, casesReadDelete } from './roles';
+import { casesAll, casesNoDelete, casesReadDelete, casesReadAndEditSettings } from './roles';
 
 /**
  * Users for Cases in the Stack
@@ -16,12 +16,6 @@ export const casesReadDeleteUser: User = {
   username: 'cases_read_delete_user',
   password: 'password',
   roles: [casesReadDelete.name],
-};
-
-export const casesNoDeleteUser: User = {
-  username: 'cases_no_delete_user',
-  password: 'password',
-  roles: [casesNoDelete.name],
 };
 
 export const casesAllUser: User = {
@@ -36,4 +30,22 @@ export const casesAllUser2: User = {
   roles: [casesAll.name],
 };
 
-export const users = [casesReadDeleteUser, casesNoDeleteUser, casesAllUser, casesAllUser2];
+export const casesReadAndEditSettingsUser: User = {
+  username: 'cases_read_and_edit_settings_user',
+  password: 'password',
+  roles: [casesReadAndEditSettings.name],
+};
+
+export const casesNoDeleteUser: User = {
+  username: 'cases_no_delete_user',
+  password: 'password',
+  roles: [casesNoDelete.name],
+};
+
+export const users = [
+  casesReadDeleteUser,
+  casesNoDeleteUser,
+  casesAllUser,
+  casesAllUser2,
+  casesReadAndEditSettingsUser,
+];

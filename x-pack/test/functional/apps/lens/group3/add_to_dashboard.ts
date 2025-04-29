@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();
     await visualize.clickVisType('lens');
-    await lens.goToTimeRange();
-
     await lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
       operation: 'average',
@@ -48,8 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
     await find.clickByButtonText('lnsXYvis');
     await dashboardAddPanel.closeAddPanel();
-    await lens.goToTimeRange();
-
     await dashboard.saveDashboard(dashboardName);
     await dashboard.gotoDashboardLandingPage();
     await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
@@ -59,7 +55,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await visualize.gotoVisualizationLandingPage();
     await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
     await lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-    await lens.goToTimeRange();
     await lens.waitForVisualization('legacyMtrVis');
     await lens.assertLegacyMetric('Maximum of bytes', '19,986');
   };
@@ -72,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal', true);
+      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -87,10 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectNotLinkedToLibrary(
-        'Artistpreviouslyknownaslens Copy',
-        true
-      );
+      await dashboardPanelActions.expectNotLinkedToLibrary('Artistpreviouslyknownaslens Copy');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -114,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal', true);
+      await dashboardPanelActions.expectNotLinkedToLibrary('New Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -136,10 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectNotLinkedToLibrary(
-        'Artistpreviouslyknownaslens Copy',
-        true
-      );
+      await dashboardPanelActions.expectNotLinkedToLibrary('Artistpreviouslyknownaslens Copy');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -152,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectLinkedToLibrary('New by ref Lens from Modal', true);
+      await dashboardPanelActions.expectLinkedToLibrary('New by ref Lens from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -167,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref', true);
+      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -191,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      await dashboardPanelActions.expectLinkedToLibrary('New Lens by ref from Modal', true);
+      await dashboardPanelActions.expectLinkedToLibrary('New Lens by ref from Modal');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -213,10 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
 
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
-      await dashboardPanelActions.expectLinkedToLibrary(
-        'Artistpreviouslyknownaslens by ref 2',
-        true
-      );
+      await dashboardPanelActions.expectLinkedToLibrary('Artistpreviouslyknownaslens by ref 2');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
@@ -226,7 +212,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should add a Lens heatmap to the dashboard', async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -281,8 +266,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('should not display', async () => {
             await visualize.navigateToNewVisualization();
             await visualize.clickVisType('lens');
-            await lens.goToTimeRange();
-
             await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
               operation: 'average',
@@ -330,7 +313,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           it('should not display', async () => {
             await visualize.navigateToNewVisualization();
             await visualize.clickVisType('lens');
-            await lens.goToTimeRange();
 
             await lens.configureDimension({
               dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',

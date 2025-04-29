@@ -17,7 +17,11 @@
   },
   "action_task_params": {
     "dynamic": false,
-    "properties": {}
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      }
+    }
   },
   "ad_hoc_run_params": {
     "dynamic": false,
@@ -585,6 +589,17 @@
           }
         }
       },
+      "observables": {
+        "properties": {
+          "typeKey": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "owner": {
         "type": "keyword"
       },
@@ -787,6 +802,10 @@
         "type": "keyword"
       }
     }
+  },
+  "cloud": {
+    "dynamic": false,
+    "properties": {}
   },
   "cloud-security-posture-settings": {
     "dynamic": false,
@@ -1073,12 +1092,16 @@
       "status": {
         "type": "keyword"
       },
+      "timestampField": {
+        "type": "keyword"
+      },
       "type": {
         "type": "keyword"
       }
     }
   },
   "epm-packages": {
+    "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
@@ -1509,6 +1532,10 @@
       "favoriteIds": {
         "type": "keyword"
       },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
       "type": {
         "type": "keyword"
       },
@@ -1585,6 +1612,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1599,6 +1627,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -1654,6 +1686,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1678,6 +1714,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
@@ -1706,7 +1743,11 @@
     "properties": {}
   },
   "fleet-package-policies": {
+    "dynamic": false,
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -1774,6 +1815,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -1948,6 +1992,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1962,6 +2007,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -2029,6 +2078,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2053,6 +2106,7 @@
     }
   },
   "ingest-download-sources": {
+    "dynamic": false,
     "properties": {
       "host": {
         "type": "keyword"
@@ -2073,6 +2127,7 @@
     }
   },
   "ingest-outputs": {
+    "dynamic": false,
     "properties": {
       "allow_edit": {
         "enabled": false
@@ -2291,7 +2346,11 @@
     }
   },
   "ingest-package-policies": {
+    "dynamic": false,
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2359,6 +2418,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -2499,6 +2561,20 @@
       "events": {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range"
+      },
+      "expirationDate": {
+        "type": "date"
+      },
+      "title": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
@@ -2673,6 +2749,27 @@
       }
     }
   },
+  "onechat_workflow": {
+    "dynamic": false,
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "categories": {
+        "type": "keyword"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "workflow_id": {
+        "type": "keyword"
+      }
+    }
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
@@ -2837,6 +2934,34 @@
       }
     }
   },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "date"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
+      }
+    }
+  },
   "query": {
     "dynamic": false,
     "properties": {
@@ -2943,6 +3068,46 @@
   "search-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "search_playground": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
+  },
+  "security-ai-prompt": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "model": {
+        "type": "keyword"
+      },
+      "prompt": {
+        "properties": {
+          "default": {
+            "type": "text"
+          }
+        }
+      },
+      "promptGroupId": {
+        "type": "keyword"
+      },
+      "promptId": {
+        "type": "keyword"
+      },
+      "provider": {
+        "type": "keyword"
+      }
+    }
   },
   "security-rule": {
     "dynamic": false,
@@ -3552,6 +3717,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-private-location": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-privates-locations": {
     "dynamic": false,
     "properties": {}
@@ -3584,6 +3753,9 @@
       "partition": {
         "type": "integer"
       },
+      "priority": {
+        "type": "integer"
+      },
       "retryAt": {
         "type": "date"
       },
@@ -3608,6 +3780,13 @@
       },
       "taskType": {
         "type": "keyword"
+      },
+      "userScope": {
+        "properties": {
+          "apiKeyId": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -3724,6 +3903,107 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "workchat_agent": {
+    "dynamic": false,
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "agent_name": {
+        "type": "text"
+      },
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "description": {
+        "type": "text"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_conversation": {
+    "dynamic": "strict",
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "conversation_id": {
+        "type": "keyword"
+      },
+      "events": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "title": {
+        "type": "text"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_integration": {
+    "dynamic": "strict",
+    "properties": {
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },

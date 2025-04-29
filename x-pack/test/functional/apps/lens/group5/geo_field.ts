@@ -9,12 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, header, maps, common } = getPageObjects([
+  const { visualize, lens, header, maps, common, timePicker } = getPageObjects([
     'visualize',
     'lens',
     'header',
     'maps',
     'common',
+    'timePicker',
   ]);
   const from = 'Sep 22, 2015 @ 00:00:00.000';
   const to = 'Sep 22, 2015 @ 04:00:00.000';
@@ -25,7 +26,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await common.unsetTime();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     it('should visualize geo fields in maps', async () => {

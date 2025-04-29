@@ -27,14 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             spaces: ['*'],
             base: [],
-            feature: { canvas: ['read'] },
+            feature: { canvas: ['read', 'generate_report'] },
           },
         ],
       });
-      await security.testUser.setRoles([
-        'test_canvas_user',
-        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
-      ]);
+      await security.testUser.setRoles(['test_canvas_user']);
       await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });
@@ -43,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
     });
 

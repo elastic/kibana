@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -110,6 +110,8 @@ export default ({ getService }: FtrProviderContext): void => {
             headers: { [`content-type`]: 'application/json' },
             viewIncidentUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
             getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',
+            getIncidentMethod: 'get',
+            getIncidentJson: null,
             updateIncidentJson:
               '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
             updateIncidentMethod: 'put',

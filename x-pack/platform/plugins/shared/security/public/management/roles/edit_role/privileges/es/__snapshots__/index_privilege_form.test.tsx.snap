@@ -1,0 +1,147 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<Fragment>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    className="index-privilege-form"
+    responsive={false}
+  >
+    <EuiFlexItem>
+      <EuiPanel
+        color="subdued"
+      >
+        <EuiFlexGrid
+          css="unknown styles"
+        >
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth={true}
+              isInvalid={false}
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Indices"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
+                />
+              }
+            >
+              <EuiComboBox
+                async={false}
+                compressed={false}
+                data-test-subj="indicesInput0"
+                fullWidth={true}
+                isClearable={true}
+                isDisabled={false}
+                onChange={[Function]}
+                onCreateOption={[Function]}
+                optionMatcher={[Function]}
+                options={Array []}
+                placeholder="Add an index pattern…"
+                selectedOptions={Array []}
+                singleSelection={false}
+                sortMatchesBy="none"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth={true}
+              isInvalid={false}
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Privileges"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel"
+                />
+              }
+            >
+              <EuiComboBox
+                async={false}
+                compressed={false}
+                data-test-subj="privilegesInput0"
+                fullWidth={true}
+                isClearable={true}
+                isDisabled={false}
+                onChange={[Function]}
+                onCreateOption={[Function]}
+                optionMatcher={[Function]}
+                options={
+                  Array [
+                    Object {
+                      "label": "all",
+                    },
+                    Object {
+                      "label": "read",
+                    },
+                    Object {
+                      "label": "write",
+                    },
+                    Object {
+                      "label": "index",
+                    },
+                  ]
+                }
+                placeholder="Add an action…"
+                selectedOptions={Array []}
+                singleSelection={false}
+                sortMatchesBy="none"
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGrid>
+        <EuiSpacer />
+        <EuiFlexGroup
+          direction="column"
+        >
+          <EuiFlexItem>
+            <EuiSwitch
+              checked={false}
+              compressed={true}
+              data-test-subj="restrictFieldsQuery0"
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Grant access to specific fields"
+                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantFieldPrivilegesLabel"
+                />
+              }
+              onChange={[Function]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiFlexGroup
+          direction="column"
+        >
+          <EuiFlexItem>
+            <EuiSwitch
+              checked={false}
+              compressed={true}
+              data-test-subj="restrictDocumentsQuery0"
+              disabled={false}
+              label={
+                <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Grant read privileges to specific documents"
+                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
+                />
+              }
+              onChange={[Function]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonIcon
+        aria-label="Delete index privilege"
+        color="danger"
+        iconType="trash"
+        onClick={[MockFunction]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

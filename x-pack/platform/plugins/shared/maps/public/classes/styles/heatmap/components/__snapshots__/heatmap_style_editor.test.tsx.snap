@@ -1,0 +1,143 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeatmapStyleEditor is rendered 1`] = `
+<EuiFormRow
+  display="rowCompressed"
+  label="Color range"
+>
+  <EuiColorPalettePicker
+    compressed={true}
+    onChange={[Function]}
+    palettes={
+      Array [
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "#e4eefd",
+            "#d3e3fe",
+            "#c1d8fe",
+            "#afceff",
+            "#9dc3ff",
+            "#8bb8ff",
+            "#77adff",
+            "#61a2ff",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "Blues",
+        },
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "#e1f3ee",
+            "#cbece1",
+            "#b5e6d3",
+            "#9fdfc6",
+            "#87d8b9",
+            "#6dd1ac",
+            "#50c99f",
+            "#24c292",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "Greens",
+        },
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "#d5dce8",
+            "#b6c0d3",
+            "#98a5bc",
+            "#7b8aa4",
+            "#61718b",
+            "#485872",
+            "#324058",
+            "#1d2a3e",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "Greys",
+        },
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "#fae9e9",
+            "#fcd8d6",
+            "#fec8c3",
+            "#feb7b0",
+            "#fda69e",
+            "#fc968d",
+            "#f9847b",
+            "#f6726a",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "Reds",
+        },
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "#ffdad5",
+            "#ffccc6",
+            "#ffbeb6",
+            "#ffafa6",
+            "#fea097",
+            "#fc9188",
+            "#f98279",
+            "#f6726a",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "Yellow to Red",
+        },
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "#24c292",
+            "#69d5b2",
+            "#aee8d2",
+            "#d5e0ab",
+            "#fed1a3",
+            "#ffc9c2",
+            "#fb9e96",
+            "#f6726a",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "Green to Red",
+        },
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "#61a2ff",
+            "#85b6ff",
+            "#a8caff",
+            "#c8deff",
+            "#ffccc6",
+            "#ffafa6",
+            "#fb9188",
+            "#f6726a",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "Blue to Red",
+        },
+        Object {
+          "getPalette": [Function],
+          "palette": Array [
+            "rgb(65, 105, 225)",
+            "rgb(0, 256, 256)",
+            "rgb(0, 256, 0)",
+            "rgb(256, 256, 0)",
+            "rgb(256, 0, 0)",
+          ],
+          "title": "",
+          "type": "gradient",
+          "value": "theclassic",
+        },
+      ]
+    }
+    valueOfSelected="Blues"
+  />
+</EuiFormRow>
+`;

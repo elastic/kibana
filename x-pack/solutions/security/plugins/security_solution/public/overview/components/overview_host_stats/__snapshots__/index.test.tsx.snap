@@ -1,0 +1,1257 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview Host Stat Data rendering it renders the default OverviewHostStats 1`] = `
+<div
+  class="css-yrm4o9-HostStatsContainer e9fdr4h4"
+  data-test-subj="overview-hosts-stats"
+>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
+  />
+  <div
+    class="euiAccordion emotion-euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupauditbeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupauditbeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Auditbeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    246,351
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="246351"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupauditbeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Audit
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatAuditd"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      73,847
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="73847"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  File Integrity Module
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatFIM"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      107,307
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="107307"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Login
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatLogin"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      60,015
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="60015"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Package
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatPackage"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      2,003
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="2003"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Process
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatProcess"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      1,200
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="1200"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  User
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-auditbeatUser"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      1,979
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="246351"
+                        value="1979"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
+  />
+  <div
+    class="euiAccordion emotion-euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupendgame"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupendgame"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Endpoint Security
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    156,714,735
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="156714735"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupendgame"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  DNS
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameDns"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,123
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39123"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  File
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameFile"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,456
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39456"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Image Load
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameImageLoad"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,789
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39789"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Network
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameNetwork"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,101,112
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39101112"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Process
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameProcess"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,131,415
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39131415"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Registry
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameRegistry"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,161,718
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39161718"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Security
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-endgameSecurity"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      39,202,122
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="156714735"
+                        value="39202122"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
+  />
+  <div
+    class="euiAccordion emotion-euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupfilebeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupfilebeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Filebeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    568
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="568"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupfilebeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  System Module
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-filebeatSystemModule"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      568
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="568"
+                        value="568"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
+  />
+  <div
+    class="euiAccordion emotion-euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="host-stat-accordion-groupwinlogbeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="host-stat-accordion-groupwinlogbeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Winlogbeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    296,999
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="157258653"
+                      value="296999"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="host-stat-accordion-groupwinlogbeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent e9fdr4h0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Security
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-winlogbeatSecurity"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      195,929
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="296999"
+                        value="195929"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle e9fdr4h3"
+                >
+                  Microsoft-Windows-Sysmon/Operational
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem e9fdr4h1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="host-stat-winlogbeatMWSysmonOperational"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft e9fdr4h2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      101,070
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="296999"
+                        value="101070"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

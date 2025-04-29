@@ -6,13 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  getUrlPrefix,
-  TaskManagerDoc,
-  ObjectRemover,
-  getTestRuleData,
-} from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../common/lib';
+import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const MIGRATED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
 const MIGRATED_TASK_ID = '329798f0-b0b0-11ea-9510-fdf248d5f2a4';
@@ -137,6 +133,12 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
         // a task with a removed task type. Task manager will mark the task as unrecognized.
         // When we enable the rule, the unrecognized task should be removed and a new
         // task created in its place
+
+        await supertestWithoutAuth
+          .post('/api/alerting_tasks/run_mark_tasks_as_unrecognized')
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(200);
 
         // scheduled task should exist and be unrecognized
         await retry.try(async () => {

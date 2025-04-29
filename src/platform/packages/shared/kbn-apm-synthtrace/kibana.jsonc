@@ -1,0 +1,11 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/apm-synthtrace",
+  "owner": [
+    "@elastic/obs-ux-infra_services-team",
+    "@elastic/obs-ux-logs-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

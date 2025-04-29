@@ -20,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from '../routes_test_utils';
+import { deprecationMock, setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -55,7 +55,14 @@ describe('DELETE /api/saved_objects/{type}/{id} with allowApiAccess true', () =>
     const logger = loggerMock.create();
     const config = setupConfig(true);
     const access = 'public';
-    registerDeleteRoute(router, { config, coreUsageData, logger, access });
+
+    registerDeleteRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { AlertHistoryDefaultIndexName } from '@kbn/actions-plugin/common';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getTestRuleData, ObjectRemover } from '../../../../../common/lib';
 
 const ALERT_HISTORY_OVERRIDE_INDEX = 'kibana-alert-history-not-the-default';
@@ -137,10 +137,10 @@ export default function preconfiguredAlertHistoryConnectorTests({
       expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
     }
 
-    const response = await supertest.get(`/api/alerts/alert/${id}`);
+    const response = await supertest.get(`/api/alerting/rule/${id}`);
     expect(response.status).to.eql(200);
 
-    const { executionStatus } = response.body || {};
+    const { execution_status: executionStatus } = response.body || {};
     const { status } = executionStatus || {};
 
     const message = `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(

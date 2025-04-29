@@ -3,7 +3,9 @@
     "actionTypeId",
     "name"
   ],
-  "action_task_params": [],
+  "action_task_params": [
+    "apiKeyId"
+  ],
   "ad_hoc_run_params": [
     "apiKeyId",
     "createdAt",
@@ -169,6 +171,9 @@
     "external_service.pushed_by.full_name",
     "external_service.pushed_by.profile_uid",
     "external_service.pushed_by.username",
+    "observables",
+    "observables.typeKey",
+    "observables.value",
     "owner",
     "settings",
     "settings.syncAlerts",
@@ -233,6 +238,7 @@
     "payload.connector.type",
     "type"
   ],
+  "cloud": [],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -315,6 +321,7 @@
     "filter",
     "indexPattern",
     "status",
+    "timestampField",
     "type"
   ],
   "epm-packages": [
@@ -443,6 +450,7 @@
   ],
   "favorites": [
     "favoriteIds",
+    "favoriteMetadata",
     "type",
     "userId"
   ],
@@ -474,6 +482,7 @@
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
+    "agentless",
     "data_output_id",
     "description",
     "download_source_id",
@@ -491,6 +500,7 @@
     "name",
     "namespace",
     "overrides",
+    "required_versions",
     "revision",
     "schema_version",
     "status",
@@ -509,6 +519,7 @@
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -530,6 +541,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
@@ -592,6 +604,7 @@
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
+    "agentless",
     "data_output_id",
     "description",
     "download_source_id",
@@ -612,6 +625,7 @@
     "name",
     "namespace",
     "overrides",
+    "required_versions",
     "revision",
     "schema_version",
     "status",
@@ -690,6 +704,7 @@
     "version"
   ],
   "ingest-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -711,6 +726,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
@@ -756,7 +772,10 @@
   ],
   "maintenance-window": [
     "enabled",
-    "events"
+    "events",
+    "expirationDate",
+    "title",
+    "updatedAt"
   ],
   "map": [
     "bounds",
@@ -799,6 +818,13 @@
     "progress",
     "state",
     "type"
+  ],
+  "onechat_workflow": [
+    "access_control",
+    "access_control.public",
+    "categories",
+    "user_id",
+    "workflow_id"
   ],
   "osquery-manager-usage-metric": [
     "count",
@@ -854,6 +880,16 @@
   "policy-settings-protection-updates-note": [
     "note"
   ],
+  "privilege-monitoring-status": [
+    "status"
+  ],
+  "product-doc-install-status": [
+    "index_name",
+    "installation_status",
+    "last_installation_date",
+    "product_name",
+    "product_version"
+  ],
   "query": [
     "description",
     "title",
@@ -891,6 +927,18 @@
     "username"
   ],
   "search-telemetry": [],
+  "search_playground": [
+    "name"
+  ],
+  "security-ai-prompt": [
+    "description",
+    "model",
+    "prompt",
+    "prompt.default",
+    "promptGroupId",
+    "promptId",
+    "provider"
+  ],
   "security-rule": [
     "rule_id",
     "version"
@@ -1073,6 +1121,7 @@
     "urls"
   ],
   "synthetics-param": [],
+  "synthetics-private-location": [],
   "synthetics-privates-locations": [],
   "tag": [
     "color",
@@ -1084,6 +1133,7 @@
     "enabled",
     "ownerId",
     "partition",
+    "priority",
     "retryAt",
     "runAt",
     "schedule",
@@ -1091,7 +1141,9 @@
     "scheduledAt",
     "scope",
     "status",
-    "taskType"
+    "taskType",
+    "userScope",
+    "userScope.apiKeyId"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
@@ -1129,6 +1181,38 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
+  ],
+  "workchat_agent": [
+    "access_control",
+    "access_control.public",
+    "agent_id",
+    "agent_name",
+    "configuration",
+    "description",
+    "last_updated",
+    "user_id",
+    "user_name"
+  ],
+  "workchat_conversation": [
+    "access_control",
+    "access_control.public",
+    "agent_id",
+    "conversation_id",
+    "events",
+    "last_updated",
+    "title",
+    "user_id",
+    "user_name"
+  ],
+  "workchat_integration": [
+    "configuration",
+    "created_at",
+    "created_by",
+    "description",
+    "integration_id",
+    "name",
+    "type",
+    "updated_at"
   ],
   "workplace_search_telemetry": []
 }

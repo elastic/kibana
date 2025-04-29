@@ -12,7 +12,7 @@ import {
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
-  describe('@ess @serverless @serverlessQA Entity Analytics - Asset Criticality CSV upload', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Analytics - Asset Criticality CSV upload', () => {
     const esClient = getService('es');
     const supertest = getService('supertest');
     const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
@@ -102,36 +102,37 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.errors).toEqual([
         {
-          index: 0,
-          message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
-        },
-        {
           index: 1,
-          message: 'Invalid entity type "invalid_entity", expected host or user',
+          message:
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
         },
         {
           index: 2,
-          message: 'Missing identifier',
+          message:
+            'Invalid entity type "invalid_entity", expected to be one of: user, host, service',
         },
         {
           index: 3,
-          message: 'Missing criticality level',
+          message: 'Missing identifier',
         },
         {
           index: 4,
-          message: 'Missing entity type',
+          message: 'Missing criticality level',
         },
         {
           index: 5,
-          message: 'Expected 3 columns, got 2',
+          message: 'Missing entity type',
         },
         {
           index: 6,
-          message: 'Expected 3 columns, got 4',
+          message: 'Expected 3 columns, got 2',
         },
         {
           index: 7,
+          message: 'Expected 3 columns, got 4',
+        },
+        {
+          index: 8,
           message: `Identifier is too long, expected less than 1000 characters, got 1001`,
         },
       ]);
@@ -154,9 +155,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.errors).toEqual([
         {
-          index: 1,
+          index: 2,
           message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact',
+            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
         },
       ]);
 

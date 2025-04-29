@@ -13,7 +13,7 @@ import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
@@ -71,7 +71,7 @@ export const NoGroupCrossingManifestsRule: Rule.RuleModule = {
         if (dependency) {
           // at this point, we know the dependency is a plugin
           const { id, group, visibility } = dependency;
-          if (!isImportableFrom(moduleId.group, group, visibility)) {
+          if (!isImportableFrom(moduleId, group, visibility)) {
             offendingDependencies.push({ id, pluginId, group, visibility });
           }
         }

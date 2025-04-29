@@ -18,7 +18,7 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true
 
 source .buildkite/scripts/pipelines/security_solution_quality_gate/prepare_vault_entries.sh
 
-cd x-pack/plugins/security_solution
+cd x-pack/solutions/security/plugins/security_solution
 set +e
 
 export BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate serverless-cypress-defend-workflows)

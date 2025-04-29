@@ -9,7 +9,7 @@ import {
   APMIndicesSavedObjectBody,
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-} from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+} from '@kbn/apm-sources-access-plugin/server/saved_objects/apm_indices';
 import expect from '@kbn/expect';
 import { ApmApiError } from '../../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -42,7 +42,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
 
     it('[basic] returns APM Indices', async () => {
       const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
+        endpoint: 'GET /internal/apm-sources/settings/apm-indices',
       });
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
@@ -59,7 +59,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       const INDEX_VALUE = 'foo-*';
 
       const writeResponse = await apmApiClient.writeUser({
-        endpoint: 'POST /internal/apm/settings/apm-indices/save',
+        endpoint: 'POST /internal/apm-sources/settings/apm-indices/save',
         params: {
           body: { transaction: INDEX_VALUE },
         },
@@ -67,7 +67,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       expect(writeResponse.status).to.be(200);
 
       const readResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
+        endpoint: 'GET /internal/apm-sources/settings/apm-indices',
       });
 
       expect(readResponse.status).to.be(200);
@@ -78,7 +78,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       const INDEX_VALUE = 'foo-*';
 
       const writeResponse = await apmApiClient.writeUser({
-        endpoint: 'POST /internal/apm/settings/apm-indices/save',
+        endpoint: 'POST /internal/apm-sources/settings/apm-indices/save',
         params: {
           body: { sourcemap: 'bar-*', transaction: INDEX_VALUE },
         },
@@ -90,7 +90,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       expect(savedAPMSavedObject.apmIndices?.sourcemap).to.eql(undefined);
 
       const readResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
+        endpoint: 'GET /internal/apm-sources/settings/apm-indices',
       });
       expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
       expect(readResponse.body.sourcemap).to.eql('apm-*');
@@ -107,45 +107,11 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       await deleteSavedObject();
     });
 
-    it('[trial] returns APM Indices', async () => {
-      const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
-      });
-      expect(response.status).to.be(200);
-      expect(response.body).to.eql({
-        transaction: 'traces-apm*,apm-*,traces-*.otel-*',
-        span: 'traces-apm*,apm-*,traces-*.otel-*',
-        error: 'logs-apm*,apm-*,logs-*.otel-*',
-        metric: 'metrics-apm*,apm-*,metrics-*.otel-*',
-        onboarding: 'apm-*',
-        sourcemap: 'apm-*',
-      });
-    });
-
-    it('[trial] updates apm indices', async () => {
-      const INDEX_VALUE = 'foo-*';
-
-      const writeResponse = await apmApiClient.writeUser({
-        endpoint: 'POST /internal/apm/settings/apm-indices/save',
-        params: {
-          body: { transaction: INDEX_VALUE },
-        },
-      });
-      expect(writeResponse.status).to.be(200);
-
-      const readResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
-      });
-
-      expect(readResponse.status).to.be(200);
-      expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
-    });
-
     it('[trial] updates apm indices as read privileges with modify settings user', async () => {
       const INDEX_VALUE = 'foo-*';
 
       const writeResponse = await apmApiClient.apmReadPrivilegesWithWriteSettingsUser({
-        endpoint: 'POST /internal/apm/settings/apm-indices/save',
+        endpoint: 'POST /internal/apm-sources/settings/apm-indices/save',
         params: {
           body: { transaction: INDEX_VALUE },
         },
@@ -153,7 +119,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       expect(writeResponse.status).to.be(200);
 
       const readResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
+        endpoint: 'GET /internal/apm-sources/settings/apm-indices',
       });
 
       expect(readResponse.status).to.be(200);
@@ -165,7 +131,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
 
       try {
         await apmApiClient.apmAllPrivilegesWithoutWriteSettingsUser({
-          endpoint: 'POST /internal/apm/settings/apm-indices/save',
+          endpoint: 'POST /internal/apm-sources/settings/apm-indices/save',
           params: {
             body: { transaction: INDEX_VALUE },
           },
@@ -181,7 +147,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       const INDEX_VALUE = 'foo-*';
 
       const writeResponse = await apmApiClient.writeUser({
-        endpoint: 'POST /internal/apm/settings/apm-indices/save',
+        endpoint: 'POST /internal/apm-sources/settings/apm-indices/save',
         params: {
           body: { sourcemap: 'bar-*', transaction: INDEX_VALUE },
         },
@@ -193,7 +159,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
       expect(savedAPMSavedObject.apmIndices?.sourcemap).to.eql(undefined);
 
       const readResponse = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/settings/apm-indices',
+        endpoint: 'GET /internal/apm-sources/settings/apm-indices',
       });
       expect(readResponse.body.transaction).to.eql(INDEX_VALUE);
       expect(readResponse.body.sourcemap).to.eql('apm-*');

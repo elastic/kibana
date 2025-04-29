@@ -1,0 +1,66 @@
+load("@npm//webpack-cli:index.bzl", "webpack_cli")
+
+SRCS = glob([
+  "index.js",
+  "webpack.config.js",
+  "src/**/*",
+])
+
+webpack_cli(
+  name = "shared_built_assets",
+  data = SRCS + [
+    "//:.browserslistrc",
+    "@npm//webpack",
+    "@npm//mini-css-extract-plugin",
+    "@npm//moment",
+    "@npm//babel-loader",
+    "@npm//css-loader",
+    "@npm//@babel/plugin-transform-numeric-separator",
+    "//src/platform/packages/private/kbn-ui-shared-deps-npm",
+    "//src/platform/packages/shared/kbn-babel-register",
+    "//packages/kbn-babel-preset",
+    # packages included in the shared deps src bundle
+    "//src/platform/packages/shared/kbn-ui-theme",
+    "//src/platform/packages/shared/kbn-i18n",
+    "//src/platform/packages/shared/kbn-i18n-react",
+    "//src/platform/packages/shared/kbn-ebt-tools",
+    "//src/platform/packages/shared/kbn-esql-ast",
+    "//src/platform/packages/shared/kbn-monaco",
+    "//src/platform/packages/shared/kbn-datemath",
+    "//src/platform/packages/shared/kbn-analytics",
+    "//src/platform/packages/shared/kbn-crypto-browser",
+    "//src/platform/packages/shared/kbn-es-query",
+    "//src/platform/packages/shared/kbn-search-errors",
+    "//src/platform/packages/shared/kbn-security-hardening",
+    "//src/platform/packages/shared/kbn-std",
+    "//src/platform/packages/shared/kbn-safer-lodash-set",
+    "//src/platform/packages/private/kbn-peggy",
+    "//packages/kbn-peggy-loader",
+    "//src/platform/packages/shared/shared-ux/error_boundary",
+    "//src/platform/packages/shared/kbn-rison",
+    "//src/platform/packages/shared/shared-ux/code_editor/impl:code_editor",
+    "//src/platform/packages/shared/react/kibana_context/common",
+    "//src/platform/packages/shared/react/kibana_context/root",
+    "//src/platform/packages/shared/react/kibana_context/render",
+    "//src/platform/packages/shared/react/kibana_context/theme",
+    "//src/platform/packages/shared/shared-ux/router/impl:shared-ux-router",
+    "//src/platform/packages/shared/react/kibana_mount:react-kibana-mount"
+  ],
+  output_dir = True,
+  args = [
+    "--config",
+    "$(location webpack.config.js)",
+    "--output-path",
+    "$(@D)",
+    "--stats=errors-only"
+  ],
+  env = select({
+    "//:dist": {
+      "NODE_ENV": "production",
+    },
+    "//conditions:default": {
+      "NODE_ENV": "development"
+    },
+  }),
+  visibility = ["//visibility:public"],
+)

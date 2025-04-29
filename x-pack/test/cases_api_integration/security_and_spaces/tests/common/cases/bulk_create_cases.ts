@@ -7,19 +7,19 @@
 
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
-import { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
 import { CaseSeverity } from '@kbn/cases-plugin/common';
 import { CaseStatuses, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
-  getCaseUserActions,
+  findCaseUserActions,
   getSpaceUrlPrefix,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
 } from '../../../../common/lib/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   secOnly,
   secOnlyRead,
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * There is no official route that supports
    * bulk creating cases. The purpose of this test
    * is to test the bulkCreate method of the cases client in
-   * x-pack/plugins/cases/server/client/cases/bulk_create.ts
+   * x-pack/platform/plugins/shared/cases/server/client/cases/bulk_create.ts
    *
    * The test route is configured here x-pack/test/cases_api_integration/common/plugins/cases/server/routes.ts
    */
@@ -168,12 +168,12 @@ export default ({ getService }: FtrProviderContext): void => {
       const firstCase = createdCases.cases[0];
       const secondCase = createdCases.cases[1];
 
-      const firstCaseUserActions = await getCaseUserActions({
+      const { userActions: firstCaseUserActions } = await findCaseUserActions({
         supertest,
         caseID: firstCase.id,
       });
 
-      const secondCaseUserActions = await getCaseUserActions({
+      const { userActions: secondCaseUserActions } = await findCaseUserActions({
         supertest,
         caseID: secondCase.id,
       });
@@ -193,7 +193,6 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'create',
         type: 'create_case',
         created_by: defaultUser,
-        case_id: firstCase.id,
         comment_id: null,
         owner: 'securitySolutionFixture',
         payload: {
@@ -215,7 +214,6 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'create',
         type: 'create_case',
         created_by: defaultUser,
-        case_id: secondCase.id,
         comment_id: null,
         owner: 'securitySolutionFixture',
         payload: {

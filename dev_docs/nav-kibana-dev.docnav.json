@@ -198,6 +198,9 @@
           "id": "kibDevTutorialDebugging"
         },
         {
+          "id": "kibDevTutorialDebuggingFipsTestFailures"
+        },
+        {
           "id": "kibDevTutorialBuildingDistributable",
           "label": "Building a Kibana distributable"
         },
@@ -466,9 +469,6 @@
           "id": "kibDataSearchPluginApi"
         },
         {
-          "id": "kibBfetchPluginApi"
-        },
-        {
           "id": "kibAlertingPluginApi"
         },
         {
@@ -623,9 +623,6 @@
         },
         {
           "id": "kibTelemetryCollectionManagerPluginApi"
-        },
-        {
-          "id": "kibTelemetryCollectionXpackPluginApi"
         },
         {
           "id": "kibTelemetryManagementSectionPluginApi"

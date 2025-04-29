@@ -1,0 +1,913 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import agent from 'elastic-apm-node';
+import { createHash } from 'crypto';
+import { get, invert, isEmpty, merge, partition } from 'lodash';
+import moment from 'moment';
+import objectHash from 'object-hash';
+
+import dateMath from '@kbn/datemath';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
+import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import {
+  ALERT_UUID,
+  ALERT_RULE_UUID,
+  ALERT_RULE_PARAMETERS,
+  TIMESTAMP,
+  ALERT_INSTANCE_ID,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_TERMS,
+} from '@kbn/rule-data-utils';
+import type {
+  ListArray,
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import type {
+  DocLinksServiceSetup,
+  ElasticsearchClient,
+  IUiSettingsClient,
+} from '@kbn/core/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { Privilege } from '../../../../../common/api/detection_engine';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
+import type {
+  SearchAfterAndBulkCreateReturnType,
+  SignalSearchResponse,
+  WrappedSignalHit,
+  RuleRangeTuple,
+  BaseSignalHit,
+  SimpleHit,
+  WrappedEventHit,
+  SecuritySharedParams,
+} from '../types';
+import type { ShardError } from '../../../types';
+import type {
+  EqlRuleParams,
+  EsqlRuleParams,
+  MachineLearningRuleParams,
+  QueryRuleParams,
+  RuleParams,
+  ThreatRuleParams,
+  ThresholdRuleParams,
+} from '../../rule_schema';
+import type { BaseHit, SearchTypes } from '../../../../../common/detection_engine/types';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type {
+  BaseFieldsLatest,
+  DetectionAlert,
+  EqlBuildingBlockFieldsLatest,
+  EqlShellFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/api/detection_engine/model/alerts';
+import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
+import type { GenericBulkCreateResponse } from '../factories';
+import type {
+  ExtraFieldsForShellAlert,
+  WrappedEqlShellOptionalSubAlertsType,
+} from '../eql/build_alert_group_from_sequence';
+import type { BuildReasonMessage } from './reason_formatters';
+import { getSuppressionTerms } from './suppression_utils';
+import { robustGet } from './source_fields_merging/utils/robust_field_access';
+import {
+  SECURITY_NUM_EXCEPTION_ITEMS,
+  SECURITY_NUM_INDICES_MATCHING_PATTERN,
+  SECURITY_QUERY_SPAN_S,
+} from './apm_field_names';
+
+export const MAX_RULE_GAP_RATIO = 4;
+
+export const hasReadIndexPrivileges = async (args: {
+  privileges: Privilege;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  uiSettingsClient: IUiSettingsClient;
+  docLinks: DocLinksServiceSetup;
+}): Promise<string | undefined> => {
+  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
+  const apiKeyDocs = docLinks.links.alerting.authorization;
+  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
+  const indexNames = Object.keys(privileges.index);
+  const filteredIndexNames = isCcsPermissionWarningEnabled
+    ? indexNames
+    : indexNames.filter((indexName) => {
+        return !isCCSRemoteIndexName(indexName);
+      });
+  const [, indexesWithNoReadPrivileges] = partition(
+    filteredIndexNames,
+    (indexName) => privileges.index[indexName].read
+  );
+  let warningStatusMessage;
+
+  // Some indices have read privileges others do not.
+  if (indexesWithNoReadPrivileges.length > 0) {
+    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
+    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: warningStatusMessage,
+    });
+  }
+  return warningStatusMessage;
+};
+
+export const hasTimestampFields = async (args: {
+  timestampField: string;
+  // any is derived from here
+  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
+  inputIndices: string[];
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+}): Promise<{
+  foundNoIndices: boolean;
+  warningMessage: string | undefined;
+}> => {
+  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
+  const { ruleName } = ruleExecutionLogger.context;
+
+  agent.setCustomContext({
+    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
+  });
+
+  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
+    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
+      inputIndices
+    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
+      ruleName === 'Endpoint Security'
+        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
+        : ''
+    }`;
+
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: errorString.trimEnd(),
+    });
+
+    return {
+      foundNoIndices: true,
+      warningMessage: errorString.trimEnd(),
+    };
+  } else if (
+    isEmpty(timestampFieldCapsResponse.body.fields) ||
+    timestampFieldCapsResponse.body.fields[timestampField] == null ||
+    timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
+  ) {
+    // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
+    // warning
+    const errorString = `The following indices are missing the ${
+      timestampField === '@timestamp'
+        ? 'timestamp field "@timestamp"'
+        : `timestamp override field "${timestampField}"`
+    }: ${JSON.stringify(
+      isEmpty(timestampFieldCapsResponse.body.fields) ||
+        isEmpty(timestampFieldCapsResponse.body.fields[timestampField])
+        ? timestampFieldCapsResponse.body.indices
+        : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
+    )}`;
+
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: errorString,
+    });
+
+    return { foundNoIndices: false, warningMessage: errorString };
+  }
+
+  return { foundNoIndices: false, warningMessage: undefined };
+};
+
+export const checkPrivilegesFromEsClient = async (
+  esClient: ElasticsearchClient,
+  indices: string[]
+): Promise<Privilege> =>
+  withSecuritySpan(
+    'checkPrivilegesFromEsClient',
+    async () =>
+      (await esClient.transport.request({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: indices ?? [],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      })) as Privilege
+  );
+
+export const getNumCatchupIntervals = ({
+  gap,
+  intervalDuration,
+}: {
+  gap: moment.Duration;
+  intervalDuration: moment.Duration;
+}): number => {
+  if (gap.asMilliseconds() <= 0 || intervalDuration.asMilliseconds() <= 0) {
+    return 0;
+  }
+  const ratio = Math.ceil(gap.asMilliseconds() / intervalDuration.asMilliseconds());
+  // maxCatchup is to ensure we are not trying to catch up too far back.
+  // This allows for a maximum of 4 consecutive rule execution misses
+  // to be included in the number of signals generated.
+  return ratio < MAX_RULE_GAP_RATIO ? ratio : MAX_RULE_GAP_RATIO;
+};
+
+export const getExceptions = async ({
+  client,
+  lists,
+}: {
+  client: ExceptionListClient;
+  lists: ListArray;
+}): Promise<ExceptionListItemSchema[]> => {
+  return withSecuritySpan('getExceptions', async () => {
+    if (lists.length > 0) {
+      try {
+        const listIds = lists.map(({ list_id: listId }) => listId);
+        const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+
+        // Stream the results from the Point In Time (PIT) finder into this array
+        let items: ExceptionListItemSchema[] = [];
+        const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+          items = [...items, ...response.data];
+        };
+
+        await client.findExceptionListsItemPointInTimeFinder({
+          executeFunctionOnStream,
+          listId: listIds,
+          namespaceType: namespaceTypes,
+          perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+          filter: [],
+          maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+          sortOrder: undefined,
+          sortField: undefined,
+        });
+        agent.setCustomContext({ [SECURITY_NUM_EXCEPTION_ITEMS]: items.length });
+        return items;
+      } catch (e) {
+        throw new Error(
+          `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
+        );
+      }
+    } else {
+      return [];
+    }
+  });
+};
+
+export const generateId = (
+  docIndex: string,
+  docId: string,
+  version: string,
+  ruleId: string
+): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+
+export const parseInterval = (intervalString: string): moment.Duration | null => {
+  try {
+    return moment.duration(parseDuration(intervalString));
+  } catch (err) {
+    return null;
+  }
+};
+
+export const getGapBetweenRuns = ({
+  previousStartedAt,
+  originalFrom,
+  originalTo,
+  startedAt,
+}: {
+  previousStartedAt: Date | undefined | null;
+  originalFrom: moment.Moment;
+  originalTo: moment.Moment;
+  startedAt: Date;
+}): moment.Duration => {
+  if (previousStartedAt == null) {
+    return moment.duration(0);
+  }
+  const driftTolerance = moment.duration(originalTo.diff(originalFrom));
+  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
+  return currentDuration.subtract(driftTolerance);
+};
+
+export const makeFloatString = (num: number): string => Number(num).toFixed(2);
+
+export const getRuleRangeTuples = async ({
+  startedAt,
+  previousStartedAt,
+  from,
+  to,
+  interval,
+  maxSignals,
+  ruleExecutionLogger,
+  alerting,
+}: {
+  startedAt: Date;
+  previousStartedAt: Date | null | undefined;
+  from: string;
+  to: string;
+  interval: string;
+  maxSignals: number;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  alerting: AlertingServerSetup;
+}) => {
+  const originalFrom = dateMath.parse(from, { forceNow: startedAt });
+  const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  let warningStatusMessage;
+  if (originalFrom == null || originalTo == null) {
+    throw new Error('Failed to parse date math of rule.from or rule.to');
+  }
+
+  const maxAlertsAllowed = alerting.getConfig().run.alerts.max;
+  let maxSignalsToUse = maxSignals;
+  if (maxSignals > maxAlertsAllowed) {
+    maxSignalsToUse = maxAlertsAllowed;
+    warningStatusMessage = `The rule's max alerts per run setting (${maxSignals}) is greater than the Kibana alerting limit (${maxAlertsAllowed}). The rule will only write a maximum of ${maxAlertsAllowed} alerts per rule run.`;
+    await ruleExecutionLogger.logStatusChange({
+      newStatus: RuleExecutionStatusEnum['partial failure'],
+      message: warningStatusMessage,
+    });
+  }
+
+  const tuples = [
+    {
+      to: originalTo,
+      from: originalFrom,
+      maxSignals: maxSignalsToUse,
+    },
+  ];
+
+  const intervalDuration = parseInterval(interval);
+  if (intervalDuration == null) {
+    ruleExecutionLogger.error(
+      `Failed to compute gap between rule runs: could not parse rule interval "${JSON.stringify(
+        interval
+      )}"`
+    );
+    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
+  }
+
+  const gap = getGapBetweenRuns({
+    previousStartedAt,
+    originalTo,
+    originalFrom,
+    startedAt,
+  });
+  const catchup = getNumCatchupIntervals({
+    gap,
+    intervalDuration,
+  });
+  const catchupTuples = getCatchupTuples({
+    originalTo,
+    originalFrom,
+    ruleParamsMaxSignals: maxSignalsToUse,
+    catchup,
+    intervalDuration,
+  });
+
+  tuples.push(...catchupTuples);
+
+  // Each extra tuple adds one extra intervalDuration to the time range this rule will cover.
+  const remainingGapMilliseconds = Math.max(
+    gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
+    0
+  );
+
+  let gapRange;
+  if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
+    gapRange = {
+      gte: previousStartedAt.toISOString(),
+      lte: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
+    };
+  }
+
+  return {
+    tuples: tuples.reverse(),
+    remainingGap: moment.duration(remainingGapMilliseconds),
+    warningStatusMessage,
+    gap: gapRange,
+  };
+};
+
+/**
+ * Creates rule range tuples needed to cover gaps since the last rule run.
+ * @param to moment.Moment representing the rules 'to' property
+ * @param from moment.Moment representing the rules 'from' property
+ * @param ruleParamsMaxSignals int representing the maxSignals property on the rule (usually unmodified at 100)
+ * @param catchup number the number of additional rule run intervals to add
+ * @param intervalDuration moment.Duration the interval which the rule runs
+ */
+export const getCatchupTuples = ({
+  originalTo,
+  originalFrom,
+  ruleParamsMaxSignals,
+  catchup,
+  intervalDuration,
+}: {
+  originalTo: moment.Moment;
+  originalFrom: moment.Moment;
+  ruleParamsMaxSignals: number;
+  catchup: number;
+  intervalDuration: moment.Duration;
+}): RuleRangeTuple[] => {
+  const catchupTuples: RuleRangeTuple[] = [];
+  const intervalInMilliseconds = intervalDuration.asMilliseconds();
+  let currentTo = originalTo;
+  let currentFrom = originalFrom;
+  // This loop will create tuples with overlapping time ranges, the same way rule runs have overlapping time
+  // ranges due to the additional lookback. We could choose to create tuples that don't overlap here by using the
+  // "from" value from one tuple as "to" in the next one, however, the overlap matters for rule types like EQL and
+  // threshold rules that look for sets of documents within the query. Thus we keep the overlap so that these
+  // extra tuples behave as similarly to the regular rule runs as possible.
+  while (catchupTuples.length < catchup) {
+    const nextTo = currentTo.clone().subtract(intervalInMilliseconds);
+    const nextFrom = currentFrom.clone().subtract(intervalInMilliseconds);
+    catchupTuples.push({
+      to: nextTo,
+      from: nextFrom,
+      maxSignals: ruleParamsMaxSignals,
+    });
+    currentTo = nextTo;
+    currentFrom = nextFrom;
+  }
+  return catchupTuples;
+};
+
+/**
+ * Takes the rule schedule fields `interval` and `lookback` and uses them to calculate the `from` value for a rule
+ *
+ * @param interval string representing the interval on which the rule runs
+ * @param lookback string representing the rule's additional lookback
+ * @returns string representing the rule's 'from' property
+ */
+export const calculateFromValue = (interval: string, lookback: string) => {
+  const parsedInterval = parseInterval(interval) ?? moment.duration(0);
+  const parsedFrom = parseInterval(lookback) ?? moment.duration(0);
+  const duration = parsedFrom.asSeconds() + parsedInterval.asSeconds();
+  return `now-${duration}s`;
+};
+
+/**
+ * Given errors from a search query this will return an array of strings derived from the errors.
+ * @param errors The errors to derive the strings from
+ */
+export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
+  return errors.map((error) => {
+    const {
+      index,
+      reason: {
+        reason,
+        type,
+        caused_by: { reason: causedByReason, type: causedByType } = {
+          reason: undefined,
+          type: undefined,
+        },
+      } = {},
+    } = error;
+
+    return [
+      ...(index != null ? [`index: "${index}"`] : []),
+      ...(reason != null ? [`reason: "${reason}"`] : []),
+      ...(type != null ? [`type: "${type}"`] : []),
+      ...(causedByReason != null ? [`caused by reason: "${causedByReason}"`] : []),
+      ...(causedByType != null ? [`caused by type: "${causedByType}"`] : []),
+    ].join(' ');
+  });
+};
+
+/**
+ * Given a search hit this will return a valid last date if it can find one, otherwise it
+ * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
+ * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
+ * is not correctly ISO8601 or epoch milliseconds formatted.
+ * @param searchResult The result to try and parse out the timestamp.
+ * @param primaryTimestamp The primary timestamp to use.
+ */
+export const getValidDateFromDoc = ({
+  doc,
+  primaryTimestamp,
+}: {
+  doc: BaseSignalHit;
+  primaryTimestamp: TimestampOverride;
+}): Date | undefined => {
+  const timestampValue =
+    doc.fields != null && doc.fields[primaryTimestamp] != null
+      ? doc.fields[primaryTimestamp][0]
+      : doc._source != null
+      ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
+      : undefined;
+  const lastTimestamp =
+    typeof timestampValue === 'string' || typeof timestampValue === 'number'
+      ? timestampValue
+      : undefined;
+  if (lastTimestamp != null) {
+    const tempMoment = moment(lastTimestamp);
+    if (tempMoment.isValid()) {
+      return tempMoment.toDate();
+    } else if (typeof timestampValue === 'string') {
+      // worst case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
+      // so we try one last time to parse this best we can by converting from string to a number
+      const maybeDate = moment(+lastTimestamp);
+      if (maybeDate.isValid()) {
+        return maybeDate.toDate();
+      } else {
+        return undefined;
+      }
+    } else {
+      return undefined;
+    }
+  }
+};
+
+export const createSearchAfterReturnTypeFromResponse = <
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+>({
+  searchResult,
+  primaryTimestamp,
+}: {
+  searchResult: SignalSearchResponse<TAggregations>;
+  primaryTimestamp: TimestampOverride;
+}): SearchAfterAndBulkCreateReturnType => {
+  return createSearchAfterReturnType({
+    success:
+      searchResult._shards.failed === 0 ||
+      searchResult._shards.failures?.every((failure) => {
+        return (
+          failure.reason?.reason?.includes(
+            'No mapping found for [@timestamp] in order to sort on'
+          ) ||
+          failure.reason?.reason?.includes(
+            `No mapping found for [${primaryTimestamp}] in order to sort on`
+          )
+        );
+      }),
+  });
+};
+
+export const createSearchAfterReturnType = ({
+  success,
+  warning,
+  searchAfterTimes,
+  enrichmentTimes,
+  bulkCreateTimes,
+  createdSignalsCount,
+  createdSignals,
+  errors,
+  warningMessages,
+  suppressedAlertsCount,
+}: {
+  success?: boolean | undefined;
+  warning?: boolean;
+  searchAfterTimes?: string[] | undefined;
+  enrichmentTimes?: string[] | undefined;
+  bulkCreateTimes?: string[] | undefined;
+  createdSignalsCount?: number | undefined;
+  createdSignals?: unknown[] | undefined;
+  errors?: string[] | undefined;
+  warningMessages?: string[] | undefined;
+  suppressedAlertsCount?: number | undefined;
+} = {}): SearchAfterAndBulkCreateReturnType => {
+  return {
+    success: success ?? true,
+    warning: warning ?? false,
+    searchAfterTimes: searchAfterTimes ?? [],
+    enrichmentTimes: enrichmentTimes ?? [],
+    bulkCreateTimes: bulkCreateTimes ?? [],
+    createdSignalsCount: createdSignalsCount ?? 0,
+    createdSignals: createdSignals ?? [],
+    errors: errors ?? [],
+    warningMessages: warningMessages ?? [],
+    suppressedAlertsCount: suppressedAlertsCount ?? 0,
+  };
+};
+
+/**
+ * Merges the return values from bulk creating alerts into the appropriate fields in the combined return object.
+ */
+export const addToSearchAfterReturn = ({
+  current,
+  next,
+}: {
+  current: SearchAfterAndBulkCreateReturnType;
+  next: Omit<GenericBulkCreateResponse<BaseFieldsLatest>, 'alertsWereTruncated'>;
+}) => {
+  current.success = current.success && next.success;
+  current.createdSignalsCount += next.createdItemsCount;
+  current.createdSignals.push(...next.createdItems);
+  current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.enrichmentTimes.push(next.enrichmentDuration);
+  current.errors = [...new Set([...current.errors, ...next.errors])];
+  if (next.suppressedItemsCount != null) {
+    current.suppressedAlertsCount =
+      (current.suppressedAlertsCount ?? 0) + next.suppressedItemsCount;
+  }
+};
+
+export const mergeReturns = (
+  searchAfters: SearchAfterAndBulkCreateReturnType[]
+): SearchAfterAndBulkCreateReturnType => {
+  return searchAfters.reduce((prev, next) => {
+    const {
+      success: existingSuccess,
+      warning: existingWarning,
+      searchAfterTimes: existingSearchAfterTimes,
+      bulkCreateTimes: existingBulkCreateTimes,
+      enrichmentTimes: existingEnrichmentTimes,
+      createdSignalsCount: existingCreatedSignalsCount,
+      createdSignals: existingCreatedSignals,
+      errors: existingErrors,
+      warningMessages: existingWarningMessages,
+      suppressedAlertsCount: existingSuppressedAlertsCount,
+    }: SearchAfterAndBulkCreateReturnType = prev;
+
+    const {
+      success: newSuccess,
+      warning: newWarning,
+      searchAfterTimes: newSearchAfterTimes,
+      enrichmentTimes: newEnrichmentTimes,
+      bulkCreateTimes: newBulkCreateTimes,
+      createdSignalsCount: newCreatedSignalsCount,
+      createdSignals: newCreatedSignals,
+      errors: newErrors,
+      warningMessages: newWarningMessages,
+      suppressedAlertsCount: newSuppressedAlertsCount,
+    }: SearchAfterAndBulkCreateReturnType = next;
+
+    return {
+      success: existingSuccess && newSuccess,
+      warning: existingWarning || newWarning,
+      searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
+      bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
+      createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
+      createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
+      errors: [...new Set([...existingErrors, ...newErrors])],
+      warningMessages: [...existingWarningMessages, ...newWarningMessages],
+      suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
+    };
+  });
+};
+
+export const getTotalHitsValue = (totalHits: number | { value: number } | undefined): number =>
+  typeof totalHits === 'undefined'
+    ? -1
+    : typeof totalHits === 'number'
+    ? totalHits
+    : totalHits.value;
+
+export const calculateTotal = (
+  prevTotal: number | { value: number } | undefined,
+  nextTotal: number | { value: number } | undefined
+): number => {
+  const prevTotalHits = getTotalHitsValue(prevTotal);
+  const nextTotalHits = getTotalHitsValue(nextTotal);
+  if (prevTotalHits === -1 || nextTotalHits === -1) {
+    return -1;
+  }
+  return prevTotalHits + nextTotalHits;
+};
+
+export const isEqlParams = (params: RuleParams): params is EqlRuleParams => params.type === 'eql';
+export const isEsqlParams = (params: RuleParams): params is EsqlRuleParams =>
+  params.type === 'esql';
+export const isThresholdParams = (params: RuleParams): params is ThresholdRuleParams =>
+  params.type === 'threshold';
+export const isQueryParams = (params: RuleParams): params is QueryRuleParams =>
+  params.type === 'query';
+export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =>
+  params.type === 'threat_match';
+export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
+  params.type === 'machine_learning';
+
+/**
+ * Prevent javascript from returning Number.MAX_SAFE_INTEGER when Elasticsearch expects
+ * Java's Long.MAX_VALUE. This happens when sorting fields by date which are
+ * unmapped in the provided index
+ *
+ * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
+ *
+ * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
+ * @param sortIds estypes.SortResults | undefined
+ * @returns SortResults
+ */
+export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
+  return sortIds?.map((sortId) => {
+    // haven't determined when we would receive a null value for a sort id
+    // but in case we do, default to sending the stringified Java max_int
+    if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
+      return '9223372036854775807';
+    }
+    return sortId;
+  });
+};
+
+export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
+  return !isWrappedSignalHit(event) && !isWrappedDetectionAlert(event);
+};
+
+export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
+  return (event as WrappedSignalHit)?._source?.signal != null;
+};
+
+export const isWrappedDetectionAlert = (event: SimpleHit): event is BaseHit<DetectionAlert> => {
+  return (event as BaseHit<DetectionAlert>)?._source?.[ALERT_UUID] != null;
+};
+
+export const isDetectionAlert = (event: unknown): event is DetectionAlert => {
+  return get(event, ALERT_UUID) != null;
+};
+
+export const racFieldMappings: Record<string, string> = {
+  'signal.rule.id': ALERT_RULE_UUID,
+  'signal.rule.description': `${ALERT_RULE_PARAMETERS}.description`,
+  'signal.rule.filters': `${ALERT_RULE_PARAMETERS}.filters`,
+  'signal.rule.language': `${ALERT_RULE_PARAMETERS}.language`,
+  'signal.rule.query': `${ALERT_RULE_PARAMETERS}.query`,
+  'signal.rule.risk_score': `${ALERT_RULE_PARAMETERS}.riskScore`,
+  'signal.rule.severity': `${ALERT_RULE_PARAMETERS}.severity`,
+  'signal.rule.building_block_type': `${ALERT_RULE_PARAMETERS}.buildingBlockType`,
+  'signal.rule.namespace': `${ALERT_RULE_PARAMETERS}.namespace`,
+  'signal.rule.note': `${ALERT_RULE_PARAMETERS}.note`,
+  'signal.rule.license': `${ALERT_RULE_PARAMETERS}.license`,
+  'signal.rule.output_index': `${ALERT_RULE_PARAMETERS}.outputIndex`,
+  'signal.rule.timeline_id': `${ALERT_RULE_PARAMETERS}.timelineId`,
+  'signal.rule.timeline_title': `${ALERT_RULE_PARAMETERS}.timelineTitle`,
+  'signal.rule.meta': `${ALERT_RULE_PARAMETERS}.meta`,
+  'signal.rule.rule_name_override': `${ALERT_RULE_PARAMETERS}.ruleNameOverride`,
+  'signal.rule.timestamp_override': `${ALERT_RULE_PARAMETERS}.timestampOverride`,
+  'signal.rule.author': `${ALERT_RULE_PARAMETERS}.author`,
+  'signal.rule.false_positives': `${ALERT_RULE_PARAMETERS}.falsePositives`,
+  'signal.rule.from': `${ALERT_RULE_PARAMETERS}.from`,
+  'signal.rule.rule_id': `${ALERT_RULE_PARAMETERS}.ruleId`,
+  'signal.rule.max_signals': `${ALERT_RULE_PARAMETERS}.maxSignals`,
+  'signal.rule.risk_score_mapping': `${ALERT_RULE_PARAMETERS}.riskScoreMapping`,
+  'signal.rule.severity_mapping': `${ALERT_RULE_PARAMETERS}.severityMapping`,
+  'signal.rule.threat': `${ALERT_RULE_PARAMETERS}.threat`,
+  'signal.rule.to': `${ALERT_RULE_PARAMETERS}.to`,
+  'signal.rule.references': `${ALERT_RULE_PARAMETERS}.references`,
+  'signal.rule.version': `${ALERT_RULE_PARAMETERS}.version`,
+  'signal.rule.exceptions_list': `${ALERT_RULE_PARAMETERS}.exceptionsList`,
+  'signal.rule.immutable': `${ALERT_RULE_PARAMETERS}.immutable`,
+};
+
+export const getField = (event: SimpleHit, field: string): SearchTypes | undefined => {
+  if (isWrappedDetectionAlert(event)) {
+    const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
+    const parts = mappedField.split('.');
+    if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {
+      const params = get(event._source, ALERT_RULE_PARAMETERS);
+      return get(params, parts[parts.length - 1]);
+    }
+    return get(event._source, mappedField) as SearchTypes | undefined;
+  } else if (isWrappedSignalHit(event)) {
+    const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
+    return get(event._source, mappedField) as SearchTypes | undefined;
+  } else if (isWrappedEventHit(event)) {
+    return get(event._source, field) as SearchTypes | undefined;
+  }
+};
+
+export const getUnprocessedExceptionsWarnings = (
+  unprocessedExceptions: ExceptionListItemSchema[]
+): string | undefined => {
+  if (unprocessedExceptions.length > 0) {
+    const exceptionNames = unprocessedExceptions.map((exception) => exception.name);
+    return `The following exceptions won't be applied to rule execution: ${exceptionNames.join(
+      ', '
+    )}`;
+  }
+};
+
+export const getMaxSignalsWarning = (): string => {
+  return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created.`;
+};
+
+export const getSuppressionMaxSignalsWarning = (): string => {
+  return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
+};
+
+export const getDisabledActionsWarningText = ({
+  alertsCreated,
+  disabledActions,
+}: {
+  alertsCreated: boolean;
+  disabledActions: SanitizedRuleAction[];
+}) => {
+  const uniqueActionTypes = new Set(disabledActions.map((action) => action.actionTypeId));
+
+  const actionTypesJoined = [...uniqueActionTypes].join(', ');
+
+  // This rule generated alerts but did not send external notifications because rule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics tier.
+  const alertsGeneratedText = alertsCreated
+    ? 'This rule generated alerts but did not send external notifications because rule action'
+    : 'Rule action';
+
+  if (uniqueActionTypes.size > 1) {
+    return `${alertsGeneratedText} connectors ${actionTypesJoined} are not enabled. To send notifications, you need a higher Security Analytics license / tier`;
+  } else {
+    return `${alertsGeneratedText} connector ${actionTypesJoined} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
+  }
+};
+
+export type RuleWithInMemorySuppression =
+  | ThreatRuleParams
+  | EqlRuleParams
+  | MachineLearningRuleParams;
+
+export interface SequenceSuppressionTermsAndFieldsParams {
+  sharedParams: SecuritySharedParams<EqlRuleParams>;
+  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
+  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+}
+
+export type SequenceSuppressionTermsAndFieldsFactory = (
+  shellAlert: WrappedEqlShellOptionalSubAlertsType,
+  buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>,
+  buildReasonMessage: BuildReasonMessage
+) => WrappedFieldsLatest<EqlShellFieldsLatest & SuppressionFieldsLatest> & {
+  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+};
+
+/**
+ * converts ES after_key object into string
+ * for example: { "agent.name": "test" } would become `agent.name: test`
+ */
+export const stringifyAfterKey = (afterKey: Record<string, string | number | null> | undefined) => {
+  if (!afterKey) {
+    return;
+  }
+
+  return Object.entries(afterKey)
+    .map((entry) => entry.join(': '))
+    .join(', ');
+};
+
+export const buildShellAlertSuppressionTermsAndFields = ({
+  sharedParams,
+  shellAlert,
+  buildingBlockAlerts,
+}: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
+  EqlShellFieldsLatest & SuppressionFieldsLatest
+> & {
+  subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+} => {
+  const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
+    sharedParams;
+  const suppressionTerms = getSuppressionTerms({
+    alertSuppression: completeRule?.ruleParams?.alertSuppression,
+    input: shellAlert._source,
+  });
+  const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
+
+  const primarySuppressionTime = robustGet({
+    key: primaryTimestamp,
+    document: shellAlert._source,
+  }) as string | undefined;
+
+  const secondarySuppressionTime =
+    secondaryTimestamp &&
+    (robustGet({
+      key: secondaryTimestamp,
+      document: shellAlert._source,
+    }) as string | undefined);
+
+  const suppressionTime = new Date(
+    primarySuppressionTime ??
+      secondarySuppressionTime ??
+      alertTimestampOverride ??
+      shellAlert._source[TIMESTAMP]
+  );
+
+  const suppressionFields: ExtraFieldsForShellAlert = {
+    [ALERT_INSTANCE_ID]: instanceId,
+    [ALERT_SUPPRESSION_TERMS]: suppressionTerms,
+    [ALERT_SUPPRESSION_START]: suppressionTime,
+    [ALERT_SUPPRESSION_END]: suppressionTime,
+    [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+  };
+
+  merge<EqlShellFieldsLatest, SuppressionFieldsLatest>(shellAlert._source, suppressionFields);
+
+  return {
+    _id: shellAlert._id,
+    _index: shellAlert._index,
+    _source: shellAlert._source as EqlShellFieldsLatest & SuppressionFieldsLatest,
+    subAlerts: buildingBlockAlerts,
+  };
+};

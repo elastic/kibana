@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-plugin-dynamic-resolving-b",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "coreDynamicResolvingB",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "core_plugin_b"
+    ],
+    "runtimePluginDependencies" : ["coreDynamicResolvingA"]
+  }
+}

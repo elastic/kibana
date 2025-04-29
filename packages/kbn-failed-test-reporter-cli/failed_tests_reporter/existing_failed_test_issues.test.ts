@@ -102,6 +102,7 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
       "calls": Array [
         Array [
           Object {
+            "allowAbsoluteUrls": false,
             "baseURL": "https://ci-stats.kibana.dev",
             "data": Object {
               "failures": Array [
@@ -117,6 +118,7 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
         ],
         Array [
           Object {
+            "allowAbsoluteUrls": false,
             "baseURL": "https://ci-stats.kibana.dev",
             "data": Object {
               "failures": Array [

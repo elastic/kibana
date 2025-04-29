@@ -294,7 +294,64 @@ This event will be indexed with the following structure:
 }
 ```
 
+#### Add time ranges
+
+The meta field supports telemetry on time ranges, providing calculated metrics for enhanced context. This includes:
+
+- **Query range in seconds:**
+
+  - Calculated as the time difference in seconds between `rangeFrom` and `rangeTo`.
+
+- **Offset calculation:**
+  - A **negative offset** indicates that `rangeTo` is in the past.
+  - A **positive offset** indicates that `rangeTo` is in the future.
+  - An offset of **zero** indicates that `rangeTo` matches `'now'`.
+
+###### Code example
+
+```
+onPageReady({
+  meta: {
+    rangeFrom: 'now-15m',
+    rangeTo: 'now',
+  }
+});
+```
+
+This will be indexed as:
+
+```typescript
+{
+  "_index": "backing-ebt-kibana-browser-performance-metrics-000001",    // Performance metrics are stored in a dedicated simplified index (browser \ server).
+  "_source": {
+    "timestamp": "2024-08-13T11:29:58.275Z"
+    "event_type": "performance_metric",                                 // All performance events share a common event type to simplify mapping
+    "eventName": 'kibana:plugin_render_time',                           // Event name as specified when reporting it
+    "duration": 736,                                                    // Event duration as specified when reporting it
+    "meta": {
+      "target": '/home',
+      "query_range_secs": 900, // 15 minutes
+      "query_from_offset_secs": -900 // From 15 minutes ago
+      "query_to_offset_secs": 0 // To now
+    },
+    "context": {                                                        // Context holds information identifying the deployment, version, application and page that generated the event
+      "version": "8.16.0-SNAPSHOT",
+      "cluster_name": "elasticsearch",
+      "pageName": "application:home:app",
+      "applicationId": "home",
+      "page": "app",
+      "entityId": "61c58ad0-3dd3-11e8-b2b9-5d5dc1715159",
+      "branch": "main",
+      ...
+    },
+
+    ...
+  },
+}
+```
+
 #### Add custom metrics
+
 Having `kibana:plugin_render_time` metric event is not always enough, depending on the use case you would likely need some complementary information to give some sense to the value reported by the metric (e.g. number of hosts, number of services, number of dataStreams, etc).
 `kibana:plugin_render_time` metric API supports up to 9 numbered free fields that can be used to report numeric metrics that you intend to analyze. Note that they can be used for any type of numeric information you may want to report.
 
@@ -304,10 +361,12 @@ We could make use of these custom metrics using the following format:
 ...
   // Call onPageReady once the meaningful data has rendered and visible to the user
   onPageReady({
-    key1: 'datasets',
-    value1: 5,
-    key2: 'documents',
-    value2: 1000,
+    customMetrics: {
+      key1: 'datasets',
+      value1: 5,
+      key2: 'documents',
+      value2: 1000,
+    }
   });
 ...
 ```

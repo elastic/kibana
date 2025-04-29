@@ -10,7 +10,7 @@ import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils/es_utils';
+import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 
 const MORE_THAN_1024_CHARS =
@@ -66,10 +66,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('gets limit analysis for a given datastream and degraded field', () => {
       before(async () => {
         synthtraceLogsEsClient = await synthtrace.createLogsSynthtraceEsClient();
-        await synthtraceLogsEsClient.createComponentTemplate(
-          customComponentTemplateName,
-          logsSynthMappings(dataset)
-        );
+        await synthtraceLogsEsClient.createComponentTemplate({
+          name: customComponentTemplateName,
+          mappings: logsSynthMappings(dataset),
+        });
         await esClient.indices.putIndexTemplate({
           name: dataStreamName,
           _meta: {

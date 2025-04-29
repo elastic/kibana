@@ -11,20 +11,22 @@
   },
   "dependencies": {
     "@octokit/rest": "^18.10.0",
-    "axios": "^1.7.4",
+    "axios": "^1.8.3",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",
+    "minimist": "^1.2.8",
     "tslib": "*"
   },
   "devDependencies": {
     "@types/chai": "^4.3.3",
-    "@types/js-yaml": "^4.0.5",
+    "@types/js-yaml": "^4.0.9",
     "@types/minimatch": "^3.0.5",
+    "@types/minimist": "^1.2.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^15.12.2",
     "chai": "^4.3.10",
-    "mocha": "^10.3.0",
+    "mocha": "^11.0.1",
     "nock": "^12.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.6"

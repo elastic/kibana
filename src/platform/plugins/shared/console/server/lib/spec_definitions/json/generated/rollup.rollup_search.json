@@ -1,0 +1,24 @@
+{
+  "rollup.rollup_search": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "rest_total_hits_as_int": "__flag__",
+      "typed_keys": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_rollup_search"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/rollup-search.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}
