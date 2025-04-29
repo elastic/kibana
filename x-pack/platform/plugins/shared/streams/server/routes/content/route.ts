@@ -12,10 +12,10 @@ import { createConcatStream, createListStream, createPromiseFromStreams } from '
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
   ContentPack,
-  ContentPackSavedObject,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
 } from '@kbn/content-packs-schema';
+import type { SavedObject } from '@kbn/core/server';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { Asset } from '../../../common';
 import { DashboardAsset, DashboardLink } from '../../../common/assets';
@@ -91,7 +91,7 @@ const exportContentRoute = createServerRoute({
       includeReferencesDeep: true,
     });
 
-    const savedObjects: ContentPackSavedObject[] = await createPromiseFromStreams([
+    const savedObjects: SavedObject[] = await createPromiseFromStreams([
       exportStream,
       createConcatStream([]),
     ]);

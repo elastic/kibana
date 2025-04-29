@@ -10,7 +10,10 @@ import {
   ContentPack,
   ContentPackEntry,
   ContentPackManifest,
+  SUPPORTED_SAVED_OBJECT_TYPES,
   contentPackManifestSchema,
+  isSupportedSavedObjectFile,
+  isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
@@ -35,13 +38,9 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
   const entries: ContentPackEntry[] = [];
   zip.forEach((entry) => {
     const filepath = path.join(...entry.entryName.split(path.sep).slice(1));
-    const dirname = path.dirname(filepath);
     if (filepath === 'manifest.yml') {
       manifestEntry = entry;
-    } else if (
-      dirname === path.join('kibana', 'dashboard') ||
-      dirname === path.join('kibana', 'index_pattern')
-    ) {
+    } else if (isSupportedSavedObjectFile(filepath)) {
       entries.push(JSON.parse(entry.getData().toString()));
     }
   });
@@ -65,8 +64,8 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
   const rootDir = `${manifest.name}-${manifest.version}`;
 
   objects.forEach((object: ContentPackEntry) => {
-    if (object.type === 'dashboard' || object.type === 'index-pattern') {
-      const dir = object.type === 'dashboard' ? 'dashboard' : 'index_pattern';
+    if (isSupportedSavedObjectType(object)) {
+      const dir = SUPPORTED_SAVED_OBJECT_TYPES.find(({ type }) => type === object.type)!.dir;
       zip.addFile(
         path.join(rootDir, 'kibana', dir, `${object.id}.json`),
         Buffer.from(JSON.stringify(object, null, 2))

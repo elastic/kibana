@@ -95,11 +95,9 @@ export function replaceIndexPatterns(
 }
 
 function locateConfiguration(
-  object: ContentPackSavedObject,
+  content: ContentPackSavedObject,
   options: TraverseOptions
 ): ContentPackSavedObject {
-  const content = object;
-
   if (content.type === 'index-pattern') {
     content.attributes = options.indexPattern(content.attributes);
   }
@@ -113,7 +111,11 @@ function locateConfiguration(
     attributes.panelsJSON = JSON.stringify(panels);
   }
 
-  return object;
+  if (content.type === 'lens') {
+    content.attributes = traverseLensPanel(content.attributes, options);
+  }
+
+  return content;
 }
 
 function traversePanel(panel: SavedDashboardPanel, options: TraverseOptions) {
