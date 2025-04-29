@@ -12,13 +12,13 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type {
   CspClientPluginStartDeps,
   FindingMisconfigurationFlyoutFooterProps,
-  FindingMisconfigurationFlyoutProps,
   FindingsMisconfigurationFlyoutContentProps,
   FindingsMisconfigurationFlyoutHeaderProps,
   FindingsVulnerabilityFlyoutContentProps,
   FindingsVulnerabilityFlyoutFooterProps,
   FindingsVulnerabilityFlyoutHeaderProps,
   FindingVulnerabilityFlyoutProps,
+  FindingsMisconfigurationPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { CspLoadingState } from './components/csp_loading_state';
@@ -151,7 +151,7 @@ export class CspPlugin
       getCloudSecurityPostureRouter: () => App,
       getCloudSecurityPostureMisconfigurationFlyout: () => {
         return {
-          Component: (props: FindingMisconfigurationFlyoutProps) => (
+          Component: (props: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => (
             <LazyCspFindingsMisconfigurationFlyout {...props}>
               {props.children}
             </LazyCspFindingsMisconfigurationFlyout>

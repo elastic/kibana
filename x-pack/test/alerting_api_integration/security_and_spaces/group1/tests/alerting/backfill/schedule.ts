@@ -151,10 +151,19 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .send([
               {
                 rule_id: ruleId1,
-                start: defaultStart,
-                end: defaultEnd,
+                ranges: [
+                  {
+                    start: defaultStart,
+                    end: defaultEnd,
+                  },
+                ],
               },
-              { rule_id: ruleId2, start: defaultStart },
+              {
+                rule_id: ruleId2,
+                ranges: [
+                  { start: defaultStart, end: moment(defaultStart).add(12, 'hours').toISOString() },
+                ],
+              },
             ]);
 
           switch (scenario.id) {
@@ -338,9 +347,12 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
-              { rule_id: ruleId, start: start1, end: end1 },
-              { rule_id: ruleId, start: start2 },
-              { rule_id: ruleId, start: start3, end: end3 },
+              { rule_id: ruleId, ranges: [{ start: start1, end: end1 }] },
+              {
+                rule_id: ruleId,
+                ranges: [{ start: start2, end: moment(start2).add(12, 'hours').toISOString() }],
+              },
+              { rule_id: ruleId, ranges: [{ start: start3, end: end3 }] },
             ]);
 
           switch (scenario.id) {
@@ -571,7 +583,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
-            .send([{ rule_id: 'abc', start: 'foo' }]);
+            .send([{ rule_id: 'abc', ranges: [{ start: 'foo', end: 'bar' }] }]);
 
           // invalid end time
           const response2 = await supertestWithoutAuth
@@ -582,8 +594,12 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .send([
               {
                 rule_id: 'abc',
-                start: moment().utc().startOf('day').subtract(7, 'days').toISOString(),
-                end: 'foo',
+                ranges: [
+                  {
+                    start: moment().utc().startOf('day').subtract(7, 'days').toISOString(),
+                    end: 'foo',
+                  },
+                ],
               },
             ]);
 
@@ -594,7 +610,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
-            .send([{ rule_id: 'abc', start: time, end: time }]);
+            .send([{ rule_id: 'abc', ranges: [{ start: time, end: time }] }]);
 
           // end time is before start time
           const response4 = await supertestWithoutAuth
@@ -605,8 +621,12 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .send([
               {
                 rule_id: 'abc',
-                start: moment().utc().startOf('day').subtract(7, 'days').toISOString(),
-                end: moment().utc().startOf('day').subtract(8, 'days').toISOString(),
+                ranges: [
+                  {
+                    start: moment().utc().startOf('day').subtract(7, 'days').toISOString(),
+                    end: moment().utc().startOf('day').subtract(8, 'days').toISOString(),
+                  },
+                ],
               },
             ]);
 
@@ -616,7 +636,12 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .set('x-elastic-internal-origin', 'xxx')
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
-            .send([{ rule_id: 'abc', start: '2023-04-30T00:00:00.000Z' }]);
+            .send([
+              {
+                rule_id: 'abc',
+                ranges: [{ start: '2023-04-30T00:00:00.000Z', end: '2023-04-30T00:10:00.000Z' }],
+              },
+            ]);
 
           // start time is in the future
           const response6 = await supertestWithoutAuth
@@ -625,7 +650,15 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
-              { rule_id: 'abc', start: moment().utc().startOf('day').add(1, 'days').toISOString() },
+              {
+                rule_id: 'abc',
+                ranges: [
+                  {
+                    start: moment().utc().startOf('day').add(1, 'days').toISOString(),
+                    end: moment().utc().startOf('day').add(2, 'days').toISOString(),
+                  },
+                ],
+              },
             ]);
 
           // end time is in the future
@@ -637,8 +670,12 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .send([
               {
                 rule_id: 'abc',
-                start: moment().utc().startOf('day').subtract(1, 'days').toISOString(),
-                end: moment().utc().startOf('day').add(1, 'days').toISOString(),
+                ranges: [
+                  {
+                    start: moment().utc().startOf('day').subtract(1, 'days').toISOString(),
+                    end: moment().utc().startOf('day').add(1, 'days').toISOString(),
+                  },
+                ],
               },
             ]);
 
@@ -724,7 +761,12 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .send([
               {
                 rule_id: 'ac612b4b-5d0c-46d7-855a-98dd920e3aa6',
-                start: moment().utc().startOf('day').subtract(7, 'days').toISOString(),
+                ranges: [
+                  {
+                    start: moment().utc().startOf('day').subtract(7, 'days').toISOString(),
+                    end: moment().utc().startOf('day').subtract(6, 'days').toISOString(),
+                  },
+                ],
               },
             ]);
 
@@ -766,6 +808,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         it('should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
           const start = moment().utc().startOf('day').subtract(14, 'days').toISOString();
           const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
+          const end2 = moment(start).add(12, 'hours').toISOString();
           // create 2 rules
           const rresponse1 = await supertest
             .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
@@ -822,12 +865,12 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password)
             .send([
-              { rule_id: ruleId1, start, end },
-              { rule_id: ruleId2, start },
-              { rule_id: lifecycleRuleId, start },
-              { rule_id: disabledRuleId, start },
-              { rule_id: deletedRuleId, start },
-              { rule_id: ruleId1, start },
+              { rule_id: ruleId1, ranges: [{ start, end }] },
+              { rule_id: ruleId2, ranges: [{ start, end: end2 }] },
+              { rule_id: lifecycleRuleId, ranges: [{ start, end: end2 }] },
+              { rule_id: disabledRuleId, ranges: [{ start, end: end2 }] },
+              { rule_id: deletedRuleId, ranges: [{ start, end: end2 }] },
+              { rule_id: ruleId1, ranges: [{ start, end: end2 }] },
             ]);
 
           switch (scenario.id) {
@@ -1156,8 +1199,8 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
             .set('x-elastic-internal-origin', 'xxx')
             .auth(apiOptions.username, apiOptions.password)
             .send([
-              { rule_id: ruleId1, start, end, run_actions: true },
-              { rule_id: ruleId2, start, end, run_actions: true },
+              { rule_id: ruleId1, ranges: [{ start, end }], run_actions: true },
+              { rule_id: ruleId2, ranges: [{ start, end }], run_actions: true },
             ]);
 
           switch (scenario.id) {
