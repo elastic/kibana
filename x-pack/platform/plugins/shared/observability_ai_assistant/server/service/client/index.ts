@@ -32,6 +32,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -77,7 +78,6 @@ import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
-import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
 const MAX_FUNCTION_CALLS = 8;
 

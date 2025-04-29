@@ -9,12 +9,12 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import pLimit from 'p-limit';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { uniq } from 'lodash';
+import { LockManagerService } from '@kbn/lock-manager';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
 import { waitForKbModel } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { sleep } from '../util/sleep';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
