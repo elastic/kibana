@@ -30,6 +30,7 @@ import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { agentRunnableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -59,6 +60,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   telemetryParams,
   traceOptions,
   responseLanguage = 'English',
+  timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai' && !isOssModel;
@@ -90,6 +92,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
       convertSystemMessageToHumanContent: false,
+      timeout,
       telemetryMetadata: {
         pluginId: 'security_ai_assistant',
       },
@@ -179,28 +182,19 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     savedObjectsClient,
   });
 
-  const agentRunnable =
-    isOpenAI || llmType === 'inference'
-      ? await createOpenAIToolsAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : llmType && ['bedrock', 'gemini'].includes(llmType)
-      ? await createToolCallingAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPrompt(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        })
-      : // used with OSS models
-        await createStructuredChatAgent({
-          llm: createLlmInstance(),
-          tools,
-          prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt),
-          streamRunnable: isStream,
-        });
+  const chatPromptTemplate = formatPrompt({
+    prompt: defaultSystemPrompt,
+    additionalPrompt: systemPrompt,
+  });
+
+  const agentRunnable = await agentRunnableFactory({
+    llm: createLlmInstance(),
+    isOpenAI,
+    llmType,
+    tools,
+    isStream,
+    prompt: chatPromptTemplate,
+  });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
   const telemetryTracer = telemetryParams
