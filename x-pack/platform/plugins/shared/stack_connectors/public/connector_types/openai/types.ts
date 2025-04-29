@@ -19,6 +19,12 @@ export interface Config {
   apiProvider: OpenAiProviderType;
   apiUrl: string;
   defaultModel?: string;
+  certificateFile?: string | string[];
+  certificateData?: string;
+  privateKeyFile?: string | string[];
+  privateKeyData?: string;
+  verificationMode?: 'full' | 'certificate' | 'none';
+  headers?: Record<string, string>;
 }
 
 export interface Secrets {

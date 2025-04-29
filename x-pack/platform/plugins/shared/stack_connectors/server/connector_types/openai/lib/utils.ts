@@ -8,6 +8,7 @@
 import type { AxiosResponse, ResponseType } from 'axios';
 import type { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
+import type { Config } from '../../../../common/openai/types';
 import {
   sanitizeRequest as openAiSanitizeRequest,
   getRequestWithStreamOption as openAiGetRequestWithStreamOption,
@@ -20,6 +21,8 @@ import {
   sanitizeRequest as otherOpenAiSanitizeRequest,
   getRequestWithStreamOption as otherOpenAiGetRequestWithStreamOption,
 } from './other_openai_utils';
+import fs from 'fs';
+import https from 'https';
 
 export const sanitizeRequest = (
   provider: string,
@@ -84,12 +87,13 @@ export function getRequestWithStreamOption(
 export const getAxiosOptions = (
   provider: string,
   apiKey: string,
-  stream: boolean
-): { headers: Record<string, string>; responseType?: ResponseType } => {
+  stream: boolean,
+  config?: Config
+): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
+
   switch (provider) {
     case OpenAiProviderType.OpenAi:
-    case OpenAiProviderType.Other:
       return {
         headers: { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' },
         ...responseType,
@@ -97,6 +101,69 @@ export const getAxiosOptions = (
     case OpenAiProviderType.AzureAi:
       return {
         headers: { ['api-key']: apiKey, ['content-type']: 'application/json' },
+        ...responseType,
+      };
+    case OpenAiProviderType.Other:
+      if (
+        config &&
+        (config.certificateFile ||
+          config.certificateData ||
+          config.privateKeyFile ||
+          config.privateKeyData)
+      ) {
+        if (!config.certificateFile && !config.certificateData) {
+          throw new Error('Either certificate file or certificate data must be provided for PKI');
+        }
+        if (!config.privateKeyFile && !config.privateKeyData) {
+          throw new Error('Either private key file or private key data must be provided for PKI');
+        }
+
+        let cert: string | Buffer;
+        let key: string | Buffer;
+
+        if (config.certificateFile) {
+          cert = fs.readFileSync(
+            Array.isArray(config.certificateFile)
+              ? config.certificateFile[0]
+              : config.certificateFile
+          );
+        } else {
+          cert = config.certificateData!;
+        }
+
+        if (config.privateKeyFile) {
+          key = fs.readFileSync(
+            Array.isArray(config.privateKeyFile) ? config.privateKeyFile[0] : config.privateKeyFile
+          );
+        } else {
+          key = config.privateKeyData!;
+        }
+
+        if (!cert.toString().includes('-----BEGIN CERTIFICATE-----')) {
+          throw new Error('Invalid certificate format: Must be PEM-encoded');
+        }
+        if (!key.toString().includes('-----BEGIN PRIVATE KEY-----')) {
+          throw new Error('Invalid private key format: Must be PEM-encoded');
+        }
+
+        const httpsAgent = new https.Agent({
+          cert,
+          key,
+          rejectUnauthorized: config.verificationMode === 'none',
+          checkServerIdentity:
+            config.verificationMode === 'certificate' || config.verificationMode === 'none'
+              ? () => undefined
+              : undefined,
+        });
+
+        return {
+          headers: { ['content-type']: 'application/json', Accept: 'application/json' },
+          httpsAgent,
+          ...responseType,
+        };
+      }
+      return {
+        headers: { Authorization: `Bearer ${apiKey}`, ['content-type']: 'application/json' },
         ...responseType,
       };
     default:
@@ -116,4 +183,41 @@ export const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) 
 export const getAzureApiVersionParameter = (url: string): string | undefined => {
   const urlSearchParams = new URLSearchParams(new URL(url).search);
   return urlSearchParams.get('api-version') ?? undefined;
+};
+
+export const validatePKICertificates = (
+  certificateFile?: string | string[],
+  certificateData?: string,
+  privateKeyFile?: string | string[],
+  privateKeyData?: string
+): boolean => {
+  try {
+    // Check file paths if provided
+    if (certificateFile) {
+      const certPath = Array.isArray(certificateFile) ? certificateFile[0] : certificateFile;
+      if (!fs.existsSync(certPath)) {
+        return false;
+      }
+      fs.accessSync(certPath, fs.constants.R_OK);
+    }
+    if (privateKeyFile) {
+      const keyPath = Array.isArray(privateKeyFile) ? privateKeyFile[0] : privateKeyFile;
+      if (!fs.existsSync(keyPath)) {
+        return false;
+      }
+      fs.accessSync(keyPath, fs.constants.R_OK);
+    }
+
+    // Check PEM format for data if provided
+    if (certificateData && !certificateData.includes('-----BEGIN CERTIFICATE-----')) {
+      return false;
+    }
+    if (privateKeyData && !privateKeyData.includes('-----BEGIN PRIVATE KEY-----')) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    return false;
+  }
 };

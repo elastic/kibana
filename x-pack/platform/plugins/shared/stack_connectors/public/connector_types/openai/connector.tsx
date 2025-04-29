@@ -110,6 +110,28 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           readOnly={readOnly}
           configFormSchema={otherOpenAiConfig}
           secretsFormSchema={otherOpenAiSecrets}
+          configValidations={[
+            {
+              validator: ({ certificateFile, certificateData, privateKeyFile, privateKeyData }) => {
+                if (
+                  (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                  !(certificateFile || certificateData)
+                ) {
+                  return {
+                    message: i18n.MISSING_CERTIFICATE,
+                  };
+                }
+                if (
+                  (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                  !(privateKeyFile || privateKeyData)
+                ) {
+                  return {
+                    message: i18n.MISSING_PRIVATE_KEY,
+                  };
+                }
+              },
+            },
+          ]}
         />
       )}
       <UseField

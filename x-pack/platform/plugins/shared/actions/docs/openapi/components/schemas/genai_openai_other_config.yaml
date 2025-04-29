@@ -1,0 +1,59 @@
+title: Connector request properties for an OpenAI connector with Other provider
+description: >
+  Defines properties for connectors when type is `.gen-ai` and the API provider is `Other` (OpenAI-compatible service), including optional PKI authentication.
+type: object
+required:
+  - apiProvider
+  - apiUrl
+  - defaultModel
+properties:
+  apiProvider:
+    type: string
+    description: The OpenAI API provider.
+    enum: ['Other']
+  apiUrl:
+    type: string
+    description: The OpenAI-compatible API endpoint.
+  defaultModel:
+    type: string
+    description: The default model to use for requests.
+  certificateFile:
+    oneOf:
+      - type: string
+        description: Path to the PKI certificate file (.pem).
+        minLength: 1
+      - type: array
+        items:
+          type: string
+          minLength: 1
+        minItems: 1
+        description: Array of paths to PKI certificate files (.pem).
+  certificateData:
+    type: string
+    description: PEM-encoded certificate content.
+    minLength: 1
+  privateKeyFile:
+    oneOf:
+      - type: string
+        description: Path to the PKI private key file (.pem).
+        minLength: 1
+      - type: array
+        items:
+          type: string
+          minLength: 1
+        minItems: 1
+        description: Array of paths to PKI private key files (.pem).
+  privateKeyData:
+    type: string
+    description: PEM-encoded private key content.
+    minLength: 1
+  verificationMode:
+    type: string
+    description: SSL verification mode for PKI authentication.
+    enum: ['full', 'certificate', 'none']
+    default: 'full'
+  headers:
+    type: object
+    description: Optional HTTP headers to include in requests.
+    additionalProperties:
+      type: string

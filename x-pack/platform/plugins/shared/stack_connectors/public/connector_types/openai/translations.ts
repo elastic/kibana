@@ -72,6 +72,76 @@ export const DOCUMENTATION = i18n.translate(
   }
 );
 
+export const CERT_FILE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certificateFileLabel',
+  {
+    defaultMessage: 'Certificate File Path',
+  }
+);
+
+export const CERT_DATA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certificateDataLabel',
+  {
+    defaultMessage: 'Certificate Content',
+  }
+);
+
+export const KEY_FILE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.privateKeyFileLabel',
+  {
+    defaultMessage: 'Private Key File Path',
+  }
+);
+
+export const KEY_DATA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.privateKeyDataLabel',
+  {
+    defaultMessage: 'Private Key Content',
+  }
+);
+
+export const VERIFICATION_MODE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeLabel',
+  {
+    defaultMessage: 'SSL Verification Mode',
+  }
+);
+
+export const VERIFICATION_MODE_FULL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeFullLabel',
+  {
+    defaultMessage: 'Full (Certificate and Hostname)',
+  }
+);
+
+export const VERIFICATION_MODE_CERTIFICATE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeCertificateLabel',
+  {
+    defaultMessage: 'Certificate Only',
+  }
+);
+
+export const VERIFICATION_MODE_NONE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeNoneLabel',
+  {
+    defaultMessage: 'None (Skip Verification)',
+  }
+);
+
+export const MISSING_CERTIFICATE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.error.missingCertificate',
+  {
+    defaultMessage: 'Either certificate file or certificate data must be provided.',
+  }
+);
+
+export const MISSING_PRIVATE_KEY = i18n.translate(
+  'xpack.stackConnectors.components.genAi.error.missingPrivateKey',
+  {
+    defaultMessage: 'Either private key file or private key data must be provided.',
+  }
+);
+
 export const URL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.urlTextFieldLabel',
   {
