@@ -8,6 +8,7 @@
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { installSecurityAiPromptsPackage } from '../../logic/integrations/install_ai_prompts';
 import type {
   BootstrapPrebuiltRulesResponse,
   PackageInstallStatus,
@@ -20,9 +21,6 @@ import { installPrebuiltRulesPackage } from '../../logic/integrations/install_pr
 import { installPromotionRules } from '../../logic/integrations/install_promotion_rules';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import {
-  installSecurityAiPromptsPackage,
-} from '../install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 
 export const bootstrapPrebuiltRulesHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -80,12 +78,12 @@ export const bootstrapPrebuiltRulesHandler = async (
       ? await installSecurityAiPromptsPackage(config, securityContext)
       : null;
 
-    if (securityAIPromptsEnabled && securityAiPromptsResult !== null) {
+    if (securityAiPromptsResult !== null) {
       packageResults.push({
         name: securityAiPromptsResult.package.name,
-          version: securityAiPromptsResult.package.version,
+        version: securityAiPromptsResult.package.version,
         status: securityAiPromptsResult.status,
-      })
+      });
     }
 
     const responseBody: BootstrapPrebuiltRulesResponse = {
