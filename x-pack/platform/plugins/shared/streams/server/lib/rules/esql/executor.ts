@@ -8,7 +8,6 @@
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertsClientError,
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
 import { Alert } from '@kbn/alerts-as-data-utils';
@@ -16,6 +15,7 @@ import { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
+import { MAX_ALERTS_PER_EXECUTION } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
 import { EsqlRuleInstanceState, EsqlRuleParams } from './types';
@@ -33,11 +33,7 @@ export async function getRuleExecutor(
   }
 ) {
   const { services, params, logger, state, startedAt, spaceId, rule } = options;
-  const { scopedClusterClient, alertsClient, alertWithPersistence } = services;
-
-  if (!alertsClient) {
-    throw new AlertsClientError();
-  }
+  const { scopedClusterClient, alertWithPersistence } = services;
 
   const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];
 
@@ -53,7 +49,7 @@ export async function getRuleExecutor(
 
   const results = await executeEsqlRequest({
     esClient: scopedClusterClient.asCurrentUser,
-    requestBody: esqlRequest,
+    esqlRequest,
   });
 
   const alertDocIdToDocumentIdMap = new Map<string, string>();
@@ -67,10 +63,14 @@ export async function getRuleExecutor(
     };
   });
 
-  const { createdAlerts, errors } = await alertWithPersistence(alerts, true, 10000);
+  const { createdAlerts, errors } = await alertWithPersistence(
+    alerts,
+    true,
+    MAX_ALERTS_PER_EXECUTION
+  );
 
   if (!isEmpty(errors)) {
-    logger.debug(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    logger.debug(() => `Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
   }
 
   const originalDocumentIds = createdAlerts.map(

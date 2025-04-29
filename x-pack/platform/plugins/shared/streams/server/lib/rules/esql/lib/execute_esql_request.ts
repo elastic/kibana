@@ -5,21 +5,9 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-
-interface EsqlResultColumn {
-  name: string;
-  type: 'date' | 'keyword';
-}
-
-type EsqlRowValue = string | number | boolean | null | Record<string, unknown>;
-type EsqlResultRow = EsqlRowValue[];
-
-interface EsqlTable {
-  columns: EsqlResultColumn[];
-  values: EsqlResultRow[];
-}
+import { ESQLSearchResponse } from '@kbn/es-types';
 
 type Response = Array<{
   _id: string;
@@ -28,39 +16,32 @@ type Response = Array<{
 
 export const executeEsqlRequest = async ({
   esClient,
-  requestBody,
+  esqlRequest,
 }: {
   esClient: ElasticsearchClient;
-  requestBody: Record<string, unknown>;
+  esqlRequest: { query: string; filter: estypes.QueryDslQueryContainer };
 }): Promise<Response> => {
-  try {
-    const response = await esClient.transport.request<EsqlTable>({
-      method: 'POST',
-      path: '/_query',
-      body: requestBody,
-      querystring: { drop_null_columns: true },
-    });
+  const response = (await esClient.esql.query({
+    query: esqlRequest.query,
+    filter: esqlRequest.filter,
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
 
-    const [sourceIndex, idIndex] = [
-      response.columns.findIndex((col) => col.name === '_source'),
-      response.columns.findIndex((col) => col.name === '_id'),
-    ];
+  const { columns, values } = response;
 
-    const results = response.values
-      .map((row) => ({
-        _id: row[idIndex],
-        _source: row[sourceIndex],
-      }))
-      .filter(
-        (row) =>
-          row._id !== null &&
-          typeof row._id === 'string' &&
-          row._source !== null &&
-          typeof row._source === 'object'
-      ) as Response;
+  const [sourceIndex, idIndex] = [
+    columns.findIndex((col) => col.name === '_source'),
+    columns.findIndex((col) => col.name === '_id'),
+  ];
 
-    return results;
-  } catch (e) {
-    throw getKbnServerError(e);
+  if (sourceIndex === -1 || idIndex === -1) {
+    throw new Error('Invalid ES|QL response format: missing _source or _id column');
   }
+
+  const results = values.map((row) => ({
+    _id: row[idIndex],
+    _source: row[sourceIndex],
+  })) as Response;
+
+  return results;
 };
