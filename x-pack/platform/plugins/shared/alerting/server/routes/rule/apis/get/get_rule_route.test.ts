@@ -255,7 +255,7 @@ describe('getRuleRoute', () => {
     ]);
   });
 
-  it('returns the artifacts if defined', async () => {
+  it('does not return the artifacts', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
