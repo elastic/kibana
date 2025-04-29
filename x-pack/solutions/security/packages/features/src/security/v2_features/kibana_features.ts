@@ -51,6 +51,7 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 
 export const getSecurityV2BaseKibanaFeature = ({
   savedObjects,
+  isServerless,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
   deprecated: {
     notice: i18n.translate(
@@ -101,7 +102,7 @@ export const getSecurityV2BaseKibanaFeature = ({
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
           {
             feature: SECURITY_FEATURE_ID_V3,
-            privileges: ['minimal_all'],
+            privileges: ['minimal_all', ...(isServerless ? [] : ['endpoint_exceptions_all'])],
           },
         ],
       },
@@ -133,7 +134,7 @@ export const getSecurityV2BaseKibanaFeature = ({
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
           {
             feature: SECURITY_FEATURE_ID_V3,
-            privileges: ['minimal_read'],
+            privileges: ['minimal_read', ...(isServerless ? [] : ['endpoint_exceptions_read'])],
           },
         ],
       },

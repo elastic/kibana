@@ -55,11 +55,13 @@ export class ProductFeaturesService {
 
   constructor(
     private readonly logger: Logger,
-    private readonly experimentalFeatures: ExperimentalFeatures
+    private readonly experimentalFeatures: ExperimentalFeatures,
+    isServerless: boolean
   ) {
     const securityFeature = getSecurityFeature({
       savedObjects: securityV1SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
+      isServerless,
     });
     this.securityProductFeatures = new ProductFeatures(
       this.logger,
@@ -70,6 +72,7 @@ export class ProductFeaturesService {
     const securityV2Feature = getSecurityV2Feature({
       savedObjects: securityDefaultSavedObjects,
       experimentalFeatures: this.experimentalFeatures,
+      isServerless,
     });
     this.securityV2ProductFeatures = new ProductFeatures(
       this.logger,
@@ -81,6 +84,7 @@ export class ProductFeaturesService {
     const securityV3Feature = getSecurityV3Feature({
       savedObjects: securityDefaultSavedObjects,
       experimentalFeatures: this.experimentalFeatures,
+      isServerless,
     });
     this.securityV3ProductFeatures = new ProductFeatures(
       this.logger,
@@ -147,6 +151,7 @@ export class ProductFeaturesService {
     const timelineFeature = getTimelineFeature({
       savedObjects: securityTimelineSavedObjects,
       experimentalFeatures: {},
+      isServerless,
     });
     this.timelineProductFeatures = new ProductFeatures(
       this.logger,
@@ -158,6 +163,7 @@ export class ProductFeaturesService {
     const notesFeature = getNotesFeature({
       savedObjects: securityNotesSavedObjects,
       experimentalFeatures: {},
+      isServerless,
     });
     this.notesProductFeatures = new ProductFeatures(
       this.logger,

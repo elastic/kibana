@@ -8,10 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import {
-  ProductFeaturesPrivilegeId,
-  ProductFeaturesPrivileges,
-} from '../../product_features_privileges';
 
 import { SecuritySubFeatureId } from '../../product_features_keys';
 import { APP_ID, SECURITY_FEATURE_ID_V3 } from '../../constants';
@@ -645,7 +641,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.description',
     {
-      defaultMessage: 'Use Endpoint Exceptions (this is a test sub-feature).',
+      defaultMessage: 'Manage Endpoint Exceptions.',
     }
   ),
   privilegeGroups: [
@@ -663,7 +659,8 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
+          api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+          ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
         },
         {
           replacedBy: [
@@ -676,7 +673,8 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
+          api: [`${APP_ID}-showEndpointExceptions`],
+          ui: ['showEndpointExceptions'],
         },
       ],
     },

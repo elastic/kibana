@@ -18,10 +18,11 @@ export interface SecurityFeatureParams {
    */
   experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];
+  isServerless: boolean;
 }
 
-export type DefaultSecurityProductFeaturesConfig = Omit<
-  Record<ProductFeatureSecurityKey, ProductFeatureKibanaConfig<SecuritySubFeatureId>>,
-  ProductFeatureSecurityKey.endpointExceptions
-  // | add not generic security app features here
+// Omit<> not generic security app features here
+export type DefaultSecurityProductFeaturesConfig = Record<
+  ProductFeatureSecurityKey,
+  ProductFeatureKibanaConfig<SecuritySubFeatureId>
 >;

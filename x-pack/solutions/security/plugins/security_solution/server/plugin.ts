@@ -169,9 +169,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.config = serverConfig;
     this.logger = context.logger.get();
     this.appClientFactory = new AppClientFactory();
+
+    const isServerless = this.pluginContext.env.packageInfo.buildFlavor === 'serverless';
     this.productFeaturesService = new ProductFeaturesService(
       this.logger,
-      this.config.experimentalFeatures
+      this.config.experimentalFeatures,
+      isServerless
     );
     this.siemMigrationsService = new SiemMigrationsService(
       this.config,
