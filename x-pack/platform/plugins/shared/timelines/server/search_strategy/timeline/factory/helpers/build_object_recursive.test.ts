@@ -10,8 +10,9 @@ import { EventHit } from '../../../../../common/search_strategy';
 import { buildObjectRecursive } from './build_object_recursive';
 
 describe('buildObjectRecursive', () => {
+  let eventHitKeys = Object.keys(eventHit.fields ?? {});
   it('builds an object from a single non-nested field', () => {
-    expect(buildObjectRecursive('@timestamp', eventHit.fields)).toEqual({
+    expect(buildObjectRecursive('@timestamp', eventHit.fields, eventHitKeys)).toEqual({
       '@timestamp': ['2020-11-17T14:48:08.922Z'],
     });
   });
@@ -19,7 +20,7 @@ describe('buildObjectRecursive', () => {
   it('builds an object with no fields response', () => {
     const { fields, ...fieldLessHit } = eventHit;
     // @ts-expect-error fieldLessHit is intentionally missing fields
-    expect(buildObjectRecursive('@timestamp', fieldLessHit)).toEqual({
+    expect(buildObjectRecursive('@timestamp', fieldLessHit, eventHitKeys)).toEqual({
       '@timestamp': [],
     });
   });
@@ -33,7 +34,7 @@ describe('buildObjectRecursive', () => {
       },
     };
 
-    expect(buildObjectRecursive('foo.barBaz', hit.fields)).toEqual({
+    expect(buildObjectRecursive('foo.barBaz', hit.fields, eventHitKeys)).toEqual({
       foo: { barBaz: ['foo'] },
     });
   });
@@ -45,7 +46,8 @@ describe('buildObjectRecursive', () => {
         foo: [{ bar: ['baz'] }],
       },
     };
-    expect(buildObjectRecursive('foo.bar', hit.fields)).toEqual({
+    const hitKeys = Object.keys(hit.fields ?? {});
+    expect(buildObjectRecursive('foo.bar', hit.fields, hitKeys)).toEqual({
       foo: [{ bar: ['baz'] }],
     });
   });
@@ -61,7 +63,8 @@ describe('buildObjectRecursive', () => {
         ],
       },
     };
-    expect(buildObjectRecursive('foo.bar.baz', nestedHit.fields)).toEqual({
+    const nestedHitKeys = Object.keys(nestedHit.fields ?? {});
+    expect(buildObjectRecursive('foo.bar.baz', nestedHit.fields, nestedHitKeys)).toEqual({
       foo: {
         bar: [
           {
@@ -73,7 +76,7 @@ describe('buildObjectRecursive', () => {
   });
 
   it('builds intermediate objects at multiple levels', () => {
-    expect(buildObjectRecursive('threat.enrichments.matched.atomic', eventHit.fields)).toEqual({
+    expect(buildObjectRecursive('threat.enrichments.matched.atomic', eventHit.fields, eventHitKeys)).toEqual({
       threat: {
         enrichments: [
           {
@@ -117,7 +120,7 @@ describe('buildObjectRecursive', () => {
   });
 
   it('preserves multiple values for a single leaf', () => {
-    expect(buildObjectRecursive('threat.enrichments.matched.field', eventHit.fields)).toEqual({
+    expect(buildObjectRecursive('threat.enrichments.matched.field', eventHit.fields, eventHitKeys)).toEqual({
       threat: {
         enrichments: [
           {
@@ -162,6 +165,7 @@ describe('buildObjectRecursive', () => {
 
   describe('multiple levels of nested fields', () => {
     let nestedHit: EventHit;
+    let nestedHitKeys: string[];
 
     beforeEach(() => {
       // @ts-expect-error nestedHit is minimal
@@ -183,10 +187,11 @@ describe('buildObjectRecursive', () => {
           ],
         },
       };
+      nestedHitKeys = Object.keys(nestedHit.fields ?? {});
     });
 
     it('includes objects without the field', () => {
-      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf', nestedHit.fields)).toEqual({
+      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf', nestedHit.fields, nestedHitKeys)).toEqual({
         nested_1: {
           foo: [
             {
@@ -205,7 +210,7 @@ describe('buildObjectRecursive', () => {
     });
 
     it('groups multiple leaf values', () => {
-      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf_2', nestedHit.fields)).toEqual({
+      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf_2', nestedHit.fields, nestedHitKeys)).toEqual({
         nested_1: {
           foo: [
             {
