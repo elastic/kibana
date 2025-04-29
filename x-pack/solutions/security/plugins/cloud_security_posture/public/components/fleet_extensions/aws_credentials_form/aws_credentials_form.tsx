@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import {
   EuiCallOut,
   EuiFormRow,
@@ -34,6 +34,8 @@ import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from '../../test_subjects';
+import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
+
 
 interface AWSSetupInfoContentProps {
   info: ReactNode;
@@ -164,13 +166,11 @@ const CloudFormationSetup = ({
         </ol>
       </EuiText>
       <EuiSpacer size="l" />
-      <ReadDocumentation url={CLOUD_FORMATION_EXTERNAL_DOC_URL} />
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.awsCloudFormationDocPathInternal} />
     </>
   );
 };
 
-const CLOUD_FORMATION_EXTERNAL_DOC_URL =
-  'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
 const Link = ({ children, url }: { children: React.ReactNode; url: string }) => (
   <EuiLink
@@ -230,6 +230,40 @@ export const AwsCredentialsForm = ({
     updatePolicy,
   });
 
+  const [manualSetupDocUrl, setManualSetupDocUrl] = useState(
+    cspIntegrationDocsNavigation.cspm.awsManualSetupAsuumeRoleDocPathInternal
+  );
+
+  const handleManualCredentialTypeChange = useCallback(
+    (optionId: AwsCredentialsType) => {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
+          'aws.credentials.type': { value: optionId },
+        })
+      );
+      console.log('optionId', optionId);
+
+      // Update the documentation URL based on the selected credential type for Manual setup
+      const updatedUrl = (() => {
+        switch (optionId) {
+          case AWS_CREDENTIALS_TYPE.ASSUME_ROLE:
+            return cspIntegrationDocsNavigation.cspm.awsManualSetupAsuumeRoleDocPathInternal
+          case AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS:
+            return cspIntegrationDocsNavigation.cspm.awsManualSetupDirectAccessKeysDocPathInternal;
+          case AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS:
+            return cspIntegrationDocsNavigation.cspm.awsManualSetupTemporaryKeysDocPathInternal;
+          case AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS:
+            return cspIntegrationDocsNavigation.cspm.awsManualSetupSharedCredentialsDocPathInternal;
+          default:
+            return cspIntegrationDocsNavigation.cspm.awsManualSetupAsuumeRoleDocPathInternal;
+        }
+      })();
+
+      setManualSetupDocUrl(updatedUrl);
+    },
+    [newPolicy, input.type, updatePolicy]
+  );
+
   return (
     <>
       <AWSSetupInfoContent
@@ -239,7 +273,7 @@ export const AwsCredentialsForm = ({
             defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
-                <EuiLink href={elasticDocLink} target="_blank">
+                <EuiLink href={cspIntegrationDocsNavigation.cspm.getStartedPath} target="_blank">
                   <FormattedMessage
                     id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
@@ -272,18 +306,12 @@ export const AwsCredentialsForm = ({
             })}
             options={getAwsCredentialsFormManualOptions()}
             type={awsCredentialsType}
-            onChange={(optionId) => {
-              updatePolicy(
-                getPosturePolicy(newPolicy, input.type, {
-                  'aws.credentials.type': { value: optionId },
-                })
-              );
-            }}
+            onChange={handleManualCredentialTypeChange}
           />
           <EuiSpacer size="m" />
           {group.info}
           <EuiSpacer size="m" />
-          <ReadDocumentation url={elasticDocLink} />
+          <ReadDocumentation url={manualSetupDocUrl} />
           <EuiSpacer size="l" />
           <AwsInputVarFields
             fields={fields}

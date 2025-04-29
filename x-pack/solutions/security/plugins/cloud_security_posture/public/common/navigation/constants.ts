@@ -63,6 +63,14 @@ export const cspIntegrationDocsNavigation = {
     awsGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
     gcpGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
     azureGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
+    awsCloudFormationDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-set-up-cloudformation`,
+    awsCloudFormationDocPathExternal: `https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html`,
+    awsManualSetupMethodsDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-set-up-manual`,
+    awsManualSetupAsuumeRoleDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-use-instance-role`,
+    awsManualSetupDirectAccessKeysDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-use-keys-directly`,
+    awsManualSetupTemporaryKeysDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-use-temp-credentials`,
+    awsManualSetupSharedCredentialsDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-use-a-shared-credentials-file`,
+
   },
   cnvm: {
     overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CNVM_POLICY_TEMPLATE}`,
