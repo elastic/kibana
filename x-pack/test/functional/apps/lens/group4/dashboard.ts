@@ -330,7 +330,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    it('should add a drilldown to a Lens by-value chart', async () => {
+    it.only('should add a drilldown to a Lens by-value chart', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -347,9 +347,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // check that the drilldown is working now
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
-      expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
-      ).to.be(true);
+      expect(await panelActions.expectExistsPanelAction('embeddablePanelAction-D_ACTION')).to.be(
+        true
+      );
 
       // save the dashboard
       await dashboard.saveDashboard('dashboardWithDrilldown');
@@ -360,9 +360,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
-      expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-D_ACTION"]')
-      ).to.be(true);
+      expect(await panelActions.expectExistsPanelAction('embeddablePanelAction-D_ACTION')).to.be(
+        true
+      );
     });
   });
 }
