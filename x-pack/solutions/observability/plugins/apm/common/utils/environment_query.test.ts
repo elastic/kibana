@@ -6,13 +6,17 @@
  */
 
 import { SERVICE_ENVIRONMENT } from '../es_fields/apm';
-import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { environmentQuery } from './environment_query';
 
 describe('environmentQuery', () => {
   describe('when environment is an empty string', () => {
-    it('returns an empty query', () => {
-      expect(environmentQuery('')).toEqual([]);
+    it('returns ENVIRONMENT_NOT_DEFINED', () => {
+      expect(environmentQuery('')).toEqual([
+        {
+          term: { [SERVICE_ENVIRONMENT]: ENVIRONMENT_NOT_DEFINED.value },
+        },
+      ]);
     });
   });
 
@@ -24,10 +28,15 @@ describe('environmentQuery', () => {
     ]);
   });
 
+  it('creates a query for all environments', () => {
+    expect(environmentQuery(ENVIRONMENT_ALL.value)).toEqual([]);
+  });
+
   it('creates a query for missing service environments', () => {
-    expect(environmentQuery(ENVIRONMENT_NOT_DEFINED.value)[0]).toHaveProperty(
-      ['bool', 'must_not', 'exists', 'field'],
-      SERVICE_ENVIRONMENT
-    );
+    expect(environmentQuery(ENVIRONMENT_NOT_DEFINED.value)).toEqual([
+      {
+        term: { [SERVICE_ENVIRONMENT]: ENVIRONMENT_NOT_DEFINED.value },
+      },
+    ]);
   });
 });
