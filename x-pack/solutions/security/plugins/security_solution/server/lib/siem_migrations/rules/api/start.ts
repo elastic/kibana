@@ -19,6 +19,7 @@ import { authz } from './util/authz';
 import { getRetryFilter } from './util/retry';
 import { withLicense } from './util/with_license';
 import { createTracersCallbacks } from './util/tracing';
+import { withExistingMigration } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -41,56 +42,63 @@ export const registerSiemRuleMigrationsStartRoute = (
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
-          const migrationId = req.params.migration_id;
-          const {
-            langsmith_options: langsmithOptions,
-            connector_id: connectorId,
-            retry,
-          } = req.body;
+        withExistingMigration(
+          async (context, req, res): Promise<IKibanaResponse<StartRuleMigrationResponse>> => {
+            const migrationId = req.params.migration_id;
+            const {
+              langsmith_options: langsmithOptions,
+              connector_id: connectorId,
+              retry,
+            } = req.body;
 
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
-          try {
-            const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            try {
+              const ctx = await context.resolve([
+                'core',
+                'actions',
+                'alerting',
+                'securitySolution',
+              ]);
 
-            // Check if the connector exists and user has permissions to read it
-            const connector = await ctx.actions.getActionsClient().get({ id: connectorId });
-            if (!connector) {
-              return res.badRequest({ body: `Connector with id ${connectorId} not found` });
-            }
-
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            if (retry) {
-              const { updated } = await ruleMigrationsClient.task.updateToRetry(
-                migrationId,
-                getRetryFilter(retry)
-              );
-              if (!updated) {
-                return res.ok({ body: { started: false } });
+              // Check if the connector exists and user has permissions to read it
+              const connector = await ctx.actions.getActionsClient().get({ id: connectorId });
+              if (!connector) {
+                return res.badRequest({ body: `Connector with id ${connectorId} not found` });
               }
+
+              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              if (retry) {
+                const { updated } = await ruleMigrationsClient.task.updateToRetry(
+                  migrationId,
+                  getRetryFilter(retry)
+                );
+                if (!updated) {
+                  return res.ok({ body: { started: false } });
+                }
+              }
+
+              const callbacks = createTracersCallbacks(langsmithOptions, logger);
+
+              const { exists, started } = await ruleMigrationsClient.task.start({
+                migrationId,
+                connectorId,
+                invocationConfig: { callbacks },
+              });
+
+              if (!exists) {
+                return res.notFound();
+              }
+
+              await siemMigrationAuditLogger.logStart({ migrationId });
+
+              return res.ok({ body: { started } });
+            } catch (error) {
+              logger.error(error);
+              await siemMigrationAuditLogger.logStart({ migrationId, error });
+              return res.badRequest({ body: error.message });
             }
-
-            const callbacks = createTracersCallbacks(langsmithOptions, logger);
-
-            const { exists, started } = await ruleMigrationsClient.task.start({
-              migrationId,
-              connectorId,
-              invocationConfig: { callbacks },
-            });
-
-            if (!exists) {
-              return res.notFound();
-            }
-
-            await siemMigrationAuditLogger.logStart({ migrationId });
-
-            return res.ok({ body: { started } });
-          } catch (error) {
-            logger.error(error);
-            await siemMigrationAuditLogger.logStart({ migrationId, error });
-            return res.badRequest({ body: error.message });
           }
-        }
+        )
       )
     );
 };

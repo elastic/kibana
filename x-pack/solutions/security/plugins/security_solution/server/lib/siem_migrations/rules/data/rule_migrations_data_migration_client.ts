@@ -36,7 +36,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     return migrationId;
   }
 
-  async get({ id }: { id: string }): Promise<StoredSiemMigration> {
+  async get({ id }: { id: string }): Promise<StoredSiemMigration | undefined> {
     const index = await this.getIndexName();
     return this.esClient
       .get<StoredSiemMigration>({
@@ -47,6 +47,10 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         return this.processHit(document);
       })
       .catch((error) => {
+        const message = JSON.parse(error.message);
+        if (Object.hasOwn(message, 'found') && message.found === false) {
+          return undefined;
+        }
         this.logger.error(`Error getting migration ${id}: ${error}`);
         throw error;
       });

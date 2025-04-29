@@ -95,6 +95,20 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response.body.total).toEqual(0);
       });
 
+      it('should return 404 if invalid migration id is provided', async () => {
+        const { body } = await migrationRulesRoutes.addRulesToMigration({
+          migrationId: 'non-existing-migration-id',
+          payload: [defaultOriginalRule],
+          expectStatusCode: 404,
+        });
+
+        expect(body).toMatchObject({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'No Migration found with id: non-existing-migration-id',
+        });
+      });
+
       it(`should return an error when undefined payload has been passed`, async () => {
         const response = await migrationRulesRoutes.addRulesToMigration({
           migrationId,
@@ -111,6 +125,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return an error when original rule id is not specified', async () => {
         const { id, ...restOfOriginalRule } = defaultOriginalRule;
         const response = await migrationRulesRoutes.addRulesToMigration({
+          migrationId,
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
@@ -124,6 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return an error when original rule vendor is not specified', async () => {
         const { vendor, ...restOfOriginalRule } = defaultOriginalRule;
         const response = await migrationRulesRoutes.addRulesToMigration({
+          migrationId,
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
@@ -137,6 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return an error when original rule title is not specified', async () => {
         const { title, ...restOfOriginalRule } = defaultOriginalRule;
         const response = await migrationRulesRoutes.addRulesToMigration({
+          migrationId,
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
@@ -150,6 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return an error when original rule description is not specified', async () => {
         const { description, ...restOfOriginalRule } = defaultOriginalRule;
         const response = await migrationRulesRoutes.addRulesToMigration({
+          migrationId,
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
@@ -163,6 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return an error when original rule query is not specified', async () => {
         const { query, ...restOfOriginalRule } = defaultOriginalRule;
         const response = await migrationRulesRoutes.addRulesToMigration({
+          migrationId,
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });
@@ -176,6 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return an error when original rule query_language is not specified', async () => {
         const { query_language: _, ...restOfOriginalRule } = defaultOriginalRule;
         const response = await migrationRulesRoutes.addRulesToMigration({
+          migrationId,
           payload: [restOfOriginalRule],
           expectStatusCode: 400,
         });

@@ -153,8 +153,7 @@ export const statsOverrideCallbackFactory = ({
 
 export const createMigrationRules = async (
   es: Client,
-  rules: RuleMigrationRuleData[],
-  migrationId: string
+  rules: RuleMigrationRuleData[]
 ): Promise<string[]> => {
   const createdAt = new Date().toISOString();
   const addRuleOperations = rules.flatMap((ruleMigration) => [
@@ -166,16 +165,18 @@ export const createMigrationRules = async (
     },
   ]);
 
+  const migrationIdsToBeCreated = new Set(rules.map((rule) => rule.migration_id));
+  const createMigrationOperations = Array.from(migrationIdsToBeCreated).flatMap((migrationId) => [
+    { create: { _index: SIEM_MIGRATIONS_INDEX_PATTERN, _id: migrationId } },
+    {
+      created_by: SOME_USER_ID,
+      created_at: new Date().toISOString(),
+    },
+  ]);
+
   const res = await es.bulk({
     refresh: 'wait_for',
-    operations: [
-      { create: { _index: SIEM_MIGRATIONS_INDEX_PATTERN, _id: migrationId } },
-      {
-        created_by: SOME_USER_ID,
-        created_at: new Date().toISOString(),
-      },
-      ...addRuleOperations,
-    ],
+    operations: [...createMigrationOperations, ...addRuleOperations],
   });
 
   const ids = res.items.reduce((acc, item) => {

@@ -15,7 +15,7 @@ import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 import { withExistingMigration } from './util/with_existing_migration_id';
 
-export const registerSiemRuleMigrationsGetRoute = (
+export const registerSiemRuleMigrationsDeleteRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {

@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Update API', () => {
+  describe('@ess @serverless @serverlessQA Update Rules API', () => {
     beforeEach(async () => {
       await deleteAllMigrationRules(es);
     });
@@ -29,11 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should update migration rules', async () => {
         const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
-        const [createdDocumentId] = await createMigrationRules(
-          es,
-          [migrationRuleDocument],
-          migrationId
-        );
+        const [createdDocumentId] = await createMigrationRules(es, [migrationRuleDocument]);
 
         const now = new Date().toISOString();
 
@@ -77,11 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should ignore attributes that are not eligible for update', async () => {
         const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
-        const [createdDocumentId] = await createMigrationRules(
-          es,
-          [migrationRuleDocument],
-          migrationId
-        );
+        const [createdDocumentId] = await createMigrationRules(es, [migrationRuleDocument]);
 
         const now = new Date().toISOString();
         await ruleMigrationRoutes.updateRules({
@@ -126,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return empty content response when no rules passed', async () => {
         const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
-        await createMigrationRules(es, [migrationRuleDocument], migrationId);
+        await createMigrationRules(es, [migrationRuleDocument]);
         await ruleMigrationRoutes.updateRules({
           migrationId,
           payload: [],
@@ -137,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`should return an error when rule's id is not specified`, async () => {
         const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
-        await createMigrationRules(es, [migrationRuleDocument], migrationId);
+        await createMigrationRules(es, [migrationRuleDocument]);
         const response = await ruleMigrationRoutes.updateRules({
           migrationId,
           payload: [{ elastic_rule: { title: 'Updated title' } }],
@@ -153,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`should return an error when undefined payload has been passed`, async () => {
         const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
-        await createMigrationRules(es, [migrationRuleDocument], migrationId);
+        await createMigrationRules(es, [migrationRuleDocument]);
         const response = await ruleMigrationRoutes.updateRules({
           migrationId,
           expectStatusCode: 400,

@@ -26,6 +26,7 @@ import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privilege
 import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
 import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/add';
 import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
+import { registerSiemRuleMigrationsDeleteRoute } from './delete';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -33,18 +34,22 @@ export const registerSiemRuleMigrationsRoutes = (
   logger: Logger
 ) => {
   registerSiemRuleMigrationsCreateRoute(router, logger);
+  registerSiemRuleMigrationsGetRoute(router, logger);
+  registerSiemRuleMigrationsDeleteRoute(router, logger);
   /** Rules */
   registerSiemRuleMigrationsCreateRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRulesRoute(router, logger);
   registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
   /** *******/
+  /** Tasks **/
   registerSiemRuleMigrationsStatsAllRoute(router, logger);
   registerSiemRuleMigrationsPrebuiltRulesRoute(router, logger);
-  registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsStartRoute(router, logger);
   registerSiemRuleMigrationsStatsRoute(router, logger);
   registerSiemRuleMigrationsTranslationStatsRoute(router, logger);
   registerSiemRuleMigrationsStopRoute(router, logger);
+  /** *******/
+
   registerSiemRuleMigrationsInstallRoute(router, logger);
   registerSiemRuleMigrationsIntegrationsRoute(router, logger);
 

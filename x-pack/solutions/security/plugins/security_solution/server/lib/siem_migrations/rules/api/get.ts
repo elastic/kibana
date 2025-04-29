@@ -14,6 +14,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
+import { MIGRATION_ID_NOT_FOUND } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -46,6 +47,12 @@ export const registerSiemRuleMigrationsGetRoute = (
           const storedMigration = await ruleMigrationsClient.data.migrations.get({
             id: migrationId,
           });
+
+          if (!storedMigration) {
+            return res.notFound({
+              body: MIGRATION_ID_NOT_FOUND(migrationId),
+            });
+          }
 
           return res.ok({
             body: {

@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type { GetRuleMigrationResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 
-const MIGRATION_ID_NOT_FOUND = (id: string) =>
+export const MIGRATION_ID_NOT_FOUND = (id: string) =>
   i18n.translate('xpack.securitySolution.api.migrationIdNotFound', {
-    defaultMessage: `No Migration found with id: '{id}'`,
+    defaultMessage: `No Migration found with id: {id}`,
     values: {
       id,
     },
