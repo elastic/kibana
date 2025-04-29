@@ -34,11 +34,6 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
-        },
-      },
     })
     .addVersion(
       {
