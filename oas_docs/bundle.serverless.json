@@ -2222,12 +2222,14 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "investigation_guide": {
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
+                            "maxLength": 1000,
                             "type": "string"
                           }
                         },
@@ -3857,12 +3859,14 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 10,
                         "type": "array"
                       },
                       "investigation_guide": {
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
+                            "maxLength": 1000,
                             "type": "string"
                           }
                         },
