@@ -8,14 +8,25 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import {
-  ProductFeaturesPrivilegeId,
-  ProductFeaturesPrivileges,
-} from '../../product_features_privileges';
 
 import { SecuritySubFeatureId } from '../../product_features_keys';
-import { APP_ID, SECURITY_FEATURE_ID_V3 } from '../../constants';
+import { APP_ID } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
+
+const TRANSLATIONS = Object.freeze({
+  all: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.allPrivilegeName',
+    {
+      defaultMessage: 'All',
+    }
+  ),
+  read: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.readPrivilegeName',
+    {
+      defaultMessage: 'Read',
+    }
+  ),
+});
 
 const endpointListSubFeature = (): SubFeatureConfig => ({
   requireAllSpaces: true,
@@ -43,11 +54,10 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_list_all'] }],
           api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
           id: 'endpoint_list_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -55,11 +65,10 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEndpointList', 'readEndpointList'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_list_read'] }],
           api: [`${APP_ID}-readEndpointList`],
           id: 'endpoint_list_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -97,9 +106,6 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['trusted_applications_all'] },
-          ],
           api: [
             'lists-all',
             'lists-read',
@@ -109,7 +115,7 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'trusted_applications_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -117,13 +123,10 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedApplications', 'readTrustedApplications'],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['trusted_applications_read'] },
-          ],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
           id: 'trusted_applications_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -160,9 +163,6 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['host_isolation_exceptions_all'] },
-          ],
           api: [
             'lists-all',
             'lists-read',
@@ -172,7 +172,7 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'host_isolation_exceptions_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -180,13 +180,10 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['host_isolation_exceptions_read'] },
-          ],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
           id: 'host_isolation_exceptions_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -220,7 +217,6 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['blocklist_all'] }],
           api: [
             'lists-all',
             'lists-read',
@@ -230,7 +226,7 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'blocklist_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -238,11 +234,10 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
           ui: ['writeBlocklist', 'readBlocklist'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['blocklist_read'] }],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
           id: 'blocklist_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -279,7 +274,6 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['event_filters_all'] }],
           api: [
             'lists-all',
             'lists-read',
@@ -289,7 +283,7 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'event_filters_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
@@ -297,11 +291,10 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEventFilters', 'readEventFilters'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['event_filters_read'] }],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
           id: 'event_filters_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -338,11 +331,10 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['policy_management_all'] }],
           api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
           id: 'policy_management_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: ['policy-settings-protection-updates-note'],
             read: [],
@@ -350,11 +342,10 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
           ui: ['writePolicyManagement', 'readPolicyManagement'],
         },
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['policy_management_read'] }],
           api: [`${APP_ID}-readPolicyManagement`],
           id: 'policy_management_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: ['policy-settings-protection-updates-note'],
@@ -391,13 +382,10 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['actions_log_management_all'] },
-          ],
           api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -405,13 +393,10 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           ui: ['writeActionsLogManagement', 'readActionsLogManagement'],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['actions_log_management_read'] },
-          ],
           api: [`${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_read',
           includeIn: 'none',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
@@ -445,11 +430,10 @@ const hostIsolationSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['host_isolation_all'] }],
           api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -486,11 +470,10 @@ const processOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['process_operations_all'] }],
           api: [`${APP_ID}-writeProcessOperations`],
           id: 'process_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -526,11 +509,10 @@ const fileOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['file_operations_all'] }],
           api: [`${APP_ID}-writeFileOperations`],
           id: 'file_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -569,11 +551,10 @@ const executeActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['execute_operations_all'] }],
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
@@ -611,17 +592,67 @@ const scanActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['scan_operations_all'] }],
-
           api: [`${APP_ID}-writeScanOperations`],
           id: 'scan_operations_all',
           includeIn: 'none',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
           },
           ui: ['writeScanOperations'],
+        },
+      ],
+    },
+  ],
+});
+
+const workflowInsightsSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Automatic Troubleshooting access.',
+    }
+  ),
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights',
+    {
+      defaultMessage: 'Automatic Troubleshooting',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.description',
+    {
+      defaultMessage: 'Access to the automatic troubleshooting.',
+    }
+  ),
+
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
+          id: 'workflow_insights_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeWorkflowInsights', 'readWorkflowInsights'],
+        },
+        {
+          api: [`${APP_ID}-readWorkflowInsights`],
+          id: 'workflow_insights_read',
+          includeIn: 'none',
+          name: TRANSLATIONS.read,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readWorkflowInsights'],
         },
       ],
     },
@@ -645,7 +676,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.description',
     {
-      defaultMessage: 'Use Endpoint Exceptions (this is a test sub-feature).',
+      defaultMessage: 'Manage Endpoint Exceptions.',
     }
   ),
   privilegeGroups: [
@@ -653,30 +684,64 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_exceptions_all'] },
-          ],
           id: 'endpoint_exceptions_all',
           includeIn: 'all',
-          name: 'All',
+          name: TRANSLATIONS.all,
           savedObject: {
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
+          api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+          ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
         },
         {
-          replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_exceptions_read'] },
-          ],
           id: 'endpoint_exceptions_read',
           includeIn: 'read',
-          name: 'Read',
+          name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
+          api: [`${APP_ID}-showEndpointExceptions`],
+          ui: ['showEndpointExceptions'],
+        },
+      ],
+    },
+  ],
+});
+
+const globalArtifactManagementSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: false,
+  privilegesTooltip: undefined,
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement',
+    {
+      defaultMessage: 'Global Artifact Management',
+    }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
+    {
+      defaultMessage:
+        'Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) ' +
+        'across all policies. This privilege controls global assignment rights only; privileges for each ' +
+        'artifact type are required for full artifact management.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeGlobalArtifacts`],
+          id: 'global_artifact_management_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeGlobalArtifacts'],
         },
       ],
     },
@@ -687,7 +752,7 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
  * Sub-features that will always be available for Security
  * regardless of the product type.
  */
-export const getSecurityBaseKibanaSubFeatureIds = (
+export const getSecurityV3BaseKibanaSubFeatureIds = (
   { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
 ): SecuritySubFeatureId[] => [];
 
@@ -696,7 +761,7 @@ export const getSecurityBaseKibanaSubFeatureIds = (
  * The order of the subFeatures is the order they will be displayed
  */
 
-export const getSecuritySubFeaturesMap = ({
+export const getSecurityV3SubFeaturesMap = ({
   experimentalFeatures,
 }: SecurityFeatureParams): Map<SecuritySubFeatureId, SubFeatureConfig> => {
   const enableSpaceAwarenessIfNeeded = (subFeature: SubFeatureConfig): SubFeatureConfig => {
@@ -714,6 +779,16 @@ export const getSecuritySubFeaturesMap = ({
       SecuritySubFeatureId.endpointExceptions,
       enableSpaceAwarenessIfNeeded(endpointExceptionsSubFeature()),
     ],
+
+    ...((experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+      ? [
+          [
+            SecuritySubFeatureId.globalArtifactManagement,
+            enableSpaceAwarenessIfNeeded(globalArtifactManagementSubFeature()),
+          ],
+        ]
+      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
+
     [
       SecuritySubFeatureId.trustedApplications,
       enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
@@ -724,6 +799,7 @@ export const getSecuritySubFeaturesMap = ({
     ],
     [SecuritySubFeatureId.blocklist, enableSpaceAwarenessIfNeeded(blocklistSubFeature())],
     [SecuritySubFeatureId.eventFilters, enableSpaceAwarenessIfNeeded(eventFiltersSubFeature())],
+
     [
       SecuritySubFeatureId.policyManagement,
       enableSpaceAwarenessIfNeeded(policyManagementSubFeature()),
@@ -746,6 +822,14 @@ export const getSecuritySubFeaturesMap = ({
   // if (experimentalFeatures.featureFlagName) {
   //   securitySubFeaturesList.push([SecuritySubFeatureId.featureId, featureSubFeature]);
   // }
+
+  if (experimentalFeatures.defendInsights) {
+    // place with other All/Read/None options
+    securitySubFeaturesList.splice(1, 0, [
+      SecuritySubFeatureId.workflowInsights,
+      enableSpaceAwarenessIfNeeded(workflowInsightsSubFeature()),
+    ]);
+  }
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(
     securitySubFeaturesList

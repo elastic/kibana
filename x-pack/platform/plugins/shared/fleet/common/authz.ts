@@ -8,6 +8,7 @@
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
 import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
+import { SECURITY_SOLUTION_APP_ID } from './constants/authz';
 
 import { ENDPOINT_EXCEPTIONS_PRIVILEGES, ENDPOINT_PRIVILEGES } from './constants';
 
@@ -180,7 +181,9 @@ export function calculatePackagePrivilegesFromCapabilities(
     (acc, [privilege, { privilegeName }]) => {
       acc[privilege] = {
         executePackageAction:
-          (capabilities.siemV2 && (capabilities.siemV2[privilegeName] as boolean)) || false,
+          (capabilities[SECURITY_SOLUTION_APP_ID] &&
+            (capabilities[SECURITY_SOLUTION_APP_ID][privilegeName] as boolean)) ||
+          false,
       };
       return acc;
     },
@@ -210,14 +213,15 @@ export function calculatePackagePrivilegesFromCapabilities(
 export function calculateEndpointExceptionsPrivilegesFromCapabilities(
   capabilities: Capabilities | undefined
 ): FleetAuthz['endpointExceptionsPrivileges'] {
-  if (!capabilities || !capabilities.siemV2) {
+  if (!capabilities || !capabilities[SECURITY_SOLUTION_APP_ID]) {
     return;
   }
 
   const endpointExceptionsActions = Object.keys(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<
     Record<string, boolean>
   >((acc, privilegeName) => {
-    acc[privilegeName] = (capabilities.siemV2[privilegeName] as boolean) || false;
+    acc[privilegeName] =
+      (capabilities[SECURITY_SOLUTION_APP_ID][privilegeName] as boolean) || false;
     return acc;
   }, {});
 

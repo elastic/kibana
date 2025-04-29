@@ -36,8 +36,8 @@ describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
           ...base.kibana[0],
           feature: {
             ...base.kibana[0].feature,
-            siemV2: [
-              ...base.kibana[0].feature.siemV2,
+            siemV3: [
+              ...base.kibana[0].feature.siemV3,
               `endpoint_list_all`,
               `policy_management_${endpointPolicyManagementPrivilege}`,
             ],

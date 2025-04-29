@@ -14,7 +14,7 @@ import {
 } from '../../product_features_privileges';
 
 import { SecuritySubFeatureId } from '../../product_features_keys';
-import { APP_ID } from '../../constants';
+import { APP_ID, SECURITY_FEATURE_ID_V3 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 
 const TRANSLATIONS = Object.freeze({
@@ -58,6 +58,7 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_list_all'] }],
           api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
           id: 'endpoint_list_all',
           includeIn: 'none',
@@ -69,6 +70,7 @@ const endpointListSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEndpointList', 'readEndpointList'],
         },
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_list_read'] }],
           api: [`${APP_ID}-readEndpointList`],
           id: 'endpoint_list_read',
           includeIn: 'none',
@@ -110,6 +112,9 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['trusted_applications_all'] },
+          ],
           api: [
             'lists-all',
             'lists-read',
@@ -127,6 +132,9 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedApplications', 'readTrustedApplications'],
         },
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['trusted_applications_read'] },
+          ],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
           id: 'trusted_applications_read',
           includeIn: 'none',
@@ -167,6 +175,9 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['host_isolation_exceptions_all'] },
+          ],
           api: [
             'lists-all',
             'lists-read',
@@ -184,6 +195,9 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['host_isolation_exceptions_read'] },
+          ],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
           id: 'host_isolation_exceptions_read',
           includeIn: 'none',
@@ -221,6 +235,7 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['blocklist_all'] }],
           api: [
             'lists-all',
             'lists-read',
@@ -238,6 +253,7 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
           ui: ['writeBlocklist', 'readBlocklist'],
         },
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['blocklist_read'] }],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
           id: 'blocklist_read',
           includeIn: 'none',
@@ -278,6 +294,7 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['event_filters_all'] }],
           api: [
             'lists-all',
             'lists-read',
@@ -295,6 +312,7 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEventFilters', 'readEventFilters'],
         },
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['event_filters_read'] }],
           api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
           id: 'event_filters_read',
           includeIn: 'none',
@@ -335,6 +353,7 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['policy_management_all'] }],
           api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
           id: 'policy_management_all',
           includeIn: 'none',
@@ -346,6 +365,7 @@ const policyManagementSubFeature = (): SubFeatureConfig => ({
           ui: ['writePolicyManagement', 'readPolicyManagement'],
         },
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['policy_management_read'] }],
           api: [`${APP_ID}-readPolicyManagement`],
           id: 'policy_management_read',
           includeIn: 'none',
@@ -386,6 +406,9 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['actions_log_management_all'] },
+          ],
           api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_all',
           includeIn: 'none',
@@ -397,6 +420,9 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           ui: ['writeActionsLogManagement', 'readActionsLogManagement'],
         },
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['actions_log_management_read'] },
+          ],
           api: [`${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_read',
           includeIn: 'none',
@@ -434,6 +460,7 @@ const hostIsolationSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['host_isolation_all'] }],
           api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
@@ -474,6 +501,7 @@ const processOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['process_operations_all'] }],
           api: [`${APP_ID}-writeProcessOperations`],
           id: 'process_operations_all',
           includeIn: 'none',
@@ -513,6 +541,7 @@ const fileOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['file_operations_all'] }],
           api: [`${APP_ID}-writeFileOperations`],
           id: 'file_operations_all',
           includeIn: 'none',
@@ -555,6 +584,7 @@ const executeActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['execute_operations_all'] }],
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
@@ -596,6 +626,7 @@ const scanActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['scan_operations_all'] }],
           api: [`${APP_ID}-writeScanOperations`],
           id: 'scan_operations_all',
           includeIn: 'none',
@@ -637,6 +668,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['workflow_insights_all'] }],
           api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_all',
           includeIn: 'none',
@@ -648,6 +680,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeWorkflowInsights', 'readWorkflowInsights'],
         },
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V3, privileges: ['workflow_insights_read'] }],
           api: [`${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_read',
           includeIn: 'none',
@@ -688,6 +721,9 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_exceptions_all'] },
+          ],
           id: 'endpoint_exceptions_all',
           includeIn: 'all',
           name: TRANSLATIONS.all,
@@ -698,6 +734,9 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
           ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
         },
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['endpoint_exceptions_read'] },
+          ],
           id: 'endpoint_exceptions_read',
           includeIn: 'read',
           name: TRANSLATIONS.read,
@@ -735,6 +774,9 @@ const globalArtifactManagementSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
+          replacedBy: [
+            { feature: SECURITY_FEATURE_ID_V3, privileges: ['global_artifact_management_all'] },
+          ],
           api: [`${APP_ID}-writeGlobalArtifacts`],
           id: 'global_artifact_management_all',
           includeIn: 'none',
