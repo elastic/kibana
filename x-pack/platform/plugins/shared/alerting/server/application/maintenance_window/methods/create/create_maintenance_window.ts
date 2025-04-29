@@ -67,7 +67,7 @@ export async function createMaintenanceWindow(
   const id = SavedObjectsUtils.generateId();
   let expirationDate;
   if (rRule.interval || rRule.freq) {
-    expirationDate = moment().utc().add(5, 'days').toISOString();
+    expirationDate = moment().utc().add(1, 'year').toISOString();
   } else {
     expirationDate = moment(rRule.dtstart).utc().add(duration, 'ms').toISOString();
   }

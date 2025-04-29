@@ -33,7 +33,7 @@ import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './
 export const MAINTENANCE_WINDOW_EVENTS_TASK_TYPE = 'Maintenance-window-events';
 
 export const MAINTENANCE_WINDOW_EVENTS_TASK_ID = `${MAINTENANCE_WINDOW_EVENTS_TASK_TYPE}-generator`;
-export const SCHEDULE: IntervalSchedule = { interval: '5m' };
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeMaintenanceWindowEventsGenerator(
   logger: Logger,
@@ -126,8 +126,9 @@ export function eventsGeneratorTaskRunner(
             runs: state.runs + 1,
             total_mw_with_generated_events: totalMaintenanceWindowsWithGeneratedEvents,
           };
-          logger.info('maintenance windows events generator task completed successfully'),
-            { updatedState };
+          logger.info(
+            `Maintenance windows events generator task updated ${updatedState.total_mw_with_generated_events} maintenance windows successfully`
+          );
 
           return {
             state: updatedState,
@@ -224,6 +225,8 @@ export async function generateEventsAndUpdateMaintenanceWindowSavedObjects({
     })
   );
 
+  const newExpirationDate = moment(startRangeDate).utc().add(1, 'year').toISOString();
+
   const mwWithGeneratedEvents = maintenanceWindows
     .filter(
       (maintenanceWindow) =>
@@ -239,8 +242,6 @@ export async function generateEventsAndUpdateMaintenanceWindowSavedObjects({
         expirationDate: oldExpirationDate,
       } = filteredMaintenanceWindow;
 
-      const newExpirationDate = moment(startRangeDate).utc().add(1, 'year').toISOString();
-
       const newEvents = generateMaintenanceWindowEvents({
         rRule,
         expirationDate: newExpirationDate,
@@ -250,10 +251,11 @@ export async function generateEventsAndUpdateMaintenanceWindowSavedObjects({
 
       return {
         ...filteredMaintenanceWindow,
-        expirationDate: newExpirationDate,
+        expirationDate: newEvents.length ? newExpirationDate : oldExpirationDate,
         events: [...oldEvents, ...newEvents],
       };
-    });
+    })
+    .filter((mappedMW) => mappedMW.expirationDate === newExpirationDate);
 
   try {
     updatedMaintenanceWindows = await Promise.all(

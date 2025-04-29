@@ -108,6 +108,44 @@ const runningMaintenanceWindowMock = {
   references: [],
 };
 
+const finishedWithEventsMaintenanceWindowMock = {
+  id: '5',
+  type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  attributes: getMockMaintenanceWindow({
+    title: 'MW 5',
+    enabled: true,
+    duration: 7200000,
+    expirationDate: '2025-04-26T09:00:00.000Z',
+    events: [
+      {
+        gte: '2025-03-31T00:00:00.011Z',
+        lte: '2025-03-31T10:00:00.011Z',
+      },
+      {
+        gte: '2025-04-07T00:00:00.011Z',
+        lte: '2025-04-07T10:00:00.011Z',
+      },
+      {
+        gte: '2025-04-14T00:00:00.011Z',
+        lte: '2025-04-14T10:00:00.011Z',
+      },
+      {
+        gte: '2025-04-21T00:00:00.011Z',
+        lte: '2025-04-21T10:00:00.011Z',
+      },
+    ],
+    rRule: {
+      byweekday: ['+1MO'],
+      count: 4,
+      interval: 1,
+      freq: 2,
+      dtstart: '2025-03-31T00:00:00.011Z',
+      tzid: 'UTC',
+    },
+  }),
+  references: [],
+};
+
 const statusFilter = {
   arguments: [
     {
@@ -300,11 +338,26 @@ describe('Maintenance window events generator task', () => {
         maintenanceWindowsSO: [],
         startRangeDate: '2025-04-23T09:00:00.000Z',
       });
+
+      expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
     });
 
-    test('should not generate new events or update expiration date when maintenance window is finished', async () => {
+    test('should not update maintenance window when finished', async () => {
+      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
+        maintenanceWindowsSO: [finishedWithEventsMaintenanceWindowMock],
+        startRangeDate: '2025-04-23T09:00:00.000Z',
+        logger,
+        savedObjectsClient: internalSavedObjectsRepository,
+      });
+
+      expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
+      expect(total).toEqual(0);
+      expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
+    });
+
+    test('should not generate new events when events are empty', async () => {
       const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
         maintenanceWindowsSO: [finishedMaintenanceWindowMock],
         startRangeDate: '2025-04-23T09:00:00.000Z',
@@ -313,7 +366,6 @@ describe('Maintenance window events generator task', () => {
       });
 
       expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
-
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
     });
@@ -329,6 +381,47 @@ describe('Maintenance window events generator task', () => {
       expect(internalSavedObjectsRepository.update).not.toHaveBeenCalled();
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
+    });
+
+    test('should generate single events set', async () => {
+      const total = await generateEventsAndUpdateMaintenanceWindowSavedObjects({
+        maintenanceWindowsSO: [
+          {
+            ...finishedWithEventsMaintenanceWindowMock,
+            attributes: {
+              ...finishedWithEventsMaintenanceWindowMock.attributes,
+              rRule: { ...finishedWithEventsMaintenanceWindowMock.attributes.rRule, count: 5 },
+            },
+          },
+        ],
+        startRangeDate: '2025-04-23T09:00:00.000Z',
+        logger,
+        savedObjectsClient: internalSavedObjectsRepository,
+      });
+
+      expect(internalSavedObjectsRepository.update).toHaveBeenCalledTimes(1);
+      expect(internalSavedObjectsRepository.update).toHaveBeenNthCalledWith(
+        1,
+        MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+        '5',
+        {
+          ...finishedWithEventsMaintenanceWindowMock.attributes,
+          rRule: {
+            ...finishedWithEventsMaintenanceWindowMock.attributes.rRule,
+            count: 5,
+          },
+          events: [
+            ...finishedWithEventsMaintenanceWindowMock.attributes.events,
+            {
+              gte: '2025-04-28T00:00:00.011Z',
+              lte: '2025-04-28T02:00:00.011Z',
+            },
+          ],
+          expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
+        }
+      );
+      expect(total).toEqual(1);
+      expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "1"`);
     });
 
     test('should update multiple maintenance windows with new events', async () => {
@@ -352,10 +445,7 @@ describe('Maintenance window events generator task', () => {
         {
           ...upcomingMaintenanceWindowMock.attributes,
           events: [
-            {
-              gte: '2025-04-20T09:00:00.000Z',
-              lte: '2025-04-20T17:00:00.000Z',
-            },
+            ...upcomingMaintenanceWindowMock.attributes.events,
             {
               gte: '2025-05-20T09:00:00.000Z',
               lte: '2025-05-20T11:00:00.000Z',
@@ -416,10 +506,7 @@ describe('Maintenance window events generator task', () => {
           ...runningMaintenanceWindowMock.attributes,
           expirationDate: moment(mockCurrentDate).tz('UTC').add(1, 'year').toISOString(),
           events: [
-            {
-              gte: '2025-04-23T05:00:00.000Z',
-              lte: '2025-04-23T17:00:00.000Z',
-            },
+            ...runningMaintenanceWindowMock.attributes.events,
             {
               gte: '2026-04-23T05:00:00.000Z',
               lte: '2026-04-23T13:00:00.000Z',
@@ -446,7 +533,6 @@ describe('Maintenance window events generator task', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to update events in maintenance windows saved object". Error: something went wrong'
       );
-
       expect(total).toEqual(0);
       expect(logger.debug).toHaveBeenCalledWith(`Total updated maintenance windows "0"`);
     });
