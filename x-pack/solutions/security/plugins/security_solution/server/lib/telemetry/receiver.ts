@@ -1344,8 +1344,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       index: '*',
       expand_wildcards: ['open', 'hidden'],
       filter_path: [
-        '*.settings.index.final_pipeline',
+        '*.mappings._source.mode',
         '*.settings.index.default_pipeline',
+        '*.settings.index.final_pipeline',
+        '*.settings.index.mode',
         '*.settings.index.provided_name',
       ],
     };
@@ -1358,6 +1360,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             index_name: index,
             default_pipeline: value.settings?.index?.default_pipeline,
             final_pipeline: value.settings?.index?.final_pipeline,
+            index_mode: value.settings?.index?.mode,
+            source_mode: value.mappings?._source?.mode,
           } as IndexSettings;
         })
       )

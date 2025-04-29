@@ -8,9 +8,6 @@
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { screen, render, renderHook } from '@testing-library/react';
-import { matchers } from '@emotion/jest';
-
-expect.extend(matchers);
 
 import type { ChartSeriesData } from './common';
 import {
