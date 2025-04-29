@@ -50,7 +50,6 @@ export const ASSET_FIELDS = {
   ENTITY_ID: 'entity.id',
   ENTITY_NAME: 'entity.name',
   ENTITY_RISK: 'entity.risk',
-  ENTITY_SOURCE: 'entity.source',
   ENTITY_SUB_TYPE: 'entity.sub_type',
   ENTITY_TYPE: 'entity.type',
   TIMESTAMP: '@timestamp',
