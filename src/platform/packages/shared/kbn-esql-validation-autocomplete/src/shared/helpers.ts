@@ -30,7 +30,7 @@ import {
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
-import { collectVariables } from './variables';
+import { collectUserDefinedColumns } from './user_defined_columns';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { getTestFunctions } from './test_functions';
@@ -933,16 +933,18 @@ export function getExpressionType(
   return 'unknown';
 }
 
-export function transformMapToRealFields(inputMap: Map<string, ESQLVariable[]>): ESQLRealField[] {
+export function transformMapToRealFields(
+  inputMap: Map<string, ESQLUserDefinedColumn[]>
+): ESQLRealField[] {
   const realFields: ESQLRealField[] = [];
 
-  for (const [, variables] of inputMap) {
-    for (const variable of variables) {
-      // Only include variables that have a known type
-      if (variable.type) {
+  for (const [, userDefinedColumns] of inputMap) {
+    for (const userDefinedColumn of userDefinedColumns) {
+      // Only include userDefinedColumns that have a known type
+      if (userDefinedColumn.type) {
         realFields.push({
-          name: variable.name,
-          type: variable.type as FieldType,
+          name: userDefinedColumn.name,
+          type: userDefinedColumn.type as FieldType,
         });
       }
     }
@@ -989,9 +991,9 @@ export async function getCurrentQueryAvailableFields(
 
   // If the command has a fieldsSuggestionsAfter function, use it to get the fields
   if (commandDef.fieldsSuggestionsAfter) {
-    const userDefinedColumns = collectVariables([lastCommand], cacheCopy, query);
+    const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
     const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
-      userDefinedColumns ?? new Map<string, ESQLVariable[]>()
+      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
     );
 
     return commandDef.fieldsSuggestionsAfter(
@@ -1001,9 +1003,9 @@ export async function getCurrentQueryAvailableFields(
     );
   } else {
     // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
-    const userDefinedColumns = collectVariables(commands, cacheCopy, query);
+    const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
     const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
-      userDefinedColumns ?? new Map<string, ESQLVariable[]>()
+      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
     );
     const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
     return allFields;

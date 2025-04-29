@@ -67,7 +67,7 @@ describe('autocomplete.suggest', () => {
       ]);
 
       await assertSuggestions('from a | eval col0 = 1, /', [
-        'col0 = ',
+        'col1 = ',
         ...getFieldNamesByType('any').map((v) => `${v} `),
         ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
