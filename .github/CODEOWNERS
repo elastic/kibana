@@ -993,6 +993,7 @@ x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-tea
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
+x-pack/solutions/observability/test
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
