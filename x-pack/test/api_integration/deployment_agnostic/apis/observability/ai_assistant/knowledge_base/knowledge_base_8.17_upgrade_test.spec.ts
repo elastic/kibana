@@ -7,36 +7,14 @@
 
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteTinyElserModelAndInferenceEndpoint,
   deployTinyElserAndSetupKb,
+  getKnowledgeBaseEntries,
   TINY_ELSER_INFERENCE_ID,
 } from '../utils/knowledge_base';
 import { restoreIndexAssets, runStartupMigrations } from '../utils/index_assets';
-
-interface InferenceChunk {
-  text: string;
-  embeddings: any;
-}
-
-interface InferenceData {
-  inference_id: string;
-  chunks: {
-    semantic_text: InferenceChunk[];
-  };
-}
-
-interface SemanticTextField {
-  semantic_text: string;
-  _inference_fields?: {
-    semantic_text?: {
-      inference: InferenceData;
-    };
-  };
-}
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -47,23 +25,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
 
-  async function getKnowledgeBaseEntriesFromEs() {
-    const res = (await es.search({
-      index: '.kibana-observability-ai-assistant-kb*',
-      // Add fields parameter to include inference metadata
-      fields: ['_inference_fields'],
-      query: {
-        match_all: {},
-      },
-    })) as SearchResponse<KnowledgeBaseEntry & SemanticTextField>;
-
-    return res.hits.hits;
-  }
-
   // In 8.17 semantic text field is added to the knowledge base index and inference endpoint is introduced
   // Prior to this ML embeddings were used.
   // We need to ensure that the semantic_text field is populated
-
   describe('when upgrading to 8.17 and the knowledge base index was created in an earlier release', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
@@ -83,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('before migrating', () => {
       it('the docs do not have semantic_text embeddings', async () => {
-        const hits = await getKnowledgeBaseEntriesFromEs();
+        const hits = await getKnowledgeBaseEntries(es);
         const hasSemanticTextEmbeddings = hits.some((hit) => hit._source?.semantic_text);
         expect(hasSemanticTextEmbeddings).to.be(false);
       });
@@ -96,7 +60,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('the docs have semantic_text embeddings', async () => {
         await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntriesFromEs();
+          const hits = await getKnowledgeBaseEntries(es);
           const hasSemanticTextEmbeddings = hits.every((hit) => hit._source?.semantic_text);
           expect(hasSemanticTextEmbeddings).to.be(true);
 

@@ -14,9 +14,9 @@ import {
   deleteTinyElserModelAndInferenceEndpoint,
   getConcreteWriteIndexFromAlias,
   deployTinyElserAndSetupKb,
-  createTinyElserInferenceEndpoint,
   waitForKnowledgeBaseReady,
   deleteInferenceEndpoint,
+  createTinyElserInferenceEndpoint,
 } from '../utils/knowledge_base';
 import { restoreIndexAssets } from '../utils/index_assets';
 

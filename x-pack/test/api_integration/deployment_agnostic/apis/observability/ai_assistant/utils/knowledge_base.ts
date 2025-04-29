@@ -11,6 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import {
   Instruction,
+  KnowledgeBaseEntry,
   KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
@@ -185,14 +186,14 @@ export async function deleteInferenceEndpoint({
 export async function createInferenceEndpoint({
   es,
   log,
-  modelId,
   inferenceId,
+  modelId,
   taskType,
 }: {
   es: Client;
   log: ToolingLog;
-  modelId: string;
   inferenceId: string;
+  modelId: string;
   taskType?: InferenceTaskType;
 }) {
   try {
@@ -317,4 +318,35 @@ export async function getKbIndexCreatedVersion(es: Client) {
     throw new Error(`Could not find created version for index ${resourceNames.writeIndexAlias.kb}`);
   }
   return createdVersion;
+}
+
+interface SemanticTextField {
+  semantic_text: string;
+  _inference_fields?: {
+    semantic_text?: {
+      inference: {
+        inference_id: string;
+        chunks: {
+          semantic_text: Array<{
+            embeddings:
+              | Record<string, number> // sparse embedding
+              | number[]; // dense embedding;
+          }>;
+        };
+      };
+    };
+  };
+}
+
+export async function getKnowledgeBaseEntries(es: Client) {
+  const res = await es.search<KnowledgeBaseEntry & SemanticTextField>({
+    index: resourceNames.writeIndexAlias.kb,
+    // Add fields parameter to include inference metadata
+    fields: ['_inference_fields'],
+    query: {
+      match_all: {},
+    },
+  });
+
+  return res.hits.hits;
 }
