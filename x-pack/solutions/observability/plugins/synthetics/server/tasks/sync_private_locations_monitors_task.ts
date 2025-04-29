@@ -32,8 +32,7 @@ import {
 } from '../synthetics_service/formatters/public_formatters/format_configs';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
-const VERSION = '1.0.0';
-const TASK_ID = `${TASK_TYPE}:${VERSION}`;
+const TASK_ID = `${TASK_TYPE}-single-instance`;
 
 export class SyncPrivateLocationMonitorsTask {
   constructor(
