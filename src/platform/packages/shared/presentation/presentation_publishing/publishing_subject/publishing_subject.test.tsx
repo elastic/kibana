@@ -244,7 +244,10 @@ describe('publishing subject', () => {
           </>
         );
       }
-      render(<Component />);
+      render(<Component />, {
+        // TODO: fails with concurrent mode
+        legacyRoot: true,
+      });
       await waitFor(() => {
         expect(
           screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
