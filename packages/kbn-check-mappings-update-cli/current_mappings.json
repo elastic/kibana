@@ -71,6 +71,19 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "consumer": {
         "type": "keyword"
       },

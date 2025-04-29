@@ -4737,7 +4737,7 @@ describe('update()', () => {
       expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     });
 
-    test.only('modifies the investigation guide', async () => {
+    test('gives updated investigation guide to saved objects client', async () => {
       actionsClient.getBulk.mockReset();
       actionsClient.getBulk.mockResolvedValue([
         {
@@ -4887,10 +4887,12 @@ describe('update()', () => {
         },
       });
 
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(
+        (unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain).artifacts
+          ?.investigation_guide?.blob
+      ).toEqual('new blob');
       expect(result.artifacts).toBeDefined();
-      expect(result.artifacts!.investigation_guide).toEqual({
-        blob: 'new blob',
-      });
     });
   });
 });

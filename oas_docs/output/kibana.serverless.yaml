@@ -1793,12 +1793,14 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
                     investigation_guide:
                       additionalProperties: false
                       type: object
                       properties:
                         blob:
+                          maxLength: 1000
                           type: string
                       required:
                         - blob
@@ -3062,12 +3064,14 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
                     investigation_guide:
                       additionalProperties: false
                       type: object
                       properties:
                         blob:
+                          maxLength: 1000
                           type: string
                       required:
                         - blob
@@ -55819,6 +55823,7 @@ components:
               type: string
           required:
             - start_date
+            - end_date
       required:
         - action
         - run

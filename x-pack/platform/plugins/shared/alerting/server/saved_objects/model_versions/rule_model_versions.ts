@@ -52,7 +52,24 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '6': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          artifacts: {
+            properties: {
+              investigation_guide: {
+                properties: {
+                  blob: {
+                    type: 'text',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
     schemas: {
       forwardCompatibility: rawRuleSchemaV6.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV6,

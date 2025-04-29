@@ -62,7 +62,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action": "696d997e420024a8cf973da94d905c8756e1177c",
         "action_task_params": "cd91a48515202852ebf1fed0d999cd96f6b2823e",
         "ad_hoc_run_params": "690b8991f48c73a04e6a8cf41fd4967a42f8e552",
-        "alert": "1dcfa1391ca9e31e9b71e4e1785fb1f5da3f9c96",
+        "alert": "5da9b026c9a1e71df8b02a57dfd8625b6e3a5916",
         "api_key_pending_invalidation": "cef0693ec88475a0e1f43614cfa6ca43c24d0338",
         "apm-custom-dashboards": "9b08d5d5222131c6981a70144b1d61648757a613",
         "apm-indices": "b844821e9675768b1cb78f6d91ff336ed09d4739",
