@@ -7,14 +7,16 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAlertSummary } from './use_alert_summary';
-import { useChatComplete } from '../../assistant/api/chat_complete/use_chat_complete';
-import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import type { PromptContext } from '@kbn/elastic-assistant';
+import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import { useChatComplete } from '@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete';
 import { useFetchAlertSummary } from './use_fetch_alert_summary';
 import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
-import type { PromptContext } from '../../..';
 
-jest.mock('../../assistant/api/chat_complete/use_chat_complete');
-jest.mock('../../assistant/api/anonymization_fields/use_fetch_anonymization_fields');
+jest.mock('@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete');
+jest.mock(
+  '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
+);
 jest.mock('./use_fetch_alert_summary');
 jest.mock('./use_bulk_update_alert_summary');
 const promptContext: PromptContext = {

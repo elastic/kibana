@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { AlertSummary } from './alert_summary';
-export { SuggestedPrompts } from './suggested_prompts';
-export { AttackDiscoveryWidget } from './attack_discovery';
-export { Conversations } from './conversations';
+export const ASSET_INVENTORY_INDEX_PATTERN = '.entities.*.latest.security_*_';
+export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
+export const ASSET_INVENTORY_DATA_VIEW_NAME = 'Asset Inventory Data View';

@@ -20,9 +20,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useFetchCurrentUserConversations } from '../assistant/api';
-import { useAssistantContext } from '../assistant_context';
-import * as i18n from './translations';
+import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
+import * as i18n from '../constants/translations';
 
 interface Props {
   id?: string;
