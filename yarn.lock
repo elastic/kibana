@@ -11153,13 +11153,13 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
-"@types/enzyme@^3.10.12":
-  version "3.10.12"
-  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.12.tgz#ac4494801b38188935580642f772ad18f72c132f"
-  integrity sha512-xryQlOEIe1TduDWAOphR0ihfebKFSWOXpIsk+70JskCfRfW+xALdnJ0r1ZOTo85F9Qsjk6vtlU7edTYHbls9tA==
+"@types/enzyme@^3.10.18":
+  version "3.10.18"
+  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.18.tgz#86010e7cb56cf1450dd391b8cc3a788f6a6fadef"
+  integrity sha512-RaO/TyyHZvXkpzinbMTZmd/S5biU4zxkvDsn22ujC29t9FMSzq8tnn8f2MxQ2P8GVhFRG5jTAL05DXKyTtpEQQ==
   dependencies:
     "@types/cheerio" "*"
-    "@types/react" "*"
+    "@types/react" "^16"
 
 "@types/eslint-scope@^3.7.7":
   version "3.7.7"
@@ -11954,7 +11954,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16 || 17 || 18", "@types/react@~18.2.0":
+"@types/react@*", "@types/react@16 || 17 || 18", "@types/react@^16", "@types/react@~18.2.0":
   version "18.2.79"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.2.79.tgz#c40efb4f255711f554d47b449f796d1c7756d865"
   integrity sha512-RwGAGXPl9kSXwdNTafkOEuFrTBD5SA2B3iEB96xi8+xu5ddUa/cpvyVCSNn+asgLCTHkb5ZxN8gbuibYJi4s1w==
@@ -12684,22 +12684,22 @@
   resolved "https://registry.yarnpkg.com/@webpack-cli/serve/-/serve-2.0.5.tgz#325db42395cd49fe6c14057f9a900e427df8810e"
   integrity sha512-lqaoKnRYBdo1UgDX8uF24AfGMifWK19TxPmM5FHc2vAGxrJ/qtyUyFBWoY1tISZdelsQ5fBcOusifo5o5wSJxQ==
 
-"@wojtekmaj/enzyme-adapter-react-17@^0.6.7":
-  version "0.6.7"
-  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-react-17/-/enzyme-adapter-react-17-0.6.7.tgz#7784bd32f518b186218cebb26c98c852676f30b0"
-  integrity sha512-B+byiwi/T1bx5hcj9wc0fUL5Hlb5giSXJzcnEfJVl2j6dGV2NJfcxDBYX0WWwIxlzNiFz8kAvlkFWI2y/nscZQ==
+"@wojtekmaj/enzyme-adapter-react-17@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-react-17/-/enzyme-adapter-react-17-0.8.0.tgz#138f404f82f502d152242c049e87d9621dcda4bd"
+  integrity sha512-zeUGfQRziXW7R7skzNuJyi01ZwuKCH8WiBNnTgUJwdS/CURrJwAhWsfW7nG7E30ak8Pu3ZwD9PlK9skBfAoOBw==
   dependencies:
-    "@wojtekmaj/enzyme-adapter-utils" "^0.1.4"
+    "@wojtekmaj/enzyme-adapter-utils" "^0.2.0"
     enzyme-shallow-equal "^1.0.0"
     has "^1.0.0"
     prop-types "^15.7.0"
     react-is "^17.0.0"
     react-test-renderer "^17.0.0"
 
-"@wojtekmaj/enzyme-adapter-utils@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-utils/-/enzyme-adapter-utils-0.1.4.tgz#bcd411ad6e368f17dce5425582c2907104cdb1ad"
-  integrity sha512-ARGIQSIIv3oBia1m5Ihn1VU0FGmft6KPe39SBKTb8p7LSXO23YI4kNtc4M/cKoIY7P+IYdrZcgMObvedyjoSQA==
+"@wojtekmaj/enzyme-adapter-utils@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@wojtekmaj/enzyme-adapter-utils/-/enzyme-adapter-utils-0.2.0.tgz#dc2a8c14f92e502da28ea6b3fad96a082076d028"
+  integrity sha512-ZvZm9kZxZEKAbw+M1/Q3iDuqQndVoN8uLnxZ8bzxm7KgGTBejrGRoJAp8f1EN8eoO3iAjBNEQnTDW/H4Ekb0FQ==
   dependencies:
     function.prototype.name "^1.1.0"
     has "^1.0.0"
