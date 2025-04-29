@@ -61,6 +61,9 @@ export const i18nTexts = {
       defaultMessage: 'Count by extension',
     }
   ),
+  filesFlyoutLabel: i18n.translate('filesManagement.filesFlyout.flyoutLabel', {
+    defaultMessage: 'File details',
+  }),
   filesFlyoutSize: i18n.translate('filesManagement.filesFlyout.sizeLabel', {
     defaultMessage: 'Size',
   }),

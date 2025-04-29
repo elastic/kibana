@@ -37,7 +37,7 @@ interface Props {
 export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
   const { filesClient } = useFilesManagementContext();
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="m">
+    <EuiFlyout ownFocus onClose={onClose} size="m" aria-label={i18nTexts.filesFlyoutLabel}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>{file.name}</h2>
