@@ -10,8 +10,9 @@ import { Condition, SampleDocument, conditionToQueryDsl } from '@kbn/streams-sch
 import { ErrorActorEvent, fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
-import { filter, map } from 'rxjs';
+import { Observable, filter, map } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import { getFormattedError } from '../../../../../util/errors';
 import { SimulationMachineDeps } from './types';
 
 export interface SamplesFetchInput {
@@ -23,57 +24,42 @@ export interface SamplesFetchInput {
 
 export function createSamplesFetchActor({
   data,
-  // streamsRepositoryClient,
   timeState$,
 }: Pick<SimulationMachineDeps, 'data' | 'timeState$'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
     const abortController = new AbortController();
     const { asAbsoluteTimeRange } = timeState$.getValue();
 
-    // const samplesBody = await streamsRepositoryClient.fetch(
-    //   'POST /internal/streams/{name}/_sample',
-    //   {
-    //     signal,
-    //     params: {
-    //       path: { name: input.streamName },
-    //       body: {
-    //         if: input.condition,
-    //         start: new Date(asAbsoluteTimeRange.from).getTime(),
-    //         end: new Date(asAbsoluteTimeRange.to).getTime(),
-    //         size: 100,
-    //       },
-    //     },
-    //   }
-    // );
+    return new Observable((observer) => {
+      const subscription = data.search
+        .search(
+          {
+            params: buildSamplesSearchParams({
+              condition: input.condition,
+              filters: input.filters,
+              index: input.streamName,
+              query: input.query,
+              timeRange: asAbsoluteTimeRange,
+            }),
+          },
+          {
+            abortSignal: abortController.signal,
+          }
+        )
+        .pipe(
+          filter(
+            (result) => !isRunningResponse(result) && result.rawResponse.hits?.hits !== undefined
+          ),
+          map((result) => result.rawResponse.hits.hits.map((doc) => doc._source))
+        )
+        .subscribe(observer);
 
-    // return samplesBody.documents;
-
-    return data.search.search(
-      {
-        params: {
-          index: input.streamName,
-          ...buildSamplesSearchParams({
-            condition: input.condition,
-            filters: input.filters,
-            index: input.streamName,
-            query: input.query,
-            timeRange: asAbsoluteTimeRange,
-          }),
-        },
-      },
-      {
-        abortSignal: abortController.signal,
-      }
-    );
-    // .pipe(
-    //   // filter(
-    //   //   (result) => !isRunningResponse(result) && result.rawResponse.hits?.hits !== undefined
-    //   // ),
-    //   map(
-    //     (result) =>
-    //       console.log('fdsfdsf', result) || result.rawResponse.hits.hits.map((doc) => doc._source)
-    //   )
-    // );
+      return () => {
+        // Abort logic when unsubscribed
+        abortController.abort();
+        subscription.unsubscribe();
+      };
+    });
   });
 }
 
@@ -107,6 +93,8 @@ const buildSamplesSearchParams = ({
   );
 
   const searchBody = {
+    index,
+    allow_no_indices: true,
     query: queryDefinition,
     sort: [
       {
@@ -115,9 +103,9 @@ const buildSamplesSearchParams = ({
         },
       },
     ],
+    size,
     terminate_after: size,
     track_total_hits: false,
-    size,
   };
 
   return searchBody;
@@ -128,11 +116,12 @@ export function createSamplesFetchFailureNofitier({
 }: Pick<SimulationMachineDeps, 'toasts'>) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
+    const error = getFormattedError(event.error);
+    toasts.addError(error, {
       title: i18n.translate('xpack.streams.enrichment.simulation.samplesFetchError', {
         defaultMessage: 'An issue occurred retrieving samples.',
       }),
-      toastMessage: event.error.body.message,
+      toastMessage: error.message,
     });
   };
 }

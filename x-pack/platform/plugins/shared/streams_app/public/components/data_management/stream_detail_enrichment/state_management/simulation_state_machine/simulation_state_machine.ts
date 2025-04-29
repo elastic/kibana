@@ -8,6 +8,7 @@ import {
   ActorRefFrom,
   MachineImplementationsFrom,
   SnapshotFrom,
+  and,
   assign,
   fromEventObservable,
   setup,
@@ -232,12 +233,10 @@ export const simulationMachine = setup({
           },
           streamName: context.streamName,
         }),
-        // onSnapshot: {
-        //   actions: ({ event }) => {
-        //     console.log('sadasdas', event.snapshot.context); // 1, 2, 3, ...
-        //   },
-        // },
         onSnapshot: [
+          {
+            guard: ({ event }) => event.snapshot.context === undefined,
+          },
           {
             guard: {
               type: 'hasProcessors',
@@ -247,8 +246,7 @@ export const simulationMachine = setup({
             actions: [
               {
                 type: 'storeSamples',
-                params: ({ event }) =>
-                  console.log('eventeee', event) || { samples: event.snapshot.context ?? [] },
+                params: ({ event }) => ({ samples: event.snapshot.context ?? [] }),
               },
             ],
           },
@@ -257,8 +255,7 @@ export const simulationMachine = setup({
             actions: [
               {
                 type: 'storeSamples',
-                params: ({ event }) =>
-                  console.log('eventeee', event) || { samples: event.snapshot.context ?? [] },
+                params: ({ event }) => ({ samples: event.snapshot.context ?? [] }),
               },
             ],
           },
