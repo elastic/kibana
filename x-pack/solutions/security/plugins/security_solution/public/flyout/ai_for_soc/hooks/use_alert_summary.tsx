@@ -6,18 +6,18 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import {
-  replaceAnonymizedValuesWithOriginalValues,
-  Replacements,
-} from '@kbn/elastic-assistant-common';
-import { useChatComplete } from '../../assistant/api/chat_complete/use_chat_complete';
-import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+  type PromptContext,
+  useChatComplete,
+  useFetchAnonymizationFields,
+  getNewSelectedPromptContext,
+  getCombinedMessage,
+} from '@kbn/elastic-assistant';
 import { useFetchAlertSummary } from './use_fetch_alert_summary';
 import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
-import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
-import { getCombinedMessage } from '../../assistant/prompt/helpers';
-import type { PromptContext } from '../../..';
-import * as i18n from '../translations';
+import * as i18n from '../constants/translations';
 
 interface Props {
   alertId: string;

@@ -8,10 +8,10 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AlertSummary } from '.';
-import type { PromptContext } from '../../..';
-import { useAlertSummary } from './use_alert_summary';
+import type { PromptContext } from '@kbn/elastic-assistant';
+import { useAlertSummary } from '../../hooks/use_alert_summary';
 
-jest.mock('./use_alert_summary');
+jest.mock('../../hooks/use_alert_summary');
 const promptContext: PromptContext = {
   category: 'alert',
   description: 'Alert summary',
