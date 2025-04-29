@@ -415,7 +415,7 @@ describe('WHERE <expression>', () => {
       test('suggests `Create control` option', async () => {
         const { suggest } = await setup();
 
-        const suggestions = await suggest('FROM a | WHERE agent.name == /', {
+        const suggestions = await suggest('FROM index_b | WHERE agent.name == /', {
           callbacks: {
             canSuggestVariables: () => true,
             getVariables: () => [],
@@ -436,7 +436,7 @@ describe('WHERE <expression>', () => {
       test('suggests `?value` option', async () => {
         const { suggest } = await setup();
 
-        const suggestions = await suggest('FROM a | WHERE agent.name == /', {
+        const suggestions = await suggest('FROM index_b | WHERE agent.name == /', {
           callbacks: {
             canSuggestVariables: () => true,
             getVariables: () => [
@@ -463,7 +463,7 @@ describe('WHERE <expression>', () => {
       test('suggests `Create control` option when a questionmark is typed', async () => {
         const { suggest } = await setup();
 
-        const suggestions = await suggest('FROM a | WHERE agent.name == ?/', {
+        const suggestions = await suggest('FROM index_b | WHERE agent.name == ?/', {
           callbacks: {
             canSuggestVariables: () => true,
             getVariables: () => [],

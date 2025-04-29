@@ -12,10 +12,11 @@ import type {
   ESQLFunction,
   ESQLMessage,
   ESQLSource,
+  ESQLAstCommand,
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy, ReferenceMaps } from '../validation/types';
+import type { ESQLPolicy, ReferenceMaps, ESQLRealField } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -420,6 +421,15 @@ export interface CommandDefinition<CommandName extends string> {
    * This method is called to load suggestions when the cursor is within this command.
    */
   suggest: CommandSuggestFunction<CommandName>;
+
+  /**
+   * This method is called to define the fields available after this command is applied.
+   */
+  fieldsSuggestionsAfter?: (
+    lastCommand: ESQLAstCommand,
+    previousCommandFields: ESQLRealField[],
+    userDefinedColumns: ESQLRealField[]
+  ) => ESQLRealField[];
 }
 
 export interface CommandTypeDefinition {
