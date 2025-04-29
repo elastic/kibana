@@ -2792,19 +2792,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\"",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | grok doubleField \"%{firstWord}\"",
+      "query": "from a_index | grok doubleField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [
         "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\" | keep firstWord",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\" | keep textPrts",
       "error": [],
       "warning": []
     },

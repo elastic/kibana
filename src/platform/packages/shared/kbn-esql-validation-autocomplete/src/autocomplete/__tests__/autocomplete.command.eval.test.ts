@@ -86,7 +86,7 @@ describe('autocomplete.suggest', () => {
       // ]);
 
       await assertSuggestions(
-        'from a | stats avg(doubleField) by keywordField | eval /',
+        'from b | stats avg(doubleField) by keywordField | eval /',
         [
           'col0 = ',
           '`avg(doubleField)` ',
@@ -103,7 +103,7 @@ describe('autocomplete.suggest', () => {
         }
       );
       await assertSuggestions(
-        'from a | eval abs(doubleField) + 1 | eval /',
+        'from c | eval abs(doubleField) + 1 | eval /',
         [
           'col0 = ',
           ...getFieldNamesByType('any').map((v) => `${v} `),
@@ -120,7 +120,7 @@ describe('autocomplete.suggest', () => {
         }
       );
       await assertSuggestions(
-        'from a | stats avg(doubleField) by keywordField | eval /',
+        'from d | stats avg(doubleField) by keywordField | eval /',
         [
           'col0 = ',
           '`avg(doubleField)` ',

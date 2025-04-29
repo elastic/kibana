@@ -207,23 +207,24 @@ describe('autocomplete', () => {
   });
 
   describe('callbacks', () => {
-    it('should send the columns query without the last command', async () => {
+    it('should send the columns query only for the from part', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
-      const statement = 'from a | drop keywordField | eval col0 = abs(doubleField) ';
+      const statement = 'from index_b | drop keywordField | eval col0 = abs(doubleField) ';
+
       const triggerOffset = statement.lastIndexOf(' ');
       const context = createCompletionContext(statement[triggerOffset]);
       await suggest(statement, triggerOffset + 1, context, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({
-        query: 'from a | drop keywordField',
+        query: 'from index_b',
       });
     });
     it('should send the fields query aware of the location', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
-      const statement = 'from a | drop | eval col0 = abs(doubleField) ';
+      const statement = 'from index_d | drop | eval col0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
       const context = createCompletionContext(statement[triggerOffset]);
       await suggest(statement, triggerOffset + 1, context, callbackMocks);
-      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from a' });
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from index_d' });
     });
   });
 
@@ -888,10 +889,9 @@ describe('autocomplete', () => {
             .map(attachTriggerCommand)
         );
         testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
-
         // Let's get funky with the field names
         testSuggestions(
-          `FROM a | ${commandName} @timestamp/`,
+          `FROM b | ${commandName} @timestamp/`,
           ['@timestamp, ', '@timestamp | ']
             .map((text) => ({
               text,
@@ -908,7 +908,7 @@ describe('autocomplete', () => {
           ]
         );
         testSuggestions(
-          `FROM a | ${commandName} foo.bar/`,
+          `FROM c | ${commandName} foo.bar/`,
           ['foo.bar, ', 'foo.bar | ']
             .map((text) => ({
               text,
@@ -927,7 +927,7 @@ describe('autocomplete', () => {
 
         describe('escaped field names', () => {
           testSuggestions(
-            `FROM a | ${commandName} \`foo.bar\`/`,
+            `FROM c | ${commandName} \`foo.bar\`/`,
             ['`foo.bar`, ', '`foo.bar` | '],
             undefined,
             [
@@ -938,7 +938,7 @@ describe('autocomplete', () => {
             ]
           );
           testSuggestions(
-            `FROM a | ${commandName} \`foo\`\`\`\`bar\`\`baz\`/`,
+            `FROM d | ${commandName} \`foo\`\`\`\`bar\`\`baz\`/`,
             ['`foo````bar``baz`, ', '`foo````bar``baz` | '],
             undefined,
             [
@@ -975,7 +975,7 @@ describe('autocomplete', () => {
 
         // out of fields
         testSuggestions(
-          `FROM a | ${commandName} doubleField, dateField/`,
+          `FROM e | ${commandName} doubleField, dateField/`,
           ['dateField | '],
           undefined,
           [
@@ -1023,29 +1023,29 @@ describe('autocomplete', () => {
 
     describe('dot-separated field names', () => {
       testSuggestions(
-        'FROM a | KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 14, end: 23 } }],
+        'FROM index_a | KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );
       // multi-line
       testSuggestions(
-        'FROM a\n| KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 14, end: 23 } }],
+        'FROM index_a\n| KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );
       // triple separator
       testSuggestions(
-        'FROM a\n| KEEP field.name.f/',
-        [{ text: 'field.name.foo', rangeToReplace: { start: 14, end: 26 } }],
+        'FROM index_c\n| KEEP field.name.f/',
+        [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double' }]]
       );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(
       testSuggestions.skip(
-        'FROM a | KEEP field . n/',
+        'FROM index_a | KEEP field . n/',
         [{ text: 'field . name', rangeToReplace: { start: 14, end: 22 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
