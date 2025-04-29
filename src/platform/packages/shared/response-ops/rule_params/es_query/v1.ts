@@ -173,13 +173,6 @@ const EsQueryRuleParamsSchemaProperties = {
       }
     )
   ),
-  linkedVisId: schema.conditional(
-    schema.siblingRef('searchType'),
-    schema.literal('esqlQuery'),
-    schema.string(),
-    schema.never(),
-    { meta: { description: 'The uuid of a visualization linked to this rule' } }
-  ),
 };
 
 // rule type parameters

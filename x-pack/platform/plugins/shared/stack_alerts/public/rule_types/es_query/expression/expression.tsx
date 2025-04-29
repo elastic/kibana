@@ -40,7 +40,6 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   const isEsqlQuery = isEsqlQueryRule(ruleParams);
   // metadata provided only when the user opens the alert from the Discover page or a dashboard
   const isManagementPage = props.metadata?.isManagementPage ?? true;
-  const ruleHasLinkedVisualization = !!ruleParams.linkedVisId;
 
   const formTypeSelected = useCallback(
     (searchType: SearchType | null) => {
@@ -96,7 +95,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
       {expressionError}
 
       {/* Showing the selected type */}
-      {isManagementPage && !ruleHasLinkedVisualization && (
+      {isManagementPage && (
         <QueryFormTypeChooser
           searchType={ruleParams.searchType as SearchType}
           onFormTypeSelect={formTypeSelected}

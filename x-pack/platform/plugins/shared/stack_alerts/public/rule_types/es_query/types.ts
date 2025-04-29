@@ -67,7 +67,6 @@ export interface OnlyEsqlQueryRuleParams {
   searchType?: 'esqlQuery';
   esqlQuery: AggregateQuery;
   timeField: string;
-  linkedVisId?: string;
 }
 
 export type DataViewOption = EuiComboBoxOptionOption<string>;
