@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { EuiSwitchProps } from '@elastic/eui';
-import { EuiIcon, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -54,15 +54,17 @@ export const InstallSection: React.FunctionComponent<Props> = ({
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
       <RootPrivilegesCallout rootIntegrations={rootIntegrations} />
       <UnprivilegedInfo />
-      <EuiSwitch
-        label={addElasticAgentCompleteLabel}
-        checked={showCompleteAgentInstructions}
-        onChange={onChangeShowCompleteAgentInstructions}
-        compressed
-      />
-      <EuiToolTip position="top" content={addElasticAgentCompleteTooltipContent}>
-        <EuiIcon tabIndex={0} type="questionInCircle" />
-      </EuiToolTip>
+      <EuiFlexGroup gutterSize="xs">
+        <EuiSwitch
+          label={addElasticAgentCompleteLabel}
+          checked={showCompleteAgentInstructions}
+          onChange={onChangeShowCompleteAgentInstructions}
+          compressed
+        />
+        <EuiToolTip position="top" content={addElasticAgentCompleteTooltipContent}>
+          <EuiIcon tabIndex={0} type="iInCircle" />
+        </EuiToolTip>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <PlatformSelector
         fullCopyButton={fullCopyButton}
