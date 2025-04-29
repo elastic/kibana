@@ -12,7 +12,7 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { RunContext } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { syntheticsParamType } from '../../common/types/saved_objects';
 import { normalizeSecrets } from '../synthetics_service/utils';
@@ -34,6 +34,13 @@ import {
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 const TASK_ID = `${TASK_TYPE}-single-instance`;
 
+interface TaskState extends Record<string, unknown> {
+  lastStartedAt: string;
+  lastTotalParams: number;
+}
+
+type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & { state: Partial<TaskState> };
+
 export class SyncPrivateLocationMonitorsTask {
   constructor(
     public serverSetup: SyntheticsServerSetup,
@@ -47,10 +54,10 @@ export class SyncPrivateLocationMonitorsTask {
           'This task is executed so that we can sync private location monitors for example when global params are updated',
         timeout: '3m',
         maxAttempts: 3,
-        createTaskRunner: (taskInstance) => {
+        createTaskRunner: ({ taskInstance }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance);
+              return this.runTask({ taskInstance });
             },
           };
         },
@@ -58,16 +65,20 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask(context: RunContext) {
+  public async runTask({
+    taskInstance,
+  }: {
+    taskInstance: CustomTaskInstance;
+  }): Promise<{ state: TaskState; error?: Error }> {
     const {
       coreStart: { savedObjects },
       encryptedSavedObjects,
       logger,
     } = this.serverSetup;
     const lastStartedAt =
-      context.taskInstance.state?.lastStartedAt || moment().subtract(10, 'minute');
-    const startedAt = context.taskInstance.startedAt || moment();
-    let lastTotalParams = context.taskInstance.state?.lastTotalParams || 0;
+      taskInstance.state.lastStartedAt || moment().subtract(10, 'minute').toISOString();
+    const startedAt = taskInstance.startedAt || new Date();
+    let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     try {
       logger.debug(
         `Syncing private location monitors, last total params ${lastTotalParams}, last run ${lastStartedAt}`
