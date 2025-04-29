@@ -940,8 +940,6 @@ describe('TaskClaiming', () => {
         getAvailableCapacity: (type?: string) => {
           if (type === 'sampleTaskSharedConcurrencyType1') {
             return 2;
-          } else if (type === 'sampleTaskSharedConcurrencyType1') {
-            return 10;
           } else {
             return 10;
           }
