@@ -30,16 +30,6 @@ const LlmPerformanceMatrixDocsLink = React.memo<{ text: string }>(({ text }) => 
 });
 LlmPerformanceMatrixDocsLink.displayName = 'LlmPerformanceMatrixDocsLink';
 
-const SiemMigrationDocsLink = React.memo<{ text: string }>(({ text }) => {
-  const { siemMigrations } = useKibana().services.docLinks.links.securitySolution;
-  return (
-    <EuiLink href={siemMigrations} target="_blank">
-      {text}
-    </EuiLink>
-  );
-});
-SiemMigrationDocsLink.displayName = 'SiemMigrationDocsLink';
-
 export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> = ({
   checkCompleteMetadata,
   checkComplete,
@@ -86,20 +76,18 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
               {i18n.AI_CONNECTOR_CARD_DESCRIPTION_START}
               {isInferenceConnector ? (
                 <FormattedMessage
-                  id="xpack.securitySolution.onboarding.aiConnectorCardInferenceDescription"
-                  defaultMessage="The Elastic-provided connector is selected by default. You can configure another connector and model if you prefer. Learn more about {docsLink} and {llmMatrixLink}"
+                  id="xpack.securitySolution.onboarding.llmConnectorCardInferenceDescription"
+                  defaultMessage="The Elastic-provided connector is selected by default. You can configure another connector and model if you prefer. Learn more about {llmMatrixLink}"
                   values={{
                     llmMatrixLink: <LlmPerformanceMatrixDocsLink text={i18n.LLM_MATRIX_LINK} />,
-                    docsLink: <SiemMigrationDocsLink text={i18n.AI_POWERED_MIGRATIONS_LINK} />,
                   }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.securitySolution.onboarding.aiConnectorCardNotInferenceDescription"
-                  defaultMessage="Refer to the {llmMatrixLink} for information about which models perform best. {docsLink} about AI-powered SIEM migration."
+                  id="xpack.securitySolution.onboarding.llmConnectorCardNotInferenceDescription"
+                  defaultMessage="Refer to the {llmMatrixLink} for information about which models perform best."
                   values={{
                     llmMatrixLink: <LlmPerformanceMatrixDocsLink text={i18n.LLM_MATRIX_LINK} />,
-                    docsLink: <SiemMigrationDocsLink text={i18n.LEARN_MORE_LINK} />,
                   }}
                 />
               )}

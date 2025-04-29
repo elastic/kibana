@@ -13,7 +13,6 @@ import { INTEGRATION_TABS } from './integration_tabs_configs';
 import { ManageIntegrationsCallout } from '../../common/integrations/callouts/manage_integrations_callout';
 import { useOnboardingContext } from '../../../../onboarding_context';
 import { useEnhancedIntegrationCards } from '../../../../../../common/lib/search_ai_lake/hooks';
-import { useSelectedTab } from '../../../../../../common/lib/integrations/hooks/use_selected_tab';
 import type {
   RenderChildrenType,
   IntegrationCardMetadata,
@@ -56,13 +55,8 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
   ({ checkCompleteMetadata }) => {
     const {
       spaceId,
-      telemetry: { trackLinkClick },
+      telemetry: { reportLinkClick },
     } = useOnboardingContext();
-
-    const selectedTabResult = useSelectedTab({
-      spaceId,
-      integrationTabs: INTEGRATION_TABS,
-    });
 
     if (!checkCompleteMetadata) {
       return <CenteredLoadingSpinner data-test-subj="loadingInstalledIntegrations" />;
@@ -70,12 +64,15 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
 
     return (
       <OnboardingCardContentPanel>
-        <IntegrationContextProvider spaceId={spaceId} trackLinkClick={trackLinkClick}>
+        <IntegrationContextProvider
+          spaceId={spaceId}
+          reportLinkClick={reportLinkClick}
+          integrationTabs={INTEGRATION_TABS}
+        >
           <WithFilteredIntegrations
             renderChildren={IntegrationsCardGridTabs}
             prereleaseIntegrationsEnabled={true}
             checkCompleteMetadata={checkCompleteMetadata}
-            selectedTabResult={selectedTabResult}
           />
         </IntegrationContextProvider>
       </OnboardingCardContentPanel>
