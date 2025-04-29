@@ -119,7 +119,7 @@ export const DiscoverMainRoute = ({
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
 
-      const userId = (await services.userProfile?.getCurrent())?.uid ?? '';
+      const userId = 'todo'; // TODO: fix getting the user id. Does not work with: (await services.userProfile?.getCurrent())?.uid ?? '';
       const spaceId = (await services.spaces?.getActiveSpace())?.id ?? '';
 
       internalState.dispatch(internalStateActions.initiateTabs({ userId, spaceId }));
