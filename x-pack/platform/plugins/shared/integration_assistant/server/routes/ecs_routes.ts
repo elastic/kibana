@@ -36,10 +36,7 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         version: '1',
         security: {
           authz: {
-            requiredPrivileges: [
-              FLEET_ALL_ROLE,
-              INTEGRATIONS_ALL_ROLE,
-            ],
+            requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
           },
         },
         validate: {
