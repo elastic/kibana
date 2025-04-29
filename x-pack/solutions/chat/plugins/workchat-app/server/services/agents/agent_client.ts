@@ -47,6 +47,12 @@ export interface AgentClient {
    * Updates an agent and returns it.
    */
   update(agentId: string, fields: AgentUpdatableFields): Promise<Agent>;
+
+  /**
+   * Deletes an agent and returns it.
+   */
+  delete(agentId: string): Promise<Agent>;
+
 }
 
 export class AgentClientImpl implements AgentClient {
@@ -110,6 +116,14 @@ export class AgentClientImpl implements AgentClient {
       ...conversationSo,
       attributes: updatedAttributes,
     });
+  }
+
+  async delete(agentId: string): Promise<Agent> {
+    const conversationSo = await this._rawGet({ agentId });
+    await this.client.delete(agentTypeName, conversationSo.id)
+    return savedObjectToModel({
+      ...conversationSo
+    })
   }
 
   private async _rawGet({ agentId }: { agentId: string }): Promise<SavedObject<AgentAttributes>> {
