@@ -8,7 +8,7 @@
  */
 
 import { Client, estypes } from '@elastic/elasticsearch';
-import { ApmFields, ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import { ApmFields, ApmOtelFields, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import { ValuesType } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
 import { Logger } from '../../../utils/create_logger';
@@ -25,7 +25,6 @@ export enum ComponentTemplateName {
   TracesApmRum = 'traces-apm.rum@custom',
   TracesApmSampled = 'traces-apm.sampled@custom',
 }
-export type ApmSynthtracePipelines = 'default' | 'otelToApm' | 'apmToOtel';
 
 export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOptions, 'pipeline'> {
   version: string;
@@ -96,7 +95,7 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
     } = { includeSerialization: true }
   ) {
     switch (pipeline) {
-      case 'otelToApm': {
+      case 'otel': {
         return otelToApmPipeline(this.logger, options.includeSerialization);
       }
       case 'apmToOtel': {

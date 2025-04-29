@@ -36,6 +36,7 @@
     "@kbn/wci-browser",
     "@kbn/features-plugin",
     "@kbn/wc-genai-utils",
+    "@kbn/workchat-framework-plugin",
   ],
   "exclude": [
     "target/**/*",
