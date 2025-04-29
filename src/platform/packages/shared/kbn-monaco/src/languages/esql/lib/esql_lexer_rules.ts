@@ -186,6 +186,7 @@ export const builtinFunctions = [
   'WEIGHTED_AVG',
 ];
 
+// These ESQL lexer rules are only used for highlighting nested ESQL in Console requests
 export const lexerRules = {
   defaultToken: 'invalid',
   ignoreCase: true,
@@ -206,9 +207,8 @@ export const lexerRules = {
         },
       ],
       [/[()]/, '@brackets'],
-      [/--.*$/, 'comment'],
+      [/\/\/.*$/, 'comment'],
       [/\/\*/, 'comment', '@comment'],
-      [/\/.*$/, 'comment'],
 
       [/".*?"/, 'string'],
 

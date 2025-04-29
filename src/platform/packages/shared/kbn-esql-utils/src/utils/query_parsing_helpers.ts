@@ -16,7 +16,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { monaco } from '@kbn/monaco';
 
@@ -25,7 +25,7 @@ const DEFAULT_ESQL_LIMIT = 1000;
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export function getIndexPatternFromESQLQuery(esql?: string) {
   const { ast } = parse(esql);
-  const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
+  const sourceCommand = ast.find(({ name }) => ['from', 'ts'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.name).join(',');
@@ -161,7 +161,7 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = parse(esql);
   const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+  return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
 };
 
 /**
@@ -192,7 +192,7 @@ export const mapVariableToColumn = (
   return columns;
 };
 
-const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
+export const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
   const lines = queryString.split('\n');
   const lineNumber = cursorPosition?.lineNumber ?? lines.length;
   const column = cursorPosition?.column ?? lines[lineNumber - 1].length;
@@ -210,8 +210,23 @@ const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Positio
   return previousLines + '\n' + currentLine;
 };
 
+const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
+  if (typeof queryString !== 'string' || queryString.length === 0) {
+    return false;
+  }
+
+  const lastChar = queryString.slice(-1);
+  const secondLastChar = queryString.slice(-2, -1);
+
+  return lastChar === '?' || secondLastChar === '?';
+};
+
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
+
+  if (hasQuestionMarkAtEndOrSecondLastPosition(queryInCursorPosition)) {
+    return undefined;
+  }
 
   const validQuery = `${queryInCursorPosition} ""`;
   const { root } = parse(validQuery);
@@ -224,7 +239,40 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
 
   const column = Walker.match(lastCommand, { type: 'column' });
 
-  if (column) {
+  if (column && column.name && column.name !== '*') {
     return `${column.name}`;
   }
+};
+
+// this is for backward compatibility, if the query is of fields or functions type
+// and the query is not set with ?? in the query, we should set it
+// https://github.com/elastic/elasticsearch/pull/122459
+export const fixESQLQueryWithVariables = (
+  queryString: string,
+  esqlVariables?: ESQLControlVariable[]
+) => {
+  const currentVariables = getESQLQueryVariables(queryString);
+  if (!currentVariables.length) {
+    return queryString;
+  }
+
+  // filter out the variables that are not used in the query
+  // and that they are not of type FIELDS or FUNCTIONS
+  const identifierTypeVariables = esqlVariables?.filter(
+    (variable) =>
+      currentVariables.includes(variable.key) &&
+      (variable.type === ESQLVariableType.FIELDS || variable.type === ESQLVariableType.FUNCTIONS)
+  );
+
+  // check if they are set with ?? or ? in the query
+  // replace only if there is only one ? in front of the variable
+  if (identifierTypeVariables?.length) {
+    identifierTypeVariables.forEach((variable) => {
+      const regex = new RegExp(`(?<!\\?)\\?${variable.key}`);
+      queryString = queryString.replace(regex, `??${variable.key}`);
+    });
+    return queryString;
+  }
+
+  return queryString;
 };

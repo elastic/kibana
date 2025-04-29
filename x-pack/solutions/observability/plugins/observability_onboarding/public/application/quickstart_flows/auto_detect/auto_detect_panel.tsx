@@ -34,8 +34,15 @@ import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { SupportedIntegrationsList } from './supported_integrations_list';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 export const AutoDetectPanel: FunctionComponent = () => {
+  useFlowBreadcrumb({
+    text: i18n.translate(
+      'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel',
+      { defaultMessage: 'Elastic Agent: Logs & Metrics' }
+    ),
+  });
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });

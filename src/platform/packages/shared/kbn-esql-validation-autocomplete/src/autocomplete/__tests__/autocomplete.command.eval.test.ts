@@ -21,7 +21,7 @@ import {
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
-import { FunctionDefinitionTypes } from '../../definitions/types';
+import { FunctionDefinitionTypes, Location } from '../../definitions/types';
 import {
   getCompatibleTypesToSuggestNext,
   getValidFunctionSignaturesForPreviousArgs,
@@ -46,7 +46,7 @@ const getTypesFromParamDefs = (paramDefs: FunctionParameter[]): SupportedDataTyp
   ) as SupportedDataType[];
 
 describe('autocomplete.suggest', () => {
-  describe('eval', () => {
+  describe(Location.EVAL, () => {
     let assertSuggestions: AssertSuggestionsFn;
 
     beforeEach(async () => {
@@ -58,23 +58,23 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions('from a | eval /', [
         'var0 = ',
         ...getFieldNamesByType('any').map((v) => `${v} `),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
 
       await assertSuggestions('from a | eval col0 = /', [
         ...getFieldNamesByType('any').map((v) => `${v} `),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
 
       await assertSuggestions('from a | eval col0 = 1, /', [
         'var0 = ',
         ...getFieldNamesByType('any').map((v) => `${v} `),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
 
       await assertSuggestions('from a | eval col0 = 1, col1 = /', [
         ...getFieldNamesByType('any').map((v) => `${v} `),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
 
       // Re-enable with https://github.com/elastic/kibana/issues/210639
@@ -82,15 +82,15 @@ describe('autocomplete.suggest', () => {
       //   'var0 = ',
       //   ...getFieldNamesByType('any').map((v) => `${v} `),
       //   'a',
-      //   ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      //   ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       // ]);
 
       await assertSuggestions(
-        'from a | stats avg(doubleField) by keywordField | eval /',
+        'from b | stats avg(doubleField) by keywordField | eval /',
         [
           'var0 = ',
           '`avg(doubleField)` ',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ],
         {
           triggerCharacter: ' ',
@@ -103,12 +103,12 @@ describe('autocomplete.suggest', () => {
         }
       );
       await assertSuggestions(
-        'from a | eval abs(doubleField) + 1 | eval /',
+        'from c | eval abs(doubleField) + 1 | eval /',
         [
           'var0 = ',
           ...getFieldNamesByType('any').map((v) => `${v} `),
           '`abs(doubleField) + 1` ',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ],
         {
           triggerCharacter: ' ',
@@ -120,11 +120,11 @@ describe('autocomplete.suggest', () => {
         }
       );
       await assertSuggestions(
-        'from a | stats avg(doubleField) by keywordField | eval /',
+        'from d | stats avg(doubleField) by keywordField | eval /',
         [
           'var0 = ',
           '`avg(doubleField)` ',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ],
         {
           triggerCharacter: ' ',
@@ -139,9 +139,12 @@ describe('autocomplete.suggest', () => {
 
     test('after column', async () => {
       await assertSuggestions('from a | eval doubleField /', [
-        ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
-          'double',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
       ]);
     });
 
@@ -160,7 +163,7 @@ describe('autocomplete.suggest', () => {
 
       await assertSuggestions('from index | EVAL not /', [
         ...getFieldNamesByType('boolean').map((v) => `${v} `),
-        ...getFunctionSignaturesByReturnType('eval', 'boolean', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'boolean', { scalar: true }),
       ]);
     });
 
@@ -170,7 +173,7 @@ describe('autocomplete.suggest', () => {
         'from index | EVAL doubleField in (/)',
         [
           ...getFieldNamesByType('double').filter((name) => name !== 'doubleField'),
-          ...getFunctionSignaturesByReturnType('eval', 'double', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'double', { scalar: true }),
         ],
         { triggerCharacter: '(' }
       );
@@ -182,7 +185,7 @@ describe('autocomplete.suggest', () => {
         'from a | eval a=/',
         [
           ...getFieldNamesByType('any').map((v) => `${v} `),
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ],
         { triggerCharacter: '=' }
       );
@@ -190,7 +193,7 @@ describe('autocomplete.suggest', () => {
         'from a | eval a=abs(doubleField), b= /',
         [
           ...getFieldNamesByType('any').map((v) => `${v} `),
-          ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ],
         { triggerCharacter: '=' }
       );
@@ -202,7 +205,7 @@ describe('autocomplete.suggest', () => {
         [
           ...getFieldNamesByType(roundParameterTypes),
           ...getFunctionSignaturesByReturnType(
-            'eval',
+            Location.EVAL,
             roundParameterTypes,
             { scalar: true },
             undefined,
@@ -237,10 +240,12 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions('from a | eval a=round(doubleField) /', [
         ', ',
         '| ',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
-          'double',
-          'long',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true },
+          ['double', 'long']
+        ),
         'IN $0',
         'IS NOT NULL',
         'IS NULL',
@@ -250,7 +255,7 @@ describe('autocomplete.suggest', () => {
         [
           ...getFieldNamesByType(['integer', 'long']),
           ...getFunctionSignaturesByReturnType(
-            'eval',
+            Location.EVAL,
             ['integer', 'long'],
             { scalar: true },
             undefined,
@@ -264,7 +269,7 @@ describe('autocomplete.suggest', () => {
         [
           ...getFieldNamesByType(['integer', 'long']),
           ...getFunctionSignaturesByReturnType(
-            'eval',
+            Location.EVAL,
             ['integer', 'long'],
             { scalar: true },
             undefined,
@@ -278,29 +283,29 @@ describe('autocomplete.suggest', () => {
         ...getFieldNamesByType('any').map((v) => `${v} `),
         // Re-enable with https://github.com/elastic/kibana/issues/210639
         // 'a',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
       await assertSuggestions('from a | eval a=round(doubleField) + /', [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
           scalar: true,
         }),
       ]);
       await assertSuggestions('from a | eval a=round(doubleField)+ /', [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
           scalar: true,
         }),
       ]);
       await assertSuggestions('from a | eval a=doubleField+ /', [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
           scalar: true,
         }),
       ]);
       await assertSuggestions('from a | eval a=`any#Char$Field`+ /', [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType('eval', ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
           scalar: true,
         }),
       ]);
@@ -310,7 +315,7 @@ describe('autocomplete.suggest', () => {
         [
           ...getFieldNamesByType(roundParameterTypes),
           ...getFunctionSignaturesByReturnType(
-            'eval',
+            Location.EVAL,
             roundParameterTypes,
             { scalar: true },
             undefined,
@@ -323,7 +328,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions('from a | eval a=concat( /', [
         ...getFieldNamesByType(['text', 'keyword']).map((v) => `${v}, `),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ['text', 'keyword'],
           { scalar: true },
           undefined,
@@ -335,7 +340,7 @@ describe('autocomplete.suggest', () => {
         [
           ...getFieldNamesByType(['text', 'keyword']),
           ...getFunctionSignaturesByReturnType(
-            'eval',
+            Location.EVAL,
             ['text', 'keyword'],
             { scalar: true },
             undefined,
@@ -351,7 +356,7 @@ describe('autocomplete.suggest', () => {
       // test that comma is correctly added to the suggestions if minParams is not reached yet
       await assertSuggestions('from a | eval a=cidr_match(/', [
         ...getFieldNamesByType('ip').map((v) => `${v}, `),
-        ...getFunctionSignaturesByReturnType('eval', 'ip', { scalar: true }, undefined, [
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'ip', { scalar: true }, undefined, [
           'cidr_match',
         ]).map((v) => ({ ...v, text: `${v.text},` })),
       ]);
@@ -360,7 +365,7 @@ describe('autocomplete.suggest', () => {
         [
           ...getFieldNamesByType(['text', 'keyword']),
           ...getFunctionSignaturesByReturnType(
-            'eval',
+            Location.EVAL,
             ['text', 'keyword'],
             { scalar: true },
             undefined,
@@ -378,7 +383,7 @@ describe('autocomplete.suggest', () => {
           [
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
-              'eval',
+              Location.EVAL,
               roundParameterTypes,
               { scalar: true },
               undefined,
@@ -395,16 +400,19 @@ describe('autocomplete.suggest', () => {
 
       // Smoke testing for suggestions in previous position than the end of the statement
       await assertSuggestions('from a | eval var0 = abs(doubleField) / | eval abs(var0)', [
-        ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
-          'double',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
         ', ',
         '| ',
       ]);
       await assertSuggestions('from a | eval var0 = abs(b/) | eval abs(var0)', [
         ...getFieldNamesByType(absParameterTypes),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           absParameterTypes,
           { scalar: true },
           undefined,
@@ -519,7 +527,7 @@ describe('autocomplete.suggest', () => {
                         getTypesFromParamDefs(typesToSuggestNext).filter(isFieldType)
                       ),
                       ...getFunctionSignaturesByReturnType(
-                        'eval',
+                        Location.EVAL,
                         getTypesFromParamDefs(typesToSuggestNext).filter(
                           isReturnType
                         ) as FunctionReturnType[],
@@ -581,7 +589,7 @@ describe('autocomplete.suggest', () => {
           ', ',
           '| ',
           ...getFunctionSignaturesByReturnType(
-            'eval',
+            Location.EVAL,
             'any',
             { operators: true, skipAssign: true },
             ['integer']
@@ -589,19 +597,12 @@ describe('autocomplete.suggest', () => {
         ],
         { triggerCharacter: ' ' }
       );
-      await assertSuggestions('from a | eval a = 1 year /', [
-        ', ',
-        '| ',
-        '+ $0',
-        '- $0',
-        'IS NOT NULL',
-        'IS NULL',
-      ]);
+      await assertSuggestions('from a | eval a = 1 year /', [', ', '| ', '+ $0', '- $0']);
       await assertSuggestions(
         'from a | eval var0=date_trunc(/)',
         [
           ...getLiteralsByType('time_literal').map((t) => `${t}, `),
-          ...getFunctionSignaturesByReturnType('eval', ['time_duration', 'date_period'], {
+          ...getFunctionSignaturesByReturnType(Location.EVAL, ['time_duration', 'date_period'], {
             scalar: true,
           }).map((t) => `${t.text},`),
         ],

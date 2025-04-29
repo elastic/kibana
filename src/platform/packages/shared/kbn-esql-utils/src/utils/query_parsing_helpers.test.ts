@@ -20,6 +20,7 @@ import {
   getQueryColumnsFromESQLQuery,
   mapVariableToColumn,
   getValuesFromQueryField,
+  fixESQLQueryWithVariables,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
 
@@ -64,14 +65,14 @@ describe('esql query helpers', () => {
       const idxPattern13 = getIndexPatternFromESQLQuery('ROW a = 1, b = "two", c = null');
       expect(idxPattern13).toBe('');
 
-      const idxPattern14 = getIndexPatternFromESQLQuery('METRICS tsdb');
+      const idxPattern14 = getIndexPatternFromESQLQuery('TS tsdb');
       expect(idxPattern14).toBe('tsdb');
 
-      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb | STATS max(cpu) BY host');
+      const idxPattern15 = getIndexPatternFromESQLQuery('TS tsdb | STATS max(cpu) BY host');
       expect(idxPattern15).toBe('tsdb');
 
       const idxPattern16 = getIndexPatternFromESQLQuery(
-        'METRICS pods | STATS load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
+        'TS pods | STATS load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
       );
       expect(idxPattern16).toBe('pods');
 
@@ -80,6 +81,9 @@ describe('esql query helpers', () => {
 
       const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
       expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
+
+      const idxPattern19 = getIndexPatternFromESQLQuery('FROM foo-1::data');
+      expect(idxPattern19).toBe('foo-1::data');
     });
   });
 
@@ -144,12 +148,12 @@ describe('esql query helpers', () => {
       ).toBeFalsy();
     });
 
-    it('should return false for metrics with no aggregation', () => {
-      expect(hasTransformationalCommand('metrics a')).toBeFalsy();
+    it('should return false for timeseries with no aggregation', () => {
+      expect(hasTransformationalCommand('ts a')).toBeFalsy();
     });
 
-    it('should return true for metrics with aggregations', () => {
-      expect(hasTransformationalCommand('metrics a | stats var = avg(b)')).toBeTruthy();
+    it('should return true for timeseries with aggregations', () => {
+      expect(hasTransformationalCommand('ts a | stats var = avg(b)')).toBeTruthy();
     });
   });
 
@@ -579,6 +583,152 @@ describe('esql query helpers', () => {
         column: 36,
       } as monaco.Position);
       expect(values).toEqual('my_field');
+    });
+
+    it('should return undefined if no column is found', () => {
+      const queryString = 'FROM my_index | STATS COUNT() ';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 31,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the column is *', () => {
+      const queryString = 'FROM my_index | STATS COUNT(*) ';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 31,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the last position', () => {
+      const queryString = 'FROM my_index | STATS COUNT() BY ?';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 34,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 42,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the last cursor position', () => {
+      const queryString =
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 52,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+  });
+
+  describe('fixESQLQueryWithVariables', () => {
+    it('should return the query as is if no variables are given', () => {
+      const esql = 'FROM my_index | STATS COUNT(?field)';
+      const variables: ESQLControlVariable[] = [];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(esql);
+    });
+
+    it('should return the query as is if no fields or functions variables are given', () => {
+      const esql = 'FROM my_index | WHERE field == ?value';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(esql);
+    });
+
+    it('should return the query as is if fields or functions variables are given but they are already used with ??', () => {
+      const esql = 'FROM my_index | STATS COUNT(??field)';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'field',
+          value: 'bytes',
+          type: ESQLVariableType.FIELDS,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(esql);
+    });
+
+    it('should fix the query if fields or functions variables are given and they are already used with ?', () => {
+      const esql = 'FROM my_index | STATS COUNT(?field)';
+      const expected = 'FROM my_index | STATS COUNT(??field)';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'field',
+          value: 'bytes',
+          type: ESQLVariableType.FIELDS,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(expected);
+    });
+
+    it('should fix a query with multiple variables', () => {
+      const esql =
+        'FROM my_index | STATS COUNT(?field) by ?breakdownField | WHERE agent.name == ?agent_name';
+      const expected =
+        'FROM my_index | STATS COUNT(??field) by ??breakdownField | WHERE agent.name == ?agent_name';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'field',
+          value: 'bytes',
+          type: ESQLVariableType.FIELDS,
+        },
+        {
+          key: 'breakdownField',
+          value: 'clientip',
+          type: ESQLVariableType.FIELDS,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(expected);
     });
   });
 });

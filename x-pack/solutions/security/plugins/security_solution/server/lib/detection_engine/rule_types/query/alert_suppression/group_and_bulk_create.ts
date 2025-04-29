@@ -10,7 +10,7 @@ import type moment from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
-import { buildTimeRangeFilter } from '../../utils/build_events_query';
+import { buildEventsSearchQuery, buildTimeRangeFilter } from '../../utils/build_events_query';
 import type {
   SecurityRuleServices,
   SecuritySharedParams,
@@ -146,7 +146,6 @@ export const groupAndBulkCreate = async ({
       searchAfterTimes: [],
       enrichmentTimes: [],
       bulkCreateTimes: [],
-      lastLookBackDate: null,
       createdSignalsCount: 0,
       createdSignals: [],
       errors: [],
@@ -187,29 +186,31 @@ export const groupAndBulkCreate = async ({
         missingBucket: suppressOnMissingFields,
       });
 
-      const eventsSearchParams = {
+      const searchRequest = buildEventsSearchQuery({
         aggregations: groupingAggregation,
         searchAfterSortIds: undefined,
         index: sharedParams.inputIndex,
         from: tuple.from.toISOString(),
         to: tuple.to.toISOString(),
-        services,
-        ruleExecutionLogger: sharedParams.ruleExecutionLogger,
         filter,
-        pageSize: 0,
+        size: 0,
         primaryTimestamp: sharedParams.primaryTimestamp,
         secondaryTimestamp: sharedParams.secondaryTimestamp,
         runtimeMappings: sharedParams.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
-        loggedRequestsConfig: isLoggedRequestsEnabled
-          ? {
-              type: 'findDocuments',
-              description: i18n.FIND_EVENTS_DESCRIPTION,
-            }
-          : undefined,
-      };
+      });
       const { searchResult, searchDuration, searchErrors, loggedRequests } =
-        await singleSearchAfter(eventsSearchParams);
+        await singleSearchAfter({
+          searchRequest,
+          services,
+          ruleExecutionLogger: sharedParams.ruleExecutionLogger,
+          loggedRequestsConfig: isLoggedRequestsEnabled
+            ? {
+                type: 'findDocuments',
+                description: i18n.FIND_EVENTS_DESCRIPTION,
+              }
+            : undefined,
+        });
 
       if (isLoggedRequestsEnabled) {
         toReturn.loggedRequests = loggedRequests;

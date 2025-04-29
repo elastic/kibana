@@ -10,7 +10,7 @@ import type {
   RuleMigration,
   RuleMigrationResource,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
+import type { SiemMigration, RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
@@ -58,7 +58,11 @@ export const ruleMigrationResourcesFieldMap: FieldMap<
   updated_by: { type: 'keyword', required: false },
 };
 
-export const integrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationIntegration>> = {
+export const getIntegrationsFieldMap: ({
+  elserInferenceId,
+}: {
+  elserInferenceId?: string;
+}) => FieldMap<SchemaFieldMapKeys<RuleMigrationIntegration>> = ({ elserInferenceId }) => ({
   id: { type: 'keyword', required: true },
   title: { type: 'text', required: true },
   description: { type: 'text', required: true },
@@ -66,13 +70,30 @@ export const integrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationInte
   'data_streams.dataset': { type: 'keyword', required: true },
   'data_streams.title': { type: 'text', required: true },
   'data_streams.index_pattern': { type: 'keyword', required: true },
-  elser_embedding: { type: 'semantic_text', required: true },
-};
+  elser_embedding: {
+    type: 'semantic_text',
+    required: true,
+    ...(elserInferenceId ? { inference_id: elserInferenceId } : {}),
+  },
+});
 
-export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPrebuiltRule>> = {
+export const getPrebuiltRulesFieldMap: ({
+  elserInferenceId,
+}: {
+  elserInferenceId?: string;
+}) => FieldMap<SchemaFieldMapKeys<RuleMigrationPrebuiltRule>> = ({ elserInferenceId }) => ({
   name: { type: 'text', required: true },
   description: { type: 'text', required: true },
-  elser_embedding: { type: 'semantic_text', required: true },
+  elser_embedding: {
+    type: 'semantic_text',
+    required: true,
+    ...(elserInferenceId ? { inference_id: elserInferenceId } : {}),
+  },
   rule_id: { type: 'keyword', required: true },
   mitre_attack_ids: { type: 'keyword', array: true, required: false },
+});
+
+export const migrationsFieldMaps: FieldMap<SchemaFieldMapKeys<SiemMigration>> = {
+  created_at: { type: 'date', required: true },
+  created_by: { type: 'keyword', required: true },
 };

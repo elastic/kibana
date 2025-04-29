@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('o11y sidenav', () => {
     let cleanUp: () => Promise<unknown>;
@@ -42,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
 
         // check Other Tools section
-        await solutionNavigation.sidenav.openPanel('otherTools', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('otherTools');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('otherTools');
           expect(isOpen).to.be(true);
@@ -61,16 +62,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check Machine Learning section
-        await solutionNavigation.sidenav.openPanel('machine_learning-landing', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('machine_learning-landing');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('machine_learning-landing');
           expect(isOpen).to.be(true);
         }
 
-        await solutionNavigation.sidenav.clickPanelLink('ml:suppliedConfigurations');
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Supplied configurations',
+        await solutionNavigation.sidenav.expectLinkExists({
+          panelNavLinkId: 'ml:anomalyExplorer',
         });
+        await solutionNavigation.sidenav.expectLinkExists({
+          panelNavLinkId: 'ml:singleMetricViewer',
+        });
+
+        // Supplied configurations is under Management -> Anomaly Detection Jobs -> Click button mlSuppliedConfigurationsButton
+        await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.clickPanelLink('management:anomaly_detection');
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+          text: 'Anomaly Detection Jobs',
+        });
+        await testSubjects.click('mlSuppliedConfigurationsButton');
+        await testSubjects.existOrFail('mlPageSuppliedConfigurations');
       });
     });
   });

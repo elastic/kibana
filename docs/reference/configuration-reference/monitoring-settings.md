@@ -93,7 +93,7 @@ $$$monitoring-ui-enabled$$$ `monitoring.ui.enabled`
 :   [8.1.1] Used as a workaround to avoid querying `metricbeat-*` indices which are now no longer queried. The default value is `metricbeat-*`.
 
 `monitoring.ui.max_bucket_size`
-:   Specifies the number of term buckets to return out of the overall terms list when performing terms aggregations to retrieve index and node metrics. For more information about the `size` parameter, see [Terms Aggregation](elasticsearch://reference/data-analysis/aggregations/search-aggregations-bucket-terms-aggregation.md#search-aggregations-bucket-terms-aggregation-size). Defaults to `10000`.
+:   Specifies the number of term buckets to return out of the overall terms list when performing terms aggregations to retrieve index and node metrics. For more information about the `size` parameter, see [Terms Aggregation](elasticsearch://reference/aggregations/search-aggregations-bucket-terms-aggregation.md#search-aggregations-bucket-terms-aggregation-size). Defaults to `10000`.
 
 `monitoring.ui.min_interval_seconds` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Specifies the minimum number of seconds that a time bucket in a chart can represent. Defaults to 10. If you modify the `monitoring.ui.collection.interval` in `elasticsearch.yml`, use the same value in this setting.

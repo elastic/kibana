@@ -12,7 +12,10 @@ import {
   isWiredStreamGetResponse,
   isUnwiredStreamGetResponse,
 } from '@kbn/streams-schema';
+import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
+import { useKibana } from './use_kibana';
 
 export interface StreamDetailContextProviderProps {
   name: string;
@@ -20,7 +23,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   loading: boolean;
   refresh: () => void;
 }
@@ -32,6 +35,15 @@ export function StreamDetailContextProvider({
   streamsRepositoryClient,
   children,
 }: React.PropsWithChildren<StreamDetailContextProviderProps>) {
+  const {
+    core: {
+      application: {
+        capabilities: {
+          streams: { [STREAMS_UI_PRIVILEGES.manage]: canManage },
+        },
+      },
+    },
+  } = useKibana();
   const {
     value: definition,
     loading,
@@ -49,19 +61,41 @@ export function StreamDetailContextProvider({
         })
         .then((response) => {
           if (isWiredStreamGetResponse(response) || isUnwiredStreamGetResponse(response)) {
-            return response;
+            return {
+              ...response,
+              privileges: {
+                ...response.privileges,
+                // restrict the manage privilege by the Elasticsearch-level data-stream specific privilege and the Kibana-level UI privilege
+                // the UI should only enable manage features if the user has privileges on both levels for the current stream
+                manage: response.privileges.manage && canManage,
+              },
+            };
           }
 
           throw new Error('Stream detail only supports IngestStreams.');
         });
     },
-    [streamsRepositoryClient, name]
+    [streamsRepositoryClient, name, canManage]
   );
 
   const context = React.useMemo(
-    () => ({ definition, loading, refresh }),
+    // useMemo cannot be used conditionally after the definition narrowing, the assertion is to narrow correctly the context value
+    () => ({ definition, loading, refresh } as StreamDetailContextValue),
     [definition, loading, refresh]
   );
+
+  // Display loading spinner for first data-fetching only to have SWR-like behaviour
+  if (!definition && loading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiLoadingSpinner size="xxl" />
+      </EuiFlexGroup>
+    );
+  }
+
+  if (!definition) {
+    return null;
+  }
 
   return <StreamDetailContext.Provider value={context}>{children}</StreamDetailContext.Provider>;
 }

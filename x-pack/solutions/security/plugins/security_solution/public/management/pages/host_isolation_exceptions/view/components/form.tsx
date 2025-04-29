@@ -44,7 +44,7 @@ interface ExceptionIpEntry {
 }
 
 export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
-  ({ item: exception, onChange, policies, disabled, mode, error }) => {
+  ({ item: exception, onChange, disabled, mode, error }) => {
     const ipEntry = useMemo(() => {
       return (exception.entries[0] || {
         field: 'destination.ip',
@@ -278,7 +278,6 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
         >
           <EffectedPolicySelect
             item={exception}
-            options={policies}
             onChange={handleEffectedPolicyOnChange}
             data-test-subj={getTestId('effectedPolicies')}
             disabled={disabled}

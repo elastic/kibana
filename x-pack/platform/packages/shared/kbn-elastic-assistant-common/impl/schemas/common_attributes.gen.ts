@@ -59,3 +59,12 @@ export const ScreenContext = z.object({
    */
   timeZone: z.string().optional(),
 });
+
+/**
+ * User screen context
+ */
+export type PromptIds = z.infer<typeof PromptIds>;
+export const PromptIds = z.object({
+  promptId: z.string(),
+  promptGroupId: z.string(),
+});

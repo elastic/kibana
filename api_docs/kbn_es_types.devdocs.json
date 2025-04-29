@@ -52,6 +52,20 @@
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLColumn.original_types",
+            "type": "Array",
+            "tags": [],
+            "label": "original_types",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

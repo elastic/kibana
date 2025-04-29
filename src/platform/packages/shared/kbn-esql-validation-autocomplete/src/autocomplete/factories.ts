@@ -36,6 +36,11 @@ const techPreviewLabel = i18n.translate(
   }
 );
 
+const getVariablePrefix = (variableType: ESQLVariableType) =>
+  variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
+    ? '??'
+    : '?';
+
 const allFunctions = memoize(
   () =>
     aggFunctionDefinitions
@@ -228,7 +233,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     const controlSuggestions = fields.length
       ? getControlSuggestion(
           variableType,
-          variables?.map((v) => `?${v.key}`)
+          variables?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];
     suggestions.push(...controlSuggestions);
@@ -482,16 +487,17 @@ export function getDateLiterals(options?: {
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
-  getVariables?: () => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined,
+  shouldBePrefixed = true
 ) {
   if (!supportsControls) {
     return [];
   }
-  const variableType = type;
-  const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
+  const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
+  const variables = getVariables?.()?.filter((variable) => variable.type === type) ?? [];
   const controlSuggestion = getControlSuggestion(
-    variableType,
-    variables?.map((v) => `?${v.key}`)
+    type,
+    variables?.map((v) => `${prefix}${v.key}`)
   );
   return controlSuggestion;
 }

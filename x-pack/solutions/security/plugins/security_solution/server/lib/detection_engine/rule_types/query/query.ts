@@ -15,7 +15,8 @@ import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { CreateRuleOptions, SecurityRuleServices, SecuritySharedParams } from '../types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const queryExecutor = async ({
   sharedParams,
@@ -30,7 +31,7 @@ export const queryExecutor = async ({
   eventsTelemetry: ITelemetryEventsSender | undefined;
   services: SecurityRuleServices;
   bucketHistory?: BucketHistory[];
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   licensing: LicensingPluginSetup;
   isLoggedRequestsEnabled: boolean;
 }) => {

@@ -202,7 +202,6 @@ describe.skip('Import rules route', () => {
               message: `Unexpected token 'h', "this is not"... is not valid JSON`,
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
@@ -222,7 +221,7 @@ describe.skip('Import rules route', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         clients.detectionRulesClient.importRule.mockRejectedValue({
-          message: 'rule_id: "rule-1" already exists',
+          message: 'Rule with this rule_id already exists',
           statusCode: 409,
         });
         const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -232,7 +231,7 @@ describe.skip('Import rules route', () => {
           errors: [
             {
               error: {
-                message: 'rule_id: "rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'rule-1',
@@ -350,14 +349,12 @@ describe.skip('Import rules route', () => {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
           {
             error: {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
@@ -440,7 +437,7 @@ describe.skip('Import rules route', () => {
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.detectionRulesClient.importRule.mockRejectedValueOnce({
-          message: 'rule_id: "rule-1" already exists',
+          message: 'Rule with this rule_id already exists',
           statusCode: 409,
         });
         const multiRequest = getImportRulesRequest(
@@ -455,7 +452,7 @@ describe.skip('Import rules route', () => {
           errors: [
             {
               error: {
-                message: 'rule_id: "rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'rule-1',

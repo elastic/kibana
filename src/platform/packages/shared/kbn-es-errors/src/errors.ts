@@ -25,6 +25,12 @@ export function isResponseError(error: unknown): error is errors.ResponseError {
   return error instanceof errors.ResponseError;
 }
 
+export function isNotFoundError(
+  error: unknown
+): error is errors.ResponseError & { statusCode: 404 } {
+  return isResponseError(error) && error.statusCode === 404;
+}
+
 /**
  * Checks if the provided `error` is an {@link UnauthorizedError | elasticsearch unauthorized error}
  * @public

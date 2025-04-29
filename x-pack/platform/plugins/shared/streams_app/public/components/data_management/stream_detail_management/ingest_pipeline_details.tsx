@@ -42,10 +42,14 @@ export function IngestPipelineDetails({
                 defaultMessage: 'Name',
               })}
             </EuiText>
-            <EuiLink onClick={() => onFlyoutOpen(ingestPipeline?.name || '')}>
-              {ingestPipeline ? ingestPipeline.name : '-'}
-              <ManagedBadge meta={ingestPipeline?._meta} />
-            </EuiLink>
+            {ingestPipeline ? (
+              <EuiLink onClick={() => onFlyoutOpen(ingestPipeline.name)}>
+                {ingestPipeline.name}
+                <ManagedBadge meta={ingestPipeline?._meta} />
+              </EuiLink>
+            ) : (
+              <EuiText size="s">-</EuiText>
+            )}
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlexGroup>

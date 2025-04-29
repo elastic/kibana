@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subject, combineLatestWith } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatestWith } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -24,6 +24,7 @@ import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
@@ -42,8 +43,10 @@ import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
-import { updateAppLinks, type LinksPermissions } from './common/links';
-import { registerDeepLinksUpdater } from './common/links/deep_links';
+import {
+  applicationLinksUpdater,
+  type ApplicationLinksUpdateParams,
+} from './app/links/application_links_updater';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
@@ -211,14 +214,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           return;
         }
 
-        const isAssistantAvailable =
+        const shouldShowAssistantManagement =
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
           license?.hasAtLeast('enterprise');
         const assistantManagementApp = management?.sections.section.kibana.getApp(
           'securityAiAssistantManagement'
         );
 
-        if (!isAssistantAvailable) {
+        if (!shouldShowAssistantManagement) {
           assistantManagementApp?.disable();
         }
       });
@@ -321,10 +325,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
-        assets: new subPluginClasses.Assets(),
-        investigations: new subPluginClasses.Investigations(),
-        machineLearning: new subPluginClasses.MachineLearning(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        configurations: new subPluginClasses.Configurations(),
       };
     }
     return this._subPlugins;
@@ -355,12 +357,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       entityAnalytics: subPlugins.entityAnalytics.start(
         this.experimentalFeatures.riskScoringRoutesEnabled
       ),
-      assets: subPlugins.assets.start(),
-      investigations: subPlugins.investigations.start(),
-      machineLearning: subPlugins.machineLearning.start(),
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
+      configurations: subPlugins.configurations.start(),
     };
   }
 
@@ -433,7 +433,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private async registerPluginUpdates(core: CoreStart, plugins: StartPlugins) {
     const { license$ } = plugins.licensing;
     const { capabilities } = core.application;
-    const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
+    const { upsellingService, solutionNavigationTree$ } = this.contract;
 
     // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
@@ -447,27 +447,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const {
       appLinks: initialAppLinks,
       getFilteredLinks,
-      solutionAppLinksSwitcher,
+      registerDeepLinksUpdater,
     } = await this.lazyApplicationLinks();
 
-    registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$);
+    registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
 
-    const appLinksToUpdate$ = new Subject<AppLinkItems>();
-    appLinksToUpdate$.next(initialAppLinks);
+    const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(initialAppLinks);
 
-    appLinksToUpdate$
-      .pipe(combineLatestWith(license$, isSolutionNavigationEnabled$))
-      .subscribe(([appLinks, license, isSolutionNavigationEnabled]) => {
-        const links = isSolutionNavigationEnabled ? solutionAppLinksSwitcher(appLinks) : appLinks;
-        const linksPermissions: LinksPermissions = {
-          experimentalFeatures: this.experimentalFeatures,
-          upselling: upsellingService,
-          capabilities,
-          uiSettingsClient: core.uiSettings,
-          ...(license.type != null && { license }),
-        };
-        updateAppLinks(links, linksPermissions);
-      });
+    appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinks, license]) => {
+      const params: ApplicationLinksUpdateParams = {
+        experimentalFeatures: this.experimentalFeatures,
+        upselling: upsellingService,
+        capabilities,
+        uiSettingsClient: core.uiSettings,
+        ...(license.type != null && { license }),
+      };
+      applicationLinksUpdater.update(appLinks, params);
+    });
 
     const filteredLinks = await getFilteredLinks(core, plugins);
     appLinksToUpdate$.next(filteredLinks);
@@ -598,7 +594,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_app_links" */
-      './app_links'
+      './app/links'
     );
   }
 

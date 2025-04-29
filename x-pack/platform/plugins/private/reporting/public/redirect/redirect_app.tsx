@@ -9,8 +9,9 @@ import { parse } from 'query-string';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import type { ScopedHistory } from '@kbn/core/public';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '@kbn/reporting-common';
@@ -19,8 +20,6 @@ import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/publ
 
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { SharePluginSetup } from '../shared_imports';
-
-import './redirect_app.scss';
 
 interface Props {
   apiClient: ReportingAPIClient;
@@ -75,7 +74,14 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
   }, [apiClient, screenshotMode, share]);
 
   return (
-    <div className="reportingRedirectApp__interstitialPage">
+    <div
+      css={({ euiTheme }: UseEuiTheme) =>
+        css({
+          // Create some padding above and below the page so that the errors (if any) display nicely.
+          margin: `${euiTheme.size.xxl} auto`,
+        })
+      }
+    >
       {error ? (
         <EuiCallOut title={i18nTexts.errorTitle} color="danger">
           <p>{error.message}</p>

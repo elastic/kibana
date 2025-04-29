@@ -279,7 +279,7 @@ export function withCapacityEstimate(
       };
     } catch (e) {
       // Return monitoredStats with out capacity estimation
-      logger.error(e.message);
+      logger.debug(e.message);
     }
   }
   return monitoredStats;

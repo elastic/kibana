@@ -1,0 +1,15 @@
+# summary: 
+description: Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.
+value: >
+  {
+      "service": {
+          "name": "frontend",
+          "environment": "production"
+      },
+      "settings": {
+          "transaction_sample_rate": "0.4",
+          "capture_body": "off",
+          "transaction_max_spans": "500"
+      },
+      "agent_name": "nodejs"
+  }

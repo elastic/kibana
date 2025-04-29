@@ -9,8 +9,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useState } from 'react';
 
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
-
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
@@ -32,11 +30,12 @@ import type {
 } from '../../types';
 import type {
   BulkUpgradePackagesRequest,
-  BulkUpgradePackagesResponse,
+  BulkOperationPackagesResponse,
   FleetErrorResponse,
   GetEpmDataStreamsResponse,
-  GetOneBulkUpgradePackagesResponse,
+  GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
+  BulkUninstallPackagesRequest,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -128,6 +127,20 @@ export const useGetLimitedPackages = () => {
     version: API_VERSIONS.public.v1,
   });
 };
+export const useUpdateCustomIntegration = async (
+  id: string,
+  fields: { readMeData: string | undefined; categories: string[] }
+) => {
+  return sendRequest({
+    path: epmRouteService.getUpdateCustomIntegrationsPath(id),
+    method: 'put',
+    version: API_VERSIONS.public.v1,
+    body: {
+      readMeData: fields.readMeData,
+      categories: fields.categories,
+    },
+  });
+};
 
 export const useGetPackageInfoByKeyQuery = (
   pkgName: string,
@@ -142,6 +155,7 @@ export const useGetPackageInfoByKeyQuery = (
   queryOptions: {
     // If enabled is false, the query will not be fetched
     enabled?: boolean;
+    suspense?: boolean;
     refetchOnMount?: boolean | 'always';
   } = {
     enabled: true,
@@ -165,6 +179,7 @@ export const useGetPackageInfoByKeyQuery = (
         },
       }),
     {
+      suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
       retry: (_, error) => !isRegistryConnectionError(error),
@@ -258,8 +273,8 @@ export const useGetFileByPath = (filePath: string) => {
 };
 
 export const useGetFileByPathQuery = (filePath: string) => {
-  return useQuery<SendRequestResponse<string>, RequestError>(['get-file', filePath], () =>
-    sendRequest<string>({
+  return useQuery<string, RequestError>(['get-file', filePath], () =>
+    sendRequestForRq<string>({
       path: epmRouteService.getFilePath(filePath),
       method: 'get',
       version: API_VERSIONS.public.v1,
@@ -309,7 +324,7 @@ export const sendBulkInstallPackages = (
 };
 
 export const sendBulkUpgradePackagesForRq = (params: BulkUpgradePackagesRequest) => {
-  return sendRequestForRq<BulkUpgradePackagesResponse>({
+  return sendRequestForRq<BulkOperationPackagesResponse>({
     path: epmRouteService.getBulkUpgradePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
@@ -317,19 +332,51 @@ export const sendBulkUpgradePackagesForRq = (params: BulkUpgradePackagesRequest)
   });
 };
 
+export const sendBulkUninstallPackagesForRq = (params: BulkUninstallPackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkUninstallPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
 export const sendGetOneBulkUpgradePackagesForRq = (taskId: string) => {
-  return sendRequestForRq<GetOneBulkUpgradePackagesResponse>({
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
     path: epmRouteService.getOneBulkUpgradePath(taskId),
     method: 'get',
     version: API_VERSIONS.public.v1,
   });
 };
 
+export const sendGetOneBulkUninstallPackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getOneBulkUninstallPath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+/**
+ * @deprecated use sendRemovePackageForRq instead
+ */
 export function sendRemovePackage(
   { pkgName, pkgVersion }: DeletePackageRequest['params'],
   query?: DeletePackageRequest['query']
 ) {
   return sendRequest<DeletePackageResponse>({
+    path: epmRouteService.getRemovePath(pkgName, pkgVersion),
+    method: 'delete',
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+}
+
+export function sendRemovePackageForRq(
+  { pkgName, pkgVersion }: DeletePackageRequest['params'],
+  query?: DeletePackageRequest['query']
+) {
+  return sendRequestForRq<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
     version: API_VERSIONS.public.v1,

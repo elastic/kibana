@@ -21,7 +21,6 @@ import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_th
 import type {
   SearchAfterAndBulkCreateReturnType,
   SecuritySharedParams,
-  CreateRuleOptions,
   SecurityRuleServices,
 } from '../types';
 import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
@@ -33,6 +32,7 @@ import {
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const thresholdExecutor = async ({
   sharedParams,
@@ -47,7 +47,7 @@ export const thresholdExecutor = async ({
   startedAt: Date;
   state: ThresholdAlertState;
   licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const {
     completeRule,

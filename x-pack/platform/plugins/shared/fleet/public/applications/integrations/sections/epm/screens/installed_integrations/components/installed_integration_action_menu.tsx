@@ -8,19 +8,14 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { useStartServices } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useBulkActions } from '../hooks/use_bulk_actions';
-
-import { ConfirmBulkUpgradeModal } from './confirm_bulk_upgrade_modal';
+import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
 }> = ({ selectedItems }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const startServices = useStartServices();
 
   const button = (
     <EuiButton
@@ -37,24 +32,18 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
   );
 
   const {
-    actions: { bulkUpgradeIntegrations },
-  } = useBulkActions();
+    actions: { bulkUpgradeIntegrationsWithConfirmModal, bulkUninstallIntegrationsWithConfirmModal },
+  } = useInstalledIntegrationsActions();
 
   const openUpgradeModal = useCallback(() => {
     setIsOpen(false);
-    const ref = startServices.overlays.openModal(
-      toMountPoint(
-        <ConfirmBulkUpgradeModal
-          onClose={() => {
-            ref.close();
-          }}
-          onConfirm={({ updatePolicies }) => bulkUpgradeIntegrations(selectedItems, updatePolicies)}
-          selectedItems={selectedItems}
-        />,
-        startServices
-      )
-    );
-  }, [selectedItems, startServices, bulkUpgradeIntegrations]);
+    return bulkUpgradeIntegrationsWithConfirmModal(selectedItems);
+  }, [selectedItems, bulkUpgradeIntegrationsWithConfirmModal]);
+
+  const openUninstallModal = useCallback(async () => {
+    setIsOpen(false);
+    return bulkUninstallIntegrationsWithConfirmModal(selectedItems);
+  }, [selectedItems, bulkUninstallIntegrationsWithConfirmModal]);
 
   const items = useMemo(() => {
     const hasUpgreadableIntegrations = selectedItems.some(
@@ -62,6 +51,10 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
         item.ui.installation_status === 'upgrade_available' ||
         item.ui.installation_status === 'upgrade_failed' ||
         item.ui.installation_status === 'install_failed'
+    );
+
+    const hasUninstallableIntegrations = selectedItems.some(
+      (item) => (item.packagePoliciesInfo?.count ?? 0) === 0
     );
 
     return [
@@ -79,11 +72,22 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
           }}
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem key="edit" icon="pencil" onClick={() => {}}>
-        TODO other actions
+      <EuiContextMenuItem
+        key="uninstall"
+        icon="trash"
+        disabled={!hasUninstallableIntegrations}
+        onClick={openUninstallModal}
+      >
+        <FormattedMessage
+          id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
+          defaultMessage={'Uninstall {count, plural, one {# integration} other {# integrations}}'}
+          values={{
+            count: selectedItems.length,
+          }}
+        />
       </EuiContextMenuItem>,
     ];
-  }, [selectedItems, openUpgradeModal]);
+  }, [selectedItems, openUninstallModal, openUpgradeModal]);
 
   return (
     <EuiPopover

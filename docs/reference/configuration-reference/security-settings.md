@@ -179,12 +179,12 @@ xpack.security.authc.providers.anonymous.<provider-name>.credentials ![logo clou
     ```
 
 
-For more information, refer to [Anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#anonymous-authentication).
+For more information, refer to [Anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
 
 
 ### HTTP authentication settings [http-authentication-settings]
 
-There is a very limited set of cases when you’d want to change these settings. For more information, refer to [HTTP authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#http-authentication).
+There is a very limited set of cases when you’d want to change these settings. For more information, refer to [HTTP authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#http-authentication).
 
 xpack.security.authc.http.enabled
 :   Determines if HTTP authentication should be enabled. By default, this setting is set to `true`.
@@ -193,7 +193,7 @@ xpack.security.authc.http.autoSchemesEnabled
 :   Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
 
 xpack.security.authc.http.schemes[]
-:   List of HTTP authentication schemes that {{kib}} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the [`ApiKey`](docs-content://deploy-manage/api-keys/elasticsearch-api-keys.md) and [`Bearer`](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#http-authentication) schemes.
+:   List of HTTP authentication schemes that {{kib}} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the [`ApiKey`](docs-content://deploy-manage/api-keys/elasticsearch-api-keys.md) and [`Bearer`](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#http-authentication) schemes.
 
 
 ### Login user interface settings [login-ui-settings]

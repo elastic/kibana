@@ -35,6 +35,23 @@ const taskManagerQuery = {
   },
 };
 
+const taskSchema = schema.object({
+  task: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    taskType: schema.string(),
+    schedule: schema.maybe(
+      schema.object({
+        interval: schema.string(),
+      })
+    ),
+    interval: schema.maybe(schema.string()),
+    params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    id: schema.maybe(schema.string()),
+    timeoutOverride: schema.maybe(schema.string()),
+  }),
+});
+
 export function initRoutes(
   router: IRouter,
   taskManagerStart: Promise<TaskManagerStartContract>,
@@ -56,22 +73,7 @@ export function initRoutes(
         },
       },
       validate: {
-        body: schema.object({
-          task: schema.object({
-            enabled: schema.boolean({ defaultValue: true }),
-            taskType: schema.string(),
-            schedule: schema.maybe(
-              schema.object({
-                interval: schema.string(),
-              })
-            ),
-            interval: schema.maybe(schema.string()),
-            params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-            state: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-            id: schema.maybe(schema.string()),
-            timeoutOverride: schema.maybe(schema.string()),
-          }),
-        }),
+        body: taskSchema,
       },
     },
     async function (
@@ -87,6 +89,37 @@ export function initRoutes(
       };
 
       const taskResult = await taskManager.schedule(task, { req });
+
+      return res.ok({ body: taskResult });
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/schedule_with_api_key`,
+      validate: {
+        body: taskSchema,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const taskManager = await taskManagerStart;
+      const { task: taskFields } = req.body;
+      const task = {
+        ...taskFields,
+        scope: [scope],
+      };
+
+      const taskResult = await taskManager.schedule(task, { request: req });
 
       return res.ok({ body: taskResult });
     }

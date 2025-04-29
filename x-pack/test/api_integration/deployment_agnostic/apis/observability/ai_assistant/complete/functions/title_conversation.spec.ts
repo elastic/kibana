@@ -11,20 +11,20 @@ import {
   TITLE_CONVERSATION_FUNCTION_NAME,
   TITLE_SYSTEM_MESSAGE,
 } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { chatComplete } from '../../utils/conversation';
+import { chatComplete, clearConversations } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/215952
-  // Failing: See https://github.com/elastic/kibana/issues/215952
-  describe.skip('when calling the title_conversation function', function () {
+  describe('when calling the title_conversation function', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
     let llmProxy: LlmProxy;
@@ -52,7 +52,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let conversationId: string;
 
       before(async () => {
-        void llmProxy.interceptTitle(TITLE);
+        await clearConversations(es);
+        const simulatorPromise = llmProxy.interceptTitle(TITLE);
         void llmProxy.interceptConversation('The sky is blue because of Rayleigh scattering.');
 
         const res = await chatComplete({
@@ -65,7 +66,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        titleRequestBody = llmProxy.interceptedRequests[0].requestBody;
+        const simulator = await simulatorPromise;
+        titleRequestBody = simulator.requestBody;
+      });
+
+      after(async () => {
+        await clearConversations(es);
       });
 
       it('makes 2 requests to the LLM', () => {
@@ -74,13 +80,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('sends the correct system message to the LLM for the title', () => {
         expect(
-          titleRequestBody.messages.find((message) => message.role === 'system')?.content
+          titleRequestBody.messages.find((message) => message.role === MessageRole.System)?.content
         ).to.be(TITLE_SYSTEM_MESSAGE);
       });
 
       it('sends the correct user message to the LLM for the title', () => {
         expect(
-          titleRequestBody.messages.find((message) => message.role === 'user')?.content
+          titleRequestBody.messages.find((message) => message.role === MessageRole.User)?.content
         ).to.contain('Why the sky is blue?');
       });
 

@@ -17,10 +17,12 @@ import { MetricVisualizationState } from './types';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
+  DimensionEditorDataExtraComponent,
   SupportingVisType,
 } from './dimension_editor';
 import { DatasourcePublicAPI } from '../..';
 import { createMockFramePublicAPI } from '../../mocks';
+import { GROUP_ID } from './constants';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
@@ -401,11 +403,6 @@ describe('dimension editor', () => {
         />
       );
 
-      const selectCollapseBy = async (collapseFn: string) => {
-        const collapseBySelect = screen.getByLabelText(/collapse by/i);
-        await userEvent.selectOptions(collapseBySelect, collapseFn);
-      };
-
       const setMaxCols = async (maxCols: number) => {
         const maxColsInput = screen.getByLabelText(/layout columns/i);
         await userEvent.clear(maxColsInput);
@@ -414,8 +411,18 @@ describe('dimension editor', () => {
 
       return {
         ...rtlRender,
-        selectCollapseBy,
         setMaxCols,
+        rerender: (newOverrides = {}) => {
+          rtlRender.rerender(
+            <DimensionEditor
+              {...props}
+              state={{ ...fullState, breakdownByAccessor: accessor }}
+              accessor={accessor}
+              setState={mockSetState}
+              {...newOverrides}
+            />
+          );
+        },
       };
     }
 
@@ -425,14 +432,6 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).not.toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).toBeInTheDocument();
-    });
-
-    it('supports setting a collapse function', async () => {
-      const { selectCollapseBy } = renderBreakdownEditor();
-      const newCollapseFn = 'min';
-      await selectCollapseBy(newCollapseFn);
-
-      expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
     });
 
     it('sets max columns', async () => {
@@ -448,6 +447,71 @@ describe('dimension editor', () => {
       await setMaxCols(3);
       await waitFor(() =>
         expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
+      );
+    });
+
+    describe('data section', () => {
+      function renderBreakdownEditorDataSection(overrides = {}) {
+        const rtlRender = render(
+          <DimensionEditorDataExtraComponent
+            {...props}
+            groupId={GROUP_ID.BREAKDOWN_BY}
+            state={{ ...fullState, breakdownByAccessor: accessor }}
+            accessor={accessor}
+            setState={mockSetState}
+            {...overrides}
+          />
+        );
+
+        const selectCollapseBy = async (collapseFn: string) => {
+          const collapseBySelect = screen.getByLabelText(/collapse by/i);
+          await userEvent.selectOptions(collapseBySelect, collapseFn);
+        };
+
+        return {
+          ...rtlRender,
+          selectCollapseBy,
+          rerender: (newOverrides = {}) => {
+            rtlRender.rerender(
+              <DimensionEditorDataExtraComponent
+                {...props}
+                groupId={GROUP_ID.BREAKDOWN_BY}
+                state={{ ...fullState, breakdownByAccessor: accessor }}
+                accessor={accessor}
+                setState={mockSetState}
+                {...newOverrides}
+              />
+            );
+          },
+        };
+      }
+
+      it('supports setting a collapse function', async () => {
+        const { selectCollapseBy } = renderBreakdownEditorDataSection();
+        const newCollapseFn = 'min';
+        await selectCollapseBy(newCollapseFn);
+
+        expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
+      });
+
+      it('should not display the collapse function if the primary metric is not numeric', async () => {
+        const { rerender, container } = renderBreakdownEditorDataSection({
+          datasource: getNonNumericDatasource(),
+        });
+
+        expect(container).toBeEmptyDOMElement();
+
+        // now rerender with a numeric metric
+        rerender({ datasource: props.datasource });
+        expect(screen.getByLabelText(/collapse by/i)).toBeInTheDocument();
+      });
+
+      it.each([[GROUP_ID.METRIC], [GROUP_ID.SECONDARY_METRIC], [GROUP_ID.MAX]])(
+        'should not render for other group types: %s',
+        async (groupId) => {
+          const { container } = renderBreakdownEditorDataSection({ groupId });
+          expect(container).toBeEmptyDOMElement();
+        }
       );
     });
   });

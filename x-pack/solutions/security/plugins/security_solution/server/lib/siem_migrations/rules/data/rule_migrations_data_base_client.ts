@@ -18,8 +18,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import assert from 'assert';
-import type { Stored, SiemRuleMigrationsClientDependencies } from '../types';
-import type { IndexNameProvider } from './rule_migrations_data_client';
+import type { IndexNameProvider, SiemRuleMigrationsClientDependencies, Stored } from '../types';
 
 const DEFAULT_PIT_KEEP_ALIVE: Duration = '30s' as const;
 
@@ -53,22 +52,25 @@ export class RuleMigrationsDataBaseClient {
     }
   }
 
-  protected processResponseHits<T extends object>(
-    response: SearchResponse<T>,
-    override?: Partial<T>
-  ): Array<Stored<T>> {
-    return this.processHits(response.hits.hits, override);
+  protected processHit<T extends object>(hit: SearchHit<T>, override: Partial<T> = {}): Stored<T> {
+    const { _id, _source } = hit;
+    assert(_id, 'document should have _id');
+    assert(_source, 'document should have _source');
+    return { ..._source, ...override, id: _id };
   }
 
   protected processHits<T extends object>(
     hits: Array<SearchHit<T>> = [],
     override: Partial<T> = {}
   ): Array<Stored<T>> {
-    return hits.map(({ _id, _source }) => {
-      assert(_id, 'document should have _id');
-      assert(_source, 'document should have _source');
-      return { ..._source, ...override, id: _id };
-    });
+    return hits.map((hit) => this.processHit(hit, override));
+  }
+
+  protected processResponseHits<T extends object>(
+    response: SearchResponse<T>,
+    override?: Partial<T>
+  ): Array<Stored<T>> {
+    return this.processHits(response.hits.hits, override);
   }
 
   protected getTotalHits(response: SearchResponse) {

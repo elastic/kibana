@@ -7,7 +7,7 @@
 
 import * as http from 'http';
 import expect from '@kbn/expect';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
 

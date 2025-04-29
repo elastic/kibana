@@ -13,4 +13,5 @@ export const createLogViewsClientMock = (): jest.Mocked<ILogViewsClient> => ({
   getResolvedLogViewStatus: jest.fn(),
   putLogView: jest.fn(),
   resolveLogView: jest.fn(),
+  unwrapDataViewLazy: jest.fn(),
 });

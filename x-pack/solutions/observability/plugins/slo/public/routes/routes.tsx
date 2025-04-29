@@ -12,7 +12,6 @@ import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import {
   SLOS_MANAGEMENT_PATH,
-  SLOS_OUTDATED_DEFINITIONS_PATH,
   SLOS_PATH,
   SLOS_WELCOME_PATH,
   SLO_CREATE_PATH,
@@ -20,14 +19,11 @@ import {
   SLO_EDIT_PATH,
   SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
-import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
-import { ExperimentalFeatures } from '../../common/config';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';
 
 export const getRoutes = (
-  isServerless?: boolean,
-  experimentalFeatures?: ExperimentalFeatures
+  isServerless?: boolean
 ): {
   [key: string]: {
     handler: () => React.ReactElement;
@@ -57,13 +53,6 @@ export const getRoutes = (
       params: {},
       exact: true,
     },
-    [SLOS_OUTDATED_DEFINITIONS_PATH]: {
-      handler: () => {
-        return <SlosOutdatedDefinitions />;
-      },
-      params: {},
-      exact: true,
-    },
     [SLO_EDIT_PATH]: {
       handler: () => {
         return <SloEditPage />;
@@ -82,17 +71,13 @@ export const getRoutes = (
           },
         }
       : {}),
-    ...(!!experimentalFeatures?.management.enabled
-      ? {
-          [SLOS_MANAGEMENT_PATH]: {
-            handler: () => {
-              return <SloManagementPage />;
-            },
-            params: {},
-            exact: true,
-          },
-        }
-      : {}),
+    [SLOS_MANAGEMENT_PATH]: {
+      handler: () => {
+        return <SloManagementPage />;
+      },
+      params: {},
+      exact: true,
+    },
     [SLO_DETAIL_PATH]: {
       handler: () => {
         return <SloDetailsPage />;

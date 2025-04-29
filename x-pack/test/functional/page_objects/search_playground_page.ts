@@ -13,6 +13,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
   const findService = getService('find');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
   const selectIndex = async () => {
     await testSubjects.existOrFail('addDataSourcesButton');
     await testSubjects.click('addDataSourcesButton');
@@ -46,8 +47,17 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async expectSession(): Promise<void> {
-        const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
-        const state = JSON.parse(session);
+        let state: Record<string, unknown> = {};
+        await retry.try(
+          async () => {
+            const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
+            state = JSON.parse(session);
+            expect(Object.keys(state).length).to.be.greaterThan(0, 'Session state has no keys');
+          },
+          undefined,
+          200
+        );
+
         expect(state.prompt).to.be('You are an assistant for question-answering tasks.');
         expect(state.doc_size).to.be(3);
         expect(state.elasticsearch_query).eql({
@@ -136,11 +146,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();
-        await testSubjects.existOrFail('successConnectLLMButton');
+        await testSubjects.existOrFail('successConnectLLMText');
       },
 
-      async expectShowSuccessLLMButton() {
-        await testSubjects.existOrFail('successConnectLLMButton');
+      async expectShowSuccessLLMText() {
+        await testSubjects.existOrFail('successConnectLLMText');
       },
     },
     PlaygroundChatPage: {

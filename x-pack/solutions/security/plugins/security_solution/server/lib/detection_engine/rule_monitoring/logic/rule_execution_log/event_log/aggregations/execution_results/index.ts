@@ -315,7 +315,7 @@ export const formatAggExecutionEventFromBucket = (
   const backfill = getBackfill(bucket);
 
   return {
-    execution_uuid: bucket?.key ?? '',
+    execution_uuid: bucket?.key ? `${bucket.key}` : '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / ONE_MILLISECOND_AS_NANOSECONDS,
     status: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome,

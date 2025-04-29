@@ -261,6 +261,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id: packagePolicyId,
+      name: packagePolicy.name,
       savedObjectType,
     });
 
@@ -514,6 +515,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'create',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
 
@@ -772,6 +774,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id,
+      name: response.name,
       savedObjectType,
     });
 
@@ -800,6 +803,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
     }
@@ -842,6 +846,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
     }
@@ -879,6 +884,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType,
       });
     }
@@ -899,13 +905,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<ListResult<string>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const packagePolicies = await soClient.find<{}>({
+    const packagePolicies = await soClient.find<{ name: string }>({
       type: savedObjectType,
       sortField,
       sortOrder,
       page,
       perPage,
-      fields: [],
+      fields: ['name'],
       filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
     });
 
@@ -913,6 +919,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType,
       });
     }
@@ -936,6 +943,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
+      name: packagePolicyUpdate.name,
       savedObjectType,
     });
     const logger = appContextService.getLogger();
@@ -1126,15 +1134,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const bumpPromise = pMap(
       associatedPolicyIds,
       (policyId) => {
+        const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
         // Check if the agent policy is in both old and updated package policies
         const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
         const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
         // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
         const removeProtection =
-          (assignedInOldPolicy && !assignedInNewPolicy) ||
-          (!assignedInOldPolicy && assignedInNewPolicy);
-
+          isEndpointPolicy &&
+          ((assignedInOldPolicy && !assignedInNewPolicy) ||
+            (!assignedInOldPolicy && assignedInNewPolicy));
         return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
           removeProtection,
@@ -1191,6 +1200,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
     }
@@ -1207,7 +1217,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const packageInfos = await getPackageInfoForPackagePolicies(
       [...packagePolicyUpdates, ...oldPackagePolicies],
-      soClient
+      soClient,
+      true
     );
     const allSecretsToDelete: PolicySecretReference[] = [];
 
@@ -1869,55 +1880,65 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             for (const callback of externalCallbacks) {
               let thisCallbackResponse;
 
-              if (externalCallbackType === 'packagePolicyPostCreate') {
-                thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
-                  updatedNewData as PackagePolicy,
-                  soClient,
-                  esClient,
-                  context,
-                  request
-                );
-                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
-              } else if (externalCallbackType === 'packagePolicyPostUpdate') {
-                thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
-                  updatedNewData as PackagePolicy,
-                  soClient,
-                  esClient,
-                  context,
-                  request
-                );
-                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
-              } else {
-                thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
-                  updatedNewData as NewPackagePolicy,
-                  soClient,
-                  esClient,
-                  context,
-                  request
-                );
-              }
+              try {
+                if (externalCallbackType === 'packagePolicyPostCreate') {
+                  thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
+                    updatedNewData as PackagePolicy,
+                    soClient,
+                    esClient,
+                    context,
+                    request
+                  );
+                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                } else if (externalCallbackType === 'packagePolicyPostUpdate') {
+                  thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
+                    updatedNewData as PackagePolicy,
+                    soClient,
+                    esClient,
+                    context,
+                    request
+                  );
+                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                } else {
+                  thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
+                    updatedNewData as NewPackagePolicy,
+                    soClient,
+                    esClient,
+                    context,
+                    request
+                  );
+                }
 
-              if (externalCallbackType === 'packagePolicyCreate') {
-                updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
-              } else if (externalCallbackType === 'packagePolicyUpdate') {
-                const omitted = {
-                  ...omit(thisCallbackResponse, [
-                    'id',
-                    'spaceIds',
-                    'version',
-                    'revision',
-                    'updated_at',
-                    'updated_by',
-                    'created_at',
-                    'created_by',
-                    'elasticsearch',
-                  ]),
-                  inputs: thisCallbackResponse.inputs.map((input) =>
-                    omit(input, ['compiled_input'])
-                  ),
-                };
+                if (externalCallbackType === 'packagePolicyCreate') {
+                  updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
+                } else if (externalCallbackType === 'packagePolicyUpdate') {
+                  const omitted = {
+                    ...omit(thisCallbackResponse, [
+                      'id',
+                      'spaceIds',
+                      'version',
+                      'revision',
+                      'updated_at',
+                      'updated_by',
+                      'created_at',
+                      'created_by',
+                      'elasticsearch',
+                    ]),
+                    inputs: thisCallbackResponse.inputs.map((input) =>
+                      omit(input, ['compiled_input'])
+                    ),
+                  };
 
-                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                  updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                }
+              } catch (callbackError) {
+                logger.debug(
+                  () =>
+                    `The following [${externalCallbackType}] external callback threw an error (first 1k characters of callback):\n${callback
+                      .toString()
+                      .substring(0, 1000)}`
+                );
+                throw callbackError;
               }
             }
 
@@ -2126,6 +2147,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           auditLoggingService.writeCustomSoAuditLog({
             action: 'find',
             id: packagePolicySO.id,
+            name: packagePolicySO.attributes.name,
             savedObjectType,
           });
 
@@ -2584,7 +2606,8 @@ export const packagePolicyService: PackagePolicyClient = new PackagePolicyClient
 
 async function getPackageInfoForPackagePolicies(
   packagePolicies: NewPackagePolicyWithId[],
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  ignoreMissing?: boolean
 ) {
   const pkgInfoMap = new Map<string, { name: string; version: string }>();
 
@@ -2599,14 +2622,20 @@ async function getPackageInfoForPackagePolicies(
   await pMap(pkgInfoMap.keys(), async (pkgKey) => {
     const pkgInfo = pkgInfoMap.get(pkgKey);
     if (pkgInfo) {
-      const pkgInfoData = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: pkgInfo.name,
-        pkgVersion: pkgInfo.version,
-        prerelease: true,
-      });
+      try {
+        const pkgInfoData = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: pkgInfo.name,
+          pkgVersion: pkgInfo.version,
+          prerelease: true,
+        });
 
-      resultMap.set(pkgKey, pkgInfoData);
+        resultMap.set(pkgKey, pkgInfoData);
+      } catch (error) {
+        if (!ignoreMissing) {
+          throw error;
+        }
+      }
     }
   });
 

@@ -22,10 +22,11 @@ import { RowCommandContext } from "./esql_parser.js";
 import { FieldsContext } from "./esql_parser.js";
 import { FieldContext } from "./esql_parser.js";
 import { FromCommandContext } from "./esql_parser.js";
-import { MetricsCommandContext } from "./esql_parser.js";
+import { TimeSeriesCommandContext } from "./esql_parser.js";
 import { IndexPatternAndMetadataFieldsContext } from "./esql_parser.js";
 import { IndexPatternContext } from "./esql_parser.js";
 import { ClusterStringContext } from "./esql_parser.js";
+import { SelectorStringContext } from "./esql_parser.js";
 import { IndexStringContext } from "./esql_parser.js";
 import { MetadataContext } from "./esql_parser.js";
 import { EvalCommandContext } from "./esql_parser.js";
@@ -70,6 +71,9 @@ import { SingleForkSubQueryCommandContext } from "./esql_parser.js";
 import { CompositeForkSubQueryContext } from "./esql_parser.js";
 import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 import { RrfCommandContext } from "./esql_parser.js";
+import { RerankCommandContext } from "./esql_parser.js";
+import { CompletionCommandContext } from "./esql_parser.js";
+import { SampleCommandContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
 import { LogicalNotContext } from "./esql_parser.js";
 import { BooleanDefaultContext } from "./esql_parser.js";
@@ -237,15 +241,15 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFromCommand?: (ctx: FromCommandContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.metricsCommand`.
+	 * Enter a parse tree produced by `esql_parser.timeSeriesCommand`.
 	 * @param ctx the parse tree
 	 */
-	enterMetricsCommand?: (ctx: MetricsCommandContext) => void;
+	enterTimeSeriesCommand?: (ctx: TimeSeriesCommandContext) => void;
 	/**
-	 * Exit a parse tree produced by `esql_parser.metricsCommand`.
+	 * Exit a parse tree produced by `esql_parser.timeSeriesCommand`.
 	 * @param ctx the parse tree
 	 */
-	exitMetricsCommand?: (ctx: MetricsCommandContext) => void;
+	exitTimeSeriesCommand?: (ctx: TimeSeriesCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.indexPatternAndMetadataFields`.
 	 * @param ctx the parse tree
@@ -276,6 +280,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitClusterString?: (ctx: ClusterStringContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.selectorString`.
+	 * @param ctx the parse tree
+	 */
+	enterSelectorString?: (ctx: SelectorStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.selectorString`.
+	 * @param ctx the parse tree
+	 */
+	exitSelectorString?: (ctx: SelectorStringContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.indexString`.
 	 * @param ctx the parse tree
@@ -730,6 +744,36 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRrfCommand?: (ctx: RrfCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.rerankCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRerankCommand?: (ctx: RerankCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.rerankCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRerankCommand?: (ctx: RerankCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.completionCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterCompletionCommand?: (ctx: CompletionCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.completionCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitCompletionCommand?: (ctx: CompletionCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.sampleCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterSampleCommand?: (ctx: SampleCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.sampleCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitSampleCommand?: (ctx: SampleCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by the `matchExpression`
 	 * labeled alternative in `esql_parser.booleanExpression`.

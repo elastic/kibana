@@ -191,6 +191,7 @@ const patchConversationRoute = createObservabilityAIAssistantServerRoute({
     }),
     body: t.partial({
       public: t.boolean,
+      archived: t.boolean,
     }),
   }),
   security: {

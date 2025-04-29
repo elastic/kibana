@@ -1267,7 +1267,13 @@
             "description": [],
             "signature": [
               "{ readonly useTimefilter: () => ",
-              "TimefilterHook",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.TimefilterHook",
+                "text": "TimefilterHook"
+              },
               "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
@@ -2292,35 +2298,84 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.injectCurrentTab",
+            "type": "Function",
+            "tags": [],
+            "label": "injectCurrentTab",
+            "description": [
+              "\nInjects the current tab into a given internalState action"
+            ],
+            "signature": [
+              "<TPayload extends { tabId: string; }, TReturn>(actionCreator: (params: TPayload) => TReturn) => (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => TReturn"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.DiscoverStateContainer.injectCurrentTab.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "actionCreator",
+                "description": [],
+                "signature": [
+                  "(params: TPayload) => TReturn"
+                ],
+                "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "discover",
+                    "id": "def-public.DiscoverStateContainer.injectCurrentTab.$1.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "params",
+                    "description": [],
+                    "signature": [
+                      "TPayload"
+                    ],
+                    "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/utils.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.getCurrentTab",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentTab",
+            "description": [
+              "\nGets the state of the current tab"
+            ],
+            "signature": [
+              "() => ",
+              "TabState"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverStateContainer.runtimeStateManager",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeStateManager",
             "description": [
               "\nState manager for runtime state that can't be stored in Redux"
             ],
             "signature": [
-              "{ currentDataView$: ",
-              "BehaviorSubject",
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined>; adHocDataViews$: ",
-              "BehaviorSubject",
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[]>; }"
+              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ReactiveTabRuntimeState>; }; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
@@ -2406,7 +2461,7 @@
               "\nComplex functions to update multiple containers from UI"
             ],
             "signature": [
-              "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => () => void; createAndAppendAdHocDataView: (dataViewSpec: ",
+              "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => void; stopSyncing: () => void; createAndAppendAdHocDataView: (dataViewSpec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",

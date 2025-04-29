@@ -6,6 +6,7 @@
  */
 
 import { AGENTS_PREFIX } from '../../../common';
+import { AgentStatusKueryHelper } from '../../../common/services';
 import type {
   CurrentVersionCount,
   GetAutoUpgradeAgentsStatusResponse,
@@ -26,7 +27,7 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"`,
       aggregations: {
         versions: {
           terms: {
@@ -52,7 +53,7 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
+      kuery: `${AgentStatusKueryHelper.buildKueryForActiveAgents()} AND ${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
       aggregations: {
         versions: {
           terms: {

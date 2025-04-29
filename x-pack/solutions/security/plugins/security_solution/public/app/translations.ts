@@ -21,12 +21,12 @@ export const DATA_QUALITY = i18n.translate(
 export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.navigation.entityRiskScore',
   {
-    defaultMessage: 'Entity Risk Score',
+    defaultMessage: 'Entity risk score',
   }
 );
 
 export const ENTITY_STORE = i18n.translate('xpack.securitySolution.navigation.entityStore', {
-  defaultMessage: 'Entity Store',
+  defaultMessage: 'Entity store',
 });
 
 export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
@@ -50,7 +50,14 @@ export const DETECTION_RESPONSE = i18n.translate(
 export const ENTITY_ANALYTICS = i18n.translate(
   'xpack.securitySolution.navigation.entityAnalytics',
   {
-    defaultMessage: 'Entity Analytics',
+    defaultMessage: 'Entity analytics',
+  }
+);
+
+export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
+  'xpack.securitySolution.navigation.privilegedUserMonitoring',
+  {
+    defaultMessage: 'Privileged user monitoring',
   }
 );
 
@@ -101,13 +108,6 @@ export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exce
   defaultMessage: 'Shared exception lists',
 });
 
-export const SIEM_MIGRATIONS_RULES = i18n.translate(
-  'xpack.securitySolution.navigation.siemMigrationsRules',
-  {
-    defaultMessage: 'SIEM Rule Migrations',
-  }
-);
-
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
 });
@@ -133,6 +133,10 @@ export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timel
 
 export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
+});
+
+export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.navigation.configurations', {
+  defaultMessage: 'Configurations',
 });
 
 export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {

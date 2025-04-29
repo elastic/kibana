@@ -53,7 +53,6 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
         />
@@ -77,7 +76,6 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
         />
@@ -106,7 +104,6 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
         />
@@ -134,7 +131,6 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
         />
@@ -163,7 +159,6 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
         />
@@ -192,7 +187,6 @@ describe('rule_actions_popover', () => {
           rule={rule}
           onDelete={onDeleteMock}
           onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
           onRunRule={onRunRuleMock}
         />
@@ -211,30 +205,5 @@ describe('rule_actions_popover', () => {
     await waitFor(() => {
       expect(screen.queryByText('Run rule')).not.toBeInTheDocument();
     });
-  });
-
-  it('disables buttons when the user does not have enough permission', async () => {
-    const rule = mockRule();
-    render(
-      <IntlProvider locale="en">
-        <RuleActionsPopover
-          rule={rule}
-          onDelete={onDeleteMock}
-          onApiKeyUpdate={onApiKeyUpdateMock}
-          canSaveRule={false}
-          onEnableDisable={onEnableDisableMock}
-          onRunRule={onRunRuleMock}
-        />
-      </IntlProvider>
-    );
-
-    const actionButton = screen.getByTestId('ruleActionsButton');
-    expect(actionButton).toBeInTheDocument();
-    fireEvent.click(actionButton);
-
-    expect(screen.getByText('Delete rule').closest('button')).toBeDisabled();
-    expect(screen.getByText('Update API key').closest('button')).toBeDisabled();
-    expect(screen.getByText('Disable').closest('button')).toBeDisabled();
-    expect(screen.getByText('Run rule').closest('button')).toBeDisabled();
   });
 });

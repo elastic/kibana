@@ -14,12 +14,7 @@ import type { MachineLearningRuleParams } from '../../rule_schema';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
 import { findMlSignals } from './find_ml_signals';
-import type {
-  CreateRuleOptions,
-  SecurityRuleServices,
-  SecuritySharedParams,
-  WrapSuppressedHits,
-} from '../types';
+import type { SecurityRuleServices, SecuritySharedParams, WrapSuppressedHits } from '../types';
 import {
   addToSearchAfterReturn,
   createErrorsFromShard,
@@ -33,6 +28,7 @@ import type { AnomalyResults } from '../../../machine_learning';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 interface MachineLearningRuleExecutorParams {
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
@@ -40,7 +36,7 @@ interface MachineLearningRuleExecutorParams {
   services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
   isAlertSuppressionActive: boolean;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   isLoggedRequestsEnabled?: boolean;
 }
 

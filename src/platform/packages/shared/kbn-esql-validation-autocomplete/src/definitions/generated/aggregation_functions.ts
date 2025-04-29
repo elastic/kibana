@@ -1689,7 +1689,7 @@ const valuesDefinition: FunctionDefinition = {
   name: 'values',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
     defaultMessage:
-      'Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use esql-mv_sort.',
+      'Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use `MV_SORT`.',
   }),
   preview: true,
   alias: undefined,
@@ -1838,7 +1838,7 @@ const valuesDefinition: FunctionDefinition = {
   locationsAvailable: [Location.STATS],
   validate: undefined,
   examples: [
-    '  FROM employees\n| EVAL first_letter = SUBSTRING(first_name, 0, 1)\n| STATS first_name=MV_SORT(VALUES(first_name)) BY first_letter\n| SORT first_letter',
+    'FROM employees\n| EVAL first_letter = SUBSTRING(first_name, 0, 1)\n| STATS first_name = MV_SORT(VALUES(first_name)) BY first_letter\n| SORT first_letter',
   ],
 };
 
@@ -1991,7 +1991,7 @@ const weightedAvgDefinition: FunctionDefinition = {
   locationsAvailable: [Location.STATS],
   validate: undefined,
   examples: [
-    'FROM employees\n| STATS w_avg = WEIGHTED_AVG(salary, height) by languages\n| EVAL w_avg = ROUND(w_avg)\n| KEEP w_avg, languages\n| SORT languages',
+    'FROM employees\n| STATS w_avg = WEIGHTED_AVG(salary, height) BY languages\n| EVAL w_avg = ROUND(w_avg)\n| KEEP w_avg, languages\n| SORT languages',
   ],
 };
 export const aggFunctionDefinitions = [

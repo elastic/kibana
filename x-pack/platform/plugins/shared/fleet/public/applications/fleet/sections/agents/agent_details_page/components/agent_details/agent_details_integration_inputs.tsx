@@ -36,6 +36,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
     padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
     .euiTreeView__nodeLabel {
       width: 100%;
+      user-select: text;
+      cursor: text;
     }
   }
   .inputStatusHealth {
@@ -58,6 +60,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
     .euiTreeView__nodeLabel {
       .euiText {
         font-size: ${({ theme }) => theme.eui.euiFontSize};
+        user-select: text;
+        cursor: text;
       }
     }
   }

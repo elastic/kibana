@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service']);
+export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
@@ -58,7 +58,12 @@ export const EngineDescriptor = z.object({
     .optional()
     .default('1m'),
   docsPerSecond: z.number().int().optional(),
-  error: z.object({}).optional(),
+  error: z
+    .object({
+      message: z.string(),
+      action: z.literal('init'),
+    })
+    .optional(),
 });
 
 export type TransformStatsMetadata = z.infer<typeof TransformStatsMetadata>;

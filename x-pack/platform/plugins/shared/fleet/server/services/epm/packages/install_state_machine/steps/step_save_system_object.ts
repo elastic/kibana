@@ -38,6 +38,7 @@ export async function stepSaveSystemObject(context: InstallContext) {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 

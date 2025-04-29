@@ -15,7 +15,7 @@ import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useDataViewContext } from '../../hooks/data_view_context';
 import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { ASSET_INVENTORY_INDEX_PATTERN } from '../../constants';
+import { ASSET_FIELDS, ASSET_INVENTORY_INDEX_PATTERN } from '../../constants';
 import { FilterGroupLoading } from './asset_inventory_filters_loading';
 import { ASSET_INVENTORY_RULE_TYPE_IDS } from './asset_inventory_rule_type_ids';
 
@@ -24,25 +24,25 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.type', {
       defaultMessage: 'Type',
     }),
-    fieldName: 'entity.category',
-  },
-  {
-    title: i18n.translate('xpack.securitySolution.assetInventory.filters.criticality', {
-      defaultMessage: 'Criticality',
-    }),
-    fieldName: 'asset.criticality',
-  },
-  {
-    title: i18n.translate('xpack.securitySolution.assetInventory.filters.tags', {
-      defaultMessage: 'Tags',
-    }),
-    fieldName: 'asset.tags.name',
+    fieldName: ASSET_FIELDS.ENTITY_TYPE,
   },
   {
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.name', {
       defaultMessage: 'Name',
     }),
-    fieldName: 'asset.name',
+    fieldName: ASSET_FIELDS.ENTITY_NAME,
+  },
+  {
+    title: i18n.translate('xpack.securitySolution.assetInventory.filters.id', {
+      defaultMessage: 'ID',
+    }),
+    fieldName: ASSET_FIELDS.ENTITY_ID,
+  },
+  {
+    title: i18n.translate('xpack.securitySolution.assetInventory.filters.source', {
+      defaultMessage: 'Source',
+    }),
+    fieldName: ASSET_FIELDS.ENTITY_SOURCE,
   },
 ];
 
@@ -69,15 +69,20 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
     [dataView]
   );
 
-  if (!spaceId || !dataViewSpec) {
+  if (!spaceId) {
+    // TODO Add error handling if no spaceId is found
     return null;
   }
 
   if (dataViewIsLoading) {
     return (
-      <EuiFlexItem grow={true}>
-        <FilterGroupLoading />
-      </EuiFlexItem>
+      <>
+        <EuiSpacer size="l" />
+        <EuiFlexItem grow={true}>
+          <FilterGroupLoading />
+        </EuiFlexItem>
+        <EuiSpacer size="l" />
+      </>
     );
   }
 

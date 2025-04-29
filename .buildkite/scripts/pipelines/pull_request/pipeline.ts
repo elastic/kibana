@@ -468,11 +468,17 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
         /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:security-genai-run-evals')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
+      );
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
