@@ -10,10 +10,8 @@ import { type LoghubSystem } from './read_loghub_system_files';
 import { getFileOrThrow, getParserFilename } from './utils';
 
 export async function validateParser(system: LoghubSystem): Promise<void> {
-  const [{ getTimestamp, replaceTimestamp }, parserFileContents] = await Promise.all([
-    getParser(system),
-    getFileOrThrow(getParserFilename(system)),
-  ]);
+  const [{ getTimestamp, replaceTimestamp, getFakeMetadata }, parserFileContents] =
+    await Promise.all([getParser(system), getFileOrThrow(getParserFilename(system))]);
 
   let successfullyParsed = 0;
   system.logLines.forEach((logLine, index) => {
@@ -26,6 +24,12 @@ export async function validateParser(system: LoghubSystem): Promise<void> {
       const next = replaceTimestamp(logLine, timestamp);
 
       const extracted = getTimestamp(next);
+
+      const metadata = getFakeMetadata(logLine);
+
+      if (metadata === undefined) {
+        throw new Error(`getFakeMetadata: no metadata extracted`);
+      }
 
       const isEqual = extracted === timestamp;
 
