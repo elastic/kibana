@@ -22,6 +22,7 @@ const notifications = notificationServiceMock.createStartContract();
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();
   const servicesMock = { http, notifications };
+  const lastRunDate = '2025-10-01T02:10:23.000Z';
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -40,12 +41,26 @@ describe('AlertDelete Modal', () => {
     </IntlProvider>
   );
 
+  const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
+    http.get.mockClear();
+    http.get.mockImplementation(async (path: any) => {
+      if (path.includes('_last_run')) {
+        return { last_run: lastRun };
+      }
+      if (path.includes('_preview')) {
+        return { affected_alert_count: affectedAlertCount };
+      }
+      throw new Error(`No mock implementation for path: ${path}`);
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     closeModalMock.mockClear();
+    mockHttpGet({ lastRun: lastRunDate, affectedAlertCount: 0 });
   });
 
-  it('renders the modal with initial state', () => {
+  it('renders the modal with initial state', async () => {
     render(
       <AlertDeleteModal
         onCloseModal={closeModalMock}
@@ -69,7 +84,7 @@ describe('AlertDelete Modal', () => {
     );
   });
 
-  it('enables the active alerts threshold when the checkbox is checked', () => {
+  it('enables the active alerts threshold when the checkbox is checked', async () => {
     render(
       <AlertDeleteModal
         onCloseModal={closeModalMock}
@@ -108,10 +123,7 @@ describe('AlertDelete Modal', () => {
   });
 
   it('validates the delete confirmation input', async () => {
-    const apiResponse = {
-      affected_alert_count: 100,
-    };
-    http.get.mockResolvedValueOnce(apiResponse);
+    mockHttpGet({ affectedAlertCount: 100 });
 
     render(
       <AlertDeleteModal
@@ -160,10 +172,7 @@ describe('AlertDelete Modal', () => {
   });
 
   it('submits the form when all validations pass', async () => {
-    const apiResponse = {
-      affected_alert_count: 100,
-    };
-    http.get.mockResolvedValueOnce(apiResponse);
+    mockHttpGet({ affectedAlertCount: 100 });
 
     render(
       <AlertDeleteModal
@@ -188,10 +197,7 @@ describe('AlertDelete Modal', () => {
   });
 
   it('disables the submit button when no alert would be deleted with current settings', async () => {
-    const apiResponse = {
-      affected_alert_count: 0,
-    };
-    http.get.mockResolvedValueOnce(apiResponse);
+    mockHttpGet({ affectedAlertCount: 0 });
 
     render(
       <AlertDeleteModal
@@ -218,7 +224,7 @@ describe('AlertDelete Modal', () => {
   });
 
   it('shows a success toast and closes the modal on successful schedule submission', async () => {
-    http.get.mockResolvedValueOnce({ affected_alert_count: 100 });
+    mockHttpGet({ affectedAlertCount: 100 });
     http.post.mockResolvedValueOnce(null);
 
     render(
@@ -284,7 +290,7 @@ describe('AlertDelete Modal Error Handling', () => {
   });
 
   it('shows an error toast on schedule submission failure', async () => {
-    http.get.mockResolvedValueOnce({ affected_alert_count: 100 });
+    mockHttpGet({ affectedAlertCount: 100 });
     const mockError: IHttpFetchError<ResponseErrorBody> = {
       body: {
         message: 'Request failed',
@@ -329,7 +335,7 @@ describe('AlertDelete Modal Error Handling', () => {
   });
 
   it('shows a generic error toast if the error response does not have a message', async () => {
-    http.get.mockResolvedValueOnce({ affected_alert_count: 100 });
+    mockHttpGet({ affectedAlertCount: 100 });
     const errorResponse = {};
     http.post.mockRejectedValueOnce(errorResponse);
 
@@ -360,6 +366,25 @@ describe('AlertDelete Modal Error Handling', () => {
         title: i18n.ALERT_DELETE_FAILURE,
         text: 'Unknown error',
       });
+    });
+  });
+
+  it('should show the last run date', async () => {
+    mockHttpGet({ lastRun: lastRunDate });
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={servicesMock}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      const lastRunTextContent = screen.getByTestId('alert-delete-last-run').textContent;
+      const lastRunDateContent = lastRunTextContent?.replace('Last cleanup task: ', '') ?? '';
+      expect(new Date(lastRunDateContent).toISOString()).toEqual(lastRunDate);
     });
   });
 });

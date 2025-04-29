@@ -22,3 +22,9 @@ export { alertDeleteScheduleQuerySchema as alertDeleteScheduleQuerySchemaV1 } fr
 
 export type { AlertDeleteScheduleQuery } from './types/latest';
 export type { AlertDeleteScheduleQuery as AlertDeleteScheduleQueryV1 } from './types/v1';
+
+export { alertDeleteLastRunResponseSchema } from './schemas/latest';
+export { alertDeleteLastRunResponseSchema as alertDeleteLastRunResponseSchemaV1 } from './schemas/v1';
+
+export type { AlertDeleteLastRunResponse } from './types/latest';
+export type { AlertDeleteLastRunResponse as AlertDeleteLastRunResponseV1 } from './types/v1';

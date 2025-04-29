@@ -24,13 +24,16 @@ import {
   EuiHorizontalRule,
   EuiFieldText,
   EuiPanel,
+  EuiText,
 } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
-import * as i18n from '../translations';
+import { i18n } from '@kbn/i18n';
+import * as translations from '../translations';
+
 import { ModalThresholdSelector as ThresholdSelector } from './modal_threshold_selector';
 import {
   DEFAULT_THRESHOLD,
@@ -42,6 +45,7 @@ import {
 } from '../constants';
 import { useAlertDeletePreview } from '../api/preview/use_alert_delete_preview';
 import { useAlertDeleteSchedule } from '../api/schedule/use_alert_delete_schedule';
+import { useAlertDeleteLastRun } from '../api/last_run/use_alert_delete_last_run';
 
 const FORM_ID = 'alert-delete-settings';
 const MODAL_ID = 'alert-delete-modal';
@@ -57,6 +61,17 @@ const getThresholdInDays = (threshold: number, thresholdUnit: EuiSelectOption) =
     default:
       return 0;
   }
+};
+
+const dateTimeFormat = (locale: string) => {
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 };
 
 interface PreviewMessageProps {
@@ -114,10 +129,10 @@ const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOp
   const thresholdInDays = getThresholdInDays(threshold, thresholdUnit);
   const errorMessages = [];
   if (thresholdInDays < MIN_THRESHOLD_DAYS) {
-    errorMessages.push(i18n.THRESHOLD_ERROR_MIN);
+    errorMessages.push(translations.THRESHOLD_ERROR_MIN);
   }
   if (thresholdInDays > MAX_THRESHOLD_DAYS) {
-    errorMessages.push(i18n.THRESHOLD_ERROR_MAX);
+    errorMessages.push(translations.THRESHOLD_ERROR_MAX);
   }
   return errorMessages;
 };
@@ -162,7 +177,7 @@ export const AlertDeleteModal = ({
     isActiveThresholdValid: errorMessages.activeThreshold.length === 0,
     isInactiveThresholdValid: errorMessages.inactiveThreshold.length === 0,
     isDeleteConfirmationValid:
-      deleteConfirmation === i18n.DELETE_PASSKEY || deleteConfirmation.length === 0,
+      deleteConfirmation === translations.DELETE_PASSKEY || deleteConfirmation.length === 0,
   };
 
   const isValidThreshold =
@@ -189,16 +204,23 @@ export const AlertDeleteModal = ({
   const { mutate: createAlertDeleteSchedule } = useAlertDeleteSchedule({
     services: { http },
     onSuccess: () => {
-      notifications.toasts.addSuccess(i18n.ALERT_DELETE_SUCCESS);
+      notifications.toasts.addSuccess(translations.ALERT_DELETE_SUCCESS);
       onClose();
     },
     onError: (error: IHttpFetchError<ResponseErrorBody>) => {
       notifications.toasts.addDanger({
-        title: i18n.ALERT_DELETE_FAILURE,
-        text: error.body?.message || i18n.UNKNOWN_ERROR,
+        title: translations.ALERT_DELETE_FAILURE,
+        text: error.body?.message || translations.UNKNOWN_ERROR,
       });
     },
   });
+
+  const { data: { lastRun } = { lastRun: undefined }, isInitialLoading: isLoadingLastRun } =
+    useAlertDeleteLastRun({
+      services: { http },
+      isEnabled: true,
+      isOpen: isVisible,
+    });
 
   const currentSettingsWouldDeleteAlerts =
     (activeState.checked || inactiveState.checked) &&
@@ -285,11 +307,22 @@ export const AlertDeleteModal = ({
     <EuiModal aria-labelledby={MODAL_ID} onClose={onClose} data-test-subj="alert-delete-modal">
       <EuiForm id={FORM_ID} component="form">
         <EuiModalHeader>
-          <EuiModalHeaderTitle id={MODAL_ID}>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={MODAL_ID}>{translations.MODAL_TITLE}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <p>{i18n.MODAL_DESCRIPTION}</p>
+          {!isLoadingLastRun && lastRun && (
+            <>
+              <EuiText color="subdued" size="s" data-test-subj="alert-delete-last-run">
+                {translations.ALERT_DELETE_LAST_RUN(
+                  lastRun && dateTimeFormat(i18n.getLocale()).format(new Date(lastRun))
+                )}
+              </EuiText>
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          <p>{translations.MODAL_DESCRIPTION}</p>
           <EuiSpacer size="l" />
 
           <EuiPanel hasShadow={false} hasBorder color="subdued" id="alert-delete-active-panel">
@@ -302,8 +335,8 @@ export const AlertDeleteModal = ({
               labelProps={{ css: 'width: 100%' }}
               label={
                 <ThresholdSelector
-                  title={i18n.ACTIVE_ALERTS}
-                  description={i18n.ACTIVE_ALERTS_DESCRIPTION}
+                  title={translations.ACTIVE_ALERTS}
+                  description={translations.ACTIVE_ALERTS_DESCRIPTION}
                   threshold={activeState.threshold}
                   thresholdUnit={activeState.thresholdUnit}
                   onChangeThreshold={activeAlertsCallbacks.onChangeThreshold}
@@ -329,8 +362,8 @@ export const AlertDeleteModal = ({
               labelProps={{ css: 'width: 100%' }}
               label={
                 <ThresholdSelector
-                  title={i18n.INACTIVE_ALERTS}
-                  description={i18n.INACTIVE_ALERTS_DESCRIPTION}
+                  title={translations.INACTIVE_ALERTS}
+                  description={translations.INACTIVE_ALERTS_DESCRIPTION}
                   threshold={inactiveState.threshold}
                   thresholdUnit={inactiveState.thresholdUnit}
                   onChangeThreshold={inactiveAlertsCallbacks.onChangeThreshold}
@@ -358,7 +391,7 @@ export const AlertDeleteModal = ({
           <EuiSpacer size="m" />
 
           <EuiFormRow
-            label={i18n.DELETE_CONFIRMATION}
+            label={translations.DELETE_CONFIRMATION}
             fullWidth
             isInvalid={!validations.isDeleteConfirmationValid}
           >
@@ -373,7 +406,7 @@ export const AlertDeleteModal = ({
 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onClose} data-test-subj="alert-delete-modal-cancel">
-            {i18n.MODAL_CANCEL}
+            {translations.MODAL_CANCEL}
           </EuiButtonEmpty>
           <EuiButton
             type="submit"
@@ -384,7 +417,7 @@ export const AlertDeleteModal = ({
             data-test-subj="alert-delete-submit"
             onClick={onScheduleCleanUpTask}
           >
-            {i18n.MODAL_SUBMIT}
+            {translations.MODAL_SUBMIT}
           </EuiButton>
         </EuiModalFooter>
       </EuiForm>

@@ -60,7 +60,7 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
     it('should remove active alerts from task state when deleted', async () => {
       // get last run date should be undefined
       const lastRunResponsePre = await supertestWithoutAuth
-        .get(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/last_run_alert_deletion`)
+        .get(`${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_delete_last_run`)
         .set('kbn-xsrf', 'foo')
         .auth(Superuser.username, Superuser.password)
         .expect(200);
@@ -152,12 +152,12 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
 
       // get last run date should be defined
       const lastRunResponsePost = await supertestWithoutAuth
-        .get(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/last_run_alert_deletion`)
+        .get(`${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_delete_last_run`)
         .set('kbn-xsrf', 'foo')
         .auth(Superuser.username, Superuser.password)
         .expect(200);
 
-      expect(lastRunResponsePost.body.lastRun).to.match(
+      expect(lastRunResponsePost.body.last_run).to.match(
         /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
       );
     });

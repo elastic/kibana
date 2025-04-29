@@ -71,3 +71,7 @@ export const alertDeleteScheduleQuerySchema = schema.object({
     })
   ),
 });
+
+export const alertDeleteLastRunResponseSchema = schema.object({
+  last_run: schema.maybe(schema.string()),
+});
