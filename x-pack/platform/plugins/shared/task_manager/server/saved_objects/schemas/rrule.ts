@@ -18,15 +18,43 @@ function validateTimezone(timezone: string) {
 }
 
 const rruleCommon = schema.object({
-  freq: schema.number(),
-  interval: schema.number(),
+  freq: schema.maybe(
+    schema.oneOf([
+      schema.literal(0),
+      schema.literal(1),
+      schema.literal(2),
+      schema.literal(3),
+      schema.literal(4),
+      schema.literal(5),
+      schema.literal(6),
+    ])
+  ),
+  interval: schema.number({ min: 1 }),
   tzid: schema.string({ validate: validateTimezone, defaultValue: 'UTC' }),
 });
 
-const byminute = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 })));
-const byhour = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 })));
-const byweekday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 7 })));
-const bymonthday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 })));
+const byminute = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }), { minSize: 1 }));
+const byhour = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }), { minSize: 1 }));
+const byweekday = schema.maybe(
+  schema.arrayOf(
+    schema.oneOf([
+      schema.oneOf([
+        schema.literal('MO'),
+        schema.literal('TU'),
+        schema.literal('WE'),
+        schema.literal('TH'),
+        schema.literal('FR'),
+        schema.literal('SA'),
+        schema.literal('SU'),
+      ]),
+      schema.number({ min: 1, max: 7 }),
+    ]),
+    {
+      minSize: 1,
+    }
+  )
+);
+const bymonthday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 }));
 
 const rruleMonthly = rruleCommon.extends({
   freq: schema.literal(Frequency.MONTHLY),
