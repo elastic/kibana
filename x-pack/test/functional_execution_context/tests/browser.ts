@@ -316,7 +316,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 type: 'search',
                 name: 'discover',
                 id: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-                description: '',
+                description: '[Flights] Flight Log',
                 url: '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d',
               },
             }),
