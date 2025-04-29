@@ -40,7 +40,7 @@ steps:
       provider: gcp
       machineType: n2-highcpu-8
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -70,7 +70,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -85,7 +85,7 @@ steps:
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -135,7 +135,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 80
     retry:
       automatic:
