@@ -53,7 +53,8 @@
     "@kbn/ai-assistant-icon",
     "@kbn/core-http-browser",
     "@kbn/sse-utils",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/lock-manager"
   ],
   "exclude": ["target/**/*"]
 }
