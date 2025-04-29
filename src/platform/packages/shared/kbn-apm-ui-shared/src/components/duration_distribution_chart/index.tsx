@@ -34,7 +34,7 @@ import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ChartContainer } from './chart_container';
-import { FETCH_STATUS, ProcessorEvent } from '../../enums';
+import { ProcessorEvent } from '../../enums';
 import { HistogramItem } from '../../typings';
 import { getDurationFormatter } from '../../utils';
 import { useChartThemes } from '../../hooks/use_chart_theme';
@@ -64,7 +64,8 @@ interface DurationDistributionChartProps {
   markerValue: number;
   onChartSelection?: BrushEndListener;
   selection?: [number, number];
-  status: FETCH_STATUS;
+  loading: boolean;
+  hasError: boolean;
   eventType: ProcessorEvent.span | ProcessorEvent.transaction;
   dataTestSubPrefix?: string;
   showAxisTitle?: boolean;
@@ -109,7 +110,8 @@ export function DurationDistributionChart({
   markerValue,
   onChartSelection,
   selection,
-  status,
+  loading,
+  hasError,
   eventType,
   dataTestSubPrefix,
   showAxisTitle = true,
@@ -169,7 +171,7 @@ export function DurationDistributionChart({
       data-test-subj={dataTestSubPrefix + 'CorrelationsChart'}
       style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
     >
-      <ChartContainer height={250} hasData={hasData} status={status}>
+      <ChartContainer height={250} hasData={hasData} loading={loading} hasError={hasError}>
         <Chart>
           <Settings
             rotation={0}

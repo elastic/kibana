@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
-import { FETCH_STATUS, ProcessorEvent } from '@kbn/apm-ui-shared';
+import { ProcessorEvent } from '@kbn/apm-ui-shared';
 import { useRootTransactionContext } from '../../hooks/use_root_transaction';
 import { useTransactionLatencyChart } from '../../hooks/use_transaction_latency_chart';
 import { Section } from '../../../components/section';
@@ -33,7 +33,11 @@ export function TransactionDurationSummary({
   const { transaction: rootTransaction, loading: rootTransactionLoading } =
     useRootTransactionContext();
 
-  const { data: latencyChartData, loading: latencyChartLoading } = useTransactionLatencyChart({
+  const {
+    data: latencyChartData,
+    loading: latencyChartLoading,
+    hasError: latencyChartHasError,
+  } = useTransactionLatencyChart({
     transactionName,
     transactionType,
     serviceName,
@@ -94,8 +98,9 @@ export function TransactionDurationSummary({
                 data={latencyChartData?.transactionDistributionChartData ?? []}
                 markerValue={latencyChartData?.percentileThresholdValue ?? 0}
                 markerCurrentEvent={transactionDuration}
-                hasData={!latencyChartLoading}
-                status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+                hasData={!!latencyChartData}
+                loading={latencyChartLoading}
+                hasError={latencyChartHasError}
                 eventType={ProcessorEvent.transaction}
                 showAxisTitle={false}
                 showLegend={false}

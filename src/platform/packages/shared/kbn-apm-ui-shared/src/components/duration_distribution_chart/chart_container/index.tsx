@@ -10,22 +10,29 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FETCH_STATUS, isPending } from '../../../..';
 
 export interface ChartContainerProps {
   hasData: boolean;
-  status: FETCH_STATUS;
+  loading: boolean;
+  hasError: boolean;
   height: number;
   children: React.ReactNode;
   id?: string;
 }
 
-export function ChartContainer({ children, height, status, hasData, id }: ChartContainerProps) {
-  if (!hasData && isPending(status)) {
+export function ChartContainer({
+  children,
+  height,
+  hasData,
+  id,
+  loading,
+  hasError,
+}: ChartContainerProps) {
+  if (!hasData && loading) {
     return <LoadingChartPlaceholder height={height} />;
   }
 
-  if (status === FETCH_STATUS.FAILURE) {
+  if (hasError) {
     return <FailedChartPlaceholder height={height} />;
   }
 

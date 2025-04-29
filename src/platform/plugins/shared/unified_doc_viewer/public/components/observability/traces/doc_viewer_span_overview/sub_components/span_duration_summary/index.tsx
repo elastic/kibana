@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
-import { FETCH_STATUS, ProcessorEvent } from '@kbn/apm-ui-shared';
+import { ProcessorEvent } from '@kbn/apm-ui-shared';
 import { useTransactionContext } from '../../hooks/use_transaction';
 import { useSpanLatencyChart } from '../../hooks/use_span_latency_chart';
 import { FieldWithoutActions } from '../../../components/field_without_actions';
@@ -31,7 +31,11 @@ export function SpanDurationSummary({
   serviceName,
 }: SpanDurationSummaryProps) {
   const { transaction, loading } = useTransactionContext();
-  const { data: latencyChartData, loading: latencyChartLoading } = useSpanLatencyChart({
+  const {
+    data: latencyChartData,
+    loading: latencyChartLoading,
+    hasError: latencyChartHasError,
+  } = useSpanLatencyChart({
     spanName,
     transactionId: transactionId || '',
     serviceName,
@@ -89,8 +93,9 @@ export function SpanDurationSummary({
                   data={latencyChartData?.spanDistributionChartData ?? []}
                   markerValue={latencyChartData?.percentileThresholdValue ?? 0}
                   markerCurrentEvent={spanDuration}
-                  hasData={!latencyChartLoading}
-                  status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+                  hasData={!!latencyChartData}
+                  loading={latencyChartLoading}
+                  hasError={latencyChartHasError}
                   eventType={ProcessorEvent.span}
                   showAxisTitle={false}
                   showLegend={false}
