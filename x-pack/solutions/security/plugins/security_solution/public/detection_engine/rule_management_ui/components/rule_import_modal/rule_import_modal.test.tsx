@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, act } from '@testing-library/react';
 
 import { RuleImportModal } from './rule_import_modal';
 import { ReactQueryClientProvider } from '../../../../common/containers/query_client/query_client_provider';
 import { importRules } from '../../../rule_management/logic';
-import { mockImportResponse } from './utils.test';
+import { mockImportResponse } from './test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -51,9 +51,9 @@ describe('RuleImportModal', () => {
       'importDataModalActionConnectorsCheckbox'
     ) as HTMLInputElement;
 
-    await waitFor(() => fireEvent.click(overwriteCheckbox));
-    await waitFor(() => fireEvent.click(exceptionCheckbox));
-    await waitFor(() => fireEvent.click(connectorsCheckbox));
+    await act(() => fireEvent.click(overwriteCheckbox));
+    await act(() => fireEvent.click(exceptionCheckbox));
+    await act(() => fireEvent.click(connectorsCheckbox));
 
     await waitFor(() =>
       fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
@@ -93,9 +93,9 @@ describe('RuleImportModal', () => {
       'importDataModalActionConnectorsCheckbox'
     ) as HTMLInputElement;
 
-    await waitFor(() => fireEvent.click(overwriteCheckbox));
-    await waitFor(() => fireEvent.click(exceptionCheckbox));
-    await waitFor(() => fireEvent.click(connectorsCheckbox));
+    await act(() => fireEvent.click(overwriteCheckbox));
+    await act(() => fireEvent.click(exceptionCheckbox));
+    await act(() => fireEvent.click(connectorsCheckbox));
 
     await waitFor(() =>
       fireEvent.change(getByTestId('rule-file-picker') as HTMLInputElement, {
