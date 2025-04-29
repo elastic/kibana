@@ -22,11 +22,13 @@ export const getFindAttackDiscoveryAlertsAggregation = (): Record<
   alert_ids: {
     terms: {
       field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, // kibana.alert.attack_discovery.alert_ids
+      size: 1000, // up to 1000 unique alert IDs
     },
   },
   api_config_name: {
     terms: {
       field: ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME, // kibana.alert.attack_discovery.api_config.name
+      size: 100, // up to 100 unique connector names
     },
   },
   unique_alert_ids_count: {
