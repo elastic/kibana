@@ -73,6 +73,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**](#scenario-revert-prebuilt-rule-button-shouldnt-appear-if-rule-is-non-customzied)
     - [**Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rules-base-version-is-missing)
     - [**Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rules-base-version-is-missing-1)
+    - [**Scenario: Revert prebuilt rule endpoint does not modify non-customized rule**](#scenario-revert-prebuilt-rule-endpoint-does-not-modify-non-customized-rule)
+    - [**Scenario: Revert prebuilt rule endpoint returns error if rule isn't prebuilt**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rule-isnt-prebuilt)
     - [**Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**](#scenario-reverting-a-prebuilt-rule-doesnt-modify-customization-adjacent-fields)
 
 ## Useful information
@@ -618,6 +620,30 @@ Given a space with at least one prebuilt rule
 And that rule is customized
 And that rule does not have an existing base version
 When a user reverts the rule
+Then the API should return a 500 error
+And the rule should remain the same
+```
+
+#### **Scenario: Revert prebuilt rule endpoint does not modify non-customized rule**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is non-customized
+And that rule has an existing base version
+When a user reverts the rule
+Then the API should return successfully
+And the rule should remain the same
+```
+
+#### **Scenario: Revert prebuilt rule endpoint returns error if rule isn't prebuilt**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least custom rule
+When a user calls the revert endpoint on this rule
 Then the API should return a 500 error
 And the rule should remain the same
 ```
