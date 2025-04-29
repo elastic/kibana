@@ -31,6 +31,12 @@ import {
 } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
+  return {
+    bulkMigrateLegacyActions: jest.fn(),
+  };
+});
+
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));

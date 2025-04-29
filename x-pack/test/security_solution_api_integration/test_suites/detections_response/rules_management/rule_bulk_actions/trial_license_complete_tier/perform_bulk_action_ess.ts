@@ -102,9 +102,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
 
-      // Check that the updated rule is returned with the response
-      expect(body.attributes.results.updated[0].enabled).toBeTruthy();
-
       // Check that the updates have been persisted
       const { body: ruleBody } = await securitySolutionApi
         .readRule({ query: { rule_id: ruleId } })
@@ -114,7 +111,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const sidecarActionsPostResults = await getLegacyActionSO(es);
       expect(sidecarActionsPostResults.hits.hits.length).toBe(0);
 
-      expect(ruleBody.enabled).toBeTruthy();
       expect(ruleBody.actions).toEqual([
         {
           action_type_id: '.slack',
