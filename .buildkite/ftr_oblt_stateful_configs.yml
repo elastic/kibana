@@ -25,7 +25,7 @@ enabled:
   - x-pack/solutions/observability/test/api_integration/apis/logs_shared/config.ts
   - x-pack/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
-  - x-pack/test/api_integration/apis/uptime/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/uptime/config.ts
   - x-pack/test/api_integration/apis/entity_manager/config.ts
   - x-pack/solutions/observability/test/api_integration/apm/basic/config.ts
   - x-pack/solutions/observability/test/api_integration/apm/cloud/config.ts
