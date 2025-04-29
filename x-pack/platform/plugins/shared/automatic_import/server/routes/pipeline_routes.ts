@@ -26,11 +26,6 @@ export function registerPipelineRoutes(router: IRouter<AutomaticImportRouteHandl
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
-        },
-      },
     })
     .addVersion(
       {
