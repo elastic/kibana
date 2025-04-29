@@ -6,6 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { MAX_ALERTS_PER_EXECUTION } from '../common';
 
 export const buildEsqlSearchRequest = ({
   query,
@@ -19,7 +20,7 @@ export const buildEsqlSearchRequest = ({
   from: string;
   to: string;
   previousOriginalDocumentIds: string[];
-}) => {
+}): { query: string; filter: estypes.QueryDslQueryContainer } => {
   const sanitizedDocumentIds = previousOriginalDocumentIds.filter((id) => id != null);
   const rangeFilter = {
     range: {
@@ -35,7 +36,7 @@ export const buildEsqlSearchRequest = ({
 
   return {
     // Make sure query includes `METADATA _id, _source`
-    query: `${query} | limit 10000`,
+    query: `${query} | limit ${MAX_ALERTS_PER_EXECUTION}`,
     filter: {
       bool: {
         must_not:
