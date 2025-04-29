@@ -88,9 +88,11 @@ export const useAsyncSample = (options: Options) => {
         next: (result) => {
           if (!isRunningResponse(result)) {
             toggleIsLoadingDocuments(false);
-          }
-
-          if (!isEmpty(result.rawResponse.hits?.hits)) {
+            if (result.rawResponse.hits?.hits) {
+              setDocuments(result.rawResponse.hits.hits.map((hit) => hit._source));
+            }
+            return;
+          } else if (!isEmpty(result.rawResponse.hits?.hits)) {
             setDocuments(result.rawResponse.hits.hits.map((hit) => hit._source));
           }
         },
