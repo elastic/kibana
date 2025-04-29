@@ -63,11 +63,21 @@ export async function runStartupMigrations({
 
       await pRetry(
         async () => populateMissingSemanticTextFieldWithLock({ core, logger, config, esClient }),
-        { retries: 5, minTimeout: 10_000 }
+        {
+          retries: 5,
+          minTimeout: 10_000,
+          onFailedAttempt: async (error) => {
+            const isLockAcquisitionError = error instanceof LockAcquisitionError;
+            if (!isLockAcquisitionError) {
+              throw error;
+            }
+          },
+        }
       );
     })
     .catch((error) => {
-      if (!(error instanceof LockAcquisitionError)) {
+      const isLockAcquisitionError = error instanceof LockAcquisitionError;
+      if (!isLockAcquisitionError) {
         throw error;
       }
     });

@@ -77,6 +77,7 @@ import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -735,10 +736,15 @@ export class ObservabilityAIAssistantClient {
         });
       })
       .catch((e) => {
-        logger.error(
-          `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
-        );
-        logger.debug(e);
+        const isLockAcquisitionError = e instanceof LockAcquisitionError;
+        if (isLockAcquisitionError) {
+          logger.info(e.message);
+        } else {
+          logger.error(
+            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
+          );
+          logger.debug(e);
+        }
       });
 
     return { reindex: true, currentInferenceId, nextInferenceId };

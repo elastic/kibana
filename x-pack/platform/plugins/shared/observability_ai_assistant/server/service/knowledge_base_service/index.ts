@@ -450,7 +450,7 @@ export class KnowledgeBaseService {
           inferenceId,
         }).catch((e) => {
           if (error instanceof LockAcquisitionError) {
-            this.dependencies.logger.debug(`Re-indexing operation is already in progress`);
+            this.dependencies.logger.info(`Re-indexing operation is already in progress`);
             return;
           }
           this.dependencies.logger.error(`Failed to re-index knowledge base: ${e.message}`);
