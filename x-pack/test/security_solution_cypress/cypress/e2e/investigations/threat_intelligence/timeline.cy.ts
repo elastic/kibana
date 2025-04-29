@@ -31,7 +31,8 @@ import { login } from '../../../tasks/login';
 
 const URL = '/app/security/threat_intelligence/indicators';
 
-describe('Timeline', { tags: ['@ess'] }, () => {
+// TODO: unskip this test, adding from barchart crashes chrome in cypress
+describe.skip('Timeline', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_single' }));
 
   after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_single' }));

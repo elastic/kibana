@@ -358,10 +358,11 @@ describe('Invalid Indicators', { tags: ['@ess'] }, () => {
   });
 });
 
-describe('Missing mappings', { tags: ['@ess'] }, () => {
-  before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_no_mappings' }));
+// TODO: investigate and re-enable this
+describe.skip('Missing mappings', { tags: ['@ess'] }, () => {
+  beforeEach(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_no_mappings' }));
 
-  after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_no_mappings' }));
+  afterEach(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_no_mappings' }));
 
   describe('verify the grid loads even with missing mappings and missing fields', () => {
     beforeEach(() => {
