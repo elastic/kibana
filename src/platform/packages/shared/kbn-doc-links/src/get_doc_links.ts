@@ -221,6 +221,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     heartbeat: {
       base: `${ELASTIC_DOCS}reference/beats/heartbeat`,
+      monitorTags: `${ELASTIC_DOCS}reference/beats/heartbeat/monitor-options#monitor-tags`,
     },
     libbeat: {
       getStarted: `${ELASTIC_DOCS}reference/beats`,

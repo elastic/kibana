@@ -59,7 +59,7 @@ Array [
       <a
         class="euiLink emotion-euiLink-primary"
         data-test-subj="syntheticsMonitorTagsSetTagsLink"
-        href="https://www.elastic.co/docs/reference/beats/heartbeat/monitor-options.html#monitor-tags"
+        href="https://www.elastic.co/docs/reference/beats/heartbeat/monitor-options#monitor-tags"
         rel="noopener noreferrer"
         target="_blank"
       >
