@@ -46,21 +46,14 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
         <FieldsTable
           document={source || {}}
           tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
+          disableSearch
+          onlyShowPinnedFields
+          hidePins
         />
       </ExpandableSection>
 
       <EuiHorizontalRule />
 
-      {/* <ExpandableSection*/}
-      {/*  title={*/}
-      {/*    <FormattedMessage*/}
-      {/*      id="xpack.securitySolution.genericEntityFlyout.flyoutContent.expandableSection.insightsLabel"*/}
-      {/*      defaultMessage="Insights"*/}
-      {/*    />*/}
-      {/*  }*/}
-      {/*  expanded={insightsSectionExpandedState}*/}
-      {/*  localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_INSIGHTS_SECTION}*/}
-      {/* >*/}
       <EntityInsight
         field={'agent.type'}
         value={'cloudbeat'}
@@ -68,7 +61,6 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
         isLinkEnabled={false}
         openDetailsPanel={() => {}}
       />
-      {/* </ExpandableSection>*/}
     </FlyoutBody>
   );
 };
