@@ -559,14 +559,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
           deleteByQueryTaskId: res.right.taskId,
         };
-      } else {
-        // cleanup_not_needed, let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+      } else if (res.right.type === 'cleanup_not_needed') {
+        // let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
         return {
           ...stateP,
           logs,
           controlState: 'PREPARE_COMPATIBLE_MIGRATION',
           ...getPrepareCompatibleMigrationStateProperties(stateP),
         };
+      } else {
+        throwBadResponse(stateP, res.right);
       }
     } else {
       const reason = extractUnknownDocFailureReason(

@@ -10,6 +10,7 @@
 import * as Either from 'fp-ts/Either';
 import { extractUnknownDocFailureReason } from '../../../model/extract_errors';
 import type { ModelStage } from '../types';
+import { throwBadResponse } from '../../../model/helpers';
 
 export const cleanupUnknownAndExcludedDocs: ModelStage<
   'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS',
@@ -35,8 +36,8 @@ export const cleanupUnknownAndExcludedDocs: ModelStage<
       controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK',
       deleteTaskId: res.right.taskId,
     };
-  } else {
-    // cleanup_not_needed, let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+  } else if (res.right.type === 'cleanup_not_needed') {
+    // let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK
     if (state.hasDeletedDocs) {
       return {
         ...state,
@@ -48,5 +49,7 @@ export const cleanupUnknownAndExcludedDocs: ModelStage<
         controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
     }
+  } else {
+    throwBadResponse(state, res.right);
   }
 };
