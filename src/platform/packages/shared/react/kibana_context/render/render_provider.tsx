@@ -21,7 +21,10 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
 /**
  * The `KibanaRenderContextProvider` provides the necessary context for an out-of-current React render, such as using `ReactDOM.render()`.
  *
- * @deprecated Internal use only: Use RenderingService.addContext from the CoreStart contract instead of consuming this directly.
+/**
+ * @internal Use RenderingService.addContext from the CoreStart contract instead of consuming this directly.
+ * @deprecated 
+ */
  */
 export const KibanaRenderContextProvider: FC<
   PropsWithChildren<KibanaRenderContextProviderProps>
