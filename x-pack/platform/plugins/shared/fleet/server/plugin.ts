@@ -146,6 +146,7 @@ import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/mana
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
+import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -197,6 +198,7 @@ export interface FleetAppContext {
   uninstallTokenService: UninstallTokenServiceInterface;
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
   deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
+  updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
   taskManagerStart?: TaskManagerStartContract;
 }
 
@@ -296,6 +298,7 @@ export class FleetPlugin
   private fleetMetricsTask?: FleetMetricsTask;
   private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
   private deleteUnenrolledAgentsTask?: DeleteUnenrolledAgentsTask;
+  private updateAgentlessDeploymentsTask?: UpgradeAgentlessDeploymentsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -647,6 +650,12 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
     });
 
+    this.updateAgentlessDeploymentsTask = new UpgradeAgentlessDeploymentsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
+
     // Register fields metadata extractors
     registerFieldsMetadataExtractors({ core, fieldsMetadata: deps.fieldsMetadata });
   }
@@ -693,6 +702,7 @@ export class FleetPlugin
       uninstallTokenService,
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
       deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
+      updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
       taskManagerStart: plugins.taskManager,
     });
     licenseService.start(plugins.licensing.license$);
@@ -702,6 +712,11 @@ export class FleetPlugin
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     this.deleteUnenrolledAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+
+    this.updateAgentlessDeploymentsTask
+      ?.start({ taskManager: plugins.taskManager })
+      .catch(() => {});
+
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)

@@ -31,6 +31,7 @@ import { getTime } from '../../query';
 import {
   ESQL_ASYNC_SEARCH_STRATEGY,
   ESQL_TABLE_TYPE,
+  getSideEffectFunction,
   isRunningResponse,
   type KibanaContext,
 } from '..';
@@ -95,7 +96,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     name: 'esql',
     type: 'datatable',
     inputTypes: ['kibana_context', 'null'],
-    allowCache: true,
     help: i18n.translate('data.search.esql.help', {
       defaultMessage: 'Queries Elasticsearch using ES|QL.',
     }),
@@ -143,6 +143,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         help: i18n.translate('data.search.esql.descriptionForInspector.help', {
           defaultMessage: 'The description to show in Inspector.',
         }),
+      },
+    },
+    allowCache: {
+      withSideEffects: (_, { inspectorAdapters }) => {
+        return getSideEffectFunction(inspectorAdapters);
       },
     },
     fn(

@@ -15,6 +15,7 @@ import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
+  getSideEffectFunction,
 } from '../../../common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
@@ -37,13 +38,19 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
+    allowCache: {
+      withSideEffects: (_, { inspectorAdapters }) => {
+        return getSideEffectFunction(inspectorAdapters);
+      },
+    },
     fn(
       input,
       args,
       { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
     ) {
       return defer(async () => {
-        const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
+        const [{ aggs, indexPatterns, searchSource, getNow }, { handleEsaggsRequest }] =
+          await Promise.all([getStartDependencies(), import('../../../common/search/expressions')]);
 
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
@@ -56,8 +63,6 @@ export function getFunctionDefinition({
             samplerSeed: args.samplerSeed,
           }
         );
-
-        const { handleEsaggsRequest } = await import('../../../common/search/expressions');
 
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(

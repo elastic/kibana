@@ -1496,4 +1496,51 @@ describe('MetricVisComponent', function () {
       expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
     });
   });
+
+  describe('ES|QL metric chart', () => {
+    it('keyword value should remain string', () => {
+      const dataFromESQL: Datatable = {
+        type: 'datatable',
+        columns: [
+          {
+            id: 'a',
+            name: 'alpha',
+            meta: {
+              esType: 'keyword',
+              type: 'string',
+              sourceParams: {
+                indexPattern: 'index',
+              },
+            },
+          },
+        ],
+        rows: [{ a: '12h50m30s' }],
+        meta: {
+          type: 'es_ql',
+        },
+      };
+
+      const config: Props['config'] = {
+        dimensions: {
+          metric: 'a',
+        },
+        metric: {
+          color: '#FFFFFF',
+          iconAlign: 'left',
+          maxCols: 3,
+          titlesTextAlign: 'left',
+          valueFontSize: 'default',
+          valuesTextAlign: 'right',
+        },
+      };
+
+      const component = shallow(
+        <MetricVis config={config} data={dataFromESQL} {...defaultProps} />
+      );
+
+      const { data } = component.find(Metric).props();
+      const formattedMetricValue = data[0][0]!.value;
+      expect(formattedMetricValue).toEqual('string-12h50m30s');
+    });
+  });
 });
