@@ -38,19 +38,27 @@ export class AIAssistantManagementSelectionPlugin
     >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
+
+
 
   public setup(
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
+
+    const envSpecificScope = !this.isServerless ? 'Observability' : 'Observability and Search'
+
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant for Observability and Search visibility',
+        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', //TODO: set different one for serverless or not
+          {
+          defaultMessage: 'AI Assistant for ' + envSpecificScope + ' visibility',
         }),
         category: [DEFAULT_APP_CATEGORIES.observability.id],
         value: this.config.preferredAIAssistantType,
@@ -58,7 +66,7 @@ export class AIAssistantManagementSelectionPlugin
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
+              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in '+ envSpecificScope +', everywhere, or nowhere.',
             values: {
               em: (chunks) => `<em>${chunks}</em>`,
             },
@@ -77,7 +85,7 @@ export class AIAssistantManagementSelectionPlugin
         optionLabels: {
           [AIAssistantType.Default]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability and Search only (default)' }
+            { defaultMessage: envSpecificScope + ' only (default)' }
           ),
           [AIAssistantType.Observability]: i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
