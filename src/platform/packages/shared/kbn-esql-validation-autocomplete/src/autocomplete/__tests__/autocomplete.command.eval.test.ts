@@ -56,7 +56,7 @@ describe('autocomplete.suggest', () => {
 
     test('empty expression', async () => {
       await assertSuggestions('from a | eval /', [
-        'var0 = ',
+        'col0 = ',
         ...getFieldNamesByType('any').map((v) => `${v} `),
         ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
@@ -67,7 +67,7 @@ describe('autocomplete.suggest', () => {
       ]);
 
       await assertSuggestions('from a | eval col0 = 1, /', [
-        'var0 = ',
+        'col1 = ',
         ...getFieldNamesByType('any').map((v) => `${v} `),
         ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ]);
@@ -79,7 +79,7 @@ describe('autocomplete.suggest', () => {
 
       // Re-enable with https://github.com/elastic/kibana/issues/210639
       // await assertSuggestions('from a | eval a=doubleField, /', [
-      //   'var0 = ',
+      //   'col0 = ',
       //   ...getFieldNamesByType('any').map((v) => `${v} `),
       //   'a',
       //   ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
@@ -88,7 +88,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(
         'from b | stats avg(doubleField) by keywordField | eval /',
         [
-          'var0 = ',
+          'col0 = ',
           '`avg(doubleField)` ',
           ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ],
@@ -105,7 +105,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(
         'from c | eval abs(doubleField) + 1 | eval /',
         [
-          'var0 = ',
+          'col0 = ',
           ...getFieldNamesByType('any').map((v) => `${v} `),
           '`abs(doubleField) + 1` ',
           ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
@@ -122,7 +122,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(
         'from d | stats avg(doubleField) by keywordField | eval /',
         [
-          'var0 = ',
+          'col0 = ',
           '`avg(doubleField)` ',
           ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ],
@@ -233,7 +233,7 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: '(' }
       );
       await assertSuggestions(
-        'from a | eval var0 = raund(5, /', // note the typo in round
+        'from a | eval col0 = raund(5, /', // note the typo in round
         [],
         { triggerCharacter: '(' }
       );
@@ -279,7 +279,7 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: '(' }
       );
       await assertSuggestions('from a | eval a=round(doubleField),/', [
-        'var0 = ',
+        'col0 = ',
         ...getFieldNamesByType('any').map((v) => `${v} `),
         // Re-enable with https://github.com/elastic/kibana/issues/210639
         // 'a',
@@ -399,7 +399,7 @@ describe('autocomplete.suggest', () => {
       const absParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
       // Smoke testing for suggestions in previous position than the end of the statement
-      await assertSuggestions('from a | eval var0 = abs(doubleField) / | eval abs(var0)', [
+      await assertSuggestions('from a | eval col0 = abs(doubleField) / | eval abs(col0)', [
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,
           'any',
@@ -409,7 +409,7 @@ describe('autocomplete.suggest', () => {
         ', ',
         '| ',
       ]);
-      await assertSuggestions('from a | eval var0 = abs(b/) | eval abs(var0)', [
+      await assertSuggestions('from a | eval col0 = abs(b/) | eval abs(col0)', [
         ...getFieldNamesByType(absParameterTypes),
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,
@@ -542,7 +542,7 @@ describe('autocomplete.suggest', () => {
                   triggerCharacter: ' ',
                 });
 
-                await assertSuggestions(`from a | eval var0 = ${testCase}`, expected, {
+                await assertSuggestions(`from a | eval col0 = ${testCase}`, expected, {
                   triggerCharacter: ' ',
                 });
               }
@@ -579,7 +579,7 @@ describe('autocomplete.suggest', () => {
       const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
 
       // Eval bucket is not a valid expression
-      await assertSuggestions('from a | eval var0 = bucket(@timestamp, /', [], {
+      await assertSuggestions('from a | eval col0 = bucket(@timestamp, /', [], {
         triggerCharacter: ' ',
       });
 
@@ -599,7 +599,7 @@ describe('autocomplete.suggest', () => {
       );
       await assertSuggestions('from a | eval a = 1 year /', [', ', '| ', '+ $0', '- $0']);
       await assertSuggestions(
-        'from a | eval var0=date_trunc(/)',
+        'from a | eval col0=date_trunc(/)',
         [
           ...getLiteralsByType('time_literal').map((t) => `${t}, `),
           ...getFunctionSignaturesByReturnType(Location.EVAL, ['time_duration', 'date_period'], {
@@ -609,7 +609,7 @@ describe('autocomplete.suggest', () => {
         { triggerCharacter: '(' }
       );
       await assertSuggestions(
-        'from a | eval var0=date_trunc(2 /)',
+        'from a | eval col0=date_trunc(2 /)',
         [...dateSuggestions.map((t) => `${t}, `), ','],
         { triggerCharacter: ' ' }
       );

@@ -1032,7 +1032,7 @@ describe('validation logic', () => {
         ]
       );
       testErrorsAndWarnings(
-        'from a_index | eval var0 = log(-1, -20)',
+        'from a_index | eval col0 = log(-1, -20)',
         [],
         [
           'Log of a negative number results in null: -1',
@@ -1261,7 +1261,7 @@ describe('validation logic', () => {
         []
       );
       testErrorsAndWarnings(
-        `from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)`,
+        `from a_index | eval result = case(false, 0, 1) | stats col0 = sum(result)`,
         []
       );
       testErrorsAndWarnings(`from a_index | eval round(case(false, 0, 1))`, []);
@@ -1432,52 +1432,52 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a_index | enrich policy on textField with `, [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
       ]);
-      testErrorsAndWarnings(`from a_index | enrich policy on textField with var0 `, [
-        'Unknown column [var0]',
+      testErrorsAndWarnings(`from a_index | enrich policy on textField with col0 `, [
+        'Unknown column [col0]',
       ]);
-      testErrorsAndWarnings(`from a_index |enrich policy on doubleField with var0 = `, [
+      testErrorsAndWarnings(`from a_index |enrich policy on doubleField with col0 = `, [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column [var0]',
+        'Unknown column [col0]',
       ]);
-      testErrorsAndWarnings(`from a_index | enrich policy on textField with var0 = c `, [
-        'Unknown column [var0]',
+      testErrorsAndWarnings(`from a_index | enrich policy on textField with col0 = c `, [
+        'Unknown column [col0]',
         `Unknown column [c]`,
       ]);
       // need to re-enable once the fields/variables become location aware
-      // testErrorsAndWarnings(`from a_index | enrich policy on textField with var0 = textField `, [
+      // testErrorsAndWarnings(`from a_index | enrich policy on textField with col0 = textField `, [
       //   `Unknown column [textField]`,
       // ]);
-      testErrorsAndWarnings(`from a_index |enrich policy on doubleField with var0 = , `, [
+      testErrorsAndWarnings(`from a_index |enrich policy on doubleField with col0 = , `, [
         "SyntaxError: mismatched input ',' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column [var0]',
+        'Unknown column [col0]',
       ]);
       testErrorsAndWarnings(
-        `from a_index | enrich policy on textField with var0 = otherField, var1 `,
-        ['Unknown column [var1]']
+        `from a_index | enrich policy on textField with col0 = otherField, col1 `,
+        ['Unknown column [col1]']
       );
       testErrorsAndWarnings(
-        `from a_index | enrich policy on textField with var0 = otherField `,
+        `from a_index | enrich policy on textField with col0 = otherField `,
         []
       );
       testErrorsAndWarnings(
-        `from a_index | enrich policy on textField with var0 = otherField, yetAnotherField `,
+        `from a_index | enrich policy on textField with col0 = otherField, yetAnotherField `,
         []
       );
       testErrorsAndWarnings(
-        `from a_index |enrich policy on doubleField with var0 = otherField, var1 = `,
+        `from a_index |enrich policy on doubleField with col0 = otherField, col1 = `,
         [
           "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-          'Unknown column [var1]',
+          'Unknown column [col1]',
         ]
       );
 
       testErrorsAndWarnings(
-        `from a_index | enrich policy on textField with var0 = otherField, var1 = yetAnotherField`,
+        `from a_index | enrich policy on textField with col0 = otherField, col1 = yetAnotherField`,
         []
       );
       testErrorsAndWarnings(
-        'from a_index | enrich policy on textField with var0 = otherField, `this``is fine` = yetAnotherField',
+        'from a_index | enrich policy on textField with col0 = otherField, `this``is fine` = yetAnotherField',
         []
       );
       testErrorsAndWarnings(`from a_index | enrich policy with `, [
@@ -1485,7 +1485,7 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy with otherField`, []);
       testErrorsAndWarnings(`from a_index | enrich policy | eval otherField`, []);
-      testErrorsAndWarnings(`from a_index | enrich policy with var0 = otherField | eval var0`, []);
+      testErrorsAndWarnings(`from a_index | enrich policy with col0 = otherField | eval col0`, []);
       testErrorsAndWarnings('from a_index | enrich my-pol*', [
         'Using wildcards (*) in ENRICH is not allowed [my-pol*]',
       ]);

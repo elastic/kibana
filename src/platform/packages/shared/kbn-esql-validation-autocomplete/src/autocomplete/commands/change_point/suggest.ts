@@ -14,7 +14,7 @@ import { findFinalWord, isSingleItem } from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { pipeCompleteItem } from '../../complete_items';
-import { buildVariablesDefinitions, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
+import { buildUserDefinedColumnsDefinitions, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 
 export enum Position {
   VALUE = 'value',
@@ -126,14 +126,14 @@ export async function suggest({
       return [asSuggestion, pipeCompleteItem];
     case Position.AS_TYPE_COLUMN: {
       // add comma and space
-      return buildVariablesDefinitions(['changePointType']).map((v) => ({
+      return buildUserDefinedColumnsDefinitions(['changePointType']).map((v) => ({
         ...v,
         text: v.text + ', ',
         command: TRIGGER_SUGGESTION_COMMAND,
       }));
     }
     case Position.AS_P_VALUE_COLUMN: {
-      return buildVariablesDefinitions(['pValue']).map((v) => ({
+      return buildUserDefinedColumnsDefinitions(['pValue']).map((v) => ({
         ...v,
         command: TRIGGER_SUGGESTION_COMMAND,
       }));
