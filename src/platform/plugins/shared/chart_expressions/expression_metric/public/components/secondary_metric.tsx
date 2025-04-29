@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiBadge, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
@@ -72,30 +72,6 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   };
 }
 
-const badgeSupportedTokens = new Set([
-  'default',
-  'hollow',
-  'primary',
-  'success',
-  'accent',
-  'warning',
-  'danger',
-]);
-
-function getBadgeColor(color: string, euiTheme: EuiThemeComputed<{}>) {
-  if (color === 'backgroundBaseDisabled') {
-    return 'default';
-  }
-  if (badgeSupportedTokens.has(color)) {
-    return color;
-  }
-  return (
-    euiTheme.colors[color as Exclude<keyof typeof euiTheme.colors, 'vis' | 'DARK' | 'LIGHT'>] ||
-    euiTheme.colors.vis[color as keyof typeof euiTheme.colors.vis] ||
-    color
-  );
-}
-
 function getValueToShow(
   value: string,
   deltaValue: number,
@@ -153,7 +129,6 @@ function SecondaryMetricValue({
   fontSize: number;
   formatter?: FieldFormatConvertFunction;
 }) {
-  const { euiTheme } = useEuiTheme();
   const safeFormattedValue = formattedValue ?? notAvailable;
 
   const badgeCss = css(`
@@ -171,7 +146,6 @@ function SecondaryMetricValue({
     const deltaFactor = trendConfig.compareToPrimary ? -1 : 1;
     const deltaValue = deltaFactor * getDeltaValue(rawValue, trendConfig.baselineValue);
     const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
-    const translatedColor = getBadgeColor(trendColor, euiTheme);
     const valueToShow = getValueToShow(
       safeFormattedValue,
       deltaValue,
@@ -185,7 +159,7 @@ function SecondaryMetricValue({
           // so show it only when icon only mode to avoid to be reduntant
           getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)
         }
-        color={translatedColor}
+        color={trendColor}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
