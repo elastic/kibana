@@ -15,13 +15,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { PromptContext } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ConnectorMissingCallout } from './connector_missing_callout';
-import { useAlertSummary } from './use_alert_summary';
-import type { PromptContext } from '../../..';
+import { useAlertSummary } from '../../hooks/use_alert_summary';
 import { MessageText } from '../message_text';
-import * as i18n from '../translations';
+import * as i18n from '../../constants/translations';
 
 interface Props {
   alertId: string;

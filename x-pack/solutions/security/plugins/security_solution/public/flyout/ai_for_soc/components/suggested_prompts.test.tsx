@@ -8,15 +8,11 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { SuggestedPrompts } from './suggested_prompts';
-import { useAssistantContext } from '../assistant_context';
-import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
+import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 
 // Mock the custom hooks
-jest.mock('../assistant_context', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
-}));
-
-jest.mock('../assistant/use_assistant_overlay', () => ({
   useAssistantOverlay: jest.fn(),
 }));
 
