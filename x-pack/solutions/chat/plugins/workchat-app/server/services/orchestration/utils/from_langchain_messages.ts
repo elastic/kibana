@@ -12,7 +12,7 @@ import {
   isHumanMessage,
 } from '@langchain/core/messages';
 import type { ToolCall as LangchainToolCall } from '@langchain/core/messages/tool';
-import { AppLogger } from '../../../plugin';
+import { AppLogger } from '../../../utils';
 import {
   createUserMessage,
   createAssistantMessage,

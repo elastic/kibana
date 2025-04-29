@@ -10,7 +10,6 @@ import type {
   CoreSetup,
   Plugin,
   PluginInitializerContext,
-  Logger,
   LoggerFactory,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
@@ -20,6 +19,7 @@ import type { InternalServices } from './services/types';
 import { IntegrationRegistry } from './services/integrations';
 import { createServices } from './services/create_services';
 import type { WorkChatAppConfig } from './config';
+import { AppLogger } from './utils';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -90,17 +90,5 @@ export class WorkChatAppPlugin
     });
 
     return {};
-  }
-}
-
-export class AppLogger {
-  private static instance: Logger;
-
-  public static getInstance(): Logger {
-    return AppLogger.instance;
-  }
-
-  public static setInstance(logger: Logger) {
-    AppLogger.instance = logger;
   }
 }
