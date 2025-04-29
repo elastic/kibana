@@ -90,7 +90,7 @@ export const initializeSession: InternalStateThunkActionCreator<
 
     const wasTabInitialized = Boolean(stateContainer$.getValue());
 
-    if (!wasTabInitialized) {
+    if (TABS_ENABLED && !wasTabInitialized) {
       const tabGlobalStateFromLocalStorage =
         tabsStorageManager.loadTabGlobalStateFromLocalCache(tabId);
 
