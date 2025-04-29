@@ -1433,6 +1433,8 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             expect(alerts.hits.hits.findIndex((a) => a._id === alertId)).to.be.greaterThan(-1);
           });
         });
+
+        await cleanupEventLog();
       });
     });
   });
