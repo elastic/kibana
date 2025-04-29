@@ -8,9 +8,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IndexSelectorModal } from './select_index_modal';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../common/hooks/use_app_toasts', () => ({
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
     addError: jest.fn(),
   }),
@@ -22,7 +22,7 @@ const mockUseFetchPrivilegedUserIndices = jest.fn().mockReturnValue({
   error: null,
 });
 
-jest.mock('./hooks/use_fetch_privileged_user_indices', () => ({
+jest.mock('../hooks/use_fetch_privileged_user_indices', () => ({
   useFetchPrivilegedUserIndices: () => mockUseFetchPrivilegedUserIndices(),
 }));
 
