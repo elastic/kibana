@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { TabularPage } from './tabular_page';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -139,7 +139,9 @@ describe('When the tabular page is loaded', () => {
   it('should only disable delete action for preconfigured endpoints', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    screen.getAllByTestId('euiCollapsedItemActionsButton')[0].click();
+    act(() => {
+      screen.getAllByTestId('euiCollapsedItemActionsButton')[0].click();
+    });
 
     const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
 
@@ -149,7 +151,9 @@ describe('When the tabular page is loaded', () => {
   it('should not disable delete action for other endpoints', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    screen.getAllByTestId('euiCollapsedItemActionsButton')[4].click();
+    act(() => {
+      screen.getAllByTestId('euiCollapsedItemActionsButton')[4].click();
+    });
 
     const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
 
