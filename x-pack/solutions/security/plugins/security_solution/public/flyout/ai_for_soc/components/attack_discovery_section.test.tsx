@@ -13,9 +13,12 @@ import { AttackDiscoverySection } from './attack_discovery_section';
 import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 
 jest.mock('../context');
+jest.mock('./attack_discovery', () => ({
+  AttackDiscoveryWidget: jest.fn(),
+}));
 
 describe('AttackDiscoverySection', () => {
-  it('should render the switch in the unchecked state by default', () => {
+  it('should render the attack discovery section', () => {
     (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
       eventId: 'eventId',
     });

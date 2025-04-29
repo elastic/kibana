@@ -84,6 +84,7 @@ export class ProductDocBasePlugin
       kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
+      elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger.get('package-installer'),
     });
 

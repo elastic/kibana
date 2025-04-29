@@ -195,6 +195,11 @@ interface NodeDefinitionBase {
    * ----------------------------------------------------------------------------------------------
    */
   /**
+   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
+   * the Navigation.Item component when React components are used to declare the navigation tree.
+   */
+  renderItem?: () => React.ReactNode;
+  /**
    * ["item" nodes only] Optional flag to indicate if the target page should be opened in a new Browser tab.
    * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
    */
@@ -237,11 +242,6 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    * considered a "group" node.
    */
   children?: ChromeProjectNavigationNode[];
-  /**
-   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
-   * the Navigation.Item component when React components are used to declare the navigation tree.
-   */
-  renderItem?: () => React.ReactNode;
   /**
    * Flag to indicate if the node is an "external" cloud link
    */
@@ -386,7 +386,7 @@ export type RootNavigationItemDefinition<
 /**
  * @public
  *
- * Definition for the complete navigation tree, including body and footer
+ * Definition for the complete navigation tree, including body, callout, and footer
  */
 export interface NavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -403,7 +403,14 @@ export interface NavigationTreeDefinition<
    * or "group" items.
    * */
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  /**
+   * Special callout section displayed between the body and footer.
+   * Typically used for promotional or informational content.
+   * */
+  callout?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
+
+export type SideNavigationSection = keyof NavigationTreeDefinition;
 
 /**
  * @public
@@ -417,6 +424,7 @@ export interface NavigationTreeDefinitionUI {
   id: SolutionId;
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  callout?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }
 
 /**
