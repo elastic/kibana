@@ -9,7 +9,7 @@ import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import type { ActionContext } from './action_context';
 import type { EsQueryAlertState, EsQueryRuleState } from './rule_type_params';
-import type { ActionGroupId } from './constants';
+import type { ActionGroupId } from '../../../common/es_query';
 import type { StackAlertType } from '../types';
 
 export type OnlyEsQueryRuleParams = Omit<EsQueryRuleParams, 'searchConfiguration' | 'esqlQuery'> & {

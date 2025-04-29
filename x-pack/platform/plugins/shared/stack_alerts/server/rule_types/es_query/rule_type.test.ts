@@ -19,7 +19,7 @@ import type { ActionContext } from './action_context';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import type {
   OnlyEsqlQueryRuleParams,
   OnlyEsQueryRuleParams,

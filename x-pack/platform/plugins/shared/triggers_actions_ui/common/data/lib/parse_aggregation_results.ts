@@ -29,7 +29,7 @@ export interface ParsedAggregationResults {
   truncated: boolean;
 }
 
-interface ParseAggregationResultsOpts {
+export interface ParseAggregationResultsOpts {
   isCountAgg: boolean;
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
