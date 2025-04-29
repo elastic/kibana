@@ -154,6 +154,9 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should NOT use space ID in creating SO client when feature is disabled', async () => {
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
+      'foo'
+    );
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
@@ -162,7 +165,7 @@ describe('Agent Status API route handler', () => {
     expect(
       apiTestSetup.endpointAppContextMock.service.savedObjects.createInternalScopedSoClient
     ).toHaveBeenCalledWith({
-      spaceId: undefined,
+      spaceId: 'default',
     });
   });
 
