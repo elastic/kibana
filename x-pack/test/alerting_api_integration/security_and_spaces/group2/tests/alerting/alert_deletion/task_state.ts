@@ -43,6 +43,14 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
   };
 
   describe('alert deletion - task state', () => {
+    beforeEach(async () => {
+      await es.deleteByQuery({
+        index: '.kibana-event-log*',
+        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+        conflicts: 'proceed',
+      });
+    });
+
     afterEach(async () => {
       await es.deleteByQuery({
         index: '.internal.alerts-*',
