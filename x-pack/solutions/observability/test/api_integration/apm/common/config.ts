@@ -19,7 +19,7 @@ import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
+import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
@@ -106,7 +106,7 @@ export function createTestConfig(
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackAPITestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.ts')
+      require.resolve('@kbn/test-suites-xpack-platform/api_integration/config')
     );
 
     const services = xPackAPITestsConfig.get('services');

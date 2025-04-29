@@ -176,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       let servicesDetailedStatistics: ServicesDetailedStatisticsReturn;
-      // eslint-disable-next-line mocha/no-sibling-hooks
+
       before(async () => {
         const response = await apmApiClient.readUser({
           endpoint: `POST /internal/apm/services/detailed_statistics`,

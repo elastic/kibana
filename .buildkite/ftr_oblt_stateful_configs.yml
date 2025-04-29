@@ -27,10 +27,10 @@ enabled:
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
   - x-pack/test/api_integration/apis/entity_manager/config.ts
-  - x-pack/test/apm_api_integration/basic/config.ts
-  - x-pack/test/apm_api_integration/cloud/config.ts
-  - x-pack/test/apm_api_integration/rules/config.ts
-  - x-pack/test/apm_api_integration/trial/config.ts
+  - x-pack/solutions/observability/test/api_integration/apm/basic/config.ts
+  - x-pack/solutions/observability/test/api_integration/apm/cloud/config.ts
+  - x-pack/solutions/observability/test/api_integration/apm/rules/config.ts
+  - x-pack/solutions/observability/test/api_integration/apm/trial/config.ts
   - x-pack/test/dataset_quality_api_integration/basic/config.ts
   - x-pack/test/functional/apps/dataset_quality/config.ts
   - x-pack/test/functional/apps/slo/embeddables/config.ts

@@ -98,11 +98,10 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
   });
 
   registry.when('[trial] APM Indices', { config: 'trial', archives: [] }, () => {
-    // eslint-disable-next-line mocha/no-sibling-hooks
     beforeEach(async () => {
       await deleteSavedObject();
     });
-    // eslint-disable-next-line mocha/no-sibling-hooks
+
     afterEach(async () => {
       await deleteSavedObject();
     });

@@ -39,7 +39,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   });
 
   registry.when('Fleet migration check - cloud', { config: 'cloud', archives: [] }, () => {
-    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       await setupFleet(bettertest);
     });

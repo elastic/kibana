@@ -13,10 +13,7 @@ import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
-import {
-  APM_ACTION_VARIABLE_INDEX,
-  APM_ALERTS_INDEX,
-} from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
+import { APM_ACTION_VARIABLE_INDEX, APM_ALERTS_INDEX } from './constants';
 
 const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 

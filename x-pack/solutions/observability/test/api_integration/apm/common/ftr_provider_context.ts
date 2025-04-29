@@ -6,7 +6,7 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { FtrProviderContext as InheritedFtrProviderContext } from '../../api_integration/ftr_provider_context';
+import { FtrProviderContext as InheritedFtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
 import { ApmServices } from './config';
 
 export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<

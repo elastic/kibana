@@ -9,7 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import job from '@kbn/ml-plugin/server/models/data_recognizer/modules/apm_transaction/ml/apm_tx_metrics.json';
 import datafeed from '@kbn/ml-plugin/server/models/data_recognizer/modules/apm_transaction/ml/datafeed_apm_tx_metrics.json';
 import { ToolingLog } from '@kbn/tooling-log';
-import { MlApi } from '../../../functional/services/ml/api';
+import { MlApi } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
 
 export async function createAndRunApmMlJobs({
   es,

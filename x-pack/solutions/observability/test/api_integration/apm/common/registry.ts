@@ -32,6 +32,8 @@ interface RunCondition {
 
 export function RegistryProvider({ getService }: FtrProviderContext) {
   const apmFtrConfig = getService('apmFtrConfig');
+  const esArchivesPath =
+    'x-pack/solutions/observability/test/api_integration/apm/common/fixtures/es_archiver';
 
   const callbacks: Array<
     RunCondition & {
@@ -142,12 +144,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
               for (const archiveName of condition.archives) {
                 log(`Loading ${archiveName}`);
 
-                await esArchiver.load(
-                  Path.join(
-                    'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
-                    archiveName
-                  )
-                );
+                await esArchiver.load(Path.join(esArchivesPath, archiveName));
 
                 // sync jobs from .ml-config to .kibana SOs
                 await supertest
@@ -164,12 +161,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
               const log = logWithTimer();
               for (const archiveName of condition.archives) {
                 log(`Unloading ${archiveName}`);
-                await esArchiver.unload(
-                  Path.join(
-                    'x-pack/test/apm_api_integration/common/fixtures/es_archiver',
-                    archiveName
-                  )
-                );
+                await esArchiver.unload(Path.join(esArchivesPath, archiveName));
               }
               if (condition.archives.length) {
                 log('Unloaded all archives');
