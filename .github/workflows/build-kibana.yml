@@ -59,11 +59,21 @@ jobs:
           rm -rf build/default/*
           df -h
 
-      - name: Build Kibana (linux-x86_64 only)
-        run: yarn build --release --skip-os-packages --linux-x86_64
+      - name: Build Kibana
+        run: yarn build --release --skip-os-packages
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
           BUILD_LOG_LEVEL: "error"
+
+      - name: Monitor Disk and Log Usage
+        run: |
+          echo "Checking disk usage..."
+          df -h
+          echo "Checking log file sizes..."
+          du -sh /home/runner/runners/*/_diag/*.log || true
+          echo "Checking build artifact sizes..."
+          du -sh target/* || true
+          du -sh build/default/* || true
 
       - name: Free Up Disk Space (Remove Unnecessary Artifacts)
         run: |
