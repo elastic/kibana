@@ -224,6 +224,16 @@ export default ({ getService }: FtrProviderContext) => {
         expect(events.filter((v) => v.final_pipeline === finalPipeline)).toHaveLength(NUM_INDICES);
       });
 
+      it('should publish index mode as part of index settings', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_INDEX_SETTINGS_EVENT],
+          index: dsName,
+        });
+
+        expect(events.length).toEqual(NUM_INDICES);
+        expect(events.filter((v) => v.index_mode !== undefined)).toHaveLength(NUM_INDICES);
+      });
+
       it('should publish index templates', async () => {
         const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_INDEX_TEMPLATES_EVENT],
