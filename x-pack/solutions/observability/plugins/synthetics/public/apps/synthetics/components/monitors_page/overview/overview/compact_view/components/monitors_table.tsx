@@ -59,6 +59,7 @@ export const MonitorsTable = ({
 
   return (
     <EuiBasicTable
+      compressed
       items={pageOfItems}
       columns={columns}
       loading={!status || !loaded}
