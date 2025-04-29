@@ -41,7 +41,7 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
 export function createTinyElserInferenceEndpoint({
   es,
   log,
-  inferenceId,
+  inferenceId = TINY_ELSER_INFERENCE_ID,
 }: {
   es: Client;
   log: ToolingLog;

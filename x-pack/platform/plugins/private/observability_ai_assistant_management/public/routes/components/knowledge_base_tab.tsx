@@ -36,7 +36,8 @@ import {
   KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
-import { SelectModelAndInstallKnowledgeBase } from '@kbn/ai-assistant/src/knowledge_base/select_model_and_install_knowledge_base';
+import { KnowledgeBaseInstallationStatusPanel } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_installation_status_panel';
+import { SettingUpKnowledgeBase } from '@kbn/ai-assistant/src/knowledge_base/setting_up_knowledge_base';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
@@ -448,10 +449,11 @@ export function KnowledgeBaseTab() {
       <EuiSpacer size="l" />
       <EuiPanel hasBorder paddingSize="xl" grow={false} className={panelClassname}>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
-          <SelectModelAndInstallKnowledgeBase
-            onInstall={knowledgeBase.install}
-            isInstalling={knowledgeBase.isInstalling}
-          />
+          {knowledgeBase.isInstalling ? (
+            <SettingUpKnowledgeBase />
+          ) : (
+            <KnowledgeBaseInstallationStatusPanel knowledgeBase={knowledgeBase} />
+          )}
         </EuiFlexItem>
       </EuiPanel>
     </EuiFlexGroup>
