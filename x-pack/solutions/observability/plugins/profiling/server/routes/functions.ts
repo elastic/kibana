@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { SERVICE_NAME } from '@kbn/observability-shared-plugin/common';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths } from '../../common';
@@ -47,7 +48,7 @@ export function registerTopNFunctionsSearchRoute({
       try {
         const core = await context.core;
 
-        const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
+        const { timeFrom, timeTo, kuery }: QuerySchemaType = request.query;
         const startSecs = timeFrom / 1000;
         const endSecs = timeTo / 1000;
 
@@ -72,13 +73,12 @@ export function registerTopNFunctionsSearchRoute({
 
         const totalSeconds = endSecs - startSecs;
 
-        const topNFunctions = await profilingDataAccess.services.fetchFunctions({
+        const topNFunctions = await profilingDataAccess.services.fetchESFunctions({
           core,
           esClient,
-          startIndex,
-          endIndex,
-          totalSeconds,
           query,
+          aggregationFields: [SERVICE_NAME],
+          totalSeconds,
         });
 
         return response.ok({
