@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import { TestProviders, mockGlobalState } from '../../../../common/mock';
 import { createMockStore } from '../../../../common/mock/create_store';
@@ -16,7 +17,6 @@ import {
   openAlertsVisualizationId,
   useAlertsByStatusVisualizationData,
 } from './use_alerts_by_status_visualization_data';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 
 describe('useAlertsByStatusVisualizationData', () => {
   it('should return visualization alerts count', () => {
@@ -40,46 +40,40 @@ describe('useAlertsByStatusVisualizationData', () => {
               ...defaultQueryAttrs,
               id: openAlertsVisualizationId,
               tables: {
-                tables: {
-                  'layer-id-0': {
-                    meta: {
-                      statistics: {
-                        totalCount: 10,
-                      },
+                'layer-id-0': {
+                  meta: {
+                    statistics: {
+                      totalCount: 10,
                     },
                   },
-                },
-              } as unknown as TablesAdapter,
+                } as unknown as Datatable,
+              },
             },
             {
               ...defaultQueryAttrs,
               id: acknowledgedAlertsVisualizationId,
               tables: {
-                tables: {
-                  'layer-id-0': {
-                    meta: {
-                      statistics: {
-                        totalCount: 20,
-                      },
+                'layer-id-0': {
+                  meta: {
+                    statistics: {
+                      totalCount: 20,
                     },
                   },
-                },
-              } as unknown as TablesAdapter,
+                } as unknown as Datatable,
+              },
             },
             {
               ...defaultQueryAttrs,
               id: closedAlertsVisualizationId,
               tables: {
-                tables: {
-                  'layer-id-0': {
-                    meta: {
-                      statistics: {
-                        totalCount: 30,
-                      },
+                'layer-id-0': {
+                  meta: {
+                    statistics: {
+                      totalCount: 30,
                     },
                   },
-                },
-              } as unknown as TablesAdapter,
+                } as unknown as Datatable,
+              },
             },
           ],
         },

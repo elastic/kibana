@@ -14,6 +14,7 @@ import { TestProviders } from '../../mock';
 import { getDnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 jest.mock('../../containers/query_toggle');
 
@@ -26,18 +27,17 @@ jest.mock('../../hooks/use_experimental_features', () => ({
 
 jest.mock('../visualization_actions/use_visualization_response', () => ({
   ...jest.requireActual('../visualization_actions/use_visualization_response'),
-  useVisualizationResponse: jest.fn(() => ({
+  useVisualizationResponse: jest.fn<ReturnType<typeof useVisualizationResponse>, []>(() => ({
     searchSessionId: 'search-session-id',
+    loading: false,
     tables: {
-      tables: {
-        'layer-id-0': {
-          meta: {
-            statistics: {
-              totalCount: 999,
-            },
+      'layer-id-0': {
+        meta: {
+          statistics: {
+            totalCount: 999,
           },
         },
-      },
+      } as unknown as Datatable,
     },
   })),
 }));
@@ -120,6 +120,7 @@ describe('Matrix Histogram Component', () => {
     test('it should not render subtitle when subtitle is function and no tables are present', () => {
       useVisualizationResponseMocked.mockReturnValue({
         searchSessionId: 'search-session-id',
+        loading: false,
         tables: undefined,
       });
 

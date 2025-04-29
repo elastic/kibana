@@ -8,7 +8,6 @@
 import React from 'react';
 import type { Store } from 'redux';
 import { screen, render, waitFor } from '@testing-library/react';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { VisualizationEmbeddable } from './visualization_embeddable';
@@ -16,6 +15,7 @@ import * as inputActions from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 jest.mock('./lens_embeddable');
 jest.mock('../page/use_refetch_by_session');
@@ -117,16 +117,14 @@ describe('VisualizationEmbeddable', () => {
               searchSessionId: undefined,
               refetch: jest.fn(),
               tables: {
-                tables: {
-                  'layer-id-0': {
-                    meta: {
-                      statistics: {
-                        totalCount: 999,
-                      },
+                'layer-id-0': {
+                  meta: {
+                    statistics: {
+                      totalCount: 999,
                     },
                   },
-                },
-              } as unknown as TablesAdapter,
+                } as unknown as Datatable,
+              },
             },
           ],
         },

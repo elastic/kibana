@@ -154,7 +154,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const kibana = useKibana();
     const { navigateToApp } = kibana.services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
-    const { tables } = useVisualizationResponse({
+    const { tables, loading: isLoadingAlerts } = useVisualizationResponse({
       visualizationId,
     });
 
@@ -184,14 +184,14 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     useEffect(() => {
       let canceled = false;
-      if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: !tables })) {
+      if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts })) {
         setIsInitialLoading(false);
       }
 
       return () => {
         canceled = true; // prevent long running data fetches from updating state after unmounting
       };
-    }, [isInitialLoading, setIsInitialLoading, tables]);
+    }, [isInitialLoading, isLoadingAlerts, setIsInitialLoading, tables]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {

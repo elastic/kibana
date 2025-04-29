@@ -9,20 +9,18 @@ import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 
 import { getTotalCountFromTables } from './get_total_count_from_tables';
 
-const createTablesAdapter = ({ repeatTimes = 1 } = {}): TablesAdapter => {
+const createDataTables = ({ repeatTimes = 1 } = {}): TablesAdapter['tables'] => {
   return {
-    tables: {
-      ...Array.from({ length: repeatTimes }, (_, i) => ({
-        [`layer-id-${i}`]: {
-          meta: {
-            statistics: {
-              totalCount: 10,
-            },
+    ...Array.from({ length: repeatTimes }, (_, i) => ({
+      [`layer-id-${i}`]: {
+        meta: {
+          statistics: {
+            totalCount: 10,
           },
         },
-      })).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
-    },
-  } as unknown as TablesAdapter;
+      },
+    })).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
+  } as unknown as TablesAdapter['tables'];
 };
 
 describe('getTotalCountFromTables', () => {
@@ -35,7 +33,7 @@ describe('getTotalCountFromTables', () => {
 
   describe('when tables is present', () => {
     it('returns the total count from all layers', () => {
-      const result = getTotalCountFromTables(createTablesAdapter({ repeatTimes: 2 }));
+      const result = getTotalCountFromTables(createDataTables({ repeatTimes: 2 }));
       expect(result).toEqual(20);
     });
   });

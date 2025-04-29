@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import { SecurityPageName } from '../../../../app/types';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -89,18 +89,17 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
   ...jest.requireActual(
     '../../../../common/components/visualization_actions/use_visualization_response'
   ),
-  useVisualizationResponse: jest.fn(() => ({
+  useVisualizationResponse: jest.fn<ReturnType<typeof useVisualizationResponse>, []>(() => ({
     searchSessionId: 'search-session-id',
+    loading: false,
     tables: {
-      tables: {
-        'layer-id-0': {
-          meta: {
-            statistics: {
-              totalCount: 999,
-            },
+      'layer-id-0': {
+        meta: {
+          statistics: {
+            totalCount: 999,
           },
         },
-      },
+      } as unknown as Datatable,
     },
   })),
 }));
@@ -534,17 +533,16 @@ describe('AlertsHistogramPanel', () => {
     it('should render correct subtitle with empty string', () => {
       mockUseVisualizationResponse.mockReturnValue({
         searchSessionId: 'search-session-id',
+        loading: false,
         tables: {
-          tables: {
-            'layer-id-0': {
-              meta: {
-                statistics: {
-                  totalCount: 0,
-                },
+          'layer-id-0': {
+            meta: {
+              statistics: {
+                totalCount: 0,
               },
             },
-          },
-        } as unknown as TablesAdapter,
+          } as unknown as Datatable,
+        },
       });
 
       render(

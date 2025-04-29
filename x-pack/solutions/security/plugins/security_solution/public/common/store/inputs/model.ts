@@ -60,7 +60,7 @@ export interface GlobalGenericQuery {
   selectedInspectIndex: number;
   invalidKqlQuery?: Error;
   searchSessionId?: string;
-  tables?: TablesAdapter;
+  tables?: TablesAdapter['tables'];
 }
 
 export interface GlobalKqlQuery extends GlobalGenericQuery {

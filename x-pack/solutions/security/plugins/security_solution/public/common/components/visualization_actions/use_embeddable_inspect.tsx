@@ -23,7 +23,7 @@ export const useEmbeddableInspect = (onEmbeddableLoad?: OnEmbeddableLoaded) => {
         requests: data.requests,
         responses: data.responses,
         isLoading,
-        tables: adapters?.tables,
+        tables: adapters?.tables?.tables,
       });
     },
     [onEmbeddableLoad]

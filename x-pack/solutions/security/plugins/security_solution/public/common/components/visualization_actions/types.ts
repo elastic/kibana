@@ -78,7 +78,7 @@ export interface EmbeddableData {
   requests: string[];
   responses: string[];
   isLoading: boolean;
-  tables?: TablesAdapter;
+  tables?: TablesAdapter['tables'];
 }
 
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;

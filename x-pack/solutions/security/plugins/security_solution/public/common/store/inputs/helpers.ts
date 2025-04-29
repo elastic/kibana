@@ -99,7 +99,7 @@ export interface UpdateQueryParams {
   refetch: Refetch | RefetchKql;
   state: InputsModel;
   searchSessionId?: string;
-  tables?: TablesAdapter;
+  tables?: TablesAdapter['tables'];
 }
 
 export const upsertQuery = ({

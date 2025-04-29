@@ -7,12 +7,12 @@
 
 import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 
-export function getTotalCountFromTables(tablesAdapter?: TablesAdapter): number | undefined {
-  if (tablesAdapter == null) {
+export function getTotalCountFromTables(tables?: TablesAdapter['tables']): number | undefined {
+  if (tables == null) {
     return undefined;
   }
 
-  return Object.values(tablesAdapter.tables).reduce((acc, table) => {
+  return Object.values(tables).reduce((acc, table) => {
     if (table?.meta?.statistics?.totalCount != null) {
       return acc + table.meta.statistics.totalCount;
     }

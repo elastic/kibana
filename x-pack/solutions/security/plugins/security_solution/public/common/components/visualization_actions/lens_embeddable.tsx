@@ -93,7 +93,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const { searchSessionId, tables } = useVisualizationResponse({ visualizationId: id });
+  const { loading, searchSessionId, tables } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
@@ -129,8 +129,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     response,
   } = useInspect({
     inputId: inputsModelId,
-    isDisabled: !tables,
-    multiple: tables != null && Object.keys(tables.tables).length > 1,
+    isDisabled: loading,
+    multiple: tables != null && Object.keys(tables).length > 1,
     queryId: id,
   });
 

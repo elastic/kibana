@@ -6,7 +6,7 @@
  */
 import { screen, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { State } from '../../store';
@@ -34,18 +34,18 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('./use_visualization_response', () => ({
-  useVisualizationResponse: jest.fn(() => ({
+  ...jest.requireActual('./use_visualization_response'),
+  useVisualizationResponse: jest.fn<ReturnType<typeof useVisualizationResponse>, []>(() => ({
     searchSessionId: mockSearchSessionId,
+    loading: false,
     tables: {
-      tables: {
-        'layer-id-0': {
-          meta: {
-            statistics: {
-              totalCount: 999,
-            },
+      'layer-id-0': {
+        meta: {
+          statistics: {
+            totalCount: 999,
           },
         },
-      },
+      } as unknown as Datatable,
     },
   })),
 }));
@@ -158,17 +158,16 @@ describe('LensEmbeddable', () => {
     it('should not render', () => {
       useVisualizationResponseMocked.mockReturnValue({
         searchSessionId: undefined,
+        loading: false,
         tables: {
-          tables: {
-            'layer-id-0': {
-              meta: {
-                statistics: {
-                  totalCount: 999,
-                },
+          'layer-id-0': {
+            meta: {
+              statistics: {
+                totalCount: 999,
               },
             },
-          },
-        } as unknown as TablesAdapter,
+          } as unknown as Datatable,
+        },
       });
 
       const { container } = render(
@@ -188,17 +187,16 @@ describe('LensEmbeddable', () => {
     it('should render no data text', async () => {
       useVisualizationResponseMocked.mockReturnValue({
         searchSessionId: mockSearchSessionId,
+        loading: false,
         tables: {
-          tables: {
-            'layer-id-0': {
-              meta: {
-                statistics: {
-                  totalCount: 0,
-                },
+          'layer-id-0': {
+            meta: {
+              statistics: {
+                totalCount: 0,
               },
             },
-          },
-        } as unknown as TablesAdapter,
+          } as unknown as Datatable,
+        },
       });
 
       const { container } = render(

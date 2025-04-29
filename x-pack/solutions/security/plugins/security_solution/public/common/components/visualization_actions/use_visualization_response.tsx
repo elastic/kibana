@@ -12,15 +12,16 @@ import { inputsSelectors } from '../../store';
 
 export const useVisualizationResponse = ({ visualizationId }: { visualizationId: string }) => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const { tables, searchSessionId } = useDeepEqualSelector((state) =>
+  const { loading, tables, searchSessionId } = useDeepEqualSelector((state) =>
     getGlobalQuery(state, visualizationId)
   );
   const response = useMemo(
     () => ({
       searchSessionId,
       tables,
+      loading,
     }),
-    [searchSessionId, tables]
+    [loading, searchSessionId, tables]
   );
 
   return response;

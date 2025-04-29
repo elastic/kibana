@@ -11,7 +11,7 @@ import moment from 'moment';
 import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { render, waitFor } from '@testing-library/react';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
@@ -44,9 +44,11 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
   ...jest.requireActual(
     '../../../../common/components/visualization_actions/use_visualization_response'
   ),
-  useVisualizationResponse: jest.fn().mockReturnValue({
-    searchSessionId: 'test-search-session-id',
-    tables: {
+  useVisualizationResponse: jest
+    .fn<ReturnType<typeof useVisualizationResponse>, []>()
+    .mockReturnValue({
+      searchSessionId: 'test-search-session-id',
+      loading: false,
       tables: {
         'layer-id-0': {
           meta: {
@@ -54,10 +56,9 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
               totalCount: 1,
             },
           },
-        },
+        } as unknown as Datatable,
       },
-    } as unknown as TablesAdapter,
-  } as ReturnType<typeof useVisualizationResponse>),
+    }),
 }));
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
@@ -209,17 +210,16 @@ describe('PreviewHistogram', () => {
       ]);
       mockUseVisualizationResponse.mockReturnValue({
         searchSessionId: 'test-search-session-id',
+        loading: false,
         tables: {
-          tables: {
-            'layer-id-0': {
-              meta: {
-                statistics: {
-                  totalCount: 0,
-                },
+          'layer-id-0': {
+            meta: {
+              statistics: {
+                totalCount: 0,
               },
             },
-          },
-        } as unknown as TablesAdapter,
+          } as unknown as Datatable,
+        },
       });
 
       render(

@@ -57,7 +57,7 @@ export const setQuery = actionCreator<{
   refetch: Refetch | RefetchKql;
   inspect: InspectQuery | null;
   searchSessionId?: string;
-  tables?: TablesAdapter;
+  tables?: TablesAdapter['tables'];
 }>('SET_QUERY');
 
 export const deleteOneQuery = actionCreator<{

@@ -7,10 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useVisualizationResponse } from './use_visualization_response';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('useVisualizationResponse', () => {
   const mockState = {
@@ -34,16 +34,14 @@ describe('useVisualizationResponse', () => {
             searchSessionId: 'search-session-id',
             refetch: jest.fn(),
             tables: {
-              tables: {
-                'layer-id-0': {
-                  meta: {
-                    statistics: {
-                      totalCount: 999,
-                    },
+              'layer-id-0': {
+                meta: {
+                  statistics: {
+                    totalCount: 999,
                   },
                 },
-              },
-            } as unknown as TablesAdapter,
+              } as Datatable,
+            },
           },
         ],
       },
@@ -63,13 +61,12 @@ describe('useVisualizationResponse', () => {
     });
     expect(result.current).toEqual({
       searchSessionId: 'search-session-id',
+      loading: false,
       tables: {
-        tables: {
-          'layer-id-0': {
-            meta: {
-              statistics: {
-                totalCount: 999,
-              },
+        'layer-id-0': {
+          meta: {
+            statistics: {
+              totalCount: 999,
             },
           },
         },
