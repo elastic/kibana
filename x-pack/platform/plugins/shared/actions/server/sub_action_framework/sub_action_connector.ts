@@ -44,7 +44,7 @@ export abstract class SubActionConnector<Config, Secrets> {
   [k: string]: ((params: unknown) => unknown) | unknown;
   private axiosInstance: AxiosInstance;
   private subActions: Map<string, SubAction> = new Map();
-  private configurationUtilities: ActionsConfigurationUtilities;
+  protected configurationUtilities: ActionsConfigurationUtilities;
   protected readonly kibanaRequest?: KibanaRequest;
   protected logger: Logger;
   protected esClient: ElasticsearchClient;
