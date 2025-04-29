@@ -30,7 +30,7 @@ export function useEnableRule() {
       onError: (_err) => {
         toasts.addDanger(
           i18n.translate(
-            'xpack.observability.rules.enableConfirmationModal.errorNotification.descriptionText',
+            'xpack.observability.rules.enableErrorModal.errorNotification.descriptionText',
             {
               defaultMessage: 'Failed to enable rule',
             }

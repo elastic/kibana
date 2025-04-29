@@ -33,7 +33,7 @@ export function useDisableRule() {
       onError: (_err) => {
         toasts.addDanger(
           i18n.translate(
-            'xpack.observability.rules.enableConfirmationModal.errorNotification.descriptionText',
+            'xpack.observability.rules.disableErrorModal.errorNotification.descriptionText',
             {
               defaultMessage: 'Failed to disable rule',
             }
@@ -45,7 +45,7 @@ export function useDisableRule() {
         queryClient.invalidateQueries({ queryKey: ['fetchRule', variables.id], exact: false });
         toasts.addSuccess(
           i18n.translate(
-            'xpack.observability.rules.enableConfirmationModal.successNotification.descriptionText',
+            'xpack.observability.rules.disableConfirmationModal.successNotification.descriptionText',
             {
               defaultMessage: 'Disabled rule',
             }
