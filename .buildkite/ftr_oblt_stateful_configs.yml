@@ -9,6 +9,7 @@ disabled:
   - x-pack/test/profiling_cypress/cli_config.ts
   #FTR configs
   - x-pack/solutions/observability/plugins/uptime/e2e/config.ts
+  - x-pack/solutions/observability/test/api_integration/config.ts
 
   # Elastic Synthetics configs
   - x-pack/solutions/observability/plugins/uptime/e2e/uptime/synthetics_run.ts
