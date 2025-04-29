@@ -755,7 +755,7 @@ Every 2 weeks on Friday at 08:45
       freq: Frequency.WEEKLY,
       tzid: 'UTC',
       interval: 2,
-      byhour: [08],
+      byhour: [8],
       byminute: [45]
       byweekday: Weekday.FR
     }
