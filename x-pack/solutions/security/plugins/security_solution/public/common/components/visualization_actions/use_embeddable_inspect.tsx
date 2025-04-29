@@ -7,24 +7,44 @@
 
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useCallback } from 'react';
-import type { OnEmbeddableLoaded, Request } from './types';
+import type { EmbeddableData, OnEmbeddableLoaded, Request } from './types';
 
 import { getRequestsAndResponses } from './utils';
 
 export const useEmbeddableInspect = (onEmbeddableLoad?: OnEmbeddableLoaded) => {
   const setInspectData = useCallback<NonNullable<LensEmbeddableInput['onLoad']>>(
     (isLoading, adapters) => {
-      if (!adapters) {
+      if (!onEmbeddableLoad) {
         return;
       }
-      const data = getRequestsAndResponses(adapters?.requests?.getRequests() as Request[]);
 
-      onEmbeddableLoad?.({
+      // adapters is undefined when the embeddable is not loaded yet
+      // so both loading and !adapters are interdependent
+      if (isLoading || !adapters) {
+        onEmbeddableLoad?.({
+          requests: [],
+          responses: [],
+          isLoading: true,
+        });
+        return;
+      }
+
+      const data = getRequestsAndResponses(adapters.requests?.getRequests() as Request[]);
+
+      const embeddableData: EmbeddableData = {
         requests: data.requests,
         responses: data.responses,
-        isLoading,
-        tables: adapters?.tables?.tables,
-      });
+        isLoading: false,
+      };
+
+      // during error response, tables.tables == {}
+      // so are not including it in the embeddableData
+      // to align with no data state
+      if (adapters.tables && Object.keys(adapters.tables.tables).length > 0) {
+        embeddableData.tables = adapters.tables.tables;
+      }
+
+      onEmbeddableLoad(embeddableData);
     },
     [onEmbeddableLoad]
   );
