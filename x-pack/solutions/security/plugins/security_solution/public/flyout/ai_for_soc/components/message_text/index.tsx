@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { customCodeBlockLanguagePlugin } from './custom_codeblock_markdown_plugin';
-import { CustomCodeBlock } from './custom_code_block';
+import { CustomCodeBlock } from '../../../../assistant/get_comments/custom_codeblock/custom_code_block';
+import { customCodeBlockLanguagePlugin } from '../../../../assistant/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
 
 interface Props {
   content: string;
