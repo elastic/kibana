@@ -64,7 +64,7 @@ describe('autocomplete.suggest', () => {
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
         const expected = [
-          'var0 = ',
+          'col0 = ',
           ...allAggFunctions,
           ...allGroupingFunctions,
           ...allEvaFunctions,
@@ -210,15 +210,15 @@ describe('autocomplete.suggest', () => {
       });
 
       test('increments suggested variable name counter', async () => {
-        await assertSuggestions('from a | eval var0=round(b), var1=round(c) | stats /', [
-          'var2 = ',
+        await assertSuggestions('from a | eval col0=round(b), col1=round(c) | stats /', [
+          'col2 = ',
           // TODO verify that this change is ok
           ...allAggFunctions,
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
-        await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
-          'var2 = ',
+        await assertSuggestions('from a | stats col0=min(b),col1=c,/', [
+          'col2 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
           ...allGroupingFunctions,
@@ -327,7 +327,7 @@ describe('autocomplete.suggest', () => {
     describe('... BY <grouping>', () => {
       test('on space after "BY" keyword', async () => {
         const expected = [
-          'var0 = ',
+          'col0 = ',
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
@@ -346,20 +346,20 @@ describe('autocomplete.suggest', () => {
       test('after comma "," in grouping fields', async () => {
         const fields = getFieldNamesByType('any').map((field) => `${field} `);
         await assertSuggestions('from a | stats a=c by d, /', [
-          'var0 = ',
+          'col0 = ',
           getDateHistogramCompletionItem(),
           ...fields,
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats a=min(b),/', [
-          'var0 = ',
+          'col0 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
-          'var0 = ',
+          'col0 = ',
           getDateHistogramCompletionItem(),
           ...fields,
           ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
@@ -378,13 +378,13 @@ describe('autocomplete.suggest', () => {
           // categorize is not compatible here
           ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
         ]);
-        await assertSuggestions('from a | stats avg(b) by var0 = /', [
+        await assertSuggestions('from a | stats avg(b) by col0 = /', [
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
-        await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
+        await assertSuggestions('from a | stats avg(b) by c, col0 = /', [
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
           ...allEvaFunctions,
@@ -398,7 +398,7 @@ describe('autocomplete.suggest', () => {
         });
 
         await assertSuggestions(
-          'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day) /',
+          'from a | stats col0 = AVG(doubleField) BY col1 = BUCKET(dateField, 1 day) /',
           [', ', '| '],
           { triggerCharacter: ' ' }
         );
@@ -486,7 +486,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `??function` option', async () => {
-          const suggestions = await suggest('FROM a | STATS var0 = /', {
+          const suggestions = await suggest('FROM a | STATS col0 = /', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [
@@ -555,7 +555,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `?interval` option', async () => {
-          const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
+          const suggestions = await suggest('FROM index_a | STATS BY BUCKET(@timestamp, /)', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [
@@ -580,7 +580,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `Create control` option when ? is being typed', async () => {
-          const suggestions = await suggest('FROM a | STATS PERCENTILE(bytes, ?/)', {
+          const suggestions = await suggest('FROM index_b | STATS PERCENTILE(bytes, ?/)', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [],
