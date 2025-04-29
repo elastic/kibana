@@ -86,7 +86,7 @@ export const registerRoutes = (
 
   // Evaluate
   getEvaluateRoute(router);
-  postEvaluateRoute(router, getElserId);
+  postEvaluateRoute(router, config);
 
   // Prompts
   bulkPromptsRoute(router, logger);

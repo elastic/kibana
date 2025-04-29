@@ -19,14 +19,12 @@ export const populateIndex = async ({
   manifestVersion,
   archive,
   log,
-  elserInferenceId,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
   manifestVersion: string;
   archive: ZipArchive;
   log: Logger;
-  elserInferenceId?: string;
 }) => {
   log.debug(`Starting populating index ${indexName}`);
 
@@ -43,7 +41,6 @@ export const populateIndex = async ({
       esClient,
       contentBuffer,
       legacySemanticText,
-      elserInferenceId,
     });
   }
 
