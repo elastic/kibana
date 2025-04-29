@@ -88,7 +88,7 @@ describe('fetchSearchResults lib function', () => {
       index: indexName,
       q: query,
       size: DEFAULT_DOCS_PER_PAGE,
-      track_total_hits: undefined,
+      track_total_hits: false,
     });
   });
 
@@ -110,7 +110,7 @@ describe('fetchSearchResults lib function', () => {
       index: indexName,
       q: '\\"yellow banana\\"',
       size: DEFAULT_DOCS_PER_PAGE,
-      track_total_hits: undefined,
+      track_total_hits: false,
     });
   });
 
@@ -125,7 +125,7 @@ describe('fetchSearchResults lib function', () => {
       from: DEFAULT_FROM_VALUE,
       index: indexName,
       size: DEFAULT_DOCS_PER_PAGE,
-      track_total_hits: undefined,
+      track_total_hits: false,
     });
   });
 
@@ -153,7 +153,7 @@ describe('fetchSearchResults lib function', () => {
       index: indexName,
       q: query,
       size: DEFAULT_DOCS_PER_PAGE,
-      track_total_hits: undefined,
+      track_total_hits: false,
     });
   });
 
