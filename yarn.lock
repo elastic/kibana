@@ -10948,10 +10948,12 @@
   dependencies:
     "@types/node" "*"
 
-"@types/classnames@^2.2.9":
-  version "2.2.9"
-  resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.2.9.tgz#d868b6febb02666330410fe7f58f3c4b8258be7b"
-  integrity sha512-MNl+rT5UmZeilaPxAVs6YaPC2m6aA8rofviZbhbxpPpl61uKodfdQVsBtgJGTqGizEf02oW3tsVe7FYB8kK14A==
+"@types/classnames@^2.3.4":
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/@types/classnames/-/classnames-2.3.4.tgz#1a1fdf5023ef216219f13e702543f9ce9b394560"
+  integrity sha512-dwmfrMMQb9ujX1uYGvB5ERDlOzBNywnZAZBtOe107/hORWP05ESgU4QyaanZMWYYfd2BzrG78y13/Bju8IQcMQ==
+  dependencies:
+    classnames "*"
 
 "@types/cli-progress@^3.11.5":
   version "3.11.5"
@@ -14770,12 +14772,7 @@ classcat@^5.0.3:
   resolved "https://registry.yarnpkg.com/classcat/-/classcat-5.0.5.tgz#8c209f359a93ac302404a10161b501eba9c09c77"
   integrity sha512-JhZUT7JFcQy/EzW605k/ktHtncoo9vnyW/2GspNYwFlN1C/WmjuV/xtS04e9SOkL2sTdw0VAZ2UGCcQ9lR6p6w==
 
-classnames@2.2.6:
-  version "2.2.6"
-  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
-  integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
-
-classnames@^2.2.6, classnames@^2.3.2, classnames@^2.5.1:
+classnames@*, classnames@2.5.1, classnames@^2.2.6, classnames@^2.3.2, classnames@^2.5.1:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.5.1.tgz#ba774c614be0f016da105c858e7159eae8e7687b"
   integrity sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==
