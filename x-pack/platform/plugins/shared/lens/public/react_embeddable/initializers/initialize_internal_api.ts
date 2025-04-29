@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createEmptyLensState } from '../helper';
 import type {
@@ -68,9 +68,9 @@ export function initializeInternalApi(
     activeData: undefined,
   });
 
-  const esqlVariables$ = new BehaviorSubject(
-    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$.value : []
-  );
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
+    : new BehaviorSubject<ESQLControlVariable[]>([]);
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
