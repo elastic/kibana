@@ -40,13 +40,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           ids = spanLinksData.ids;
 
-          apmSynthtraceEsClient.resolvePipelineType(pipeline);
-          await apmSynthtraceEsClient.index([
-            Readable.from(spanLinksData.events.producerInternalOnly),
-            Readable.from(spanLinksData.events.producerExternalOnly),
-            Readable.from(spanLinksData.events.producerConsumer),
-            Readable.from(spanLinksData.events.producerMultiple),
-          ]);
+          await apmSynthtraceEsClient.index(
+            [
+              Readable.from(spanLinksData.events.producerInternalOnly),
+              Readable.from(spanLinksData.events.producerExternalOnly),
+              Readable.from(spanLinksData.events.producerConsumer),
+              Readable.from(spanLinksData.events.producerMultiple),
+            ],
+            apmSynthtraceEsClient.resolvePipelineType(pipeline)
+          );
         });
 
         after(() => apmSynthtraceEsClient.clean());
