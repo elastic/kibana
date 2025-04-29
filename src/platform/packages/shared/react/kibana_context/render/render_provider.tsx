@@ -23,8 +23,7 @@ export type KibanaRenderContextProviderProps = Omit<KibanaRootContextProviderPro
  *
 /**
  * @internal Use RenderingService.addContext from the CoreStart contract instead of consuming this directly.
- * @deprecated 
- */
+ * @deprecated
  */
 export const KibanaRenderContextProvider: FC<
   PropsWithChildren<KibanaRenderContextProviderProps>
