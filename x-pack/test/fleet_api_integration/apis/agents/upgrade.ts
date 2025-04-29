@@ -67,6 +67,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'fleet-server-policy',
           namespace: 'default',
           has_fleet_server: true,
+          force: true,
         });
 
         await kibanaServer.savedObjects.create({
@@ -687,6 +688,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'fleet-server-policy',
           namespace: 'default',
           has_fleet_server: true,
+          force: true,
         });
 
         await kibanaServer.savedObjects.create({

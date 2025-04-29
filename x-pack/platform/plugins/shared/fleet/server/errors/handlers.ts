@@ -47,6 +47,7 @@ import {
   AgentlessPolicyExistsRequestError,
   PackageInvalidDeploymentMode,
   PackagePolicyContentPackageError,
+  OutputInvalidError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -154,6 +155,13 @@ const getHTTPResponseCode = (error: FleetError): number => {
   return 400; // Bad Request
 };
 
+function shouldRespondWithErrorType(error: FleetError) {
+  if (error instanceof OutputInvalidError) {
+    return true;
+  }
+  return false;
+}
+
 export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
   const logger = appContextService.getLogger();
   // our "expected" errors
@@ -164,6 +172,7 @@ export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['err
       statusCode: getHTTPResponseCode(error),
       body: {
         message: error.message,
+        ...(shouldRespondWithErrorType(error) ? { attributes: { type: error.name } } : {}),
         ...(error.attributes && { attributes: error.attributes }),
       },
     };

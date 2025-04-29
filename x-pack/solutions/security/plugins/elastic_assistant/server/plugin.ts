@@ -9,7 +9,6 @@ import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/s
 
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -25,7 +24,8 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
-import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import type { ConfigSchema } from './config_schema';
 
 export class ElasticAssistantPlugin
   implements
@@ -40,13 +40,13 @@ export class ElasticAssistantPlugin
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
-  private mlTrainedModelsProvider?: MlPluginSetup['trainedModelsProvider'];
-  private getElserId?: () => Promise<string>;
+  private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.config = initializerContext.config.get<ConfigSchema>();
   }
 
   public setup(
@@ -60,6 +60,7 @@ export class ElasticAssistantPlugin
       ml: plugins.ml,
       taskManager: plugins.taskManager,
       kibanaVersion: this.kibanaVersion,
+      elserInferenceId: this.config.elserInferenceId,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
@@ -84,10 +85,7 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
-    this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
-
-    registerRoutes(router, this.logger, this.getElserId);
+    registerRoutes(router, this.logger, this.config);
 
     return {
       actions: plugins.actions,
@@ -107,11 +105,6 @@ export class ElasticAssistantPlugin
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
 
-    plugins.licensing.license$.subscribe(() => {
-      if (this.mlTrainedModelsProvider) {
-        this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
-      }
-    });
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {
         if (res?.total)

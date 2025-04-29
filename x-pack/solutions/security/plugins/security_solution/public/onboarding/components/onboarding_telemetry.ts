@@ -16,6 +16,7 @@ export interface OnboardingTelemetry {
   reportCardOpen: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
   reportCardComplete: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;
   reportCardLinkClicked: (cardId: OnboardingCardId, linkId: string) => void;
+  reportCardSelectorClicked: (cardId: OnboardingCardId, selectorId: string) => void;
 }
 
 export const useOnboardingTelemetry = (): OnboardingTelemetry => {
@@ -38,6 +39,12 @@ export const useOnboardingTelemetry = (): OnboardingTelemetry => {
         telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepLinkClicked, {
           originStepId: getStepId(cardId),
           stepLinkId: linkId,
+        });
+      },
+      reportCardSelectorClicked: (cardId, selectorId: string) => {
+        telemetry.reportEvent(OnboardingHubEventTypes.OnboardingHubStepSelectorClicked, {
+          originStepId: getStepId(cardId),
+          selectorId,
         });
       },
     }),

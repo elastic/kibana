@@ -41,11 +41,7 @@ describe(
     // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
     tags: ['@ess', '@skipInServerlessMKI'],
     env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForSequenceEqlRuleEnabled',
-        ])}`,
-      ],
+      kbnServerArgs: [],
     },
   },
   () => {

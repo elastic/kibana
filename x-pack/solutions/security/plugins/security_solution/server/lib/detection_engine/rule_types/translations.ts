@@ -14,6 +14,20 @@ export const ESQL_SEARCH_REQUEST_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ESQL_POLL_REQUEST_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.esqlRuleType.esqlPollRequestDescription',
+  {
+    defaultMessage: 'ES|QL request to poll for async search results',
+  }
+);
+
+export const ESQL_DELETE_REQUEST_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.esqlRuleType.esqlDeleteRequestDescription',
+  {
+    defaultMessage: 'ES|QL request to delete async search query',
+  }
+);
+
 export const FIND_SOURCE_DOCUMENTS_REQUEST_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.esqlRuleType.findSourceDocumentsRequestDescription',
   {

@@ -174,6 +174,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
               }),
           'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': 2500,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
         mappings: {
           dynamic: false,
@@ -480,6 +481,7 @@ describe('Alerts Service', () => {
                 settings: {
                   ...existingIndexTemplate.index_template.template?.settings,
                   'index.mapping.total_fields.limit': 2500,
+                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                 },
               },
             },
@@ -914,6 +916,7 @@ describe('Alerts Service', () => {
                         },
                       }),
                   'index.mapping.ignore_malformed': true,
+                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                   'index.mapping.total_fields.limit': 2500,
                 },
                 mappings: {

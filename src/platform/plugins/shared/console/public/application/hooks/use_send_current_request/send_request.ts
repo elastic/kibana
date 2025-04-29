@@ -115,8 +115,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         if (response) {
           let value;
+          if (statusCode === 200 && !body) {
+            // If the request resolves with a 200 status code but has an empty or null body,
+            // we should still display a success message to the user.
+            value = 'OK';
+          }
           // check if object is ArrayBuffer
-          if (body instanceof ArrayBuffer) {
+          else if (body instanceof ArrayBuffer) {
             value = body;
           } else {
             value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
@@ -157,18 +162,12 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
-        // When the request is sent, the HTTP library tries to parse the response body as JSON.
-        // However, if the response body is empty or not in valid JSON format, it throws an error.
-        // To handle this, if the request resolves with a 200 status code but has an empty or invalid body,
-        // we should still display a success message to the user.
-        if (statusCode === 200 && body === null) {
+        if (statusCode === 200 && !body) {
           value = 'OK';
+        } else if (body) {
+          value = JSON.stringify(body, null, 2);
         } else {
-          if (body) {
-            value = JSON.stringify(body, null, 2);
-          } else {
-            value = 'Request failed to get to the server (status code: ' + statusCode + ')';
-          }
+          value = 'Request failed to get to the server (status code: ' + statusCode + ')';
         }
 
         if (isMultiRequest) {
