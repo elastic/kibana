@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OtelInstance, ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import {
+  OtelInstance,
+  ApmOtelFields,
+  ApmSynthtracePipelineSchema,
+} from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
@@ -103,7 +107,7 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
       ];
     },
     setupPipeline: ({ apmEsClient }) => {
-      apmEsClient.setPipeline(apmEsClient.resolvePipelineType('otel'));
+      apmEsClient.setPipeline(apmEsClient.resolvePipelineType(ApmSynthtracePipelineSchema.Otel));
     },
   };
 };

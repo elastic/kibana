@@ -14,10 +14,7 @@ import { loggerProxy } from '../../logger_proxy';
 import { StreamManager } from '../../stream_manager';
 import { BaseWorkerData } from '../type';
 
-export interface WorkerData extends BaseWorkerData {
-  bucketFrom: Date;
-  bucketTo: Date;
-}
+export type WorkerData = BaseWorkerData;
 
 const { file, bucketFrom, bucketTo, runOptions, workerId, from, to } = workerData as WorkerData;
 

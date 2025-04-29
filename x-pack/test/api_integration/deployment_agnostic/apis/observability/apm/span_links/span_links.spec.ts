@@ -9,7 +9,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Readable } from 'stream';
 import { type ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import moment from 'moment';
-import { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 
@@ -21,11 +21,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = moment(baseTime).subtract(15, 'minutes');
   const end = moment(baseTime);
 
-  const scenarios: ApmSynthtracePipelines[] = ['default', 'apmToOtel'];
+  const scenarios: ApmSynthtracePipelines[] = [
+    ApmSynthtracePipelineSchema.Default,
+    ApmSynthtracePipelineSchema.ApmToOtel,
+  ];
 
   describe('Span Links', () => {
     scenarios.forEach((pipeline) => {
-      const isDefaultPipeline = pipeline === 'default';
+      const isDefaultPipeline = pipeline === ApmSynthtracePipelineSchema.Default;
 
       describe(`contains linked children - ${isDefaultPipeline ? 'elastic APM' : 'Otel'}`, () => {
         let ids: ReturnType<typeof generateSpanLinksData>['ids'];

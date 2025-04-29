@@ -49,6 +49,7 @@ export {
   type SynthtraceGenerator,
   type SynthtraceDynamicTemplate,
   type ApmSynthtracePipelines,
+  ApmSynthtracePipelineSchema,
 } from './src/types';
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';

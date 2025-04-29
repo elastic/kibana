@@ -14,7 +14,7 @@ import { loggerProxy } from '../../logger_proxy';
 import { StreamManager } from '../../stream_manager';
 import { BaseWorkerData } from '../type';
 
-export interface WorkerData extends BaseWorkerData {
+export interface WorkerData extends Omit<BaseWorkerData, 'bucketFrom' | 'bucketTo'> {
   bucketSizeInMs: number;
 }
 

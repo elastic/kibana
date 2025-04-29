@@ -26,4 +26,7 @@ export type SynthtraceProcessor<TFields extends Fields> = (
   fields: ESDocumentWithOperation<TFields>
 ) => ESDocumentWithOperation<TFields>;
 
-export type { ApmSynthtracePipelines } from './apm_synthtrace_pipelines';
+export {
+  ApmSynthtracePipelineSchema,
+  type ApmSynthtracePipelines,
+} from './apm_synthtrace_pipelines';

@@ -12,4 +12,7 @@ export enum ApmSynthtracePipelineSchema {
   Otel = 'otel', // OTel native through APM server
   ApmToOtel = 'apmToOtel', // convert classic APM synthtrace scenario into OTel native (useful to run existing scenarios as OTel)
 }
-export type ApmSynthtracePipelines = `${ApmSynthtracePipelineSchema}`;
+export type ApmSynthtracePipelines =
+  | ApmSynthtracePipelineSchema.Default
+  | ApmSynthtracePipelineSchema.Otel
+  | ApmSynthtracePipelineSchema.ApmToOtel;

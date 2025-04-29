@@ -12,7 +12,7 @@ import { castArray } from 'lodash';
 import { Logger } from '../../lib/utils/create_logger';
 import { SynthtraceClients } from './get_clients';
 import { getScenario } from './get_scenario';
-import { WorkerData } from './workers/historical_data/synthtrace_historical_data_worker';
+import { BaseWorkerData } from './workers/type';
 import { StreamManager } from './stream_manager';
 import { startPerformanceLogger } from './performance_logger';
 
@@ -28,7 +28,7 @@ export async function indexData({
   to,
   streamManager,
   autoTerminateStreams = true,
-}: WorkerData & {
+}: BaseWorkerData & {
   logger: Logger;
   clients: SynthtraceClients;
   streamManager: StreamManager;

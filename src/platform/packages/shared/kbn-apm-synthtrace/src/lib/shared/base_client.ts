@@ -32,7 +32,7 @@ export interface SynthtraceEsClientOptions {
 
 type MaybeArray<T> = T | T[];
 
-export abstract class SynthtraceEsClient<TFields extends Fields> {
+export class SynthtraceEsClient<TFields extends Fields> {
   protected readonly client: Client;
   protected readonly kibana?: KibanaClient;
   protected readonly logger: Logger;

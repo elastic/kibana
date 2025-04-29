@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import {
   apm,
   ApmFields,
+  ApmSynthtracePipelineSchema,
   generateLongId,
   generateShortId,
   Serializable,
@@ -40,7 +41,7 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
 }
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
-  const { pipeline = 'default' } = parseApmScenarioOpts(scenarioOpts);
+  const { pipeline = ApmSynthtracePipelineSchema.Default } = parseApmScenarioOpts(scenarioOpts);
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
       const producerTimestamps = range.ratePerMinute(1);
