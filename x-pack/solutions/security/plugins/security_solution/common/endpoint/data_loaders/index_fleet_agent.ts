@@ -81,7 +81,7 @@ const generateFleetAgentEsHitForEndpointHost = (
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator,
   spaceId: string | string[] = DEFAULT_SPACE_ID
 ) => {
-  return fleetAgentGenerator.generateEsHit({
+  const esHit = fleetAgentGenerator.generateEsHit({
     _id: endpointHost.agent.id,
     _source: {
       agent: {
@@ -106,6 +106,33 @@ const generateFleetAgentEsHitForEndpointHost = (
       namespaces: Array.isArray(spaceId) ? spaceId : [spaceId],
     },
   });
+
+  // Set the agent status to Healthy
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  esHit._source!.components = [
+    {
+      id: 'endpoint-0',
+      type: 'endpoint',
+      status: 'HEALTHY',
+      message: 'Running as external service',
+      units: [
+        {
+          id: 'endpoint-1',
+          type: 'input',
+          status: 'HEALTHY',
+          message: 'Protecting machine',
+        },
+        {
+          id: 'shipper',
+          type: 'output',
+          status: 'HEALTHY',
+          message: 'Connected over GRPC',
+        },
+      ],
+    },
+  ];
+
+  return esHit;
 };
 
 interface BuildFleetAgentBulkCreateOperationsOptions {
