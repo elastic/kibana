@@ -79,7 +79,7 @@ export const transformGetAttackDiscoveryGenerationsSearchResult = ({
           status,
         };
       } catch (e) {
-        logger.warn(
+        logger.debug(
           () =>
             `Skipping Attack discovery generation search result for execution ${
               executionUuid != null ? executionUuid : 'unknown executionUuid'
