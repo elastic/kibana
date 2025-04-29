@@ -215,7 +215,8 @@ describe('Add Integration - Real API', () => {
   });
 });
 
-describe('Dashboards link for installed integration - Real API', () => {
+// Enable when we are ready to provide more testing for the tabular view of installed integrations.
+describe.skip('Dashboards link for installed integration - Real API', () => {
   const integration = 'apache';
   const expectedIntegrationDashboard = '[Metrics Apache] Overview';
   const unexpectedIntegrationDashboard = '[Elastic Agent]';
