@@ -1,1 +1,33 @@
-{"min_version":"7.12.0","uuid":"Z32sceNySTyUXskXH4H93g","cluster_id":"pN2COvnNRlioIBagZPodZA","snapshots":[{"name":"my_snapshot","uuid":"9Wej6Q4gRZWSblPzNrtLOQ","state":1,"index_metadata_lookup":{"cu5-wQR7QG23KfAPUnwM3w":"0rXxAgjoRj-qvtNtkEbiVg-_na_-1-1-2","N_Kh2FQYQMm75IXVc3vEQg":"ISXCrwsDSw2eeJITjq-_2g-_na_-2-1-2","di3G7tF7TuG135ZWqIu7TA":"PuImkBxnTMaPZHGy_SWyIg-_na_-2-1-2","R6Qzt0N5R5yC6BrS-Wk2-w":"lLOP5VOTRxewgVKERPb-HQ-_na_-2-1-2","a4BcAiZFTluiX6qlNX2A_A":"92vA-d2fTiWKFbaRKMUwyw-_na_-2-1-1","nAKcREROS56SfvDraHe9Ww":"nmDGcCduSf-wACVvZX2-Hw-_na_-2-1-2","Tz5G0fz9RVaQlltU_8QJ9A":"Nu2rzmihRqC7BY4IlOp17w-_na_-1-1-1","oYscBShISaWpDm7n1KXkCA":"X0NlkruTSgCxTsBO_mA37g-_na_-3-1-1","gyOVfCvDSVCoTHDGuvV7yQ":"hWIHHNfOQuG4NGSFt-OjLg-_na_-2-1-1","7Jxuolu9S1SttqSEpJK58Q":"dx089vH-R9qYjCs_HzirHA-_na_-2-1-2","Rwz3AXrZR5O6BLzxD6Ce2w":"FoZxaUyfTWiCVIPVpUMpMA-_na_-2-1-2","H0B_seF_Rveh3Jpk-6nHOw":"sgxlGcMzRRS4UzRXV3MNJA-_na_-2-1-1","0iSyT96PTg-Y_Azvscr_Yg":"nKpK8Z-3T1-jpPX1Pmieng-_na_-2-1-1"},"version":8100599,"start_time_millis":1739275733654,"end_time_millis":1739275734671,"slm_policy":""}],"indices":{".transform-notifications-000002":{"id":"0iSyT96PTg-Y_Azvscr_Yg","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["iPNLKMh8S5-wR-XeltPWEA"]},".kibana-observability-ai-assistant-kb-000001":{"id":"oYscBShISaWpDm7n1KXkCA","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["KxGoXW9rQlmlCfPaW8lMYA"]},".transform-internal-007":{"id":"a4BcAiZFTluiX6qlNX2A_A","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["ECY0ShimSiOutZeM8drn9w"]},".kibana_security_solution_8.10.5_001":{"id":"di3G7tF7TuG135ZWqIu7TA","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["94QxJpm2QCm1M-UrRVxVqg"]},".kibana_analytics_8.10.5_001":{"id":"N_Kh2FQYQMm75IXVc3vEQg","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["JQeqYKKSTIeFk-f4hyarHQ"]},".kibana_task_manager_8.10.5_001":{"id":"R6Qzt0N5R5yC6BrS-Wk2-w","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["JuJTUJgNQ5mbegggjNvEDA"]},".apm-custom-link":{"id":"H0B_seF_Rveh3Jpk-6nHOw","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["Wv7vrK_qSb-szCACArQW2A"]},".kibana_alerting_cases_8.10.5_001":{"id":"Rwz3AXrZR5O6BLzxD6Ce2w","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["XMYKwCOvSKudzVl-UZ0qsw"]},".apm-agent-configuration":{"id":"gyOVfCvDSVCoTHDGuvV7yQ","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["cp5s9dK8R9ufxvCfX9AeIA"]},".security-7":{"id":"Tz5G0fz9RVaQlltU_8QJ9A","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["VpvF0qGDRH6kazaGGKtPkw"]},".kibana_security_session_1":{"id":"cu5-wQR7QG23KfAPUnwM3w","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["Ce4ZjuiwT-GtzRV_5vJ_ng"]},".kibana_ingest_8.10.5_001":{"id":"nAKcREROS56SfvDraHe9Ww","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["f_fnu7K9RymlNGkNQxxGlw"]},".kibana_8.10.5_001":{"id":"7Jxuolu9S1SttqSEpJK58Q","snapshots":["9Wej6Q4gRZWSblPzNrtLOQ"],"shard_generations":["XbQGzS2GQPOWREsRJNFo8A"]}},"index_metadata_identifiers":{"PuImkBxnTMaPZHGy_SWyIg-_na_-2-1-2":"28Lp9JQBDFLNeO2pjufJ","hWIHHNfOQuG4NGSFt-OjLg-_na_-2-1-1":"3MLp9JQBDFLNeO2pjufJ","FoZxaUyfTWiCVIPVpUMpMA-_na_-2-1-2":"4sLp9JQBDFLNeO2pjufX","lLOP5VOTRxewgVKERPb-HQ-_na_-2-1-2":"2sLp9JQBDFLNeO2pjufJ","92vA-d2fTiWKFbaRKMUwyw-_na_-2-1-1":"2cLp9JQBDFLNeO2pjufJ","nKpK8Z-3T1-jpPX1Pmieng-_na_-2-1-1":"5MLp9JQBDFLNeO2pjufb","0rXxAgjoRj-qvtNtkEbiVg-_na_-1-1-2":"2MLp9JQBDFLNeO2pjufJ","X0NlkruTSgCxTsBO_mA37g-_na_-3-1-1":"3cLp9JQBDFLNeO2pjufJ","ISXCrwsDSw2eeJITjq-_2g-_na_-2-1-2":"38Lp9JQBDFLNeO2pjufJ","nmDGcCduSf-wACVvZX2-Hw-_na_-2-1-2":"4MLp9JQBDFLNeO2pjufJ","sgxlGcMzRRS4UzRXV3MNJA-_na_-2-1-1":"48Lp9JQBDFLNeO2pjufb","dx089vH-R9qYjCs_HzirHA-_na_-2-1-2":"4cLp9JQBDFLNeO2pjufT","Nu2rzmihRqC7BY4IlOp17w-_na_-1-1-1":"3sLp9JQBDFLNeO2pjufJ"}}
+{
+  "min_version": "7.12.0",
+  "uuid": "Z32sceNySTyUXskXH4H93g",
+  "cluster_id": "pN2COvnNRlioIBagZPodZA",
+  "snapshots": [
+    {
+      "name": "my_snapshot",
+      "uuid": "9Wej6Q4gRZWSblPzNrtLOQ",
+      "state": 1,
+      "index_metadata_lookup": {
+        "oYscBShISaWpDm7n1KXkCA": "X0NlkruTSgCxTsBO_mA37g-_na_-3-1-1"
+      },
+      "version": 8100599,
+      "start_time_millis": 1739275733654,
+      "end_time_millis": 1739275734671,
+      "slm_policy": ""
+    }
+  ],
+  "indices": {
+    ".kibana-observability-ai-assistant-kb-000001": {
+      "id": "oYscBShISaWpDm7n1KXkCA",
+      "snapshots": [
+        "9Wej6Q4gRZWSblPzNrtLOQ"
+      ],
+      "shard_generations": [
+        "KxGoXW9rQlmlCfPaW8lMYA"
+      ]
+    }
+  },
+  "index_metadata_identifiers": {
+    "X0NlkruTSgCxTsBO_mA37g-_na_-3-1-1": "3cLp9JQBDFLNeO2pjufJ"
+  }
+}
