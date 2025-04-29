@@ -241,7 +241,7 @@ describe('callAssistantGraph', () => {
 
   describe('agentRunnable', () => {
     it('creates OpenAIToolsAgent for openai llmType', async () => {
-      const params = { ...defaultParams, llmType: 'openai' };
+      const params = { ...defaultParams, llmType: 'openai' as const };
       await callAssistantGraph(params);
 
       expect(createOpenAIToolsAgent).toHaveBeenCalled();
@@ -256,7 +256,7 @@ describe('callAssistantGraph', () => {
           providerConfig: { model_id: 'rainbow-sprinkles' },
         },
       });
-      const params = { ...defaultParams, llmType: 'inference' };
+      const params = { ...defaultParams, llmType: 'inference' as const };
       await callAssistantGraph(params);
 
       expect(createOpenAIToolsAgent).toHaveBeenCalled();
@@ -265,7 +265,7 @@ describe('callAssistantGraph', () => {
     });
 
     it('creates ToolCallingAgent for bedrock llmType', async () => {
-      const params = { ...defaultParams, llmType: 'bedrock' };
+      const params = { ...defaultParams, llmType: 'bedrock' as const };
       await callAssistantGraph(params);
 
       expect(createToolCallingAgent).toHaveBeenCalled();
@@ -279,7 +279,7 @@ describe('callAssistantGraph', () => {
         request: {
           body: { model: 'gemini-1.5-flash' },
         } as unknown as AgentExecutorParams<boolean>['request'],
-        llmType: 'gemini',
+        llmType: 'gemini' as const,
       };
       await callAssistantGraph(params);
 
@@ -289,7 +289,7 @@ describe('callAssistantGraph', () => {
     });
 
     it('creates StructuredChatAgent for oss model', async () => {
-      const params = { ...defaultParams, llmType: 'openai', isOssModel: true };
+      const params = { ...defaultParams, llmType: 'openai' as const, isOssModel: true };
       await callAssistantGraph(params);
 
       expect(createStructuredChatAgent).toHaveBeenCalled();
@@ -297,13 +297,13 @@ describe('callAssistantGraph', () => {
       expect(createToolCallingAgent).not.toHaveBeenCalled();
     });
     it('does not calls resolveProviderAndModel when llmType === openai', async () => {
-      const params = { ...defaultParams, llmType: 'openai' };
+      const params = { ...defaultParams, llmType: 'openai' as const };
       await callAssistantGraph(params);
 
       expect(resolveProviderAndModelMock).not.toHaveBeenCalled();
     });
     it('calls resolveProviderAndModel when llmType === inference', async () => {
-      const params = { ...defaultParams, llmType: 'inference' };
+      const params = { ...defaultParams, llmType: 'inference' as const };
       await callAssistantGraph(params);
 
       expect(resolveProviderAndModelMock).toHaveBeenCalled();

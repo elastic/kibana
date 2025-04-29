@@ -11,12 +11,14 @@ import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { SchemaObject } from 'oas/dist/types.cjs';
 import { z } from '@kbn/zod';
 import type { StructuredToolInterface } from '@langchain/core/tools';
-import { groupBy, memoize } from 'lodash';
-import { fixOpenApiSpecIteratively, formatToolName, isOperation } from './utils';
+import { groupBy, isEmpty, memoize } from 'lodash';
+import { formatToolName, isOperation } from './utils';
 import type { Operation } from './utils';
+import { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 
 export abstract class OpenApiTool<T> {
   private dereferencedOas: Oas;
+  private llmType: LlmType | undefined;
   private getParametersAsZodSchemaMemoized = memoize(
     this.getParametersAsZodSchemaInternal.bind(this),
     (args) => {
@@ -24,26 +26,21 @@ export abstract class OpenApiTool<T> {
     }
   );
 
-  protected constructor(args: { dereferencedOas: Oas }) {
+  protected constructor(args: { dereferencedOas: Oas, llmType: LlmType | undefined }) {
     const { dereferencedOas } = args;
     this.dereferencedOas = dereferencedOas;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static fixOpenApiSpecIteratively(openApiSpec: any): any {
-    return fixOpenApiSpecIteratively(openApiSpec);
+    this.llmType = args.llmType;
   }
 
   protected getOperations() {
     const oas = this.dereferencedOas;
     return Object.values(oas.getPaths())
-      .map((operationByMethod) => Object.values(operationByMethod))
-      .flat()
+      .flatMap((operationByMethod) => Object.values(operationByMethod))
       .filter(isOperation);
   }
 
   protected getParametersAsZodSchema(args: { operation: Operation }) {
-    return this.getParametersAsZodSchemaMemoized(args);
+    return this.getParametersAsZodSchemaMemoized(args);;
   }
 
   private getParametersAsZodSchemaInternal(args: { operation: Operation }) {
@@ -56,9 +53,31 @@ export abstract class OpenApiTool<T> {
       {} as Record<string, SchemaObject>
     );
 
+    const jsonSchemaToZodWithParserOverride = (schema: JsonSchema): z.ZodTypeAny => {
+      return jsonSchemaToZod(schema as JsonSchema, {
+        // Overrides to ensure schema is compatible with LLM provider
+        parserOverride: (schema, refs) => {
+          if (schema.enum && schema.enum.length == 1 && schema.enum[0] == '*') {
+            return z.enum(["*"])
+          }
+          if (schema.anyOf && schema.default) {
+            if(typeof schema.default === 'string') {
+              return z.enum([schema.default])
+            }
+            delete schema.default
+            return jsonSchemaToZodWithParserOverride(schema)
+          }
+          if (schema.type === "array" && isEmpty(schema.items)) {
+            return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())])
+          }
+          return undefined;
+        },
+      })
+    }
+
     const schemaTypeToZod = Object.keys(schemaTypeToSchemaObject).reduce((total, next) => {
       const schema = schemaTypeToSchemaObject[next];
-      const zodSchema = jsonSchemaToZod(schema as JsonSchema);
+      const zodSchema = jsonSchemaToZodWithParserOverride(schema as JsonSchema);
       return { ...total, [next]: zodSchema };
     }, {} as Record<'query' | 'body' | 'header' | 'path' | 'cookie' | 'formData', z.ZodTypeAny>);
 
@@ -98,7 +117,7 @@ export abstract class OpenApiTool<T> {
           tools: Promise.all(
             internalToolsAndOperations.map((toolAndOperation) => toolAndOperation.tool)
           ),
-          name: formatToolName(`kibana_${tag}_agent`),
+          name: formatToolName(`${tag}_agent`),
           description: internalToolsAndOperations
             .map((toolAndOperation) => toolAndOperation.operation.getOperationId())
             .join('\n'),
@@ -106,16 +125,27 @@ export abstract class OpenApiTool<T> {
         return internalNode;
       });
 
+    const { name, description } = this.getRootToolDetails(args);
+
     // Create root tool
     const rootTool = await this.getInternalNode({
       ...args,
       tools: Promise.all(tools),
-      name: 'kibana_tool',
-      description: 'Kibana tool',
+      name,
+      description,
     });
 
     return rootTool;
   }
+
+  protected getRootToolDetails(
+    args: T
+  ): {
+    name: string;
+    description: string;
+  } {
+    throw new Error('Method not implemented.');
+  };
 
   protected abstract getToolForOperation(
     args: T & { operation: Operation }

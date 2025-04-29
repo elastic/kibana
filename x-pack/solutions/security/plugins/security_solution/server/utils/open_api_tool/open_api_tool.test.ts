@@ -15,6 +15,9 @@ import Oas from 'oas';
 import path from 'node:path';
 
 class TestableOpenApiTool extends OpenApiTool<{}> {
+  protected getRootToolDetails(args: {}): { name: string; description: string; } {
+      throw new Error('Method not implemented.');
+  }
   protected getToolForOperation(args: { operation: Operation }): Promise<StructuredToolInterface> {
     throw new Error('Method not implemented.');
   }
@@ -36,10 +39,9 @@ class TestableOpenApiTool extends OpenApiTool<{}> {
       'utf8'
     );
     const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
-    const fixedJsonOpenApiSpec = super.fixOpenApiSpecIteratively(jsonOpenApiSpec);
-    const dereferencedOas = new Oas(fixedJsonOpenApiSpec);
+    const dereferencedOas = new Oas(jsonOpenApiSpec);
     await dereferencedOas.dereference();
-    return new this({ dereferencedOas });
+    return new this({ dereferencedOas, llmType: undefined });
   }
 }
 

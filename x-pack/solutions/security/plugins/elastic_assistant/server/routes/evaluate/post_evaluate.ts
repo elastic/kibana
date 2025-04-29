@@ -367,6 +367,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
                 createLlmInstance,
+                llmType
               };
 
               const tools: StructuredTool[] = (

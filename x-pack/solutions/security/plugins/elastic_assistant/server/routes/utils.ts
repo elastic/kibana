@@ -24,6 +24,7 @@ import {
   OpenAiProviderType,
 } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { CustomHttpRequestError } from './custom_http_request_error';
+import { LlmType } from '../types';
 
 export interface BulkError {
   // Id can be single id or stringified ids.
@@ -172,8 +173,8 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
 /**
  * Returns the LangChain `llmType` for the given actionTypeId
  */
-export const getLlmType = (actionTypeId: string): string | undefined => {
-  const llmTypeDictionary: Record<string, string> = {
+export const getLlmType = (actionTypeId: string): LlmType | undefined => {
+  const llmTypeDictionary: Record<string, LlmType> = {
     [`.gen-ai`]: `openai`,
     [`.bedrock`]: `bedrock`,
     [`.gemini`]: `gemini`,

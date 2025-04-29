@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
-import { pickBy } from 'lodash';
+import { memoize, pickBy } from 'lodash';
 import { StdUriTemplate } from '@std-uritemplate/std-uritemplate';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
@@ -21,6 +21,7 @@ import axios from 'axios';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
+import { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 
 export const kibanaServerlessOpenApiSpec = path.join(
   __dirname,
@@ -33,10 +34,12 @@ export const kibanaOpenApiSpec = path.join(
 
 const defaultOptions: Options = {
   apiSpecPath: kibanaOpenApiSpec,
+  llmType: undefined,
 };
 
 interface Options {
   apiSpecPath: string;
+  llmType: LlmType | undefined;
 }
 
 interface RuntimeOptions {
@@ -91,13 +94,21 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     };
     const yamlOpenApiSpec = await fs.promises.readFile(options.apiSpecPath, 'utf8');
     const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
-    const fixedJsonOpenApiSpec = super.fixOpenApiSpecIteratively(jsonOpenApiSpec);
-    const dereferencedOas = new Oas(fixedJsonOpenApiSpec);
+    const dereferencedOas = new Oas(jsonOpenApiSpec);
     await dereferencedOas.dereference();
     return new this({
       options,
       dereferencedOas,
     });
+  }
+
+  protected getRootToolDetails(args: RuntimeOptions): { name: string; description: string; } {
+    return {
+      name: 'kibana_client',
+      description: 'This function interacts with the Kibana API. It takes a natural language request,' +
+        ' finds out the correct endpoint to call and returns the result of the API call. This function ' +
+        'should be used when the user requests information, configurations or changes in Kibana.',
+    }
   }
 
   protected async getToolForOperation({
@@ -180,7 +191,9 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           messages: [
             new SystemMessage({
               content:
-                'You are Kibana Client agent. You are an expert in using functions. Try to use the functions at your disposal to perform the task requested. In your final response include as much information as possible about the tool results.',
+                'You are Kibana API Client agent. You are an expert in using functions that interact' +
+                ' with the Kibana APIs. Try to use the functions at your disposal to perform the task requested. ' +
+                'If there is no function appropriate for the request, state in your own words that you cannot perform the task.',
             }),
             new HumanMessage({ content: input }),
           ],
@@ -196,10 +209,17 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           input: z
             .string()
             .describe(
-              'The action that should be performed relevant parameters. Include as much detail as possible.'
+              'The action that should be performed and any relevant parameters provided in the conversation. Include as much detail as possible.'
             ),
         }),
       }
     );
   }
 }
+
+export const getMemoizedKibanaClientTool = memoize(
+  (...args: Parameters<typeof KibanaClientTool.create>) => KibanaClientTool.create(...args),
+  (...[args]) => {
+    return `${args?.options?.apiSpecPath}:${args?.options?.llmType}`;
+  }
+);

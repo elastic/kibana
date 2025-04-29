@@ -187,6 +187,8 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
 
 export type GetElser = () => Promise<string> | never;
 
+export type LlmType = 'openai' | 'bedrock' | 'gemini' | 'inference'
+
 export interface AssistantResourceNames {
   componentTemplate: {
     alertSummary: string;
@@ -290,6 +292,7 @@ export interface AssistantToolParams {
     | ActionsClientChatBedrockConverse
     | ActionsClientChatVertexAI
     | ActionsClientChatOpenAI;
+    llmType: LlmType | undefined;
 }
 
 /**
@@ -297,7 +300,7 @@ export interface AssistantToolParams {
  *
  *
  * ```ts
- * export type MyNewTypeWithAssistantContext = AssistantToolParams & OmitUndefined<Pick<AssistantToolParams, 'assistantContext'>>
+ * export type MyNewTypeWithAssistantContext = AssistantToolParams & RequiredDefined<Pick<AssistantToolParams, 'assistantContext'>>
  * ```
  */
 export type RequiredDefined<T> = {

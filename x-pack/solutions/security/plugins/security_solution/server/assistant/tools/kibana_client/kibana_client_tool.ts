@@ -5,20 +5,12 @@
  * 2.0.
  */
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { memoize } from 'lodash';
 import type { RequiredDefined } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
-import { KibanaClientTool } from './kibana_client_open_api';
+import { getMemoizedKibanaClientTool, KibanaClientTool } from './kibana_client_open_api';
 
 export type KibanaClientToolParams = AssistantToolParams &
   RequiredDefined<Pick<AssistantToolParams, 'createLlmInstance' | 'assistantContext'>>;
-
-const getKibanaClientTool = memoize(
-  (...args: Parameters<typeof KibanaClientTool.create>) => KibanaClientTool.create(...args),
-  (...[args]) => {
-    return args?.options?.apiSpecPath;
-  }
-);
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -45,15 +37,16 @@ export const KIBANA_CLIENT_TOOL: AssistantTool = {
     if (!this.isSupported(params)) return null;
     const kibanaClientToolParams = params as KibanaClientToolParams;
     const { buildFlavor } = kibanaClientToolParams.assistantContext;
-    const flavouredApiSpecPath = KibanaClientTool.getKibanaOpenApiSpec(buildFlavor);
+    const flavoredApiSpecPath = KibanaClientTool.getKibanaOpenApiSpec(buildFlavor);
 
-    if (!flavouredApiSpecPath) {
+    if (!flavoredApiSpecPath) {
       return null;
     }
 
-    const kibanaClientTool = await getKibanaClientTool({
+    const kibanaClientTool = await getMemoizedKibanaClientTool({
       options: {
-        apiSpecPath: flavouredApiSpecPath,
+        apiSpecPath: flavoredApiSpecPath,
+        llmType: kibanaClientToolParams.llmType,
       },
     });
 

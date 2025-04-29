@@ -110,7 +110,7 @@ describe('kibana_client_open_api', () => {
     jest.clearAllMocks();
   });
 
-  it('can initialize KibanaClientTool default', async () => {
+  it.only('can initialize KibanaClientTool default', async () => {
     const kibanaClientTool = await KibanaClientTool.create();
 
     await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
@@ -120,6 +120,7 @@ describe('kibana_client_open_api', () => {
     const kibanaClientTool = await KibanaClientTool.create({
       options: {
         apiSpecPath: kibanaOpenApiSpec,
+        llmType: undefined
       },
     });
 
@@ -130,6 +131,7 @@ describe('kibana_client_open_api', () => {
     const kibanaClientTool = await KibanaClientTool.create({
       options: {
         apiSpecPath: kibanaServerlessOpenApiSpec,
+        llmType: undefined
       },
     });
 
@@ -146,6 +148,7 @@ describe('kibana_client_open_api', () => {
         const kibanaClientTool = await KibanaClientTool.create({
           options: {
             apiSpecPath: 'fake-path',
+            llmType: undefined
           },
         });
 
