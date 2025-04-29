@@ -71,3 +71,47 @@ if (!Object.hasOwn(global, 'Worker')) {
 if (!Object.hasOwn(global, 'MessagePort')) {
   global.MessagePort = {};
 }
+
+export const getJsDomPerformanceFix = () => {
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+  return {
+    fix: () => {
+      // The JSDOM implementation is too slow
+      // Especially for dropdowns that try to position themselves
+      // perf issue - https://github.com/jsdom/jsdom/issues/3234
+      Object.defineProperty(window, 'getComputedStyle', {
+        value: (el) => {
+          /**
+           * This is based on the jsdom implementation of getComputedStyle
+           * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+           *
+           * It is missing global style parsing and will only return styles applied directly to an element.
+           * Will not return styles that are global or from emotion
+           */
+          const declaration = new CSSStyleDeclaration();
+          const { style } = el;
+
+          Array.prototype.forEach.call(style, (property) => {
+            declaration.setProperty(
+              property,
+              style.getPropertyValue(property),
+              style.getPropertyPriority(property)
+            );
+          });
+
+          return declaration;
+        },
+        configurable: true,
+        writable: true,
+      });
+    },
+    cleanup: () => {
+      Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+    },
+  };
+};
+
+const { fix } = getJsDomPerformanceFix();
+fix();
