@@ -10,8 +10,8 @@
 /*
  * This file provides logic for migrating raw documents.
  */
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Either from 'fp-ts/lib/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
+import * as Either from 'fp-ts/Either';
 import type {
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,

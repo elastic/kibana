@@ -14,7 +14,7 @@ import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import type { Annotation } from '../../../../common/annotations';
 import { AnnotationType } from '../../../../common/annotations';
 import { AT_TIMESTAMP, SERVICE_NAME, SERVICE_VERSION } from '../../../../common/es_fields/apm';
-import { environmentQuery } from '../../../../common/utils/environment_query';
+import { environmentQueryAnnotations } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
@@ -39,7 +39,7 @@ export async function getDerivedServiceAnnotations({
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-    ...environmentQuery(environment),
+    ...environmentQueryAnnotations(environment),
   ];
 
   const versions =

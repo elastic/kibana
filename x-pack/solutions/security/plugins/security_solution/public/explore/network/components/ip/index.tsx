@@ -26,7 +26,6 @@ export const Ip = React.memo<{
 }>(({ contextId, eventId, fieldName, value }) => (
   <FormattedFieldValue
     contextId={contextId}
-    data-test-subj="formatted-ip"
     eventId={eventId}
     fieldName={fieldName}
     fieldType={IP_FIELD_TYPE}

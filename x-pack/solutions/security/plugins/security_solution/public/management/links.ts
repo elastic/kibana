@@ -57,7 +57,7 @@ import { IconAssetCriticality } from '../common/icons/asset_criticality';
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
-      defaultMessage: 'Entity Analytics',
+      defaultMessage: 'Entity analytics',
     }),
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,

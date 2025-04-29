@@ -536,16 +536,16 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | project textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | PROJECT textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | keep k*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
@@ -758,11 +758,18 @@ describe('validation logic', () => {
         "SyntaxError: mismatched input '%' expecting QUOTED_STRING",
       ]);
       // Do not try to validate the grok pattern string
-      testErrorsAndWarnings('from a_index | grok textField "%{firstWord}"', []);
-      testErrorsAndWarnings('from a_index | grok doubleField "%{firstWord}"', [
-        'GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]',
-      ]);
-      testErrorsAndWarnings('from a_index | grok textField "%{firstWord}" | keep firstWord', []);
+      testErrorsAndWarnings(
+        'from a_index | grok textField """%{WORD:textPrts} %{WORD:textPrts}"""',
+        []
+      );
+      testErrorsAndWarnings(
+        'from a_index | grok doubleField """%{WORD:textPrts} %{WORD:textPrts}"""',
+        ['GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]']
+      );
+      testErrorsAndWarnings(
+        'from a_index | grok textField """%{WORD:textPrts} %{WORD:textPrts}""" | keep textPrts',
+        []
+      );
       // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
       //   'Using wildcards (*) in grok is not allowed [s*]',
       // ]);
@@ -1574,10 +1581,7 @@ describe('validation logic', () => {
         );
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
-        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
-        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
-          query: `from enrich_index | keep otherField, yetAnotherField`,
-        });
+        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
       });
 
       it('should call fields callbacks also for show command', async () => {
@@ -1601,10 +1605,7 @@ describe('validation logic', () => {
         );
         expect(callbackMocks.getSources).toHaveBeenCalled();
         expect(callbackMocks.getPolicies).toHaveBeenCalled();
-        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(2);
-        expect(callbackMocks.getColumnsFor).toHaveBeenLastCalledWith({
-          query: `from enrich_index | keep otherField, yetAnotherField`,
-        });
+        expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(0);
       });
 
       it(`should not crash if no callbacks are available`, async () => {

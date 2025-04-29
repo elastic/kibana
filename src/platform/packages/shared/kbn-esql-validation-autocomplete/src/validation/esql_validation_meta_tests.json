@@ -2271,28 +2271,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2792,19 +2792,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\"",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | grok doubleField \"%{firstWord}\"",
+      "query": "from a_index | grok doubleField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [
         "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\" | keep firstWord",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\" | keep textPrts",
       "error": [],
       "warning": []
     },
@@ -9663,6 +9663,31 @@
       "warning": []
     },
     {
+      "query": "FROM index, missingIndex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index*, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, missingIndex2*, index",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index,",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
@@ -9738,6 +9763,42 @@
       "query": "FROM policy",
       "error": [
         "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex, index",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missingIndex2, index",
+      "error": [
+        "Unknown index [missingIndex2]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*",
+      "error": [
+        "Unknown index [missingIndex*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missing*Index2",
+      "error": [
+        "Unknown index [*missingIndex]",
+        "Unknown index [missing*Index2]"
       ],
       "warning": []
     },
