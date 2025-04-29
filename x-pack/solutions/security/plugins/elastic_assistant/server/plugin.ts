@@ -73,6 +73,9 @@ export class ElasticAssistantPlugin
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      soClientPromise: core
+        .getStartServices()
+        .then(([{ savedObjects }]) => savedObjects.createInternalRepository()),
       productDocManager: core
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
