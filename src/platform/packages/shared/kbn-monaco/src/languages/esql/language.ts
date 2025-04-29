@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateQuery, type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
-import { language as esqlMonarchLanguage } from '@elastic/monaco-esql/lib/monarch-shared';
+import {
+  validateQuery,
+  type ESQLCallbacks,
+  suggest,
+  esqlFunctionNames,
+} from '@kbn/esql-validation-autocomplete';
+import { monarch } from '@elastic/monaco-esql';
+import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { monaco } from '../../monaco_imports';
 import { ESQL_LANG_ID } from './lib/constants';
 import { buildEsqlTheme } from './lib/theme';
@@ -25,7 +31,12 @@ const removeKeywordSuffix = (name: string) => {
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
-    monaco.languages.setMonarchTokensProvider(ESQL_LANG_ID, esqlMonarchLanguage);
+    const language = monarch.create({
+      ...monarchDefinitions,
+      functions: esqlFunctionNames,
+    });
+
+    monaco.languages.setMonarchTokensProvider(ESQL_LANG_ID, language);
   },
   languageThemeResolver: buildEsqlTheme,
   languageConfiguration: {
