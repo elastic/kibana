@@ -185,7 +185,7 @@ export async function getAgentTags(
       },
     });
     const buckets = result.aggregations?.tags.buckets;
-    return (buckets?.map((bucket) => bucket.key) ?? []).toSorted((a, b) =>
+    return (buckets?.map((bucket) => bucket.key) ?? []).sort((a, b) =>
       a.toLowerCase().localeCompare(b.toLowerCase())
     );
   } catch (err) {
