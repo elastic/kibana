@@ -113,7 +113,6 @@
     "@kbn/automatic-import-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/server-http-tools",
-    "@kbn/avc-banner",
     "@kbn/zod",
     "@kbn/reporting-public",
     "@kbn/field-formats-plugin",

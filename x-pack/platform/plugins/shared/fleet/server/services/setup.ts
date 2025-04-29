@@ -67,6 +67,7 @@ import {
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
 import { createOrUpdateFleetSyncedIntegrationsIndex } from './setup/fleet_synced_integrations';
+import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -260,6 +261,14 @@ async function createSetupSideEffects(
   logger.debug('Backfilling package policy supports_agentless field');
   await backfillPackagePolicySupportsAgentless(esClient);
 
+  let ensureCorrectAgentlessSettingsIdsError;
+  try {
+    logger.debug('Fix agentless policy settings');
+    await ensureCorrectAgentlessSettingsIds(esClient);
+  } catch (error) {
+    ensureCorrectAgentlessSettingsIdsError = { error };
+  }
+
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
 
@@ -269,6 +278,7 @@ async function createSetupSideEffects(
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+    ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
   ];
 
   if (nonFatalErrors.length > 0) {
