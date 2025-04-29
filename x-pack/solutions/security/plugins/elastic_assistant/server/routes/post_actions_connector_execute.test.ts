@@ -470,39 +470,4 @@ describe('postActionsConnectorExecuteRoute', () => {
       mockConfig
     );
   });
-  it('calls getPrompt with promptIds when passed in request.body', async () => {
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(
-                mockContext,
-                {
-                  ...mockRequest,
-                  body: {
-                    ...mockRequest.body,
-                    promptIds: { promptId: 'test-prompt-id', promptGroupId: 'test-group-id' },
-                  },
-                },
-                mockResponse
-              );
-
-              expect(mockGetPrompt).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  promptId: 'test-prompt-id',
-                  promptGroupId: 'test-group-id',
-                })
-              );
-            }),
-          };
-        }),
-      },
-    };
-
-    await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockConfig
-    );
-  });
 });
