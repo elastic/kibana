@@ -15,10 +15,6 @@ export const NAME = i18n.translate('xpack.synthetics.overview.compactView.monito
   defaultMessage: 'Name',
 });
 
-export const TYPE = i18n.translate('xpack.synthetics.overview.compactView.monitorType', {
-  defaultMessage: 'Type',
-});
-
 export const LOCATIONS = i18n.translate('xpack.synthetics.overview.compactView.monitorLocations', {
   defaultMessage: 'Locations',
 });

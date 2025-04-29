@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
@@ -19,7 +19,7 @@ import { getFilterForTypeMessage } from '../../../../management/monitor_list_tab
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
-import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, TYPE, DURATION } from '../labels';
+import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, DURATION } from '../labels';
 import { MonitorsDuration } from '../components/monitors_duration';
 
 export const useMonitorsTableColumns = ({
@@ -75,16 +75,21 @@ export const useMonitorsTableColumns = ({
       {
         field: 'name',
         name: NAME,
-      },
-      {
-        field: 'type',
-        name: TYPE,
-        render: (type: OverviewStatusMetaData['type']) => (
-          <MonitorTypeBadge
-            monitorType={type}
-            ariaLabel={getFilterForTypeMessage(type)}
-            onClick={() => onClickMonitorFilter('monitorTypes', type)}
-          />
+        render: (name: OverviewStatusMetaData['name'], monitor) => (
+          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText size="s" onClick={() => openFlyout(monitor)}>
+                {name}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MonitorTypeBadge
+                monitorType={monitor.type}
+                ariaLabel={getFilterForTypeMessage(monitor.type)}
+                onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
       {
