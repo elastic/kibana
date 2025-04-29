@@ -16,6 +16,22 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { RunActionResponseSchema } from '../../../common/openai/schema';
 
 const logger = loggingSystemMock.createLogger();
+
+// Mock an instance of the OpenAI class
+// with overridden flag for purpose of jest test
+jest.mock('openai', () => {
+  const UnmodifiedOpenAIClient = jest.requireActual('openai').default;
+
+  return {
+    __esModule: true,
+    default: jest.fn().mockImplementation((config) => {
+      return new UnmodifiedOpenAIClient({
+        ...config,
+        dangerouslyAllowBrowser: true,
+      });
+    }),
+  };
+});
 describe('OpenAI with proxy config', () => {
   let mockProxiedRequest: jest.Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
@@ -34,14 +50,13 @@ describe('OpenAI with proxy config', () => {
   const configurationUtilities = actionsConfigMock.create();
   const PROXY_HOST = 'proxy.custom.elastic.co';
   const PROXY_URL = `http://${PROXY_HOST}`;
-  const PROXY_BYPASS_HOSTS = ['proxy-bypass-1.elastic.co', 'proxy-bypass-2.elastic.co'];
 
   configurationUtilities.getProxySettings.mockReturnValue({
     proxyUrl: PROXY_URL,
     proxySSLSettings: {
       verificationMode: 'none',
     },
-    proxyBypassHosts: new Set(PROXY_BYPASS_HOSTS),
+    proxyBypassHosts: undefined,
     proxyOnlyHosts: undefined,
   });
 
@@ -84,11 +99,11 @@ describe('OpenAI with proxy config', () => {
     jest.clearAllMocks();
   });
 
-  it('verifies that the OpenAI client is initialized with the correct HTTP agent', () => {
+  it('verifies that the OpenAI client is initialized with the custom proxy HTTP agent', () => {
     // @ts-ignore .openAI is private
     const openAIClient = connector.openAI;
 
-    // Verify the client was initialized with the correct agent configuration
+    // Verify the client was initialized with the custom agent configuration
     expect(openAIClient).toBeDefined();
     expect(openAIClient.httpAgent).toBeDefined();
     expect(openAIClient.httpAgent.proxy).toBeDefined();
@@ -124,27 +139,4 @@ describe('OpenAI with proxy config', () => {
     );
     expect(response).toEqual(mockResponse.data);
   });
-
-  // it('verifies that streaming requests use the configured HTTP agent', async () => {
-  //   // Make a streaming request
-  //   await connector.invokeAsyncIterator(
-  //     { messages: [{ role: 'user', content: 'test' }] },
-  //     connectorUsageCollector
-  //   );
-
-  //   // Verify the streaming request was made with the correct agent
-  //   expect(mockProxiedRequest).toHaveBeenCalledWith(
-  //     expect.objectContaining({
-  //       httpAgent: expect.objectContaining({
-  //         proxy: expect.objectContaining({
-  //           host: 'proxy.example.com',
-  //           port: 80,
-  //         }),
-  //         options: expect.objectContaining({
-  //           rejectUnauthorized: false,
-  //         }),
-  //       }),
-  //     })
-  //   );
-  // });
 });
