@@ -6,7 +6,7 @@
  */
 
 import type Oas from 'oas';
-import type { JsonSchema, JsonSchemaObject, ParserOverride, Refs } from '@n8n/json-schema-to-zod';
+import type { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { SchemaObject } from 'oas/dist/types.cjs';
 import { z } from '@kbn/zod';
@@ -41,7 +41,7 @@ export abstract class OpenApiTool<T> {
     return this.getParametersAsZodSchemaMemoized(args);;
   }
 
-  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
+  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny, operation: Operation) {
     if (schema.enum && schema.enum.length == 1 && schema.enum[0] == '*') {
       return z.enum(["*"]) // jsonSchemaToZod would convert this to literal which is not supported by Gemini 
     }
@@ -72,7 +72,7 @@ export abstract class OpenApiTool<T> {
     const jsonSchemaToZodWithParserOverride = (schema: JsonSchema): z.ZodTypeAny => {
       return jsonSchemaToZod(schema as JsonSchema, {
         // Overrides to ensure schema is compatible with LLM provider
-        parserOverride: (schema, refs) => this.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride),
+        parserOverride: (schema, refs) => this.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride, operation),
       })
     }
 

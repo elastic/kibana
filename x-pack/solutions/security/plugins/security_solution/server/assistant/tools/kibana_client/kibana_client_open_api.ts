@@ -249,13 +249,13 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     );
   }
 
-  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
+  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny, operation: Operation) {
     if (schema.properties && schema.properties["kbn-xsrf"] && Array.isArray(schema.required) && schema.required.includes("kbn-xsrf")) {
       // Remove kbn-xsrf from required properties, it will be added to headers manually
       schema.required = schema.required.filter((item) => item !== "kbn-xsrf");
       return jsonSchemaToZodWithParserOverride(schema)
     }
-    return super.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride);
+    return super.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride, operation);
   }
 }
 
