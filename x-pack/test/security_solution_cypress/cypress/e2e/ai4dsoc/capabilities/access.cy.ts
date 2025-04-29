@@ -12,7 +12,7 @@ import {
   ALERT_SUMMARY_URL,
   ALERTS_URL,
   MAINTENANCE_WINDOW_URL,
-  RULES_LANDING_URL,
+  RULES_URL,
   STACK_RULES_URL,
 } from '../../../urls/navigation';
 
@@ -98,7 +98,7 @@ describe('Capabilities', { tags: '@serverless' }, () => {
       });
 
       it('should redirect from rules to get started page', () => {
-        visit(RULES_LANDING_URL);
+        visit(RULES_URL);
         cy.get(GET_STARTED_PAGE).should('exist');
       });
 
