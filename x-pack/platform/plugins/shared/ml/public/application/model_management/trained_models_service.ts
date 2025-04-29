@@ -626,6 +626,7 @@ export class TrainedModelsService {
                     model_id: item.model_id,
                     result: 'cancelled',
                   });
+                  this.uiInitiatedDownloads.delete(item.model_id);
                 }
               } else if (downloadInProgress.has(item.model_id) || !item.state) {
                 // Finished downloading
@@ -640,6 +641,7 @@ export class TrainedModelsService {
                     model_id: item.model_id,
                     result: 'success',
                   });
+                  this.uiInitiatedDownloads.delete(item.model_id);
                 }
               }
               downloadInProgress.delete(item.model_id);
