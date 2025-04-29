@@ -641,11 +641,11 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       const valueArg = command.args[0];
       if (isColumnItem(valueArg)) {
         const columnName = valueArg.name;
-        // look up for columns in variables and existing fields
+        // look up for columns in userDefinedColumns and existing fields
         let valueColumnType: string | undefined;
-        const variableRef = references.variables.get(columnName);
-        if (variableRef) {
-          valueColumnType = variableRef.find((v) => v.name === columnName)?.type;
+        const userDefinedColumnRef = references.userDefinedColumns.get(columnName);
+        if (userDefinedColumnRef) {
+          valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
         } else {
           const fieldRef = references.fields.get(columnName);
           valueColumnType = fieldRef?.type;
@@ -690,10 +690,10 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // validate AS
       const asArg = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
       if (asArg && isOptionItem(asArg)) {
-        // populate variable references to prevent the common check from failing with unknown column
+        // populate userDefinedColumns references to prevent the common check from failing with unknown column
         asArg.args.forEach((arg, index) => {
           if (isColumnItem(arg)) {
-            references.variables.set(arg.name, [
+            references.userDefinedColumns.set(arg.name, [
               { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
             ]);
           }

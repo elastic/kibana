@@ -45,17 +45,17 @@ describe('WHERE <expression>', () => {
 
     await assertSuggestions('from a | where /', EMPTY_WHERE_SUGGESTIONS);
     await assertSuggestions(
-      'from a | eval var0 = 1 | where /',
+      'from a | eval col0 = 1 | where /',
       [
         ...getFieldNamesByType('any')
           .map((name) => `${name} `)
           .map(attachTriggerCommand),
-        attachTriggerCommand('var0 '),
+        attachTriggerCommand('col0 '),
         ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'KQL'),
       ],
       {
         callbacks: {
-          getColumnsFor: () => Promise.resolve([...fields, { name: 'var0', type: 'integer' }]),
+          getColumnsFor: () => Promise.resolve([...fields, { name: 'col0', type: 'integer' }]),
         },
       }
     );
