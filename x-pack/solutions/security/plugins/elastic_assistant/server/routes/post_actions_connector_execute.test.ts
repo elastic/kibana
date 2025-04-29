@@ -130,8 +130,6 @@ const mockConfig = {
 };
 
 describe('postActionsConnectorExecuteRoute', () => {
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
-
   beforeEach(() => {
     jest.clearAllMocks();
     license.hasAtLeast.mockReturnValue(true);

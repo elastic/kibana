@@ -145,7 +145,6 @@ const mockResponse = {
 };
 
 describe('chatCompleteRoute', () => {
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -236,8 +235,7 @@ describe('chatCompleteRoute', () => {
     };
 
     chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -268,8 +266,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -303,8 +300,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -337,8 +333,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -368,8 +363,7 @@ describe('chatCompleteRoute', () => {
     };
 
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -398,8 +392,7 @@ describe('chatCompleteRoute', () => {
       },
     };
     await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -434,8 +427,7 @@ describe('chatCompleteRoute', () => {
     };
 
     chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -466,8 +458,7 @@ describe('chatCompleteRoute', () => {
     };
 
     chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -503,8 +494,7 @@ describe('chatCompleteRoute', () => {
     };
 
     chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -535,8 +525,7 @@ describe('chatCompleteRoute', () => {
     };
 
     chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 });

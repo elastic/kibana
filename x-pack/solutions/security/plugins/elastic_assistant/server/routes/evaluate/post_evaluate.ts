@@ -71,7 +71,7 @@ export const postEvaluateRoute = (
       },
       options: {
         timeout: {
-          idleSocket: ROUTE_HANDLER_TIMEOUT,
+          idleSocket: RESPONSE_TIMEOUT,
         },
       },
     })
@@ -206,7 +206,7 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: ROUTE_HANDLER_TIMEOUT,
+                connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
                 evaluationId,

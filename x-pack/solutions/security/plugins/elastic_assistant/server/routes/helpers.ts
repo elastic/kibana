@@ -51,7 +51,7 @@ import {
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ElasticAssistantRequestHandlerContext } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
@@ -248,7 +248,6 @@ export interface LangChainExecuteParams {
     traceData?: Message['traceData'],
     isError?: boolean
   ) => Promise<void>;
-  getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
@@ -273,7 +272,6 @@ export const langChainExecute = async ({
   logger,
   conversationId,
   onLlmResponse,
-  getElser,
   response,
   responseLanguage,
   isStream = true,
