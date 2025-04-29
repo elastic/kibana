@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  EuiButtonIconProps,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -63,25 +62,25 @@ export const getSharedActions = ({
   core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
   customRemoveModalText?: { title?: string; description?: string };
 }) => [
-  getOpenLayerSettingsAction({
-    hasLayerSettings,
-    openLayerSettings,
-  }),
-  getCloneLayerAction({
-    execute: onCloneLayer,
-    layerIndex,
-    activeVisualization,
-    isTextBasedLanguage,
-  }),
-  getRemoveLayerAction({
-    execute: onRemoveLayer,
-    layerIndex,
-    layerType,
-    isOnlyLayer,
-    core,
-    customModalText: customRemoveModalText,
-  }),
-];
+    getOpenLayerSettingsAction({
+      hasLayerSettings,
+      openLayerSettings,
+    }),
+    getCloneLayerAction({
+      execute: onCloneLayer,
+      layerIndex,
+      activeVisualization,
+      isTextBasedLanguage,
+    }),
+    getRemoveLayerAction({
+      execute: onRemoveLayer,
+      layerIndex,
+      layerType,
+      isOnlyLayer,
+      core,
+      customModalText: customRemoveModalText,
+    }),
+  ];
 
 /** @internal **/
 const InContextMenuActions = (props: LayerActionsProps) => {
@@ -101,6 +100,16 @@ const InContextMenuActions = (props: LayerActionsProps) => {
       setPopover(false);
     }
   }, [isPopoverOpen]);
+
+  // `neutral` and `risk` variants belong to `severity` so they're not
+  // available in `euiTheme.colors` directly
+  const getColorFromTheme = useCallback(
+    (color: LayerAction['color']) =>
+      color === 'risk' || color === 'neutral'
+        ? euiTheme.colors.severity[color]
+        : euiTheme.colors[color!],
+    [euiTheme]
+  );
 
   return (
     <EuiOutsideClickDetector onOutsideClick={closePopover}>
@@ -144,16 +153,14 @@ const InContextMenuActions = (props: LayerActionsProps) => {
               }}
               {...(i.color
                 ? {
-                    css: css`
-                      color: ${euiTheme.colors[i.color as keyof EuiButtonIconProps['color']]};
+                  css: css`
+                      color: ${getColorFromTheme(i.color)};
                       &:hover {
-                        text-decoration-color: ${euiTheme.colors[
-                          i.color as keyof EuiButtonIconProps['color']
-                        ]} !important;
+                        text-decoration-color: ${getColorFromTheme(i.color)} !important;
                       }
                     `,
-                    size: 's', // need to be explicit here as css prop will disable the default small size
-                  }
+                  size: 's', // need to be explicit here as css prop will disable the default small size
+                }
                 : {})}
             >
               <EuiText size={'s'} color={i.color}>
