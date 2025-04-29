@@ -190,60 +190,6 @@ export interface SavedObjectsType<Attributes = any> {
    * ```
    */
   modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
-
-  /**
-   * Allows to opt-in to the model version API.
-   *
-   * Must be a valid semver version (with the patch version being necessarily 0)
-   *
-   * When specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}
-   * to use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.
-   *
-   * Once opted in, it will no longer be possible to use the legacy migration API after the specified version.
-   *
-   * @example A **valid** usage example would be:
-   *
-   * ```ts
-   * {
-   *   name: 'foo',
-   *   // other mandatory attributes...
-   *   switchToModelVersionAt: '8.8.0',
-   *   migrations: {
-   *     '8.1.0': migrateTo810,
-   *     '8.7.0': migrateTo870,
-   *   },
-   *   modelVersions: {
-   *     '1': modelVersion1
-   *   }
-   * }
-   * ```
-   *
-   * @example An **invalid** usage example would be:
-   *
-   * ```ts
-   * {
-   *   name: 'foo',
-   *   // other mandatory attributes...
-   *   switchToModelVersionAt: '8.9.0',
-   *   migrations: {
-   *     '8.1.0': migrateTo8_1,
-   *     '8.9.0': migrateTo8_9, // error: migration registered for the switch version
-   *     '8.10.0': migrateTo8_10, // error: migration registered for after the switch version
-   *   },
-   *   modelVersions: {
-   *     '1': modelVersion1
-   *   }
-   * }
-   * ```
-   *
-   * Please refer to the {@link SavedObjectsType.modelVersions | modelVersion API} for more documentation on
-   * the new API.
-   *
-   * @remarks All types will be forced to switch to use the new API during `8.10.0`. This switch is
-   *          allowing types owners to switch their types before the milestone (and for testing purposes).
-   */
-  switchToModelVersionAt?: string;
-
   /**
    * Function returning the title to display in the management table.
    * If not defined, will use the object's type and id to generate a label.
