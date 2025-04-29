@@ -12,7 +12,8 @@ import { getFieldCellActions, getFieldValueCellActions } from './table_cell_acti
 import { FieldRow } from './field_row';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { copyToClipboard } from '@elastic/eui';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
@@ -135,21 +136,23 @@ describe('TableActions', () => {
         render(<>{actions}</>);
       });
 
-      it('should call the copy function', () => {
+      it('should call the copy function', async () => {
         // When
-        fireEvent.click(screen.getByText('Copy value'));
+        const user = userEvent.setup();
+        await user.click(screen.getByText('Copy value'));
 
         // Then
         expect(mockCopyToClipboard).toHaveBeenCalledWith(EuiCellParams.columnId);
       });
 
       describe('when the copy fails', () => {
-        it('should show a warning toast', () => {
+        it('should show a warning toast', async () => {
           // Given
           mockCopyToClipboard.mockReturnValue(false);
+          const user = userEvent.setup();
 
           // When
-          fireEvent.click(screen.getByText('Copy value'));
+          await user.click(screen.getByText('Copy value'));
 
           // Then
           expect(toastsMock.addWarning).toHaveBeenCalledTimes(1);
@@ -157,12 +160,13 @@ describe('TableActions', () => {
       });
 
       describe('when the copy succeeds', () => {
-        it('should show an info toast', () => {
+        it('should show an info toast', async () => {
           // Given
           mockCopyToClipboard.mockReturnValue(true);
+          const user = userEvent.setup();
 
           // When
-          fireEvent.click(screen.getByText('Copy value'));
+          await user.click(screen.getByText('Copy value'));
 
           // Then
           expect(toastsMock.addInfo).toHaveBeenCalledTimes(1);
