@@ -26,17 +26,13 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import {
-  AgentFinish,
-} from 'langchain/agents';
+import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
-import {
-  formatPrompt,
-} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
+import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
