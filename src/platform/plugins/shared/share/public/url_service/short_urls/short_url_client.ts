@@ -9,6 +9,7 @@
 
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
 import {
   LegacyShortUrlLocatorParams,
   LEGACY_SHORT_URL_LOCATOR_ID,
@@ -75,9 +76,26 @@ export class BrowserShortUrlClient implements IShortUrlClient {
   }
 
   public async createWithLocator<P extends SerializableRecord>(
-    params: ShortUrlCreateParams<P>
+    params: ShortUrlCreateParams<P>,
+    isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
-    const result = await this.create(params);
+    const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
+      const timeRange = inputParams.params?.timeRange as SerializableRecord;
+      if (isAbsoluteTime && timeRange?.from && timeRange?.to)
+        return {
+          ...inputParams,
+          params: {
+            ...inputParams.params,
+            timeRange: {
+              from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
+              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string),
+            },
+          },
+        };
+      return inputParams;
+    };
+
+    const result = await this.create(getUpdatedParams(params));
     const redirectLocator = this.dependencies.locators.get<ShortUrlRedirectLocatorParams>(
       SHORT_URL_REDIRECT_LOCATOR
     )!;
@@ -92,7 +110,10 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     };
   }
 
-  public async createFromLongUrl(longUrl: string): Promise<ShortUrlCreateFromLongUrlResponse> {
+  public async createFromLongUrl(
+    longUrl: string,
+    isAbsoluteTime?: boolean
+  ): Promise<ShortUrlCreateFromLongUrlResponse> {
     const parsedUrl = parseUrl(longUrl);
 
     if (!parsedUrl || !parsedUrl.path) {
@@ -110,12 +131,16 @@ export class BrowserShortUrlClient implements IShortUrlClient {
       throw new Error(`Locator "${LEGACY_SHORT_URL_LOCATOR_ID}" not found`);
     }
 
-    const result = await this.createWithLocator({
-      locator,
-      params: {
-        url: relativeUrl,
+    const result = await this.createWithLocator(
+      {
+        locator,
+        params: {
+          url: relativeUrl,
+        },
       },
-    });
+      isAbsoluteTime
+    );
+
     const shortUrl = await result.locator.getUrl(result.params, { absolute: true });
 
     return {
