@@ -27,7 +27,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -46,7 +46,6 @@ export interface StreamsAppSetupDependencies {
   discoverShared: DiscoverSharedPublicSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePublicSetup;
-  streams: StreamsPluginSetup;
   unifiedSearch: {};
 }
 

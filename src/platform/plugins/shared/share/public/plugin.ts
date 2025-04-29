@@ -9,7 +9,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
+import { ShareRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
@@ -25,7 +25,7 @@ import { registrations } from './lib/registrations';
 import type { BrowserUrlService } from './types';
 
 /** @public */
-export type SharePublicSetup = ShareMenuRegistrySetup & {
+export interface SharePublicSetup extends ShareMenuRegistrySetup {
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -41,7 +41,7 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
-};
+}
 
 /** @public */
 export type SharePublicStart = ShareMenuManagerStart & {
@@ -72,7 +72,7 @@ export class SharePlugin
       SharePublicStartDependencies
     >
 {
-  private readonly shareMenuRegistry?: ShareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareRegistry = new ShareRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
@@ -122,7 +122,7 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      ...this.shareMenuRegistry!.setup(),
+      ...this.shareRegistry.setup(),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -135,14 +135,18 @@ export class SharePlugin
   }
 
   public start(core: CoreStart): SharePublicStart {
-    const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    const sharingContextMenuStart = this.shareContextMenu.start(
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+
+    const { resolveShareItemsForShareContext } = this.shareRegistry.start({
+      urlService: this.url!,
+      anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
+    });
+
+    const sharingContextMenuStart = this.shareContextMenu.start({
       core,
-      this.url!,
-      this.shareMenuRegistry!.start(),
-      disableEmbed,
-      this.anonymousAccessServiceProvider
-    );
+      isServerless,
+      resolveShareItemsForShareContext,
+    });
 
     return {
       ...sharingContextMenuStart,
