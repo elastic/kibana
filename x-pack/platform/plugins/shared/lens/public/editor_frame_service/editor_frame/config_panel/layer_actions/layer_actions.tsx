@@ -62,25 +62,25 @@ export const getSharedActions = ({
   core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
   customRemoveModalText?: { title?: string; description?: string };
 }) => [
-    getOpenLayerSettingsAction({
-      hasLayerSettings,
-      openLayerSettings,
-    }),
-    getCloneLayerAction({
-      execute: onCloneLayer,
-      layerIndex,
-      activeVisualization,
-      isTextBasedLanguage,
-    }),
-    getRemoveLayerAction({
-      execute: onRemoveLayer,
-      layerIndex,
-      layerType,
-      isOnlyLayer,
-      core,
-      customModalText: customRemoveModalText,
-    }),
-  ];
+  getOpenLayerSettingsAction({
+    hasLayerSettings,
+    openLayerSettings,
+  }),
+  getCloneLayerAction({
+    execute: onCloneLayer,
+    layerIndex,
+    activeVisualization,
+    isTextBasedLanguage,
+  }),
+  getRemoveLayerAction({
+    execute: onRemoveLayer,
+    layerIndex,
+    layerType,
+    isOnlyLayer,
+    core,
+    customModalText: customRemoveModalText,
+  }),
+];
 
 /** @internal **/
 const InContextMenuActions = (props: LayerActionsProps) => {
@@ -153,14 +153,14 @@ const InContextMenuActions = (props: LayerActionsProps) => {
               }}
               {...(i.color
                 ? {
-                  css: css`
+                    css: css`
                       color: ${getColorFromTheme(i.color)};
                       &:hover {
                         text-decoration-color: ${getColorFromTheme(i.color)} !important;
                       }
                     `,
-                  size: 's', // need to be explicit here as css prop will disable the default small size
-                }
+                    size: 's', // need to be explicit here as css prop will disable the default small size
+                  }
                 : {})}
             >
               <EuiText size={'s'} color={i.color}>

@@ -23,13 +23,16 @@ export function RootCauseAnalysisPanel({
   const isSeverityColor = color === 'risk' || color === 'neutral';
   const panelClassName =
     color &&
-      color !== 'transparent' &&
-      color !== 'plain' &&
-      color !== 'subdued' &&
-      color !== 'highlighted'
+    color !== 'transparent' &&
+    color !== 'plain' &&
+    color !== 'subdued' &&
+    color !== 'highlighted'
       ? css`
           border: 1px solid;
-          border-color: ${rgba(isSeverityColor ? theme.colors.severity[color] : theme.colors[color], 0.25)};
+          border-color: ${rgba(
+            isSeverityColor ? theme.colors.severity[color] : theme.colors[color],
+            0.25
+          )};
         `
       : undefined;
 
