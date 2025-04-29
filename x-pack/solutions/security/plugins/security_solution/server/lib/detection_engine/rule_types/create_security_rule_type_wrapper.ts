@@ -367,11 +367,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
                 if (frozenIndices.length > 0) {
                   frozenIndicesQueriedCount = frozenIndices.length;
-                  wrapperWarnings.push(
-                    `This rule found frozen indices that could not be excluded by the time range filter ${frozenIndices
-                      .sort()
-                      .join(', ')}`
-                  );
                 }
               } catch (exc) {
                 wrapperWarnings.push(`Frozen indices check failed to execute ${exc}`);
@@ -570,6 +565,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
                   gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
+                  frozenIndicesQueriedCount,
                 },
                 userError: result.userError,
               });
@@ -591,6 +587,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
+                  frozenIndicesQueriedCount,
                 },
               });
             }
