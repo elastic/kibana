@@ -193,7 +193,10 @@ export function HeaderActions({
       {snoozeModalOpen && (
         <RuleSnoozeModal
           rule={rule}
-          onClose={() => setSnoozeModalOpen(false)}
+          onClose={() => {
+            setSnoozeModalOpen(false);
+            setIsRuleEditPopoverOpen(false);
+          }}
           onRuleChanged={async () => {
             refetch();
           }}
