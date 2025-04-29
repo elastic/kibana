@@ -42,7 +42,6 @@ describe('Post Evaluate Route', () => {
     },
   } as AuthenticatedUser;
 
-
   beforeEach(() => {
     jest.clearAllMocks();
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
