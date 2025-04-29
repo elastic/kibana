@@ -18,7 +18,13 @@ export const llmConnectorCardConfig: OnboardingCardConfig<AssistantCardMetadata>
   id: OnboardingCardId.searchAiLakeLLM,
   title: AI_CONNECTOR_CARD_TITLE,
   icon: AssistantIcon,
-  Component: React.lazy(() => import('../../common/connectors/assistant_card')),
+  Component: React.lazy(
+    () =>
+      import(
+        /* webpackChunkName: "onboarding_search_ai_lake_llm_connector_card" */
+        '../../common/connectors/assistant_card'
+      )
+  ),
   checkComplete: checkAssistantCardComplete,
   capabilitiesRequired: [`${SECURITY_FEATURE_ID}.external_detections`],
 };
