@@ -13,13 +13,13 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
-import {registerRoutes} from './routes';
-import {registerTypes} from './saved_objects';
-import {registerFeatures} from './features';
-import type {InternalServices} from './services/types';
-import {IntegrationRegistry} from './services/integrations';
-import {createServices} from './services/create_services';
-import type {WorkChatAppConfig} from './config';
+import { registerRoutes } from './routes';
+import { registerTypes } from './saved_objects';
+import { registerFeatures } from './features';
+import type { InternalServices } from './services/types';
+import { IntegrationRegistry } from './services/integrations';
+import { createServices } from './services/create_services';
+import type { WorkChatAppConfig } from './config';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -28,12 +28,14 @@ import type {
 } from './types';
 
 export class WorkChatAppPlugin
-  implements Plugin<
-    WorkChatAppPluginSetup,
-    WorkChatAppPluginStart,
-    WorkChatAppPluginSetupDependencies,
-    WorkChatAppPluginStartDependencies
-  > {
+  implements
+    Plugin<
+      WorkChatAppPluginSetup,
+      WorkChatAppPluginStart,
+      WorkChatAppPluginSetupDependencies,
+      WorkChatAppPluginStartDependencies
+    >
+{
   private readonly loggerFactory: LoggerFactory;
   private readonly config: WorkChatAppConfig;
   private readonly integrationRegistry = new IntegrationRegistry();
@@ -62,9 +64,9 @@ export class WorkChatAppPlugin
       },
     });
 
-    registerTypes({savedObjects: core.savedObjects});
+    registerTypes({ savedObjects: core.savedObjects });
 
-    registerFeatures({features: setupDeps.features});
+    registerFeatures({ features: setupDeps.features });
 
     return {
       integrations: {

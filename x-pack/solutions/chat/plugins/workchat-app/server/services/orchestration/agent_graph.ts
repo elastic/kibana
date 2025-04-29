@@ -48,14 +48,15 @@ export const createAgentGraph = async ({
 
   const toolsProvider = new ToolsProvider({ session, logger });
 
+  // @ts-ignore
   const searchTool = createSearchAgentTool({
     toolsProvider,
     chatModel,
     logger,
   });
-  const builtInTools = await toolsProvider.getBuiltInTools();
+  const allTools = await toolsProvider.getAllTools();
 
-  const tools = [...builtInTools, searchTool];
+  const tools = [...allTools];
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({
