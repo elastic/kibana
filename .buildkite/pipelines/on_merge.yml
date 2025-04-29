@@ -102,7 +102,7 @@ steps:
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 60
     retry:
       automatic:
