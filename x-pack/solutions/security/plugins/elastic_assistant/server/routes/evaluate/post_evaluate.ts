@@ -303,6 +303,7 @@ export const postEvaluateRoute = (
                   connectorId: connector.id,
                   llmType,
                   logger,
+                  model: connector.config?.defaultModel,
                   temperature: getDefaultArguments(llmType).temperature,
                   signal: abortSignal,
                   streaming: false,

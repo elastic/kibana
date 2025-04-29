@@ -52,7 +52,8 @@ export const postActionsConnectorExecuteRoute = (
       },
       options: {
         timeout: {
-          idleSocket: RESPONSE_TIMEOUT,
+          // Add extra time to the timeout to account for the time it takes to process the request
+          idleSocket: RESPONSE_TIMEOUT + 30 * 1000,
         },
       },
     })
