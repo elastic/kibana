@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
@@ -15,7 +15,7 @@ import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useDataViewContext } from '../../hooks/data_view_context';
 import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { ASSET_FIELDS, ASSET_INVENTORY_INDEX_PATTERN } from '../../constants';
+import { ASSET_FIELDS } from '../../constants';
 import { FilterGroupLoading } from './asset_inventory_filters_loading';
 import { ASSET_INVENTORY_RULE_TYPE_IDS } from './asset_inventory_rule_type_ids';
 
@@ -54,21 +54,6 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
   const { dataView, dataViewIsLoading } = useDataViewContext();
   const spaceId = useSpaceId();
 
-  const dataViewSpec = useMemo(
-    () =>
-      dataView
-        ? {
-            // TODO We need this hard-coded id because `ASSET_INVENTORY_INDEX_PATTERN` does not populate the filter dropdowns
-            id: 'cloud_asset_inventory-2773feaf-50bb-43f8-9fa9-8f9a5f85e566',
-            name: ASSET_INVENTORY_INDEX_PATTERN,
-            allowNoIndex: true,
-            title: dataView.getIndexPattern(),
-            timeFieldName: '@timestamp',
-          }
-        : null,
-    [dataView]
-  );
-
   if (!spaceId) {
     // TODO Add error handling if no spaceId is found
     return null;
@@ -90,7 +75,7 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
     <>
       <EuiSpacer size="l" />
       <FilterGroup
-        dataViewId={dataViewSpec?.id || null}
+        dataViewId={dataView.id || null}
         onFiltersChange={(filters: Filter[]) => {
           setQuery({ filters });
         }}
