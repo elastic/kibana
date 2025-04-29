@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useGetGlobalRuleExecutionSummary should call useQuery with the correct parameters 1`] = `
+Object {
+  "keepPreviousData": true,
+  "retry": 0,
+}
+`;
+
+exports[`useGetGlobalRuleExecutionSummary should pass a function that calls getGlobalRuleExecutionSummary and return its value 1`] = `
+Array [
+  Array [
+    Object {
+      "end": "2025-03-26T00:00:00.000Z",
+      "signal": Object {},
+      "start": "2025-03-25T00:00:00.000Z",
+    },
+  ],
+]
+`;

@@ -204,4 +204,15 @@ export const RULE_GAPS_PROGRESS_BAR = '[data-test-subj="rule-gaps-progress-bar"]
 export const RULE_GAPS_DATE_PICKER = '[data-test-subj="rule-gaps-date-picker"]';
 export const RULE_GAPS_DATE_PICKER_APPLY_REFRESH = `${RULE_GAPS_DATE_PICKER} .euiSuperUpdateButton`;
 
+export const RULE_EXECUTION_SUMMARY_PANEL_TIME_RANGE_SELECTOR =
+  '[data-test-subj="rule-with-gaps_overview-panel"] [data-test-subj="select-time-range-button"]';
+export const RULE_EXECUTION_SUMMARY_PANEL_SUCCESS_RATE_LABEL =
+  '[data-test-subj="rule-with-gaps_overview-panel"] [data-test-subj="rule-execution-success-rate-label"]';
+export const RULE_EXECUTION_SUMMARY_PANEL_SUCCESS_COUNT_LABEL =
+  '[data-test-subj="rule-with-gaps_overview-panel"] [data-test-subj="last-rule-execution-success-count-label"]';
+export const RULE_EXECUTION_SUMMARY_PANEL_FAILURE_COUNT_LABEL =
+  '[data-test-subj="rule-with-gaps_overview-panel"] [data-test-subj="last-rule-execution-failure-count-label"]';
+export const RULE_EXECUTION_SUMMARY_PANEL_WARNING_COUNT_LABEL =
+  '[data-test-subj="rule-with-gaps_overview-panel"] [data-test-subj="last-rule-execution-warning-count-label"]';
+
 export const MODIFIED_PREBUILT_RULE_BADGE = '[data-test-subj="modified-prebuilt-rule-badge"]';

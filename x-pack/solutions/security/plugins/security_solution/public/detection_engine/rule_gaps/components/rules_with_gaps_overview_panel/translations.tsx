@@ -40,3 +40,38 @@ export const RULE_GAPS_OVERVIEW_PANEL_LAST_7_DAYS_LABEL = i18n.translate(
     defaultMessage: 'Last 7 days',
   }
 );
+
+export const RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.executionSuccessRateLabel',
+  {
+    defaultMessage: 'Total execution success:',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_STATUS_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionStatusLabel',
+  {
+    defaultMessage: 'Last execution status summary:',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_SUCCESS_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionSuccessLabel',
+  {
+    defaultMessage: 'Succeeded:',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_FAILURE_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionFailureLabel',
+  {
+    defaultMessage: 'Failed:',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_WARNING_LABEL = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionWarningLabel',
+  {
+    defaultMessage: 'Warning:',
+  }
+);

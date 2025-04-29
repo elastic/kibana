@@ -18,15 +18,34 @@ import {
   EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiProgress,
+  EuiHealth,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 
 import { gapStatus } from '@kbn/alerting-plugin/common';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { defaultRangeValue, GapRangeValue } from '../../constants';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry/events/manual_rule_run/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useGetGlobalRuleExecutionSummary } from '../../api/hooks/use_get_global_rule_execution_summary';
+
+const DoubleDivider = styled.div`
+  border-right: ${(props) => props.theme.euiTheme.border.thin};
+  padding-left: 16px;
+  margin-right: 16px;
+  height: 24px;
+`;
+
+const SingleDivider = styled.div`
+  padding-left: 16px;
+  height: 24px;
+`;
 
 export const RulesWithGapsOverviewPanel = () => {
   const {
@@ -35,12 +54,18 @@ export const RulesWithGapsOverviewPanel = () => {
     },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data } = useGetRuleIdsWithGaps({
+  const { data, isLoading: isLoadingGapsData } = useGetRuleIdsWithGaps({
     gapRange: gapSearchRange ?? defaultRangeValue,
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
   });
+  const { data: executionSummaryData, isLoading: executionSummaryIsLoading } =
+    useGetGlobalRuleExecutionSummary({
+      range: gapSearchRange ?? defaultRangeValue,
+    });
   const [isPopoverOpen, setPopover] = useState(false);
   const telemetry = useKibana().services.telemetry;
+  const theme = useEuiTheme();
+  const isMediumOrBiggerScreen = useIsWithinMinBreakpoint('m');
 
   useEffect(() => {
     return () => {
@@ -72,7 +97,12 @@ export const RulesWithGapsOverviewPanel = () => {
   }));
 
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+    <EuiButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+      data-test-subj="select-time-range-button"
+    >
       {rangeValueToLabel[gapSearchRange ?? defaultRangeValue]}
     </EuiButton>
   );
@@ -88,13 +118,39 @@ export const RulesWithGapsOverviewPanel = () => {
     });
   };
 
+  const executionSuccessRate =
+    typeof executionSummaryData?.executions.total !== 'number'
+      ? 0
+      : Math.round(
+          (100 * executionSummaryData.executions.success) / executionSummaryData.executions.total
+        );
+
+  const gapsCounterBadgeColor = isLoadingGapsData
+    ? 'hollow'
+    : data?.total === 0
+    ? 'success'
+    : 'warning';
+
+  const DoubleDividerElement = isMediumOrBiggerScreen ? (
+    <EuiFlexItem grow={false}>
+      <DoubleDivider theme={theme} />
+    </EuiFlexItem>
+  ) : null;
+
+  const SingleDividerElement = isMediumOrBiggerScreen ? (
+    <EuiFlexItem grow={false}>
+      <SingleDivider />
+    </EuiFlexItem>
+  ) : null;
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup
         alignItems="center"
         justifyContent="flexStart"
-        gutterSize="m"
+        gutterSize="none"
         data-test-subj="rule-with-gaps_overview-panel"
+        wrap
       >
         <EuiFlexItem grow={false}>
           <EuiPopover
@@ -123,18 +179,114 @@ export const RulesWithGapsOverviewPanel = () => {
             />
           </EuiPopover>
         </EuiFlexItem>
+
+        {DoubleDividerElement}
+
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiText>
-                <b>{i18n.RULE_GAPS_OVERVIEW_PANEL_LABEL}</b>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="xs"
+                css={css`
+                  font-weight: ${theme.euiTheme.font.weight.semiBold};
+                `}
+              >
+                {i18n.RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_LABEL}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={data?.total === 0 ? 'success' : 'warning'}>{data?.total}</EuiBadge>
+              <EuiText size="xs" data-test-subj="rule-execution-success-rate-label">
+                {executionSuccessRate}
+                {'%'}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiProgress
+                css={css`
+                  width: 50px;
+                  ${executionSummaryIsLoading
+                    ? ''
+                    : `background-color: ${theme.euiTheme.colors.danger}`}
+                `}
+                valueText={false}
+                color="success"
+                value={executionSuccessRate}
+                max={100}
+                size="s"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+
+        {DoubleDividerElement}
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiText
+                size="xs"
+                css={css`
+                  font-weight: ${theme.euiTheme.font.weight.semiBold};
+                `}
+              >
+                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_STATUS_LABEL}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth
+                color="success"
+                textSize="xs"
+                data-test-subj="last-rule-execution-success-count-label"
+              >
+                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_SUCCESS_LABEL}{' '}
+                {executionSummaryData?.latestExecutionSummary.success}
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth
+                color="danger"
+                textSize="xs"
+                data-test-subj="last-rule-execution-failure-count-label"
+              >
+                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_FAILURE_LABEL}{' '}
+                {executionSummaryData?.latestExecutionSummary.failure}
+              </EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiHealth
+                color="warning"
+                textSize="xs"
+                data-test-subj="last-rule-execution-warning-count-label"
+              >
+                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_WARNING_LABEL}{' '}
+                {executionSummaryData?.latestExecutionSummary.warning}
+              </EuiHealth>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        {DoubleDividerElement}
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiText
+                size="xs"
+                css={css`
+                  font-weight: ${theme.euiTheme.font.weight.semiBold};
+                `}
+              >
+                {i18n.RULE_GAPS_OVERVIEW_PANEL_LABEL}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={gapsCounterBadgeColor}>{data?.total}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        {SingleDividerElement}
+
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton

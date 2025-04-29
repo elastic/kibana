@@ -11,11 +11,14 @@ import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '@kbn/security-solution-plugin/common/constants';
+import { INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH } from '@kbn/alerting-plugin/common';
 import type {
+  GetRuleExecutionResultsResponse,
   RuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
+import { RouteHandler } from 'cypress/types/net-stubbing';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 import { rootRequest } from './common';
 import { getSpaceUrl } from '../space';
@@ -168,4 +171,14 @@ export const enableRules = ({ names, ids }: EnableRulesParameters): Cypress.Chai
     },
     failOnStatusCode: false,
   });
+};
+
+export const interceptGetGlobalRuleExecutionSummary = (
+  response?: RouteHandler<void, GetRuleExecutionResultsResponse>
+) => {
+  cy.intercept(
+    'GET',
+    `${INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH}*`,
+    response
+  ).as('getGlobalRuleExecutionSummary');
 };

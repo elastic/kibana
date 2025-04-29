@@ -14,6 +14,7 @@ import {
   INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
   INTERNAL_ALERTING_GAPS_FIND_API_PATH,
   gapStatus,
+  INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH,
 } from '@kbn/alerting-plugin/common';
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
@@ -22,6 +23,7 @@ import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import type { FillGapByIdResponseV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/fill';
 import dateMath from '@kbn/datemath';
+import type { GetGlobalExecutionSummaryResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/global_execution_summary';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { GapStatus, ScheduleBackfillProps } from '../types';
 
@@ -240,6 +242,34 @@ export const fillGapByIdForRule = async ({
         rule_id: ruleId,
         gap_id: gapId,
       },
+      signal,
+    }
+  );
+
+/**
+ * Get a summary of the execution of all rules in the namespace given a time range.
+ * @param start ISO String of the start date
+ * @param end ISO String of the end date
+ * @param signal? AbortSignal
+ * @returns
+ */
+export const getGlobalRuleExecutionSummary = async ({
+  signal,
+  start,
+  end,
+}: {
+  start: string;
+  end: string;
+  signal?: AbortSignal;
+}): Promise<GetGlobalExecutionSummaryResponseBody> =>
+  KibanaServices.get().http.fetch<GetGlobalExecutionSummaryResponseBody>(
+    INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH,
+    {
+      query: {
+        date_start: start,
+        date_end: end,
+      },
+      method: 'GET',
       signal,
     }
   );
