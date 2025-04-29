@@ -10,6 +10,11 @@ import { isPromise } from 'util/types';
 import { withInferenceSpan } from './with_inference_span';
 import { GenAISemanticConventions } from './types';
 
+/**
+ * Wrapper around {@link withInferenceSpan} that sets the right attributes for a execute_tool operation span.
+ * @param options
+ * @param cb
+ */
 export function withExecuteToolSpan<T>(
   options: string | { name: string; toolCallId?: string; input?: unknown },
   cb: (span?: Span) => T

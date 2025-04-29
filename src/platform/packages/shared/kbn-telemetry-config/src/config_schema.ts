@@ -9,6 +9,9 @@
 import { Type, schema } from '@kbn/config-schema';
 import { TracingConfig } from './types';
 
+/**
+ * The tracing config schema that is exposed by the Telemetry plugin.
+ */
 export const telemetryTracingSchema: Type<TracingConfig> = schema.object({
   enabled: schema.maybe(schema.boolean()),
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),

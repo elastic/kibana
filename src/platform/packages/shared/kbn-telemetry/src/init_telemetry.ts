@@ -18,6 +18,16 @@ import {
 } from '@opentelemetry/sdk-trace-node';
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 
+/**
+ *
+ * Initializes OpenTelemetry (currently only tracing)
+ *
+ * @param argv                Process arguments
+ * @param rootDir             Root dir of Kibana repo
+ * @param isDistributable     Whether this is a distributable build
+ * @param serviceName         The service name used in resource attributes
+ * @returns                   A function that can be called on shutdown and allows exporters to flush their queue.
+ */
 export const initTelemetry = (
   argv: string[],
   rootDir: string,
@@ -32,10 +42,8 @@ export const initTelemetry = (
 
   const telemetryEnabled = telemetryConfig?.enabled === true;
 
-  const tracing = telemetryConfig?.tracing;
-
   // tracing is enabled only when telemetry is enabled and tracing is not disabled
-  const tracingEnabled = !!telemetryEnabled && !!tracing?.enabled;
+  const tracingEnabled = telemetryEnabled && telemetryConfig.tracing.enabled;
 
   if (!tracingEnabled) {
     return async () => {};
@@ -52,7 +60,7 @@ export const initTelemetry = (
     // by default, base sampling on parent context,
     // or for root spans, based on the configured sample rate
     sampler: new ParentBasedSampler({
-      root: new TraceIdRatioBasedSampler(tracing.sample_rate),
+      root: new TraceIdRatioBasedSampler(telemetryConfig.tracing.sample_rate),
     }),
     spanProcessors: [processor],
     resource: resourceFromAttributes({

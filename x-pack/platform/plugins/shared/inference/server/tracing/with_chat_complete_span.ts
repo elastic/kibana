@@ -126,6 +126,11 @@ function mapAssistantResponse({
   };
 }
 
+/**
+ * Wrapper around {@link withInferenceSpan} that sets the right attributes for a chat operation span.
+ * @param options
+ * @param cb
+ */
 export function withChatCompleteSpan<T extends ChatCompleteCompositeResponse<ToolOptions, boolean>>(
   options: InferenceGenerationOptions,
   cb: () => T

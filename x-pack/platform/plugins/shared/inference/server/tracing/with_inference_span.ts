@@ -13,6 +13,13 @@ import { GenAISemConvAttributes } from './types';
 
 export type InferenceSpanAttributes = GenAISemConvAttributes;
 
+/**
+ * Wraps a callback in an active span. If the callback returns an Observable
+ * or Promise, it will set the span status to the appropriate value when the
+ * async operation completes.
+ * @param options
+ * @param cb
+ */
 export function withInferenceSpan<T>(
   options: string | ({ name: string } & InferenceSpanAttributes),
   cb: (span: Span) => T
@@ -28,6 +35,9 @@ export function withInferenceSpan<T>(
       if (isPromise(res)) {
         return withInferenceSpanPromise(span, res) as T;
       }
+
+      span.setStatus({ code: SpanStatusCode.OK });
+      span.end();
       return res;
     } catch (error) {
       span.recordException(error);
@@ -46,6 +56,8 @@ function withInferenceSpan$<T>(
   const ctx = context.active();
 
   return new Observable<T>((subscriber) => {
+    // Make sure anything that happens during this callback uses the context
+    // that was active when this function was called
     const subscription = context.with(ctx, () => {
       return source$
         .pipe(
@@ -54,6 +66,9 @@ function withInferenceSpan$<T>(
               subscriber.next(value);
             },
             error: (error) => {
+              // Call span.end() and subscriber.error() in the parent context, to
+              // ensure a span that gets created right after doesn't get created
+              // as a child of this span, but as a child of its parent span.
               context.with(parentContext, () => {
                 span.recordException(error);
                 span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
@@ -61,9 +76,10 @@ function withInferenceSpan$<T>(
                 subscriber.error(error);
               });
             },
-            complete: () => {},
           }),
           switchMap((value) => {
+            // unwraps observable -> observable | promise which is a use case for the
+            // Observability AI Assistant in tool calling
             if (isObservable(value)) {
               return value;
             }
@@ -85,6 +101,9 @@ function withInferenceSpan$<T>(
           },
           complete: () => {
             context.with(parentContext, () => {
+              span.setStatus({
+                code: SpanStatusCode.OK,
+              });
               span.end();
               subscriber.complete();
             });
@@ -98,6 +117,7 @@ function withInferenceSpan$<T>(
 function withInferenceSpanPromise<T>(span: Span, promise: Promise<T>): Promise<T> {
   return promise
     .then((res) => {
+      span.setStatus({ code: SpanStatusCode.OK });
       span.end();
       return res;
     })

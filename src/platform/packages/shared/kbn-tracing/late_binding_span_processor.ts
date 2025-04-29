@@ -14,7 +14,7 @@ import { pull } from 'lodash';
 const noop = async () => {};
 
 /**
- * This processors allows consumers to register Span processors after startup,
+ * This processor allows consumers to register Span processors after startup,
  * which is useful if processors should be conditionally applied based on config
  * or runtime logic.
  */
