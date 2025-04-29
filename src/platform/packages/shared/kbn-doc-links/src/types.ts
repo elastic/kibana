@@ -17,6 +17,7 @@ export interface DocLinksMeta {
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
   searchLabsUrl: string;
+  apiDocsUrl: string;
 }
 
 /**
@@ -70,7 +71,6 @@ export interface DocLinks {
     readonly configuration: string;
     readonly elasticsearchOutput: string;
     readonly elasticsearchModule: string;
-    readonly kafkaOutput: string;
     readonly startup: string;
     readonly exportedFields: string;
     readonly suricataModule: string;
@@ -381,7 +381,6 @@ export interface DocLinks {
     simulatePipeline: string;
     tasks: string;
     timeUnits: string;
-    unfreezeIndex: string;
     updateTransform: string;
   }>;
   readonly observability: Readonly<{
@@ -408,6 +407,7 @@ export interface DocLinks {
     aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
+    authorization: string;
     guide: string;
     actionTypes: string;
     apmRulesErrorCount: string;
@@ -433,7 +433,6 @@ export interface DocLinks {
     slackApiAction: string;
     teamsAction: string;
     connectors: string;
-    legacyRuleApiDeprecations: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
@@ -448,7 +447,6 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
-    grantUserAccess: string;
     browserSystemDependencies: string;
     browserSandboxDependencies: string;
   }>;
@@ -494,6 +492,7 @@ export interface DocLinks {
     settings: string;
     logstashSettings: string;
     kafkaSettings: string;
+    kafkaOutputTopicsSettings: string;
     settingsFleetServerHostSettings: string;
     settingsFleetServerProxySettings: string;
     troubleshooting: string;
@@ -515,6 +514,7 @@ export interface DocLinks {
     onPremRegistry: string;
     secureLogstash: string;
     agentPolicy: string;
+    agentlessIntegrations: string;
     api: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
@@ -527,6 +527,7 @@ export interface DocLinks {
     proxiesSettings: string;
     unprivilegedMode: string;
     httpMonitoring: string;
+    agentLevelLogging: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -640,11 +641,12 @@ export interface DocLinks {
   readonly inferenceManagement: {
     readonly inferenceAPIDocumentation: string;
   };
-  readonly cases: {
-    readonly legacyApiDeprecations: string;
-  };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
+  };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
   };
 }
 

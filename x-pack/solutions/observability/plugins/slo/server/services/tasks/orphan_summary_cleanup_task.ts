@@ -105,8 +105,10 @@ export class SloOrphanSummaryCleanupTask {
           );
 
           await this.esClient.deleteByQuery({
-            wait_for_completion: false,
             index: SUMMARY_DESTINATION_INDEX_PATTERN,
+            wait_for_completion: false,
+            conflicts: 'proceed',
+            slices: 'auto',
             query: {
               bool: {
                 should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),

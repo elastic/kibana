@@ -23,14 +23,25 @@ const getClosingLineRegex = (closingMarker: string) => {
   return new RegExp(regExStr);
 };
 
+// A regex that matches a line containing a complete triple-quote string
+const inlineTripleQuoteString = /^.*?"""(.*?)""".*$/m;
+
 export const getFoldingRanges = (lines: string[], openingMarker: string, closingMarker: string) => {
   const ranges: monaco.languages.ProviderResult<monaco.languages.FoldingRange[]> = [];
   const stack: number[] = [];
   const openingLineRegex = getOpeningLineRegex(openingMarker);
   const closingLineRegex = getClosingLineRegex(closingMarker);
+  let insideTripleQuotes = false;
 
   for (let i = 0; i < lines.length; i++) {
     const lineContent = lines[i].trim();
+    if (lineContent.includes('"""') && !inlineTripleQuoteString.test(lineContent)) {
+      insideTripleQuotes = !insideTripleQuotes;
+    }
+    if (insideTripleQuotes) {
+      // If we are inside a multi-line triple-quote string, ignore opening/closing markers
+      continue;
+    }
     if (openingLineRegex.test(lineContent)) {
       stack.push(i + 1); // Line numbers start from 1 so we need to add 1 to the current index
     } else if (closingLineRegex.test(lineContent)) {

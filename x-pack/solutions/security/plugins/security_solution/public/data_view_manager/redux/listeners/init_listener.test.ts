@@ -53,6 +53,7 @@ describe('createInitListener', () => {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: [
           DataViewManagerScopeName.default,
+          DataViewManagerScopeName.detections,
           DataViewManagerScopeName.timeline,
           DataViewManagerScopeName.analyzer,
         ],

@@ -6,7 +6,7 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { McpTool } from '../mcp';
+import type { McpServerTool } from '../mcp';
 
 export const createMcpServer = ({
   name,
@@ -15,7 +15,7 @@ export const createMcpServer = ({
 }: {
   name: string;
   version?: string;
-  tools: McpTool[];
+  tools: McpServerTool[];
 }): McpServer => {
   const server = new McpServer({
     name,

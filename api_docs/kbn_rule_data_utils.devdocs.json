@@ -170,7 +170,7 @@
         "signature": [
           "(sortIds: ",
           "SortResults",
-          " | null | undefined) => any[] | null | undefined"
+          " | null | undefined) => (string | number)[] | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

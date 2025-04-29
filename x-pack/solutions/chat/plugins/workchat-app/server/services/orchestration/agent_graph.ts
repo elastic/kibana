@@ -9,33 +9,53 @@ import { StateGraph, Annotation } from '@langchain/langgraph';
 import { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import { StructuredTool } from '@langchain/core/tools';
+import type { Logger } from '@kbn/core/server';
+import type { ContentRef } from '@kbn/wci-common';
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { type McpGatewaySession, ToolsProvider } from './mcp_gateway';
 import type { Agent } from '../../../common/agents';
 import { withSystemPrompt } from './prompts';
+import { createSearchAgentTool } from './sub_agents';
+import { extractCitations } from './utils';
 
 export const createAgentGraph = async ({
   agent,
   chatModel,
-  integrationTools,
+  session,
+  logger,
 }: {
   agent: Agent;
   chatModel: InferenceChatModel;
-  integrationTools: StructuredTool[];
+  session: McpGatewaySession;
+  logger: Logger;
 }) => {
   const StateAnnotation = Annotation.Root({
+    // inputs
     initialMessages: Annotation<BaseMessage[]>({
       reducer: messagesStateReducer,
       default: () => [],
     }),
+    // outputs
     addedMessages: Annotation<BaseMessage[]>({
       reducer: messagesStateReducer,
       default: () => [],
     }),
+    citations: Annotation<ContentRef[]>({
+      reducer: (a = [], b = []) => [...a, ...b],
+      default: () => [],
+    }),
   });
 
-  const tools = [...integrationTools];
+  const toolsProvider = new ToolsProvider({ session, logger });
 
+  const searchTool = createSearchAgentTool({
+    toolsProvider,
+    chatModel,
+    logger,
+  });
+  const builtInTools = await toolsProvider.getBuiltInTools();
+
+  const tools = [...builtInTools, searchTool];
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({
@@ -65,8 +85,10 @@ export const createAgentGraph = async ({
 
   const toolHandler = async (state: typeof StateAnnotation.State) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
+    const citations = extractCitations({ messages: toolNodeResult });
     return {
-      addedMessages: [...state.addedMessages, ...toolNodeResult],
+      addedMessages: [...toolNodeResult],
+      citations,
     };
   };
 

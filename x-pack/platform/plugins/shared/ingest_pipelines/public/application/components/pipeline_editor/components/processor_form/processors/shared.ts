@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import { isPlainObject } from 'lodash';

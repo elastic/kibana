@@ -22,6 +22,8 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -69,6 +71,7 @@ export interface TaskManagerSetupContract {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+  registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -86,11 +89,13 @@ export type TaskManagerStartContract = Pick<
     removeIfExists: TaskStore['remove'];
   } & {
     getRegisteredTypes: () => string[];
+    registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
   };
 
 export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface TaskManagerPluginsSetup {
@@ -128,6 +133,7 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private canEncryptSavedObjects: boolean;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -138,6 +144,7 @@ export class TaskManagerPlugin
     this.nodeRoles = initContext.node.roles;
     this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
+    this.canEncryptSavedObjects = false;
   }
 
   isNodeBackgroundTasksOnly() {
@@ -168,6 +175,7 @@ export class TaskManagerPlugin
       });
 
     setupSavedObjects(core.savedObjects, this.config);
+
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -272,12 +280,15 @@ export class TaskManagerPlugin
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
+      registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
+        this.canEncryptSavedObjects = canEncrypt;
+      },
     };
   }
 
   public start(
-    { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud }: TaskManagerPluginsStart
+    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    { cloud, spaces }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -300,6 +311,7 @@ export class TaskManagerPlugin
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
+      savedObjectsService: savedObjects,
       esClient: elasticsearch.client.asInternalUser,
       index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
@@ -308,6 +320,9 @@ export class TaskManagerPlugin
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
       requestTimeouts: this.config.request_timeouts,
+      security,
+      canEncryptSavedObjects: this.canEncryptSavedObjects,
+      spaces,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -352,6 +367,7 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
+        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,
@@ -411,6 +427,9 @@ export class TaskManagerPlugin
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
+      registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
+        taskStore.registerEncryptedSavedObjectsClient(client);
+      },
     };
   }
 

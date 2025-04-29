@@ -6,9 +6,10 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { retrieveCases } from './tools';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { createMcpServer as createServer, McpServerTool, toolResultFactory } from '@kbn/wci-server';
+import { getCases, getAccounts, searchDocs, getById } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -23,19 +24,16 @@ interface FieldWithValues extends Field {
 }
 
 export async function createMcpServer({
+  integrationId,
   configuration,
   elasticsearchClient,
   logger,
 }: {
+  integrationId: string;
   configuration: Record<string, any>;
   elasticsearchClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<McpServer> {
-  const server = new McpServer({
-    name: 'wci-salesforce',
-    version: '1.0.0',
-  });
-
   const { index } = configuration;
 
   const enumFields: Field[] = [
@@ -61,21 +59,106 @@ export async function createMcpServer({
     priorityValues.length ? (priorityValues as [string, ...string[]]) : ['']
   );
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
+  const dataSources = ['support_case', 'account'];
 
-  server.tool(
-    'retrieve_cases',
-    `Retrieves Salesforce support cases with flexible filtering options`,
-    {
-      caseNumber: z
-        .array(z.string())
-        .optional()
-        .describe('Salesforce case number identifiers (preferred lookup method)'),
-      id: z
+  const searchTool: McpServerTool = {
+    name: 'search',
+    description: 'Searches through Salesforce data sources using a semantic query',
+    schema: {
+      objects: z
         .array(z.string())
         .optional()
         .describe(
-          'Salesforce internal IDs of the support cases (use only when specifically requested)'
+          `Return what type of Salesforce documents to search through. Can only be a out of these ${dataSources}`
         ),
+      query: z
+        .string()
+        .describe(
+          'Return Salesforce documents that relate to this query to search content semantically'
+        ),
+      createdAfter: z
+        .string()
+        .optional()
+        .describe('Return documents created after this date (format: YYYY-MM-DD)'),
+      createdBefore: z
+        .string()
+        .optional()
+        .describe('Return documents created before this date (format: YYYY-MM-DD)'),
+      updatedAfter: z
+        .string()
+        .optional()
+        .describe('Return documents updated after this date (format: YYYY-MM-DD)'),
+      updatedBefore: z
+        .string()
+        .optional()
+        .describe('Return documents updated before this date (format: YYYY-MM-DD)'),
+    },
+    execute: async ({
+      objects,
+      query,
+      createdAfter,
+      createdBefore,
+      updatedAfter,
+      updatedBefore,
+    }) => {
+      try {
+        const content = await searchDocs({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          filters: {
+            query,
+            objects,
+            createdAfter,
+            createdBefore,
+            updatedAfter,
+            updatedBefore,
+          },
+        });
+
+        return toolResultFactory.contentList(content);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
+  const getTool: McpServerTool = {
+    name: 'get',
+    description: 'Retrieves a Salesforce document by id only. If there is no id use another tool',
+    schema: {
+      id: z.string().describe('id of document '),
+      dataSource: z
+        .string()
+        .describe(
+          `what Salesforce object type to search through. Supported object types ${dataSources}`
+        ),
+    },
+    execute: async ({ id, dataSource }) => {
+      try {
+        const content = await getById({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          dataSource,
+          id,
+        });
+
+        return toolResultFactory.contentList(content);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
+  const getCasesTool: McpServerTool = {
+    name: 'search_cases',
+    description: 'Retrieves Salesforce support cases with flexible filtering options',
+    schema: {
+      caseNumber: z.array(z.string()).optional().describe('Salesforce case number identifiers'),
+      id: z.array(z.string()).optional().describe('Salesforce internal IDs of the support cases'),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
       sortField: z
         .string()
@@ -116,10 +199,6 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Return cases created before this date (format: YYYY-MM-DD)'),
-      semanticQuery: z
-        .string()
-        .optional()
-        .describe('Natural language query to search case content semantically'),
       updatedAfter: z
         .string()
         .optional()
@@ -128,8 +207,20 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Return cases updated before this date (format: YYYY-MM-DD)'),
+      commentAuthorEmail: z
+        .array(z.string())
+        .optional()
+        .describe('Filter cases by the email of the comment author'),
+      commentCreatedAfter: z
+        .string()
+        .optional()
+        .describe('Filter cases with comments created after this date (format: YYYY-MM-DD)'),
+      commentCreatedBefore: z
+        .string()
+        .optional()
+        .describe('Filter cases with comments created before this date (format: YYYY-MM-DD)'),
     },
-    async ({
+    execute: async ({
       id,
       size = 10,
       sortField,
@@ -139,36 +230,122 @@ export async function createMcpServer({
       caseNumber,
       createdAfter,
       createdBefore,
-      semanticQuery,
       status,
       updatedAfter,
       updatedBefore,
+      commentAuthorEmail,
+      commentCreatedAfter,
+      commentCreatedBefore,
+      ownerEmail,
     }) => {
-      const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
-        id,
-        size,
-        sortField,
-        sortOrder,
-        priority,
-        closed,
-        caseNumber,
-        createdAfter,
-        createdBefore,
-        semanticQuery,
-        status,
-        updatedAfter,
-        updatedBefore,
+      try {
+        const caseContent = await getCases({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          params: {
+            id,
+            size,
+            sortField,
+            sortOrder,
+            priority,
+            closed,
+            caseNumber,
+            createdAfter,
+            createdBefore,
+            status,
+            updatedAfter,
+            updatedBefore,
+            commentAuthorEmail,
+            commentCreatedAfter,
+            commentCreatedBefore,
+            ownerEmail,
+          },
+        });
+
+        logger.info(`Retrieved ${caseContent.length} support cases`);
+
+        return toolResultFactory.contentList(caseContent);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
+  const getAccountsTool: McpServerTool = {
+    name: 'search_accounts',
+    description: 'Retrieves Salesforce accounts with flexible filtering options',
+    schema: {
+      id: z.array(z.string()).optional().describe('Salesforce internal IDs of the accounts'),
+      size: z
+        .number()
+        .int()
+        .positive()
+        .default(10)
+        .describe('Maximum number of accounts to return'),
+      sortField: z
+        .string()
+        .optional()
+        .describe(`Field to sort results by. Can only be one of these ${sortableFields}`),
+      sortOrder: z
+        .string()
+        .optional()
+        .describe(
+          `Sorting order. Can only be 'desc' meaning sort in descending order or 'asc' meaning sort in ascending order`
+        ),
+      ownerEmail: z
+        .array(z.string())
+        .optional()
+        .describe('Emails of account owners/assignees to filter results'),
+      isPartner: z.boolean().optional().describe('Filter accounts by partner status (true/false)'),
+      createdAfter: z
+        .string()
+        .optional()
+        .describe('Return accounts created after this date (format: YYYY-MM-DD)'),
+      createdBefore: z
+        .string()
+        .optional()
+        .describe('Return accounts created before this date (format: YYYY-MM-DD)'),
+    },
+    execute: async ({
+      id,
+      size = 10,
+      sortField,
+      sortOrder,
+      isPartner,
+      createdAfter,
+      createdBefore,
+      ownerEmail,
+    }) => {
+      const accountContent = await getAccounts({
+        esClient: elasticsearchClient,
+        logger,
+        integrationId,
+        indexName: index,
+        params: {
+          id,
+          size,
+          sortField,
+          sortOrder,
+          isPartner,
+          createdAfter,
+          createdBefore,
+          ownerEmail,
+        },
       });
 
-      logger.info(`Retrieved ${caseContent.length} support cases`);
+      logger.info(`Retrieved ${accountContent.length} accounts`);
 
-      return {
-        content: caseContent,
-      };
-    }
-  );
+      return toolResultFactory.contentList(accountContent);
+    },
+  };
 
-  return server;
+  return createServer({
+    name: 'wci-salesforce',
+    version: '1.0.0',
+    tools: [searchTool, getTool, getCasesTool, getAccountsTool],
+  });
 }
 
 /**
@@ -229,7 +406,7 @@ async function getSortableFields(
       for (const [fieldName, fieldConfig] of Object.entries(properties)) {
         if (sortableFieldTypes.includes(fieldConfig.type)) {
           const sortableField = { field: fieldName, type: fieldConfig.type };
-          sortableFields.push(sortableField);
+          sortableFields.push(sortableField.field);
         }
       }
       return sortableFields;

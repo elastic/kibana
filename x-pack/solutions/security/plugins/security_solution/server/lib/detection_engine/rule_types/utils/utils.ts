@@ -31,7 +31,11 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type {
+  DocLinksServiceSetup,
+  ElasticsearchClient,
+  IUiSettingsClient,
+} from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -91,35 +95,32 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
+  docLinks: DocLinksServiceSetup;
 }): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
-
+  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
+  const apiKeyDocs = docLinks.links.alerting.authorization;
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
-
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames
     : indexNames.filter((indexName) => {
         return !isCCSRemoteIndexName(indexName);
       });
-
   const [, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
-
   let warningStatusMessage;
 
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
+    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
   }
-
   return warningStatusMessage;
 };
 
@@ -491,31 +492,6 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
- * Given a SignalSearchResponse this will return a valid last date if it can find one, otherwise it
- * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
- * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
- * is not correctly ISO8601 or epoch milliseconds formatted.
- * @param searchResult The result to try and parse out the timestamp.
- * @param primaryTimestamp The primary timestamp to use.
- */
-export const lastValidDate = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->({
-  searchResult,
-  primaryTimestamp,
-}: {
-  searchResult: SignalSearchResponse<TAggregations>;
-  primaryTimestamp: TimestampOverride;
-}): Date | undefined => {
-  if (searchResult.hits.hits.length === 0) {
-    return undefined;
-  } else {
-    const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    return getValidDateFromDoc({ doc: lastRecord, primaryTimestamp });
-  }
-};
-
-/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
@@ -581,7 +557,6 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
-    lastLookBackDate: lastValidDate({ searchResult, primaryTimestamp }),
   });
 };
 
@@ -591,7 +566,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
-  lastLookBackDate,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -603,7 +577,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
-  lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -616,7 +589,6 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
-    lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -657,7 +629,6 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
-      lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -671,7 +642,6 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
-      lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -685,7 +655,6 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
-      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
@@ -741,7 +710,7 @@ export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
-    if (sortId == null || sortId === '' || sortId >= Number.MAX_SAFE_INTEGER) {
+    if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
       return '9223372036854775807';
     }
     return sortId;

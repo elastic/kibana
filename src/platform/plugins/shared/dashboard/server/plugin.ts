@@ -14,6 +14,7 @@ import {
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
@@ -32,6 +33,7 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -44,6 +46,7 @@ interface StartDeps {
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
+  share?: SharePluginStart;
 }
 
 export class DashboardPlugin
@@ -133,6 +136,19 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
+    if (plugins.share) {
+      plugins.share.url.locators.create(
+        new DashboardAppLocatorDefinition({
+          useHashedUrl: false,
+          getDashboardFilterFields: async (dashboardId: string) => {
+            throw new Error(
+              'Locator .getLocation() is not supported on the server with the `preserveSavedFilters` parameter.'
+            );
+          },
+        })
+      );
+    }
+
     if (plugins.taskManager) {
       scheduleDashboardTelemetry(this.logger, plugins.taskManager)
         .then(async () => {
@@ -144,7 +160,7 @@ export class DashboardPlugin
     }
 
     return {
-      contentClient: this.contentClient,
+      getContentClient: () => this.contentClient,
     };
   }
 

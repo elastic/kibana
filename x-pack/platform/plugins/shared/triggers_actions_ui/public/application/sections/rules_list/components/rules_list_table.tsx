@@ -539,6 +539,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           if (!rule.enabled) {
             return null;
           }
+
           return (
             <RulesListNotifyBadge
               showOnHover
@@ -550,6 +551,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 await onSnoozeRule(rule, snoozeSchedule);
               }}
               unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
+              isRuleEditable={rule.isEditable}
             />
           );
         },

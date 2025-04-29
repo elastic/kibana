@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-const actionVariableSchema = schema.object({
+export const actionVariableSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
   usesPublicBaseUrl: schema.maybe(schema.boolean()),
 });
 
-const actionGroupSchema = schema.object(
+export const actionGroupSchema = schema.object(
   {
     id: schema.string(),
     name: schema.string(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
@@ -122,16 +122,19 @@ export function Waterfall({
           display: flex;
           position: sticky;
           top: var(--euiFixedHeadersOffset, 0);
-          z-index: ${euiTheme.levels.content};
+          z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: 1px solid ${euiTheme.colors.mediumShade};
         `}
       >
-        <EuiButtonEmpty
+        <EuiButtonIcon
           data-test-subj="apmWaterfallButton"
+          size="m"
           css={css`
             position: absolute;
-            z-index: ${euiTheme.levels.content};
+            z-index: ${euiTheme.levels.menu};
+            padding: ${euiTheme.size.m};
+            width: auto;
           `}
           aria-label={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
             defaultMessage: 'Click to {isAccordionOpen} the waterfall',

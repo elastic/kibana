@@ -7,16 +7,28 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
-  createConcatStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-} from '@kbn/utils';
-import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
-import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
+  ContentPackEntry,
+  contentPackIncludedObjectsSchema,
+  isIncludeAll,
+} from '@kbn/content-packs-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { Asset } from '../../../common';
+import { DashboardAsset, DashboardLink } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
+import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
+import {
+  generateArchive,
+  parseArchive,
+  prepareForExport,
+  prepareForImport,
+  referenceManagedIndexPattern,
+} from '../../lib/content';
+
+const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
 const exportContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
@@ -29,12 +41,17 @@ const exportContentRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
+    body: z.object({
+      name: z.string(),
+      description: z.string(),
+      version: z.string(),
+      replaced_patterns: z.array(z.string()),
+      include: contentPackIncludedObjectsSchema,
+    }),
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   async handler({ params, request, response, getScopedClients, context }) {
@@ -42,33 +59,50 @@ const exportContentRoute = createServerRoute({
 
     await streamsClient.ensureStream(params.path.name);
 
-    const dashboards = await assetClient
-      .getAssets({ entityId: params.path.name, entityType: 'stream' })
-      .then((assets) => assets.filter(({ assetType }) => assetType === 'dashboard'));
+    if (!isIncludeAll(params.body.include) && params.body.include.objects.dashboards.length === 0) {
+      throw new StatusError(`Content pack must include at least one object`, 400);
+    }
+
+    function isDashboard(asset: Asset): asset is DashboardAsset {
+      return asset[ASSET_TYPE] === 'dashboard';
+    }
+
+    const dashboards = (await assetClient.getAssets(params.path.name))
+      .filter(isDashboard)
+      .filter(
+        (dashboard) =>
+          isIncludeAll(params.body.include) ||
+          params.body.include.objects.dashboards.includes(dashboard['asset.id'])
+      );
     if (dashboards.length === 0) {
-      throw new StatusError(`No dashboards are linked to [${params.path.name}] stream`, 400);
+      throw new StatusError('No included objects were found', 400);
     }
 
     const exporter = (await context.core).savedObjects.getExporter(soClient);
     const exportStream = await exporter.exportByObjects({
       request,
-      objects: dashboards.map((dashboard) => ({ id: dashboard.assetId, type: 'dashboard' })),
+      objects: dashboards.map((dashboard) => ({ id: dashboard[ASSET_ID], type: 'dashboard' })),
       includeReferencesDeep: true,
     });
 
-    const savedObjects: string[] = await createPromiseFromStreams([
+    const savedObjects: ContentPackEntry[] = await createPromiseFromStreams([
       exportStream,
-      createMapStream((savedObject) => {
-        return JSON.stringify(savedObject);
-      }),
       createConcatStream([]),
     ]);
+    const archive = await generateArchive(
+      params.body,
+      prepareForExport({
+        savedObjects,
+        source: params.path.name,
+        replacedPatterns: params.body.replaced_patterns,
+      })
+    );
 
     return response.ok({
-      body: { content: savedObjects.join('\n') },
+      body: archive,
       headers: {
-        'Content-Disposition': `attachment; filename="content.json"`,
-        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="${params.body.name}.zip"`,
+        'Content-Type': 'application/zip',
       },
     });
   },
@@ -82,6 +116,84 @@ const importContentRoute = createServerRoute({
     description: 'Links content objects to a stream.',
     body: {
       accepts: 'multipart/form-data',
+      maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
+      output: 'stream',
+    },
+  },
+  params: z.object({
+    path: z.object({
+      name: z.string(),
+    }),
+    body: z.object({
+      include: z
+        .string()
+        .transform((value) => contentPackIncludedObjectsSchema.parse(JSON.parse(value))),
+      content: z.instanceof(Readable),
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  async handler({ params, request, getScopedClients, context }) {
+    const { assetClient, soClient, streamsClient } = await getScopedClients({ request });
+
+    await streamsClient.ensureStream(params.path.name);
+
+    const contentPack = await parseArchive(params.body.content);
+
+    const importer = (await context.core).savedObjects.getImporter(soClient);
+
+    const savedObjects = prepareForImport({
+      target: params.path.name,
+      include: params.body.include,
+      savedObjects: contentPack.entries,
+    });
+
+    if (referenceManagedIndexPattern(savedObjects)) {
+      // integration package's dashboards may reference pre-existing data views
+      // that we need to install before import
+      await installManagedIndexPattern({
+        savedObjectsClient: soClient,
+        savedObjectsImporter: importer,
+      });
+    }
+
+    const { successResults, errors = [] } = await importer.import({
+      readStream: createListStream(savedObjects),
+      createNewCopies: false,
+      overwrite: true,
+    });
+
+    const createdAssets: Array<Omit<DashboardLink, 'asset.uuid'>> =
+      successResults
+        ?.filter((savedObject) => savedObject.type === 'dashboard')
+        .map((dashboard) => ({
+          [ASSET_TYPE]: 'dashboard',
+          [ASSET_ID]: dashboard.destinationId ?? dashboard.id,
+        })) ?? [];
+
+    if (createdAssets.length > 0) {
+      await assetClient.bulk(
+        params.path.name,
+        createdAssets.map((asset) => ({ index: { asset } }))
+      );
+    }
+
+    return { errors, created: createdAssets };
+  },
+});
+
+const previewContentRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/content/preview',
+  options: {
+    access: 'internal',
+    summary: 'Preview a content pack',
+    description: 'Returns a json representation of a content pack.',
+    body: {
+      accepts: 'multipart/form-data',
+      maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
   },
@@ -95,63 +207,16 @@ const importContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, getScopedClients, context }) {
-    const { assetClient, soClient, streamsClient } = await getScopedClients({ request });
-
-    await streamsClient.ensureStream(params.path.name);
-
-    const body: ContentPack = await new Promise((resolve, reject) => {
-      let data = '';
-      params.body.content.on('data', (chunk) => (data += chunk));
-      params.body.content.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          resolve(contentPackSchema.parse(parsed));
-        } catch (err) {
-          reject(new StatusError('Invalid content pack format', 400));
-        }
-      });
-      params.body.content.on('error', (error) => reject(error));
-    });
-
-    const updatedSavedObjectsStream = await createPromiseFromStreams([
-      await createSavedObjectsStreamFromNdJson(Readable.from(body.content)),
-      createConcatStream([]),
-    ]);
-
-    const importer = (await context.core).savedObjects.getImporter(soClient);
-    const { successResults, errors } = await importer.import({
-      readStream: createListStream(updatedSavedObjectsStream),
-      createNewCopies: true,
-      overwrite: true,
-    });
-
-    const createdAssets = (successResults ?? [])
-      .filter((savedObject) => savedObject.type === 'dashboard')
-      .map((dashboard) => ({
-        assetType: 'dashboard' as const,
-        assetId: dashboard.destinationId ?? dashboard.id,
-      }));
-
-    if (createdAssets.length > 0) {
-      await assetClient.bulk(
-        { entityId: params.path.name, entityType: 'stream' },
-        createdAssets.map((asset) => ({
-          index: { asset },
-        }))
-      );
-    }
-
-    return { errors, created: createdAssets };
+  async handler({ params }) {
+    return await parseArchive(params.body.content);
   },
 });
 
 export const contentRoutes = {
   ...exportContentRoute,
   ...importContentRoute,
+  ...previewContentRoute,
 };

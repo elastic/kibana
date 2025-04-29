@@ -12,7 +12,6 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE_FIELD,
   TraceDocumentOverview,
   SERVICE_ENVIRONMENT_FIELD,
-  SPAN_DURATION_FIELD,
   SPAN_SUBTYPE_FIELD,
   SPAN_TYPE_FIELD,
 } from '@kbn/discover-utils';
@@ -24,7 +23,6 @@ import {
   FieldConfiguration,
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
-import { asDuration } from '../../utils';
 
 export const getSpanFieldConfiguration = (
   attributes: TraceDocumentOverview
@@ -37,13 +35,6 @@ export const getSpanFieldConfiguration = (
       }),
       content: (value) => <EuiText size="xs">{value}</EuiText>,
       value: attributes[SPAN_NAME_FIELD],
-    },
-    [SPAN_DURATION_FIELD]: {
-      title: i18n.translate('unifiedDocViewer.observability.traces.details.spanDuration.title', {
-        defaultMessage: 'Duration',
-      }),
-      content: (value) => <EuiText size="xs">{asDuration(value as number)}</EuiText>,
-      value: attributes[SPAN_DURATION_FIELD] ?? 0,
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: {
       title: i18n.translate(

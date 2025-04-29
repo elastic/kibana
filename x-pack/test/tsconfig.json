@@ -190,5 +190,8 @@
     "@kbn/scout-info",
     "@kbn/inference-common",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/aiops-change-point-detection",
+    "@kbn/es-errors",
+    "@kbn/content-packs-schema",
   ]
 }

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AuthzDisabled } from '@kbn/core-security-server';
 import type { QueryRolesResult } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '../..';
@@ -34,10 +35,7 @@ export function defineQueryRolesRoutes({
         tags: ['oas-tags:roles'],
       },
       security: {
-        authz: {
-          enabled: false,
-          reason: `This route delegates authorization to Core's scoped ES cluster client`,
-        },
+        authz: AuthzDisabled.delegateToESClient,
       },
     })
     .addVersion(

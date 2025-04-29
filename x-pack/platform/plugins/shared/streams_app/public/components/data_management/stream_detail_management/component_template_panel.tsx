@@ -95,13 +95,6 @@ export function ComponentTemplatePanel({
     [onFlyoutOpen]
   );
 
-  const sorting = {
-    sort: {
-      field: 'name',
-      direction: 'asc' as const,
-    },
-  };
-
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -114,7 +107,6 @@ export function ComponentTemplatePanel({
           <EuiInMemoryTable
             items={componentTemplates}
             columns={columns}
-            sorting={sorting}
             tableLayout={'auto'}
             // align text with heading
             className={css`

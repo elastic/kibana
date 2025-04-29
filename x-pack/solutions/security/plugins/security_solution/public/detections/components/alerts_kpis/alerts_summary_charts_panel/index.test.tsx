@@ -18,7 +18,8 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-describe('AlertsSummaryChartsPanel', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/218302
+describe.skip('AlertsSummaryChartsPanel', () => {
   const mockSetIsExpanded = jest.fn();
   const defaultProps = {
     signalIndexName: 'signalIndexName',

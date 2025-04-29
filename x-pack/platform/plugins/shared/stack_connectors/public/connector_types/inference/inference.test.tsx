@@ -31,7 +31,7 @@ describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.selectMessage).toBe(
-      'Use the Elastic LLM for your chat and RAG usecases.'
+      'Use the Elastic Managed LLM for your chat and RAG use cases.'
     );
     expect(actionTypeModel.actionTypeTitle).toBe('AI Connector');
   });

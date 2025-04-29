@@ -13,8 +13,9 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
+import {
   ApiConfig,
   ContentReferencesStore,
   DefendInsightGenerationInterval,
@@ -22,6 +23,9 @@ import type {
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
+  DEFEND_INSIGHTS_ID,
+  DefendInsightStatus,
+  DefendInsightType,
 } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -30,15 +34,9 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DEFEND_INSIGHTS_ID,
-  DefendInsightStatus,
-  DefendInsightType,
-  DefendInsightsGetRequestQuery,
-} from '@kbn/elastic-assistant-common';
 
 import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
-import type { GetRegisteredTools } from '../../services/app_context';
+import { CallbackIds, GetRegisteredTools, appContextService } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
 import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
@@ -269,6 +267,18 @@ export async function createDefendInsight(
   };
 }
 
+const extractInsightsForTelemetryReporting = (
+  insightType: DefendInsightType,
+  insights: DefendInsights
+): string[] => {
+  switch (insightType) {
+    case DefendInsightType.Enum.incompatible_antivirus:
+      return insights.map((insight) => insight.group);
+    default:
+      return [];
+  }
+};
+
 export async function updateDefendInsights({
   anonymizedEvents,
   apiConfig,
@@ -280,6 +290,7 @@ export async function updateDefendInsights({
   logger,
   startTime,
   telemetry,
+  insightType,
 }: {
   anonymizedEvents: Document[];
   apiConfig: ApiConfig;
@@ -291,6 +302,7 @@ export async function updateDefendInsights({
   logger: Logger;
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
+  insightType: DefendInsightType;
 }) {
   try {
     const currentInsight = await dataClient.getDefendInsight({
@@ -324,13 +336,19 @@ export async function updateDefendInsights({
       defendInsightUpdateProps: updateProps,
       authenticatedUser,
     });
+
     telemetry.reportEvent(DEFEND_INSIGHT_SUCCESS_EVENT.eventType, {
       actionTypeId: apiConfig.actionTypeId,
       eventsContextCount: updateProps.eventsContextCount,
       insightsGenerated: updateProps.insights?.length ?? 0,
+      insightsDetails: extractInsightsForTelemetryReporting(
+        insightType,
+        updateProps.insights || []
+      ),
       durationMs,
       model: apiConfig.model,
       provider: apiConfig.provider,
+      insightType,
     });
   } catch (updateErr) {
     logger.error(updateErr);
@@ -345,18 +363,14 @@ export async function updateDefendInsights({
 }
 
 export async function updateDefendInsightsLastViewedAt({
-  params,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  params: DefendInsightsGetRequestQuery;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse[]> {
-  const defendInsights = await dataClient.findDefendInsightsByParams({
-    params,
-    authenticatedUser,
-  });
   if (!defendInsights.length) {
     return [];
   }
@@ -376,16 +390,20 @@ export async function updateDefendInsightsLastViewedAt({
 }
 
 export async function updateDefendInsightLastViewedAt({
-  id,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  id: string;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse | undefined> {
   return (
-    await updateDefendInsightsLastViewedAt({ params: { ids: [id] }, authenticatedUser, dataClient })
+    await updateDefendInsightsLastViewedAt({
+      defendInsights,
+      authenticatedUser,
+      dataClient,
+    })
   )[0];
 }
 
@@ -572,6 +590,14 @@ export const handleGraphError = async ({
       provider: apiConfig.provider,
     });
   }
+};
+
+export const runExternalCallbacks = async (
+  callback: CallbackIds,
+  ...args: [KibanaRequest] | [KibanaRequest, unknown]
+) => {
+  const callbacks = appContextService.getRegisteredCallbacks(callback);
+  await Promise.all(callbacks.map((cb) => Promise.resolve(cb(...args))));
 };
 
 export const throwIfErrorCountsExceeded = ({

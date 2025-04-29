@@ -8,15 +8,20 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
-import { differenceBy } from 'lodash';
+import { cloneDeep, differenceBy } from 'lodash';
+import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
 import {
   defaultTabState,
   internalStateSlice,
+  type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { createTabRuntimeState } from '../runtime_state';
+import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
+import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { GLOBAL_STATE_URL_KEY } from '../../discover_global_state_container';
+import type { DiscoverAppState } from '../../discover_app_state_container';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -28,6 +33,7 @@ export const setTabs: InternalStateThunkActionCreator<
     const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
 
     for (const tab of removedTabs) {
+      dispatch(disconnectTab({ tabId: tab.id }));
       delete runtimeStateManager.tabs.byId[tab.id];
     }
 
@@ -38,45 +44,89 @@ export const setTabs: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.setTabs(params));
   };
 
-export interface UpdateTabsParams {
-  currentTabId: string;
-  updateState: TabbedContentState;
-  stopSyncing?: () => void;
-}
-
-export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
-  ({ currentTabId, updateState: { items, selectedItem }, stopSyncing }) =>
-  async (dispatch, getState, { urlStateStorage }) => {
+export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], Promise<void>> =
+  ({ items, selectedItem }) =>
+  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
-    const currentTab = selectTab(currentState, currentTabId);
+    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     let updatedTabs = items.map<TabState>((item) => {
-      const existingTab = currentState.tabs.byId[item.id];
+      const existingTab = selectTab(currentState, item.id);
       return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      stopSyncing?.();
+      const previousTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+      const previousTabStateContainer = previousTabRuntimeState.stateContainer$.getValue();
 
-      updatedTabs = updatedTabs.map((tab) =>
-        tab.id === currentTab.id
-          ? {
-              ...tab,
-              globalState: urlStateStorage.get('_g') ?? undefined,
-              appState: urlStateStorage.get('_a') ?? undefined,
-            }
-          : tab
-      );
+      previousTabStateContainer?.actions.stopSyncing();
 
-      const existingTab = selectedItem ? currentState.tabs.byId[selectedItem.id] : undefined;
+      updatedTabs = updatedTabs.map((tab) => {
+        if (tab.id !== currentTab.id) {
+          return tab;
+        }
 
-      if (existingTab) {
-        await urlStateStorage.set('_g', existingTab.globalState);
-        await urlStateStorage.set('_a', existingTab.appState);
+        const {
+          time: timeRange,
+          refreshInterval,
+          filters,
+        } = previousTabStateContainer?.globalState.get() ?? {};
+
+        return { ...tab, lastPersistedGlobalState: { timeRange, refreshInterval, filters } };
+      });
+
+      const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
+      const nextTabRuntimeState = selectedItem
+        ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
+        : undefined;
+      const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
+
+      if (nextTab && nextTabStateContainer) {
+        const {
+          timeRange,
+          refreshInterval,
+          filters: globalFilters,
+        } = nextTab.lastPersistedGlobalState;
+        const appState = nextTabStateContainer.appState.getState();
+        const { filters: appFilters, query } = appState;
+
+        await urlStateStorage.set<QueryState>(GLOBAL_STATE_URL_KEY, {
+          time: timeRange,
+          refreshInterval,
+          filters: globalFilters,
+        });
+        await urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, appState);
+
+        services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
+        services.timefilter.setRefreshInterval(
+          refreshInterval ?? services.timefilter.getRefreshIntervalDefaults()
+        );
+        services.filterManager.setGlobalFilters(cloneDeep(globalFilters ?? []));
+        services.filterManager.setAppFilters(cloneDeep(appFilters ?? []));
+        services.data.query.queryString.setQuery(
+          query ?? services.data.query.queryString.getDefaultQuery()
+        );
+
+        nextTabStateContainer.actions.initializeAndSync();
       } else {
-        await urlStateStorage.set('_g', {});
-        await urlStateStorage.set('_a', {});
+        await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
+        await urlStateStorage.set(APP_STATE_URL_KEY, null);
       }
     }
 
-    dispatch(setTabs({ allTabs: updatedTabs }));
+    dispatch(
+      setTabs({
+        allTabs: updatedTabs,
+        selectedTabId: selectedItem?.id ?? currentTab.id,
+      })
+    );
+  };
+
+export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
+  ({ tabId }) =>
+  (_, __, { runtimeStateManager }) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const stateContainer = tabRuntimeState.stateContainer$.getValue();
+    stateContainer?.dataState.cancel();
+    stateContainer?.actions.stopSyncing();
+    tabRuntimeState.customizationService$.getValue()?.cleanup();
   };

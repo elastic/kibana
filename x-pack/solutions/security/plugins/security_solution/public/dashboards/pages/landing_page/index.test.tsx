@@ -24,8 +24,8 @@ jest.mock('../../../common/containers/tags/api');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardListingTable: jest.fn().mockReturnValue(<span data-test-subj="dashboardsTable" />),
-  DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
+  DashboardListingTable: jest.fn(() => <span data-test-subj="dashboardsTable" />),
+  DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
 }));
 
 const mockUseContractComponents = jest.fn(() => ({}));

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 import { isTypeof } from '../actions';
@@ -1558,6 +1558,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // exponential delay.  We will basically keep polling forever until the
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
+      } else if (isTypeof(left, 'task_completed_with_retriable_error')) {
+        return delayRetryState(
+          {
+            ...stateP,
+            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            skipRetryReset: true,
+          },
+          left.message,
+          stateP.retryAttempts
+        );
       } else {
         throwBadResponse(stateP, left);
       }

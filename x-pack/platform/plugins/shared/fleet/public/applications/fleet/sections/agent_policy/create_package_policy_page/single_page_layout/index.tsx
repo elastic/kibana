@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiOverlayMask,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
@@ -367,7 +368,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessIntegration } = useAgentless();
+  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -421,6 +422,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
+              isAgentlessDefault={isAgentlessDefault}
             />
           )}
 
@@ -462,6 +464,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       formState,
       extensionView,
       isAgentlessIntegration,
+      isAgentlessDefault,
       selectedSetupTechnology,
       integrationToEnable,
       isAgentlessSelected,
@@ -617,6 +620,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               </>
             )}
             <StepsWithLessPadding steps={steps} />
+            {formState === 'LOADING' ? (
+              <EuiOverlayMask headerZindexLocation="below">
+                <Loading />
+              </EuiOverlayMask>
+            ) : null}
             <EuiSpacer size="xl" />
             <EuiSpacer size="xl" />
             <CustomEuiBottomBar data-test-subj="integrationsBottomBar">

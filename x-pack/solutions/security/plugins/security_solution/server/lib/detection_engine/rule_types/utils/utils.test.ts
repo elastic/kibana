@@ -33,7 +33,6 @@ import {
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
-  lastValidDate,
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
@@ -51,7 +50,6 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
-  sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
   sampleAlertDocNoSortIdWithTimestamp,
   sampleAlertDocAADNoSortIdWithTimestamp,
@@ -744,7 +742,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -766,7 +763,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -840,123 +836,6 @@ describe('utils', () => {
         primaryTimestamp: 'event.ingested',
       });
       expect(success).toEqual(true);
-    });
-
-    test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
-      }
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
-        searchResult,
-        primaryTimestamp: TIMESTAMP,
-      });
-      expect(lastLookBackDate).toEqual(null);
-    });
-
-    test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
-      }
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
-        searchResult,
-        primaryTimestamp: TIMESTAMP,
-      });
-      expect(lastLookBackDate).toEqual(null);
-    });
-
-    test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
-      }
-      const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
-        searchResult,
-        primaryTimestamp: TIMESTAMP,
-      });
-      expect(lastLookBackDate).toEqual(null);
-    });
-  });
-
-  describe('lastValidDate', () => {
-    test('It returns undefined if the search result contains a null timestamp', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns undefined if the search result contains a undefined timestamp', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns undefined if the search result contains an invalid string value', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns normal date time if set', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
-    });
-
-    test('It returns date time from field if set there', () => {
-      const timestamp = '2020-10-07T19:27:19.136Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      if (searchResult.hits.hits[0] == null) {
-        throw new TypeError('Test requires one element');
-      }
-      searchResult.hits.hits[0] = {
-        ...searchResult.hits.hits[0],
-        fields: {
-          '@timestamp': [timestamp],
-        },
-      };
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date?.toISOString()).toEqual(timestamp);
-    });
-
-    test('It returns timestampOverride date time if set', () => {
-      const override = '2020-10-07T19:20:28.049Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
-      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
-      expect(date?.toISOString()).toEqual(override);
-    });
-
-    test('It returns timestampOverride date time from fields if set on it', () => {
-      const override = '2020-10-07T19:36:31.110Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      if (searchResult.hits.hits[0] == null) {
-        throw new TypeError('Test requires one element');
-      }
-      searchResult.hits.hits[0] = {
-        ...searchResult.hits.hits[0],
-        fields: {
-          different_timestamp: [override],
-        },
-      };
-      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
-      expect(date?.toISOString()).toEqual(override);
     });
   });
 
@@ -1086,7 +965,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1103,7 +981,6 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
-        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
@@ -1115,7 +992,6 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
-        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
@@ -1137,7 +1013,6 @@ describe('utils', () => {
         createdSignalsCount: 5,
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1157,7 +1032,6 @@ describe('utils', () => {
         createdSignalsCount: 0,
         createdSignals: [],
         errors: [],
-        lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
         warning: false,
@@ -1183,30 +1057,6 @@ describe('utils', () => {
       expect(success).toEqual(false);
     });
 
-    test('it merges search where the lastLookBackDate is the "next" date when given', () => {
-      const { lastLookBackDate } = mergeReturns([
-        createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
-        }),
-        createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-09-21T19:21:46.194Z'),
-        }),
-      ]);
-      expect(lastLookBackDate).toEqual(new Date('2020-09-21T19:21:46.194Z'));
-    });
-
-    test('it merges search where the lastLookBackDate is the "prev" if given undefined for "next', () => {
-      const { lastLookBackDate } = mergeReturns([
-        createSearchAfterReturnType({
-          lastLookBackDate: new Date('2020-08-21T19:21:46.194Z'),
-        }),
-        createSearchAfterReturnType({
-          lastLookBackDate: undefined,
-        }),
-      ]);
-      expect(lastLookBackDate).toEqual(new Date('2020-08-21T19:21:46.194Z'));
-    });
-
     test('it merges search where values from "next" and "prev" are computed together', () => {
       const merged = mergeReturns([
         createSearchAfterReturnType({
@@ -1215,7 +1065,6 @@ describe('utils', () => {
           createdSignalsCount: 3,
           createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
-          lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
           success: true,
           warningMessages: ['warning1'],
@@ -1226,7 +1075,6 @@ describe('utils', () => {
           createdSignalsCount: 2,
           createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
-          lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
           success: true,
           warningMessages: ['warning2'],
@@ -1239,7 +1087,6 @@ describe('utils', () => {
         createdSignalsCount: 5, // Adds the 3 and 2 together
         createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
-        lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
         warning: true,

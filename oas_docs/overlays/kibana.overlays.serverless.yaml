@@ -16,33 +16,12 @@ actions:
           kibana_url:
             default: <KIBANA_URL>
 # Add some tag descriptions and displayNames
-  - target: '$.tags[?(@.name=="alerting")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Alerting enables you to define rules, which detect complex conditions within your data.
-        When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. 
-        Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
-      externalDocs:
-        description: Alerting documentation
-        url: https://www.elastic.co/docs/current/serverless/rules
-      x-displayName: "Alerting"
   - target: '$.tags[?(@.name=="streams")]'
     description: Change tag description and displayName
     update:
       description: >
         Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
       x-displayName: "Streams"
-  - target: '$.tags[?(@.name=="connectors")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
-        Alerting rules can use connectors to run actions when rule conditions are met.
-      externalDocs:
-        description: Connector documentation
-        url: https://www.elastic.co/docs/current/serverless/action-connectors
-      x-displayName: "Connectors"
   - target: '$.tags[?(@.name=="data views")]'
     description: Change displayName
     update:
@@ -74,6 +53,17 @@ actions:
       x-displayName: "System"
       description: >
         Get information about the system status, resource usage, and installed plugins.
+  - target: '$.tags[?(@.name=="saved objects")]'
+    description: Change displayName and description
+    update:
+      x-displayName: "Saved objects"
+      description: |
+        Export or import sets of saved objects.
+
+        To manage a specific type of saved object, use the corresponding APIs.
+        For example, use:
+
+        [Data views](../group/endpoint-data-views).
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

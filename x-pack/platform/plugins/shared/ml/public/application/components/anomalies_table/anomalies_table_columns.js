@@ -318,12 +318,22 @@ export function getColumns(
         const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
         return (
           <EuiLink
-            className="mlAnomalyCategoryExamples__link"
+            css={{
+              width: '100%',
+            }}
             onClick={() => toggleRow(item, ANOMALIES_TABLE_TABS.CATEGORY_EXAMPLES)}
           >
             {examples.map((example, i) => {
               return (
-                <span key={`example${i}`} className="category-example">
+                <span
+                  key={`example${i}`}
+                  css={{
+                    display: 'block',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
                   {example}
                 </span>
               );

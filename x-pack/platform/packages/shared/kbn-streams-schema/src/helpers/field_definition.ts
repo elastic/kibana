@@ -8,8 +8,8 @@
 import { omit } from 'lodash';
 import { FieldDefinitionConfig, InheritedFieldDefinition, WiredStreamDefinition } from '../models';
 
-// Parameters that we consider first class and provide a curated experience for
-const FIRST_CLASS_PARAMETERS = ['type', 'format'];
+// Parameters that we consider first class and provide a curated experience for, or are added as metadata.
+const FIRST_CLASS_PARAMETERS = ['type', 'format', 'from'];
 
 // Advanced parameters that we provide a generic experience (JSON blob) for
 export const getAdvancedParameters = (fieldName: string, fieldConfig: FieldDefinitionConfig) => {
