@@ -72,6 +72,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
   }) {
     super({
       dereferencedOas,
+      llmType: options.llmType,
     });
 
     this.options = options;
@@ -191,9 +192,9 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           messages: [
             new SystemMessage({
               content:
-                'You are Kibana API Client agent. You are an expert in using functions that interact' +
-                ' with the Kibana APIs. Try to use the functions at your disposal to perform the task requested. ' +
-                'If there is no function appropriate for the request, state in your own words that you cannot perform the task.',
+                'You are Kibana API Client agent. You are an expert in using functions that call' +
+                ' the Kibana APIs. Use the functions at your disposal to action requested by the user. ' +
+                'You do not need to confirm with the user before using a function.',
             }),
             new HumanMessage({ content: input }),
           ],

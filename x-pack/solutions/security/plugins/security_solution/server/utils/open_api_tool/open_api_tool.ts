@@ -18,7 +18,6 @@ import { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 
 export abstract class OpenApiTool<T> {
   private dereferencedOas: Oas;
-  private llmType: LlmType | undefined;
   private getParametersAsZodSchemaMemoized = memoize(
     this.getParametersAsZodSchemaInternal.bind(this),
     (args) => {
@@ -29,7 +28,6 @@ export abstract class OpenApiTool<T> {
   protected constructor(args: { dereferencedOas: Oas, llmType: LlmType | undefined }) {
     const { dereferencedOas } = args;
     this.dereferencedOas = dereferencedOas;
-    this.llmType = args.llmType;
   }
 
   protected getOperations() {
@@ -53,22 +51,21 @@ export abstract class OpenApiTool<T> {
       {} as Record<string, SchemaObject>
     );
 
+    return schemaTypeToSchemaObject
+
     const jsonSchemaToZodWithParserOverride = (schema: JsonSchema): z.ZodTypeAny => {
       return jsonSchemaToZod(schema as JsonSchema, {
         // Overrides to ensure schema is compatible with LLM provider
         parserOverride: (schema, refs) => {
           if (schema.enum && schema.enum.length == 1 && schema.enum[0] == '*') {
-            return z.enum(["*"])
+            return z.enum(["*"]) // jsonSchemaToZod would convert this to literal which is not supported by Gemini 
           }
           if (schema.anyOf && schema.default) {
-            if(typeof schema.default === 'string') {
-              return z.enum([schema.default])
-            }
-            delete schema.default
+            delete schema.default // Gemini does not support keys alongside anyOf
             return jsonSchemaToZodWithParserOverride(schema)
           }
           if (schema.type === "array" && isEmpty(schema.items)) {
-            return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())])
+            return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]) // OpenAi requires items in array to be defined
           }
           return undefined;
         },
