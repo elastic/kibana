@@ -9,8 +9,8 @@
 
 import { ComponentProps } from 'react';
 import { EuiToast } from '@elastic/eui';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { EventMetric, FieldType } from './event_types';
+import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { EventMetric, FieldType, eventTypes } from './event_types';
 
 type ToastMessageType = Exclude<ComponentProps<typeof EuiToast>['color'], 'success'>;
 
@@ -20,14 +20,26 @@ interface EventPayload {
   [FieldType.TOAST_MESSAGE_TYPE]: ToastMessageType;
 }
 
-export class EventReporter {
-  private reportEvent: AnalyticsServiceStart['reportEvent'];
+export class ToastsTelemetry {
+  private reportEvent?: AnalyticsServiceStart['reportEvent'];
 
-  constructor({ analytics }: { analytics: AnalyticsServiceStart }) {
-    this.reportEvent = analytics.reportEvent;
+  public setup({ analytics }: { analytics: AnalyticsServiceSetup }) {
+    eventTypes.forEach((eventType) => {
+      analytics.registerEventType(eventType);
+    });
+
+    return {};
   }
 
-  onDismissToast({
+  public start({ analytics }: { analytics: AnalyticsServiceStart }) {
+    this.reportEvent = analytics.reportEvent;
+
+    return {
+      onDismissToast: this.onDismissToast.bind(this),
+    };
+  }
+
+  private onDismissToast({
     recurrenceCount,
     toastMessage,
     toastMessageType,
@@ -36,7 +48,7 @@ export class EventReporter {
     recurrenceCount: number;
     toastMessageType: ToastMessageType;
   }) {
-    this.reportEvent<EventPayload>(EventMetric.TOAST_DISMISSED, {
+    this.reportEvent<EventPayload>?.(EventMetric.TOAST_DISMISSED, {
       [FieldType.RECURRENCE_COUNT]: recurrenceCount,
       [FieldType.TOAST_MESSAGE]: toastMessage,
       [FieldType.TOAST_MESSAGE_TYPE]: toastMessageType,
