@@ -52,7 +52,6 @@ describe('Util: isValidIndexName()', () => {
     expect(isValidIndexName('a'.repeat(255))).toBe(true);
     expect(isValidIndexName('a'.repeat(256))).toBe(false);
     // multi-byte character test
-    // because jest doesn't have TextEncoder this will still be true
-    expect(isValidIndexName('あ'.repeat(255))).toBe(true);
+    expect(isValidIndexName('あ'.repeat(255))).toBe(false);
   });
 });
