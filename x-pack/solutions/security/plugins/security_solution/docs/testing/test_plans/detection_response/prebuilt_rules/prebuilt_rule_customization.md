@@ -43,6 +43,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Detecting rule customizations](#detecting-rule-customizations)
     - [**Scenario: prebuilt rule's `is_customized` is set to true after it is customized**](#scenario-prebuilt-rules-is_customized-is-set-to-true-after-it-is-customized)
     - [**Scenario: prebuilt rule's `is_customized` value is not affected by specific fields**](#scenario-prebuilt-rules-is_customized-value-is-not-affected-by-specific-fields)
+    - [**Scenario: is\_customized calculation is not affected by customization adjacent fields**](#scenario-is_customized-calculation-is-not-affected-by-customization-adjacent-fields)
     - [**Scenario: User cannot change non-customizable rule fields on prebuilt rules**](#scenario-user-cannot-change-non-customizable-rule-fields-on-prebuilt-rules)
     - [**Scenario: User can revert a customized prebuilt rule to its original state**](#scenario-user-can-revert-a-customized-prebuilt-rule-to-its-original-state)
   - [Detecting rule customizations when base version is missing](#detecting-rule-customizations-when-base-version-is-missing)
@@ -71,6 +72,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**](#scenario-revert-prebuilt-rule-button-should-be-disabled-when-rules-base-version-is-missing)
     - [**Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**](#scenario-revert-prebuilt-rule-button-shouldnt-appear-if-rule-is-non-customzied)
     - [**Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rules-base-version-is-missing)
+    - [**Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rules-base-version-is-missing-1)
+    - [**Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**](#scenario-reverting-a-prebuilt-rule-doesnt-modify-customization-adjacent-fields)
 
 ## Useful information
 
@@ -102,6 +105,19 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 | Delete custom highlighted fields |
 | Update rule schedules |
 | Apply timeline template |
+| Update rule schedules |
+| Apply timeline template |
+
+````
+- **customization adjacent fields**: fields on a rule object that can be changed but aren't taken into account when calculating `is_customized` field. See list below.
+```Gherkin
+Examples:
+| actions         |
+| exceptions_list |
+| enabled         |
+| revision        |
+| meta            |
+````
 
 ## Requirements
 
@@ -241,13 +257,18 @@ And ruleSource should be "external"
 
 #### **Scenario: prebuilt rule's `is_customized` value is not affected by specific fields**
 
-**Automation**: 5 integration tests.
+#### **Scenario: is_customized calculation is not affected by customization adjacent fields**
+
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
 And it is non-customized
 When a user changes the <field_name> field so it differs from the base version
-Then the rule's `is_customized` value should remain `false`
+Then the rule's `is_customized` value should remain false
+
+Examples:
+<field_name> = all customization adjacent fields
 ```
 
 **Examples:**
@@ -261,7 +282,7 @@ Then the rule's `is_customized` value should remain `false`
 
 #### **Scenario: User cannot change non-customizable rule fields on prebuilt rules**
 
-**Automation**: 4 integration tests.
+**Automation**: one integration test per field.
 
 ```Gherkin
 Given a prebuilt rule installed
@@ -530,10 +551,90 @@ And for each prebuilt rule the response should contain a message that the action
 
 #### **Scenario: User can revert customized prebuilt rule to current Elastic version**
 
+**Automation**: 1 cypress test and 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user reverts the rule
+Then the rule should be modified to match the original Elastic rule object corresponding to its version number
+And the rule's `is_customized` value should be false
+```
+
 #### **Scenario: User can view diff between current and original Elastic rule versions in flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user navigates to that rule's details page
+And clicks the overflow actions button
+And clicks the revert rule button
+Then a rule diff flyout should open
+And this flyout should be read-only
+And should list all fields that are different between the current and base version
+```
 
 #### **Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**
 
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule does not have an existing base version
+When a user navigates to that rule's details page
+And clicks the overflow actions button
+Then the revert rule button should be disabled
+And have an informational tooltip on hover
+```
+
 #### **Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**
 
+<<<<<<< HEAD
+
 #### **Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**
+
+=======
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is non-customized
+When a user navigates to that rule's details page
+And clicks the overflow actions button
+Then the revert rule button should not be displayed as an option
+```
+
+#### **Scenario: Revert prebuilt rule endpoint returns error if rule's base version is missing**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule does not have an existing base version
+When a user reverts the rule
+Then the API should return a 500 error
+And the rule should remain the same
+```
+
+#### **Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**
+
+**Automation**: one integration test per field.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+And that rule has a custom <field_name> field different from the base version
+When a user reverts the rule
+Then the <field_name> field is not modified
+And the rule's `is_customized` value should be false
+
+Examples:
+<field_name> = all customization adjacent fields
+```
