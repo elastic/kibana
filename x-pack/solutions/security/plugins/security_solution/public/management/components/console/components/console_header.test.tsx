@@ -10,6 +10,7 @@ import type { ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../mocks';
 import { HELP_LABEL } from './console_header';
+import { act } from '@testing-library/react';
 
 describe('Console header area', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -43,7 +44,9 @@ describe('Console header area', () => {
 
   it('should open the side panel when help button is clicked', () => {
     render();
-    renderResult.getByTestId('test-header-helpButton').click();
+    act(() => {
+      renderResult.getByTestId('test-header-helpButton').click();
+    });
 
     expect(renderResult.getByTestId('test-sidePanel')).toBeTruthy();
   });

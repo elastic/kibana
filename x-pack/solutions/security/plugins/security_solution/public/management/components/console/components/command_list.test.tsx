@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import type { ConsoleTestSetup, HelpSidePanelSelectorsAndActions } from '../mocks';
 import {
   getCommandListMock,
@@ -35,7 +36,9 @@ describe('When rendering the command list (help output)', () => {
       renderAndOpenHelpPanel = (props) => {
         render(props);
         helpPanelSelectors = getHelpSidePanelSelectorsAndActionsMock(renderResult);
-        consoleSelectors.openHelpPanel();
+        act(() => {
+          consoleSelectors.openHelpPanel();
+        });
 
         return renderResult;
       };
@@ -58,7 +61,9 @@ describe('When rendering the command list (help output)', () => {
 
     it('should close the side panel when close button is clicked', () => {
       renderAndOpenHelpPanel();
-      consoleSelectors.closeHelpPanel();
+      act(() => {
+        consoleSelectors.closeHelpPanel();
+      });
 
       expect(renderResult.queryByTestId('test-sidePanel')).toBeNull();
     });
@@ -121,7 +126,10 @@ describe('When rendering the command list (help output)', () => {
 
     it('should add command to console input when [+] button is clicked', () => {
       renderAndOpenHelpPanel();
-      renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
+      act(() => {
+        renderResult.getByTestId('test-commandList-group1-cmd6-addToInput').click();
+      });
+
       expect(consoleSelectors.getInputText()).toEqual('cmd6 --foo ');
     });
 
