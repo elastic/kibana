@@ -11,8 +11,6 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { LockManagerService } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_service';
-
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   EncryptedSavedObjectsClient,
@@ -29,6 +27,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
+import type { LockManagerService } from '@kbn/lock-manager';
 
 import type { FleetConfigType } from '../../common/types';
 import {

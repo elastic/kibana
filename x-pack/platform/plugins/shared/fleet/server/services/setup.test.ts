@@ -8,7 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { LockAcquisitionError } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import type { Logger } from '@kbn/core/server';
 

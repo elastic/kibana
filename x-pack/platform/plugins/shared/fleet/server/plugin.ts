@@ -28,7 +28,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-
+import { LockManagerService } from '@kbn/lock-manager';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -49,10 +49,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { LockManagerService } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_service';
-
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';

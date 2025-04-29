@@ -15,7 +15,7 @@ import pRetry from 'p-retry';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-import { LockAcquisitionError } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import { MessageSigningError } from '../../common/errors';
 

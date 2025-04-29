@@ -120,6 +120,6 @@
     "@kbn/core-http-server-utils",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/handlebars",
-    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/lock-manager",
   ]
 }
