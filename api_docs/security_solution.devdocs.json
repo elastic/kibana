@@ -1897,26 +1897,6 @@
       "children": [
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.getNavLinks$",
-          "type": "Function",
-          "tags": [],
-          "label": "getNavLinks$",
-          "description": [],
-          "signature": [
-            "() => ",
-            "Observable",
-            "<",
-            "NavigationLink",
-            "[]>"
-          ],
-          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
-        },
-        {
-          "parentPluginId": "securitySolution",
           "id": "def-public.PluginStart.setComponents",
           "type": "Function",
           "tags": [],
@@ -2016,13 +1996,17 @@
         },
         {
           "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.setIsSolutionNavigationEnabled",
+          "id": "def-public.PluginStart.setSolutionNavigationTree",
           "type": "Function",
           "tags": [],
-          "label": "setIsSolutionNavigationEnabled",
+          "label": "setSolutionNavigationTree",
           "description": [],
           "signature": [
-            "(isSolutionNavigationEnabled: boolean) => void"
+            "(navigationTree: ",
+            "NavigationTreeDefinition",
+            "<",
+            "AppDeepLinkId",
+            ", string, string> | null) => void"
           ],
           "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -2030,18 +2014,21 @@
           "children": [
             {
               "parentPluginId": "securitySolution",
-              "id": "def-public.PluginStart.setIsSolutionNavigationEnabled.$1",
-              "type": "boolean",
+              "id": "def-public.PluginStart.setSolutionNavigationTree.$1",
+              "type": "CompoundType",
               "tags": [],
-              "label": "isSolutionNavigationEnabled",
+              "label": "navigationTree",
               "description": [],
               "signature": [
-                "boolean"
+                "NavigationTreeDefinition",
+                "<",
+                "AppDeepLinkId",
+                ", string, string> | null"
               ],
               "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
-              "isRequired": true
+              "isRequired": false
             }
           ],
           "returnComment": []
