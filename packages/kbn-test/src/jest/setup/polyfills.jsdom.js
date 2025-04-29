@@ -24,6 +24,7 @@ if (!global.URL.hasOwnProperty('createObjectURL')) {
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!Object.hasOwn(global, 'TextEncoder')) {
+  // eslint-disable-next-line import/no-unresolved
   const customTextEncoding = require('@kayahr/text-encoding');
   global.TextEncoder = customTextEncoding.TextEncoder;
   global.TextDecoder = customTextEncoding.TextDecoder;
