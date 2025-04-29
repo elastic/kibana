@@ -98,7 +98,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       const scheduleResponse = await supertest
         .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
-        .send([{ rule_id: ruleId, start: gapStart, end: gapEnd }]);
+        .send([{ rule_id: ruleId, ranges: [{ start: gapStart, end: gapEnd }] }]);
 
       expect(scheduleResponse.statusCode).to.eql(200);
       const backfillId = scheduleResponse.body[0].id;
@@ -166,7 +166,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       const scheduleResponse = await supertest
         .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
-        .send([{ rule_id: ruleId, start: gapStart, end: gapEnd }]);
+        .send([{ rule_id: ruleId, ranges: [{ start: gapStart, end: gapEnd }] }]);
 
       expect(scheduleResponse.statusCode).to.eql(200);
 
@@ -258,7 +258,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       const scheduleResponse = await supertest
         .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
-        .send([{ rule_id: ruleId, start: partialStart, end: partialEnd }]);
+        .send([{ rule_id: ruleId, ranges: [{ start: partialStart, end: partialEnd }] }]);
 
       expect(scheduleResponse.statusCode).to.eql(200);
       const backfillId = scheduleResponse.body[0].id;
@@ -327,8 +327,12 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       for (let i = 0; i < 5; i++) {
         backfills.push({
           rule_id: ruleId,
-          start: startBackfillTime.toISOString(),
-          end: moment(startBackfillTime).add(24, 'hours').toISOString(),
+          ranges: [
+            {
+              start: startBackfillTime.toISOString(),
+              end: moment(startBackfillTime).add(24, 'hours').toISOString(),
+            },
+          ],
         });
         startBackfillTime.add(24, 'hours');
       }
@@ -408,7 +412,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       const scheduleResponse = await supertest
         .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
-        .send([{ rule_id: ruleId, start: gapStart, end: gapEnd }]);
+        .send([{ rule_id: ruleId, ranges: [{ start: gapStart, end: gapEnd }] }]);
 
       expect(scheduleResponse.statusCode).to.eql(200);
       const backfillId = scheduleResponse.body[0].id;
@@ -493,7 +497,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       const scheduleResponse = await supertest
         .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
-        .send([{ rule_id: ruleId, start: gapStart, end: gapEnd }]);
+        .send([{ rule_id: ruleId, ranges: [{ start: gapStart, end: gapEnd }] }]);
 
       expect(scheduleResponse.statusCode).to.eql(200);
 
