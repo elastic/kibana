@@ -39,7 +39,7 @@ export function SettingsPage() {
       serverless.setBreadcrumbs([
         {
           text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability', //TODO: change this to remove search mentions
+            'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability', //TODO: change this string to remove search mentions
             {
               defaultMessage: 'AI Assistant for Observability Settings',
             }
