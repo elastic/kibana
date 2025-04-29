@@ -7,11 +7,9 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiFlexGroup,
   EuiFilterButton,
   EuiFilterGroup,
   EuiEmptyPrompt,
-  EuiFlexItem,
   EuiSpacer,
   EuiProgress,
 } from '@elastic/eui';
@@ -41,9 +39,11 @@ export const ProcessorOutcomePreview = () => {
 
   return (
     <>
-      <EuiFlexItem grow={false}>
-        <OutcomeControls />
-      </EuiFlexItem>
+      <div>
+        <StreamsAppSearchBar showDatePicker showFilterBar showQueryInput showQueryMenu />
+        <EuiSpacer size="s" />
+        <PreviewDocumentGroupBy />
+      </div>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
@@ -58,7 +58,7 @@ const formatter = new Intl.NumberFormat('en-US', {
 const formatRateToPercentage = (rate?: number) =>
   (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
 
-const OutcomeControls = () => {
+const PreviewDocumentGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
@@ -81,53 +81,48 @@ const OutcomeControls = () => {
   });
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-      <EuiFilterGroup
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
-          { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
-        )}
+    <EuiFilterGroup
+      aria-label={i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
+        { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
+      )}
+    >
+      <EuiFilterButton {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}>
+        {previewDocsFilterOptions.outcome_filter_all.label}
+      </EuiFilterButton>
+      <EuiFilterButton
+        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
+        badgeColor="success"
+        numFilters={simulationParsedRate}
+        numActiveFilters={simulationParsedRate}
       >
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
-        >
-          {previewDocsFilterOptions.outcome_filter_all.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
-          badgeColor="success"
-          numFilters={simulationParsedRate}
-          numActiveFilters={simulationParsedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_parsed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
-          badgeColor="accent"
-          numFilters={simulationPartiallyParsedRate}
-          numActiveFilters={simulationPartiallyParsedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
-          badgeColor="accent"
-          numFilters={simulationSkippedRate}
-          numActiveFilters={simulationSkippedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_skipped.label}
-        </EuiFilterButton>
-        <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
-          badgeColor="accent"
-          numFilters={simulationFailedRate}
-          numActiveFilters={simulationFailedRate}
-        >
-          {previewDocsFilterOptions.outcome_filter_failed.label}
-        </EuiFilterButton>
-      </EuiFilterGroup>
-      <StreamsAppSearchBar showDatePicker />
-    </EuiFlexGroup>
+        {previewDocsFilterOptions.outcome_filter_parsed.label}
+      </EuiFilterButton>
+      <EuiFilterButton
+        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
+        badgeColor="accent"
+        numFilters={simulationPartiallyParsedRate}
+        numActiveFilters={simulationPartiallyParsedRate}
+      >
+        {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+      </EuiFilterButton>
+      <EuiFilterButton
+        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+        badgeColor="accent"
+        numFilters={simulationSkippedRate}
+        numActiveFilters={simulationSkippedRate}
+      >
+        {previewDocsFilterOptions.outcome_filter_skipped.label}
+      </EuiFilterButton>
+      <EuiFilterButton
+        {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
+        badgeColor="accent"
+        numFilters={simulationFailedRate}
+        numActiveFilters={simulationFailedRate}
+      >
+        {previewDocsFilterOptions.outcome_filter_failed.label}
+      </EuiFilterButton>
+    </EuiFilterGroup>
   );
 };
 

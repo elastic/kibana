@@ -28,7 +28,9 @@ export function createSamplesFetchActor({
 }: Pick<SimulationMachineDeps, 'data' | 'timeState$'>) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
     const abortController = new AbortController();
-    const { asAbsoluteTimeRange } = timeState$.getValue();
+    // const { asAbsoluteTimeRange } = timeState$.getValue();
+
+    const { query, filters, time } = data.query.getState();
 
     return new Observable((observer) => {
       const subscription = data.search
@@ -36,10 +38,10 @@ export function createSamplesFetchActor({
           {
             params: buildSamplesSearchParams({
               condition: input.condition,
-              filters: input.filters,
+              filters,
               index: input.streamName,
-              query: input.query,
-              timeRange: asAbsoluteTimeRange,
+              query: query as Query,
+              timeRange: time,
             }),
           },
           {
@@ -72,21 +74,21 @@ const buildSamplesSearchParams = ({
   timeRange,
 }: {
   condition?: Condition;
-  filters: Filter[];
+  filters?: Filter[];
   index: string;
-  query: Query;
+  query?: Query;
   size?: number;
-  timeRange: TimeRange;
+  timeRange?: TimeRange;
 }) => {
-  const queryDefinition = buildEsQuery({ title: index, fields: [] }, query, filters);
+  const queryDefinition = buildEsQuery({ title: index, fields: [] }, query ?? [], filters ?? []);
 
   queryDefinition.bool.must.unshift(
     condition ? conditionToQueryDsl(condition) : { match_all: {} },
     {
       range: {
         '@timestamp': {
-          gte: timeRange.from,
-          lte: timeRange.to,
+          gte: timeRange?.from,
+          lte: timeRange?.to,
         },
       },
     }
