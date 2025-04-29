@@ -824,7 +824,8 @@ export class CasesConnectorExecutor {
     const oracleCounterString =
       oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : '';
 
-    const staticSuffixStart = ` - ${GROUPED_BY_TITLE('')}`;
+    const staticSuffixStart = groupingDescription.length > 0 ? ` - ${GROUPED_BY_TITLE('')}` : '';
+
     const staticSuffixEnd = `${oracleCounterString} (${AUTO_CREATED_TITLE})`;
 
     const ruleName = params.rule.name;
