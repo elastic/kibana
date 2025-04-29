@@ -66,7 +66,7 @@ describe('notification coordination', () => {
       expect(subscriptionHandler).not.toHaveBeenCalled();
     });
 
-    it('will acquire a lock and emit to just the coordinated with matching even in race type scenarios', async () => {
+    it('will acquire a lock and emit to just the coordinated with a condition that is fulfilled even in race type scenarios', async () => {
       const coordinator = new Coordinator();
 
       // only emit values when the lock has not been acquired

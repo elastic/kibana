@@ -67,12 +67,12 @@ export class Coordinator {
   public optInToCoordination<T extends Array<{ id: string }>>(
     registrar: string,
     $: Observable<T>,
-    cond: Parameters<typeof filter<NotificationCoordinatorState>>[0]
+    cond: (coordinatorState: NotificationCoordinatorState) => boolean
   ) {
     // signal used to determine when to emit values from the source observable based on the provided opt-in condition
-    const on$ = this.coordinationLock$.pipe(filter((...args) => cond(...args)));
+    const on$ = this.coordinationLock$.pipe(filter((state) => cond(state)));
     // signal used to determine when to buffer values from the source observable based on the provided opt-in condition
-    const off$ = this.coordinationLock$.pipe(filter((...args) => !cond(...args)));
+    const off$ = this.coordinationLock$.pipe(filter((state) => !cond(state)));
     const multicast$ = $.pipe(share());
 
     return merge(
@@ -108,15 +108,14 @@ export function notificationCoordinator(
 ): NotificationCoordinatorPublicApi {
   return {
     optInToCoordination: <T extends Array<{ id: string }>>(
-      ...args: Parameters<typeof this.optInToCoordination<T>> extends [infer Head, ...infer Tail]
-        ? Tail
-        : unknown
+      $: Observable<T>,
+      cond: (coordinatorState: NotificationCoordinatorState) => boolean
     ) =>
       this.optInToCoordination.apply<
         Coordinator,
         Parameters<typeof this.optInToCoordination<T>>,
         Observable<T>
-      >(this, [registrar, ...args]),
+      >(this, [registrar, $, cond]),
     acquireLock: this.acquireLock.bind(this, registrar),
     releaseLock: this.releaseLock.bind(this, registrar),
     lock$: this.lock$,
