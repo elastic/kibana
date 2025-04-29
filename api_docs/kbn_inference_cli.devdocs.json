@@ -190,6 +190,29 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-cli",
+            "id": "def-common.InferenceCliClient.getLangChainChatModel",
+            "type": "Function",
+            "tags": [],
+            "label": "getLangChainChatModel",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/inference-langchain",
+                "scope": "common",
+                "docId": "kibKbnInferenceLangchainPluginApi",
+                "section": "def-common.InferenceChatModel",
+                "text": "InferenceChatModel"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -204,7 +227,7 @@
         "label": "createInferenceClient",
         "description": [],
         "signature": [
-          "({\n  log,\n  prompt,\n  signal,\n  kibanaClient,\n}: { log: ",
+          "({\n  log,\n  prompt,\n  signal,\n  kibanaClient,\n  connectorId,\n}: { log: ",
           {
             "pluginId": "@kbn/tooling-log",
             "scope": "common",
@@ -220,7 +243,7 @@
             "section": "def-common.KibanaClient",
             "text": "KibanaClient"
           },
-          " | undefined; }) => Promise<",
+          " | undefined; connectorId?: string | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/inference-cli",
             "scope": "common",
@@ -239,7 +262,7 @@
             "id": "def-common.createInferenceClient.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  log,\n  prompt,\n  signal,\n  kibanaClient,\n}",
+            "label": "{\n  log,\n  prompt,\n  signal,\n  kibanaClient,\n  connectorId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
             "deprecated": false,
@@ -309,6 +332,20 @@
                     "text": "KibanaClient"
                   },
                   " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-cli",
+                "id": "def-common.createInferenceClient.$1.connectorId",
+                "type": "string",
+                "tags": [],
+                "label": "connectorId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
                 "deprecated": false,
