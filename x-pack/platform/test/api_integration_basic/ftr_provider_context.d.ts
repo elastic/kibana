@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { GenericFtrProviderContext } from '@kbn/test';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('apis', function () {
-    loadTestFile(require.resolve('./security_solution'));
-  });
-}
+import { services } from '../api_integration/services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
