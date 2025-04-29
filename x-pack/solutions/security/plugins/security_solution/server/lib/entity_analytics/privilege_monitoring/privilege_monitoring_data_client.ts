@@ -65,10 +65,12 @@ interface PrivilegeMonitoringClientOpts {
 export class PrivilegeMonitoringDataClient {
   private apiKeyGenerator?: ApiKeyManager;
   private esClient: ElasticsearchClient;
+  private internalUserClient: ElasticsearchClient;
   private engineClient: PrivilegeMonitoringEngineDescriptorClient;
 
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
+    this.internalUserClient = opts.clusterClient.asInternalUser;
     this.apiKeyGenerator = opts.apiKeyManager;
     this.engineClient = new PrivilegeMonitoringEngineDescriptorClient({
       soClient: opts.soClient,
@@ -141,7 +143,7 @@ export class PrivilegeMonitoringDataClient {
 
   public async createOrUpdateIndex() {
     await createOrUpdateIndex({
-      esClient: this.esClient,
+      esClient: this.internalUserClient,
       logger: this.opts.logger,
       options: {
         index: this.getIndex(),
