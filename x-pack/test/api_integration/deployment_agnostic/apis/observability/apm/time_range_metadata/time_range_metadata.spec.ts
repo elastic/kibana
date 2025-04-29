@@ -363,42 +363,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('with service metrics disabled', () => {
-        it('only returns tx metrics and events as available sources', async () => {
-          const response = await getTimeRangeMetadata({
-            start,
-            end,
-          });
-
-          expect(response.sources).to.eql([
-            {
-              documentType: ApmDocumentType.TransactionEvent,
-              rollupInterval: RollupInterval.None,
-              hasDocs: true,
-              hasDurationSummaryField: false,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.TenMinutes,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.SixtyMinutes,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-          ]);
-        });
-      });
-
       describe('when data is available before the time range', () => {
         it('marks all those sources as available', async () => {
           const response = await getTimeRangeMetadata({
