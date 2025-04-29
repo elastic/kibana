@@ -105,6 +105,7 @@ export const getSearchEmbeddableFactory = ({
           parentApi,
           ...titleManager.api,
           ...timeRangeManager.api,
+          defaultTitle$,
           savedSearch$: searchEmbeddable.api.savedSearch$,
           dataViews$: searchEmbeddable.api.dataViews$,
           savedObjectId$,
