@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -180,11 +180,9 @@ describe('VisualizeESQL', () => {
 
     renderComponent({}, lensService);
 
-    await act(async () => {
-      await userEvent.click(
-        await screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton')
-      );
-    });
+    await userEvent.click(
+      await screen.findByTestId('observabilityAiAssistantLensESQLDisplayTableButton')
+    );
 
     expect(await screen.findByTestId('observabilityAiAssistantESQLDataGrid')).toBeInTheDocument();
   });
