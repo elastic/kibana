@@ -194,6 +194,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "infra-custom-dashboards",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "investigation",
                 },
               },

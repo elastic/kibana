@@ -90,6 +90,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "infra-custom-dashboards",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "investigation",
                       },
                     },
@@ -314,6 +319,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "infra-custom-dashboards",
                       },
                     },
                     Object {
@@ -550,6 +560,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "infra-custom-dashboards",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "investigation",
                       },
                     },
@@ -782,6 +797,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "infra-custom-dashboards",
                       },
                     },
                     Object {
@@ -1058,6 +1078,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "infra-custom-dashboards",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "investigation",
                       },
                     },
@@ -1293,6 +1318,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "infra-custom-dashboards",
                       },
                     },
                     Object {
