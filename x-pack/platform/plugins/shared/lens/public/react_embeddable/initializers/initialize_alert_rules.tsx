@@ -6,6 +6,7 @@
  */
 
 import { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { OverlayRef } from '@kbn/core/public';
 import { unitsMap } from '@kbn/datemath';
 import { TimeRange } from '@kbn/es-query';
@@ -14,13 +15,18 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleFormData, RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
+import type { RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { getDateRange } from '@kbn/timerange';
 import React from 'react';
-import type { LensAlertRulesApi, LensEmbeddableStartServices } from '../types';
+import type {
+  LensAlertRulesApi,
+  LensCreateAlertRuleInitialValues,
+  LensEmbeddableStartServices,
+} from '../types';
+import { buildObservableVariable } from '../helper';
 
 export function initializeAlertRules(
   uuid: string,
@@ -30,7 +36,7 @@ export function initializeAlertRules(
   return {
     api: {
       createAlertRule: (
-        passedInitialValues: Partial<RuleFormData>,
+        passedInitialValues: LensCreateAlertRuleInitialValues,
         ruleTypeRegistry: RuleTypeRegistryContract,
         actionTypeRegistry: ActionTypeRegistryContract
       ) => {
@@ -39,6 +45,10 @@ export function initializeAlertRules(
           : { timeRange$: undefined };
         const timeRange = timeRange$?.getValue();
 
+        const [esqlVariables$] = buildObservableVariable(
+          apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
+        );
+
         let initialValues = { ...passedInitialValues };
 
         if (timeRange) {
@@ -46,6 +56,16 @@ export function initializeAlertRules(
             params: {
               ...initialValues.params,
               ...timeRangeToNearestTimeWindow(timeRange),
+            },
+          };
+        }
+
+        const esqlVariables = esqlVariables$.getValue();
+        if (esqlVariables.length) {
+          initialValues = {
+            params: {
+              ...initialValues.params,
+              esqlQuery: parseEsqlVariables(initialValues.params?.esqlQuery, esqlVariables),
             },
           };
         }
@@ -133,4 +153,15 @@ function timeRangeToNearestTimeWindow(timeRange: TimeRange) {
   const timeWindowSize = Math.round(timeWindow / unitsMap[timeWindowUnit].base);
 
   return { timeWindowUnit, timeWindowSize };
+}
+
+function parseEsqlVariables(query: { esql: string } | undefined, variables: ESQLControlVariable[]) {
+  if (!query) return query;
+  let parsedQuery = query.esql;
+
+  variables.forEach(({ key, value }) => {
+    parsedQuery = parsedQuery.replace(`??${key}`, String(value));
+  });
+
+  return { esql: parsedQuery };
 }

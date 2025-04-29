@@ -66,6 +66,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { RuleFormData, RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
 import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -376,9 +377,10 @@ export interface LensInspectorAdapters {
   adapters$: PublishingSubject<Adapters>;
 }
 
+export type LensCreateAlertRuleInitialValues = Partial<RuleFormData<Partial<EsQueryRuleParams>>>;
 export interface LensAlertRulesApi {
   createAlertRule: (
-    initialValues: Partial<RuleFormData>,
+    initialValues: LensCreateAlertRuleInitialValues,
     ruleTypeRegistry: RuleTypeRegistryContract,
     actionTypeRegistry: ActionTypeRegistryContract
   ) => void;

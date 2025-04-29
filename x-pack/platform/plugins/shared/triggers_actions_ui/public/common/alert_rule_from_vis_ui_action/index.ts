@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
-import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
-import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   ActionTypeRegistryContract,
-  RuleTypeRegistryContract,
   AlertRuleFromVisUIActionData,
+  RuleTypeRegistryContract,
 } from '@kbn/alerts-ui-shared';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
+import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
+import type { RuleFormData } from '@kbn/response-ops-rule-form';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { pick } from 'lodash';
 
 interface Context {
   data?: AlertRuleFromVisUIActionData;
@@ -84,9 +86,9 @@ export class AlertRuleFromVisAction implements Action<Context> {
     const escapeFieldName = (fieldName: string) => {
       if (!fieldName || fieldName === 'undefined') return missingSourceFieldPlaceholder;
 
-      // Detect if the passed column name is actually an ES|QL function call instead of a field name
+      // Detect if the passed column name is actually an ES|QL function call instead of a field name, or if it has whitespace in it
       const esqlFunctionRegex = /[A-Z]+\(.*?\)/;
-      if (esqlFunctionRegex.test(fieldName)) {
+      if (esqlFunctionRegex.test(fieldName) || fieldName.includes(' ')) {
         // If there are any backticks in the field name, change them to double backticks
         const sanitizedFieldName = fieldName.replace('`', '``');
 
@@ -166,7 +168,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
     const additionalQuery = `${renameQuery}// ${thresholdQueryComment}\n| WHERE ${conditionsQuery}`;
 
     // Generate the full ES|QL code
-    let initialValues;
+    let initialValues: Partial<RuleFormData<Partial<EsQueryRuleParams>>>;
     if (query) {
       const queryHeader = i18n.translate(
         'xpack.triggersActionsUI.alertRuleFromVis.queryHeaderComment',
