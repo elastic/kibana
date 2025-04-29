@@ -37,11 +37,7 @@ export const randomDatastream = async (
       settings: {
         index: {
           mode: 'standard',
-          mapping: {
-            source: {
-              mode: 'stored',
-            },
-          },
+          mapping: {},
         },
       },
     },
