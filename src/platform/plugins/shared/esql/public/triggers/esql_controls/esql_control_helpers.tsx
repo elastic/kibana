@@ -31,7 +31,7 @@ interface Context {
 }
 
 export async function isActionCompatible(queryString: string) {
-  return Boolean(queryString && queryString.trim().length > 0);
+  return queryString != null;
 }
 
 const Fallback = () => <Fragment />;
