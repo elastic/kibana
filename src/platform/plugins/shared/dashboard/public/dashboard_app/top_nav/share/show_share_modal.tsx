@@ -18,6 +18,7 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
 import { DashboardLocatorParams } from '../../../../common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { SharedDashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
@@ -221,5 +222,11 @@ export function ShowShareModal({
       },
     },
     toasts: coreServices.notifications.toasts,
+    shareableUrlLocatorParams: {
+      locator: shareService.url.locators.get(
+        DASHBOARD_APP_LOCATOR
+      ) as LocatorPublic<DashboardLocatorParams>,
+      params: locatorParams,
+    },
   });
 }

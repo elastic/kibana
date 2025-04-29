@@ -64,7 +64,7 @@ export type ControlGroupApi = PresentationContainer &
     autoApplySelections$: PublishingSubject<boolean>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     labelPosition: PublishingSubject<ControlLabelPosition>;
-    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    controlFetch$: (controlUuid: string, onReload?: () => void) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
       onSave?: () => void;
