@@ -81,18 +81,14 @@ export class BrowserShortUrlClient implements IShortUrlClient {
   ): Promise<ShortUrlCreateResponse<P>> {
     const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
       const timeRange = inputParams.params?.timeRange as SerializableRecord;
-      if (isAbsoluteTime)
+      if (isAbsoluteTime && timeRange?.from && timeRange?.to)
         return {
           ...inputParams,
           params: {
             ...inputParams.params,
             timeRange: {
-              from: convertRelativeTimeStringToAbsoluteTimeString(
-                timeRange?.from as string | undefined
-              ),
-              to: convertRelativeTimeStringToAbsoluteTimeString(
-                timeRange?.to as string | undefined
-              ),
+              from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
+              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string),
             },
           },
         };
