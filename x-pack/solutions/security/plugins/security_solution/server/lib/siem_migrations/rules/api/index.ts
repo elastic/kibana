@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { registerSiemRuleMigrationsCreateRoute } from './create';
-import { registerSiemRuleMigrationsUpdateRoute } from './update';
+import { registerSiemRuleMigrationsUpdateRulesRoute } from './rules/update';
 import { registerSiemRuleMigrationsGetRoute } from './get';
 import { registerSiemRuleMigrationsStartRoute } from './start';
 import { registerSiemRuleMigrationsStatsRoute } from './stats';
@@ -24,6 +24,8 @@ import { registerSiemRuleMigrationsPrebuiltRulesRoute } from './get_prebuilt_rul
 import { registerSiemRuleMigrationsIntegrationsRoute } from './get_integrations';
 import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privileges/get_missing_privileges';
 import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
+import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/add';
+import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -31,7 +33,11 @@ export const registerSiemRuleMigrationsRoutes = (
   logger: Logger
 ) => {
   registerSiemRuleMigrationsCreateRoute(router, logger);
-  registerSiemRuleMigrationsUpdateRoute(router, logger);
+  /** Rules */
+  registerSiemRuleMigrationsCreateRulesRoute(router, logger);
+  registerSiemRuleMigrationsGetRulesRoute(router, logger);
+  registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
+  /** *******/
   registerSiemRuleMigrationsStatsAllRoute(router, logger);
   registerSiemRuleMigrationsPrebuiltRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRoute(router, logger);

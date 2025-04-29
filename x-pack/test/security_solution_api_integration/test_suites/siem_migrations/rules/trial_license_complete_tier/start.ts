@@ -10,18 +10,18 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   SiemMigrationsAPIErrorResponse,
   defaultOriginalRule,
-  migrationRulesRouteHelpersFactory,
+  ruleMigrationRouteHelpersFactory,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Start Migration', () => {
     let migrationId: string;
     beforeEach(async () => {
       migrationId = uuidv4();
-      await migrationRulesRoutes.create({
+      await migrationRulesRoutes.addRulesToMigration({
         migrationId,
         payload: [defaultOriginalRule],
       });

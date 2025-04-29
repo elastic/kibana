@@ -7,17 +7,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { defaultOriginalRule, migrationRulesRouteHelpersFactory } from '../../utils';
+import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('Stop Migration', () => {
     let migrationId: string;
     beforeEach(async () => {
       migrationId = uuidv4();
-      await migrationRulesRoutes.create({
+      await migrationRulesRoutes.addRulesToMigration({
         migrationId,
         payload: [defaultOriginalRule],
       });

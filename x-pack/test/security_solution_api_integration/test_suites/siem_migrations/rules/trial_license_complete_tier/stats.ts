@@ -11,7 +11,7 @@ import {
   createMigrationRules,
   deleteAllMigrationRules,
   getMigrationRuleDocuments,
-  migrationRulesRouteHelpersFactory,
+  ruleMigrationRouteHelpersFactory,
   statsOverrideCallbackFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -19,7 +19,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Stats API', () => {
     beforeEach(async () => {

@@ -10,12 +10,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import { deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
-  RuleMigrationDocument,
+  RuleMigrationRuleData,
   createMigrationRules,
   defaultElasticRule,
   deleteAllMigrationRules,
   getMigrationRuleDocuments,
-  migrationRulesRouteHelpersFactory,
+  ruleMigrationRouteHelpersFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -29,7 +29,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const supertest = getService('supertest');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Get Prebuilt Rules API', () => {
     beforeEach(async () => {
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return all prebuilt rules matched by migration rules', async () => {
       const migrationId = uuidv4();
 
-      const overrideCallback = (index: number): Partial<RuleMigrationDocument> => {
+      const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
         const { query_language: queryLanguage, query, ...rest } = defaultElasticRule;
         return {
           migration_id: migrationId,

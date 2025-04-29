@@ -20,8 +20,8 @@ import {
   getMigrationRuleDocument,
   getMigrationRuleDocuments,
   ruleMigrationRouteHelpersFactory,
-} from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -29,14 +29,15 @@ export default ({ getService }: FtrProviderContext) => {
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Get API', () => {
+    let migrationId: string;
     beforeEach(async () => {
       await deleteAllMigrationRules(es);
+      const response = await migrationRulesRoutes.create({});
+      migrationId = response.body.migration_id;
     });
 
     describe('Basic', () => {
       it('should fetch existing rules within specified migration', async () => {
-        // create a document
-        const migrationId = uuidv4();
         const migrationRuleDocument = getMigrationRuleDocument({ migration_id: migrationId });
         await createMigrationRules(es, [migrationRuleDocument]);
 
@@ -51,9 +52,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Filtering', () => {
       it('should fetch rules filtered by `searchTerm`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const title = `${index < 5 ? 'Elastic' : 'Splunk'} rule - ${index}`;
           const originalRule = { ...defaultOriginalRule, title };
@@ -103,9 +101,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules filtered by `ids`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const migrationRuleDocuments = getMigrationRuleDocuments(10, () => ({
           migration_id: migrationId,
         }));
@@ -130,9 +125,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules filtered by `prebuilt`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const prebuiltRuleId = index < 3 ? uuidv4() : undefined;
           const elasticRule = { ...defaultElasticRule, prebuilt_rule_id: prebuiltRuleId };
@@ -161,9 +153,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules filtered by `installed`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const installedRuleId = index < 2 ? uuidv4() : undefined;
           const elasticRule = { ...defaultElasticRule, id: installedRuleId };
@@ -192,9 +181,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules filtered by `failed`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const status = index < 4 ? SiemMigrationStatus.FAILED : SiemMigrationStatus.COMPLETED;
           return {
@@ -222,9 +208,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules filtered by `fullyTranslated`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const translationResult =
             index < 6
@@ -257,9 +240,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules filtered by `partiallyTranslated`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const translationResult =
             index < 4
@@ -292,9 +272,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules filtered by `untranslatable`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const translationResult =
             index < 3
@@ -331,9 +308,6 @@ export default ({ getService }: FtrProviderContext) => {
       it('should fetch rules sorted by `title`', async () => {
         const titles = ['Elastic 1', 'Windows', 'Linux', 'Elastic 2'];
 
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const title = titles[index];
           const originalRule = { ...defaultOriginalRule, title };
@@ -366,9 +340,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch rules sorted by `severity`', async () => {
         const severities = ['critical', 'low', 'medium', 'low', 'critical'];
-
-        // create a document
-        const migrationId = uuidv4();
 
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const severity = severities[index];
@@ -414,9 +385,6 @@ export default ({ getService }: FtrProviderContext) => {
       it('should fetch rules sorted by `risk_score`', async () => {
         const riskScores = [55, 0, 100, 23];
 
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const riskScore = riskScores[index];
           const elasticRule = { ...defaultElasticRule, risk_score: riskScore };
@@ -458,9 +426,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch rules sorted by `prebuilt_rule_id`', async () => {
         const prebuiltRuleIds = ['rule-1', undefined, undefined, 'rule-2', undefined];
-
-        // create a document
-        const migrationId = uuidv4();
 
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const prebuiltRuleId = prebuiltRuleIds[index];
@@ -510,9 +475,6 @@ export default ({ getService }: FtrProviderContext) => {
           RuleTranslationResult.PARTIAL,
         ];
 
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           return {
             migration_id: migrationId,
@@ -549,9 +511,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch rules sorted by `updated_at`', async () => {
-        // create a document
-        const migrationId = uuidv4();
-
         // Creating documents separately to have different `update_at` timestamps
         await createMigrationRules(es, [getMigrationRuleDocument({ migration_id: migrationId })]);
         await createMigrationRules(es, [getMigrationRuleDocument({ migration_id: migrationId })]);
@@ -580,10 +539,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Pagination', () => {
       it('should fetch rules within specific page', async () => {
         const titles = Array.from({ length: 50 }, (_, index) => `Migration rule - ${index}`);
-
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const title = titles[index];
           const originalRule = { ...defaultOriginalRule, title };
@@ -611,9 +566,6 @@ export default ({ getService }: FtrProviderContext) => {
       it('should fetch rules within very first page if `perPage` is not specified', async () => {
         const titles = Array.from({ length: 50 }, (_, index) => `Migration rule - ${index}`);
 
-        // create a document
-        const migrationId = uuidv4();
-
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const title = titles[index];
           const originalRule = { ...defaultOriginalRule, title };
@@ -640,9 +592,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch rules within very first page of a specified size if `perPage` is specified', async () => {
         const titles = Array.from({ length: 50 }, (_, index) => `Migration rule - ${index}`);
-
-        // create a document
-        const migrationId = uuidv4();
 
         const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
           const title = titles[index];

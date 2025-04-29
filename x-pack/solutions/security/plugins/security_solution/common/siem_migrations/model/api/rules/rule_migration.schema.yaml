@@ -274,7 +274,7 @@ paths:
                       $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRule'
         404:
           description: Indicates the migration id was not found.
-    put:
+    patch:
       summary: Updates rules of a migrations
       operationId: UpdateRuleMigrationRules
       x-codegen-enabled: true

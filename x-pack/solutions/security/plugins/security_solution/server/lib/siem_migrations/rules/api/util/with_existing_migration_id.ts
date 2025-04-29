@@ -49,13 +49,8 @@ export const withExistingMigration = <
       });
     }
 
-    return handler(
-      {
-        ...context,
-        migration: storedMigration,
-      },
-      req,
-      res
-    );
+    Object.defineProperty(context, 'migration', storedMigration);
+
+    return handler(context as WithMigration<SecuritySolutionRequestHandlerContext>, req, res);
   };
 };

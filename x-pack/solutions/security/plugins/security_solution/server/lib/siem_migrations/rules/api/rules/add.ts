@@ -21,7 +21,7 @@ import { authz } from '../util/authz';
 import { withExistingMigration } from '../util/with_existing_migration_id';
 import { withLicense } from '../util/with_license';
 
-export const registerSiemRuleMigrationsCreateRoute = (
+export const registerSiemRuleMigrationsCreateRulesRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
@@ -45,6 +45,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
         withExistingMigration(
           async (context, req, res): Promise<IKibanaResponse<RuleMigrationRule>> => {
             const { migration_id: migrationId } = req.params;
+            logger.warn(`Adding rules to migration : ${migrationId}`);
             const originalRules = req.body;
             const rulesCount = originalRules.length;
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);

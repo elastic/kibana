@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { GetRuleMigrationRulesResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   GetRuleMigrationRulesRequestParams,
@@ -20,13 +20,13 @@ import { authz } from '../util/authz';
 import { withLicense } from '../util/with_license';
 import { withExistingMigration } from '../util/with_existing_migration_id';
 
-export const registerSiemRuleMigrationsGetRoute = (
+export const registerSiemRuleMigrationsGetRulesRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: SIEM_RULE_MIGRATION_PATH,
+      path: SIEM_RULE_MIGRATION_RULES_PATH,
       access: 'internal',
       security: { authz },
     })
