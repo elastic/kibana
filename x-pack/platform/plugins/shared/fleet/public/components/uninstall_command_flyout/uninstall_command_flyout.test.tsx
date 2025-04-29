@@ -31,6 +31,7 @@ import type { RequestError } from '../../hooks';
 
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
 import type { UninstallCommandTarget } from './types';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
   useGetUninstallToken: jest.fn(),
@@ -159,7 +160,9 @@ describe('UninstallCommandFlyout', () => {
     it('when user selects Windows, it renders commands for Windows', () => {
       const renderResult = render();
 
-      renderResult.getByTestId('windows').click();
+      act(() => {
+        renderResult.getByTestId('windows').click();
+      });
 
       const uninstallInstructions = renderResult.getByTestId(
         'uninstall-commands-flyout-code-block'
