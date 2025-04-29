@@ -22,7 +22,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,

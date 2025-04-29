@@ -263,25 +263,25 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
       }
 
-        const inferenceId = await getInferenceEndpointId({
-          esClient,
-        });
+      const inferenceId = await getInferenceEndpointId({
+        esClient,
+      });
 
-        const inferenceExists = await isInferenceEndpointExists({
+      const inferenceExists = await isInferenceEndpointExists({
+        esClient,
+        inferenceEndpointId: inferenceId,
+        getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+        logger: this.options.logger,
+      });
+
+      if (!inferenceExists) {
+        await createInferenceEndpoint({
+          elserId,
           esClient,
-          inferenceEndpointId: inferenceId,
-          getTrainedModelsProvider: this.options.getTrainedModelsProvider,
           logger: this.options.logger,
+          inferenceId,
+          getTrainedModelsProvider: this.options.getTrainedModelsProvider,
         });
-
-        if (!inferenceExists) {
-          await createInferenceEndpoint({
-            elserId,
-            esClient,
-            logger: this.options.logger,
-            inferenceId,
-            getTrainedModelsProvider: this.options.getTrainedModelsProvider,
-          });
 
         this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
