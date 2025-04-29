@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
+import * as semver from 'semver';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -14,6 +14,7 @@ import {
   TINY_ELSER_MODEL_ID,
   createTinyElserInferenceEndpoint,
   deleteTinyElserModelAndInferenceEndpoint,
+  getKbIndexCreatedVersion,
   importTinyElserModel,
 } from '../utils/knowledge_base';
 import {
@@ -32,8 +33,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const ml = getService('ml');
 
   // Sparse vector field was introduced in Elasticsearch 8.11
-  // Indices created prior to this does not support semantic text, and will need to be reindexed
-  describe('when the knowledge base index was created before 8.11', function () {
+  // The semantic text field was added to the knowledge base index in 8.17
+  // Indices created prior 8.11 does not support semantic text field and need to be reindexed
+  describe('when upgrading to 8.18, and the knowledge base index was created prior to 8.11', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
@@ -64,7 +66,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('has an index created version earlier than 8.11', async () => {
         await retry.try(async () => {
-          expect(await getKbIndexCreatedVersion()).to.be.lessThan(8110000);
+          const indexCreatedVersion = await getKbIndexCreatedVersion(es);
+          expect(semver.lt(indexCreatedVersion, '8.11.0')).to.be(true);
         });
       });
 
@@ -78,7 +81,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         // wait for reindex to have updated the index
         await retry.try(async () => {
-          expect(await getKbIndexCreatedVersion()).to.be.greaterThan(8180000);
+          const indexCreatedVersion = await getKbIndexCreatedVersion(es);
+          expect(semver.gte(indexCreatedVersion, '8.18.0')).to.be(true);
         });
 
         const res2 = await createKnowledgeBaseEntry();
@@ -101,8 +105,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('has an index created version later than 8.18', async () => {
         await retry.try(async () => {
-          const indexCreatedVersion = await getKbIndexCreatedVersion();
-          expect(indexCreatedVersion).to.be.greaterThan(8180000);
+          const indexCreatedVersion = await getKbIndexCreatedVersion(es);
+          expect(semver.gt(indexCreatedVersion, '8.18.0')).to.be(true);
         });
       });
 
@@ -146,13 +150,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     }
   });
-
-  async function getKbIndexCreatedVersion() {
-    const indexSettings = await es.indices.getSettings({
-      index: resourceNames.writeIndexAlias.kb,
-    });
-
-    const { settings } = Object.values(indexSettings)[0];
-    return parseInt(settings?.index?.version?.created ?? '', 10);
-  }
 }

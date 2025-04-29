@@ -304,3 +304,17 @@ export async function hasIndexWriteBlock(es: Client, index: string) {
   const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
   return writeBlockSetting === 'true' || writeBlockSetting === true;
 }
+
+export async function getKbIndexCreatedVersion(es: Client) {
+  const indexSettings = await es.indices.getSettings({
+    index: resourceNames.writeIndexAlias.kb,
+    human: true,
+  });
+
+  const { settings } = Object.values(indexSettings)[0];
+  const createdVersion = settings?.index?.version?.created_string;
+  if (!createdVersion) {
+    throw new Error(`Could not find created version for index ${resourceNames.writeIndexAlias.kb}`);
+  }
+  return createdVersion;
+}

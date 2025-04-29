@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   LEGACY_INFERENCE_ID,
   createTinyElserInferenceEndpoint,
   deleteInferenceEndpoint,
   deleteTinyElserModel,
+  getKbIndexCreatedVersion,
   importTinyElserModel,
 } from '../utils/knowledge_base';
 import {
@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // In 8.19 / 9.1 the custom inference endpoint ("obs_ai_assistant_kb_inference") is replaced with the preconfigured endpoint ".elser-2-elasticsearch"
   // We need to make sure that the custom inference endpoint continues to work after the migration
 
-  describe('when the knowledge base index was created in 8.17 or 8.18', function () {
+  describe('when upgrading from 8.18 to 8.19', function () {
     this.tags(['skipServerless']);
 
     before(async () => {
@@ -44,9 +44,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await restoreKbSnapshot({
         log,
         es,
-        snapshotRepoName: 'snapshot_kb_8.10',
-        snapshotName: 'my_snapshot',
+        snapshotRepoName: 'snapshot_kb_8.18',
+        snapshotName: 'kb_snapshot_8.18',
       });
+
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
       await runStartupMigrations(observabilityAIAssistantAPIClient);
     });
@@ -59,7 +60,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     it('has an index created in 8.18', async () => {
       await retry.try(async () => {
-        expect(await getKbIndexCreatedVersion()).to.be(8180000);
+        const indexVersion = await getKbIndexCreatedVersion(es);
+        expect(indexVersion).to.be('8.18.0');
       });
     });
 
@@ -79,7 +81,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(res.body.entries[0].title).to.be('My title');
     });
 
-    it('add new entries to KB', async () => {
+    it('can add new entries to KB', async () => {
       const res = await createKnowledgeBaseEntry();
       expect(res.status).to.be(200);
     });
@@ -97,13 +99,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     }
   });
-
-  async function getKbIndexCreatedVersion() {
-    const indexSettings = await es.indices.getSettings({
-      index: resourceNames.writeIndexAlias.kb,
-    });
-
-    const { settings } = Object.values(indexSettings)[0];
-    return parseInt(settings?.index?.version?.created ?? '', 10);
-  }
 }
