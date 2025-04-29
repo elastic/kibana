@@ -103,7 +103,7 @@ export async function getKbModelStatus({
       inferenceId = await getInferenceIdFromWriteIndex(esClient);
       logger.debug(`Using existing inference id "${inferenceId}" from write index`);
     } catch (error) {
-      logger.debug(`Inference id not found: ${error.message}`);
+      logger.error(`Inference id not found: ${error.message}`);
 
       return {
         enabled,
@@ -123,7 +123,7 @@ export async function getKbModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    logger.debug(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
+    logger.error(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
 
     return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
   }
