@@ -51,6 +51,13 @@ const getTestUtils = (
           scheduled_task_id: response.body.scheduled_task_id,
           updated_by: null,
           api_key_owner: null,
+          ...(describeType === 'internal'
+            ? {
+                artifacts: {
+                  dashboards: [],
+                },
+              }
+            : {}),
           api_key_created_by_user: null,
           throttle: '1m',
           notify_when: 'onThrottleInterval',
