@@ -26,7 +26,7 @@ import {
   convertTreeToList,
   updateTraceTreeNode,
   reparentOrphanItems,
-  getLegendsAndColorBy,
+  generateLegendsAndAssignColorsToWaterfall,
   WaterfallLegendType,
 } from './waterfall_helpers';
 import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
@@ -1147,7 +1147,7 @@ describe('waterfall_helpers', () => {
     });
   });
 
-  describe('getLegendsAndColorBy', () => {
+  describe('generateLegendsAndAssignColorsToWaterfall', () => {
     const createWaterfallItem = (overrides: Partial<IWaterfallItem>): IWaterfallItem =>
       ({
         docType: 'span',
@@ -1160,7 +1160,7 @@ describe('waterfall_helpers', () => {
         ...overrides,
       } as IWaterfallItem);
 
-    describe('getLegendsAndColorBy', () => {
+    describe('generateLegendsAndAssignColorsToWaterfall', () => {
       it('should generate legends for multiple services', () => {
         const waterfallItems: IWaterfallItem[] = [
           createWaterfallItem({
@@ -1177,7 +1177,7 @@ describe('waterfall_helpers', () => {
           } as Partial<IWaterfallSpan>),
         ];
 
-        const { legends, colorBy } = getLegendsAndColorBy(waterfallItems);
+        const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
         expect(legends.length).toBeGreaterThanOrEqual(2);
         expect(colorBy).toBe(WaterfallLegendType.ServiceName);
       });
@@ -1192,7 +1192,7 @@ describe('waterfall_helpers', () => {
           } as Partial<IWaterfallSpan>),
         ];
 
-        const { legends, colorBy } = getLegendsAndColorBy(waterfallItems);
+        const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(waterfallItems);
         expect(legends.length).toBeGreaterThanOrEqual(2);
         expect(colorBy).toBe(WaterfallLegendType.SpanType);
       });
@@ -1207,7 +1207,7 @@ describe('waterfall_helpers', () => {
           } as Partial<IWaterfallSpan>),
         ];
 
-        getLegendsAndColorBy(waterfallItems);
+        generateLegendsAndAssignColorsToWaterfall(waterfallItems);
 
         expect(waterfallItems[0].color).toBeDefined();
         expect(waterfallItems[1].color).toBeDefined();
@@ -1222,13 +1222,13 @@ describe('waterfall_helpers', () => {
           } as Partial<IWaterfallSpan>),
         ];
 
-        getLegendsAndColorBy(waterfallItems);
+        generateLegendsAndAssignColorsToWaterfall(waterfallItems);
 
         expect(waterfallItems[0].color).toBeDefined();
       });
 
       it('should handle empty input without errors', () => {
-        expect(() => getLegendsAndColorBy([])).not.toThrow();
+        expect(() => generateLegendsAndAssignColorsToWaterfall([])).not.toThrow();
       });
     });
   });

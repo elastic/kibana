@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { ESQLVariableType } from '@kbn/esql-types';
 import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -30,7 +30,13 @@ describe('autocomplete.suggest', () => {
       const suggestions = await suggest('FROM a | LIMIT ?/', {
         callbacks: {
           canSuggestVariables: () => true,
-          getVariables: () => [],
+          getVariables: () => [
+            {
+              key: 'value',
+              value: 10,
+              type: ESQLVariableType.VALUES,
+            },
+          ],
           getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
         },
       });
@@ -42,6 +48,15 @@ describe('autocomplete.suggest', () => {
         detail: 'Click to create',
         command: { id: 'esql.control.values.create', title: 'Click to create' },
         sortText: '1',
+      });
+
+      expect(suggestions).toContainEqual({
+        label: 'value',
+        text: 'value',
+        kind: 'Constant',
+        detail: 'Named parameter',
+        command: undefined,
+        sortText: '1A',
       });
     });
   });

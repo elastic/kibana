@@ -18,62 +18,6 @@ export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} ${INCLUDE_CITATIONS} 
 export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
-export const STRUCTURED_SYSTEM_PROMPT = `Respond to the human as helpfully and accurately as possible. ${KNOWLEDGE_HISTORY} ${INCLUDE_CITATIONS} You have access to the following tools:
-
-{tools}
-
-The tool action_input should ALWAYS follow the tool JSON schema args.
-
-Valid "action" values: "Final Answer" or {tool_names}
-
-Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input strictly adhering to the tool JSON schema args).
-
-Provide only ONE action per $JSON_BLOB, as shown:
-
-\`\`\`
-
-{{
-
-  "action": $TOOL_NAME,
-
-  "action_input": $TOOL_INPUT
-
-}}
-
-\`\`\`
-
-Follow this format:
-
-Question: input question to answer
-
-Thought: consider previous and subsequent steps
-
-Action:
-
-\`\`\`
-
-$JSON_BLOB
-
-\`\`\`
-
-Observation: action result
-
-... (repeat Thought/Action/Observation N times)
-
-Thought: I know what to respond
-
-Action:
-
-\`\`\`
-
-{{
-
-  "action": "Final Answer",
-
-  "action_input": "Final response to human"}}
-
-Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:\`\`\`$JSON_BLOB\`\`\`then Observation. \n{formattedTime}`;
-
 export const ATTACK_DISCOVERY_DEFAULT = `
 As a world-class cyber security analyst, your task is to analyze a set of security events and accurately identify distinct, comprehensive attack chains. Your analysis should reflect the sophistication of modern cyber attacks, which often span multiple hosts and use diverse techniques.
 Key Principles:
@@ -227,3 +171,32 @@ Review the insights below and remove any that are not from an antivirus program 
     EVENTS_VALUE: 'The process.executable value of the event',
   },
 };
+
+export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
+
+Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
+
+export const ALERT_SUMMARY_SYSTEM_PROMPT =
+  'Return **only a single-line stringified JSON object** without any code fences, explanations, or variable assignments. Do **not** wrap the output in triple backticks or any Markdown code block. \n' +
+  '\n' +
+  'The result must be a valid stringified JSON object that can be directly parsed with `JSON.parse()` in JavaScript.\n' +
+  '\n' +
+  '**Strict rules**:\n' +
+  '- The output must **not** include any code blocks (no triple backticks).\n' +
+  '- The output must be **a string**, ready to be passed directly into `JSON.parse()`.\n' +
+  '- All backslashes (`\\`) must be escaped **twice** (`\\\\\\\\`) so that the string parses correctly in JavaScript.\n' +
+  '- The JSON must follow this structure:\n' +
+  '  {{\n' +
+  '    "summary": "Markdown-formatted summary with inline code where relevant.",\n' +
+  '    "recommendedActions": "Markdown-formatted action list starting with a `###` header."\n' +
+  '  }}\n' +
+  '- The summary text should just be text. It does not need any titles or leading items in bold.\n' +
+  '- Markdown formatting should be used inside string values:\n' +
+  '  - Use `inline code` (backticks) for technical values like file paths, process names, arguments, etc.\n' +
+  '  - Use `**bold**` for emphasis.\n' +
+  '  - Use `-` for bullet points.\n' +
+  '  - The `recommendedActions` value must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
+  '- **Do not** include any extra explanation or text. Only return the stringified JSON object.\n' +
+  '\n' +
+  'The response should look like this:\n' +
+  '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';

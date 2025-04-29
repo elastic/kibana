@@ -3953,6 +3953,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
           },
           {
@@ -3977,15 +3985,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/table_tab_columns.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/table_tab_columns.tsx"
           },
           {
             "plugin": "securitySolution",

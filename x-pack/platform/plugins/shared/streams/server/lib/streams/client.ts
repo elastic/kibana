@@ -253,6 +253,10 @@ export class StreamsClient {
     if: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = asWiredStreamDefinition(await this.getStream(parent));
+    const childExistsAlready = await this.existsStream(name);
+    if (childExistsAlready) {
+      throw new StatusError(`Child stream ${name} already exists`, 409);
+    }
 
     const result = await State.attemptChanges(
       [
@@ -352,7 +356,7 @@ export class StreamsClient {
           scopedClusterClient: this.dependencies.scopedClusterClient,
         });
         if (!privileges.read) {
-          throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
+          throw new SecurityError(`Cannot read stream, insufficient privileges`);
         }
       }
       return streamDefinition;
@@ -382,7 +386,7 @@ export class StreamsClient {
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
-            throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
+            throw new SecurityError(`Cannot read stream, insufficient privileges`);
           }
         }
       ),

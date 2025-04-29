@@ -6,8 +6,10 @@
  */
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -32,6 +34,29 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
 
   const telemetryService = new StreamsTelemetryService();
   telemetryService.setup(coreSetup.analytics);
+
+  const dataMock = dataPluginMock.createStartContract();
+
+  const start = new Date(new Date().getTime() - 15 * 60 * 1000);
+  const end = new Date();
+
+  jest.spyOn(dataMock.query.timefilter.timefilter, 'useTimefilter').mockReturnValue({
+    timeState: {
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      asAbsoluteTimeRange: {
+        from: start.toISOString(),
+        to: end.toISOString(),
+        mode: 'absolute',
+      },
+      start: start.getTime(),
+      end: end.getTime(),
+    },
+    timeState$: new Subject(),
+    refresh: jest.fn(),
+  });
 
   return {
     appParams,

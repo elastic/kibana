@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IntegrationIcon } from '../../../detections/components/alert_summary/common/integration_icon';
+import { IntegrationIcon } from './integration_icon';
 import { DocumentSeverity } from '../../document_details/right/components/severity';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
@@ -83,7 +83,7 @@ export const HeaderTitle = memo(() => {
                 />
               }
             >
-              <IntegrationIcon ruleId={ruleId} iconSize="l" />
+              <IntegrationIcon ruleId={ruleId} />
             </AlertHeaderBlock>
           </EuiFlexItem>
         </EuiFlexGroup>
