@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { FieldDescription } from './field_description';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY } from './field_description';
 
@@ -51,12 +51,20 @@ describe('FieldDescription', () => {
     const customDescription = 'test this long desc '.repeat(8).trim();
     render(<FieldDescription field={{ name: 'bytes', type: 'number', customDescription }} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
-    screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+
+    act(() => {
+      screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+    });
+
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
       `${customDescription}View less`
     );
     expect(mockSetLocalStorage).toHaveBeenCalledWith(false);
-    screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+
+    act(() => {
+      screen.queryByTestId('toggleFieldDescription-bytes')?.click();
+    });
+
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
     expect(mockSetLocalStorage).toHaveBeenCalledWith(true);
   });

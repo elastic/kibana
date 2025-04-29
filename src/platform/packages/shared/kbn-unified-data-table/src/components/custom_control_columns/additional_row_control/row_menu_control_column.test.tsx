@@ -14,13 +14,14 @@ import { getRowMenuControlColumn } from './row_menu_control_column';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
 import { UnifiedDataTableContext } from '../../../table_context';
+import userEvent from '@testing-library/user-event';
 
 describe('getRowMenuControlColumn', () => {
   const contextMock = {
     ...dataTableContextMock,
   };
 
-  it('should render the component', () => {
+  it('should render the component', async () => {
     const mockClick = jest.fn();
     const props = {
       id: 'test_row_menu_control',
@@ -57,7 +58,7 @@ describe('getRowMenuControlColumn', () => {
     const menuButton = screen.getByTestId('unifiedDataTable_test_row_menu_control');
     expect(menuButton).toBeInTheDocument();
 
-    menuButton.click();
+    await userEvent.click(menuButton);
 
     expect(screen.getByTestId('exampleRowControl-visBarVerticalStacked')).toBeInTheDocument();
     expect(screen.getByTestId('exampleRowControl-heart')).toBeInTheDocument();
@@ -65,7 +66,8 @@ describe('getRowMenuControlColumn', () => {
     const button = screen.getByTestId('unifiedDataTable_rowMenu_test_row_menu_control');
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
+
     expect(mockClick).toHaveBeenCalledWith({ record: contextMock.getRowByIndex(1), rowIndex: 1 });
   });
 });
