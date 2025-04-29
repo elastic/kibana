@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiButtonIconProps,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -144,9 +145,11 @@ const InContextMenuActions = (props: LayerActionsProps) => {
               {...(i.color
                 ? {
                     css: css`
-                      color: ${euiTheme.colors[i.color]};
+                      color: ${euiTheme.colors[i.color as keyof EuiButtonIconProps['color']]};
                       &:hover {
-                        text-decoration-color: ${euiTheme.colors[i.color]} !important;
+                        text-decoration-color: ${euiTheme.colors[
+                          i.color as keyof EuiButtonIconProps['color']
+                        ]} !important;
                       }
                     `,
                     size: 's', // need to be explicit here as css prop will disable the default small size

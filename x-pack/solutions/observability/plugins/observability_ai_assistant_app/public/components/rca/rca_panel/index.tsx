@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { rgba } from 'polished';
 import React from 'react';
 import { useTheme } from '../../../hooks/use_theme';
+
+type EuiBackgroundColor = Pick<
+  UseEuiTheme['euiTheme']['colors'],
+  'accent' | 'accentSecondary' | 'primary' | 'success' | 'warning' | 'danger'
+>;
 
 export function RootCauseAnalysisPanel({
   children,
@@ -28,7 +33,7 @@ export function RootCauseAnalysisPanel({
     color !== 'highlighted'
       ? css`
           border: 1px solid;
-          border-color: ${rgba(theme.colors[color], 0.25)};
+          border-color: ${rgba(theme.colors[color as keyof EuiBackgroundColor], 0.25)};
         `
       : undefined;
 
