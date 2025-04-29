@@ -1308,7 +1308,8 @@
         "release_note:skip",
         "Team:Security",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:prev-minor",
+        "backport:prev-major"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1331,7 +1332,8 @@
         "release_note:skip",
         "Team:Security",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:prev-minor",
+        "backport:prev-major"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1353,7 +1355,8 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:prev-minor",
+        "backport:prev-major"
       ],
       "enabled": true
     },
