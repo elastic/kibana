@@ -590,6 +590,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForJoin,
   },
   {
+    hidden: true,
     name: 'change_point',
     preview: true,
     description: i18n.translate(
