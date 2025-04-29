@@ -21,6 +21,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -317,5 +318,11 @@ export function createUnifiedSearchApi(
     filters$: new BehaviorSubject<Filter[] | undefined>(filters),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
     timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+  };
+}
+
+export function createEsqlVariablesApi() {
+  return {
+    esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>([]),
   };
 }

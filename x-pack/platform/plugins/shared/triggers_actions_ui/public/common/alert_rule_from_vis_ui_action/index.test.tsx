@@ -156,6 +156,31 @@ describe('AlertRuleFromVisAction', () => {
     `);
   });
 
+  it('renders empty splitValues as empty strings', () => {
+    action.execute({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | KEEP tags, something.else',
+        thresholdValues: { 'something.else': 3087 },
+        splitValues: { tags: ['["shibbity", ""]'] },
+      },
+    });
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
+      Object {
+        "params": Object {
+          "esqlQuery": Object {
+            "esql": "// Original ES|QL query derived from the visualization:
+      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | KEEP tags, something.else
+      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
+      | WHERE tags IN (\\"shibbity\\",\\"\\") AND something.else >= 3087",
+          },
+          "searchType": "esqlQuery",
+          "timeField": "@timestamp",
+        },
+      }
+    `);
+  });
+
   it('appends multiple thresholdValues separated by AND operators', () => {
     action.execute({
       embeddable: embeddableMock,

@@ -11,8 +11,9 @@ import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { createUnifiedSearchApi, makeEmbeddableServices } from '../mocks';
+import { createUnifiedSearchApi, createEsqlVariablesApi, makeEmbeddableServices } from '../mocks';
 import { initializeAlertRules } from './initialize_alert_rules';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 const mockRender = render;
 const mockRuleFormFlyout = jest.fn((props) => <div data-test-subj={props['data-test-subj']} />);
@@ -35,7 +36,10 @@ const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
   get: jest.fn(),
   list: jest.fn(),
 };
-const parentApiMock = createUnifiedSearchApi();
+const parentApiMock = {
+  ...createUnifiedSearchApi(),
+  ...createEsqlVariablesApi(),
+};
 
 const startDependenciesMock = makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
   visOverrides: { id: 'lnsXY' },
@@ -54,7 +58,10 @@ describe('Alert rules API', () => {
       api.createAlertRule(
         {
           params: {
-            foo: 'bar',
+            searchType: 'esqlQuery',
+            esqlQuery: {
+              esql: "FROM were_no_strangers_to_love | STATS `you know the rules and so do i` = COUNT(*) BY `a full commitment's what i'm thinking of`, `you wouldn't get this from any other guy`",
+            },
           },
         },
         ruleTypeRegistry,
@@ -65,7 +72,55 @@ describe('Alert rules API', () => {
         Object {
           "name": "Elasticsearch query rule from visualization",
           "params": Object {
-            "foo": "bar",
+            "esqlQuery": Object {
+              "esql": "FROM were_no_strangers_to_love | STATS \`you know the rules and so do i\` = COUNT(*) BY \`a full commitment's what i'm thinking of\`, \`you wouldn't get this from any other guy\`",
+            },
+            "searchType": "esqlQuery",
+            "timeWindowSize": 7,
+            "timeWindowUnit": "d",
+          },
+        }
+      `);
+    });
+
+    it('should parse esql variables in the query', async () => {
+      parentApiMock.esqlVariables$.next([
+        { type: ESQLVariableType.FIELDS, key: 'field', value: 'never.gonna.give.you.up' },
+        { type: ESQLVariableType.FIELDS, key: 'field1', value: 'never.gonna.let.you.down' },
+        {
+          type: ESQLVariableType.FIELDS,
+          key: 'field2',
+          value: 'never.gonna.run.around.and.desert.you',
+        },
+        { type: ESQLVariableType.FIELDS, key: 'field3', value: 'never.gonna.make.you.cry' },
+        { type: ESQLVariableType.FIELDS, key: 'field4', value: 'never.gonna.say.goodbye' },
+        {
+          type: ESQLVariableType.FIELDS,
+          key: 'field5',
+          value: 'never.gonna.tell.a.lie.and.hurt.you',
+        },
+      ]);
+      api.createAlertRule(
+        {
+          params: {
+            searchType: 'esqlQuery',
+            esqlQuery: {
+              esql: 'FROM i_just_wanna_tell_you_how_im_feeling | STATS `got to make you understand` = ??field, ??field1, ??field2, ??field3, ??field4, ??field5',
+            },
+          },
+        },
+        ruleTypeRegistry,
+        actionTypeRegistry
+      );
+      expect(await screen.findByTestId('lensEmbeddableRuleForm')).toBeInTheDocument();
+      expect(getLastCalledInitialValues()).toMatchInlineSnapshot(`
+        Object {
+          "name": "Elasticsearch query rule from visualization",
+          "params": Object {
+            "esqlQuery": Object {
+              "esql": "FROM i_just_wanna_tell_you_how_im_feeling | STATS \`got to make you understand\` = never.gonna.give.you.up, never.gonna.let.you.down, never.gonna.run.around.and.desert.you, never.gonna.make.you.cry, never.gonna.say.goodbye, never.gonna.tell.a.lie.and.hurt.you",
+            },
+            "searchType": "esqlQuery",
             "timeWindowSize": 7,
             "timeWindowUnit": "d",
           },
@@ -81,6 +136,7 @@ describe('Alert rules API', () => {
       api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
       expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
         Object {
+          "esqlQuery": undefined,
           "timeWindowSize": 21,
           "timeWindowUnit": "d",
         }
@@ -93,6 +149,7 @@ describe('Alert rules API', () => {
       api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
       expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
         Object {
+          "esqlQuery": undefined,
           "timeWindowSize": 8,
           "timeWindowUnit": "h",
         }
@@ -106,6 +163,7 @@ describe('Alert rules API', () => {
       api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
       expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
         Object {
+          "esqlQuery": undefined,
           "timeWindowSize": 8,
           "timeWindowUnit": "m",
         }
@@ -118,6 +176,7 @@ describe('Alert rules API', () => {
       api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
       expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
         Object {
+          "esqlQuery": undefined,
           "timeWindowSize": 9,
           "timeWindowUnit": "s",
         }
