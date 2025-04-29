@@ -38,7 +38,6 @@ export interface Props {
   isOnFailure: boolean;
   form: FormHook<Fields>;
   onOpen: () => void;
-  esDocsBasePath: string;
   closeFlyout: () => void;
   resetProcessors: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
@@ -99,7 +98,6 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   form,
   isOnFailure,
   onOpen,
-  esDocsBasePath,
   closeFlyout,
   handleSubmit,
   resetProcessors,
@@ -187,7 +185,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
                     return (
                       <DocumentationButton
                         processorLabel={formDescriptor.label}
-                        docLink={esDocsBasePath + formDescriptor.docLinkPath}
+                        docLink={formDescriptor.docLinkPath}
                       />
                     );
                   }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -112,11 +113,12 @@ interface FieldDescriptor {
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
 
-export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
+export const mapProcessorTypeToDescriptor: ( docLinks: CoreStart['docLinks']
+) => MapProcessorTypeToDescriptor = (docLinks: CoreStart['docLinks']) => ({
   append: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: Append,
-    docLinkPath: '/append-processor.html',
+    docLinkPath: docLinks.links.ingest.append,
     label: i18n.translate('xpack.ingestPipelines.processors.label.append', {
       defaultMessage: 'Append',
     }),
@@ -136,7 +138,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   attachment: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: Attachment,
-    docLinkPath: '/attachment.html',
+    docLinkPath: docLinks.links.ingest.attachment,
     label: i18n.translate('xpack.ingestPipelines.processors.label.attachment', {
       defaultMessage: 'Attachment',
     }),
@@ -154,7 +156,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   bytes: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Bytes,
-    docLinkPath: '/bytes-processor.html',
+    docLinkPath: docLinks.links.ingest.bytes,
     label: i18n.translate('xpack.ingestPipelines.processors.label.bytes', {
       defaultMessage: 'Bytes',
     }),
@@ -173,7 +175,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   circle: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: Circle,
-    docLinkPath: '/ingest-circle-processor.html',
+    docLinkPath: docLinks.links.ingest.circle,
     label: i18n.translate('xpack.ingestPipelines.processors.label.circle', {
       defaultMessage: 'Circle',
     }),
@@ -191,7 +193,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   community_id: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: CommunityId,
-    docLinkPath: '/community-id-processor.html',
+    docLinkPath: docLinks.links.ingest.community,
     label: i18n.translate('xpack.ingestPipelines.processors.label.communityId', {
       defaultMessage: 'Community ID',
     }),
@@ -206,7 +208,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   convert: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Convert,
-    docLinkPath: '/convert-processor.html',
+    docLinkPath: docLinks.links.ingest.convert,
     label: i18n.translate('xpack.ingestPipelines.processors.label.convert', {
       defaultMessage: 'Convert',
     }),
@@ -226,7 +228,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   csv: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: CSV,
-    docLinkPath: '/csv-processor.html',
+    docLinkPath: docLinks.links.ingest.csv,
     label: i18n.translate('xpack.ingestPipelines.processors.label.csv', {
       defaultMessage: 'CSV',
     }),
@@ -245,7 +247,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   date: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: DateProcessor,
-    docLinkPath: '/date-processor.html',
+    docLinkPath: docLinks.links.ingest.date,
     label: i18n.translate('xpack.ingestPipelines.processors.label.date', {
       defaultMessage: 'Date',
     }),
@@ -264,7 +266,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   date_index_name: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: DateIndexName,
-    docLinkPath: '/date-index-name-processor.html',
+    docLinkPath: docLinks.links.ingest.dateIndexName,
     label: i18n.translate('xpack.ingestPipelines.processors.label.dateIndexName', {
       defaultMessage: 'Date index name',
     }),
@@ -298,7 +300,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   dissect: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Dissect,
-    docLinkPath: '/dissect-processor.html',
+    docLinkPath: docLinks.links.ingest.dissect,
     label: i18n.translate('xpack.ingestPipelines.processors.label.dissect', {
       defaultMessage: 'Dissect',
     }),
@@ -316,7 +318,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   dot_expander: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: DotExpander,
-    docLinkPath: '/dot-expand-processor.html',
+    docLinkPath: docLinks.links.ingest.dotExpander,
     label: i18n.translate('xpack.ingestPipelines.processors.label.dotExpander', {
       defaultMessage: 'Dot expander',
     }),
@@ -346,7 +348,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   drop: {
     category: processorCategories.DATA_FILTERING,
     FieldsComponent: Drop,
-    docLinkPath: '/drop-processor.html',
+    docLinkPath: docLinks.links.ingest.drop,
     label: i18n.translate('xpack.ingestPipelines.processors.label.drop', {
       defaultMessage: 'Drop',
     }),
@@ -361,7 +363,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   enrich: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: Enrich,
-    docLinkPath: '/ingest-enriching-data.html',
+    docLinkPath: docLinks.links.ingest.enrich,
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',
     }),
@@ -372,7 +374,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           defaultMessage="Adds enrich data to incoming documents based on an {enrichPolicyLink}."
           values={{
             enrichPolicyLink: (
-              <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
+              <EuiLink external target="_blank" href={docLinks.links.ingest.enrich}>
                 {'enrich policy'}
               </EuiLink>
             ),
@@ -394,7 +396,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   fail: {
     category: processorCategories.PIPELINE_HANDLING,
     FieldsComponent: Fail,
-    docLinkPath: '/fail-processor.html',
+    docLinkPath: docLinks.links.ingest.fail,
     label: i18n.translate('xpack.ingestPipelines.processors.label.fail', {
       defaultMessage: 'Fail',
     }),
@@ -410,7 +412,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   fingerprint: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: Fingerprint,
-    docLinkPath: '/fingerprint-processor.html',
+    docLinkPath: docLinks.links.fleet.fingerprint,
     label: i18n.translate('xpack.ingestPipelines.processors.label.fingerprint', {
       defaultMessage: 'Fingerprint',
     }),
@@ -425,7 +427,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   foreach: {
     category: processorCategories.ARRAY_JSON_HANDLING,
     FieldsComponent: Foreach,
-    docLinkPath: '/foreach-processor.html',
+    docLinkPath: docLinks.links.ingest.foreach,
     label: i18n.translate('xpack.ingestPipelines.processors.label.foreach', {
       defaultMessage: 'Foreach',
     }),
@@ -443,7 +445,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   geo_grid: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: GeoGrid,
-    docLinkPath: '/ingest-geo-grid-processor.html',
+    docLinkPath: docLinks.links.ingest.geoGrid,
     label: i18n.translate('xpack.ingestPipelines.processors.label.geogrid', {
       defaultMessage: 'GeoGrid',
     }),
@@ -462,7 +464,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   geoip: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: GeoIP,
-    docLinkPath: '/geoip-processor.html',
+    docLinkPath: docLinks.links.ingest.geoIp,
     label: i18n.translate('xpack.ingestPipelines.processors.label.geoip', {
       defaultMessage: 'GeoIP',
     }),
@@ -481,7 +483,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   ip_location: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: IpLocation,
-    docLinkPath: '/ip-location-processor.html',
+    docLinkPath: docLinks.links.ingest.ipLocation,
     label: i18n.translate('xpack.ingestPipelines.processors.label.ipLocation', {
       defaultMessage: 'IP Location',
     }),
@@ -499,7 +501,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   grok: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Grok,
-    docLinkPath: '/grok-processor.html',
+    docLinkPath: docLinks.links.ingest.grok,
     label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
       defaultMessage: 'Grok',
     }),
@@ -510,7 +512,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           defaultMessage="Uses {grokLink} expressions to extract matches from a field."
           values={{
             grokLink: (
-              <EuiLink external target="_blank" href={esDocUrl + '/grok-processor.html'}>
+              <EuiLink external target="_blank" href={docLinks.links.ingest.grok}>
                 {'grok'}
               </EuiLink>
             ),
@@ -529,7 +531,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   gsub: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Gsub,
-    docLinkPath: '/gsub-processor.html',
+    docLinkPath: docLinks.links.ingest.gsub,
     label: i18n.translate('xpack.ingestPipelines.processors.label.gsub', {
       defaultMessage: 'Gsub',
     }),
@@ -549,7 +551,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   html_strip: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: HtmlStrip,
-    docLinkPath: '/htmlstrip-processor.html',
+    docLinkPath: docLinks.links.ingest.htmlString,
     label: i18n.translate('xpack.ingestPipelines.processors.label.htmlStrip', {
       defaultMessage: 'HTML strip',
     }),
@@ -567,7 +569,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   inference: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: Inference,
-    docLinkPath: '/inference-processor.html',
+    docLinkPath: docLinks.links.ingest.inference,
     label: i18n.translate('xpack.ingestPipelines.processors.label.inference', {
       defaultMessage: 'Inference',
     }),
@@ -590,7 +592,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   join: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Join,
-    docLinkPath: '/join-processor.html',
+    docLinkPath: docLinks.links.ingest.join,
     label: i18n.translate('xpack.ingestPipelines.processors.label.join', {
       defaultMessage: 'Join',
     }),
@@ -609,7 +611,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   json: {
     category: processorCategories.ARRAY_JSON_HANDLING,
     FieldsComponent: Json,
-    docLinkPath: '/json-processor.html',
+    docLinkPath: docLinks.links.ingest.json,
     label: i18n.translate('xpack.ingestPipelines.processors.label.json', {
       defaultMessage: 'JSON',
     }),
@@ -627,7 +629,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   kv: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Kv,
-    docLinkPath: '/kv-processor.html',
+    docLinkPath: docLinks.links.ingest.kv,
     label: i18n.translate('xpack.ingestPipelines.processors.label.kv', {
       defaultMessage: 'Key-value (KV)',
     }),
@@ -648,7 +650,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   lowercase: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Lowercase,
-    docLinkPath: '/lowercase-processor.html',
+    docLinkPath: docLinks.links.ingest.lowercase,
     label: i18n.translate('xpack.ingestPipelines.processors.label.lowercase', {
       defaultMessage: 'Lowercase',
     }),
@@ -666,7 +668,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   network_direction: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: NetworkDirection,
-    docLinkPath: '/network-direction-processor.html',
+    docLinkPath: docLinks.links.ingest.network,
     label: i18n.translate('xpack.ingestPipelines.processors.label.networkDirection', {
       defaultMessage: 'Network Direction',
     }),
@@ -684,7 +686,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   pipeline: {
     category: processorCategories.PIPELINE_HANDLING,
     FieldsComponent: Pipeline,
-    docLinkPath: '/pipeline-processor.html',
+    docLinkPath: docLinks.links.ingest.pipeline,
     label: i18n.translate('xpack.ingestPipelines.processors.label.pipeline', {
       defaultMessage: 'Pipeline',
     }),
@@ -703,7 +705,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Redact,
     forLicenseAtLeast: 'platinum',
-    docLinkPath: '/redact-processor.html',
+    docLinkPath: docLinks.links.ingest.redact,
     label: i18n.translate('xpack.ingestPipelines.processors.label.redact', {
       defaultMessage: 'Redact',
     }),
@@ -722,7 +724,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   registered_domain: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: RegisteredDomain,
-    docLinkPath: '/registered-domain-processor.html',
+    docLinkPath: docLinks.links.ingest.registeredDomain,
     label: i18n.translate('xpack.ingestPipelines.processors.label.registeredDomain', {
       defaultMessage: 'Registered domain',
     }),
@@ -745,7 +747,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   remove: {
     category: processorCategories.DATA_FILTERING,
     FieldsComponent: Remove,
-    docLinkPath: '/remove-processor.html',
+    docLinkPath: docLinks.links.ingest.remove,
     label: i18n.translate('xpack.ingestPipelines.processors.label.remove', {
       defaultMessage: 'Remove',
     }),
@@ -763,7 +765,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   rename: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Rename,
-    docLinkPath: '/rename-processor.html',
+    docLinkPath: docLinks.links.ingest.rename,
     label: i18n.translate('xpack.ingestPipelines.processors.label.rename', {
       defaultMessage: 'Rename',
     }),
@@ -782,7 +784,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   reroute: {
     category: processorCategories.PIPELINE_HANDLING,
     FieldsComponent: Reroute,
-    docLinkPath: '/reroute-processor.html',
+    docLinkPath: docLinks.links.ingest.reroute,
     label: i18n.translate('xpack.ingestPipelines.processors.label.reroute', {
       defaultMessage: 'Reroute',
     }),
@@ -797,7 +799,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   script: {
     category: processorCategories.ARRAY_JSON_HANDLING,
     FieldsComponent: Script,
-    docLinkPath: '/script-processor.html',
+    docLinkPath: docLinks.links.ingest.script,
     label: i18n.translate('xpack.ingestPipelines.processors.label.script', {
       defaultMessage: 'Script',
     }),
@@ -809,7 +811,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   set: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: SetProcessor,
-    docLinkPath: '/set-processor.html',
+    docLinkPath: docLinks.links.ingest.set,
     label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
       defaultMessage: 'Set',
     }),
@@ -839,7 +841,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   set_security_user: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: SetSecurityUser,
-    docLinkPath: '/ingest-node-set-security-user-processor.html',
+    docLinkPath: docLinks.links.ingest.setSecurityUser,
     label: i18n.translate('xpack.ingestPipelines.processors.label.setSecurityUser', {
       defaultMessage: 'Set security user',
     }),
@@ -859,7 +861,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   sort: {
     category: processorCategories.ARRAY_JSON_HANDLING,
     FieldsComponent: Sort,
-    docLinkPath: '/sort-processor.html',
+    docLinkPath: docLinks.links.ingest.sort,
     label: i18n.translate('xpack.ingestPipelines.processors.label.sort', {
       defaultMessage: 'Sort',
     }),
@@ -887,7 +889,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   split: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Split,
-    docLinkPath: '/split-processor.html',
+    docLinkPath: docLinks.links.ingest.split,
     label: i18n.translate('xpack.ingestPipelines.processors.label.split', {
       defaultMessage: 'Split',
     }),
@@ -904,7 +906,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   },
   terminate: {
     category: processorCategories.PIPELINE_HANDLING,
-    docLinkPath: '/terminate-processor.html',
+    docLinkPath: docLinks.links.ingest.terminate,
     label: i18n.translate('xpack.ingestPipelines.processors.label.terminate', {
       defaultMessage: 'Terminate',
     }),
@@ -920,7 +922,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   trim: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Trim,
-    docLinkPath: '/trim-processor.html',
+    docLinkPath: docLinks.links.ingest.trim,
     label: i18n.translate('xpack.ingestPipelines.processors.label.trim', {
       defaultMessage: 'Trim',
     }),
@@ -938,7 +940,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   uppercase: {
     category: processorCategories.DATA_TRANSFORMATION,
     FieldsComponent: Uppercase,
-    docLinkPath: '/uppercase-processor.html',
+    docLinkPath: docLinks.links.ingest.uppercase,
     label: i18n.translate('xpack.ingestPipelines.processors.label.uppercase', {
       defaultMessage: 'Uppercase',
     }),
@@ -956,7 +958,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   urldecode: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: UrlDecode,
-    docLinkPath: '/urldecode-processor.html',
+    docLinkPath: docLinks.links.ingest.urlDecode,
     label: i18n.translate('xpack.ingestPipelines.processors.label.urldecode', {
       defaultMessage: 'URL decode',
     }),
@@ -974,7 +976,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   uri_parts: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: UriParts,
-    docLinkPath: '/uri-parts-processor.html',
+    docLinkPath: docLinks.links.ingest.uriParts,
     label: i18n.translate('xpack.ingestPipelines.processors.label.uriPartsLabel', {
       defaultMessage: 'URI parts',
     }),
@@ -995,7 +997,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   user_agent: {
     category: processorCategories.DATA_ENRICHMENT,
     FieldsComponent: UserAgent,
-    docLinkPath: '/user-agent-processor.html',
+    docLinkPath: docLinks.links.ingest.userAgent,
     label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
       defaultMessage: 'User agent',
     }),
@@ -1012,7 +1014,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         },
       }),
   },
-};
+});
 
 export type ProcessorType = keyof typeof mapProcessorTypeToDescriptor;
 

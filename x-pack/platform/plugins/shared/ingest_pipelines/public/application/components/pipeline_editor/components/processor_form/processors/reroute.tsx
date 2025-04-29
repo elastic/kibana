@@ -64,7 +64,7 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
           values={{
             indexNamesLink: (
               <EuiLink
-                href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
+                href={`${docService.getIndexParametersUrl()}`}
                 target="_blank"
                 external
               >
@@ -106,7 +106,7 @@ const getFieldsConfig = (docService: DocumentationService): FieldsConfig => {
           values={{
             indexNamesLink: (
               <EuiLink
-                href={`${docService.getEsDocsBasePath()}/indices-create-index.html#indices-create-api-path-params`}
+                href={`${docService.getIndexParametersUrl}`}
                 target="_blank"
                 external
               >
