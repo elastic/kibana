@@ -279,18 +279,18 @@ export default function (providerContext: FtrProviderContext) {
           resOsquerySavedQuery = err;
         }
         expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
+        let securityAiPrompt;
+        try {
+          securityAiPrompt = await kibanaServer.savedObjects.get({
+            type: 'security-ai-prompt',
+            id: 'sample_security_ai_prompt',
+          });
+        } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
+          securityAiPrompt = err;
+        }
+        expect(securityAiPrompt.response.data.statusCode).equal(404);
       });
-      let securityAiPrompt;
-      try {
-        securityAiPrompt = await kibanaServer.savedObjects.get({
-          type: 'security-ai-prompt',
-          id: 'sample_security_ai_prompt',
-        });
-      } catch (err) {
-        checkErrorWithResponseDataOrThrow(err);
-        securityAiPrompt = err;
-      }
-      expect(securityAiPrompt.response.data.statusCode).equal(404);
       it('should have removed the saved object', async function () {
         let res;
         try {
