@@ -15,7 +15,6 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
   const orderedLayout: OrderedLayout = {};
 
   let order = 0;
-  let row = 0;
   let sectionCount = 0;
   for (let i = 0; i < widgets.length; i++) {
     const { type, id } = widgets[i];
@@ -24,7 +23,6 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
         id: `main-${sectionCount}`,
         panels: {},
         order,
-        row,
         isMainSection: true,
       };
       while (widgets[i].type === 'panel') {
@@ -40,7 +38,6 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
       const section = layout[sectionId] as GridRowData;
       orderedLayout[sectionId] = { ...section, order };
       order++;
-      row = section.row;
       sectionCount++;
     }
   }

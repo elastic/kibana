@@ -116,7 +116,7 @@ export interface ActiveRowEvent {
 
 /** This is translated from GridLayoutData */
 export interface OrderedLayout {
-  [key: string]: Omit<GridRowData, 'isCollapsed' | 'title'> &
+  [key: string]: Omit<GridRowData, 'row' | 'isCollapsed' | 'title'> &
     (
       | Partial<Pick<GridRowData, 'isCollapsed' | 'title'>>
       | {
