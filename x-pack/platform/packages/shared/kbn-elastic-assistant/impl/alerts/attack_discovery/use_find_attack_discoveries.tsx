@@ -17,6 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
 
 interface Props {
+  alertIds?: string[];
   ids?: string[];
   connectorNames?: string[];
   http: HttpSetup;
@@ -49,10 +50,11 @@ interface PageParam {
   perPage?: number;
 }
 
-const DEFAULT_PAGE = 1; // CAUTION: sever-side API uses a 1-based page index convention (for consistency with similar existing APIs)
+const DEFAULT_PAGE = 1; // CAUTION: server-side API uses a 1-based page index convention (for consistency with similar existing APIs)
 const DEFAULT_PER_PAGE = 10;
 
 export const useFindAttackDiscoveries = ({
+  alertIds,
   ids,
   connectorNames,
   http,
@@ -81,6 +83,7 @@ export const useFindAttackDiscoveries = ({
         method: 'GET',
         version: API_VERSIONS.internal.v1,
         query: {
+          alert_ids: alertIds,
           connector_names: connectorNames,
           end,
           ids,
@@ -97,6 +100,7 @@ export const useFindAttackDiscoveries = ({
       });
     },
     [
+      alertIds,
       connectorNames,
       end,
       http,
@@ -113,7 +117,10 @@ export const useFindAttackDiscoveries = ({
   );
 
   const getNextPageParam = useCallback((lastPage: AttackDiscoveryFindResponse) => {
-    const totalPages = Math.max(DEFAULT_PAGE, Math.ceil(lastPage.total / lastPage.perPage));
+    const totalPages = Math.max(
+      DEFAULT_PAGE,
+      Math.ceil(lastPage.total / (lastPage.per_page ?? DEFAULT_PER_PAGE))
+    );
 
     if (totalPages === lastPage.page) {
       return;
@@ -135,6 +142,7 @@ export const useFindAttackDiscoveries = ({
     [
       'GET',
       ATTACK_DISCOVERY_FIND,
+      alertIds,
       connectorNames,
       end,
       ids,
