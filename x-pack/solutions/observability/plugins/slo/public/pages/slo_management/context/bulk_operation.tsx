@@ -48,6 +48,7 @@ export function BulkOperationProvider({ children }: { children: React.ReactNode 
   } = useKibana().services;
   const queryClient = useQueryClient();
   const { sloClient } = usePluginContext();
+
   const [tasks, setTasks] = useState<BulkOperationTask[]>([]);
 
   const register = useCallback((task: RegisterBulkOperationTask) => {

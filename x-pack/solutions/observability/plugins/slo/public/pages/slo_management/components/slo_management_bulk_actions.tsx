@@ -9,17 +9,21 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { useBulkDeleteSlo } from '../hooks/use_bulk_delete_slo';
+import { Action } from './slo_management_table_wrapper';
 
-export function SloManagementBulkActions({ items }: { items: SLODefinitionResponse[] }) {
-  const { mutate: bulkDelete } = useBulkDeleteSlo();
-
+export function SloManagementBulkActions({
+  items,
+  setAction,
+}: {
+  items: SLODefinitionResponse[];
+  setAction: (action: Action) => void;
+}) {
   return (
     <EuiButtonEmpty
       data-test-subj="sloSloManagementTableBulkDeleteButton"
       disabled={items.length === 0}
       onClick={() => {
-        bulkDelete({ items: items.map((item) => ({ id: item.id, name: item.name })) });
+        setAction({ items, type: 'bulk_delete' });
       }}
       size="xs"
       css={{ blockSize: '0px' }}

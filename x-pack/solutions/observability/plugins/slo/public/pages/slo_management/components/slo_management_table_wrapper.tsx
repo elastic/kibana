@@ -7,6 +7,7 @@
 
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
+import { SloBulkDeleteConfirmationModal } from '../../../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
 import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
@@ -16,6 +17,7 @@ import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 import { useDisableSlo } from '../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../hooks/use_enable_slo';
 import { useResetSlo } from '../../../hooks/use_reset_slo';
+import { useBulkDeleteSlo } from '../hooks/use_bulk_delete_slo';
 import { SloManagementTable } from './slo_management_table';
 
 export type Action = SingleAction | BulkAction;
@@ -26,7 +28,7 @@ interface SingleAction {
 }
 
 interface BulkAction {
-  type: 'bulkDelete';
+  type: 'bulk_delete';
   items: SLODefinitionResponse[];
 }
 
@@ -37,6 +39,7 @@ export function SloManagementTableWrapper() {
   const { mutate: resetSlo } = useResetSlo();
   const { mutate: enableSlo } = useEnableSlo();
   const { mutate: disableSlo } = useDisableSlo();
+  const { mutate: bulkDelete } = useBulkDeleteSlo();
   const navigateToClone = useCloneSlo();
 
   function handleAction() {
@@ -54,6 +57,7 @@ export function SloManagementTableWrapper() {
             }}
           />
         );
+
       case 'reset':
         return (
           <SloResetConfirmationModal
@@ -87,8 +91,17 @@ export function SloManagementTableWrapper() {
             }}
           />
         );
-      case 'bulkDelete':
-        return null;
+      case 'bulk_delete':
+        return (
+          <SloBulkDeleteConfirmationModal
+            items={action.items}
+            onCancel={() => setAction(undefined)}
+            onConfirm={() => {
+              bulkDelete({ items: action.items.map((item) => ({ id: item.id, name: item.name })) });
+              setAction(undefined);
+            }}
+          />
+        );
       default:
         return null;
     }

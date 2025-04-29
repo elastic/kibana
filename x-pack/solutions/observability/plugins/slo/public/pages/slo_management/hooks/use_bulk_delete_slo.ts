@@ -60,7 +60,7 @@ export function useBulkDeleteSlo() {
 
         toasts.addSuccess(
           i18n.translate('xpack.slo.bulkDelete.successNotification', {
-            defaultMessage: '{count} SLO scheduled for deletion successfully',
+            defaultMessage: 'Bulk delete of {count} SLOs scheduled',
             values: { count: items.length },
           })
         );

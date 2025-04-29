@@ -253,6 +253,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
     <EuiPanel hasBorder={true}>
       <SloManagementSearchBar onRefresh={refetch} />
       <EuiSpacer size="m" />
+
       {!selectedItems.length ? (
         <EuiText size="xs">
           {i18n.translate('xpack.slo.sloManagementTable.itemCount', {
@@ -264,8 +265,9 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
           })}
         </EuiText>
       ) : (
-        <SloManagementBulkActions items={selectedItems} />
+        <SloManagementBulkActions items={selectedItems} setAction={setAction} />
       )}
+
       <EuiSpacer size="s" />
       <EuiBasicTable<SLODefinitionResponse>
         tableCaption={TABLE_CAPTION}
