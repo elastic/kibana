@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
@@ -17,10 +17,10 @@ import {
   Message,
   Replacements,
   pruneContentReferences,
+  POST_ACTIONS_CONNECTOR_EXECUTE,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
-import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
@@ -31,11 +31,14 @@ import {
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
+import { ConfigSchema } from '../config_schema';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
+  config: ConfigSchema
 ) => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout;
+
   router.versioned
     .post({
       access: 'internal',
@@ -43,6 +46,12 @@ export const postActionsConnectorExecuteRoute = (
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
+        },
+      },
+      options: {
+        timeout: {
+          // Add extra time to the timeout to account for the time it takes to process the request
+          idleSocket: RESPONSE_TIMEOUT + 30 * 1000,
         },
       },
     })
@@ -142,30 +151,42 @@ export const postActionsConnectorExecuteRoute = (
               promptsDataClient,
             });
           }
-          return await langChainExecute({
-            abortSignal,
-            isStream: request.body.subAction !== 'invokeAI',
-            actionsClient,
-            actionTypeId,
-            connectorId,
-            contentReferencesStore,
-            isOssModel,
-            conversationId,
-            context: ctx,
-            getElser,
-            logger,
-            inference,
-            messages: (newMessage ? [newMessage] : messages) ?? [],
-            onLlmResponse,
-            onNewReplacements,
-            replacements: latestReplacements,
-            request,
-            response,
-            telemetry,
-            savedObjectsClient,
-            systemPrompt,
-            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-          });
+
+          const timeout = new Promise((_, reject) => {
+            setTimeout(() => {
+              reject(
+                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
+              );
+            }, config?.responseTimeout as number);
+          }) as unknown as IKibanaResponse;
+
+          return await Promise.race([
+            langChainExecute({
+              abortSignal,
+              isStream: request.body.subAction !== 'invokeAI',
+              actionsClient,
+              actionTypeId,
+              connectorId,
+              contentReferencesStore,
+              isOssModel,
+              conversationId,
+              context: ctx,
+              logger,
+              inference,
+              messages: (newMessage ? [newMessage] : messages) ?? [],
+              onLlmResponse,
+              onNewReplacements,
+              replacements: latestReplacements,
+              request,
+              response,
+              telemetry,
+              savedObjectsClient,
+              screenContext,
+              systemPrompt,
+              ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+            }),
+            timeout,
+          ]);
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

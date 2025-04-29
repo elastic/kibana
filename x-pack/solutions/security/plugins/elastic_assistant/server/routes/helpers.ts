@@ -253,6 +253,7 @@ export interface LangChainExecuteParams {
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
   systemPrompt?: string;
+  timeout?: number;
 }
 export const langChainExecute = async ({
   messages,
@@ -278,6 +279,7 @@ export const langChainExecute = async ({
   isStream = true,
   savedObjectsClient,
   systemPrompt,
+  timeout,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -339,6 +341,7 @@ export const langChainExecute = async ({
     savedObjectsClient,
     size: request.body.size,
     systemPrompt,
+    timeout,
     telemetry,
     telemetryParams: {
       actionTypeId,

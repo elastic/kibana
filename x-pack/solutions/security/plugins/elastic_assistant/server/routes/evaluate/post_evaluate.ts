@@ -28,9 +28,6 @@ import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import {
   AgentFinish,
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
@@ -39,7 +36,6 @@ import { getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import {
   formatPrompt,
-  formatPromptStructured,
 } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
@@ -56,16 +52,18 @@ import {
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
+import { agentRunnableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { ConfigSchema } from '../../config_schema';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
-const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
-const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
+  config?: ConfigSchema
 ) => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout ?? ROUTE_HANDLER_TIMEOUT;
+
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
@@ -212,7 +210,7 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
                 evaluationId,
@@ -251,6 +249,7 @@ export const postEvaluateRoute = (
                   connectorId: connector.id,
                   llmType,
                   logger,
+                  model: connector.config?.defaultModel,
                   temperature: getDefaultArguments(llmType).temperature,
                   signal: abortSignal,
                   streaming: false,
@@ -259,6 +258,7 @@ export const postEvaluateRoute = (
                   telemetryMetadata: {
                     pluginId: 'security_ai_assistant',
                   },
+                  timeout: ROUTE_HANDLER_TIMEOUT,
                 });
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
@@ -358,27 +358,18 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable =
-                isOpenAI || llmType === 'inference'
-                  ? await createOpenAIToolsAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : llmType && ['bedrock', 'gemini'].includes(llmType)
-                  ? createToolCallingAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : await createStructuredChatAgent({
-                      llm,
-                      tools,
-                      prompt: formatPromptStructured(defaultSystemPrompt),
-                      streamRunnable: false,
-                    });
+              const chatPromptTemplate = formatPrompt({
+                prompt: defaultSystemPrompt,
+              });
+
+              const agentRunnable = await agentRunnableFactory({
+                llm: createLlmInstance(),
+                isOpenAI,
+                llmType,
+                tools,
+                isStream: false,
+                prompt: chatPromptTemplate,
+              });
 
               return {
                 connectorId: connector.id,

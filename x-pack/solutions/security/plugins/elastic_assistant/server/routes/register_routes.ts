@@ -45,11 +45,11 @@ import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  getElserId: GetElser
+  config: ConfigSchema
 ) => {
   /** PUBLIC */
   // Chat
-  chatCompleteRoute(router, getElserId);
+  chatCompleteRoute(router, config);
 
   /** INTERNAL */
   // Capabilities
@@ -82,7 +82,7 @@ export const registerRoutes = (
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
-  postActionsConnectorExecuteRoute(router, getElserId);
+  postActionsConnectorExecuteRoute(router, config);
 
   // Evaluate
   getEvaluateRoute(router);

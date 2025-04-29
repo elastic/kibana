@@ -18,62 +18,6 @@ export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} ${INCLUDE_CITATIONS} 
 export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
-export const STRUCTURED_SYSTEM_PROMPT = `Respond to the human as helpfully and accurately as possible. ${KNOWLEDGE_HISTORY} ${INCLUDE_CITATIONS} You have access to the following tools:
-
-{tools}
-
-The tool action_input should ALWAYS follow the tool JSON schema args.
-
-Valid "action" values: "Final Answer" or {tool_names}
-
-Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input strictly adhering to the tool JSON schema args).
-
-Provide only ONE action per $JSON_BLOB, as shown:
-
-\`\`\`
-
-{{
-
-  "action": $TOOL_NAME,
-
-  "action_input": $TOOL_INPUT
-
-}}
-
-\`\`\`
-
-Follow this format:
-
-Question: input question to answer
-
-Thought: consider previous and subsequent steps
-
-Action:
-
-\`\`\`
-
-$JSON_BLOB
-
-\`\`\`
-
-Observation: action result
-
-... (repeat Thought/Action/Observation N times)
-
-Thought: I know what to respond
-
-Action:
-
-\`\`\`
-
-{{
-
-  "action": "Final Answer",
-
-  "action_input": "Final response to human"}}
-
-Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:\`\`\`$JSON_BLOB\`\`\`then Observation`;
-
 export const ATTACK_DISCOVERY_DEFAULT = `
 As a world-class cyber security analyst, your task is to analyze a set of security events and accurately identify distinct, comprehensive attack chains. Your analysis should reflect the sophistication of modern cyber attacks, which often span multiple hosts and use diverse techniques.
 Key Principles:
