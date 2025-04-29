@@ -31,7 +31,10 @@ export function formatToIngestProcessors(
             tag: advancedJsonProcessorConfig.tag ?? nestedProcessor.tag,
             ignore_failure:
               advancedJsonProcessorConfig.ignore_failure ?? nestedProcessor.ignore_failure,
-            on_failure: advancedJsonProcessorConfig.on_failure ?? nestedProcessor.on_failure,
+            on_failure: [
+              ...(advancedJsonProcessorConfig.on_failure || []),
+              ...((nestedProcessor.on_failure as unknown[]) || []),
+            ],
             if: advancedJsonProcessorConfig.if
               ? conditionToPainless(advancedJsonProcessorConfig.if)
               : nestedProcessor.if,
