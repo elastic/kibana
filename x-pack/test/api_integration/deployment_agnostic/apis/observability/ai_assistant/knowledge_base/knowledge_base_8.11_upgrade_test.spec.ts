@@ -7,14 +7,10 @@
 
 import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
-import AdmZip from 'adm-zip';
-import path from 'path';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
-import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   TINY_ELSER_INFERENCE_ID,
-  TINY_ELSER_MODEL_ID,
   createTinyElserInferenceEndpoint,
   deleteTinyElserModelAndInferenceEndpoint,
   importTinyElserModel,
@@ -24,6 +20,7 @@ import {
   deleteIndexAssets,
   restoreIndexAssets,
 } from '../utils/index_assets';
+import { restoreKbSnapshot } from '../utils/snapshots';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -40,14 +37,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
-      const zipFilePath = `${AI_ASSISTANT_SNAPSHOT_REPO_PATH}.zip`;
-      log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
-      new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
-
       // in a real environment we will use the ELSER inference endpoint (`.elser-2-elasticsearch`) which is pre-installed
       // the model is also preloaded (but not deployed)
       await importTinyElserModel(ml);
-      await createTinyElserInferenceEndpoint(es, log, TINY_ELSER_INFERENCE_ID);
+      await createTinyElserInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID });
     });
 
     after(async () => {
@@ -58,7 +51,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('before running migrations', () => {
       before(async () => {
         await deleteIndexAssets(es);
-        await restoreKbSnapshot();
+        await restoreKbSnapshot({
+          log,
+          es,
+          snapshotRepoName: 'snapshot_kb_8.10',
+          snapshotName: 'my_snapshot',
+        });
         await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
       });
 
@@ -89,7 +87,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('after running migrations', () => {
       beforeEach(async () => {
         await deleteIndexAssets(es);
-        await restoreKbSnapshot();
+        await restoreKbSnapshot({
+          log,
+          es,
+          snapshotRepoName: 'snapshot_kb_8.10',
+          snapshotName: 'my_snapshot',
+        });
         await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
         await runStartupMigrations();
       });
@@ -112,8 +115,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             endpoint: 'GET /internal/observability_ai_assistant/kb/status',
           });
 
-          expect(body.endpoint?.inference_id).to.eql(TINY_ELSER_INFERENCE_ID);
-          expect(body.endpoint?.service_settings.model_id).to.eql(TINY_ELSER_MODEL_ID);
+          expect(body.endpoint?.inference_id).to.eql('.elser-2-elasticsearch');
+          expect(body.endpoint?.service_settings.model_id).to.eql('.elser_model_2');
         });
       });
 
@@ -149,31 +152,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     const { settings } = Object.values(indexSettings)[0];
     return parseInt(settings?.index?.version?.created ?? '', 10);
-  }
-
-  async function restoreKbSnapshot() {
-    log.debug(
-      `Restoring snapshot of "${resourceNames.concreteWriteIndexName.kb}" from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
-    );
-
-    const snapshotRepoName = 'snapshot-repo-8-10';
-    const snapshotName = 'my_snapshot';
-    await es.snapshot.createRepository({
-      name: snapshotRepoName,
-      repository: {
-        type: 'fs',
-        settings: { location: AI_ASSISTANT_SNAPSHOT_REPO_PATH },
-      },
-    });
-
-    await es.snapshot.restore({
-      repository: snapshotRepoName,
-      snapshot: snapshotName,
-      wait_for_completion: true,
-      indices: resourceNames.concreteWriteIndexName.kb,
-    });
-
-    await es.snapshot.deleteRepository({ name: snapshotRepoName });
   }
 
   async function runStartupMigrations() {

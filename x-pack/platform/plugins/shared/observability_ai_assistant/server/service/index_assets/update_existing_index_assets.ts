@@ -23,11 +23,11 @@ export async function updateExistingIndexAssets({
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
 }) {
   const [coreStart] = await core.getStartServices();
-  const { asInternalUser } = coreStart.elasticsearch.client;
+  const esClient = coreStart.elasticsearch.client;
 
-  const doesKbIndexExist = await hasKbWriteIndex({ esClient: coreStart.elasticsearch.client });
+  const doesKbIndexExist = await hasKbWriteIndex({ esClient });
 
-  const doesConversationIndexExist = await asInternalUser.indices.exists({
+  const doesConversationIndexExist = await esClient.asInternalUser.indices.exists({
     index: resourceNames.writeIndexAlias.conversations,
   });
 
@@ -44,9 +44,7 @@ export async function updateExistingIndexAssets({
   if (doesKbIndexExist) {
     logger.debug('Found index for knowledge base. Updating index assets.');
 
-    const currentInferenceId = await getInferenceIdFromWriteIndex(
-      coreStart.elasticsearch.client
-    ).catch(() => {
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => {
       logger.debug(
         `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
       );

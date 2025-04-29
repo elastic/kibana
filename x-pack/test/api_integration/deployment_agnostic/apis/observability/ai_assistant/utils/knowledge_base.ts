@@ -37,7 +37,15 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
   await ml.api.importTrainedModel(TINY_ELSER_MODEL_ID, TINY_ELSER_MODEL_ID, config);
 }
 
-export function createTinyElserInferenceEndpoint(es: Client, log: ToolingLog, inferenceId: string) {
+export function createTinyElserInferenceEndpoint({
+  es,
+  log,
+  inferenceId,
+}: {
+  es: Client;
+  log: ToolingLog;
+  inferenceId: string;
+}) {
   return createInferenceEndpoint({
     es,
     log,
@@ -57,7 +65,9 @@ export async function deployTinyElserAndSetupKb(
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   await importTinyElserModel(ml);
-  await createTinyElserInferenceEndpoint(es, log, TINY_ELSER_INFERENCE_ID).catch(() => {});
+  await createTinyElserInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID }).catch(
+    () => {}
+  );
 
   const { status, body } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',

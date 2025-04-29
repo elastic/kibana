@@ -62,7 +62,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           await deployTinyElserAndSetupKb(getService);
 
           // setup KB with custom inference endpoint
-          await createTinyElserInferenceEndpoint(es, log, CUSTOM_TINY_ELSER_INFERENCE_ID);
+          await createTinyElserInferenceEndpoint({
+            es,
+            log,
+            inferenceId: CUSTOM_TINY_ELSER_INFERENCE_ID,
+          });
           const res = await setupKbAsAdmin(CUSTOM_TINY_ELSER_INFERENCE_ID);
           body = res.body;
 
