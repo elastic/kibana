@@ -56,7 +56,7 @@ export class AIAssistantManagementSelectionPlugin
 
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', //TODO: set different one for serverless or not
+        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', //TODO: set different string for serverless or not
           {
           defaultMessage: 'AI Assistant for ' + envSpecificScope + ' visibility',
         }),
