@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import type { RenderResult } from '@testing-library/react';
-import { render, waitFor } from '@testing-library/react';
+import type { Store } from 'redux';
+import { screen, render, waitFor } from '@testing-library/react';
+import type { TablesAdapter } from '@kbn/expressions-plugin/common';
+
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { VisualizationEmbeddable } from './visualization_embeddable';
 import * as inputActions from '../../store/inputs/actions';
@@ -16,50 +18,61 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 
 jest.mock('./lens_embeddable');
-jest.mock('../page/use_refetch_by_session', () => ({
-  useRefetchByRestartingSession: jest.fn(),
-}));
-jest.useFakeTimers();
-let res: RenderResult;
+jest.mock('../page/use_refetch_by_session');
+
 const mockSearchSessionId = 'mockSearchSessionId';
-const mockSearchSessionIdDefault = 'mockSearchSessionIdDefault';
 const mockRefetchByRestartingSession = jest.fn();
 const mockRefetchByDeletingSession = jest.fn();
-const mockSetQuery = jest.spyOn(inputActions, 'setQuery');
-const mockDeleteQuery = jest.spyOn(inputActions, 'deleteOneQuery');
+
+const getSpies = () => {
+  const mockSetQuery = jest.spyOn(inputActions, 'setQuery');
+  const mockDeleteQuery = jest.spyOn(inputActions, 'deleteOneQuery');
+  return { mockSetQuery, mockDeleteQuery };
+};
+
+const renderWithSpies = (mockStore?: Store) => {
+  const { mockSetQuery, mockDeleteQuery } = getSpies();
+
+  const wrapper = render(
+    <TestProviders store={mockStore}>
+      <VisualizationEmbeddable
+        id="testId"
+        lensAttributes={kpiHostMetricLensAttributes}
+        timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
+      />
+    </TestProviders>
+  );
+
+  return {
+    mockSetQuery,
+    mockDeleteQuery,
+    wrapper,
+  };
+};
+
+(useRefetchByRestartingSession as jest.Mock).mockReturnValue({
+  session: {
+    current: {
+      start: () => mockSearchSessionId,
+    },
+  },
+  refetchByRestartingSession: mockRefetchByRestartingSession,
+  refetchByDeletingSession: mockRefetchByDeletingSession,
+});
 
 describe('VisualizationEmbeddable', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
   describe('when isDonut = false', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
-        session: {
-          current: {
-            start: jest
-              .fn()
-              .mockReturnValueOnce(mockSearchSessionId)
-              .mockReturnValue(mockSearchSessionIdDefault),
-          },
-        },
-        refetchByRestartingSession: mockRefetchByRestartingSession,
-        refetchByDeletingSession: mockRefetchByDeletingSession,
-      });
-      res = render(
-        <TestProviders>
-          <VisualizationEmbeddable
-            id="testId"
-            lensAttributes={kpiHostMetricLensAttributes}
-            timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
-          />
-        </TestProviders>
-      );
-    });
-
-    it('should render LensEmbeddable', () => {
-      expect(res.getByTestId('lens-embeddable')).toBeInTheDocument();
+    it('should render LensEmbeddable', async () => {
+      renderWithSpies();
+      expect(await screen.findByTestId('lens-embeddable')).toBeInTheDocument();
     });
 
     it('should refetch by delete session when no data exists', async () => {
+      const { mockSetQuery } = renderWithSpies();
       await waitFor(() => {
         expect(mockSetQuery).toHaveBeenCalledWith({
           inputId: InputsModelId.global,
@@ -73,7 +86,8 @@ describe('VisualizationEmbeddable', () => {
     });
 
     it('should delete query when unmount', () => {
-      res.unmount();
+      const { mockDeleteQuery, wrapper } = renderWithSpies();
+      wrapper.unmount();
       expect(mockDeleteQuery).toHaveBeenCalledWith({
         inputId: InputsModelId.global,
         id: 'testId',
@@ -81,7 +95,7 @@ describe('VisualizationEmbeddable', () => {
     });
   });
 
-  describe('when data exists', () => {
+  describe('when data exists and no there is no searchSessionId', () => {
     const mockState = {
       ...mockGlobalState,
       inputs: {
@@ -102,39 +116,25 @@ describe('VisualizationEmbeddable', () => {
               selectedInspectIndex: 0,
               searchSessionId: undefined,
               refetch: jest.fn(),
+              tables: {
+                tables: {
+                  'layer-id-0': {
+                    meta: {
+                      statistics: {
+                        totalCount: 999,
+                      },
+                    },
+                  },
+                },
+              } as unknown as TablesAdapter,
             },
           ],
         },
       },
     };
-    const mockStore = createMockStore(mockState);
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
-        session: {
-          current: {
-            start: jest
-              .fn()
-              .mockReturnValueOnce(mockSearchSessionId)
-              .mockReturnValue(mockSearchSessionIdDefault),
-          },
-        },
-        refetchByRestartingSession: mockRefetchByRestartingSession,
-        refetchByDeletingSession: mockRefetchByDeletingSession,
-      });
-      res = render(
-        <TestProviders store={mockStore}>
-          <VisualizationEmbeddable
-            id="testId"
-            lensAttributes={kpiHostMetricLensAttributes}
-            timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
-          />
-        </TestProviders>
-      );
-    });
 
     it('should refetch by restart session', async () => {
+      const { mockSetQuery } = renderWithSpies(createMockStore(mockState));
       await waitFor(() => {
         expect(mockSetQuery).toHaveBeenCalledWith({
           inputId: InputsModelId.global,

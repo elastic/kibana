@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getTotalCountFromTables } from '../../../../common/components/visualization_actions/get_total_count_from_tables';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 
@@ -13,29 +14,27 @@ export const acknowledgedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY
 export const closedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`;
 
 export const useAlertsByStatusVisualizationData = () => {
-  const { responses: openAlertsResponses } = useVisualizationResponse({
+  const { tables: openAlertsTables } = useVisualizationResponse({
     visualizationId: openAlertsVisualizationId,
   });
 
-  const { responses: acknowledgedAlertsResponses } = useVisualizationResponse({
+  const { tables: acknowledgedAlertsTables } = useVisualizationResponse({
     visualizationId: acknowledgedAlertsVisualizationId,
   });
 
-  const { responses: closedAlertsResponses } = useVisualizationResponse({
+  const { tables: closedAlertsTables } = useVisualizationResponse({
     visualizationId: closedAlertsVisualizationId,
   });
 
-  const visualizationOpenAlertsData =
-    openAlertsResponses != null ? openAlertsResponses[0].hits.total : 0;
+  const visualizationOpenAlertsData = getTotalCountFromTables(openAlertsTables) ?? 0;
   const visualizationAcknowledgedAlertsData =
-    acknowledgedAlertsResponses != null ? acknowledgedAlertsResponses[0].hits.total : 0;
-  const visualizationClosedAlertsData =
-    closedAlertsResponses != null ? closedAlertsResponses[0].hits.total : 0;
+    getTotalCountFromTables(acknowledgedAlertsTables) ?? 0;
+  const visualizationClosedAlertsData = getTotalCountFromTables(closedAlertsTables) ?? 0;
 
   const visualizationTotalAlertsData =
     visualizationOpenAlertsData +
-      visualizationAcknowledgedAlertsData +
-      visualizationClosedAlertsData ?? 0;
+    visualizationAcknowledgedAlertsData +
+    visualizationClosedAlertsData;
 
   return {
     open: visualizationOpenAlertsData,

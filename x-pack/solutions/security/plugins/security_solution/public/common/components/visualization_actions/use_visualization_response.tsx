@@ -7,24 +7,20 @@
 
 import { useMemo } from 'react';
 
-import { parseVisualizationData } from './utils';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
-import type { VisualizationResponse } from './types';
 
 export const useVisualizationResponse = ({ visualizationId }: { visualizationId: string }) => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const { inspect, loading, searchSessionId } = useDeepEqualSelector((state) =>
+  const { tables, searchSessionId } = useDeepEqualSelector((state) =>
     getGlobalQuery(state, visualizationId)
   );
   const response = useMemo(
     () => ({
-      requests: inspect ? parseVisualizationData<VisualizationResponse>(inspect?.dsl) : null,
-      responses: inspect ? parseVisualizationData<VisualizationResponse>(inspect?.response) : null,
-      loading,
       searchSessionId,
+      tables,
     }),
-    [inspect, loading, searchSessionId]
+    [searchSessionId, tables]
   );
 
   return response;

@@ -31,6 +31,7 @@ import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
 import { useInspect } from '../inspect/use_inspect';
+import { getTotalCountFromTables } from './get_total_count_from_tables';
 
 const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
@@ -92,7 +93,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
+  const { searchSessionId, tables } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
@@ -116,7 +117,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [enableLegendActions]
   );
   const { setInspectData } = useEmbeddableInspect(onLoad);
-  const { responses, loading } = useVisualizationResponse({ visualizationId: id });
 
   const {
     additionalRequests,
@@ -129,8 +129,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     response,
   } = useInspect({
     inputId: inputsModelId,
-    isDisabled: loading,
-    multiple: responses != null && responses.length > 1,
+    isDisabled: !tables,
+    multiple: tables != null && Object.keys(tables.tables).length > 1,
     queryId: id,
   });
 
@@ -206,11 +206,13 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [attributes?.state?.adHocDataViews]
   );
 
+  const totalCount = useMemo(() => getTotalCountFromTables(tables), [tables]);
+
   if (!searchSessionId) {
     return null;
   }
 
-  if (!attributes || (responses != null && responses.length === 0)) {
+  if (!attributes || (totalCount != null && totalCount === 0)) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>

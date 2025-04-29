@@ -21,6 +21,7 @@ import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useVisualizationResponse } from './use_visualization_response';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { getTotalCountFromTables } from './get_total_count_from_tables';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
@@ -51,8 +52,9 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-  const { responses: visualizationData } = useVisualizationResponse({ visualizationId: id });
-  const dataExists = visualizationData != null && visualizationData[0]?.hits?.total !== 0;
+  const { tables: visualizationTables } = useVisualizationResponse({ visualizationId: id });
+  const visualizationTablesTotalCount = getTotalCountFromTables(visualizationTables);
+  const dataExists = visualizationTablesTotalCount != null && visualizationTablesTotalCount > 0;
   const donutTextWrapperStyles = dataExists
     ? css`
         top: 40%;
@@ -63,7 +65,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         right: 12%;
       `;
   const onEmbeddableLoad = useCallback(
-    ({ requests, responses, isLoading }: EmbeddableData) => {
+    ({ requests, responses, isLoading, tables }: EmbeddableData) => {
       dispatch(
         inputsActions.setQuery({
           inputId,
@@ -72,11 +74,12 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
           refetch: refetchByRestartingSession,
           loading: isLoading,
           inspect: { dsl: requests, response: responses },
+          tables,
         })
       );
 
       if (typeof onLoad === 'function') {
-        onLoad({ requests, responses, isLoading });
+        onLoad({ requests, responses, isLoading, tables });
       }
     },
     [dispatch, inputId, id, session, refetchByRestartingSession, onLoad]
@@ -136,7 +139,11 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         isChartEmbeddablesEnabled={true}
         dataExists={dataExists}
         label={label}
-        title={visualizationData ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
+        title={
+          visualizationTablesTotalCount != null ? (
+            <ChartLabel count={visualizationTablesTotalCount} />
+          ) : null
+        }
         donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >

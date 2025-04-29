@@ -7,6 +7,7 @@
 
 import { get } from 'lodash/fp';
 
+import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import { getFutureTimeRange, getPreviousTimeRange } from '../../utils/get_time_range';
 import type {
   Inputs,
@@ -98,6 +99,7 @@ export interface UpdateQueryParams {
   refetch: Refetch | RefetchKql;
   state: InputsModel;
   searchSessionId?: string;
+  tables?: TablesAdapter;
 }
 
 export const upsertQuery = ({
@@ -108,6 +110,7 @@ export const upsertQuery = ({
   refetch,
   state,
   searchSessionId,
+  tables,
 }: UpdateQueryParams): InputsModel => {
   const queryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   return {
@@ -126,6 +129,7 @@ export const upsertQuery = ({
                 refetch,
                 searchSessionId: state[inputId].queries[queryIndex].searchSessionId,
                 selectedInspectIndex: state[inputId].queries[queryIndex].selectedInspectIndex,
+                ...((tables && { tables }) ?? {}),
               },
               ...state[inputId].queries.slice(queryIndex + 1),
             ]
@@ -139,6 +143,7 @@ export const upsertQuery = ({
                 refetch,
                 selectedInspectIndex: 0,
                 searchSessionId,
+                ...((tables && { tables }) ?? {}),
               },
             ],
     },

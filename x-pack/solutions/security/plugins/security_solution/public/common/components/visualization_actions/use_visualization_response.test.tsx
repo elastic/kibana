@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { useVisualizationResponse } from './use_visualization_response';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
-import { parseVisualizationData } from './utils';
+import type { TablesAdapter } from '@kbn/expressions-plugin/common';
+
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
+import { useVisualizationResponse } from './use_visualization_response';
 
 describe('useVisualizationResponse', () => {
   const mockState = {
@@ -30,8 +31,19 @@ describe('useVisualizationResponse', () => {
             isInspected: false,
             loading: false,
             selectedInspectIndex: 0,
-            searchSessionId: undefined,
+            searchSessionId: 'search-session-id',
             refetch: jest.fn(),
+            tables: {
+              tables: {
+                'layer-id-0': {
+                  meta: {
+                    statistics: {
+                      totalCount: 999,
+                    },
+                  },
+                },
+              },
+            } as unknown as TablesAdapter,
           },
         ],
       },
@@ -49,8 +61,19 @@ describe('useVisualizationResponse', () => {
         <TestProviders store={mockStore}>{children}</TestProviders>
       ),
     });
-    expect(result.current.responses).toEqual(
-      parseVisualizationData(mockState.inputs.global.queries[0].inspect.response)
-    );
+    expect(result.current).toEqual({
+      searchSessionId: 'search-session-id',
+      tables: {
+        tables: {
+          'layer-id-0': {
+            meta: {
+              statistics: {
+                totalCount: 999,
+              },
+            },
+          },
+        },
+      },
+    });
   });
 });

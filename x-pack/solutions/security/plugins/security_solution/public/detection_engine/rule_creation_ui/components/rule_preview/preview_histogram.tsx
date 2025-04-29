@@ -35,6 +35,7 @@ import { getRulePreviewLensAttributes } from '../../../../common/components/visu
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
+import { getTotalCountFromTables } from '../../../../common/components/visualization_actions/get_total_count_from_tables';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -97,11 +98,11 @@ const PreviewHistogramComponent = ({
   const previousPreviewId = usePrevious(previewId);
   const previewQueryId = `${ID}-${previewId}`;
   const previewEmbeddableId = `${previewQueryId}-embeddable`;
-  const { responses: visualizationResponses } = useVisualizationResponse({
+  const { tables } = useVisualizationResponse({
     visualizationId: previewEmbeddableId,
   });
 
-  const totalCount = visualizationResponses?.[0]?.hits?.total ?? 0;
+  const totalCount = getTotalCountFromTables(tables) ?? 0;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {
