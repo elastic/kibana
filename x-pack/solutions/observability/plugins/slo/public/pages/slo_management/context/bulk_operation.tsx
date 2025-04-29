@@ -69,85 +69,86 @@ export function BulkOperationProvider({ children }: { children: React.ReactNode 
       .map((task) => ({
         queryKey: sloKeys.bulkDeleteStatus(task.taskId),
         queryFn: async () => {
-          try {
-            const response = await sloClient.fetch(
-              'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31',
-              { params: { path: { taskId: task.taskId } } }
+          const response = await sloClient.fetch(
+            'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31',
+            { params: { path: { taskId: task.taskId } } }
+          );
+
+          if (!response.isDone) {
+            setTasks((prevTasks) =>
+              prevTasks.map((prevTask) => {
+                if (prevTask.taskId === task.taskId) {
+                  return {
+                    ...prevTask,
+                    status: 'in-progress',
+                    updatedAt: new Date(),
+                  };
+                }
+                return prevTask;
+              })
             );
 
-            if (!response.isDone) {
-              setTasks((prevTasks) =>
-                prevTasks.map((t) => {
-                  if (t.taskId === task.taskId) {
-                    return {
-                      ...t,
-                      status: 'in-progress',
-                      updatedAt: new Date(),
-                    };
-                  }
-                  return t;
-                })
-              );
-            }
+            return response;
+          }
 
-            if (response.isDone) {
-              queryClient.invalidateQueries({ queryKey: sloKeys.allDefinitions(), exact: false });
+          queryClient.invalidateQueries({ queryKey: sloKeys.allDefinitions(), exact: false });
 
-              if (response.error) {
-                setTasks((prevTasks) =>
-                  prevTasks.map((t) => {
-                    if (t.taskId === task.taskId) {
-                      return {
-                        ...t,
-                        items: t.items.map((item) => ({
-                          ...item,
-                          success: false,
-                          error: response.error,
-                        })),
-                        status: 'failed',
-                        error: response.error,
-                        updatedAt: new Date(),
-                      };
-                    }
-                    return t;
-                  })
-                );
+          if (!!response.error) {
+            setTasks((prevTasks) =>
+              prevTasks.map((prevTask) => {
+                if (prevTask.taskId === task.taskId) {
+                  return {
+                    ...prevTask,
+                    items: prevTask.items.map((item) => ({
+                      ...item,
+                      success: false,
+                      error: response.error,
+                    })),
+                    status: 'failed',
+                    error: response.error,
+                    updatedAt: new Date(),
+                  };
+                }
+                return prevTask;
+              })
+            );
 
-                toasts.addError(new Error(response.error), {
-                  title: `Bulk ${task.operation} failed`,
-                });
-              } else {
-                setTasks((prevTasks) =>
-                  prevTasks.map((t) => {
-                    if (t.taskId === task.taskId) {
-                      return {
-                        ...t,
-                        items: t.items.map((item) => ({
-                          ...item,
-                          success: response.results.find((i) => i.id === item.id)?.success ?? false,
-                          error: response.results.find((i) => i.id === item.id)?.error,
-                        })),
-                        status: 'completed',
-                        updatedAt: new Date(),
-                      };
-                    }
-                    return t;
-                  })
-                );
-
-                toasts.addSuccess({
-                  title: `Bulk ${task.operation} succeeded`,
-                  text: JSON.stringify(response),
-                });
-              }
-            }
+            toasts.addError(new Error(response.error), {
+              title: `Bulk ${task.operation} failed`,
+            });
 
             return response;
-          } catch (error) {
-            throw new Error(`Something went wrong. Error: ${error}`);
           }
+
+          setTasks((prevTasks) =>
+            prevTasks.map((prevTask) => {
+              if (prevTask.taskId === task.taskId) {
+                return {
+                  ...prevTask,
+                  items: prevTask.items.map((item) => {
+                    const result = response.results?.find((i) => i.id === item.id);
+                    return {
+                      ...item,
+                      success: result?.success ?? false,
+                      error: result?.error,
+                    };
+                  }),
+                  status: 'completed',
+                  updatedAt: new Date(),
+                };
+              }
+              return prevTask;
+            })
+          );
+
+          toasts.addSuccess({
+            title: `Bulk ${task.operation} succeeded`,
+            text: JSON.stringify(response),
+          });
+
+          return response;
         },
-        refetchInterval: 1000,
+        refetchInterval: 3000,
         retry: false,
         refetchOnWindowFocus: false,
       })),
