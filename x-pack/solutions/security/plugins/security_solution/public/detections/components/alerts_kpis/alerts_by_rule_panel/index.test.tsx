@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsByRulePanel } from '.';
@@ -27,48 +27,38 @@ describe('Alert by rule panel', () => {
   });
 
   test('renders correctly', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsByRulePanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(
-        container.querySelector('[data-test-subj="alerts-by-rule-panel"]')
-      ).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsByRulePanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector('[data-test-subj="alerts-by-rule-panel"]')).toBeInTheDocument();
   });
 
   test('renders HeaderSection', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsByRulePanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsByRulePanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
   });
 
   test('renders inspect button', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsByRulePanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsByRulePanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
   });
 
   test('renders alert by rule chart', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsByRulePanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector('[data-test-subj="alerts-by-rule"]')).toBeInTheDocument();
-    });
+    const { container } = render(
+      <TestProviders>
+        <AlertsByRulePanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector('[data-test-subj="alerts-by-rule"]')).toBeInTheDocument();
   });
 });

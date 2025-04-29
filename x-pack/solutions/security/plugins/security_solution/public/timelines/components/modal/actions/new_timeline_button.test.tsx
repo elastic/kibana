@@ -6,6 +6,7 @@
  */
 
 import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { NewTimelineButton } from './new_timeline_button';
 import { TimelineId } from '../../../../../common/types';
@@ -38,7 +39,7 @@ describe('NewTimelineButton', () => {
     expect(button).toBeInTheDocument();
     expect(getByText('New')).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(getByTestId('timeline-modal-new-timeline')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-new-timeline')).toHaveTextContent('New Timeline');
@@ -68,8 +69,8 @@ describe('NewTimelineButton', () => {
 
     const { getByTestId } = renderNewTimelineButton();
 
-    getByTestId('timeline-modal-new-timeline-dropdown-button').click();
-    getByTestId('timeline-modal-new-timeline').click();
+    await userEvent.click(getByTestId('timeline-modal-new-timeline-dropdown-button'));
+    await userEvent.click(getByTestId('timeline-modal-new-timeline'));
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

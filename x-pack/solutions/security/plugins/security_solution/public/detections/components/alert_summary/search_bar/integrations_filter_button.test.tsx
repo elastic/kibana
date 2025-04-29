@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   FILTER_KEY,
@@ -15,6 +15,7 @@ import {
   INTEGRATIONS_LIST_TEST_ID,
 } from './integrations_filter_button';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -38,20 +39,16 @@ describe('<IntegrationFilterButton />', () => {
       services: { data: { query: { filterManager: jest.fn() } } },
     });
 
-    await act(async () => {
-      const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
+    const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
-      const button = getByTestId(INTEGRATION_BUTTON_TEST_ID);
-      expect(button).toBeInTheDocument();
-      button.click();
+    const button = getByTestId(INTEGRATION_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+    await userEvent.click(button);
 
-      await new Promise(process.nextTick);
+    expect(getByTestId(INTEGRATIONS_LIST_TEST_ID)).toBeInTheDocument();
 
-      expect(getByTestId(INTEGRATIONS_LIST_TEST_ID)).toBeInTheDocument();
-
-      expect(getByTestId('first')).toHaveTextContent('firstLabel');
-      expect(getByTestId('second')).toHaveTextContent('secondLabel');
-    });
+    expect(getByTestId('first')).toHaveTextContent('firstLabel');
+    expect(getByTestId('second')).toHaveTextContent('secondLabel');
   });
 
   it('should add a negated filter to filterManager', async () => {
@@ -61,29 +58,30 @@ describe('<IntegrationFilterButton />', () => {
       services: { data: { query: { filterManager: { getFilters, setFilters } } } },
     });
 
-    await act(async () => {
-      const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
+    const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
-      getByTestId(INTEGRATION_BUTTON_TEST_ID).click();
+    await userEvent.click(getByTestId(INTEGRATION_BUTTON_TEST_ID));
 
-      await new Promise(process.nextTick);
-
-      getByTestId('first').click();
-      expect(setFilters).toHaveBeenCalledWith([
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            index: undefined,
-            key: FILTER_KEY,
-            negate: true,
-            params: { query: 'firstKey' },
-            type: 'phrase',
-          },
-          query: { match_phrase: { [FILTER_KEY]: 'firstKey' } },
-        },
-      ]);
+    await waitFor(() => {
+      expect(getByTestId('first')).toBeVisible();
     });
+
+    await userEvent.click(getByTestId('first'));
+
+    expect(setFilters).toHaveBeenCalledWith([
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          index: undefined,
+          key: FILTER_KEY,
+          negate: true,
+          params: { query: 'firstKey' },
+          type: 'phrase',
+        },
+        query: { match_phrase: { [FILTER_KEY]: 'firstKey' } },
+      },
+    ]);
   });
 
   it('should remove the negated filter from filterManager', async () => {
@@ -106,16 +104,16 @@ describe('<IntegrationFilterButton />', () => {
       services: { data: { query: { filterManager: { getFilters, setFilters } } } },
     });
 
-    await act(async () => {
-      const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
+    const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
-      getByTestId(INTEGRATION_BUTTON_TEST_ID).click();
+    await userEvent.click(getByTestId(INTEGRATION_BUTTON_TEST_ID));
 
-      await new Promise(process.nextTick);
-
-      // creates a new filter that
-      getByTestId('second').click();
-      expect(setFilters).toHaveBeenCalledWith([]);
+    await waitFor(() => {
+      expect(getByTestId('second')).toBeVisible();
     });
+
+    // creates a new filter that
+    await userEvent.click(getByTestId('second'));
+    expect(setFilters).toHaveBeenCalledWith([]);
   });
 });
