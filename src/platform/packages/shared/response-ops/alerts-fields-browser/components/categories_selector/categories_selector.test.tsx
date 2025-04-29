@@ -12,6 +12,7 @@ import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
+import userEvent from '@testing-library/user-event';
 
 const mockSetSelectedCategoryIds = jest.fn();
 const defaultProps = {
@@ -70,10 +71,10 @@ describe('CategoriesSelector', () => {
   it('should call setSelectedCategoryIds when category selected', async () => {
     const result = render(<CategoriesSelector {...defaultProps} />);
 
-    result.getByTestId('categories-filter-button').click();
+    await userEvent.click(result.getByTestId('categories-filter-button'));
     await waitForEuiPopoverOpen();
 
-    result.getByTestId(`categories-selector-option-base`).click();
+    await userEvent.click(result.getByTestId(`categories-selector-option-base`));
     expect(mockSetSelectedCategoryIds).toHaveBeenCalledWith(['base']);
   });
 });
