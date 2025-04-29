@@ -25,6 +25,29 @@ const processorBaseSchema = z.object({
   ignore_failure: z.optional(z.boolean()),
 });
 
+/* Advanced JSON processor */
+
+export interface AdvancedJsonProcessorConfig extends ProcessorBase {
+  processors: Array<Record<string, unknown>>;
+  ignore_failure?: boolean;
+  tag?: string;
+  on_failure?: Array<Record<string, unknown>>;
+}
+export interface AdvancedJsonProcessorDefinition {
+  advanced_json: AdvancedJsonProcessorConfig;
+}
+
+export const advancedJsonProcessorDefinitionSchema = z.strictObject({
+  advanced_json: z.intersection(
+    processorBaseSchema,
+    z.object({
+      processors: z.array(z.record(z.unknown())),
+      tag: z.optional(z.string()),
+      on_failure: z.optional(z.array(z.record(z.unknown()))),
+    })
+  ),
+}) satisfies z.Schema<AdvancedJsonProcessorDefinition>;
+
 /**
  * Grok processor
  */
@@ -294,6 +317,7 @@ export type ProcessorDefinition =
   | GeoIpProcessorDefinition
   | RenameProcessorDefinition
   | SetProcessorDefinition
+  | AdvancedJsonProcessorDefinition
   | UrlDecodeProcessorDefinition
   | UserAgentProcessorDefinition;
 
