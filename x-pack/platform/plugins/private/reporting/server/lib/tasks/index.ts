@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RruleSchedule, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import { RruleSchedule, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { BasePayload, ReportSource } from '@kbn/reporting-common/types';
 
 export const REPORTING_EXECUTE_TYPE = 'report:execute';
@@ -39,12 +39,6 @@ export enum ReportingTaskStatus {
 }
 
 export interface ReportingTask {
-  getTaskDefinition: () => {
-    type: string;
-    title: string;
-    createTaskRunner: TaskRunCreatorFunction;
-    maxAttempts?: number;
-    timeout: string;
-  };
+  getTaskDefinition: () => TaskRegisterDefinition;
   getStatus: () => ReportingTaskStatus;
 }

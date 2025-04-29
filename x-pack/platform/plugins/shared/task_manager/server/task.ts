@@ -260,7 +260,7 @@ export interface IntervalSchedule {
 }
 
 export interface RruleSchedule {
-  rrule: RruleMonthly | RruleWeekly | RruleDaily;
+  rrule: RruleMonthly | RruleWeekly | RruleDaily | RruleMinutely;
   interval?: never;
 }
 

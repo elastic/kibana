@@ -146,7 +146,7 @@ export class ReportingStore {
         ...sourceDoc({
           process_expiration: new Date(0).toISOString(),
           attempts: 0,
-          status: JOB_STATUS.PENDING,
+          status: report.status || JOB_STATUS.PENDING,
         }),
       },
     };

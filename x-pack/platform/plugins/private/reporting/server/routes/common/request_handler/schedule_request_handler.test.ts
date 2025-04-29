@@ -22,6 +22,7 @@ import { ReportingCore } from '../../..';
 import { createMockReportingCore } from '../../../test_helpers';
 import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
 import { ScheduleRequestHandler } from './schedule_request_handler';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 const getMockContext = () =>
   ({
@@ -89,6 +90,20 @@ describe('Handle request to schedule', () => {
       };
     });
 
+    jest.spyOn(reportingCore, 'scheduleRecurringTask').mockResolvedValue({
+      id: 'task-id',
+      scheduledAt: new Date(),
+      attempts: 0,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: new Date(),
+      retryAt: new Date(),
+      state: {},
+      ownerId: 'reporting',
+      taskType: 'reporting:printable_pdf_v2',
+      params: {},
+    });
+
     requestHandler = new ScheduleRequestHandler({
       reporting: reportingCore,
       user: { username: 'testymcgee' },
@@ -102,7 +117,7 @@ describe('Handle request to schedule', () => {
   });
 
   describe('enqueueJob', () => {
-    test('creates a scheduled report saved object', async () => {
+    test('creates a scheduled report saved object and schedules task', async () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',
         jobParams: mockJobParams,
@@ -163,6 +178,12 @@ describe('Handle request to schedule', () => {
           layout: 'preserve_layout',
           isDeprecated: false,
         },
+      });
+
+      expect(reportingCore.scheduleRecurringTask).toHaveBeenCalledWith(mockRequest, {
+        id: 'foo',
+        jobtype: 'printable_pdf_v2',
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
       });
     });
   });

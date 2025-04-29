@@ -40,6 +40,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
 
   public readonly status: ReportSource['status'];
   public readonly attempts: ReportSource['attempts'];
+  public readonly scheduled_report_id: ReportSource['scheduled_report_id'];
 
   // fields with undefined values exist in report jobs that have not been claimed
   public readonly kibana_name: ReportSource['kibana_name'];
@@ -97,6 +98,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.status = opts.status || JOB_STATUS.PENDING;
     this.output = opts.output || null;
     this.error = opts.error;
+    this.scheduled_report_id = opts.scheduled_report_id;
 
     this.queue_time_ms = fields?.queue_time_ms;
     this.execution_time_ms = fields?.execution_time_ms;
@@ -139,6 +141,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       process_expiration: this.process_expiration,
       output: this.output || null,
       metrics: this.metrics,
+      scheduled_report_id: this.scheduled_report_id,
     };
   }
 

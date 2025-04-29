@@ -69,7 +69,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     const { reporting, logger, req, user } = this.opts;
 
     const soClient = await reporting.getSoClient(req);
-    const { version, job, jobType } = await this.createJob(exportTypeId, jobParams);
+    const { version, job, jobType, name } = await this.createJob(exportTypeId, jobParams);
 
     const payload = {
       ...job,
