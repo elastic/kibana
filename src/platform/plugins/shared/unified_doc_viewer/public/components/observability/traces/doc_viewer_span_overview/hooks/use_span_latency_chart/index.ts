@@ -9,11 +9,12 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import type { HistogramItem } from '@kbn/apm-ui-shared';
 import { DurationDistributionChartData } from '@kbn/apm-ui-shared';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface GetSpanDistributionChartDataParams {
@@ -100,62 +101,44 @@ export const useSpanLatencyChart = ({
   const { core } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
 
-  const [data, setData] = useState<SpanLatencyChartData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { loading, value, error } = useAbortableAsync(
+    async ({ signal }) => {
+      if (!spanName || !transactionId || !serviceName) {
+        return null;
+      }
+
+      const result = await getSpanLatencyChart({
+        core,
+        signal,
+        spanName,
+        transactionId,
+        serviceName,
+      });
+
+      return {
+        spanDistributionChartData: getSpanDistributionChartData({
+          euiTheme,
+          spanHistogram: result.overallHistogram,
+        }),
+        percentileThresholdValue: result.percentileThresholdValue,
+      };
+    },
+    [core, euiTheme, serviceName, transactionId, spanName]
+  );
 
   useEffect(() => {
-    if (!spanName || !transactionId || !serviceName) {
-      setData(null);
-      setLoading(false);
-      return;
+    if (error) {
+      core.notifications.toasts.addDanger({
+        title: i18n.translate(
+          'unifiedDocViewer.observability.traces.useTransactionLatencyChart.error',
+          {
+            defaultMessage: 'An error occurred while fetching the latency histogram',
+          }
+        ),
+        text: error.message,
+      });
     }
+  }, [error, core]);
 
-    const controller = new AbortController();
-    const { signal } = controller;
-
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const result = await getSpanLatencyChart({
-          core,
-          signal,
-          spanName,
-          transactionId,
-          serviceName,
-        });
-
-        setData({
-          spanDistributionChartData: getSpanDistributionChartData({
-            euiTheme,
-            spanHistogram: result.overallHistogram,
-          }),
-          percentileThresholdValue: result.percentileThresholdValue,
-        });
-      } catch (err) {
-        if (!signal.aborted) {
-          const error = err as Error;
-          core.notifications.toasts.addDanger({
-            title: i18n.translate(
-              'unifiedDocViewer.observability.traces.useSpanLatencyChart.error',
-              {
-                defaultMessage: 'An error occurred while fetching the latency histogram',
-              }
-            ),
-            text: error.message,
-          });
-          setData(null);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-
-    return function onUnmount() {
-      controller.abort();
-    };
-  }, [core, euiTheme, serviceName, spanName, transactionId]);
-
-  return { loading, data };
+  return { loading, hasError: !!error, data: value as SpanLatencyChartData | null };
 };
