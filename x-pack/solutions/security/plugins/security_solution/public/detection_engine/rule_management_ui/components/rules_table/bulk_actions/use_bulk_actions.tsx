@@ -46,6 +46,7 @@ import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -95,7 +96,6 @@ export const useBulkActions = ({
   const isBulkEditAlertSuppressionEnabled = useIsExperimentalFeatureEnabled(
     'bulkEditAlertSuppressionEnabled'
   );
-  
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));

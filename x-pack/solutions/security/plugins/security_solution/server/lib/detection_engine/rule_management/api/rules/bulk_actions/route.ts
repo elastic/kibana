@@ -43,6 +43,7 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import type { ConfigType } from '../../../../../../config';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 // Set a lower limit for bulk edit as the rules client might fail with a "Query
@@ -52,7 +53,8 @@ const MAX_ROUTE_CONCURRENCY = 5;
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  config: ConfigType
 ) => {
   router.versioned
     .post({
@@ -309,6 +311,7 @@ export const performBulkActionRoute = (
                       rule,
                       edit: body.edit,
                       ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
+                      experimentalFeatures: config.experimentalFeatures,
                     });
 
                     return rule;

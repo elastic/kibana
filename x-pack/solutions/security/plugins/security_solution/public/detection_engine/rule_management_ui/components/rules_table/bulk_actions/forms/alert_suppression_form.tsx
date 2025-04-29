@@ -21,7 +21,7 @@ import {
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../../../common/lib/telemetry';
-import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../../common/translations';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../../common/detection_engine/constants';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -40,9 +40,8 @@ import {
   fieldValidators,
   UseMultiFields,
 } from '../../../../../../shared_imports';
-import { DurationInput } from '../../../../../rule_creation_ui/components/duration_input';
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
-
+import { DurationInput } from '../../../../../rule_creation/components/duration_input';
 const CommonUseField = getUseField({ component: Field });
 
 type AlertSuppressionEditActions =

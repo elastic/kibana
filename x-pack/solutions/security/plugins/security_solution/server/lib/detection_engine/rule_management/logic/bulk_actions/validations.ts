@@ -14,6 +14,7 @@ import {
   BulkActionEditTypeEnum,
   BulkActionsDryRunErrCodeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
@@ -129,6 +130,7 @@ interface DryRunBulkEditBulkActionsValidationArgs {
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
   ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -139,6 +141,7 @@ export const dryRunValidateBulkEditRule = async ({
   edit,
   mlAuthz,
   ruleCustomizationStatus,
+  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
@@ -178,6 +181,6 @@ export const dryRunValidateBulkEditRule = async ({
           !edit.some((action) => isAlertSuppressionBulkEditAction(action.type)),
         'Bulk alert_suppression action feature is disabled.'
       ),
-    BulkActionsDryRunErrCode.ALERT_SUPPRESSION_FEATURE
+    BulkActionsDryRunErrCodeEnum.ALERT_SUPPRESSION_FEATURE
   );
 };
