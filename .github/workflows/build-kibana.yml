@@ -8,10 +8,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest  # GitHub-hosted runner
+    timeout-minutes: 120
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Maximize Disk Space
+        run: |
+          echo "Removing unnecessary tools to free up space..."
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          df -h
 
       - name: Read Node.js Version from .node-version
         id: node_version
@@ -27,70 +37,82 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y tar gzip build-essential python3 libvips-dev
+          df -h
+
+      - name: Clean Caches Before Bootstrap
+        run: |
+          echo "Clearing Yarn and npm caches before bootstrap..."
+          yarn cache clean
+          npm cache clean --force
+          df -h
 
       - name: Bootstrap Kibana
         run: yarn kbn bootstrap
+        env:
+          YARN_GLOBAL_MODULE_CONCURRENCY: 4
 
-      - name: Build Kibana
-        run: yarn build --release --skip-os-packages
-
-      - name: Free Up Disk Space (Remove Unnecessary Builds)
+      - name: Clean Temporary Files Before Build
         run: |
-          echo "Removing unnecessary tarballs to free up space..."
-          rm -v target/kibana-9.0.0-linux-aarch64.tar.gz
-          rm -v target/kibana-9.0.0-darwin-x86_64.tar.gz
-          rm -v target/kibana-9.0.0-darwin-aarch64.tar.gz
-          rm -v target/kibana-9.0.0-windows-x86_64.zip
-          rm -v target/kibana-serverless-9.0.0-linux-x86_64.tar.gz
-          rm -v target/kibana-serverless-9.0.0-linux-aarch64.tar.gz
-          echo "Disk space freed. Only keeping linux-x86_64 tarball."
+          echo "Removing temporary files before build..."
+          rm -rf node_modules/.cache
+          rm -rf target/*
+          rm -rf build/default/*
+          df -h
+
+      - name: Build Kibana (linux-x86_64 only)
+        run: yarn build --release --skip-os-packages --linux-x86_64
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          BUILD_LOG_LEVEL: "error"
+
+      - name: Free Up Disk Space (Remove Unnecessary Artifacts)
+        run: |
+          echo "Removing unnecessary build artifacts..."
+          rm -rf build/default/kibana-9.1.0-linux-aarch64 || true
+          rm -rf build/default/kibana-9.1.0-darwin-x86_64 || true
+          rm -rf build/default/kibana-9.1.0-darwin-aarch64 || true
+          rm -rf build/default/kibana-9.1.0-windows-x86_64 || true
+          rm -rf build/default/kibana-serverless-9.1.0-linux-x86_64 || true
+          rm -rf build/default/kibana-serverless-9.1.0-linux-aarch64 || true
+          rm -rf target/kibana-9.1.0-linux-aarch64.tar.gz || true
+          rm -rf target/kibana-9.1.0-darwin-x86_64.tar.gz || true
+          rm -rf target/kibana-9.1.0-darwin-aarch64.tar.gz || true
+          rm -rf target/kibana-9.1.0-windows-x86_64.zip || true
+          rm -rf target/kibana-serverless-9.1.0-linux-x86_64.tar.gz || true
+          rm -rf target/kibana-serverless-9.1.0-linux-aarch64.tar.gz || true
+          echo "Disk space freed. Only keeping linux-x86_64 artifacts."
+          df -h
 
       - name: Free Up Additional Disk Space
         run: |
-          echo "Deleting unnecessary Kibana build artifacts..."
-          rm -rf build/default/kibana-9.0.0-linux-aarch64
-          rm -rf build/default/kibana-9.0.0-darwin-x86_64
-          rm -rf build/default/kibana-9.0.0-darwin-aarch64
-          rm -rf build/default/kibana-9.0.0-windows-x86_64
-          rm -rf build/default/kibana-serverless-9.0.0-linux-x86_64
-          rm -rf build/default/kibana-serverless-9.0.0-linux-aarch64
-      
-          echo "Clearing Yarn and npm caches..."
+          echo "Clearing caches and temporary files..."
           yarn cache clean
           npm cache clean --force
-          
           echo "Removing unused Docker images and cache..."
-          docker system prune -af
-          
-          echo "Disk space cleanup complete."
+          docker system prune -af --volumes
+          echo "Cleaning temporary directories..."
+          rm -rf /tmp/* || true
+          rm -rf ~/.cache/* || true
+          df -h
 
       - name: Ensure Required Files Exist
         run: |
           echo "Checking required build artifacts..."
-          
-          # Ensure the tarball exists
-          if [ ! -f "target/kibana-9.0.0-linux-x86_64.tar.gz" ]; then
-            echo "ERROR: kibana-9.0.0-linux-x86_64.tar.gz is missing in target/!"
+          if [ ! -f "target/kibana-9.1.0-linux-x86_64.tar.gz" ]; then
+            echo "ERROR: kibana-9.1.0-linux-x86_64.tar.gz is missing in target/!"
             exit 1
           fi
-
-          # Ensure the Docker context directory exists
           mkdir -p build/kibana-docker/default/bin
-
-          # Move the tarball to the expected Docker build location
           echo "Copying tarball to Docker build context..."
-          cp -v target/kibana-9.0.0-linux-x86_64.tar.gz build/kibana-docker/default/
-
-          # Extract the `kibana-docker` binary
+          cp -v target/kibana-9.1.0-linux-x86_64.tar.gz build/kibana-docker/default/
           echo "Extracting kibana-docker binary..."
-          tar -xzf target/kibana-9.0.0-linux-x86_64.tar.gz -C build/kibana-docker/default/ --strip-components=1
-          
+          tar -xzf target/kibana-9.1.0-linux-x86_64.tar.gz -C build/kibana-docker/default/ --strip-components=1
           if [ ! -f "build/kibana-docker/default/bin/kibana-docker" ]; then
             echo "ERROR: kibana-docker binary is missing after extraction!"
             exit 1
           fi
-
           echo "All required files are present."
+          df -h
 
       - name: Locate Dockerfile
         run: |
@@ -107,8 +129,8 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/kibana:9.0.0 -f $DOCKERFILE_PATH build/kibana-docker/default/
+          docker build --no-cache -t ghcr.io/${{ github.repository_owner }}/kibana:9.1.0 -f $DOCKERFILE_PATH build/kibana-docker/default/
 
       - name: Push Docker Image to GHCR
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/kibana:9.0.0
+          docker push ghcr.io/${{ github.repository_owner }}/kibana:9.1.0
