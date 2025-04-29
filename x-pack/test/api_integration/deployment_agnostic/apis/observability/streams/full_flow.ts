@@ -183,6 +183,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
       });
 
+      it('fails to fork logs to logs.nginx when already forked', async () => {
+        const body = {
+          stream: {
+            name: 'logs.nginx',
+          },
+          if: {
+            field: 'log.logger',
+            operator: 'eq' as const,
+            value: 'nginx',
+          },
+        };
+        const response = await forkStream(apiClient, 'logs', body, 409);
+        expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
+      });
+
       it('Index an Nginx access log message, should goto logs.nginx', async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',

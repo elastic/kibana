@@ -55,7 +55,8 @@ export async function forkStream(
   body: ClientRequestParamsOf<
     StreamsRouteRepository,
     'POST /api/streams/{name}/_fork 2023-10-31'
-  >['params']['body']
+  >['params']['body'],
+  expectedStatusCode: number = 200
 ) {
   return client
     .fetch(`POST /api/streams/{name}/_fork 2023-10-31`, {
@@ -66,7 +67,7 @@ export async function forkStream(
         body,
       },
     })
-    .expect(200)
+    .expect(expectedStatusCode)
     .then((response) => response.body);
 }
 
