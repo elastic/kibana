@@ -2360,13 +2360,13 @@
     tslib "^2.8.1"
     undici "^7.2.3"
 
-"@elastic/transport@^8.3.1", "@elastic/transport@^8.9.1":
-  version "8.9.4"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.9.4.tgz#8acdc0b95cd0be8022e4e16ec5a755ab65ac5ea0"
-  integrity sha512-y6kjy5s0MQE3MQx9ItmvQ8th7GlGcZfzZ7ZDvI8bUhaKua2dJk01k9ia/bdJ4dnPpWpOyFTRgkgBZS31ZTLpcg==
+"@elastic/transport@^8.3.1", "@elastic/transport@^8.9.6":
+  version "8.9.6"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.9.6.tgz#f17eb2d042ea8fa2836dab56ed2446ca117146b1"
+  integrity sha512-v71jgmZtgPg2ouXF5KTPxU1a6z7YYc8nazAS7jLySteC/vrShs1OJh6oEEeo5oDc19MYUofV/JV1h5vqJVBXOw==
   dependencies:
     "@opentelemetry/api" "1.x"
-    debug "^4.3.7"
+    debug "^4.4.0"
     hpagent "^1.2.0"
     ms "^2.1.3"
     secure-json-parse "^3.0.1"
@@ -6058,6 +6058,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lock-manager@link:packages/kbn-lock-manager":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:src/platform/packages/shared/kbn-logging-mocks":
   version "0.0.0"
   uid ""
@@ -7630,6 +7634,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-xpack-platform@link:x-pack/platform/test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-xpack@link:x-pack/test":
   version "0.0.0"
   uid ""
@@ -7807,6 +7815,10 @@
   uid ""
 
 "@kbn/upgrade-assistant-plugin@link:x-pack/platform/plugins/private/upgrade_assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/upgrade-assistant@link:x-pack/platform/packages/private/upgrade-assistant":
   version "0.0.0"
   uid ""
 
@@ -8162,27 +8174,27 @@
     ncp "^2.0.0"
     typescript "^5.5.3"
 
-"@launchdarkly/js-sdk-common@2.15.0":
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.15.0.tgz#9964895fb3c5d010800edaf4a9ae3939291a4d2d"
-  integrity sha512-M5ZI8CwKrK+snz1liRVPCfB35tu3NAIRI747ENgLZaTbF23pDUHElhISND/mn1wwSwrhoacqcYNKRwASdJDeig==
+"@launchdarkly/js-sdk-common@2.16.0":
+  version "2.16.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.16.0.tgz#4108107986d1137dee27b075bc7fd572d46ffec7"
+  integrity sha512-HiD4JBWfxRG+TkYpxQivg9+8isQ0JPpfCO9hQ/vu4gVHrSw8lprBmrnoQFFKd7LhDfOxJ6x3esgIDs0PaeDx5w==
 
-"@launchdarkly/js-server-sdk-common@2.14.0":
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.14.0.tgz#2ed3a47e50fff29ed819bf56b95c48d2d48d9314"
-  integrity sha512-ykcRxkLf4poppZxBu9VkJ3+fHY8AbVY2odzCb6ZEHtI7qVG2/TfIOJ/896UqKJt+AryotUBNmKJNWJdQ3JFeog==
+"@launchdarkly/js-server-sdk-common@2.15.0":
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.15.0.tgz#272b6854e1af45c51c74a6e92606dd11427bc73f"
+  integrity sha512-9c9l/yrqLhKWFBrmFP0Dt/4x5/vaM1EYIO2vYX5+ypkbd/wsu7GdA2wnEXWCGBeT9+vfggixWe5kjKtgXtZxJQ==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.15.0"
+    "@launchdarkly/js-sdk-common" "2.16.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.8.0":
-  version "9.8.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.8.0.tgz#12381683c5c564513a1f525c9aec3cb92c39615e"
-  integrity sha512-GQwXlK3dIY9ZjYL73jz9GKSiWOUjDHIDSGUVpa+XziaomVtG8qQXXbZXTvZvPGy7VkYXmeEyayuRBHNFA3cFrw==
+"@launchdarkly/node-server-sdk@^9.9.0":
+  version "9.9.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.9.0.tgz#1715643979ae815c95804831f9c9da35709e4755"
+  integrity sha512-fJ2QQmH1i1/CO2tePqdZxzVnrVvIXAXfEALI8XbYc7N3QJg8k3QG/4BzPQ3PY+EC/JtCQrZeIg0s6zNtC1t3ew==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.14.0"
+    "@launchdarkly/js-server-sdk-common" "2.15.0"
     https-proxy-agent "^5.0.1"
-    launchdarkly-eventsource "2.0.3"
+    launchdarkly-eventsource "2.1.0"
 
 "@launchdarkly/openfeature-node-server@^1.1.0":
   version "1.1.0"
@@ -12721,10 +12733,10 @@
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.0.0"
 
-"@xstate5/react@npm:@xstate/react@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.2.tgz#92185d20efedac97350c996cda29749c2e3fdbf1"
-  integrity sha512-x5GOrE0ZYjU2ba986u0CCp7SaPwzElSn1SW0mZ9MuBgsZ+BW7vTLVOvGmURynwojdso8d6nVbK3c2+MRVqGVgA==
+"@xstate5/react@npm:@xstate/react@^5.0.3":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.3.tgz#3cd48ea64510aa2cc4ecc0c9f17747134173d363"
+  integrity sha512-Zdnn0VTPcVdoaAiW0OX6Nkvdoe7SNGjfaZqM61NKhjt2aNULqiicmDu2tOd1ChzlRWYDxGTdbzVqqVyMLpoHJw==
   dependencies:
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.2.0"
@@ -15334,10 +15346,10 @@ constants-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
   integrity sha1-wguW2MYXdIqvHBYCF2DNJ/y4y3U=
 
-constate@^3.3.2:
-  version "3.3.2"
-  resolved "https://registry.yarnpkg.com/constate/-/constate-3.3.2.tgz#a6cd2f3c203da2cb863f47d22a330b833936c449"
-  integrity sha512-ZnEWiwU6QUTil41D5EGpA7pbqAPGvnR9kBjko8DzVIxpC60mdNKrP568tT5WLJPAxAOtJqJw60+h79ot/Uz1+Q==
+constate@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/constate/-/constate-3.3.3.tgz#668a4e849986ad68fc4e0e67451e388a1c479e06"
+  integrity sha512-J1P1K/GSB2Bn7uLU9AC9ddJb4PooiMHvektj8PK31Tj6nDWYjnmqVkOajzFp2oT7dpCjE2dL1VXVt/XrNwNwQA==
 
 content-disposition@0.5.4:
   version "0.5.4"
@@ -17129,10 +17141,10 @@ ejs@^3.1.10:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-node@^4.10.0, elastic-apm-node@^4.11.2:
-  version "4.11.2"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.11.2.tgz#1e65731034c03862bd8f1ebeee63634464fca3af"
-  integrity sha512-XL18TbF0PFliUlR+VfsR99z0Omjgq2/ap0nUqHR+6BeQU51g0sEuBJZ/96NWIiNpptx8duymS+zODQXJIkcflg==
+elastic-apm-node@^4.10.0, elastic-apm-node@^4.12.0:
+  version "4.12.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.12.0.tgz#af30ac6f6baebebed2ed11a9365ecd77d3395ba3"
+  integrity sha512-vyQ3cPrJ+4wxrKb3iKd99yH/57AQq+QxJpsv1QSiwygmebOSyWTEStXs+eg5aPEMJIOrZZlZG7mSM5Dh2D/eJw==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -17172,12 +17184,12 @@ elastic-apm-node@^4.10.0, elastic-apm-node@^4.11.2:
     stream-chopper "^3.0.1"
     unicode-byte-truncate "^1.0.0"
 
-"elasticsearch-8.x@npm:@elastic/elasticsearch@8":
-  version "8.17.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.17.1.tgz#97baa241f1f7bdd9b9b5c7479c64996e4c54adea"
-  integrity sha512-EaDP4/jfNu0nhnHZjxk9bL9ofKWKX9QUdEJ8QsGa+/KMPBEwD+HMyYXH4FSRlg7YONI0UbdO/mMZobvcEnMFBA==
+"elasticsearch-8.x@npm:@elastic/elasticsearch@8.18.1":
+  version "8.18.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.18.1.tgz#1bdd385d7f0759fec40128f2d49fed021a374a63"
+  integrity sha512-OdR2VqrpVSMzP97jMFKVilJ/e1rQzq5aaQX6gJcNPktrjDUSp+9ESls8twFgyalS0DWtqnZrWqhneRCBWT2vuA==
   dependencies:
-    "@elastic/transport" "^8.9.1"
+    "@elastic/transport" "^8.9.6"
     apache-arrow "^18.0.0"
     tslib "^2.4.0"
 
@@ -18906,12 +18918,12 @@ formdata-polyfill@^4.0.10:
     fetch-blob "^3.1.2"
 
 formidable@^3.5.1, formidable@^3.5.2:
-  version "3.5.2"
-  resolved "https://registry.yarnpkg.com/formidable/-/formidable-3.5.2.tgz#207c33fecdecb22044c82ba59d0c63a12fb81d77"
-  integrity sha512-Jqc1btCy3QzRbJaICGwKcBfGWuLADRerLzDqi2NwSt/UkXLsHJw2TVResiaoBufHVHy9aSgClOHCeJsSsFLTbg==
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/formidable/-/formidable-3.5.4.tgz#ac9a593b951e829b3298f21aa9a2243932f32ed9"
+  integrity sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==
   dependencies:
+    "@paralleldrive/cuid2" "^2.2.2"
     dezalgo "^1.0.4"
-    hexoid "^2.0.0"
     once "^1.4.0"
 
 formik@^2.4.6:
@@ -19982,11 +19994,6 @@ headers-polyfill@^4.0.2:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/headers-polyfill/-/headers-polyfill-4.0.3.tgz#922a0155de30ecc1f785bcf04be77844ca95ad07"
   integrity sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ==
-
-hexoid@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/hexoid/-/hexoid-2.0.0.tgz#fb36c740ebbf364403fa1ec0c7efd268460ec5b9"
-  integrity sha512-qlspKUK7IlSQv2o+5I7yhUd7TxlOG2Vr5LTa3ve2XSNVKAL/n/u/7KLvKmFNimomDIKvZFXWHv0T12mv7rT8Aw==
 
 history@^4.9.0:
   version "4.9.0"
@@ -22378,23 +22385,23 @@ launch-editor@^2.6.1:
     picocolors "^1.0.0"
     shell-quote "^1.8.1"
 
-launchdarkly-eventsource@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.0.3.tgz#8a7b8da5538153f438f7d452b1c87643d900f984"
-  integrity sha512-VhFjppK7jXlcEKaS7bxdoibB5j01NKyeDR7a8XfssdDGNWCTsbF0/5IExSmPi44eDncPhkoPNxlSZhEZvrbD5w==
+launchdarkly-eventsource@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.1.0.tgz#9d16d0fadda61dc54cb393d323b3ef82a08803ff"
+  integrity sha512-1HigECOMYdqX6t1cLs21vYy8Cn4enx1uhVKI7ZgT3fY14x0e75xZGAJ+K2BrAkM6ldUQj2WvIHB9es4k3yaaTQ==
 
-launchdarkly-js-client-sdk@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.5.0.tgz#cb0e3d6fc21e56750aa86fcaf75733d7f510946f"
-  integrity sha512-3dgxC9S8K2ix6qjdArjZGOJPtAytgfQTuE+vWgjWJK7725rpYbuqbHghIFr5B0+WyWyVBYANldjWd1JdtYLwsw==
+launchdarkly-js-client-sdk@^3.6.0:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.6.1.tgz#f397c33e1a3782909e5b1282934aad69b9b6d576"
+  integrity sha512-eq8v1cc3LG6tzlmOw03XrGlEjZsCLx9Pfs/eOQ0o72O8aqNj/ltmgVBFH1Z4HjNufX2680tHcOA/f68bvWyDzQ==
   dependencies:
     escape-string-regexp "^4.0.0"
-    launchdarkly-js-sdk-common "5.4.0"
+    launchdarkly-js-sdk-common "5.5.1"
 
-launchdarkly-js-sdk-common@5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.4.0.tgz#c9787daebe0b583b01d2334218524ea142c85001"
-  integrity sha512-Kb3SDcB6S0HUpFNBZgtEt0YUV/fVkyg+gODfaOCJQ0Y0ApxLKNmmJBZOrPE2qIdzw536u4BqEjtaJdqJWCEElg==
+launchdarkly-js-sdk-common@5.5.1:
+  version "5.5.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.5.1.tgz#1e3a56dbe190920942f7c9f51ba849dce4834142"
+  integrity sha512-z2+B/phJZFU8WnvYR+UX0+bn+sH+slzdV6eloIn3TF/J9tEXj8Lww9z3MErkpjuuShr4LBifSdI72tNbEASlIw==
   dependencies:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"
