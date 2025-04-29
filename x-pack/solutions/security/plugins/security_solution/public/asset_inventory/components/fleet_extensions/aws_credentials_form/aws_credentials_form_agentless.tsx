@@ -207,7 +207,7 @@ export const AwsCredentialsFormAgentless = ({
         info={
           <FormattedMessage
             id="xpack.securitySolution.assetInventory.fleetIntegration.gettingStarted.setupInfoContentAgentless"
-            defaultMessage="Utilize AWS Access Keys to set up and deploy Cloud Asset Inventory for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
+            defaultMessage="Utilize AWS Access Keys to set up and deploy Cloud Asset Discovery for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
                 <EuiLink href={documentationLink} target="_blank">

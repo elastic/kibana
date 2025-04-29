@@ -14,8 +14,6 @@ import {
   type PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import { i18n } from '@kbn/i18n';
-// // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
-// // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import {
   getAssetInputHiddenVars,
   getAssetPolicy,
@@ -67,10 +65,7 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const getSelectedOption = (
-  options: NewPackagePolicyInput[]
-  // policyTemplate: string = ASSET_POLICY_TEMPLATE
-) => {
+const getSelectedOption = (options: NewPackagePolicyInput[]) => {
   // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
   // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
   const selectedOption = options.find((i) => i.enabled) || options[0];
@@ -78,7 +73,7 @@ const getSelectedOption = (
   return selectedOption as NewPackagePolicyAssetInput;
 };
 
-export const CloudAssetInventoryPolicyTemplateForm =
+export const CloudAssetDiscoveryPolicyTemplateForm =
   memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
     ({
       newPolicy,
@@ -94,8 +89,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
       const isServerless = !!cloud?.serverless.projectType;
       const input = getSelectedOption(newPolicy.inputs);
 
-      // // const getIsSubscriptionValid = useIsSubscriptionStatusValid();
-      // // const isSubscriptionValid = !!getIsSubscriptionValid.data;
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
         input,
         isAgentlessEnabled,
@@ -181,10 +174,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
         },
       ];
 
-      // if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
-      //   return <SubscriptionNotAllowed />;
-      // }
-
       return (
         <>
           {isEditPage && <EditScreenStepTitle />}
@@ -204,7 +193,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.assetInventory.fleetIntegration.editWarning.calloutDescription"
-                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where Cloud Asset Inventory is deployed (Organization vs Single Account), please add a new Cloud Asset Inventory integration."
+                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where Cloud Asset Discovery is deployed (Organization vs Single Account), please add a new Cloud Asset Discovery integration."
                   />
                 </p>
               </EuiCallOut>
@@ -301,7 +290,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
     }
   );
 
-CloudAssetInventoryPolicyTemplateForm.displayName = 'CloudAssetInventoryPolicyTemplateForm';
+CloudAssetDiscoveryPolicyTemplateForm.displayName = 'CloudAssetDiscoveryPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
-export { CloudAssetInventoryPolicyTemplateForm as default };
+export { CloudAssetDiscoveryPolicyTemplateForm as default };

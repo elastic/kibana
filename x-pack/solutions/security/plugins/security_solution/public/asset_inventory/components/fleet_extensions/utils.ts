@@ -29,7 +29,7 @@ import {
 } from './aws_credentials_form/aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
 import type {
-  CloudAssetInventoryIntegrations,
+  CloudAssetDiscoveryIntegrations,
   AssetInput,
   NewPackagePolicyAssetInput,
 } from './types';
@@ -39,9 +39,9 @@ import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/cons
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import {
-  CAI_AWS_OPTION_TEST_SUBJ,
-  CAI_AZURE_OPTION_TEST_SUBJ,
-  CAI_GCP_OPTION_TEST_SUBJ,
+  CAD_AWS_OPTION_TEST_SUBJ,
+  CAD_AZURE_OPTION_TEST_SUBJ,
+  CAD_GCP_OPTION_TEST_SUBJ,
 } from './test_subjects';
 
 export function assert(condition: unknown, message: string): asserts condition {
@@ -260,19 +260,19 @@ export const getAssetInputHiddenVars = (
   }
 };
 
-const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
+const assetInventoryIntegrations: CloudAssetDiscoveryIntegrations = {
   asset_inventory: {
     policyTemplate: ASSET_POLICY_TEMPLATE,
     name: i18n.translate(
       'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.nameTitle',
       {
-        defaultMessage: 'Cloud Asset Inventory',
+        defaultMessage: 'Cloud Asset Discovery',
       }
     ),
     shortName: i18n.translate(
       'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.shortNameTitle',
       {
-        defaultMessage: 'CAI',
+        defaultMessage: 'CAD',
       }
     ),
     options: [
@@ -287,11 +287,11 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
         benchmark: i18n.translate(
           'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.benchmarkTitle',
           {
-            defaultMessage: 'CAI AWS',
+            defaultMessage: 'CAD AWS',
           }
         ),
         icon: 'logoAWS',
-        testId: CAI_AWS_OPTION_TEST_SUBJ,
+        testId: CAD_AWS_OPTION_TEST_SUBJ,
       },
       {
         type: CLOUDBEAT_GCP,
@@ -304,11 +304,11 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
         benchmark: i18n.translate(
           'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.benchmarkTitle',
           {
-            defaultMessage: 'CAI GCP',
+            defaultMessage: 'CAD GCP',
           }
         ),
         icon: googleCloudLogo,
-        testId: CAI_GCP_OPTION_TEST_SUBJ,
+        testId: CAD_GCP_OPTION_TEST_SUBJ,
       },
       {
         type: CLOUDBEAT_AZURE,
@@ -321,11 +321,11 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
         benchmark: i18n.translate(
           'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.benchmarkTitle',
           {
-            defaultMessage: 'CAI Azure',
+            defaultMessage: 'CAD Azure',
           }
         ),
         icon: 'logoAzure',
-        testId: CAI_AZURE_OPTION_TEST_SUBJ,
+        testId: CAD_AZURE_OPTION_TEST_SUBJ,
       },
     ],
   },

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CloudAssetInventoryPolicyTemplateForm } from './policy_template_form';
+import { CloudAssetDiscoveryPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {
   getMockPackageInfo,
@@ -32,17 +32,15 @@ import {
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-  CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
-  CAI_AZURE_OPTION_TEST_SUBJ,
-  CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
-  CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS,
-  CAI_GCP_OPTION_TEST_SUBJ,
+  CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS,
+  CAD_AZURE_OPTION_TEST_SUBJ,
+  CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  CAD_GCP_OPTION_TEST_SUBJ,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
 } from './test_subjects';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
-// import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
-// import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -51,25 +49,12 @@ jest.mock('react-router-dom', () => ({
     integration: undefined,
   }),
 }));
-// jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-// jest.mock('../../common/api/use_package_policy_list');
-// jest.mock('../../common/hooks/use_is_subscription_status_valid');
-// jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 const onChange = jest.fn();
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
-// const createReactQueryResponseWithRefetch = (
-//   data: Parameters<typeof createReactQueryResponse>[0]
-// ) => {
-//   return {
-//     ...createReactQueryResponse(data),
-//     refetch: jest.fn(),
-//   };
-// };
-
-describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
+describe('<CloudAssetDiscoveryPolicyTemplateForm />', () => {
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
       integration: undefined,
@@ -80,30 +65,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
-    // (usePackagePolicyList as jest.Mock).mockImplementation((packageName) =>
-    //   createReactQueryResponseWithRefetch({
-    //     status: 'success',
-    //     data: {
-    //       items: [],
-    //     },
-    //   })
-    // );
-
     onChange.mockClear();
-
-    // (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-    //   createReactQueryResponseWithRefetch({
-    //     status: 'success',
-    //     data: { status: 'indexed', installedPackageVersion: '1.0.0' },
-    //   })
-    // );
-
-    // (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
-    //   createReactQueryResponse({
-    //     status: 'success',
-    //     data: true,
-    //   })
-    // );
   });
 
   const WrappedComponent = ({
@@ -124,7 +86,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       <FleetAppWrapper>
         <TestProvider>
           {edit && (
-            <CloudAssetInventoryPolicyTemplateForm
+            <CloudAssetDiscoveryPolicyTemplateForm
               policy={newPolicy as PackagePolicy}
               newPolicy={newPolicy}
               onChange={onChange}
@@ -135,7 +97,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
             />
           )}
           {!edit && (
-            <CloudAssetInventoryPolicyTemplateForm
+            <CloudAssetDiscoveryPolicyTemplateForm
               newPolicy={newPolicy}
               onChange={onChange}
               packageInfo={packageInfo}
@@ -148,84 +110,6 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       </FleetAppWrapper>
     );
   };
-
-  //   it('shows loader when useIsSubscriptionStatusValid is loading', () => {
-  //     (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
-  //       createReactQueryResponse({
-  //         status: 'loading',
-  //         data: undefined,
-  //       })
-  //     );
-
-  //     const policy = getMockPolicyAWS();
-  //     render(<WrappedComponent newPolicy={policy} />);
-
-  //     expect(screen.getByTestId(POLICY_TEMPLATE_FORM_DTS.LOADER)).toBeInTheDocument();
-  //   });
-
-  //   it('shows license block if subscription is not allowed', () => {
-  //     (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
-  //       createReactQueryResponse({
-  //         status: 'success',
-  //         data: false,
-  //       })
-  //     );
-
-  //     const policy = getMockPolicyK8s();
-  //     const { rerender } = render(<WrappedComponent newPolicy={policy} />);
-
-  //     rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
-  //     expect(screen.getByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).toBeInTheDocument();
-  //   });
-
-  //   it('license block renders with license url locator', () => {
-  //     (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
-  //       createReactQueryResponse({
-  //         status: 'success',
-  //         data: false,
-  //       })
-  //     );
-  //     (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() => 'http://license-url');
-
-  //     const policy = getMockPolicyK8s();
-  //     const { rerender } = render(<WrappedComponent newPolicy={policy} />);
-
-  //     rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
-  //     expect(screen.getByTestId('has_locator')).toBeInTheDocument();
-  //   });
-
-  //   it('license block renders without license url locator', () => {
-  //     (useIsSubscriptionStatusValid as jest.Mock).mockImplementation(() =>
-  //       createReactQueryResponse({
-  //         status: 'success',
-  //         data: false,
-  //       })
-  //     );
-  //     (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(undefined);
-
-  //     const policy = getMockPolicyK8s();
-  //     const { rerender } = render(<WrappedComponent newPolicy={policy} />);
-
-  //     rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
-  //     expect(screen.getByTestId('no_locator')).toBeInTheDocument();
-  //   });
-
-  //   it('updates package policy namespace to default when it changes', () => {
-  //     const policy = getMockPolicyK8s();
-  //     const { rerender } = render(<WrappedComponent newPolicy={policy} />);
-
-  //     rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
-
-  //     // Listen to the onChange triggered by the test (re-render with new policy namespace)
-  //     // It should ensure the initial state is valid.
-  //     expect(onChange).toHaveBeenNthCalledWith(1, {
-  //       isValid: true,
-  //       updatedPolicy: {
-  //         ...policy,
-  //         namespace: 'default',
-  //       },
-  //     });
-  //   });
 
   it('renders and updates name field', async () => {
     const policy = getMockPolicyAWS();
@@ -417,7 +301,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       );
       expect(getByTestId('externalLink')).toHaveAttribute(
         'href',
-        'https://ela.st/asset-inventory-get-started'
+        'https://ela.st/cloud-asset-discovery-get-started'
       );
     });
     it(`documentation Hyperlink should have correct URL to redirect users to AWS page if user chose Cloudformation`, () => {
@@ -620,7 +504,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       );
       expect(getByText('documentation')).toHaveAttribute(
         'href',
-        'https://ela.st/asset-inventory-get-started-gcp.html'
+        'https://ela.st/cloud-asset-discovery-get-started-gcp.html'
       );
     });
 
@@ -637,7 +521,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
         updatedPolicy: policy,
       });
       expect(
-        getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
+        getByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP)
       ).toBeInTheDocument();
     });
 
@@ -664,7 +548,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       const { getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
       );
-      await userEvent.type(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
+      await userEvent.type(getByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE), 'b');
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.file': { value: 'b' },
       });
@@ -697,7 +581,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       const { getByLabelText, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
       );
-      expect(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
+      expect(getByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
       expect(getByLabelText('Organization ID')).toBeInTheDocument();
     });
 
@@ -709,7 +593,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       const { getByLabelText, getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
       );
-      expect(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
+      expect(getByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeInTheDocument();
       expect(getByLabelText('Organization ID')).toBeInTheDocument();
     });
 
@@ -721,7 +605,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       const { queryByLabelText, queryByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
       );
-      expect(queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull();
+      expect(queryByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID)).toBeNull();
       expect(queryByLabelText('Organization ID')).toBeNull();
     });
 
@@ -733,7 +617,7 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
       const { getByTestId } = render(
         <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoAssetGCP()} />
       );
-      await userEvent.type(getByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
+      await userEvent.type(getByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID), 'c');
       policy = getAssetPolicy(policy, CLOUDBEAT_GCP, {
         'gcp.organization_id': { value: 'c' },
       });
@@ -852,19 +736,19 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
         />
       );
       // navigate to GCP
-      const gcpSelectorButton = getByTestId(CAI_GCP_OPTION_TEST_SUBJ);
+      const gcpSelectorButton = getByTestId(CAD_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-      const orgIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
-      const projectIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
+      const orgIdField = queryByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
+      const projectIdField = queryByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
       // const credentialsJsonField = queryByTestId(
-      //   CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
+      //   CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
       // );
       const credentialsTypSelector = queryByTestId(
-        CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
+        CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );
       const credentialsFileField = queryByTestId(
-        CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
+        CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
       );
       // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
@@ -895,19 +779,19 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
         />
       );
       // navigate to GCP
-      const gcpSelectorButton = getByTestId(CAI_GCP_OPTION_TEST_SUBJ);
+      const gcpSelectorButton = getByTestId(CAD_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
       const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-      const orgIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
-      const projectIdField = queryByTestId(CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
+      const orgIdField = queryByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
+      const projectIdField = queryByTestId(CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
       const credentialsJsonField = queryByTestId(
-        CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
+        CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON
       );
       const credentialsTypSelector = queryByTestId(
-        CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
+        CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );
       const credentialsFileField = queryByTestId(
-        CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
+        CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE
       );
       // default state for GCP with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
@@ -929,25 +813,25 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
         />
       );
       // navigate to Azure
-      const azureSelectorButton = getByTestId(CAI_AZURE_OPTION_TEST_SUBJ);
+      const azureSelectorButton = getByTestId(CAD_AZURE_OPTION_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       // default state for Azure with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
       await waitFor(() => {
-        expect(getByTestId(CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
-        expect(getByTestId(CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
+        expect(getByTestId(CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();
+        expect(getByTestId(CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
       });
       // select agent-based and check for ARM template option
       await userEvent.click(setupTechnologySelector);
       const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
-      const tenantIdField = queryByTestId(CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
-      const clientIdField = queryByTestId(CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
-      const clientSecretField = queryByTestId(CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
-      const armTemplateSelector = queryByTestId(CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
-      const manualSelector = queryByTestId(CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+      const tenantIdField = queryByTestId(CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+      const clientIdField = queryByTestId(CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+      const clientSecretField = queryByTestId(CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
+      const armTemplateSelector = queryByTestId(CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+      const manualSelector = queryByTestId(CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(tenantIdField).toBeInTheDocument();
@@ -969,18 +853,18 @@ describe('<CloudAssetInventoryPolicyTemplateForm />', () => {
         />
       );
       // navigate to Azure
-      const azureSelectorButton = getByTestId(CAI_AZURE_OPTION_TEST_SUBJ);
+      const azureSelectorButton = getByTestId(CAD_AZURE_OPTION_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       // select agentless and check for ARM template option
       await userEvent.click(setupTechnologySelector);
       const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
-      const tenantIdField = queryByTestId(CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
-      const clientIdField = queryByTestId(CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
-      const clientSecretField = queryByTestId(CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
-      const armTemplateSelector = queryByTestId(CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
-      const manualSelector = queryByTestId(CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
+      const tenantIdField = queryByTestId(CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
+      const clientIdField = queryByTestId(CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID);
+      const clientSecretField = queryByTestId(CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET);
+      const armTemplateSelector = queryByTestId(CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+      const manualSelector = queryByTestId(CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
       // default state for Azure with the Org selected
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);

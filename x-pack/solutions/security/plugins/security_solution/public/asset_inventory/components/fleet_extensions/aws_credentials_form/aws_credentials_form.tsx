@@ -222,7 +222,7 @@ export const AwsCredentialsForm = ({
         info={
           <FormattedMessage
             id="xpack.securitySolution.assetInventory.fleetIntegration.gettingStarted.setupInfoContent"
-            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy Cloud Asset Inventory for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
+            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy Cloud Asset Discovery for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
                 <EuiLink href={elasticDocLink} target="_blank">

@@ -31,7 +31,7 @@ import { useAzureCredentialsForm } from './hooks';
 import { fieldIsInvalid, findVariableDef, getAssetPolicy } from '../utils';
 import { type AssetRadioOption, RadioGroup } from '../asset_boxed_radio_group';
 import {
-  CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
 import type { NewPackagePolicyAssetInput } from '../types';
@@ -57,7 +57,7 @@ export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoConte
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy Cloud Asset Inventory for assessing your Azure environment's assets. Refer to our {gettingStartedLink} guide for details."
+          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy Cloud Asset Discovery for assessing your Azure environment's assets. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={documentationLink} target="_blank">
@@ -78,7 +78,7 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
   {
     id: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
     label: 'ARM Template',
-    testId: CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
+    testId: CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
     id: AZURE_SETUP_FORMAT.MANUAL,
@@ -88,7 +88,7 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
         defaultMessage: 'Manual',
       }
     ),
-    testId: CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
+    testId: CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
 

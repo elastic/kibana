@@ -45,27 +45,27 @@ describe('getPosturePolicy', () => {
   }
 
   it('updates package policy required vars (posture/deployment)', () => {
-    const mockCaiAws = getMockPolicyAWS();
-    expect(mockCaiAws.vars?.asset.value).toBe('asset_inventory');
-    mockCaiAws.vars!.extra = { value: 'value' };
+    const mockCadAws = getMockPolicyAWS();
+    expect(mockCadAws.vars?.asset.value).toBe('asset_inventory');
+    mockCadAws.vars!.extra = { value: 'value' };
   });
 
   it('updates package policy with a single enabled input', () => {
-    const mockCaiAws = getMockPolicyAWS();
-    expect(mockCaiAws.inputs.filter((i) => i.enabled).length).toBe(1);
-    expect(mockCaiAws.inputs.filter((i) => i.enabled)[0].type).toBe(
+    const mockCadAws = getMockPolicyAWS();
+    expect(mockCadAws.inputs.filter((i) => i.enabled).length).toBe(1);
+    expect(mockCadAws.inputs.filter((i) => i.enabled)[0].type).toBe(
       'cloudbeat/asset_inventory_aws'
     );
 
     // enable all inputs of a policy
-    mockCaiAws.inputs = mockCaiAws.inputs.map((i) => ({
+    mockCadAws.inputs = mockCadAws.inputs.map((i) => ({
       ...i,
       enabled: true,
       streams: i.streams.map((s) => ({ ...s, enabled: true })),
     }));
 
     // change input
-    const policy = getAssetPolicy(mockCaiAws, 'cloudbeat/asset_inventory_azure');
+    const policy = getAssetPolicy(mockCadAws, 'cloudbeat/asset_inventory_azure');
     const enabledInputs = policy.inputs.filter(
       (i) => i.enabled && i.streams.some((s) => s.enabled)
     );

@@ -7,7 +7,6 @@
 import React, { useEffect } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getAssetPolicy } from '../utils';
@@ -51,13 +50,11 @@ export const AwsAccountTypeSelect = ({
   input,
   newPolicy,
   updatePolicy,
-  packageInfo,
   disabled,
 }: {
   input: Extract<NewPackagePolicyAssetInput, { type: typeof CLOUDBEAT_AWS }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
-  packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
   const awsAccountTypeOptions = getAwsAccountTypeOptions();
@@ -118,7 +115,7 @@ export const AwsAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.fleetIntegration.awsAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization-level, which automatically connects all accounts (both current and future)."
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Discovery at the organization-level, which automatically connects all accounts (both current and future)."
             />
           </EuiText>
         </>

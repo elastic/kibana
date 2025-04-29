@@ -38,7 +38,7 @@ export const TEST_SUBJ_GROUPING = 'asset-inventory-grouping';
 export const TEST_SUBJ_GROUPING_LOADING = 'asset-inventory-grouping-loading';
 export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
 
-export const DOCS_URL = 'https://ela.st/asset-inventory';
+export const DOCS_URL = 'https://ela.st/cloud-asset-discovery';
 
 export const assetIntegrationDocsNavigation = {
   overviewPath: `${DOCS_URL}`,

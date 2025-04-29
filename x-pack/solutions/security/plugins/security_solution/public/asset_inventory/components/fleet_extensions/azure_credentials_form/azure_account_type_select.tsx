@@ -7,7 +7,6 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RadioGroup, type AssetRadioGroupProps } from '../asset_boxed_radio_group';
@@ -52,14 +51,12 @@ export const AzureAccountTypeSelect = ({
   newPolicy,
   updatePolicy,
   disabled,
-  packageInfo,
   setupTechnology,
 }: {
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;
-  packageInfo: PackageInfo;
   setupTechnology: SetupTechnology;
 }) => {
   const azureAccountTypeOptions = getAzureAccountTypeOptions();
@@ -127,7 +124,7 @@ export const AzureAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.fleetIntegration.azureAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
+              defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy Cloud Asset Discovery at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
             />
           </EuiText>
         </>

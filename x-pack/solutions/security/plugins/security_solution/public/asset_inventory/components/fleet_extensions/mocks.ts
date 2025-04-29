@@ -284,7 +284,7 @@ export const getPackageInfoMock = () => {
       github: 'elastic/cloud-security-posture',
       type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
     },
-    title: 'Cloud Asset Inventory',
+    title: 'Cloud Asset Discovery',
     latestVersion: '0.0.0',
     assets: {
       kibana: {},
