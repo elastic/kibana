@@ -163,7 +163,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
-    const cacheKey = agentIds.sort().join('#');
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
     const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
 
     if (cacheResponse) {
@@ -374,7 +374,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     agentId: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(agentId);
+    const cacheKey = `getAgentDetails:${agentId}`;
+    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(cacheKey);
 
     if (cachedEntry) {
       this.log.debug(
@@ -394,7 +395,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);
     }
 
-    this.cache.set(agentId, s1ApiResponse.data[0]);
+    this.cache.set(cacheKey, s1ApiResponse.data[0]);
 
     return s1ApiResponse.data[0];
   }
