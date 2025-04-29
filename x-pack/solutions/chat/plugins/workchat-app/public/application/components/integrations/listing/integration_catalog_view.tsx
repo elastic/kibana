@@ -33,7 +33,39 @@ interface IntegrationCardData {
   disabled?: boolean;
 }
 
-const comingSoonCards: Partial<Record<IntegrationType, IntegrationCardData>> = {
+const integrationCards: Record<IntegrationType, IntegrationCardData> = {
+  [IntegrationType.index_source]: {
+    title: i18n.translate('workchatApp.integrations.listView.importIndexCard', {
+      defaultMessage: 'Import Index',
+    }),
+    icon: getIntegrationIcon(IntegrationType.index_source),
+    description: i18n.translate('workchatApp.integrations.listView.importIndexDescription', {
+      defaultMessage:
+        'Choose an existing index to connect and start using it in your workflows without re-importing your data',
+    }),
+    disabled: false,
+  },
+  [IntegrationType.external_server]: {
+    title: i18n.translate('workchatApp.integrations.listView.externalServerCard', {
+      defaultMessage: 'External Server',
+    }),
+    icon: getIntegrationIcon(IntegrationType.external_server) as IconType,
+    description: i18n.translate('workchatApp.integrations.listView.externalServerDescription', {
+      defaultMessage: 'Connect to external servers for data processing.',
+    }),
+    disabled: false,
+  },
+  [IntegrationType.salesforce]: {
+    title: i18n.translate('workchatApp.integrations.listView.salesforceCard', {
+      defaultMessage: 'Salesforce',
+    }),
+    icon: getIntegrationIcon(IntegrationType.salesforce) as IconType,
+    description: i18n.translate('workchatApp.integrations.listView.salesforceDescription', {
+      defaultMessage:
+        'Connect your Salesforce account to bring in customer records, case data, and account insights for use in workflows',
+    }),
+    disabled: false,
+  },
   [IntegrationType.google_drive]: {
     title: i18n.translate('workchatApp.integrations.listView.googleDriveCard', {
       defaultMessage: 'Google Drive',
@@ -96,41 +128,6 @@ const comingSoonCards: Partial<Record<IntegrationType, IntegrationCardData>> = {
   },
 };
 
-const integrationCards: Partial<Record<IntegrationType, IntegrationCardData>> = {
-  [IntegrationType.index_source]: {
-    title: i18n.translate('workchatApp.integrations.listView.importIndexCard', {
-      defaultMessage: 'Import Index',
-    }),
-    icon: getIntegrationIcon(IntegrationType.index_source),
-    description: i18n.translate('workchatApp.integrations.listView.importIndexDescription', {
-      defaultMessage:
-        'Choose an existing index to connect and start using it in your workflows without re-importing your data',
-    }),
-    disabled: false,
-  },
-  [IntegrationType.external_server]: {
-    title: i18n.translate('workchatApp.integrations.listView.externalServerCard', {
-      defaultMessage: 'External Server',
-    }),
-    icon: getIntegrationIcon(IntegrationType.external_server) as IconType,
-    description: i18n.translate('workchatApp.integrations.listView.externalServerDescription', {
-      defaultMessage: 'Connect to external servers for data processing.',
-    }),
-    disabled: false,
-  },
-  [IntegrationType.salesforce]: {
-    title: i18n.translate('workchatApp.integrations.listView.salesforceCard', {
-      defaultMessage: 'Salesforce',
-    }),
-    icon: getIntegrationIcon(IntegrationType.salesforce) as IconType,
-    description: i18n.translate('workchatApp.integrations.listView.salesforceDescription', {
-      defaultMessage:
-        'Connect your Salesforce account to bring in customer records, case data, and account insights for use in workflows',
-    }),
-    disabled: false,
-  },
-};
-
 export const IntegrationCatalogView: React.FC = () => {
   const { navigateToWorkchatUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
@@ -177,31 +174,33 @@ export const IntegrationCatalogView: React.FC = () => {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGrid columns={3}>
-          {Object.entries(integrationCards).map(([type, cardData]) => (
-            <EuiFlexItem>
-              <EuiCard
-                layout="horizontal"
-                icon={
-                  <div className={backgroundCircle}>
-                    <EuiIcon size="xl" type={cardData.icon} />
-                  </div>
-                }
-                title={
-                  <div className={titleStyle}>
-                    {cardData.title}
-                    <EuiIcon type="iInCircle" size="s" className={iconStyle} />
-                  </div>
-                }
-                titleSize="xs"
-                description={cardData.description}
-                paddingSize="l"
-                className={cardStyle}
-                onClick={() => {
-                  return navigateToWorkchatUrl(`${appPaths.integrations.create}?type=${type}`);
-                }}
-              />
-            </EuiFlexItem>
-          ))}
+          {Object.entries(integrationCards)
+            .filter(([_, cardData]) => !cardData.disabled)
+            .map(([type, cardData]) => (
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  icon={
+                    <div className={backgroundCircle}>
+                      <EuiIcon size="xl" type={cardData.icon} />
+                    </div>
+                  }
+                  title={
+                    <div className={titleStyle}>
+                      {cardData.title}
+                      <EuiIcon type="iInCircle" size="s" className={iconStyle} />
+                    </div>
+                  }
+                  titleSize="xs"
+                  description={cardData.description}
+                  paddingSize="l"
+                  className={cardStyle}
+                  onClick={() => {
+                    return navigateToWorkchatUrl(`${appPaths.integrations.create}?type=${type}`);
+                  }}
+                />
+              </EuiFlexItem>
+            ))}
         </EuiFlexGrid>
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section>
@@ -214,29 +213,31 @@ export const IntegrationCatalogView: React.FC = () => {
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFlexGrid columns={3}>
-          {Object.entries(comingSoonCards).map(([type, cardData]) => (
-            <EuiFlexItem>
-              <EuiCard
-                layout="horizontal"
-                icon={
-                  <div className={backgroundCircle}>
-                    <EuiIcon size="xl" type={cardData.icon} />
-                  </div>
-                }
-                title={
-                  <div className={titleStyle}>
-                    {cardData.title}
-                    <EuiIcon type="iInCircle" size="s" className={iconStyle} />
-                  </div>
-                }
-                titleSize="xs"
-                description={cardData.description}
-                paddingSize="l"
-                isDisabled={cardData.disabled}
-                className={cardStyle}
-              />
-            </EuiFlexItem>
-          ))}
+          {Object.entries(integrationCards)
+            .filter(([_, cardData]) => cardData.disabled)
+            .map(([type, cardData]) => (
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  icon={
+                    <div className={backgroundCircle}>
+                      <EuiIcon size="xl" type={cardData.icon} />
+                    </div>
+                  }
+                  title={
+                    <div className={titleStyle}>
+                      {cardData.title}
+                      <EuiIcon type="iInCircle" size="s" className={iconStyle} />
+                    </div>
+                  }
+                  titleSize="xs"
+                  description={cardData.description}
+                  paddingSize="l"
+                  isDisabled={cardData.disabled}
+                  className={cardStyle}
+                />
+              </EuiFlexItem>
+            ))}
         </EuiFlexGrid>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
