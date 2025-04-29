@@ -21,7 +21,7 @@ import type { EsQueryRuleParamsExtractedParams, EsQueryRuleState } from './rule_
 import { validateServerless } from './rule_type_params';
 
 import type { ExecutorOptions } from './types';
-import { ActionGroupId } from './constants';
+import { ActionGroupId } from '../../../common/es_query';
 import { executor } from './executor';
 import { isSearchSourceRule } from './util';
 import type { StackAlertType } from '../types';

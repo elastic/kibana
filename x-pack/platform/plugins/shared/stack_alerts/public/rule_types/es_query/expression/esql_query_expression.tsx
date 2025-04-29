@@ -7,6 +7,7 @@
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFieldNumber,
   EuiFlexGroup,
@@ -14,6 +15,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiRadioGroup,
 } from '@elastic/eui';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -25,6 +27,7 @@ import {
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,
+  isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
@@ -32,13 +35,50 @@ import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../../../../common';
+import {
+  transformDatatableToEsqlTable,
+  getEsqlQueryHits,
+  ALERT_ID_SUGGESTED_MAX,
+} from '../../../../common';
+
+const ALL_DOCUMENTS = 'all';
+const alertingOptions = [
+  {
+    id: ALL_DOCUMENTS,
+    label: i18n.translate('xpack.stackAlerts.esQuery.ui.allDocumentsLabel', {
+      defaultMessage: 'Create an alert if matches are found',
+    }),
+  },
+  {
+    id: 'row',
+    label: i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowLabel', {
+      defaultMessage: 'Create an alert for each row',
+    }),
+  },
+];
+
+const getWarning = (duplicateAlertIds?: Set<string>, longAlertIds?: Set<string>) => {
+  if (duplicateAlertIds && duplicateAlertIds.size > 0) {
+    return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowWarning', {
+      defaultMessage:
+        'Test returned multiple rows with the same alert ID. Consider updating the query to group on different fields.',
+    });
+  } else if (longAlertIds && longAlertIds.size > 0) {
+    return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowAlertIdWarning', {
+      defaultMessage:
+        'The number of fields used to generate the alert ID should be limited to a maximum of {max}. ',
+      values: {
+        max: ALERT_ID_SUGGESTED_MAX,
+      },
+    });
+  }
+};
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
   const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField } = ruleParams;
+  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -53,7 +93,7 @@ export const EsqlQueryExpression: React.FC<
     size: isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
     esqlQuery: esqlQuery ?? { esql: '' },
     aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-    groupBy: DEFAULT_VALUES.GROUP_BY,
+    groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
     // The sourceFields param is ignored for the ES|QL type
@@ -63,6 +103,7 @@ export const EsqlQueryExpression: React.FC<
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -88,6 +129,7 @@ export const EsqlQueryExpression: React.FC<
   }, []);
 
   const onTestQuery = useCallback(async () => {
+    const isGroupAgg = isPerRowAggregation(groupBy);
     const window = `${timeWindowSize}${timeWindowUnit}`;
     const emptyResult = {
       testResults: { results: [], truncated: false },
@@ -98,9 +140,9 @@ export const EsqlQueryExpression: React.FC<
     if (hasExpressionValidationErrors(currentRuleParams, isServerless)) {
       return emptyResult;
     }
+    setIsLoading(true);
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    setIsLoading(true);
     const table = await fetchFieldsFromESQL(
       esqlQuery,
       expressions,
@@ -114,30 +156,31 @@ export const EsqlQueryExpression: React.FC<
     );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
-      const hits = toEsQueryHits(esqlTable);
+      const { results, duplicateAlertIds, longAlertIds, rows, cols } = getEsqlQueryHits(
+        esqlTable,
+        esqlQuery.esql,
+        isGroupAgg
+      );
+      const warning = getWarning(duplicateAlertIds, longAlertIds);
+
       setIsLoading(false);
       return {
-        testResults: parseAggregationResults({
-          isCountAgg: true,
-          isGroupAgg: false,
-          esResult: {
-            took: 0,
-            timed_out: false,
-            _shards: { failed: 0, successful: 0, total: 0 },
-            hits,
-          },
-        }),
-        isGrouped: false,
+        testResults: parseAggregationResults(results),
+        isGrouped: isGroupAgg,
+        isGroupedByRow: isGroupAgg,
         timeWindow: window,
-        rawResults: {
-          cols: esqlTable.columns.map((col) => ({
-            id: col.name,
-            actions: false,
-          })),
-          rows: esqlTable.values.slice(0, 5).map((row) => rowToDocument(esqlTable.columns, row)),
+        preview: {
+          cols,
+          rows,
         },
+        ...(warning
+          ? {
+              warning,
+            }
+          : {}),
       };
     }
+    setIsLoading(false);
     return emptyResult;
   }, [
     timeWindowSize,
@@ -147,6 +190,7 @@ export const EsqlQueryExpression: React.FC<
     expressions,
     timeField,
     isServerless,
+    groupBy,
   ]);
 
   const refreshTimeFields = useCallback(
@@ -200,8 +244,15 @@ export const EsqlQueryExpression: React.FC<
           isLoading={isLoading}
           editorIsInline
           hasOutline
+          hideRunQueryButton={true}
         />
       </EuiFormRow>
+      <EuiSpacer />
+      <TestQueryRow
+        fetch={onTestQuery}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
+        showTable
+      />
       <EuiSpacer />
       <EuiFormRow
         id="timeField"
@@ -226,6 +277,30 @@ export const EsqlQueryExpression: React.FC<
           value={timeField || ''}
           onChange={(e) => {
             setParam('timeField', e.target.value);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFormRow
+        id="alertGroup"
+        fullWidth
+        // @ts-expect-error upgrade typescript v5.1.6
+        isInvalid={errors.groupBy.length > 0 && groupBy !== undefined}
+        error={errors.groupBy as string[]}
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryGroupByPrompt"
+            defaultMessage="Select alert group"
+          />
+        }
+      >
+        <EuiRadioGroup
+          data-test-subj="groupByRadioGroup"
+          options={alertingOptions}
+          idSelected={radioIdSelected}
+          onChange={(optionId) => {
+            setRadioIdSelected(optionId);
+            setParam('groupBy', optionId);
           }}
         />
       </EuiFormRow>
@@ -273,12 +348,6 @@ export const EsqlQueryExpression: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <TestQueryRow
-        fetch={onTestQuery}
-        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams, isServerless)}
-        showTable
-      />
     </Fragment>
   );
 };
