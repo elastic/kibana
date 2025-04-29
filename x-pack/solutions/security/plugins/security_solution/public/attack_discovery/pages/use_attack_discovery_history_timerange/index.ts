@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   ATTACK_DISCOVERY_STORAGE_KEY,
@@ -12,11 +13,12 @@ import {
   HISTORY_END_LOCAL_STORAGE_KEY,
   HISTORY_START_LOCAL_STORAGE_KEY,
 } from '@kbn/elastic-assistant';
+
 interface UseAttackDiscoveryTimerange {
   historyStart: string;
-  setHistoryStart: (start: string) => void;
+  setHistoryStart: React.Dispatch<React.SetStateAction<string | undefined>>;
   historyEnd: string;
-  setHistoryEnd: (end: string) => void;
+  setHistoryEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
 }
 
 const DEFAULT_HISTORY_END = 'now';
