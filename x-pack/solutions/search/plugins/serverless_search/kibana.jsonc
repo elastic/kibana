@@ -33,7 +33,7 @@
     ],
     "optionalPlugins": [
       "indexManagement",
-      "searchConnectors",
+      "contentConnectors",
       "searchInferenceEndpoints",
       "searchPlayground",
       "usageCollection"
