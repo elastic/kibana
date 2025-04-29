@@ -8,6 +8,7 @@
 import { AlertInstanceContext, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import { ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
 import {
@@ -43,10 +44,10 @@ export function esqlRuleType(): PersistenceAlertType<
         name: 'Default',
       },
     ],
+    minimumLicenseRequired: 'enterprise' as LicenseType,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: STREAMS_FEATURE_ID,
     solution: 'observability',
-    minimumLicenseRequired: 'basic',
     isExportable: false,
     actionVariables: {},
     executor: getRuleExecutor,
