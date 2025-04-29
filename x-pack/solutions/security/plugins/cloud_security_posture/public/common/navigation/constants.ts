@@ -70,7 +70,6 @@ export const cspIntegrationDocsNavigation = {
     awsManualSetupDirectAccessKeysDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-use-keys-directly`,
     awsManualSetupTemporaryKeysDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-use-temp-credentials`,
     awsManualSetupSharedCredentialsDocPathInternal: `https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-aws#cspm-use-a-shared-credentials-file`,
-
   },
   cnvm: {
     overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CNVM_POLICY_TEMPLATE}`,

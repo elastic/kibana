@@ -36,7 +36,6 @@ import {
 } from '../../test_subjects';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 
-
 interface AWSSetupInfoContentProps {
   info: ReactNode;
 }
@@ -171,7 +170,6 @@ const CloudFormationSetup = ({
   );
 };
 
-
 const Link = ({ children, url }: { children: React.ReactNode; url: string }) => (
   <EuiLink
     href={url}
@@ -247,7 +245,7 @@ export const AwsCredentialsForm = ({
       const updatedUrl = (() => {
         switch (optionId) {
           case AWS_CREDENTIALS_TYPE.ASSUME_ROLE:
-            return cspIntegrationDocsNavigation.cspm.awsManualSetupAsuumeRoleDocPathInternal
+            return cspIntegrationDocsNavigation.cspm.awsManualSetupAsuumeRoleDocPathInternal;
           case AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS:
             return cspIntegrationDocsNavigation.cspm.awsManualSetupDirectAccessKeysDocPathInternal;
           case AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS:
