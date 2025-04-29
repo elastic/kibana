@@ -22,8 +22,8 @@ export const getAlertRiskScore = ({
   // _id: abcd1234,
   // kibana.alert.risk_score: 50,
 
-  const idRegex = /^\w*_id,\s*(.*)\w*\n?/gm; // extracts the alert ID
-  const riskScoreRegex = /^\w*kibana\.alert\.risk_score,\s*(\d+)\w*\n?/gm; // extracts the risk score
+  const idRegex = /^\w*_id,\s*(.*)\w*\n?/m; // extracts the alert ID
+  const riskScoreRegex = /^\w*kibana\.alert\.risk_score,\s*(\d+)\w*\n?/m; // extracts the risk score
 
   const alertIdRiskScoreMap: Record<string, number> = anonymizedAlerts.reduce((acc, alert) => {
     const idMatch = idRegex.exec(alert.pageContent);

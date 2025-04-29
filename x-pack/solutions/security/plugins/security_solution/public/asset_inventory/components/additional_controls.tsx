@@ -6,12 +6,12 @@
  */
 import React, { type FC, type PropsWithChildren } from 'react';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
-import { type DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { FieldsSelectorModal } from './fields_selector_modal';
 import { useFieldsModal } from '../hooks/use_fields_modal';
 import { useStyles } from '../hooks/use_styles';
+import { useDataViewContext } from '../hooks/data_view_context';
 
 const ASSET_INVENTORY_FIELDS_SELECTOR_OPEN_BUTTON = 'assetInventoryFieldsSelectorOpenButton';
 
@@ -28,7 +28,6 @@ const GroupSelectorWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
 export const AdditionalControls = ({
   total,
   title,
-  dataView,
   columns,
   onAddColumn,
   onRemoveColumn,
@@ -37,7 +36,6 @@ export const AdditionalControls = ({
 }: {
   total: number;
   title: string;
-  dataView: DataView;
   columns: string[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
@@ -46,6 +44,8 @@ export const AdditionalControls = ({
 }) => {
   const { isFieldSelectorModalVisible, closeFieldsSelectorModal, openFieldsSelectorModal } =
     useFieldsModal();
+
+  const { dataView } = useDataViewContext();
 
   return (
     <>

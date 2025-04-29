@@ -19,6 +19,8 @@ describe('purge rollup data', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let purgeRollupData: BulkPurgeRollupData;
 
+  jest.useFakeTimers().setSystemTime(new Date('2025-04-24'));
+
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();

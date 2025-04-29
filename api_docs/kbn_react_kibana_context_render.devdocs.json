@@ -53,8 +53,10 @@
           " | undefined; modify?: ",
           "RecursivePartial",
           "<",
-          "EuiThemeShape",
-          "> | undefined; }"
+          "EuiThemeShapeBase",
+          " & { overrides?: ",
+          "_EuiThemeOverrides",
+          " | undefined; }> | undefined; }"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,

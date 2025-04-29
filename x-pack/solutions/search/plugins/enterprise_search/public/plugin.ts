@@ -82,6 +82,7 @@ export interface PluginsStart {
   charts?: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
+  contentConnectors?: SearchConnectorsPluginStart;
   data?: DataPublicPluginStart;
   fleet?: FleetStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -90,7 +91,6 @@ export interface PluginsStart {
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
-  searchConnectors?: SearchConnectorsPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;

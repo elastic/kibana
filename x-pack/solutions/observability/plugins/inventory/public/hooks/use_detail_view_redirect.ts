@@ -12,7 +12,7 @@ import {
   type ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { isBuiltinEntityOfType } from '../../common/utils/check_entity_type';
 import type { InventoryEntity } from '../../common/entities';

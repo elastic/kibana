@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { DataViewErrorComponent } from './data_view_error';
-import { useEnableExperimental } from '../../hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -40,7 +40,7 @@ export const withDataView = <P extends WithDataViewArg>(
       sourcererScope: SourcererScopeName.timeline,
     });
 
-    const { newDataViewPickerEnabled } = useEnableExperimental();
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
     const dataViewToUse = newDataViewPickerEnabled ? experimentalDataView : dataView;
 

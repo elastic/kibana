@@ -52,6 +52,7 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
+import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 
 jest.mock('./alert_summary/find_route');
 const findAlertSummaryRouteMock = findAlertSummaryRoute as jest.Mock;
@@ -134,14 +135,14 @@ const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRo
 
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
-  const getElserIdMock = jest.fn();
   let server: ReturnType<typeof serverMock.create>;
+  const config = { elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID, responseTimeout: 60000 };
 
   beforeEach(async () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
-    registerRoutes(server.router, loggerMock, getElserIdMock);
+    registerRoutes(server.router, loggerMock, config);
   });
 
   it('should call `cancelAttackDiscoveryRouteMock`', () => {
@@ -201,7 +202,7 @@ describe('registerRoutes', () => {
   });
 
   it('should call `postEvaluateRouteMock`', () => {
-    expect(postEvaluateRouteMock).toHaveBeenCalledWith(server.router, getElserIdMock);
+    expect(postEvaluateRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `getCapabilitiesRouteMock`', () => {
@@ -225,14 +226,11 @@ describe('registerRoutes', () => {
   });
 
   it('should call `chatCompleteRouteMock`', () => {
-    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, getElserIdMock);
+    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, config);
   });
 
   it('should call `postActionsConnectorExecuteRouteMock`', () => {
-    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(
-      server.router,
-      getElserIdMock
-    );
+    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router, config);
   });
 
   it('should call `bulkActionKnowledgeBaseEntriesRouteMock`', () => {

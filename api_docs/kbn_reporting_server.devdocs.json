@@ -181,19 +181,15 @@
             "label": "runTask",
             "description": [],
             "signature": [
-              "(jobId: string, payload: TaskPayloadType, taskInstanceFields: ",
-              "TaskInstanceFields",
-              ", cancellationToken: ",
+              "(opts: ",
               {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.CancellationToken",
-                "text": "CancellationToken"
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.RunTaskOpts",
+                "text": "RunTaskOpts"
               },
-              ", stream: ",
-              "Writable",
-              ") => Promise<",
+              "<TaskPayloadType>) => Promise<",
               "TaskRunResult",
               ">"
             ],
@@ -205,71 +201,19 @@
               {
                 "parentPluginId": "@kbn/reporting-server",
                 "id": "def-server.ExportType.runTask.$1",
-                "type": "string",
-                "tags": [],
-                "label": "jobId",
-                "description": [],
-                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/reporting-server",
-                "id": "def-server.ExportType.runTask.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "payload",
-                "description": [],
-                "signature": [
-                  "TaskPayloadType"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/reporting-server",
-                "id": "def-server.ExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
-                "label": "taskInstanceFields",
-                "description": [],
-                "signature": [
-                  "{ startedAt: Date | null; retryAt: Date | null; }"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/reporting-server",
-                "id": "def-server.ExportType.runTask.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "cancellationToken",
+                "label": "opts",
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/reporting-common",
-                    "scope": "common",
-                    "docId": "kibKbnReportingCommonPluginApi",
-                    "section": "def-common.CancellationToken",
-                    "text": "CancellationToken"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/reporting-server",
-                "id": "def-server.ExportType.runTask.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "stream",
-                "description": [],
-                "signature": [
-                  "Writable"
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.RunTaskOpts",
+                    "text": "RunTaskOpts"
+                  },
+                  "<TaskPayloadType>"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
                 "deprecated": false,
@@ -1200,6 +1144,118 @@
       },
       {
         "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.RunTaskOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "RunTaskOpts",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.RunTaskOpts",
+            "text": "RunTaskOpts"
+          },
+          "<TaskPayloadType>"
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskOpts.jobId",
+            "type": "string",
+            "tags": [],
+            "label": "jobId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskOpts.payload",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "TaskPayloadType"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskOpts.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskOpts.taskInstanceFields",
+            "type": "Object",
+            "tags": [],
+            "label": "taskInstanceFields",
+            "description": [],
+            "signature": [
+              "{ startedAt: Date | null; retryAt: Date | null; }"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskOpts.cancellationToken",
+            "type": "Object",
+            "tags": [],
+            "label": "cancellationToken",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/reporting-common",
+                "scope": "common",
+                "docId": "kibKbnReportingCommonPluginApi",
+                "section": "def-common.CancellationToken",
+                "text": "CancellationToken"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskOpts.stream",
+            "type": "Object",
+            "tags": [],
+            "label": "stream",
+            "description": [],
+            "signature": [
+              "Writable"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
         "id": "def-server.TimeRangeParams",
         "type": "Interface",
         "tags": [],
@@ -1516,19 +1572,15 @@
         "label": "RunTaskFn",
         "description": [],
         "signature": [
-          "(jobId: string, payload: TaskPayloadType, taskInstanceFields: ",
-          "TaskInstanceFields",
-          ", cancellationToken: ",
+          "(opts: ",
           {
-            "pluginId": "@kbn/reporting-common",
-            "scope": "common",
-            "docId": "kibKbnReportingCommonPluginApi",
-            "section": "def-common.CancellationToken",
-            "text": "CancellationToken"
+            "pluginId": "@kbn/reporting-server",
+            "scope": "server",
+            "docId": "kibKbnReportingServerPluginApi",
+            "section": "def-server.RunTaskOpts",
+            "text": "RunTaskOpts"
           },
-          ", stream: ",
-          "Writable",
-          ") => Promise<",
+          "<TaskPayloadType>) => Promise<",
           "TaskRunResult",
           ">"
         ],
@@ -1540,71 +1592,19 @@
           {
             "parentPluginId": "@kbn/reporting-server",
             "id": "def-server.RunTaskFn.$1",
-            "type": "string",
-            "tags": [],
-            "label": "jobId",
-            "description": [],
-            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-server",
-            "id": "def-server.RunTaskFn.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "payload",
-            "description": [],
-            "signature": [
-              "TaskPayloadType"
-            ],
-            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-server",
-            "id": "def-server.RunTaskFn.$3",
             "type": "Object",
             "tags": [],
-            "label": "taskInstanceFields",
-            "description": [],
-            "signature": [
-              "{ startedAt: Date | null; retryAt: Date | null; }"
-            ],
-            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-server",
-            "id": "def-server.RunTaskFn.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "cancellationToken",
+            "label": "opts",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.CancellationToken",
-                "text": "CancellationToken"
-              }
-            ],
-            "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/reporting-server",
-            "id": "def-server.RunTaskFn.$5",
-            "type": "Object",
-            "tags": [],
-            "label": "stream",
-            "description": [],
-            "signature": [
-              "Writable"
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.RunTaskOpts",
+                "text": "RunTaskOpts"
+              },
+              "<TaskPayloadType>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/server/types.ts",
             "deprecated": false,

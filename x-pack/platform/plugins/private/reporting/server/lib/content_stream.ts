@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Duplex } from 'stream';
+import { Duplex, Writable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
+import { finished } from 'stream/promises';
+import { setTimeout } from 'timers/promises';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -318,4 +320,25 @@ export async function getContentStream(
     document,
     parameters
   );
+}
+
+const MAX_RECURSION = 100;
+
+export async function finishedWithNoPendingCallbacks(stream: Writable) {
+  await finished(stream, { readable: false });
+
+  // Race condition workaround:
+  // `finished(...)` will resolve while there's still pending callbacks in the writable part of the `stream`.
+  // This introduces a race condition where the code continues before the writable part has completely finished.
+  // The `pendingCallbacks` function is a hack to ensure that all pending callbacks have been called before continuing.
+  // For more information, see: https://github.com/nodejs/node/issues/46170
+  await (async function pendingCallbacks(delay = 1, attempts = 1) {
+    if ((stream as any)._writableState.pendingcb > 0) {
+      await setTimeout(delay);
+
+      if (attempts < MAX_RECURSION) {
+        await pendingCallbacks(delay < 32 ? delay * 2 : delay, attempts + 1);
+      }
+    }
+  })();
 }

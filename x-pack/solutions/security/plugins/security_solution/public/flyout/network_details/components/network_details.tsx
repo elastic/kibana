@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
@@ -28,6 +29,9 @@ import { useInstalledSecurityJobNameById } from '../../../common/components/ml/h
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface NetworkDetailsProps {
   /**
@@ -73,7 +77,26 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     services: { uiSettings },
   } = useKibana();
 
-  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView } = useDataView();
+  const { dataViewSpec } = useDataViewSpec();
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     dataViewSpec: sourcererDataView,

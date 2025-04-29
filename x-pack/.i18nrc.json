@@ -163,7 +163,10 @@
     "xpack.timelines": "platform/plugins/shared/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
-    "xpack.upgradeAssistant": "platform/plugins/private/upgrade_assistant",
+    "xpack.upgradeAssistant": [
+      "platform/plugins/private/upgrade_assistant",
+      "platform/packages/private/upgrade-assistant"
+    ],
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"
     ],

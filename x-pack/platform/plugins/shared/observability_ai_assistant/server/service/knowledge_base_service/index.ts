@@ -10,6 +10,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -34,7 +35,6 @@ import {
   isSemanticTextUnsupportedError,
   reIndexKnowledgeBaseWithLock,
 } from './reindex_knowledge_base';
-import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;

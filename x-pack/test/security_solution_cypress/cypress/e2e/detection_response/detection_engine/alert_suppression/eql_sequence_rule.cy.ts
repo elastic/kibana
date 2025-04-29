@@ -39,11 +39,7 @@ describe(
   {
     tags: ['@ess', '@serverless'],
     env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForSequenceEqlRuleEnabled',
-        ])}`,
-      ],
+      kbnServerArgs: [],
     },
   },
   () => {

@@ -6,7 +6,11 @@
  */
 
 import { intersectionBy } from 'lodash';
-import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import {
+  isPerRowAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/common';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
@@ -14,7 +18,7 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { EsqlTable } from '../../../../common';
-import { toEsQueryHits } from '../../../../common';
+import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
@@ -26,6 +30,7 @@ export interface FetchEsqlQueryOpts {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
+    ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
   dateEnd: string;
@@ -40,7 +45,7 @@ export async function fetchEsqlQuery({
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, scopedClusterClient, share } = services;
+  const { logger, scopedClusterClient, share, ruleResultService } = services;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
@@ -61,23 +66,28 @@ export async function fetchEsqlQuery({
     throw e;
   }
 
-  const hits = toEsQueryHits(response);
   const sourceFields = getSourceFields(response);
+  const isGroupAgg = isPerRowAggregation(params.groupBy);
+  const { results, duplicateAlertIds } = getEsqlQueryHits(
+    response,
+    params.esqlQuery.esql,
+    isGroupAgg
+  );
+
+  if (ruleResultService && duplicateAlertIds && duplicateAlertIds.size > 0) {
+    const warning = `The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: ${Array.from(
+      duplicateAlertIds
+    ).join('; ')}`;
+    ruleResultService.addLastRunWarning(warning);
+    ruleResultService.setLastRunOutcomeMessage(warning);
+  }
 
   const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
 
   return {
     link,
-    numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
-      isCountAgg: true,
-      isGroupAgg: false,
-      esResult: {
-        took: 0,
-        timed_out: false,
-        _shards: { failed: 0, successful: 0, total: 0 },
-        hits,
-      },
+      ...results,
       resultLimit: alertLimit,
       sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,

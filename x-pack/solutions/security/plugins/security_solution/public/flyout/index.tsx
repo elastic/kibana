@@ -8,7 +8,10 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type {
+  FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
+  FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+} from '@kbn/cloud-security-posture';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
 import { AIForSOCDetailsProvider } from './ai_for_soc/context';
 import { AIForSOCPanel } from './ai_for_soc';
@@ -62,7 +65,10 @@ import type { ServicePanelExpandableFlyoutProps } from './entity_details/service
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
-import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
+import {
+  MisconfigurationFindingsPanelKey,
+  MisconfigurationFindingsPreviewPanelKey,
+} from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
 
@@ -198,7 +204,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: MisconfigurationFindingsPanelKey,
     component: (props) => (
       <FindingsMisconfigurationPanel
-        {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
       />
     ),
   },
@@ -208,6 +214,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
+    ),
+  },
+  {
+    key: MisconfigurationFindingsPreviewPanelKey,
+    component: (props) => (
+      <FindingsMisconfigurationPanel
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
+      />
     ),
   },
 ];

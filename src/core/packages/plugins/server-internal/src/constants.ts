@@ -13,6 +13,11 @@
 export const ENABLE_ALL_PLUGINS_CONFIG_PATH = 'forceEnableAllPlugins' as const;
 
 /**
+ * @internal
+ */
+export const INCLUDED_PLUGIN_GROUPS = 'allowlistPluginGroups' as const;
+
+/**
  * Set this to true in the raw configuration passed to {@link Root} to force
  * enable all plugins.
  * @internal

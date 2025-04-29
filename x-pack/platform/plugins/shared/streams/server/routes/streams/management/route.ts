@@ -7,6 +7,7 @@
 
 import { conditionSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
 
@@ -22,9 +23,7 @@ export const forkStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -58,9 +57,7 @@ export const resyncStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -78,9 +75,7 @@ export const getStreamsStatusRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {

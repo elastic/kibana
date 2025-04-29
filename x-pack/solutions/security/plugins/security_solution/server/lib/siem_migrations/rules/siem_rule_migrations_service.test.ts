@@ -45,7 +45,7 @@ describe('SiemRuleMigrationsService', () => {
   });
 
   it('should instantiate the rule migrations data stream adapter', () => {
-    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion);
+    expect(MockRuleMigrationsDataService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
   });
 
   describe('when setup is called', () => {

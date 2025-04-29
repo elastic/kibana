@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useQuery } from '@tanstack/react-query';
 
 import { enrollmentAPIKeyRouteService } from '../../services';
-
 import type {
   GetOneEnrollmentAPIKeyResponse,
   GetEnrollmentAPIKeysResponse,
@@ -17,7 +17,7 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { useRequest, sendRequest, useConditionalRequest } from './use_request';
+import { sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
 import type { UseRequestConfig, SendConditionalRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
@@ -62,16 +62,18 @@ export function sendGetEnrollmentAPIKeys(
   });
 }
 
-export function useGetEnrollmentAPIKeys(
+export function useGetEnrollmentAPIKeysQuery(
   query: GetEnrollmentAPIKeysRequest['query'],
   options?: RequestOptions
 ) {
-  return useRequest<GetEnrollmentAPIKeysResponse>({
-    method: 'get',
-    path: enrollmentAPIKeyRouteService.getListPath(),
-    version: API_VERSIONS.public.v1,
-    query,
-    ...options,
+  return useQuery(['get-enrollment-api-keys', query], () => {
+    return sendRequestForRq<GetEnrollmentAPIKeysResponse>({
+      method: 'get',
+      path: enrollmentAPIKeyRouteService.getListPath(),
+      version: API_VERSIONS.public.v1,
+      query,
+      ...options,
+    });
   });
 }
 

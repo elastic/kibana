@@ -3069,6 +3069,19 @@
     "dynamic": false,
     "properties": {}
   },
+  "search_playground": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
+  },
   "security-ai-prompt": {
     "dynamic": false,
     "properties": {

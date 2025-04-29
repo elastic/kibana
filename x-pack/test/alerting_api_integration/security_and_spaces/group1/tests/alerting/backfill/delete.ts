@@ -81,8 +81,8 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             .set('kbn-xsrf', 'foo')
             // set a long time range so the backfill doesn't finish running and get deleted
             .send([
-              { rule_id: ruleId1, start, end },
-              { rule_id: ruleId2, start, end },
+              { rule_id: ruleId1, ranges: [{ start, end }] },
+              { rule_id: ruleId2, ranges: [{ start, end }] },
             ]);
 
           const scheduleResult = scheduleResponse.body;
@@ -262,7 +262,7 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
             .set('kbn-xsrf', 'foo')
-            .send([{ rule_id: ruleId, start, end }]);
+            .send([{ rule_id: ruleId, ranges: [{ start, end }] }]);
 
           const scheduleResult = scheduleResponse.body;
           expect(scheduleResult.length).to.eql(1);

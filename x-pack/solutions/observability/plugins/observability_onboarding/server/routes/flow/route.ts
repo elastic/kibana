@@ -542,6 +542,10 @@ function filterUnsupportedInputs(policyYML: string): string {
  * ```
  */
 function parseIntegrationsTSV(tsv: string) {
+  if (tsv.trim() === '') {
+    return [];
+  }
+
   return Object.values(
     tsv
       .trim()

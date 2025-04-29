@@ -32,6 +32,7 @@ export {
   buildAggregation,
   isCountAggregation,
   isGroupAggregation,
+  isPerRowAggregation,
   parseAggregationResults,
   NORMALIZED_FIELD_TYPES,
 } from '../../common';

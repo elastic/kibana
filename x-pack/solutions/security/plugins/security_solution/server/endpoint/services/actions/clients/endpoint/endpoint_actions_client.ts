@@ -64,6 +64,12 @@ const getInvalidAgentsWarning = (invalidAgents: string[]) =>
 export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
 
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    return this.fetchFleetInfoForAgents(agentIds, ['endpoint']);
+  }
+
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];

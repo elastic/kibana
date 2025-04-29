@@ -2760,6 +2760,51 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_END_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_END_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyEnd\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_QUERY_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_QUERY_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyQuery\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.HISTORY_START_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "HISTORY_START_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"historyStart\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.KNOWLEDGE_BASE_LOCAL_STORAGE_KEY",
         "type": "string",
         "tags": [],

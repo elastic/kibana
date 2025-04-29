@@ -10,7 +10,7 @@
 import fastIsEqual from 'fast-deep-equal';
 import { StateComparators, initializeTitleManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardSettings, DashboardState } from './types';
+import { DashboardSettings, DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
 export function initializeSettingsManager(initialState?: DashboardState) {

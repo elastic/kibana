@@ -1454,7 +1454,7 @@
             "description": [],
             "signature": [
               "KibanaRequest",
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\"; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; connectorName?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\"; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1559,6 +1559,26 @@
                 "docId": "kibAlertingPluginApi",
                 "section": "def-server.AlertingServerSetup",
                 "text": "AlertingServerSetup"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginSetupDependencies.eventLog",
+            "type": "Object",
+            "tags": [],
+            "label": "eventLog",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "eventLog",
+                "scope": "server",
+                "docId": "kibEventLogPluginApi",
+                "section": "def-server.IEventLogService",
+                "text": "IEventLogService"
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",

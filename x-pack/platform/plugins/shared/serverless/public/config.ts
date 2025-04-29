@@ -9,7 +9,7 @@ export interface ServerlessConfig {
   developer?: {
     projectSwitcher?: {
       enabled: boolean;
-      currentType: 'security' | 'observability' | 'search';
+      currentType: 'security' | 'observability' | 'search' | 'chat';
     };
   };
 }

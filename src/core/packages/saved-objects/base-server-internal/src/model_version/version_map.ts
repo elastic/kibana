@@ -64,12 +64,11 @@ export const getModelVersionMapForTypes = (types: SavedObjectsType[]): ModelVers
 
 /**
  * Returns the current virtual version for the given type.
- * It will either be the latest model version if the type
- * already switched to using them (switchToModelVersionAt is set),
- * or the latest migration version for the type otherwise.
+ * It will either be the latest model version or the latest
+ * migration version for the type if model versions have not been declared.
  */
 export const getCurrentVirtualVersion = (type: SavedObjectsType): string => {
-  if (type.switchToModelVersionAt) {
+  if (type.modelVersions) {
     const modelVersion = getLatestModelVersion(type);
     return modelVersionToVirtualVersion(modelVersion);
   } else {
@@ -106,12 +105,11 @@ export const getLatestMappingsVersionNumber = (type: SavedObjectsType): number =
 
 /**
  * Returns the latest model version that includes changes in the mappings, for the given type.
- * It will either be a model version if the type
- * already switched to using them (switchToModelVersionAt is set),
- * or the latest migration version for the type otherwise.
+ * It will either be a model version or the latest migration version
+ * if no changed were introduced after enforcing the switch to model versions.
  */
 export const getLatestMappingsModelVersion = (type: SavedObjectsType): string => {
-  if (type.switchToModelVersionAt) {
+  if (type.modelVersions) {
     const modelVersion = getLatestMappingsVersionNumber(type);
     return modelVersionToVirtualVersion(modelVersion);
   } else {

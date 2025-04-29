@@ -181,6 +181,10 @@ export interface PluginSelector {
    * When set to true, only select plugins which have browser-side components
    */
   browser?: boolean;
+  /**
+   * When defined, only select plugins that belong to the specified groups
+   */
+  allowlistPluginGroups?: readonly KibanaGroup[];
 }
 
 export interface KbnImportReq {

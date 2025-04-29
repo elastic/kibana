@@ -37,9 +37,11 @@ export const getRiskInputTab = <T extends EntityType>({
 export const getInsightsInputTab = ({
   name,
   fieldName,
+  scopeId,
 }: {
   name: string;
   fieldName: CloudPostureEntityIdentifier;
+  scopeId: string;
 }) => {
   return {
     id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
@@ -50,6 +52,6 @@ export const getInsightsInputTab = ({
         defaultMessage="Insights"
       />
     ),
-    content: <InsightsTabCsp value={name} field={fieldName} />,
+    content: <InsightsTabCsp value={name} field={fieldName} scopeId={scopeId} />,
   };
 };

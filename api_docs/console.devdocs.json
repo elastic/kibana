@@ -284,46 +284,18 @@
           {
             "parentPluginId": "console",
             "id": "def-public.AppSetupUIPluginDependencies.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
             "signature": [
-              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuProvider",
-                "text": "ShareMenuProvider"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.AnonymousAccessServiceContract",
-                "text": "AnonymousAccessServiceContract"
-              },
-              ") => void; }"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
+              }
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,

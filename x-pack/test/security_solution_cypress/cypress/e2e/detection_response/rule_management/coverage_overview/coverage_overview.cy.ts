@@ -35,7 +35,7 @@ import { login } from '../../../../tasks/login';
 import {
   enableAllDisabledRules,
   filterCoverageOverviewBySearchBar,
-  openTechniquePanelByName,
+  toggleTechniquePanelByName,
   openTechniquePanelByNameAndTacticId,
   selectCoverageOverviewActivityFilterOption,
   selectCoverageOverviewSourceFilterOption,
@@ -218,7 +218,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless
     });
 
     it('technique panel renders custom and prebuilt rule data on page load', () => {
-      openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
+      toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
       cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
       cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
         .contains('Enabled custom rule')
@@ -236,17 +236,21 @@ describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless
       it('filters for all data', () => {
         selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
 
-        openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name); // Close opened panel so it doesn't cover other panels and lead to flaky tests
 
-        openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
 
-        openTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
 
-        openTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
       });
 
       it('filters for disabled and prebuilt rules', () => {
@@ -254,97 +258,113 @@ describe('Coverage overview', { tags: ['@ess', '@serverless', '@skipInServerless
         selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
         selectCoverageOverviewSourceFilterOption('Custom rules'); // Disables default filter
 
-        openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
           .contains('Enabled prebuilt rule')
           .should('not.exist');
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name); // Close opened panel so it doesn't cover other panels and lead to flaky tests
 
-        openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
 
-        openTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
           .contains('Enabled custom rule')
           .should('not.exist');
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
 
-        openTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
           .contains('Disabled custom rule')
           .should('not.exist');
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
       });
 
       it('filters for only prebuilt rules', () => {
         selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
         selectCoverageOverviewSourceFilterOption('Custom rules'); // Disables default filter
 
-        openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name); // Close opened panel so it doesn't cover other panels and lead to flaky tests
 
-        openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
 
-        openTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
           .contains('Enabled custom rule')
           .should('not.exist');
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
 
-        openTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
           .contains('Disabled custom rule')
           .should('not.exist');
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
       });
 
       it('filters for only custom rules', () => {
         selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
         selectCoverageOverviewSourceFilterOption('Elastic rules'); // Disables default filter
 
-        openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
           .contains('Enabled prebuilt rule')
           .should('not.exist');
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name); // Close opened panel so it doesn't cover other panels and lead to flaky tests
 
-        openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
           .contains('Disabled prebuilt rule')
           .should('not.exist');
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
 
-        openTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
 
-        openTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
       });
 
       it('filters for search term', () => {
         filterCoverageOverviewBySearchBar('Enabled custom rule'); // Disables default filter
 
-        openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
           .contains('Enabled prebuilt rule')
           .should('not.exist');
+        toggleTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name); // Close opened panel so it doesn't cover other panels and lead to flaky tests
 
-        openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
           .contains('Disabled prebuilt rule')
           .should('not.exist');
+        toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
 
-        openTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+        toggleTechniquePanelByName(EnabledCustomRuleMitreData.technique.name);
 
-        openTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
           .contains('Disabled custom rule')
           .should('not.exist');
+        toggleTechniquePanelByName(DisabledCustomRuleMitreData.technique.name);
       });
     });
 
     it('enables all disabled rules', () => {
       selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
-      openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
+      toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
       enableAllDisabledRules();
 
       // Should now render all rules in "enabled" section
-      openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
+      toggleTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
       cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Disabled prebuilt rule');
 
       // Shouldn't render the rules in "disabled" section

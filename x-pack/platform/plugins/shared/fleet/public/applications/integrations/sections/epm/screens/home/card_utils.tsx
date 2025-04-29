@@ -60,6 +60,7 @@ export interface IntegrationCardItem {
   release?: IntegrationCardReleaseLabel;
   showDescription?: boolean;
   showInstallationStatus?: boolean;
+  showCompressedInstallationStatus?: boolean;
   showLabels?: boolean;
   showReleaseBadge?: boolean;
   title: string;

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -94,7 +95,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   }) => {
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
-
+    const showTopLevelDescription = packagePolicyInput.streams.length === 1;
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
       shouldShowStreamsByDefault(
@@ -196,7 +197,17 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 }
               }}
             />
+            <EuiSpacer size="s" />
+            {/* show the description under the top level toggle if theres only one stream */}
+            {showTopLevelDescription && (
+              <EuiText size="s" color="subdued">
+                <ReactMarkdown>
+                  {String(inputStreams[0].packageInputStream.description)}
+                </ReactMarkdown>
+              </EuiText>
+            )}
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {hasErrors ? (
@@ -259,6 +270,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   data-test-subj="PackagePolicy.InputStreamConfig"
                   packageInfo={packageInfo}
                   packageInputStream={packageInputStream}
+                  totalStreams={inputStreams.length}
                   packagePolicyInputStream={packagePolicyInputStream!}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>

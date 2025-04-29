@@ -17,7 +17,13 @@ export async function emptyKibanaIndexAction({ client, log }: { client: Client; 
   const stats = createStats('emptyKibanaIndex', log);
 
   await cleanSavedObjectIndices({ client, stats, log });
-  await client.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+  // Refresh indices to prevent a race condition between a write and subsequent read operation. To
+  // fix it deterministically we have to refresh saved object indices and wait until it's done.
+  await client.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES, ignore_unavailable: true });
+
+  // Additionally, we need to clear the cache to ensure that the next read operation will
+  // not return stale data.
+  await client.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES, ignore_unavailable: true });
 
   return stats.toJSON();
 }

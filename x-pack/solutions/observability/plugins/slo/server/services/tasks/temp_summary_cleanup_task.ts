@@ -110,6 +110,7 @@ export class TempSummaryCleanupTask {
 
     this.logger.debug(`runTask started`);
 
+    this.abortController = new AbortController();
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 

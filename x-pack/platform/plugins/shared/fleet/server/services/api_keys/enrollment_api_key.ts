@@ -312,6 +312,7 @@ export async function generateEnrollmentAPIKey(
     policy_id: agentPolicyId,
     namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
+    hidden: agentPolicy?.supports_agentless || agentPolicy?.is_managed,
   };
 
   const res = await esClient.create({
@@ -429,5 +430,6 @@ function esDocToEnrollmentApiKey(doc: {
     policy_id: doc._source.policy_id,
     created_at: doc._source.created_at as string,
     active: doc._source.active || false,
+    hidden: doc._source.hidden || false,
   };
 }

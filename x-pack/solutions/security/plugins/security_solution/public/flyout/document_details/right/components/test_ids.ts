@@ -17,6 +17,15 @@ export const FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}FieldNameCellText` as const;
 export const FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}PreviewLinkField` as const;
+export const FLYOUT_TABLE_PIN_ACTION_TEST_ID = `${FLYOUT_TABLE_TEST_ID}PinAction` as const;
+export const TABLE_TAB_SETTING_BUTTON_TEST_ID = `${PREFIX}TableTabSettingButton` as const;
+export const TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HighlightedFieldsOnly` as const;
+export const TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideEmptyFields` as const;
+export const TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}HideAlertFields` as const;
+export const TABLE_TAB_TOUR_TEST_ID = `${FLYOUT_TABLE_TEST_ID}Tour` as const;
 
 /* Header */
 

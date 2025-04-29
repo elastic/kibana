@@ -70,7 +70,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(status).to.be(404);
     });
 
-    it('returns a 200 if the connector exists', async () => {
+    // Fails on ECH: https://github.com/elastic/kibana/issues/219203
+    it.skip('returns a 200 if the connector exists', async () => {
       void proxy.interceptConversation('Hello from LLM Proxy');
       const { status } = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -89,7 +90,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(status).to.be(200);
     });
 
-    it('should forward the system message to the LLM', async () => {
+    // Fails on ECH: https://github.com/elastic/kibana/issues/219203
+    it.skip('should forward the system message to the LLM', async () => {
       const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
       await observabilityAIAssistantAPIClient.editor({
         endpoint: 'POST /internal/observability_ai_assistant/chat',

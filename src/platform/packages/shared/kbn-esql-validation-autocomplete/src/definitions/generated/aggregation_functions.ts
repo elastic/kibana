@@ -968,7 +968,7 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
     'kbn-esql-validation-autocomplete.esql.definitions.median_absolute_deviation',
     {
       defaultMessage:
-        'Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable `X`, the median absolute deviation is `median(|median(X) - X|)`.',
+        'Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.\n\nIt is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random userDefinedColumn `X`, the median absolute deviation is `median(|median(X) - X|)`.',
     }
   ),
   preview: false,
@@ -1689,7 +1689,7 @@ const valuesDefinition: FunctionDefinition = {
   name: 'values',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.values', {
     defaultMessage:
-      'Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use esql-mv_sort.',
+      'Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use `MV_SORT`.',
   }),
   preview: true,
   alias: undefined,

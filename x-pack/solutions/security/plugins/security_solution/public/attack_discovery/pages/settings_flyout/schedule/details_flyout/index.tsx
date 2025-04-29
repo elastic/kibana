@@ -194,7 +194,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
       outsideClickCloses={!isEditing}
       paddingSize="m"
       side="right"
-      size="s"
+      size="m"
       type="overlay"
     >
       <EuiFlyoutHeader hasBorder>

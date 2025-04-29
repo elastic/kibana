@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the editor and preview panels', async () => {
       const editor = await testSubjects.find('kibanaCodeEditor');
-      const preview = await testSubjects.find('painlessTabs');
+      const preview = await testSubjects.find('painlessTabs-loaded');
 
       expect(await editor.isDisplayed()).to.be(true);
       expect(await preview.isDisplayed()).to.be(true);
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await monacoEditor.setCodeEditorValue(TEST_SCRIPT);
 
       await retry.try(async () => {
-        const result = await testSubjects.find('painlessTabs');
+        const result = await testSubjects.find('painlessTabs-loaded');
         expect(await result.getVisibleText()).to.contain(TEST_SCRIPT_RESULT.toString());
       });
     });

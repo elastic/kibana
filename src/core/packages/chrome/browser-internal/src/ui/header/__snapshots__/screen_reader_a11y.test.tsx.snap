@@ -247,10 +247,6 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
                     
                     .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                   </style>
-                  <style
-                    data-styled="active"
-                    data-styled-version="5.3.11"
-                  />
                 </head>,
                 "ctr": 1,
                 "insertionPoint": undefined,

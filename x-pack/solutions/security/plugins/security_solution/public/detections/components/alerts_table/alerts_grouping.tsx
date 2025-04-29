@@ -21,6 +21,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
@@ -33,6 +34,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
 import * as i18n from './translations';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface AlertsTableComponentProps {
   /**
@@ -133,9 +136,19 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { sourcererDataView, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } =
+    useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+
+  const sourcererDataView = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataView;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const {
     services: { storage, telemetry },

@@ -296,7 +296,7 @@ They look like this.
 ```ts
 test('lists possible aggregations on space after command', async () => {
   const { assertSuggestions } = await setup();
-  const expected = ['var0 = ', ...allAggFunctions, ...allEvaFunctions];
+  const expected = ['col0 = ', ...allAggFunctions, ...allEvaFunctions];
 
   await assertSuggestions('from a | stats /', expected);
   await assertSuggestions('FROM a | STATS /', expected);

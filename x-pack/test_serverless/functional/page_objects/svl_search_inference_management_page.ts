@@ -137,7 +137,7 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
         (await testSubjects.getVisibleText('provider-select')).includes('Elasticsearch');
         (await testSubjects.getVisibleText('model_id-input')).includes('.elser_model_2');
 
-        expect(await testSubjects.isEnabled('inference-endpoint-submit-button')).to.be(false);
+        await testSubjects.missingOrFail('inference-endpoint-submit-button');
       },
     },
   };

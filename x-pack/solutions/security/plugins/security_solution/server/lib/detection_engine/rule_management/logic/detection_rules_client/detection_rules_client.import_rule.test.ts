@@ -276,7 +276,7 @@ describe('DetectionRulesClient.importRule', () => {
         error: {
           ruleId: ruleToImport.rule_id,
           type: 'conflict',
-          message: `rule_id: "${ruleToImport.rule_id}" already exists`,
+          message: 'Rule with this rule_id already exists',
         },
       });
     });

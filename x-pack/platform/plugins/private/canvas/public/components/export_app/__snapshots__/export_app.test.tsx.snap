@@ -79,10 +79,6 @@ exports[`<ExportApp /> renders as expected 1`] = `
                     
                     .css-17hzfsv-ExportApp{}
                   </style>
-                  <style
-                    data-styled="active"
-                    data-styled-version="5.3.11"
-                  />
                 </head>,
                 "ctr": 1,
                 "insertionPoint": undefined,
@@ -212,10 +208,6 @@ exports[`<ExportApp /> renders as expected 2`] = `
                     
                     .css-17hzfsv-ExportApp{}
                   </style>
-                  <style
-                    data-styled="active"
-                    data-styled-version="5.3.11"
-                  />
                 </head>,
                 "ctr": 1,
                 "insertionPoint": undefined,

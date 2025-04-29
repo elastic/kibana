@@ -12,21 +12,17 @@ import { useWorkChatServices } from './use_workchat_service';
 export const useIntegrationList = () => {
   const { integrationService } = useWorkChatServices();
 
-  const {
-    data: integrations,
-    isLoading,
-    refetch: refresh,
-  } = useQuery({
+  const { data, isLoading, isRefetching } = useQuery({
     queryKey: queryKeys.integrations.list,
     queryFn: async () => {
       return integrationService.list();
     },
-    initialData: () => [],
   });
+
+  const integrations = data ?? [];
 
   return {
     integrations,
-    isLoading,
-    refresh,
+    isLoading: isLoading || isRefetching,
   };
 };

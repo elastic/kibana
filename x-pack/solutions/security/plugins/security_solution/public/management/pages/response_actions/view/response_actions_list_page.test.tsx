@@ -214,7 +214,7 @@ describe('Response actions history page', () => {
 
       expect(history.location.search).toEqual('?page=3&pageSize=20');
       expect(getByTestId('tablePaginationPopoverButton').textContent).toContain('20');
-      expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('true');
+      expect(getByTestId('pagination-button-2').getAttribute('aria-current')).toStrictEqual('page');
     });
 
     it('should read and set command filter values from URL params', async () => {

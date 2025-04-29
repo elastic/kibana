@@ -17,7 +17,10 @@ describe('SummaryActions', () => {
   beforeEach(() =>
     render(
       <TestProviders>
-        <SummaryActions attackDiscovery={mockAttackDiscovery} />
+        <SummaryActions
+          attackDiscovery={mockAttackDiscovery}
+          setSelectedAttackDiscoveries={jest.fn()}
+        />
       </TestProviders>
     )
   );

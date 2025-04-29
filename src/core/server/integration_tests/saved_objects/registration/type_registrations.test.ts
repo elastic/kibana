@@ -125,6 +125,7 @@ const previouslyRegisteredTypes = [
   'search',
   'search-session',
   'search-telemetry',
+  'search_playground',
   'security-ai-prompt',
   'security-rule',
   'security-solution-signals-migration',

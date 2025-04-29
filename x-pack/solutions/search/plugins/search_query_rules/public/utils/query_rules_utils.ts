@@ -10,3 +10,7 @@ import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 export const isPermissionError = (error: { body: KibanaServerError }) => {
   return error.body.statusCode === 403;
 };
+
+export const isNotFoundError = (error: { body: KibanaServerError }) => {
+  return error.body.statusCode === 404;
+};

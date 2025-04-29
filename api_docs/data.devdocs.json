@@ -8137,6 +8137,18 @@
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/usage/detections/rules/get_metrics.mocks.ts"
               }
@@ -24328,6 +24340,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",

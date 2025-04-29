@@ -10,7 +10,7 @@ import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
-import type { ApmOnboardingLocatorParams } from '../../../../locator/onboarding_locator';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
@@ -29,19 +29,17 @@ export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const {
-    core: {
-      http: { basePath },
-    },
     share: {
       url: { locators },
     },
   } = useApmPluginContext();
 
-  const onboardingLocator = locators.get<ApmOnboardingLocatorParams>(
+  const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
 
   const addApmButtonData = addApmDataProps(onboardingLocator);
+  const collectServiceLogsButtonData = collectServiceLogsProps(onboardingLocator);
 
   const button = (
     <EuiHeaderLink
@@ -77,8 +75,8 @@ export function AddDataContextMenu() {
           },
         },
         {
-          name: collectServiceLogsProps.name,
-          href: basePath.prepend(collectServiceLogsProps.link),
+          name: collectServiceLogsButtonData.name,
+          href: collectServiceLogsButtonData.link,
           'data-test-subj': 'apmAddDataCollectServiceLogs',
           onClick: () => {
             reportButtonClick('collect_new_service_logs');

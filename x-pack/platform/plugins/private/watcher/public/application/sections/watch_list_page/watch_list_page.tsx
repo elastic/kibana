@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect, Fragment } from 'react';
+import React, { useState, useMemo, useEffect, Fragment, useCallback } from 'react';
 
 import {
-  CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiSearchBar,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
@@ -25,6 +24,7 @@ import {
   EuiPageHeader,
   EuiPageTemplate,
   EuiSearchBarOnChangeArgs,
+  EuiTablePagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,7 +32,11 @@ import { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
+import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { debounce } from 'lodash';
+import { PropertySort } from '@elastic/eui/src/services/sort/property_sort';
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
+import { BaseWatch } from '../../../../common/types';
 import { listBreadcrumb } from '../../lib/breadcrumbs';
 import {
   getPageErrorCode,
@@ -129,34 +133,46 @@ export const WatchListPage = () => {
     links: { watcherGettingStartedUrl },
   } = useAppContext();
   const [query, setQuery] = useState('');
-  const [queryError, setQueryError] = useState<string | null>(null);
 
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
   // may not really be deleted until after they're done firing and this could take some time.
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: PAGINATION.initialPageSize,
-  });
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb]);
   }, [setBreadcrumbs]);
 
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(PAGINATION.initialPageSize);
+
+  const [sort, setSort] = useState<Criteria<BaseWatch>['sort']>({
+    field: 'name', // Currently we can only sort by name
+    direction: 'asc',
+  });
+
   const {
     isLoading: isWatchesLoading,
-    data: watches,
+    data,
     error,
-  } = useLoadWatches(REFRESH_INTERVALS.WATCH_LIST);
+  } = useLoadWatches(
+    REFRESH_INTERVALS.WATCH_LIST,
+    pageSize,
+    pageIndex,
+    sort?.field,
+    sort?.direction,
+    query
+  );
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
   const availableWatches = useMemo(
     () =>
-      watches ? watches.filter((watch: any) => !deletedWatches.includes(watch.id)) : undefined,
-    [watches, deletedWatches]
+      data?.watches
+        ? data.watches.filter((watch: any) => !deletedWatches.includes(watch.id))
+        : undefined,
+    [data?.watches, deletedWatches]
   );
 
   const watcherDescriptionText = (
@@ -249,6 +265,15 @@ export const WatchListPage = () => {
     </EuiPopover>
   );
 
+  const updateQuery = useCallback(({ queryText }: EuiSearchBarOnChangeArgs) => {
+    setQuery(queryText);
+  }, []);
+
+  const debouncedUpdateQuery = useMemo(() => {
+    // Trigger update 500 ms after the user stopped typing to reduce fetch requests to the server
+    return debounce(updateQuery, 500);
+  }, [updateQuery]);
+
   if (isWatchesLoading) {
     return (
       <EuiPageTemplate.EmptyPrompt>
@@ -279,7 +304,7 @@ export const WatchListPage = () => {
     );
   }
 
-  if (availableWatches && availableWatches.length === 0) {
+  if (availableWatches && availableWatches.length === 0 && !query) {
     const emptyPromptBody = (
       <EuiText color="subdued">
         <p>
@@ -321,7 +346,6 @@ export const WatchListPage = () => {
         name: i18n.translate('xpack.watcher.sections.watchList.watchTable.idHeader', {
           defaultMessage: 'ID',
         }),
-        sortable: true,
         truncateText: false,
         render: (id: string) => {
           return (
@@ -348,14 +372,12 @@ export const WatchListPage = () => {
       {
         field: 'watchStatus.state',
         name: stateColumnHeader,
-        sortable: true,
         width: '130px',
         render: (state: string) => <WatchStateBadge state={state} />,
       },
       {
         field: 'watchStatus.lastMetCondition',
         name: conditionLastMetHeader,
-        sortable: true,
         truncateText: true,
         width: '160px',
         render: (lastMetCondition: Moment) => {
@@ -365,7 +387,6 @@ export const WatchListPage = () => {
       {
         field: 'watchStatus.lastChecked',
         name: lastCheckedHeader,
-        sortable: true,
         truncateText: true,
         width: '160px',
         render: (lastChecked: Moment) => {
@@ -375,7 +396,6 @@ export const WatchListPage = () => {
       {
         field: 'watchStatus.comment',
         name: commentHeader,
-        sortable: true,
         truncateText: true,
       },
       {
@@ -443,8 +463,8 @@ export const WatchListPage = () => {
     ];
 
     const selectionConfig = {
-      onSelectionChange: setSelection,
-      selectable: (watch: any) => !watch.isSystemWatch,
+      onSelectionChange: setSelection as (selection: BaseWatch[]) => void,
+      selectable: (watch: BaseWatch) => !watch.isSystemWatch,
       selectableMessage: (selectable: boolean) =>
         !selectable
           ? i18n.translate('xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText', {
@@ -453,87 +473,60 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
-      if (!searchError) {
-        setQuery(queryText);
-        setQueryError(null);
-      } else {
-        setQueryError(searchError.message);
-      }
-    };
-
-    const searchConfig = {
-      onChange: handleOnChange,
-      query,
-      box: {
-        incremental: true,
-      },
-      toolsLeft:
-        selection.length > 0 ? (
-          <EuiButton
-            data-test-subj="btnDeleteWatches"
-            onClick={() => {
-              setWatchesToDelete(selection.map((selected: any) => selected.id));
-            }}
-            color="danger"
-          >
-            {selection.length > 1 ? (
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
-                defaultMessage="Delete watches"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
-                defaultMessage="Delete watch"
-              />
-            )}
-          </EuiButton>
-        ) : undefined,
-      toolsRight: createWatchContextMenu,
-    };
-
     content = (
       <div data-test-subj="watchesTableContainer">
-        <EuiInMemoryTable
-          onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
-            setPagination({ pageIndex: index, pageSize: size })
+        <EuiSearchBar
+          query={query}
+          box={{
+            placeholder: i18n.translate(
+              'xpack.watcher.sections.watchList.watchTable.searchBar.placeholder',
+              {
+                defaultMessage: 'Search by name or ID',
+              }
+            ),
+            incremental: true,
+          }}
+          onChange={debouncedUpdateQuery}
+          toolsLeft={
+            selection.length > 0 ? (
+              <EuiButton
+                data-test-subj="btnDeleteWatches"
+                onClick={() => {
+                  setWatchesToDelete(selection.map((selected: any) => selected.id));
+                }}
+                color="danger"
+              >
+                {selection.length > 1 ? (
+                  <FormattedMessage
+                    id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
+                    defaultMessage="Delete watches"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
+                    defaultMessage="Delete watch"
+                  />
+                )}
+              </EuiButton>
+            ) : undefined
           }
+          toolsRight={createWatchContextMenu}
+        />
+
+        <EuiSpacer size="l" />
+
+        <EuiInMemoryTable
+          onTableChange={({ sort: newSort }: Criteria<BaseWatch>) => {
+            if (newSort) {
+              setSort(newSort);
+            }
+          }}
           items={availableWatches}
           itemId="id"
           columns={columns}
-          search={searchConfig}
-          pagination={{
-            ...PAGINATION,
-            pageIndex: pagination.pageIndex,
-            pageSize: pagination.pageSize,
-          }}
-          sorting={{
-            sort: {
-              field: 'name',
-              direction: 'asc',
-            },
-          }}
+          pagination={false}
+          sorting={{ sort: sort as PropertySort }}
           selection={selectionConfig}
-          childrenBetween={
-            queryError && (
-              <>
-                <EuiCallOut
-                  data-test-subj="watcherListSearchError"
-                  iconType="warning"
-                  color="danger"
-                  title={
-                    <FormattedMessage
-                      id="xpack.watcher.sections.watchList.watchTable.errorOnSearch"
-                      defaultMessage="Invalid search: {queryError}"
-                      values={{ queryError }}
-                    />
-                  }
-                />
-                <EuiSpacer />
-              </>
-            )
-          }
           message={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
@@ -547,6 +540,18 @@ export const WatchListPage = () => {
             'data-test-subj': 'cell',
           })}
           data-test-subj="watchesTable"
+        />
+
+        <EuiSpacer size="l" />
+
+        <EuiTablePagination
+          aria-label="Table pagination example"
+          pageCount={data?.watchCount ? Math.ceil(data?.watchCount / pageSize) : 0}
+          activePage={pageIndex}
+          onChangePage={setPageIndex}
+          itemsPerPage={pageSize}
+          onChangeItemsPerPage={setPageSize}
+          itemsPerPageOptions={PAGINATION.pageSizeOptions}
         />
       </div>
     );

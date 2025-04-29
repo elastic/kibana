@@ -39,6 +39,21 @@ describe('generateConnectorName', () => {
         expect(toValidIndexName(input)).toBe(expected);
       });
     });
+
+    it('correctly handles strings with trailing hyphens', () => {
+      const testCases = [
+        { input: 'test-string---', expected: 'test-string' },
+        { input: 'test-string-', expected: 'test-string' },
+        { input: 'many-hyphens------------', expected: 'many-hyphens' },
+        { input: 'MixedCase-with-hyphens----', expected: 'mixed-case-with-hyphens' },
+        // Add a more pathological case with many hyphens
+        { input: 'test' + '-'.repeat(1000), expected: 'test' },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        expect(toValidIndexName(input)).toBe(expected);
+      });
+    });
   });
 
   describe('with provided connector name', () => {

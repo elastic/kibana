@@ -51,7 +51,7 @@ export const useGetIntegrationFromRuleId = ({
       return undefined;
     }
 
-    return packages.find((p) => p.name === rule.name);
+    return packages.find((p) => rule.related_integrations.map((ri) => ri.package).includes(p.name));
   }, [packages, rules, ruleId]);
 
   return useMemo(

@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { AttackDiscoveryWidget } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { AttackDiscoveryWidget } from './attack_discovery';
 import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 import { useAIForSOCDetailsContext } from '../context';
 

@@ -9,6 +9,8 @@ import { render, cleanup } from '@testing-library/react';
 import React from 'react';
 
 import '@testing-library/jest-dom';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,

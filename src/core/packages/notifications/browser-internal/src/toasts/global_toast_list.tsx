@@ -16,11 +16,11 @@ import { i18n } from '@kbn/i18n';
 import type { Toast } from '@kbn/core-notifications-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import { deduplicateToasts, ToastWithRichTitle } from './deduplicate_toasts';
-import { EventReporter } from './telemetry';
+import { ToastsTelemetry } from './telemetry';
 
 interface Props {
   toasts$: Observable<Toast[]>;
-  reportEvent: EventReporter;
+  reportEvent: ReturnType<ToastsTelemetry['start']>;
   dismissToast: (toastId: string) => void;
 }
 

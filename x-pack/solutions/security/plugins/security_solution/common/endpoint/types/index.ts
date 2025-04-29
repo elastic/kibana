@@ -1036,6 +1036,7 @@ export interface PolicyConfig {
       file: boolean;
       process: boolean;
       network: boolean;
+      security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;

@@ -1591,6 +1591,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
+    async startTrainedModelDeploymentES(modelId: string) {
+      log.debug(`Starting trained model deployment with id "${modelId}"`);
+      const url = `/_ml/trained_models/${modelId}/deployment/_start`;
+
+      const { body, status } = await esSupertest.post(url);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deployment started');
+    },
+
     async stopTrainedModelDeploymentES(deploymentId: string, force: boolean = false) {
       log.debug(`Stopping trained model deployment with id "${deploymentId}"`);
       const url = `/_ml/trained_models/${deploymentId}/deployment/_stop${

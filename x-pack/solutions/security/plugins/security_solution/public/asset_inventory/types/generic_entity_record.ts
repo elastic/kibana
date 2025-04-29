@@ -7,9 +7,15 @@
 
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 
+interface EngineMetadata {
+  Type: 'container' | 'user' | 'host' | 'service' | 'generic';
+}
+
 export interface GenericEntityRecord {
   '@timestamp': Date;
-  entity: EntityEcs;
+  entity: {
+    EngineMetadata: EngineMetadata;
+  } & EntityEcs;
   asset: {
     criticality: 'low_impact' | 'medium_impact' | 'high_impact' | 'extreme_impact' | 'unassigned';
   };

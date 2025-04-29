@@ -1,18 +1,13 @@
 # Security Project config
 
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'security']
+
+# Ess plugins
+xpack.securitySolutionEss.enabled: false
+
 ## Disable plugins
-xpack.search.enabled: false
-xpack.apm.enabled: false
-xpack.infra.enabled: false
-xpack.observabilityLogsExplorer.enabled: false
-xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
-xpack.searchNotebooks.enabled: false
-xpack.searchPlayground.enabled: false
-xpack.searchInferenceEndpoints.enabled: false
-xpack.inventory.enabled: false
-xpack.searchIndices.enabled: false
-xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:

@@ -60,8 +60,8 @@ export interface ObservabilityAlertSearchBarProps
     AlertSearchBarStateTransitions,
     CommonAlertSearchBarProps {
   services: Services;
-  filterControls: Filter[];
-  onFilterControlsChange: (controlConfigs: Filter[]) => void;
+  filterControls?: Filter[];
+  onFilterControlsChange: (filterControls: Filter[]) => void;
   savedQuery?: SavedQuery;
   showFilterBar?: boolean;
   disableLocalStorageSync?: boolean;
@@ -91,5 +91,7 @@ interface CommonAlertSearchBarProps {
   appName: string;
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   defaultFilters?: Filter[];
+  filterControls?: Filter[];
+  onFilterControlsChange: (filterControls: Filter[]) => void;
   onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 }

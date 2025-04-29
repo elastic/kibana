@@ -124,7 +124,6 @@ describe('InstallationStatus', () => {
     const callout = getByTestId('installation-status-callout');
 
     expect(spacer).toHaveStyle('background: #FFFFFF');
-    expect(callout).toHaveStyle('padding: 8px 16px');
     expect(callout).toHaveTextContent('Installed');
   });
 });

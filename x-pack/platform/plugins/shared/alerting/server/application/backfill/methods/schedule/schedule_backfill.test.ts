@@ -185,7 +185,13 @@ const mockCreatePointInTimeFinderAsInternalUser = (
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
-    start: '2023-11-16T08:00:00.000Z',
+    ranges: [
+      {
+        start: '2023-11-16T08:00:00.000Z',
+        end: '2023-11-16T08:05:00.000Z',
+      },
+    ],
+
     runActions: true,
     ...overwrites,
   };
@@ -256,7 +262,13 @@ describe('scheduleBackfill()', () => {
   afterAll(() => jest.useRealTimers());
 
   test('should successfully schedule backfill', async () => {
-    const mockData = [getMockData(), getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' })];
+    const mockData = [
+      getMockData(),
+      getMockData({
+        ruleId: '2',
+        ranges: [{ start: '2023-11-17T08:00:00.000Z', end: '2023-11-17T08:05:00.000Z' }],
+      }),
+    ];
     rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
 
     const result = await rulesClient.scheduleBackfill(mockData);
@@ -498,13 +510,13 @@ describe('scheduleBackfill()', () => {
         // @ts-expect-error
         rulesClient.scheduleBackfill(getMockData())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true}\\" - expected value of type [array] but got [Object]"`
+        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true}\\" - expected value of type [array] but got [Object]"`
       );
 
       await expect(
         rulesClient.scheduleBackfill([getMockData({ ruleId: 1 })])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
       );
     });
 
@@ -514,12 +526,16 @@ describe('scheduleBackfill()', () => {
           getMockData(),
           getMockData({
             ruleId: '2',
-            start: '2023-11-17T08:00:00.000Z',
-            end: '2023-11-17T08:00:00.000Z',
+            ranges: [
+              {
+                start: '2023-11-17T08:00:00.000Z',
+                end: '2023-11-17T08:00:00.000Z',
+              },
+            ],
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"runActions\\":true,\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}],\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
 
       await expect(
@@ -527,12 +543,16 @@ describe('scheduleBackfill()', () => {
           getMockData(),
           getMockData({
             ruleId: '2',
-            start: '2023-11-17T08:00:00.000Z',
-            end: '2023-11-16T08:00:00.000Z',
+            ranges: [
+              {
+                start: '2023-11-17T08:00:00.000Z',
+                end: '2023-11-16T08:00:00.000Z',
+              },
+            ],
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"runActions\\":true,\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}],\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
     });
 
@@ -577,7 +597,10 @@ describe('scheduleBackfill()', () => {
     test('should throw error if any scheduled rule types are disabled', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-16T08:05:00.000Z' }],
+        }),
       ];
       ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementationOnce(() => {
         throw new Error('Not enabled');
@@ -591,7 +614,15 @@ describe('scheduleBackfill()', () => {
     test('should throw error if any scheduled rule types are not authorized for this user', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [
+            {
+              start: '2023-11-16T08:00:00.000Z',
+              end: '2023-11-17T08:00:00.000Z',
+            },
+          ],
+        }),
       ];
       authorization.ensureAuthorized.mockImplementationOnce(() => {
         throw new Error('Unauthorized');
@@ -617,7 +648,10 @@ describe('scheduleBackfill()', () => {
     test('should throw if error bulk scheduling backfill tasks', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       backfillClient.bulkQueue.mockImplementationOnce(() => {
         throw new Error('error bulk queuing!');

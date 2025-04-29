@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
-import {
-  AiForSOCAlertsTab,
-  CONTENT_TEST_ID,
-  ERROR_TEST_ID,
-  LOADING_PROMPT_TEST_ID,
-  SKELETON_TEST_ID,
-} from './wrapper';
+import { render, screen, waitFor } from '@testing-library/react';
+import { AiForSOCAlertsTab, CONTENT_TEST_ID, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../../../common/mock';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
@@ -56,11 +50,10 @@ describe('<AiForSOCAlertsTab />', () => {
       },
     });
 
-    await act(async () => {
-      const { getByTestId } = render(<AiForSOCAlertsTab id={id} query={query} />);
+    render(<AiForSOCAlertsTab id={id} query={query} />);
 
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -81,14 +74,9 @@ describe('<AiForSOCAlertsTab />', () => {
       isLoading: true,
     });
 
-    await act(async () => {
-      const { getByTestId } = render(<AiForSOCAlertsTab id={id} query={query} />);
+    render(<AiForSOCAlertsTab id={id} query={query} />);
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render an error if the dataView fail to be created correctly', async () => {
@@ -108,14 +96,11 @@ describe('<AiForSOCAlertsTab />', () => {
       useEffect: jest.fn((f) => f()),
     }));
 
-    await act(async () => {
-      const { getByTestId } = render(<AiForSOCAlertsTab id={id} query={query} />);
+    render(<AiForSOCAlertsTab id={id} query={query} />);
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ERROR_TEST_ID)).toHaveTextContent('Unable to create data view');
-    });
+    expect(await screen.findByTestId(ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to create data view'
+    );
   });
 
   it('should render the content', async () => {
@@ -138,17 +123,12 @@ describe('<AiForSOCAlertsTab />', () => {
       useEffect: jest.fn((f) => f()),
     }));
 
-    await act(async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <AiForSOCAlertsTab id={id} query={query} />
-        </TestProviders>
-      );
+    render(
+      <TestProviders>
+        <AiForSOCAlertsTab id={id} query={query} />
+      </TestProviders>
+    );
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
   });
 });

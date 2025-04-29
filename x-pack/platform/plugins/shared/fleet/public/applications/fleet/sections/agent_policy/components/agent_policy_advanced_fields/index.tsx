@@ -657,7 +657,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isDisabled={disabled}
         >
           <EuiSuperSelect
-            disabled={disabled || isManagedPolicy}
+            disabled={disabled || isManagedOrAgentlessPolicy}
             valueOfSelected={dataOutputValueOfSelected}
             fullWidth
             isLoading={isLoadingOptions}

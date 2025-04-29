@@ -181,7 +181,9 @@ const HeaderLinkAddDataRoute = ({
       exact={exact}
       render={() => (
         <EuiHeaderLink
-          href={onboardingLocator?.getRedirectUrl({ category: onboardingFlow })}
+          href={onboardingLocator?.getRedirectUrl({
+            category: onboardingFlow === OnboardingFlow.Hosts ? 'host' : undefined,
+          })}
           color="primary"
           iconType="indexOpen"
         >

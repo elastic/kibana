@@ -85,6 +85,8 @@ import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_wit
 import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
 import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
 import type { FindGapsParams } from '../lib/rule_gaps/types';
+import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
+import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -161,6 +163,8 @@ export class RulesClient {
     getRuleExecutionKPI(this.context, params);
   public getGlobalExecutionKpiWithAuth = (params: GetGlobalExecutionKPIParams) =>
     getGlobalExecutionKpiWithAuth(this.context, params);
+  public getGlobalExecutionSummaryWithAuth = (params: GetGlobalExecutionSummaryParams) =>
+    getGlobalExecutionSummaryWithAuth(this.context, params);
   public getActionErrorLog = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLog(this.context, params);
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { waitFor, renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
 import * as api from '../apis/bulk_get_maintenance_windows';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -74,16 +74,17 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     addErrorMock = notifications.toasts.addError as jest.Mock;
+    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+  });
+
+  it('calls the api when invoked with the correct parameters', async () => {
     application.capabilities = {
       ...application.capabilities,
       maintenanceWindow: {
         show: true,
       },
     };
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-  });
 
-  it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
@@ -110,6 +111,13 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
   });
 
   it('does not call the api if the canFetchMaintenanceWindows is false', async () => {
+    application.capabilities = {
+      ...application.capabilities,
+      maintenanceWindow: {
+        show: true,
+      },
+    };
+
     const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
@@ -136,6 +144,13 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
   });
 
   it('does not call the api if license is not platinum', async () => {
+    application.capabilities = {
+      ...application.capabilities,
+      maintenanceWindow: {
+        show: true,
+      },
+    };
+
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
     const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
@@ -186,7 +201,35 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
     await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
+  it('does not call the api if the maintenanceWindow capability is disabled', async () => {
+    const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
+    spy.mockResolvedValue(response);
+
+    renderHook(
+      () =>
+        useBulkGetMaintenanceWindowsQuery({
+          ids: ['test-id'],
+          http,
+          notifications,
+          application,
+          licensing,
+        }),
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
+  });
+
   it('shows a toast error when the api return an error', async () => {
+    application.capabilities = {
+      ...application.capabilities,
+      maintenanceWindow: {
+        show: true,
+      },
+    };
+
     const spy = jest
       .spyOn(api, 'bulkGetMaintenanceWindows')
       .mockRejectedValue(new Error('An error'));

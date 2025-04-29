@@ -84,5 +84,50 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
     });
+
+    describe('Artifacts', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should return the artifacts correctly', async () => {
+        const { body: createdRule1 } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: true,
+              artifacts: {
+                dashboards: [
+                  {
+                    id: '123',
+                  },
+                  {
+                    id: '456',
+                  },
+                ],
+              },
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/${createdRule1.id}/_resolve`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password);
+        const { artifacts } = response.body;
+
+        expect(artifacts).to.eql({
+          dashboards: [
+            {
+              id: '123',
+            },
+            {
+              id: '456',
+            },
+          ],
+        });
+      });
+    });
   });
 };

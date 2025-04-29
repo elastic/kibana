@@ -531,7 +531,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
               class="euiPagination__item"
             >
               <button
-                aria-current="true"
+                aria-current="page"
                 aria-label="Page 1 of 5"
                 class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                 data-test-subj="pagination-button-0"
@@ -1229,7 +1229,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
               class="euiPagination__item"
             >
               <button
-                aria-current="true"
+                aria-current="page"
                 aria-label="Page 1 of 5"
                 class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                 data-test-subj="pagination-button-0"

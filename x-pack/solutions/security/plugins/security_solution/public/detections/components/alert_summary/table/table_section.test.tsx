@@ -39,6 +39,6 @@ describe('<TableSection />', () => {
     );
 
     expect(getByTestId(GROUPED_TABLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId('alertsTableErrorPrompt')).toBeInTheDocument();
+    expect(getByTestId('internalAlertsPageLoading')).toBeInTheDocument();
   });
 });

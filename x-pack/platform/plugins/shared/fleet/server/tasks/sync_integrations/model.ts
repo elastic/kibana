@@ -17,9 +17,9 @@ export interface BaseCustomAssetsData {
   name: string;
   package_name: string;
   package_version: string;
+  is_deleted?: boolean;
 }
 export interface CustomAssetsData extends BaseCustomAssetsData {
-  is_deleted: boolean;
   deleted_at?: string;
   [key: string]: any;
 }

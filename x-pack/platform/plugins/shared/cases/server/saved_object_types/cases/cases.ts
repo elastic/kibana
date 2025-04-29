@@ -24,7 +24,6 @@ export const createCaseSavedObjectType = (
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
-  switchToModelVersionAt: '8.10.0',
   indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',

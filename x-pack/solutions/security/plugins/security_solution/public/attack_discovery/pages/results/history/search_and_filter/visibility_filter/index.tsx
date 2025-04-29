@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import * as i18n from '../translations';
+import { useInvalidateFindAttackDiscoveries } from '../../../../use_find_attack_discoveries';
 
 const LIST_PROPS = {
   isVirtualized: false,
@@ -43,6 +44,8 @@ interface Props {
 }
 
 const VisibilityFilterComponent: React.FC<Props> = ({ isLoading = false, setShared, shared }) => {
+  const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onFilterButtonClick = useCallback(() => {
@@ -148,8 +151,9 @@ const VisibilityFilterComponent: React.FC<Props> = ({ isLoading = false, setShar
       }
 
       setItems(newOptions);
+      invalidateFindAttackDiscoveries();
     },
-    [setShared]
+    [invalidateFindAttackDiscoveries, setShared]
   );
 
   return (

@@ -24,7 +24,6 @@ enabled:
   - x-pack/test/api_integration/apis/logs_ui/config.ts
   - x-pack/test/api_integration/apis/logs_shared/config.ts
   - x-pack/test/api_integration/apis/metrics_ui/config.ts
-  - x-pack/test/api_integration/apis/osquery/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
   - x-pack/test/api_integration/apis/entity_manager/config.ts

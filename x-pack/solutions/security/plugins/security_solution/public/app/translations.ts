@@ -108,13 +108,6 @@ export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exce
   defaultMessage: 'Shared exception lists',
 });
 
-export const SIEM_MIGRATIONS_RULES = i18n.translate(
-  'xpack.securitySolution.navigation.siemMigrationsRules',
-  {
-    defaultMessage: 'SIEM Rule Migrations',
-  }
-);
-
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
 });

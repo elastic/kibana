@@ -21,7 +21,7 @@ import {
 } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import {
-  areFieldAndVariableTypesCompatible,
+  areFieldAndUserDefinedColumnTypesCompatible,
   getColumnExists,
   getCommandDefinition,
   hasWildcard,
@@ -35,7 +35,7 @@ import {
   sourceExists,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
-import { collectVariables } from '../shared/variables';
+import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import { errors, getMessageFromId } from './errors';
 import { validateFunction } from './function_validation';
 import {
@@ -47,7 +47,7 @@ import {
 } from './resources';
 import type {
   ESQLRealField,
-  ESQLVariable,
+  ESQLUserDefinedColumn,
   ErrorTypes,
   ReferenceMaps,
   ValidationOptions,
@@ -160,23 +160,23 @@ async function validateAst(
     );
     fieldsFromGrokOrDissect.forEach((value, key) => {
       // if the field is already present, do not overwrite it
-      // Note: this can also overlap with some variables
+      // Note: this can also overlap with some userDefinedColumns
       if (!availableFields.has(key)) {
         availableFields.set(key, value);
       }
     });
   }
 
-  const variables = collectVariables(ast, availableFields, queryString);
-  // notify if the user is rewriting a column as variable with another type
-  messages.push(...validateFieldsShadowing(availableFields, variables));
+  const userDefinedColumns = collectUserDefinedColumns(ast, availableFields, queryString);
+  // notify if the user is rewriting a column as userDefinedColumn with another type
+  messages.push(...validateFieldsShadowing(availableFields, userDefinedColumns));
   messages.push(...validateUnsupportedTypeFields(availableFields, ast));
 
   const references: ReferenceMaps = {
     sources,
     fields: availableFields,
     policies: availablePolicies,
-    variables,
+    userDefinedColumns,
     query: queryString,
     joinIndices: joinIndices?.indices || [],
   };
@@ -336,26 +336,31 @@ function validateOption(
 
 function validateFieldsShadowing(
   fields: Map<string, ESQLRealField>,
-  variables: Map<string, ESQLVariable[]>
+  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
   const messages: ESQLMessage[] = [];
-  for (const variable of variables.keys()) {
-    if (fields.has(variable)) {
-      const variableHits = variables.get(variable)!;
-      if (!areFieldAndVariableTypesCompatible(fields.get(variable)?.type, variableHits[0].type)) {
-        const fieldType = fields.get(variable)!.type;
-        const variableType = variableHits[0].type;
+  for (const userDefinedColumn of userDefinedColumns.keys()) {
+    if (fields.has(userDefinedColumn)) {
+      const userDefinedColumnHits = userDefinedColumns.get(userDefinedColumn)!;
+      if (
+        !areFieldAndUserDefinedColumnTypesCompatible(
+          fields.get(userDefinedColumn)?.type,
+          userDefinedColumnHits[0].type
+        )
+      ) {
+        const fieldType = fields.get(userDefinedColumn)!.type;
+        const userDefinedColumnType = userDefinedColumnHits[0].type;
         const flatFieldType = fieldType;
-        const flatVariableType = variableType;
+        const flatUserDefinedColumnType = userDefinedColumnType;
         messages.push(
           getMessageFromId({
             messageId: 'shadowFieldType',
             values: {
-              field: variable,
+              field: userDefinedColumn,
               fieldType: flatFieldType,
-              newType: flatVariableType,
+              newType: flatUserDefinedColumnType,
             },
-            locations: variableHits[0].location,
+            locations: userDefinedColumnHits[0].location,
           })
         );
       }
@@ -458,7 +463,7 @@ export function validateColumnForCommand(
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (commandName === 'row') {
-    if (!references.variables.has(column.name) && !isParametrized(column)) {
+    if (!references.userDefinedColumns.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
   } else if (!getColumnExists(column, references) && !isParametrized(column)) {

@@ -84,6 +84,30 @@ export const createAttackDiscoveryAlerts = async ({
 
     const createdDocumentIds = getCreatedDocumentIds(bulkResponse);
 
+    if (bulkResponse.errors) {
+      const errorDetails = bulkResponse.items.flatMap((item) => {
+        const error = item.create?.error;
+
+        if (error == null) {
+          return [];
+        }
+
+        const id = item.create?._id != null ? ` id: ${item.create._id}` : '';
+        const details = `\nError bulk inserting attack discovery alert${id} ${error.reason}`;
+        return [details];
+      });
+
+      const allErrorDetails = errorDetails.join(', ');
+      throw new Error(`Failed to bulk insert Attack discovery alerts ${allErrorDetails}`);
+    }
+
+    logger.debug(
+      () =>
+        `Created Attack discovery alerts in index ${attackDiscoveryAlertsIndex} with document ids: ${createdDocumentIds.join(
+          ', '
+        )}`
+    );
+
     return getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds,

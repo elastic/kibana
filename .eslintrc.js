@@ -257,6 +257,10 @@ const RESTRICTED_IMPORTS = [
     message: 'Please use react-use/lib/{method} instead.',
   },
   {
+    name: 'react-use/lib',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
+  {
     name: 'react-router-dom',
     importNames: ['Router', 'Switch', 'Route'],
     message: 'Please use @kbn/shared-ux-router instead',
@@ -759,6 +763,8 @@ module.exports = {
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
+        'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
+        'x-pack/platform/test/*/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',

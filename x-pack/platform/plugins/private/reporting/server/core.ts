@@ -318,8 +318,8 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async scheduleTask(report: ReportTaskParams) {
-    return await this.executeTask.scheduleTask(report);
+  public async scheduleTask(request: KibanaRequest, report: ReportTaskParams) {
+    return await this.executeTask.scheduleTask(request, report);
   }
 
   public async getStore() {
