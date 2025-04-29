@@ -61,6 +61,12 @@ describe('genericValidator', () => {
 
     expect(result).toBeUndefined();
   });
+
+  it('should return undefined if the value contains dashes', () => {
+    const result = validateGenericValue('valid-value');
+
+    expect(result).toBeUndefined();
+  });
 });
 
 describe('validateDomain', () => {

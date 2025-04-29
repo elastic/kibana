@@ -34,6 +34,7 @@ import type {
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
   AssetSOObject,
+  PackageSpecCategory,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -406,7 +407,7 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   >;
   const result = await updateCustomIntegration(esClient, soClient, pkgName, {
     readMeData,
-    categories,
+    categories: categories?.map((category) => category as PackageSpecCategory),
   });
 
   return response.ok({
