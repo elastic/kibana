@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash';
-import { getRuleRoute } from './get_rule_route';
+import { getInternalRuleRoute } from './get_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
@@ -23,7 +23,7 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('getRuleRoute', () => {
+describe('getInternalRuleRoute', () => {
   const action: RuleAction = {
     group: 'default',
     id: '2',
@@ -119,10 +119,10 @@ describe('getRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRuleRoute(router, licenseState);
+    getInternalRuleRoute(router, licenseState);
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}"`);
 
     rulesClient.get.mockResolvedValueOnce(mockedAlert);
 
@@ -147,7 +147,7 @@ describe('getRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRuleRoute(router, licenseState);
+    getInternalRuleRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -174,7 +174,7 @@ describe('getRuleRoute', () => {
       throw new Error('OMG');
     });
 
-    getRuleRoute(router, licenseState);
+    getInternalRuleRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -197,7 +197,7 @@ describe('getRuleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRuleRoute(router, licenseState);
+    getInternalRuleRoute(router, licenseState);
     const [_, handler] = router.get.mock.calls[0];
 
     rulesClient.get.mockResolvedValueOnce({
@@ -255,11 +255,11 @@ describe('getRuleRoute', () => {
     ]);
   });
 
-  it('does not return the artifacts', async () => {
+  it('returns the artifacts if defined', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRuleRoute(router, licenseState);
+    getInternalRuleRoute(router, licenseState);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -287,6 +287,15 @@ describe('getRuleRoute', () => {
     const routeRes = await handler(context, req, res);
 
     // @ts-expect-error: body exists
-    expect(routeRes.body.artifacts).toBeUndefined();
+    expect(routeRes.body.artifacts).not.toBeUndefined();
+
+    // @ts-expect-error: body exists
+    expect(routeRes.body.artifacts).toEqual({
+      dashboards: [
+        {
+          id: '123',
+        },
+      ],
+    });
   });
 });
