@@ -6,7 +6,7 @@
  */
 
 import type Oas from 'oas';
-import type { JsonSchema } from '@n8n/json-schema-to-zod';
+import type { JsonSchema, JsonSchemaObject, ParserOverride, Refs } from '@n8n/json-schema-to-zod';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { SchemaObject } from 'oas/dist/types.cjs';
 import { z } from '@kbn/zod';
@@ -41,6 +41,24 @@ export abstract class OpenApiTool<T> {
     return this.getParametersAsZodSchemaMemoized(args);;
   }
 
+  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
+    if (schema.enum && schema.enum.length == 1 && schema.enum[0] == '*') {
+      return z.enum(["*"]) // jsonSchemaToZod would convert this to literal which is not supported by Gemini 
+    }
+    if (schema.anyOf && schema.default) {
+      delete schema.default // Gemini does not support keys alongside anyOf
+      return jsonSchemaToZodWithParserOverride(schema)
+    }
+    if (schema.type === "array" && isEmpty(schema.items)) {
+      return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]) // OpenAi requires items in array to be defined
+    }
+    if (schema.format !== undefined) {
+      delete schema.format // Gemini does not support contentEncoding
+      return jsonSchemaToZodWithParserOverride(schema)
+    }
+    return undefined;
+  }
+
   private getParametersAsZodSchemaInternal(args: { operation: Operation }) {
     const { operation } = args;
     const schemaTypeToSchemaObject = (operation.getParametersAsJSONSchema() ?? []).reduce(
@@ -51,24 +69,10 @@ export abstract class OpenApiTool<T> {
       {} as Record<string, SchemaObject>
     );
 
-    return schemaTypeToSchemaObject
-
     const jsonSchemaToZodWithParserOverride = (schema: JsonSchema): z.ZodTypeAny => {
       return jsonSchemaToZod(schema as JsonSchema, {
         // Overrides to ensure schema is compatible with LLM provider
-        parserOverride: (schema, refs) => {
-          if (schema.enum && schema.enum.length == 1 && schema.enum[0] == '*') {
-            return z.enum(["*"]) // jsonSchemaToZod would convert this to literal which is not supported by Gemini 
-          }
-          if (schema.anyOf && schema.default) {
-            delete schema.default // Gemini does not support keys alongside anyOf
-            return jsonSchemaToZodWithParserOverride(schema)
-          }
-          if (schema.type === "array" && isEmpty(schema.items)) {
-            return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]) // OpenAi requires items in array to be defined
-          }
-          return undefined;
-        },
+        parserOverride: (schema, refs) => this.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride),
       })
     }
 

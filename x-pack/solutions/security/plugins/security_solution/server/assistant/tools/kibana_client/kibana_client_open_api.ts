@@ -11,7 +11,7 @@ import { tool } from '@langchain/core/tools';
 import { memoize, pickBy } from 'lodash';
 import { StdUriTemplate } from '@std-uritemplate/std-uritemplate';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { SystemMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import path from 'path';
 import Oas from 'oas';
@@ -22,6 +22,8 @@ import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
 import { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
+import { Command, END } from '@langchain/langgraph';
+import { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
 
 export const kibanaServerlessOpenApiSpec = path.join(
   __dirname,
@@ -117,7 +119,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     assistantToolParams,
   }: RuntimeOptions & { operation: Operation }) {
     return tool(
-      async (input) => {
+      async (input, config) => {
         const { request, assistantContext } = assistantToolParams;
         const { origin } = request.rewrittenUrl || request.url;
 
@@ -144,18 +146,44 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           );
         });
 
-        return axios({
-          method: operation.method.toUpperCase(),
-          headers: { ...input.header, ...headers },
-          url: url.toString(),
-          data: input.body ? JSON.stringify(input.body) : undefined,
-        })
-          .then((response) => {
-            return { content: response.data };
+        try {
+          const result = await axios({
+            method: operation.method.toUpperCase(),
+            headers: { ...input.header, ...headers, "kbn-xsrf": 'mock-kbn-xsrf' },
+            url: url.toString(),
+            data: input.body ? JSON.stringify(input.body) : undefined,
           })
-          .catch((error) => {
-            throw new Error(`Error: ${error.message}`);
-          });
+
+          return new Command({
+            goto: END, // This is not working, potential bug in langchain
+            update: {
+              messages: [
+                new ToolMessage({
+                  content: JSON.stringify(result.data),
+                  tool_call_id: config.toolCall.id,
+                })
+              ]
+            }
+          })
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            const status = error.response?.status;
+            if (status && status >= 400 && status < 500) {
+              return new Command({
+                goto: "agent",
+                update: {
+                  messages: [
+                    new ToolMessage({
+                      content: `Client error: ${status} - ${error.response?.data?.message || error.message}`,
+                      tool_call_id: config.toolCall.id,
+                    })
+                  ]
+                }
+              })
+            }
+          }
+          throw error;
+        }
       },
       {
         name: operation.getOperationId(),
@@ -167,6 +195,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
             .filter((tag) => !!tag),
         ].join('\n'),
         tags: operation.getTags().map((tag) => tag.name),
+        verboseParsingErrors: true,
         schema: this.getParametersAsZodSchema({
           operation,
         }),
@@ -194,18 +223,21 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
               content:
                 'You are Kibana API Client agent. You are an expert in using functions that call' +
                 ' the Kibana APIs. Use the functions at your disposal to action requested by the user. ' +
-                'You do not need to confirm with the user before using a function.',
+                'You do not need to confirm with the user before using a function. If the tool' +
+                ' input did not match expected schema, try to fix it and call the tool again. ',
             }),
             new HumanMessage({ content: input }),
           ],
         };
         const result = await agent.invoke(inputs);
         const lastMessage = result.messages[result.messages.length - 1];
-        return lastMessage.content;
+
+        return lastMessage
       },
       {
         name,
         description,
+        verboseParsingErrors: true,
         schema: z.object({
           input: z
             .string()
@@ -215,6 +247,15 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         }),
       }
     );
+  }
+
+  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
+    if (schema.properties && schema.properties["kbn-xsrf"] && Array.isArray(schema.required) && schema.required.includes("kbn-xsrf")) {
+      // Remove kbn-xsrf from required properties, it will be added to headers manually
+      schema.required = schema.required.filter((item) => item !== "kbn-xsrf");
+      return jsonSchemaToZodWithParserOverride(schema)
+    }
+    return super.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride);
   }
 }
 
