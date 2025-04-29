@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { MessageRole, MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { MessageRole, MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import {
   LlmProxy,
   createLlmProxy,
@@ -16,72 +19,26 @@ import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,
 } from '../../utils/conversation';
-import { createRule, runRule } from '../../utils/alerts';
+import { createRule, deleteRules } from '../../utils/alerts';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { indexSyntheticApmTransactions } from '../../synthtrace_scenarios/apm_transactions';
+import { createSyntheticApmData } from '../../synthtrace_scenarios/create_synthetic_apm_data';
+import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
 
-const apmTransactionRateRuleParams = {
+const alertRuleData = {
+  ruleTypeId: ApmRuleType.TransactionErrorRate,
+  indexName: APM_ALERTS_INDEX,
   consumer: 'apm',
-  name: 'apm_transaction_rate_obs_ai_assistant',
-  rule_type_id: 'apm.transaction_error_rate',
-  params: {
-    threshold: 10,
-    windowSize: 1,
-    windowUnit: 'h',
-    transactionType: undefined,
-    serviceName: undefined,
-    environment: 'production',
-    searchConfiguration: {
-      query: {
-        query: ``,
-        language: 'kuery',
-      },
-    },
-    groupBy: ['service.name', 'service.environment'],
-    useKqlFilter: true,
-  },
-  actions: [],
-  schedule: {
-    interval: '1m',
-  },
-};
-
-const customThresholdRuleParams = {
-  tags: ['observability', 'ai_assistant'],
-  consumer: 'logs',
-  name: 'Threshold Surpassed Error',
-  rule_type_id: 'observability.rules.custom_threshold',
-  params: {
-    criteria: [
-      {
-        comparator: COMPARATORS.GREATER_THAN,
-        threshold: [10],
-        timeSize: 2,
-        timeUnit: 'h',
-        metrics: [{ name: 'A', filter: '', aggType: 'count' }],
-      },
-    ],
-    groupBy: ['service.name'],
-    alertOnNoData: true,
-    alertOnGroupDisappear: true,
-    searchConfiguration: {
-      query: {
-        query: '',
-        language: 'kuery',
-      },
-      index: 'logs_synth',
-    },
-  },
-  actions: [],
-  schedule: {
-    interval: '1m',
-  },
+  environment: 'production',
+  threshold: 1,
+  windowSize: 1,
+  windowUnit: 'h',
+  ruleName: 'APM transaction error rate',
 };
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const synthtrace = getService('synthtrace');
   const samlAuth = getService('samlAuth');
+  const alertingApi = getService('alertingApi');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('alerts', function () {
@@ -90,57 +47,31 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let proxy: LlmProxy;
     let connectorId: string;
     let alertsEvents: MessageAddEvent[];
+    let internalReqHeader: InternalRequestHeader;
+    let roleAuthc: RoleCredentials;
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let createdRuleId: string;
+    let parsedAlertsResponse: SearchAlertsResult;
 
     const start = 'now-100h';
     const end = 'now';
 
     before(async () => {
-      const internalReqHeader = samlAuth.getInternalRequestHeader();
-      const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+
+      ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
 
       proxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: proxy.getPort(),
       });
 
-      const ruleIds = [];
-      // Create first rule
-      ruleIds.push(
-        await createRule({
-          getService,
-          roleAuthc,
-          internalReqHeader,
-          data: apmTransactionRateRuleParams,
-        })
-      );
-      // Create second rule
-      ruleIds.push(
-        await createRule({
-          getService,
-          roleAuthc,
-          internalReqHeader,
-          data: customThresholdRuleParams,
-        })
-      );
-
-      log.debug(`Created ${ruleIds.length} rules.`);
-
-      const apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-      await indexSyntheticApmTransactions({
-        apmSynthtraceEsClient,
-        logger: log,
-      });
-
-      // Trigger rule run
-      log.debug('Triggering a rule run');
-      await Promise.all(
-        ruleIds.map((ruleId) => runRule({ getService, roleAuthc, internalReqHeader, ruleId }))
-      );
-
-      log.debug('Waiting 2.5s to make sure all indices are refreshed');
-
-      await new Promise((resolve) => {
-        setTimeout(resolve, 2500);
+      createdRuleId = await createRule({
+        getService,
+        roleAuthc,
+        internalReqHeader,
+        data: alertRuleData,
       });
 
       void proxy.interceptConversation('Hello from LLM Proxy');
@@ -158,6 +89,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
       alertsEvents = getMessageAddedEvents(alertsResponseBody);
+      const alertsFunctionResponse = alertsEvents[0];
+      parsedAlertsResponse = JSON.parse(alertsFunctionResponse.message.message.content!);
     });
 
     after(async () => {
@@ -165,21 +98,42 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
+
+      await apmSynthtraceEsClient.clean();
+      await alertingApi.cleanUpAlerts({
+        roleAuthc,
+        ruleId: createdRuleId,
+        alertIndexName: APM_ALERTS_INDEX,
+        consumer: 'apm',
+      });
+      await deleteRules({ getService, roleAuthc, internalReqHeader });
+
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    // This test ensures that invoking the alerts function does not result in an error.
     it('should execute the function without any errors', async () => {
-      const alertsFunctionResponse = alertsEvents[0];
-      expect(alertsFunctionResponse.message.message.name).to.be('alerts');
-
-      const parsedAlertsResponse = JSON.parse(alertsFunctionResponse.message.message.content!);
+      expect(alertsEvents[0].message.message.name).to.be('alerts');
 
       expect(parsedAlertsResponse).not.to.have.property('error');
       expect(parsedAlertsResponse).to.have.property('total');
       expect(parsedAlertsResponse).to.have.property('alerts');
       expect(parsedAlertsResponse.alerts).to.be.an('array');
-      expect(parsedAlertsResponse.total).to.be(0);
-      expect(parsedAlertsResponse.alerts.length).to.be(0);
+    });
+
+    it('should retrieve 1 active alert', async () => {
+      expect(parsedAlertsResponse.total).to.be(1);
+      expect(parsedAlertsResponse.alerts.length).to.be(1);
+      expect(parsedAlertsResponse.alerts[0]['kibana.alert.status']).to.eql('active');
+    });
+
+    it('should retrieve correct alert information', async () => {
+      const alert = parsedAlertsResponse.alerts[0];
+
+      expect(alert['service.environment']).to.eql(alertRuleData.environment);
+      expect(alert['kibana.alert.rule.consumer']).to.eql(alertRuleData.consumer);
+      expect(alert['kibana.alert.evaluation.threshold']).to.eql(alertRuleData.threshold);
+      expect(alert['kibana.alert.rule.rule_type_id']).to.eql(alertRuleData.ruleTypeId);
+      expect(alert['kibana.alert.rule.name']).to.eql(alertRuleData.ruleName);
     });
   });
 }

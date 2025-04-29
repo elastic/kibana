@@ -6,32 +6,47 @@
  */
 
 import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { APM_ALERTS_INDEX, ApmAlertFields } from '../../apm/alerts/helpers/alerting_helper';
 
 export const createRule = async ({
   getService,
   roleAuthc,
-  internalReqHeader,
   data,
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
-  data: any;
+  data?: any;
 }) => {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const alertingApi = getService('alertingApi');
   const logger = getService('log');
 
   try {
-    const response = await supertestWithoutAuth
-      .post('/api/alerting/rule')
-      .set(roleAuthc.apiKeyHeader)
-      .set(internalReqHeader)
-      .set('kbn-xsrf', 'foo')
-      .send(data)
-      .expect(200);
+    const createdRule = await alertingApi.createRule({
+      ruleTypeId: data?.ruleTypeId || ApmRuleType.TransactionErrorRate,
+      name: data?.ruleName || 'APM transaction error rate',
+      consumer: data?.consumer || 'apm',
+      schedule: { interval: data?.interval || '1m' },
+      tags: data?.tags || ['apm'],
+      params: {
+        environment: data?.environment || 'production',
+        threshold: data?.threshold || 1,
+        windowSize: data?.windowSize || 1,
+        windowUnit: data?.windowUnit || 'h',
+      },
+      roleAuthc,
+    });
 
-    const ruleId = response.body.id as string;
+    const ruleId = createdRule.id as string;
+
+    await alertingApi.waitForDocumentInIndex<ApmAlertFields>({
+      indexName: data?.indexName || APM_ALERTS_INDEX,
+      ruleId,
+      docCountTarget: data?.docCountTarget || 1,
+    });
+
     return ruleId;
   } catch (e) {
     logger.error(`Failed to create alerting rule: ${e}`);
@@ -42,7 +57,6 @@ export const createRule = async ({
 export const runRule = async ({
   getService,
   roleAuthc,
-  internalReqHeader,
   ruleId,
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
@@ -50,55 +64,18 @@ export const runRule = async ({
   internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) => {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-
-  const response = await supertestWithoutAuth
-    .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-    .set(roleAuthc.apiKeyHeader)
-    .set(internalReqHeader)
-    .expect(204);
-
-  return response;
-};
-
-const deleteRuleById = async ({
-  getService,
-  roleAuthc,
-  internalReqHeader,
-  ruleId,
-}: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
-  ruleId: string;
-}) => {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-
-  return supertestWithoutAuth
-    .delete(`/api/alerting/rule/${ruleId}`)
-    .set(roleAuthc.apiKeyHeader)
-    .set(internalReqHeader);
+  const alertingApi = getService('alertingApi');
+  return alertingApi.runRule(roleAuthc, ruleId);
 };
 
 export const deleteRules = async ({
   getService,
   roleAuthc,
-  internalReqHeader,
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
   roleAuthc: RoleCredentials;
   internalReqHeader: InternalRequestHeader;
 }) => {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-
-  const response = await supertestWithoutAuth
-    .get('/api/alerting/rules/_find')
-    .set(roleAuthc.apiKeyHeader)
-    .set(internalReqHeader);
-
-  return Promise.all(
-    response.body.data.map((rule: any) =>
-      deleteRuleById({ getService, roleAuthc, internalReqHeader, ruleId: rule.id })
-    )
-  );
+  const alertingApi = getService('alertingApi');
+  return alertingApi.deleteRules({ roleAuthc });
 };

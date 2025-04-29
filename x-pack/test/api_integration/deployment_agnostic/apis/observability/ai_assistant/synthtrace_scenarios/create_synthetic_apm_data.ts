@@ -6,28 +6,28 @@
  */
 
 import moment from 'moment';
-import { ToolingLog } from '@kbn/tooling-log';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
-export const indexSyntheticApmTransactions = async ({
-  apmSynthtraceEsClient,
-  logger,
+export const createSyntheticApmData = async ({
+  getService,
   serviceName = 'my-service',
   environment = 'production',
   language = 'go',
 }: {
-  apmSynthtraceEsClient: ApmSynthtraceEsClient;
-  logger: ToolingLog;
+  getService: DeploymentAgnosticFtrProviderContext['getService'];
   serviceName?: string;
   environment?: string;
   language?: string;
 }) => {
+  const synthtrace = getService('synthtrace');
+  const apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+
   await apmSynthtraceEsClient.clean();
 
-  const instance = apm.service(serviceName, environment, language).instance('my-instance');
-
-  logger.debug('Indexing synthtrace data');
+  const instance = apm
+    .service({ name: serviceName, environment, agentName: language })
+    .instance('my-instance');
 
   await apmSynthtraceEsClient.index(
     timerange(moment().subtract(15, 'minutes'), moment())
@@ -42,7 +42,8 @@ export const indexSyntheticApmTransactions = async ({
           .errors(
             instance.error({ message: 'error message', type: 'Sample Type' }).timestamp(timestamp)
           ),
-        instance.transaction('GET /api').timestamp(timestamp).duration(50).outcome('success'),
       ])
   );
+
+  return { apmSynthtraceEsClient };
 };
