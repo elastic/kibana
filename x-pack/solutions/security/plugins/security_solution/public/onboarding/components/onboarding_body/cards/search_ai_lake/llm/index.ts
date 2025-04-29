@@ -12,7 +12,7 @@ import { OnboardingCardId } from '../../../../../constants';
 import { AI_CONNECTOR_CARD_TITLE } from './translations';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common/constants';
 import { checkAssistantCardComplete } from '../../common/connectors/assistant_check_complete';
-import type { AssistantCardMetadata } from '../../assistant/types';
+import type { AssistantCardMetadata } from '../../common/connectors/types';
 
 export const llmConnectorCardConfig: OnboardingCardConfig<AssistantCardMetadata> = {
   id: OnboardingCardId.searchAiLakeLLM,

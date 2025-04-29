@@ -8,8 +8,13 @@
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { ConnectorsAuthz } from './authz';
 
 export type AIConnector = ActionConnector & {
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
 };
+
+export interface AssistantCardMetadata extends ConnectorsAuthz {
+  connectors: ActionConnector[];
+}
