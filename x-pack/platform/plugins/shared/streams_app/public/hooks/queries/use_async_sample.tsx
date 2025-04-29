@@ -19,6 +19,7 @@ import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearc
 import { filter, switchMap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useAbortController } from '@kbn/react-hooks';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../use_kibana';
 import { emptyEqualsToAlways } from '../../util/condition';
 
@@ -89,7 +90,7 @@ export const useAsyncSample = (options: Options) => {
             toggleIsLoadingDocuments(false);
           }
 
-          if (result.rawResponse.hits?.hits) {
+          if (!isEmpty(result.rawResponse.hits?.hits)) {
             setDocuments(result.rawResponse.hits.hits.map((hit) => hit._source));
           }
         },
