@@ -33,13 +33,83 @@ import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view
 import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { MultiValueCellPopover, type CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { css } from '@emotion/css';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
+
+const renderValue = (item: string) => (
+  <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="flexStart" alignItems="center">
+    <EuiFlexItem>
+      <EuiText
+        size="s"
+        style={{
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {item}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiCopy textToCopy={item}>
+        {(copy) => (
+          <EuiIcon
+            css={css`
+              :hover {
+                cursor: pointer;
+              },
+            `}
+            onClick={copy}
+            type="copy"
+          />
+        )}
+      </EuiCopy>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const renderTableField = (value: string) => {
+  if (!value) {
+    return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
+  }
+
+  return Array.isArray(value) ? (
+    <MultiValueCellPopover<unknown> items={value} field="" object={{}} renderItem={renderValue} />
+  ) : (
+    <EuiFlexGroup direction="row" gutterSize="xs">
+      <EuiFlexItem>
+        <EuiText
+          size="s"
+          css={{
+            paddingTop: `4px`,
+          }}
+        >
+          {value}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCopy textToCopy={value}>
+          {(copy) => (
+            <EuiIcon
+              css={css`
+                :hover {
+                  cursor: pointer;
+                }
+              `}
+              onClick={copy}
+              type="copy"
+            />
+          )}
+        </EuiCopy>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const columns: Array<EuiBasicTableColumn<any>> = [
   {
@@ -51,37 +121,7 @@ export const columns: Array<EuiBasicTableColumn<any>> = [
     field: 'value',
     name: 'Value',
     truncateText: true,
-    render: (value: string) => (
-      <>
-        <EuiFlexGroup direction="row" gutterSize="xs">
-          <EuiFlexItem>
-            <EuiText
-              size="s"
-              css={{
-                paddingTop: `4px`,
-              }}
-            >
-              {value}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCopy textToCopy={value}>
-              {(copy) => (
-                <EuiIcon
-                  css={css`
-                    :hover {
-                      cursor: pointer;
-                    }
-                  `}
-                  onClick={copy}
-                  type="copy"
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    ),
+    render: (value: string) => renderTableField(value),
   },
 ];
 
