@@ -33,34 +33,34 @@ export const executeEsqlRequest = async ({
   esClient: ElasticsearchClient;
   requestBody: Record<string, unknown>;
 }): Promise<Response> => {
-  try {
-    const response = await esClient.transport.request<EsqlTable>({
-      method: 'POST',
-      path: '/_query',
-      body: requestBody,
-      querystring: { drop_null_columns: true },
-    });
+  const response = await esClient.transport.request<EsqlTable>({
+    method: 'POST',
+    path: '/_query',
+    body: requestBody,
+    querystring: { drop_null_columns: true },
+  });
 
-    const [sourceIndex, idIndex] = [
-      response.columns.findIndex((col) => col.name === '_source'),
-      response.columns.findIndex((col) => col.name === '_id'),
-    ];
+  const [sourceIndex, idIndex] = [
+    response.columns.findIndex((col) => col.name === '_source'),
+    response.columns.findIndex((col) => col.name === '_id'),
+  ];
 
-    const results = response.values
-      .map((row) => ({
-        _id: row[idIndex],
-        _source: row[sourceIndex],
-      }))
-      .filter(
-        (row) =>
-          row._id !== null &&
-          typeof row._id === 'string' &&
-          row._source !== null &&
-          typeof row._source === 'object'
-      ) as Response;
-
-    return results;
-  } catch (e) {
-    throw getKbnServerError(e);
+  if (sourceIndex === -1 || idIndex === -1) {
+    throw new Error('Invalid ES|QL response format: missing _source or _id column');
   }
+
+  const results = response.values
+    .map((row) => ({
+      _id: row[idIndex],
+      _source: row[sourceIndex],
+    }))
+    .filter(
+      (row) =>
+        row._id !== null &&
+        typeof row._id === 'string' &&
+        row._source !== null &&
+        typeof row._source === 'object'
+    ) as Response;
+
+  return results;
 };
