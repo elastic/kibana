@@ -286,7 +286,9 @@ export function useFetchAgentsData() {
 
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
-          const newAllTags = [...agentTagsResponse.data.items];
+          const newAllTags = [...agentTagsResponse.data.items].toSorted((a, b) =>
+            a.toLowerCase().localeCompare(b.toLowerCase())
+          );
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
