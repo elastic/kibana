@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,22 +13,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSelectable,
   EuiSpacer,
-  EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { getIndicesWithNoSourceFields } from '../utils/create_query';
 import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 import { useQueryIndices } from '../hooks/use_query_indices';
+import { handleSelectOptions } from '../utils/select_indices';
 
 interface SelectIndicesFlyout {
   onClose: () => void;
@@ -39,123 +36,95 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
   const { indices, isLoading: isIndicesLoading } = useQueryIndices({ query });
   const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
   const [selectedTempIndices, setSelectedTempIndices] = useState<string[]>(selectedIndices);
-  const handleSelectOptions = (options: EuiSelectableOption[]) => {
-    setSelectedTempIndices(
-      Array.from(
-        new Set([
-          ...selectedTempIndices.filter((index) => !unselectedOptions(options).includes(index)),
-          ...selectedOptions(options),
-        ])
-      )
-    );
-  };
-
-  const selectedOptions = (options: EuiSelectableOption[]): string[] => {
-    return options.filter((option) => option.checked === 'on').map((option) => option.label);
-  };
-
-  const unselectedOptions = (options: EuiSelectableOption[]): string[] => {
-    return options.filter((option) => option.checked === undefined).map((option) => option.label);
-  };
-
-  const handleSearchChange = (searchValue: string) => {
-    setQuery(searchValue);
-  };
-
+  const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedTempIndices);
+  const { emptyIndicesList, disabledSave } = useMemo((): {
+    disabledSave: boolean;
+    emptyIndicesList: string | null;
+  } => {
+    if (selectedTempIndices.length === 0) {
+      return {
+        disabledSave: true,
+        emptyIndicesList: null,
+      };
+    }
+    const emptyIndices = getIndicesWithNoSourceFields(fields);
+    return {
+      disabledSave: (emptyIndices?.length ?? 0) > 0,
+      emptyIndicesList: emptyIndices && emptyIndices.length > 0 ? emptyIndices.join(', ') : null,
+    };
+  }, [fields, selectedTempIndices]);
+  const indexOptions = useMemo(
+    () =>
+      indices.map(
+        (index, num): EuiSelectableOption => ({
+          label: index,
+          checked: selectedTempIndices.includes(index) ? 'on' : undefined,
+          'data-test-subj': `sourceIndex-${num}`,
+        })
+      ),
+    [indices, selectedTempIndices]
+  );
   const handleSaveQuery = () => {
     setSelectedIndices(selectedTempIndices);
     onClose();
   };
-  const tabs = [
-    {
-      id: 'indices',
-      name: i18n.translate('xpack.searchPlayground.setupPage.addDataSource.flyout.tabName', {
-        defaultMessage: 'Indices',
-      }),
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiSelectable
-            searchable
-            height="full"
-            css={css`
-              height: 70vh;
-            `}
-            searchProps={{
-              onChange: handleSearchChange,
-            }}
-            options={[
-              {
-                label: i18n.translate(
-                  'xpack.searchPlayground.setupPage.addDataSource.flyout.groupOption',
-                  {
-                    defaultMessage: 'Available indices',
-                  }
-                ),
-                isGroupLabel: true,
-              },
-              ...indices.map(
-                (index, num) =>
-                  ({
-                    label: index,
-                    checked: selectedTempIndices.includes(index) ? 'on' : '',
-                    'data-test-subj': `sourceIndex-${num}`,
-                  } as EuiSelectableOption)
-              ),
-            ]}
-            onChange={handleSelectOptions}
-            listProps={{
-              showIcons: true,
-              bordered: false,
-            }}
-            isLoading={isIndicesLoading}
-            renderOption={undefined}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
-        </>
-      ),
-    },
-  ];
-  const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedTempIndices);
-  const noSourceFieldsWarning = getIndicesWithNoSourceFields(fields);
 
   return (
     <EuiFlyout size="s" ownFocus onClose={onClose} data-test-subj="selectIndicesFlyout">
-      <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2>
-            <FormattedMessage
-              id="xpack.searchPlayground.addDataSource.flyout.title"
-              defaultMessage="Add data to query"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiTabbedContent
-          tabs={tabs}
-          initialSelectedTab={tabs[0]}
-          autoFocus="selected"
-          data-test-subj="indicesTable"
-        />
-        {!isFieldsLoading && !!noSourceFieldsWarning && (
-          <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
-            <p>
-              <FormattedMessage
-                id="xpack.searchPlayground.addDataSource.flyout.warningCallout"
-                defaultMessage="No fields found for {errorMessage}. Try adding data to these indices."
-                values={{ errorMessage: noSourceFieldsWarning }}
-              />
-            </p>
-          </EuiCallOut>
+      <EuiSelectable
+        data-test-subj="indicesTable"
+        searchable
+        height="full"
+        searchProps={{
+          onChange: setQuery,
+        }}
+        options={indexOptions}
+        onChange={handleSelectOptions(selectedTempIndices, setSelectedTempIndices)}
+        listProps={{
+          showIcons: true,
+          bordered: false,
+        }}
+        isLoading={isIndicesLoading}
+      >
+        {(list, search) => (
+          <>
+            <EuiFlyoutHeader>
+              <EuiTitle size="m">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.addDataSource.flyout.title"
+                    defaultMessage="Add data to query"
+                  />
+                </h2>
+              </EuiTitle>
+              <EuiSpacer />
+              {search}
+              <EuiSpacer size="s" />
+              <EuiTitle size="xxs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.setupPage.addDataSource.flyout.groupOption"
+                    defaultMessage="Available indices"
+                  />
+                </h5>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiSpacer size="s" />
+            {list}
+          </>
         )}
-      </EuiFlyoutBody>
+      </EuiSelectable>
+      {!isFieldsLoading && emptyIndicesList !== null ? (
+        <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
+          <p>
+            <FormattedMessage
+              id="xpack.searchPlayground.addDataSource.flyout.warningCallout"
+              defaultMessage="No fields found for {errorMessage}. Try adding data to these indices."
+              values={{ errorMessage: emptyIndicesList }}
+            />
+          </p>
+        </EuiCallOut>
+      ) : null}
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -176,7 +145,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
               onClick={handleSaveQuery}
               data-test-subj="saveButton"
               fill
-              disabled={!selectedTempIndices.length}
+              disabled={disabledSave}
             >
               <FormattedMessage
                 id="xpack.searchPlayground.setupPage.addDataSource.flyout.saveButton"
