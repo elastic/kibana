@@ -6,8 +6,13 @@
  */
 
 import expect from 'expect';
-import { deleteAllMigrationRules, ruleMigrationRouteHelpersFactory } from '../../utils';
+import {
+  deleteAllMigrationRules,
+  ruleMigrationRouteHelpersFactory,
+  splunkRuleWithResources,
+} from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { getRuleMigrationFromES, getRulesPerMigrationFromES } from '../../utils/es_queries';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -33,6 +38,42 @@ export default ({ getService }: FtrProviderContext) => {
           migrationId,
           expectStatusCode: 404,
         });
+      });
+
+      it('should delete migrations, rules and resources associated with the migration', async () => {
+        await ruleMigrationRoutes.addRulesToMigration({
+          migrationId,
+          payload: [splunkRuleWithResources],
+        });
+
+        let migrationsFromES = await getRuleMigrationFromES({
+          es,
+          migrationId,
+        });
+        expect(migrationsFromES.hits.hits).toHaveLength(1);
+
+        let rulesFromES = await getRulesPerMigrationFromES({
+          es,
+          migrationId,
+        });
+        expect(rulesFromES.hits.hits).toHaveLength(1);
+
+        await ruleMigrationRoutes.delete({
+          migrationId,
+          expectStatusCode: 200,
+        });
+
+        rulesFromES = await getRulesPerMigrationFromES({
+          es,
+          migrationId,
+        });
+        expect(rulesFromES.hits.hits).toHaveLength(0);
+
+        migrationsFromES = await getRuleMigrationFromES({
+          es,
+          migrationId,
+        });
+        expect(migrationsFromES.hits.hits).toHaveLength(0);
       });
 
       describe('Error handling', () => {
