@@ -15,8 +15,6 @@ import { WiredStream as nWiredStream } from './ingest/wired';
 /* eslint-disable @typescript-eslint/no-namespace */
 
 export namespace Streams {
-  export import base = BaseStream;
-
   export import ingest = IngestStream;
 
   export import WiredStream = nWiredStream;
@@ -31,13 +29,12 @@ export namespace Streams {
     export type UpsertRequest = ingest.all.UpsertRequest | GroupStream.UpsertRequest;
   }
 
-  export const all: ModelValidation<BaseStream.Model, all.Model> = joinValidation(base, [
+  export const all: ModelValidation<BaseStream.Model, all.Model> = joinValidation(BaseStream, [
     ingest.all,
     GroupStream,
   ]);
 }
 
-Streams.base = BaseStream;
 Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
 Streams.UnwiredStream = nUnwiredStream;
