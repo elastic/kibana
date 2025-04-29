@@ -21,11 +21,18 @@ export const buildEsqlTheme = ({
 
     { token: 'identifier', foreground: colors.textParagraph },
     { token: 'delimiter', foreground: colors.textParagraph },
+    { token: 'source', foreground: colors.textParagraph },
+
+    // The "@timestamp" identifier
+    {
+      token: 'identifier.timestamp',
+      foreground: colors.textParagraph,
+      fontStyle: 'bold',
+    },
 
     // --------------------------------------------------- strings & string-like
 
-    { token: 'string', foreground: colors.textSuccess },
-    { token: 'source', foreground: colors.textSuccess },
+    { token: 'string', foreground: colors.accent },
 
     // ----------------------------------------------------------------- numbers
 
@@ -33,7 +40,7 @@ export const buildEsqlTheme = ({
     { token: 'number', foreground: colors.textSuccess },
 
     // Constants, such as "true", "false", "null"
-    { token: 'keyword.literal', foreground: colors.textSuccess },
+    { token: 'keyword.literal', foreground: colors.accentSecondary },
 
     // ------------------------------------------------------------------ params
 
@@ -41,7 +48,11 @@ export const buildEsqlTheme = ({
     { token: 'variable', foreground: colors.textSuccess },
 
     // Override for unnamed param "?"
-    { token: 'variable.name.unnamed', foreground: colors.textSuccess, fontStyle: 'bold' },
+    {
+      token: 'variable.name.unnamed',
+      foreground: colors.textSuccess,
+      fontStyle: 'bold',
+    },
 
     // Override for named param "?name"
     { token: 'variable.name.named', foreground: colors.textSuccess },
