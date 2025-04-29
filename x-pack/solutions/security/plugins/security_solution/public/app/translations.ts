@@ -173,9 +173,6 @@ export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
-export const INVESTIGATIONS = i18n.translate('xpack.securitySolution.navigation.investigations', {
-  defaultMessage: 'Investigations',
-});
 export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
   defaultMessage: 'Manage',
 });

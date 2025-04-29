@@ -56,12 +56,10 @@ const ExceptionsContainerComponent: React.FC = () => {
 
 const Exceptions = React.memo(ExceptionsContainerComponent);
 
-const renderExceptionsRoutes = () => <Exceptions />;
-
 export const routes = [
   {
     path: EXCEPTIONS_PATH,
-    component: withSecurityRoutePageWrapper(renderExceptionsRoutes, SecurityPageName.exceptions, {
+    component: withSecurityRoutePageWrapper(Exceptions, SecurityPageName.exceptions, {
       redirectOnMissing: true,
     }),
   },

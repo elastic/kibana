@@ -81,7 +81,7 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
-const NotesRoute = () => (
+const Notes = () => (
   <SecurityRoutePageWrapper pageName={SecurityPageName.notes} redirectOnMissing>
     <NotesContainer />
   </SecurityRoutePageWrapper>
@@ -163,7 +163,7 @@ export const ManagementContainer = memo(() => {
       />
 
       {!securitySolutionNotesDisabled && (
-        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={NotesRoute} />
+        <Route path={MANAGEMENT_ROUTING_NOTES_PATH} component={Notes} />
       )}
 
       {canReadEndpointList && (
