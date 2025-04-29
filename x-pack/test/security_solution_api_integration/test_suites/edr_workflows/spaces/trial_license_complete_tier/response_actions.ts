@@ -6,6 +6,7 @@
  */
 
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
+import expect from '@kbn/expect';
 import {
   buildIndexHostsResponse,
   deleteIndexedEndpointHosts,
@@ -15,11 +16,23 @@ import {
 import { mergeAndAppendArrays } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { enableFleetServerIfNecessary } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_server';
-import { updateAgentPolicy } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
+import {
+  assignFleetAgentToNewPolicy,
+  updateAgentPolicy,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 import TestAgent from 'supertest/lib/agent';
-import { PromiseResolvedValue } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import {
+  ActionDetails,
+  ActionListApiResponse,
+  PromiseResolvedValue,
+  ResponseActionApiResponse,
+} from '@kbn/security-solution-plugin/common/endpoint/types';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  ACTION_DETAILS_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { createSupertestErrorLogger } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
@@ -31,8 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const log = getService('log');
 
-  describe('@ess @skipInServerless, @skipInServerlessMKI Response actions space awareness support', () => {
-    let afterEachDataCleanup: Array<{ cleanup: () => Promise<void> }> = [];
+  // SKIP: test suite needs to wait for the Endpoint package policy to be updated with new mappings before these tests can run
+  describe.skip('@ess @skipInServerless, @skipInServerlessMKI Response actions space awareness support', () => {
+    const afterEachDataCleanup: Array<{ cleanup: () => Promise<void> }> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
     let adminSupertest: TestAgent;
@@ -174,27 +188,67 @@ export default function ({ getService }: FtrProviderContext) {
       };
     };
 
-    beforeEach(async () => {
-      afterEachDataCleanup = [];
-      testData = await setupData();
-      afterEachDataCleanup.push(testData);
-    });
+    const setupResponseActions = async (): Promise<{
+      // 1 Action against a host that is ONLY accessible in space one
+      spaceOneAction: ActionDetails;
+      // 1 Action against two hosts:
+      //    - one from space two that is part of a shared policy, and
+      //    - one from space two that is NOT shared
+      spaceTwoAction: ActionDetails;
+    }> => {
+      // Add response action to space one only host
+      const { body: spaceOneActionResponse } = await adminSupertest
+        .post(addSpaceIdToPath('/', spaceOneId, ISOLATE_HOST_ROUTE_V2))
+        .set('elastic-api-version', '2023-10-31')
+        .set('x-elastic-internal-origin', 'kibana')
+        .set('kbn-xsrf', 'true')
+        .on('error', createSupertestErrorLogger(log))
+        .send({
+          agent_type: 'endpoint',
+          endpoint_ids: [testData.spaceOne.hosts[0].agent.id],
+        })
+        .expect(200);
+
+      const spaceOneAction = (spaceOneActionResponse as ResponseActionApiResponse).data;
+
+      // add response action to space two shared host and space one shared host
+      const { body: spaceTwoActionResponse } = await adminSupertest
+        .post(addSpaceIdToPath('/', spaceTwoId, ISOLATE_HOST_ROUTE_V2))
+        .set('elastic-api-version', '2023-10-31')
+        .set('x-elastic-internal-origin', 'kibana')
+        .set('kbn-xsrf', 'true')
+        .on('error', createSupertestErrorLogger(log))
+        .send({
+          agent_type: 'endpoint',
+          endpoint_ids: [testData.spaceTwo.hosts[0].agent.id, testData.spaceTwo.hosts[1].agent.id],
+        })
+        .expect(200);
+
+      const spaceTwoAction = (spaceTwoActionResponse as ResponseActionApiResponse).data;
+
+      return {
+        spaceOneAction,
+        spaceTwoAction,
+      };
+    };
 
     afterEach(async () => {
-      if (testData) {
-        await testData.cleanup();
-        // @ts-expect-error
-        testData = undefined;
-      }
-
       if (afterEachDataCleanup.length > 0) {
         await Promise.all(afterEachDataCleanup.map((data) => data.cleanup()));
+        afterEachDataCleanup.length = 0;
       }
     });
 
     describe('when creating actions', () => {
+      beforeEach(async () => {
+        testData = await setupData();
+        afterEachDataCleanup.push(testData);
+
+        log.verbose(`\n\nTest data loaded:\n${JSON.stringify(testData, null, 2)}\n\n`);
+      });
+
       it('should create action if all agent ids are accessible in active space', async () => {
-        adminSupertest
+        await adminSupertest
           .post(addSpaceIdToPath('/', spaceOneId, ISOLATE_HOST_ROUTE_V2))
           .set('elastic-api-version', '2023-10-31')
           .set('x-elastic-internal-origin', 'kibana')
@@ -212,7 +266,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should error if at least one agent is not accessible in active space', async () => {
-        adminSupertest
+        await adminSupertest
           .post(addSpaceIdToPath('/', spaceOneId, ISOLATE_HOST_ROUTE_V2))
           .set('elastic-api-version', '2023-10-31')
           .set('x-elastic-internal-origin', 'kibana')
@@ -230,22 +284,222 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when fetching list of actions', () => {
-      it('should return all actions sent to agents that are accessible in active space', () => {
-        throw new Error('TODO: implement');
-        // TODO: implement
+    describe('and for action history log APIs', () => {
+      // Action against a host that is ONLY accessible in space one
+      let spaceOneAction: ActionDetails;
+      // Action against two hosts:
+      //    - one from space two that is part of a shared policy, and
+      //    - one from space two that is part of a policy only accessible in space two
+      let spaceTwoAction: ActionDetails;
+
+      before(async () => {
+        testData = await setupData();
+        ({ spaceOneAction, spaceTwoAction } = await setupResponseActions());
+      });
+
+      after(async () => {
+        if (testData) {
+          await testData.cleanup();
+          // @ts-expect-error
+          testData = undefined;
+        }
+      });
+
+      describe('when fetching list of actions', () => {
+        it('should return all actions sent to agents that are accessible in active space', async () => {
+          const { body: spaceOneActionListResponse } = await adminSupertest
+            .get(addSpaceIdToPath('/', spaceOneId, BASE_ENDPOINT_ACTION_ROUTE))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send()
+            .expect(200);
+
+          expect((spaceOneActionListResponse as ActionListApiResponse).total).to.equal(2);
+
+          // Space two should only have 1 action (on the shared host)
+          const { body: spaceTwoActionListResponse } = await adminSupertest
+            .get(addSpaceIdToPath('/', spaceTwoId, BASE_ENDPOINT_ACTION_ROUTE))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send()
+            .expect(200);
+
+          expect((spaceTwoActionListResponse as ActionListApiResponse).total).to.equal(1);
+        });
+
+        it('should return empty results for space with no endpoint hosts', async () => {
+          const { body: actionListResult } = await adminSupertest
+            .get(addSpaceIdToPath('/', DEFAULT_SPACE_ID, BASE_ENDPOINT_ACTION_ROUTE))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send()
+            .expect(200);
+
+          expect((actionListResult as ActionListApiResponse).total).to.equal(0);
+        });
+      });
+
+      describe('when fetching single action', () => {
+        it('should return action if at least 1 agent is accessible in active space', async () => {
+          await adminSupertest
+            .get(
+              addSpaceIdToPath(
+                '/',
+                spaceOneId,
+                ACTION_DETAILS_ROUTE.replace('{action_id}', spaceOneAction.id)
+              )
+            )
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send()
+            .expect(200);
+
+          await adminSupertest
+            .get(
+              addSpaceIdToPath(
+                '/',
+                spaceOneId,
+                // Action taken on host from space two should also be accessible since its on a shared policy
+                ACTION_DETAILS_ROUTE.replace('{action_id}', spaceTwoAction.id)
+              )
+            )
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send()
+            .expect(200);
+        });
+
+        it('should error if none of the agents are accessible in active space', async () => {
+          await adminSupertest
+            .get(
+              addSpaceIdToPath(
+                '/',
+                DEFAULT_SPACE_ID,
+                ACTION_DETAILS_ROUTE.replace('{action_id}', spaceOneAction.id)
+              )
+            )
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send()
+            .expect(404);
+        });
       });
     });
 
-    describe('when fetching single action', () => {
-      it('should return action if at least 1 agent is accessible in active space', () => {
-        throw new Error('TODO: implement');
-        // TODO: implement
+    describe('and when a host/agent moves from a shared policy to a single-space policy', () => {
+      // Action against a host that is ONLY accessible in space one
+      let spaceOneAction: ActionDetails;
+      // Action against two hosts:
+      //    - one from space two that is part of a shared policy, and
+      //    - one from space two that is part of a policy only accessible in space two
+      let spaceTwoAction: ActionDetails;
+
+      before(async () => {
+        testData = await setupData();
+        ({ spaceOneAction, spaceTwoAction } = await setupResponseActions());
+
+        await setupResponseActions();
+
+        // Move the Space Two **shared** host/agent to the policy that is ONLY accessible in Space two
+        await assignFleetAgentToNewPolicy({
+          esClient,
+          kbnClient: endpointTestResources.getScopedKbnClient(spaceTwoId),
+          agentId: testData.spaceTwo.hosts[1].agent.id,
+          newAgentPolicyId: testData.spaceTwo.agentPolicies[0].id,
+        });
       });
 
-      it('should error if none of the agents are accessible in active space', async () => {
-        throw new Error('TODO: implement');
-        // TODO: implement
+      after(async () => {
+        if (testData) {
+          await testData.cleanup();
+          // @ts-expect-error
+          testData = undefined;
+        }
+      });
+
+      it('should return previously sent response action that included agent from space one on action list api response', async () => {
+        // From space two
+        const { body: spaceTwoActionListResponse } = await adminSupertest
+          .get(addSpaceIdToPath('/', spaceTwoId, BASE_ENDPOINT_ACTION_ROUTE))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .send()
+          .expect(200);
+
+        expect((spaceTwoActionListResponse as ActionListApiResponse).total).to.equal(1);
+        expect((spaceTwoActionListResponse as ActionListApiResponse).data[0].id).to.equal(
+          spaceTwoAction.id
+        );
+
+        // from space one: the response action that was sent to hosts from both space one and two due
+        // to the prior sharing of the same policy should still be accessible in space one after the host
+        // from space two was moved to a private policy
+        const { body: spaceOneActionListResponse } = await adminSupertest
+          .get(addSpaceIdToPath('/', spaceOneId, BASE_ENDPOINT_ACTION_ROUTE))
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .send()
+          .expect(200);
+
+        expect((spaceOneActionListResponse as ActionListApiResponse).total).to.equal(2);
+        expect((spaceOneActionListResponse as ActionListApiResponse).data[0].id).to.equal(
+          spaceOneAction.id
+        );
+        expect((spaceOneActionListResponse as ActionListApiResponse).data[1].id).to.equal(
+          spaceTwoAction.id
+        );
+      });
+
+      it('should return details for an action that was previously sent when host was on a shared policy when calling action details api ', async () => {
+        // space one
+        await adminSupertest
+          .get(
+            addSpaceIdToPath(
+              '/',
+              spaceOneId,
+              // Action taken on host from space two should also be accessible since its on a shared policy
+              ACTION_DETAILS_ROUTE.replace('{action_id}', spaceTwoAction.id)
+            )
+          )
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .send()
+          .expect(200);
+
+        // Space two
+        await adminSupertest
+          .get(
+            addSpaceIdToPath(
+              '/',
+              spaceTwoId,
+              // Action taken on host from space two should also be accessible since its on a shared policy
+              ACTION_DETAILS_ROUTE.replace('{action_id}', spaceTwoAction.id)
+            )
+          )
+          .set('elastic-api-version', '2023-10-31')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('kbn-xsrf', 'true')
+          .on('error', createSupertestErrorLogger(log))
+          .send()
+          .expect(200);
       });
     });
   });
