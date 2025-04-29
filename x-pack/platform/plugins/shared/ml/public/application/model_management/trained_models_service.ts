@@ -72,7 +72,6 @@ export class TrainedModelsService {
 
   private readonly _modelItems$ = new BehaviorSubject<TrainedModelUIItem[]>([]);
   private readonly downloadStatus$ = new BehaviorSubject<ModelDownloadStatus>({});
-  private readonly downloadInProgress = new Set<string>();
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
@@ -681,7 +680,6 @@ export class TrainedModelsService {
 
   private cleanupService() {
     // Clear operation state
-    this.downloadInProgress.clear();
     this.abortedDownloads.clear();
     this.downloadStatusFetchInProgress = false;
 
