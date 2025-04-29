@@ -12,15 +12,14 @@ import { resourceNames } from '..';
 export async function getInferenceIdFromWriteIndex(esClient: {
   asInternalUser: ElasticsearchClient;
 }): Promise<string> {
-  const response = await esClient.asInternalUser.indices.getFieldMapping({
+  const response = await esClient.asInternalUser.indices.getMapping({
     index: resourceNames.writeIndexAlias.kb,
-    fields: 'semantic_text',
   });
 
   const [indexName, indexMappings] = Object.entries(response)[0];
 
   const inferenceId = (
-    indexMappings.mappings.semantic_text?.mapping.semantic_text as MappingSemanticTextProperty
+    indexMappings.mappings?.properties?.semantic_text as MappingSemanticTextProperty
   )?.inference_id;
 
   if (!inferenceId) {
