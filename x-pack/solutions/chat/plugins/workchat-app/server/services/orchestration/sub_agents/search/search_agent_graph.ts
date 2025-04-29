@@ -27,7 +27,7 @@ import { stepDoneTool, stepDoneToolName } from './workflow_tools';
 export const createSearchAgentGraph = async ({
   chatModel,
   toolsProvider,
-  logger
+  logger,
 }: {
   chatModel: InferenceChatModel;
   toolsProvider: ToolsProvider;
@@ -61,7 +61,7 @@ export const createSearchAgentGraph = async ({
   });
 
   const createPlanning = async (state: typeof StateAnnotation.State) => {
-    logger.debug("Creating a plan")
+    logger.debug('Creating a plan');
     const response = await planningModel.invoke(getPlanningPrompt({ query: state.searchQuery }));
     return {
       planning: response.content,
@@ -77,7 +77,7 @@ export const createSearchAgentGraph = async ({
   });
 
   const agenticRetrieval = async (state: typeof StateAnnotation.State) => {
-    logger.info("Running retrieval")
+    logger.debug(`Running retrieval with plan: ${state.planning}`);
     const response = await retrievalModel.invoke(
       getRetrievalPrompt({ plan: state.planning, messages: state.retrievalMessages })
     );
@@ -87,14 +87,15 @@ export const createSearchAgentGraph = async ({
   };
 
   const handleRetrievalTransition = async (state: typeof StateAnnotation.State) => {
-    logger.debug("Transitioning retrieval tools")
     const messages = state.retrievalMessages;
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
       const toolNames = lastMessage.tool_calls.map((call) => call.name);
       if (toolNames.length === 1 && toolNames[0] === stepDoneToolName) {
+        logger.debug('Transitioning to process results');
         return 'process_results';
       } else {
+        logger.debug('Transitioning to call retrieval tools');
         return 'call_retrieval_tools';
       }
     }
@@ -103,7 +104,7 @@ export const createSearchAgentGraph = async ({
   };
 
   const retrievalToolHandler = async (state: typeof StateAnnotation.State) => {
-    logger.debug("Handling retrieval outputs")
+    logger.debug('Handling retrieval outputs');
     const toolNodeResult = await retrievalToolNode.invoke(state.retrievalMessages);
     return {
       retrievalMessages: [...toolNodeResult],
@@ -113,7 +114,7 @@ export const createSearchAgentGraph = async ({
   // step 3: rate documents
 
   const processResults = async (state: typeof StateAnnotation.State) => {
-    logger.debug("Processing results")
+    logger.debug('Processing results');
     const toolResults = processSearchResults(state.retrievalMessages);
     return {
       parsedResults: toolResults.results,
@@ -134,7 +135,7 @@ export const createSearchAgentGraph = async ({
     });
 
   const rateResults = async (state: typeof StateAnnotation.State) => {
-    logger.debug("Rating results")
+    logger.debug(`Rating ${state.parsedResults.length} results`);
     const results = state.parsedResults;
     const query = state.searchQuery;
 
@@ -164,7 +165,7 @@ export const createSearchAgentGraph = async ({
   });
 
   const generateSummary = async (state: typeof StateAnnotation.State) => {
-    logger.debug("Generating a summary")
+    logger.debug(`Generating a summary for ${state.searchQuery}`);
     const response = await summarizerModel.invoke(
       getSummarizerPrompt({
         query: state.searchQuery,

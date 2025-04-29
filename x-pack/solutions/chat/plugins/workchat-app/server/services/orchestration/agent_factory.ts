@@ -75,7 +75,7 @@ export class AgentFactory {
       agent,
       chatModel,
       createSession,
-      logger: this.logger.get("runner"),
+      logger: this.logger.get('runner'),
       tracingConfig: this.tracingConfig,
     });
   }

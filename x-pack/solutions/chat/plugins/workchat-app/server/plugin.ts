@@ -13,13 +13,13 @@ import type {
   Logger,
   LoggerFactory,
 } from '@kbn/core/server';
-import { registerRoutes } from './routes';
-import { registerTypes } from './saved_objects';
-import { registerFeatures } from './features';
-import type { InternalServices } from './services/types';
-import { IntegrationRegistry } from './services/integrations';
-import { createServices } from './services/create_services';
-import type { WorkChatAppConfig } from './config';
+import {registerRoutes} from './routes';
+import {registerTypes} from './saved_objects';
+import {registerFeatures} from './features';
+import type {InternalServices} from './services/types';
+import {IntegrationRegistry} from './services/integrations';
+import {createServices} from './services/create_services';
+import type {WorkChatAppConfig} from './config';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -28,14 +28,12 @@ import type {
 } from './types';
 
 export class WorkChatAppPlugin
-  implements
-    Plugin<
-      WorkChatAppPluginSetup,
-      WorkChatAppPluginStart,
-      WorkChatAppPluginSetupDependencies,
-      WorkChatAppPluginStartDependencies
-    >
-{
+  implements Plugin<
+    WorkChatAppPluginSetup,
+    WorkChatAppPluginStart,
+    WorkChatAppPluginSetupDependencies,
+    WorkChatAppPluginStartDependencies
+  > {
   private readonly loggerFactory: LoggerFactory;
   private readonly config: WorkChatAppConfig;
   private readonly integrationRegistry = new IntegrationRegistry();
@@ -43,7 +41,7 @@ export class WorkChatAppPlugin
 
   constructor(context: PluginInitializerContext) {
     this.loggerFactory = context.logger;
-    AppLogger.setInstance(this.loggerFactory.get("workchat.app"))
+    AppLogger.setInstance(this.loggerFactory.get('workchat.app'));
     this.config = context.config.get<WorkChatAppConfig>();
   }
 
@@ -64,9 +62,9 @@ export class WorkChatAppPlugin
       },
     });
 
-    registerTypes({ savedObjects: core.savedObjects });
+    registerTypes({savedObjects: core.savedObjects});
 
-    registerFeatures({ features: setupDeps.features });
+    registerFeatures({features: setupDeps.features});
 
     return {
       integrations: {
@@ -97,9 +95,10 @@ export class AppLogger {
   private static instance: Logger;
 
   public static getInstance(): Logger {
-    return AppLogger.instance
+    return AppLogger.instance;
   }
+
   public static setInstance(logger: Logger) {
-    AppLogger.instance = logger
+    AppLogger.instance = logger;
   }
 }
