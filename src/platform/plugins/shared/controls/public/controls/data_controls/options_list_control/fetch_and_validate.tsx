@@ -11,6 +11,7 @@ import {
   BehaviorSubject,
   combineLatest,
   debounceTime,
+  ignoreElements,
   Observable,
   of,
   startWith,
@@ -51,7 +52,7 @@ export function fetchAndValidate$({
   return combineLatest([
     api.dataViews$,
     api.field$,
-    api.controlFetch$,
+    api.controlFetch$.pipe(debounceTime(0)), // debounce to allow api.parentApi.reload$ tap to run before emitting
     api.parentApi.allowExpensiveQueries$,
     api.parentApi.ignoreParentSettings$,
     api.debouncedSearchString,
@@ -65,6 +66,9 @@ export function fetchAndValidate$({
     apiPublishesReload(api.parentApi)
       ? api.parentApi.reload$.pipe(
           tap(() => requestCache.clearCache()),
+          // api.controlFetch$ already merges with parentApi.reload$
+          // Ignore all emits to avoid double fetching on reload
+          ignoreElements(),
           startWith(undefined)
         )
       : of(undefined),
