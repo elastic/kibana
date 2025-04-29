@@ -282,7 +282,7 @@
       "enabled": true
     },
     {
-      "groupName": "enzyme dependencies",
+      "groupName": "Enzyme dependencies",
       "matchDepNames": [
         "@wojtekmaj/enzyme-adapter-react-17",
         "enzyme",
@@ -428,7 +428,7 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/appex-sharedux lz-string dependencies",
+      "groupName": "lz-string dependencies",
       "matchDepNames": [
         "lz-string",
         "@types/lz-string"
@@ -483,7 +483,7 @@
       "enabled": true
     },
     {
-      "groupName": "emotion dependencies",
+      "groupName": "Emotion dependencies",
       "matchDepNames": [
         "@emotion/cache",
         "@emotion/css",
@@ -514,7 +514,8 @@
         "react-is",
         "@types/prop-types",
         "@types/react",
-        "@types/react-dom"
+        "@types/react-dom",
+        "@types/react-is"
       ],
       "reviewers": [
         "team:appex-sharedux"
