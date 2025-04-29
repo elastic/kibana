@@ -4161,6 +4161,10 @@
                 "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
               {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
+              },
+              {
                 "plugin": "searchSynonyms",
                 "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
@@ -4939,6 +4943,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14292,6 +14300,14 @@
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.ts"
               },
@@ -14765,6 +14781,14 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -15524,6 +15548,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery_bulk.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -16318,6 +16346,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
               },
               {
                 "plugin": "@kbn/core",
