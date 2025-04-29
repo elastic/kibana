@@ -45,10 +45,8 @@ export const isLensEqual = (
           return isEqualFromVis(
             doc1.state.visualization,
             doc1.references,
-            doc1.state.datasourceStates,
             doc2.state.visualization,
             doc2.references,
-            doc2.state.datasourceStates,
             annotationGroups
           );
         } catch (err) {
@@ -65,12 +63,13 @@ export const isLensEqual = (
   const availableDatasourceTypes1 = Object.keys(doc1.state.datasourceStates);
   const availableDatasourceTypes2 = Object.keys(doc2.state.datasourceStates);
 
+  // simple comparison
   let datasourcesEqual =
     intersection(availableDatasourceTypes1, availableDatasourceTypes2).length ===
     union(availableDatasourceTypes1, availableDatasourceTypes2).length;
 
   if (datasourcesEqual) {
-    // equal so far, so actually check
+    // deep comparison
     datasourcesEqual = availableDatasourceTypes1.every((type) =>
       datasourceMap[type].isEqual(
         doc1.state.datasourceStates[type],

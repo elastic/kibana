@@ -12,7 +12,7 @@ import {
   isDeprecatedColorMapping,
 } from '../../../../runtime_state/converters/raw_color_mappings';
 import { GeneralDatasourceStates } from '../../../../state_management';
-import { XYDataLayerConfig, XYState } from '../../types';
+import { XYDataLayerConfig, XYLayerConfig, XYState } from '../../types';
 
 /** @deprecated */
 interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapping'> {
@@ -25,7 +25,7 @@ interface DeprecatedColorMappingLayer extends Omit<XYDataLayerConfig, 'colorMapp
  * @deprecated
  */
 export interface DeprecatedColorMappingsState extends Omit<XYState, 'layers'> {
-  layers: Array<DeprecatedColorMappingLayer | XYDataLayerConfig>;
+  layers: Array<DeprecatedColorMappingLayer | XYLayerConfig>;
 }
 
 export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
@@ -38,7 +38,7 @@ export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasource
 
     if (!hasDeprecatedColorMappings) return state as XYState;
 
-    const convertedLayers = state.layers.map((layer) => {
+    const convertedLayers = state.layers.map<XYLayerConfig>((layer) => {
       if (
         layer.layerType === 'data' &&
         (layer.colorMapping?.assignments || layer.colorMapping?.specialAssignments)
@@ -52,7 +52,7 @@ export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasource
         } satisfies XYDataLayerConfig;
       }
 
-      return layer as XYDataLayerConfig;
+      return layer as XYLayerConfig;
     });
 
     return {

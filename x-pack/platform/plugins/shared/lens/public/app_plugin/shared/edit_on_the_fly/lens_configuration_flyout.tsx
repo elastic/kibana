@@ -107,10 +107,8 @@ export function LensEditConfigurationFlyout({
             return customIsEqual(
               previousAttrs.state.visualization,
               previousAttrs.references,
-              previousAttrs.state.datasourceStates,
               visualizationState,
               attributes.references,
-              datasourceStates,
               annotationGroups
             );
           } catch (err) {

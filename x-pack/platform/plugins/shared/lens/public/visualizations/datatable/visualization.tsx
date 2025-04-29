@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import deepEqual from 'fast-deep-equal';
 
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
@@ -142,12 +141,6 @@ export const getDatatableVisualization = ({
 
   convertToRuntimeState(state, datasourceStates) {
     return convertToRuntimeState(state, datasourceStates);
-  },
-
-  isEqual(state1, references1, datasourceStates1, state2, references2, datasourceStates2) {
-    const convertedState1 = convertToRuntimeState(state1, datasourceStates1, true);
-    const convertedState2 = convertToRuntimeState(state2, datasourceStates2, true);
-    return deepEqual(convertedState1, convertedState2);
   },
 
   onDatasourceUpdate(state, frame) {

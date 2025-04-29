@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import deepEqual from 'fast-deep-equal';
 
 import { i18n } from '@kbn/i18n';
 import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
@@ -124,12 +123,6 @@ export const getTagcloudVisualization = ({
 
   convertToRuntimeState(state, datasourceStates) {
     return convertToRuntimeState(state, datasourceStates);
-  },
-
-  isEqual(state1, references1, datasourceStates1, state2, references2, datasourceStates2) {
-    const convertedState1 = convertToRuntimeState(state1, datasourceStates1, true);
-    const convertedState2 = convertToRuntimeState(state2, datasourceStates2, true);
-    return deepEqual(convertedState1, convertedState2);
   },
 
   getConfiguration({ state }) {

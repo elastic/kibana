@@ -1357,10 +1357,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   isEqual?: (
     state1: P,
     references1: SavedObjectReference[],
-    datasourceStates1: GeneralDatasourceStates | undefined,
     state2: P,
     references2: SavedObjectReference[],
-    datasourceStates2: GeneralDatasourceStates | undefined,
     annotationGroups: AnnotationGroups
   ) => boolean;
 

@@ -6,7 +6,11 @@
  */
 
 import React, { useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { isEqual } from 'lodash';
+
 import { Position } from '@elastic/charts';
+import { EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -22,14 +26,12 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
-import useObservable from 'react-use/lib/useObservable';
-import { EuiPopover, EuiSelectable } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes } from '@kbn/palettes';
+
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -299,16 +301,17 @@ export const getXyVisualization = ({
 
   initialize(
     addNewLayer,
-    state,
+    persistedState,
     mainPalette?,
     datasourceStates?,
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
-    if (state) {
-      const convertedState = convertPersistedState(state, annotationGroups, references);
+    if (persistedState) {
+      const convertedState = convertPersistedState(persistedState, annotationGroups, references);
       return convertToRuntimeState(convertedState, datasourceStates);
     }
+
     return {
       title: 'Empty XY chart',
       legend: { isVisible: true, position: Position.Right },
@@ -1101,20 +1104,11 @@ export const getXyVisualization = ({
     return suggestion;
   },
 
-  isEqual(
-    state1,
-    references1,
-    datasourceStates1,
-    state2,
-    references2,
-    datasourceStates2,
-    annotationGroups
-  ) {
-    const convertedState1 = convertPersistedState(state1, annotationGroups, references1);
-    const injected1 = convertToRuntimeState(convertedState1, datasourceStates1);
-    const convertedState2 = convertPersistedState(state2, annotationGroups, references2);
-    const injected2 = convertToRuntimeState(convertedState2, datasourceStates2);
-    return isEqual(injected1, injected2);
+  isEqual(persistedState1, references1, persistedState2, references2, annotationGroups) {
+    const state1 = convertPersistedState(persistedState1, annotationGroups, references1);
+    const state2 = convertPersistedState(persistedState2, annotationGroups, references2);
+
+    return isEqual(state1, state2);
   },
 
   getVisualizationInfo(state, frame) {
