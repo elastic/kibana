@@ -8,18 +8,16 @@
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertsClientError,
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
-import objectHash from 'object-hash';
+import { MAX_ALERTS_PER_EXECUTION } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
 import { EsqlRuleInstanceState, EsqlRuleParams } from './types';
-import { MAX_ALERTS_PER_EXECUTION } from './common';
 
 export async function getRuleExecutor(
   options: RuleExecutorOptions<
@@ -55,7 +53,7 @@ export async function getRuleExecutor(
 
   const alertDocIdToDocumentIdMap = new Map<string, string>();
   const alerts = results.map((result) => {
-    const alertDocId = objectHash([result._id, rule.id, spaceId]);
+    const alertDocId = [result._id, rule.id, spaceId].join('');
     alertDocIdToDocumentIdMap.set(alertDocId, result._id);
 
     return {
@@ -71,7 +69,7 @@ export async function getRuleExecutor(
   );
 
   if (!isEmpty(errors)) {
-    logger.debug(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    logger.debug(() => `Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
   }
 
   const originalDocumentIds = createdAlerts.map(
