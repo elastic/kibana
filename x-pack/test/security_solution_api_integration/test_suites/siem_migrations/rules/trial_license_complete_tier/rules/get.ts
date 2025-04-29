@@ -11,8 +11,8 @@ import {
   RuleTranslationResult,
   SiemMigrationStatus,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
+import { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import {
-  RuleMigrationRuleData,
   createMigrationRules,
   defaultElasticRule,
   defaultOriginalRule,

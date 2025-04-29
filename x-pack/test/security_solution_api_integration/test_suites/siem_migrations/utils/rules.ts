@@ -30,8 +30,8 @@ import {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
   GetRuleMigrationPrebuiltRulesResponse,
-  GetRuleMigrationRequestQuery,
   GetRuleMigrationResponse,
+  GetRuleMigrationRulesRequestQuery,
   GetRuleMigrationRulesResponse,
   GetRuleMigrationStatsResponse,
   InstallMigrationRulesResponse,
@@ -61,7 +61,7 @@ export interface MigrationRequestParams extends RequestParams {
 
 export interface GetRuleMigrationRulesParams extends MigrationRequestParams {
   /** Optional query parameters */
-  queryParams?: GetRuleMigrationRequestQuery;
+  queryParams?: GetRuleMigrationRulesRequestQuery;
 }
 
 export interface CreateRuleMigrationRulesParams extends RequestParams {

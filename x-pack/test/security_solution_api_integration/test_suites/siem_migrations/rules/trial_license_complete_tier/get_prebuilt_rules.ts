@@ -8,9 +8,9 @@
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
+import { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
-  RuleMigrationRuleData,
   createMigrationRules,
   defaultElasticRule,
   deleteAllMigrationRules,

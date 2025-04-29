@@ -124,9 +124,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should reject with 404 if migrationId is not provided', async () => {
+        // @ts-expect-error
         const response = await migrationRulesRoutes.start({
-          // @ts-expect-error
-          migrationId: 'non-existing-migration-id',
           expectStatusCode: 404,
           payload: {
             connector_id: 'preconfigured-bedrock',
@@ -134,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect((response.body as unknown as SiemMigrationsAPIErrorResponse).message).to.eql(
-          'No Migration found with id: non-existing-migration-id'
+          'No Migration found with id: undefined'
         );
       });
     });
