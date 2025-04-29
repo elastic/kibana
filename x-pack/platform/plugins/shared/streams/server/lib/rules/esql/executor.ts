@@ -14,6 +14,7 @@ import { Alert } from '@kbn/alerts-as-data-utils';
 import { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
+import objectHash from 'object-hash';
 import { MAX_ALERTS_PER_EXECUTION } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
@@ -53,7 +54,7 @@ export async function getRuleExecutor(
 
   const alertDocIdToDocumentIdMap = new Map<string, string>();
   const alerts = results.map((result) => {
-    const alertDocId = [result._id, rule.id, spaceId].join('');
+    const alertDocId = objectHash([result._id, rule.id, spaceId]);
     alertDocIdToDocumentIdMap.set(alertDocId, result._id);
 
     return {
