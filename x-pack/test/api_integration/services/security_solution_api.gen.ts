@@ -1734,7 +1734,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       kibanaSpace: string = 'default'
     ) {
       return supertest
-        .put(
+        .patch(
           routeWithNamespace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
             kibanaSpace

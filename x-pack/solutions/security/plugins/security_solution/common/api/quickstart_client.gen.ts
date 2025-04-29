@@ -2399,7 +2399,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
-        method: 'PUT',
+        method: 'PATCH',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
