@@ -67,6 +67,7 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
 ) => {
   const {
     groupingId,
+    initialGroupings,
     services,
     ruleTypeIds,
     defaultGroupingOptions,
@@ -114,6 +115,13 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
           defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
         }),
     },
+    initialGroupings: initialGroupings
+      ? {
+          groupById: {
+            [groupingId]: { activeGroups: initialGroupings, options: defaultGroupingOptions },
+          },
+        }
+      : undefined,
     defaultGroupingOptions,
     fields: dataView?.fields ?? [],
     groupingId,
