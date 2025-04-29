@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Option from 'fp-ts/lib/Option';
-import { flow } from 'fp-ts/lib/function';
+import * as TaskEither from 'fp-ts/TaskEither';
+import * as Option from 'fp-ts/Option';
+import { flow } from 'fp-ts/function';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import type { IndexNotFound, TargetIndexHadWriteBlock } from '.';
 import { waitForTask, type WaitForTaskCompletionTimeout } from './wait_for_task';

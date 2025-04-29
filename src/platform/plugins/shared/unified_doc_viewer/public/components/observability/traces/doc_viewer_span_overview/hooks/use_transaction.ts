@@ -14,6 +14,7 @@ import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
   PROCESSOR_EVENT_FIELD,
+  TRANSACTION_DURATION_FIELD,
   TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
@@ -45,7 +46,7 @@ async function getTransactionData({
           size: 1,
           body: {
             timeout: '20s',
-            fields: [TRANSACTION_NAME_FIELD],
+            fields: [TRANSACTION_NAME_FIELD, TRANSACTION_DURATION_FIELD],
             query: {
               bool: {
                 must: [
@@ -70,18 +71,19 @@ async function getTransactionData({
   );
 }
 
-export interface TransactionWithOnlyName {
+export interface Transaction {
   name: string;
+  duration: number;
 }
 
 const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) => {
   const { data, core } = getUnifiedDocViewerServices();
-  const [transaction, setTransaction] = useState<TransactionWithOnlyName | null>(null);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!transactionId) {
-      setTransaction({ name: '' });
+      setTransaction(null);
       setLoading(false);
       return;
     }
@@ -94,8 +96,14 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
         setLoading(true);
         const result = await getTransactionData({ transactionId, indexPattern, data, signal });
 
-        const transactionName = result.rawResponse.hits.hits[0]?.fields?.[TRANSACTION_NAME_FIELD];
-        setTransaction(transactionName ? { name: transactionName } : null);
+        const fields = result.rawResponse.hits.hits[0]?.fields;
+        const transactionName = fields?.[TRANSACTION_NAME_FIELD];
+        const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
+
+        setTransaction({
+          name: transactionName || null,
+          duration: transactionDuration || null,
+        });
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
@@ -105,7 +113,7 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
             }),
             text: error.message,
           });
-          setTransaction({ name: '' });
+          setTransaction(null);
         }
       } finally {
         setLoading(false);

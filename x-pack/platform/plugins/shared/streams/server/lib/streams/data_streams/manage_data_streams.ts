@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -22,10 +22,9 @@ interface DeleteDataStreamOptions {
   logger: Logger;
 }
 
-interface RolloverDataStreamOptions {
+interface UpdateOrRolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
-  mappings: MappingTypeMapping['properties'] | undefined;
   logger: Logger;
 }
 
@@ -55,21 +54,43 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
   }
 }
 
-export async function rolloverDataStreamIfNecessary({
+export async function updateOrRolloverDataStream({
   esClient,
   name,
   logger,
-  mappings,
-}: RolloverDataStreamOptions) {
-  const dataStreams = await esClient.indices.getDataStream({ name: `${name},${name}.*` });
+}: UpdateOrRolloverDataStreamOptions) {
+  const dataStreams = await esClient.indices.getDataStream({ name });
   for (const dataStream of dataStreams.data_streams) {
+    // simulate index and try to patch the write index
+    // if that doesn't work, roll it over
+    const simulatedIndex = await esClient.indices.simulateIndexTemplate({
+      name,
+    });
     const writeIndex = dataStream.indices.at(-1);
     if (!writeIndex) {
       continue;
     }
     try {
+      // Apply blocklist to avoid changing settings we don't want to
+      const simulatedIndexSettings = omit(simulatedIndex.template.settings, [
+        'index.codec',
+        'index.mapping.ignore_malformed',
+        'index.mode',
+        'index.logsdb.sort_on_host_name',
+      ]);
+
       await retryTransientEsErrors(
-        () => esClient.indices.putMapping({ index: writeIndex.index_name, properties: mappings }),
+        () =>
+          Promise.all([
+            esClient.indices.putMapping({
+              index: writeIndex.index_name,
+              properties: simulatedIndex.template.mappings.properties,
+            }),
+            esClient.indices.putSettings({
+              index: writeIndex.index_name,
+              settings: simulatedIndexSettings,
+            }),
+          ]),
         {
           logger,
         }
@@ -112,9 +133,7 @@ export async function updateDataStreamsLifecycle({
       () =>
         esClient.indices.putDataLifecycle({
           name: names,
-          lifecycle: {
-            data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-          },
+          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
         }),
       { logger }
     );

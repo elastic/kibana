@@ -20,12 +20,10 @@ import {
   SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
 import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
-import { ExperimentalFeatures } from '../../common/config';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';
 
 export const getRoutes = (
-  isServerless?: boolean,
-  experimentalFeatures?: ExperimentalFeatures
+  isServerless?: boolean
 ): {
   [key: string]: {
     handler: () => React.ReactElement;
@@ -73,17 +71,13 @@ export const getRoutes = (
           },
         }
       : {}),
-    ...(!!experimentalFeatures?.management.enabled
-      ? {
-          [SLOS_MANAGEMENT_PATH]: {
-            handler: () => {
-              return <SloManagementPage />;
-            },
-            params: {},
-            exact: true,
-          },
-        }
-      : {}),
+    [SLOS_MANAGEMENT_PATH]: {
+      handler: () => {
+        return <SloManagementPage />;
+      },
+      params: {},
+      exact: true,
+    },
     [SLO_DETAIL_PATH]: {
       handler: () => {
         return <SloDetailsPage />;

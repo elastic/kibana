@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import type { APMLinkExtendProps } from './apm_link';
-import { LegacyAPMLink } from './apm_link';
+import { EuiLink } from '@elastic/eui';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import type { APMLinkExtendProps } from './apm_link_hooks';
 
 function HomeLink(props: APMLinkExtendProps) {
-  return <LegacyAPMLink path="/" {...props} />;
+  const { link } = useApmRouter();
+  const homeLink = link('/');
+  return <EuiLink data-test-subj="apmHomeLink" href={homeLink} {...props} />;
 }
 
 export { HomeLink };

@@ -976,70 +976,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.getApmTraceUrl",
-        "type": "Function",
-        "tags": [],
-        "label": "getApmTraceUrl",
-        "description": [],
-        "signature": [
-          "({\n  traceId,\n  rangeFrom,\n  rangeTo,\n}: { traceId: string; rangeFrom: string; rangeTo: string; }) => string"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/public/utils/get_apm_trace_url.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.getApmTraceUrl.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/observability/public/utils/get_apm_trace_url.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.getApmTraceUrl.$1.traceId",
-                "type": "string",
-                "tags": [],
-                "label": "traceId",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/public/utils/get_apm_trace_url.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.getApmTraceUrl.$1.rangeFrom",
-                "type": "string",
-                "tags": [],
-                "label": "rangeFrom",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/public/utils/get_apm_trace_url.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-public.getApmTraceUrl.$1.rangeTo",
-                "type": "string",
-                "tags": [],
-                "label": "rangeTo",
-                "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability/public/utils/get_apm_trace_url.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.getCoreVitalsComponent",
         "type": "Function",
         "tags": [],
@@ -1130,38 +1066,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.LazyAlertsFlyout",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyAlertsFlyout",
-        "description": [],
-        "signature": [
-          "React.LazyExoticComponent<({ alert, alerts, onClose, selectedAlertId, observabilityRuleTypeRegistry, }: AlertsFlyoutProps) => React.JSX.Element | null>"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "observability",
-            "id": "def-public.LazyAlertsFlyout.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -3425,7 +3329,7 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
+          " | undefined; }; minScore?: number | undefined; trackScores?: boolean | undefined; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
           "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {
@@ -5701,7 +5605,7 @@
               "SettingsStart",
               "; cases?: ",
               "CasesService",
-              " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
+              " | undefined; }; minScore?: number | undefined; trackScores?: boolean | undefined; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
               "BulkActionsPanelConfig",
               "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
               {
@@ -7306,6 +7210,27 @@
             "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityAlertsTableContext.parentAlert",
+            "type": "Object",
+            "tags": [],
+            "label": "parentAlert",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.TopAlert",
+                "text": "TopAlert"
+              },
+              "<{}> | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/components/alerts_table/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7673,46 +7598,18 @@
           {
             "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsSetup.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
             "signature": [
-              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuProvider",
-                "text": "ShareMenuProvider"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.AnonymousAccessServiceContract",
-                "text": "AnonymousAccessServiceContract"
-              },
-              ") => void; }"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -8861,27 +8758,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.investigate",
-            "type": "Object",
-            "tags": [],
-            "label": "investigate",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "investigate",
-                "scope": "public",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-public.InvestigatePublicStart",
-                "text": "InvestigatePublicStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.streams",
             "type": "Object",
             "tags": [],
@@ -8915,6 +8791,26 @@
                 "docId": "kibFieldsMetadataPluginApi",
                 "section": "def-public.FieldsMetadataPublicStart",
                 "text": "FieldsMetadataPublicStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.inspector",
+            "type": "Object",
+            "tags": [],
+            "label": "inspector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "public",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-public.Start",
+                "text": "Start"
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
@@ -11987,7 +11883,7 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
+          " | undefined; }; minScore?: number | undefined; trackScores?: boolean | undefined; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
           "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {
@@ -14249,7 +14145,7 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
+          " | undefined; }; minScore?: number | undefined; trackScores?: boolean | undefined; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
           "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {
@@ -16596,7 +16492,7 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
+          " | undefined; }; minScore?: number | undefined; trackScores?: boolean | undefined; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
           "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {

@@ -7,21 +7,17 @@
 
 import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import { orderBy, size, toPairs } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  getKnowledgeBaseEntries,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
-  const log = getService('log');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   async function getEntries({
@@ -46,19 +42,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
     expect(res.status).to.be(200);
 
-    return omitCategories(res.body.entries);
+    return res.body.entries;
   }
 
   describe('Knowledge base', function () {
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
     });
 
@@ -68,48 +61,42 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         title: 'My title',
         text: 'My content',
       };
-      it('returns 200 on create', async () => {
+
+      before(async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
           params: { body: knowledgeBaseEntry },
         });
         expect(status).to.be(200);
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-        });
-        const entry = res.body.entries[0];
+      });
+
+      it('can retrieve the entry', async () => {
+        const entries = await getEntries();
+        const entry = entries[0];
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
         expect(entry.title).to.equal(knowledgeBaseEntry.title);
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
-      it('returns 200 on get entries and entry exists', async () => {
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-        });
+      it('generates sparse embeddings', async () => {
+        const hits = await getKnowledgeBaseEntries(es);
+        const embeddings =
+          hits[0]._source?._inference_fields?.semantic_text?.inference.chunks.semantic_text[0]
+            .embeddings;
 
-        expect(res.status).to.be(200);
-        const entry = res.body.entries[0];
-        expect(entry.id).to.equal(knowledgeBaseEntry.id);
-        expect(entry.title).to.equal(knowledgeBaseEntry.title);
-        expect(entry.text).to.equal(knowledgeBaseEntry.text);
+        const sorted = orderBy(toPairs(embeddings), [1], ['desc']).slice(0, 5);
+
+        expect(size(embeddings)).to.be.greaterThan(10);
+        expect(sorted).to.eql([
+          ['temperature', 0.07421875],
+          ['used', 0.068359375],
+          ['definition', 0.03955078],
+          ['only', 0.038208008],
+          ['what', 0.028930664],
+        ]);
       });
 
-      it('returns 200 on delete', async () => {
+      it('can delete the entry', async () => {
         const entryId = 'my-doc-id-1';
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
@@ -119,21 +106,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(status).to.be(200);
 
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-        });
-
-        expect(res.status).to.be(200);
-        expect(res.body.entries.filter((entry) => entry.id.startsWith('my-doc-id')).length).to.eql(
-          0
-        );
+        const entries = await getEntries();
+        expect(entries.length).to.eql(0);
       });
 
       it('returns 500 on delete not found', async () => {
@@ -183,9 +157,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await clearKnowledgeBase(es);
       });
 
-      it('returns 200 on create', async () => {
+      it('creates multiple entries', async () => {
         const entries = await getEntries();
-        expect(omitCategories(entries).length).to.eql(3);
+        expect(entries.length).to.eql(3);
       });
 
       describe('when sorting ', () => {
@@ -360,8 +334,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
   });
-}
-
-function omitCategories(entries: KnowledgeBaseEntry[]) {
-  return entries.filter((entry) => entry.labels?.category === undefined);
 }

@@ -35,11 +35,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
             jobId="population-03"
           />
         }
-        css={
-          Object {
-            "maxWidth": "none",
-          }
-        }
+        css="unknown styles"
         position="top"
         size="s"
       />
@@ -72,26 +68,14 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
             jobId="population-03"
           />
         }
-        css={
-          Object {
-            "maxWidth": "none",
-          }
-        }
+        css="unknown styles"
         position="top"
         size="s"
       />
     </span>
   </span>
   <span
-    css={
-      Object {
-        "map": undefined,
-        "name": "1ivb442",
-        "next": undefined,
-        "styles": "display:flex;align-items:center;margin-top:4px;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ExplorerChartLabelBadge
       entity={

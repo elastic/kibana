@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,15 +19,19 @@ import {
   useVulnerabilitiesFindings,
   VULNERABILITY,
 } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
+import type { MultiValueCellAction } from '@kbn/cloud-security-posture';
 import {
   getVulnerabilityStats,
   CVSScoreBadge,
   SeverityStatusBadge,
   getNormalizedSeverity,
+  ActionableBadge,
+  MultiValueCellPopover,
+  findReferenceLink,
 } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
-  NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT,
+  NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -35,6 +39,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { get } from 'lodash/fp';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
@@ -163,6 +168,59 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     currentFilter
   );
 
+  const renderItem = useCallback(
+    (item: string, i: number, field: string, object: VulnerabilitiesFindingDetailFields) => {
+      const references = Array.isArray(object.vulnerability.reference)
+        ? object.vulnerability.reference
+        : [object.vulnerability.reference];
+
+      const url = findReferenceLink(references, item);
+
+      const actions: MultiValueCellAction[] = [
+        ...(field === 'vulnerability.id' && url
+          ? [
+              {
+                onClick: () => window.open(url, '_blank'),
+                iconType: 'popout',
+                ariaLabel: i18n.translate(
+                  'xpack.securitySolution.vulnerabilities.findingsDetailsTable.openUrlInWindow',
+                  {
+                    defaultMessage: 'Open URL in window',
+                  }
+                ),
+                title: i18n.translate(
+                  'xpack.securitySolution.vulnerabilities.findingsDetailsTable.openUrlInWindow',
+                  {
+                    defaultMessage: 'Open URL in window',
+                  }
+                ),
+              },
+            ]
+          : []),
+      ];
+
+      return <ActionableBadge key={`${item}-${i}`} item={item} index={i} actions={actions} />;
+    },
+    []
+  );
+
+  const renderMultiValueCell = (field: string, finding: VulnerabilitiesFindingDetailFields) => {
+    const cellValue = get(field, finding);
+    if (!Array.isArray(cellValue)) {
+      return <EuiText size="s">{cellValue || EMPTY_VALUE}</EuiText>;
+    }
+
+    return (
+      <MultiValueCellPopover<VulnerabilitiesFindingDetailFields>
+        items={cellValue}
+        field={field}
+        object={finding}
+        renderItem={renderItem}
+        firstItemRenderer={(item) => <EuiText size="s">{item}</EuiText>}
+      />
+    );
+  };
+
   const columns: Array<EuiBasicTableColumn<VulnerabilitiesFindingDetailFields>> = [
     {
       field: 'vulnerability',
@@ -188,6 +246,20 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       ),
     },
     {
+      field: 'score',
+      render: (score: { version?: string; base?: number }) => (
+        <EuiText size="s">
+          <CVSScoreBadge version={score?.version} score={score?.base} />
+        </EuiText>
+      ),
+      name: i18n.translate(
+        'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+        { defaultMessage: 'CVSS' }
+      ),
+      width: '10%',
+      sortable: true,
+    },
+    {
       field: VULNERABILITY.TITLE,
       render: (title: string) => {
         if (Array.isArray(title)) {
@@ -205,32 +277,13 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     },
     {
       field: VULNERABILITY.ID,
-      render: (id: string) => {
-        if (Array.isArray(id)) {
-          return <EuiText size="s">{id.join(', ')}</EuiText>;
-        }
-
-        return <EuiText size="s">{id || EMPTY_VALUE}</EuiText>;
-      },
+      render: (id: string, finding: VulnerabilitiesFindingDetailFields) =>
+        renderMultiValueCell(VULNERABILITY.ID, finding),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityIdColumnName',
         { defaultMessage: 'CVE ID' }
       ),
       width: '20%',
-      sortable: true,
-    },
-    {
-      field: 'score',
-      render: (score: { version?: string; base?: number }) => (
-        <EuiText size="s">
-          <CVSScoreBadge version={score?.version} score={score?.base} />
-        </EuiText>
-      ),
-      name: i18n.translate(
-        'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
-        { defaultMessage: 'CVSS' }
-      ),
-      width: '10%',
       sortable: true,
     },
     {
@@ -251,7 +304,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     },
     {
       field: VULNERABILITY.PACKAGE_NAME,
-      render: (packageName: string) => <EuiText size="s">{packageName}</EuiText>,
+      render: (packageName: string, finding: VulnerabilitiesFindingDetailFields) =>
+        renderMultiValueCell(VULNERABILITY.PACKAGE_NAME, finding),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Package' }
@@ -272,7 +326,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
           onClick={() => {
             uiMetricService.trackUiMetric(
               METRIC_TYPE.CLICK,
-              NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
+              NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT
             );
           }}
         >

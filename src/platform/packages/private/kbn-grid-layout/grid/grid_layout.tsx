@@ -90,6 +90,13 @@ export const GridLayout = ({
         }
       });
 
+    return () => {
+      onLayoutChangeSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onLayoutChange]);
+
+  useEffect(() => {
     /**
      * This subscription ensures that rows get re-rendered when their orders change
      */
@@ -131,7 +138,6 @@ export const GridLayout = ({
     });
 
     return () => {
-      onLayoutChangeSubscription.unsubscribe();
       rowOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };

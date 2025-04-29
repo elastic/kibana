@@ -216,11 +216,10 @@ const installPreBuiltComponentTemplates = async (
 
         const esClientParams = {
           name: templateName,
-          body: content,
+          ...content,
         };
 
         return retryTransientEsErrors(
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
           () => esClient.cluster.putComponentTemplate(esClientParams, { ignore: [404] }),
           { logger }
         );
@@ -695,10 +694,9 @@ async function installTemplate({
   // TODO: Check return values for errors
   const esClientParams = {
     name: template.templateName,
-    body: template.indexTemplate,
+    ...template.indexTemplate,
   };
   await retryTransientEsErrors(
-    // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
     () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
     { logger }
   );

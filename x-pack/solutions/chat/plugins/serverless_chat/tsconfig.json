@@ -19,5 +19,7 @@
     "@kbn/serverless",
     "@kbn/config-schema",
     "@kbn/serverless-chat-settings",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser",
   ]
 }

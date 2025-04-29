@@ -42,7 +42,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           query: input.question,
         });
 
-        const reference = contentReferencesStore?.add((p) =>
+        const reference = contentReferencesStore.add((p) =>
           knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
         );
 

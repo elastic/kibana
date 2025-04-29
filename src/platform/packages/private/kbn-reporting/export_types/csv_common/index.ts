@@ -14,6 +14,7 @@ import type {
   BasePayload,
   BasePayloadV2,
   CsvPagingStrategy,
+  LocatorParams,
 } from '@kbn/reporting-common/types';
 
 export * from './constants';
@@ -23,7 +24,12 @@ interface BaseParamsCSV {
   columns?: string[];
 }
 
+interface BaseParamsCsvV2 {
+  locatorParams: LocatorParams[];
+}
+
 export type JobParamsCSV = BaseParamsCSV & BaseParams;
+export type JobParamsCsvV2 = BaseParamsCsvV2 & BaseParams;
 export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
 
 /**
@@ -33,6 +39,7 @@ export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
  * @public
  */
 export type JobAppParamsCSV = Omit<JobParamsCSV, 'browserTimezone' | 'version'>;
+export type JobAppParamsCsvV2 = Omit<JobParamsCsvV2, 'browserTimezone' | 'version'>;
 
 interface CsvFromSavedObjectBase {
   objectType: 'search';

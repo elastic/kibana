@@ -6,7 +6,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { ESQLMessage, EditorError } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';
 import Path from 'path';
@@ -156,7 +156,7 @@ const findEsqlSyntaxError = async (doc: FileToWrite): Promise<SyntaxError[]> => 
   return Array.from(doc.content.matchAll(INLINE_ESQL_QUERY_REGEX)).reduce(
     async (listP, [match, query]) => {
       const list = await listP;
-      const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, {
+      const { errors, warnings } = await validateQuery(query, {
         // setting this to true, we don't want to validate the index / fields existence
         ignoreOnMissingCallbacks: true,
       });

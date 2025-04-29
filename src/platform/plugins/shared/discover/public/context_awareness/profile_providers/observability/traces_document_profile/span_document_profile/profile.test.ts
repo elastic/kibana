@@ -15,7 +15,6 @@ import { createObservabilityTracesSpanDocumentProfileProvider } from './profile'
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
-import { applicationMock } from '../__mocks__/application_mock';
 
 describe('spanDocumentProfileProvider', () => {
   const getRootContext = ({
@@ -43,12 +42,12 @@ describe('spanDocumentProfileProvider', () => {
     isMatch: false,
   };
 
+  const mockServices: ProfileProviderServices = {
+    ...createContextAwarenessMocks().profileProviderServices,
+  };
+
   describe('when root profile is observability', () => {
     const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
-    const mockServices: ProfileProviderServices = {
-      ...createContextAwarenessMocks().profileProviderServices,
-      ...applicationMock({ apm: { show: true } }),
-    };
 
     const spanDocumentProfileProvider =
       createObservabilityTracesSpanDocumentProfileProvider(mockServices);
@@ -79,10 +78,6 @@ describe('spanDocumentProfileProvider', () => {
 
   describe('when root profile is NOT observability', () => {
     const profileId = 'another-profile';
-    const mockServices: ProfileProviderServices = {
-      ...createContextAwarenessMocks().profileProviderServices,
-      ...applicationMock({}),
-    };
 
     const spanDocumentProfileProvider =
       createObservabilityTracesSpanDocumentProfileProvider(mockServices);

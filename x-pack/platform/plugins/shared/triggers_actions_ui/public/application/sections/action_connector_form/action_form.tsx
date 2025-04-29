@@ -85,7 +85,6 @@ export interface ActionAccordionFormProps {
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultRuleFrequency?: RuleActionFrequency;
-  hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 }
 
@@ -123,7 +122,6 @@ export const ActionForm = ({
   defaultRuleFrequency = DEFAULT_FREQUENCY,
   ruleTypeId,
   producerId,
-  hasFieldsForAAD,
   disableErrorMessages,
 }: ActionAccordionFormProps) => {
   const {
@@ -555,7 +553,6 @@ export const ActionForm = ({
               featureId={featureId}
               producerId={producerId}
               ruleTypeId={ruleTypeId}
-              hasFieldsForAAD={hasFieldsForAAD}
               disableErrorMessages={disableErrorMessages}
             />
           );

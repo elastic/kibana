@@ -129,10 +129,6 @@ export class LegacyAlertsClient<
     });
   }
 
-  public getTrackedAlerts() {
-    return this.trackedAlerts;
-  }
-
   public getAlert(id: string) {
     return this.alertFactory?.get(id);
   }
@@ -285,5 +281,8 @@ export class LegacyAlertsClient<
 
   public async setAlertStatusToUntracked() {
     return;
+  }
+  public getTrackedExecutions() {
+    return new Set([]);
   }
 }

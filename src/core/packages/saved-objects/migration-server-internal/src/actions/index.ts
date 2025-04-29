@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Either } from 'fp-ts/lib/Either';
-import { right } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
+import { right } from 'fp-ts/Either';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
@@ -49,7 +49,11 @@ import type { IndexNotGreenTimeout, IndexNotYellowTimeout } from './wait_for_ind
 import { waitForIndexStatus } from './wait_for_index_status';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
-import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
+import {
+  waitForTask,
+  TaskCompletedWithRetriableError,
+  WaitForTaskCompletionTimeout,
+} from './wait_for_task';
 
 export type { UpdateByQueryResponse } from './pickup_updated_mappings';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
@@ -176,6 +180,7 @@ export interface AcknowledgeResponse {
 // Map of left response 'type' string -> response interface
 export interface ActionErrorTypeMap {
   wait_for_task_completion_timeout: WaitForTaskCompletionTimeout;
+  task_completed_with_retriable_error: TaskCompletedWithRetriableError;
   retryable_es_client_error: RetryableEsClientError;
   index_not_found_exception: IndexNotFound;
   target_index_had_write_block: TargetIndexHadWriteBlock;

@@ -59,7 +59,9 @@ describe('updatePackage', () => {
 
     mockGetInstallationObject.mockResolvedValueOnce({
       id: 'test-package',
-      attributes: {} as any,
+      attributes: {
+        name: 'test-package',
+      } as any,
       references: [],
       type: PACKAGES_SAVED_OBJECT_TYPE,
     });
@@ -73,6 +75,7 @@ describe('updatePackage', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'update',
       id: 'test-package',
+      name: 'test-package',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   });

@@ -258,6 +258,12 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type {
+  SearchPrivilegesIndicesRequestQueryInput,
+  SearchPrivilegesIndicesResponse,
+} from './entity_analytics/monitoring/search_indices.gen';
+import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
+import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -1664,6 +1670,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async initMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
+    return this.kbnClient
+      .request<InitMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/init',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
    */
@@ -1820,6 +1838,9 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   }
   /**
     * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+
+The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
 > warn
 > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
@@ -1901,6 +1922,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async privMonHealth() {
+    this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
+    return this.kbnClient
+      .request<PrivMonHealthResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/health',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2106,6 +2139,20 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
+    return this.kbnClient
+      .request<SearchPrivilegesIndicesResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2582,6 +2629,9 @@ export interface RunScriptActionProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchPrivilegesIndicesProps {
+  query: SearchPrivilegesIndicesRequestQueryInput;
 }
 export interface SetAlertAssigneesProps {
   body: SetAlertAssigneesRequestBodyInput;

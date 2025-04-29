@@ -710,7 +710,8 @@ const enrichOperators = (
       Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
     // IS NULL | IS NOT NULL
-    const arePredicates = op.name === 'is null' || op.name === 'is not null';
+    const arePredicates =
+      op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
 
     const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
@@ -732,6 +733,7 @@ const enrichOperators = (
         Location.WHERE,
         Location.ROW,
         Location.SORT,
+        Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
     }
@@ -741,13 +743,20 @@ const enrichOperators = (
         Location.EVAL,
         Location.WHERE,
         Location.ROW,
-        Location.STATS,
         Location.SORT,
+        Location.STATS,
+        Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
     }
     if (isInOperator || isLikeOperator || isNotOperator || arePredicates) {
-      locationsAvailable = [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW];
+      locationsAvailable = [
+        Location.EVAL,
+        Location.WHERE,
+        Location.SORT,
+        Location.ROW,
+        Location.STATS_WHERE,
+      ];
     }
     if (isInOperator) {
       // Override the signatures to be array types instead of singular
@@ -829,7 +838,7 @@ function printGeneratedFunctionsFile(
       functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
-    if (functionName.includes('not')) {
+    if (functionName.includes('not') && functionName !== 'is not null') {
       functionName = name;
     }
     if (name.toLowerCase() === 'match') {
@@ -955,36 +964,15 @@ ${
     const functionDefinition = getFunctionDefinition(ESDefinition);
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
     const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
+    if (arePredicates) {
+      continue;
+    }
 
     if (functionDefinition.name.toLowerCase() === 'match') {
       scalarFunctionDefinitions.push({
         ...functionDefinition,
         type: FunctionDefinitionTypes.SCALAR,
       });
-      continue;
-    }
-
-    if (arePredicates) {
-      const nullFunctions: FunctionDefinition[] = [
-        {
-          name: 'is null',
-          description: 'Predicate for NULL comparison: returns true if the value is NULL',
-          operator: 'is null',
-        },
-        {
-          name: 'is not null',
-          description: 'Predicate for NULL comparison: returns true if the value is not NULL',
-          operator: 'is not null',
-        },
-      ].map<FunctionDefinition>(({ name, description, operator }) => {
-        return {
-          ...functionDefinition,
-          name,
-          operator,
-          description,
-        };
-      });
-      operatorDefinitions.push(...nullFunctions);
       continue;
     }
 

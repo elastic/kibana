@@ -117,15 +117,7 @@
                 "section": "def-server.InternalIStorageClient",
                 "text": "InternalIStorageClient"
               },
-              "<",
-              {
-                "pluginId": "@kbn/storage-adapter",
-                "scope": "server",
-                "docId": "kibKbnStorageAdapterPluginApi",
-                "section": "def-server.ApplicationDocument",
-                "text": "ApplicationDocument"
-              },
-              "<TApplicationType>>"
+              "<TApplicationType>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
             "deprecated": false,
@@ -328,11 +320,11 @@
                 "signature": [
                   "{ id?: string | undefined; version?: number | undefined; timeout?: ",
                   "Duration",
-                  " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
+                  " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
                   "Refresh",
                   " | undefined; wait_for_active_shards?: ",
                   "WaitForActiveShards",
-                  " | undefined; require_alias?: boolean | undefined; if_primary_term?: number | undefined; if_seq_no?: number | undefined; version_type?: ",
+                  " | undefined; include_source_on_error?: boolean | undefined; require_alias?: boolean | undefined; if_primary_term?: number | undefined; if_seq_no?: number | undefined; version_type?: ",
                   "VersionType",
                   " | undefined; op_type?: ",
                   "OpType",
@@ -666,44 +658,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/storage-adapter",
-        "id": "def-server.ApplicationDocument",
-        "type": "Type",
-        "tags": [],
-        "label": "ApplicationDocument",
-        "description": [],
-        "signature": [
-          "TApplicationType & { _id: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/storage-adapter",
         "id": "def-server.IStorageClient",
         "type": "Type",
         "tags": [],
         "label": "IStorageClient",
         "description": [],
         "signature": [
-          "Exact<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.ApplicationDocument",
-            "text": "ApplicationDocument"
-          },
-          "<TApplicationType>, Partial<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.StorageDocumentOf",
-            "text": "StorageDocumentOf"
-          },
-          "<TSchema>>> extends true ? ",
+          "Exact<TApplicationType, Partial<{ type: \"object\"; properties: TSchema[\"schema\"][\"properties\"]; } extends { properties: Record<string, ",
+          "StorageMappingProperty",
+          ">; } ? { [key in keyof (Record<string, ",
+          "StorageMappingProperty",
+          "> & TSchema[\"schema\"][\"properties\"])]?: ",
+          "StorageFieldTypeOf",
+          "<(Record<string, ",
+          "StorageMappingProperty",
+          "> & TSchema[\"schema\"][\"properties\"])[key]> | undefined; } : object>> extends true ? ",
           {
             "pluginId": "@kbn/storage-adapter",
             "scope": "server",
@@ -711,15 +680,7 @@
             "section": "def-server.InternalIStorageClient",
             "text": "InternalIStorageClient"
           },
-          "<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.ApplicationDocument",
-            "text": "ApplicationDocument"
-          },
-          "<TApplicationType>> : never"
+          "<TApplicationType> : never"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
         "deprecated": false,
@@ -734,31 +695,23 @@
         "label": "SimpleIStorageClient",
         "description": [],
         "signature": [
-          "Exact<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.ApplicationDocument",
-            "text": "ApplicationDocument"
-          },
-          "<Omit<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.StorageDocumentOf",
-            "text": "StorageDocumentOf"
-          },
-          "<TStorageSettings>, \"_id\">>, Partial<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.StorageDocumentOf",
-            "text": "StorageDocumentOf"
-          },
-          "<TStorageSettings>>> extends true ? ",
+          "Exact<Partial<{ type: \"object\"; properties: TStorageSettings[\"schema\"][\"properties\"]; } extends { properties: Record<string, ",
+          "StorageMappingProperty",
+          ">; } ? { [key in keyof (Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])]?: ",
+          "StorageFieldTypeOf",
+          "<(Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object>, Partial<{ type: \"object\"; properties: TStorageSettings[\"schema\"][\"properties\"]; } extends { properties: Record<string, ",
+          "StorageMappingProperty",
+          ">; } ? { [key in keyof (Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])]?: ",
+          "StorageFieldTypeOf",
+          "<(Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object>> extends true ? ",
           {
             "pluginId": "@kbn/storage-adapter",
             "scope": "server",
@@ -766,23 +719,15 @@
             "section": "def-server.InternalIStorageClient",
             "text": "InternalIStorageClient"
           },
-          "<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.ApplicationDocument",
-            "text": "ApplicationDocument"
-          },
-          "<Omit<",
-          {
-            "pluginId": "@kbn/storage-adapter",
-            "scope": "server",
-            "docId": "kibKbnStorageAdapterPluginApi",
-            "section": "def-server.StorageDocumentOf",
-            "text": "StorageDocumentOf"
-          },
-          "<TStorageSettings>, \"_id\">>> : never"
+          "<Partial<{ type: \"object\"; properties: TStorageSettings[\"schema\"][\"properties\"]; } extends { properties: Record<string, ",
+          "StorageMappingProperty",
+          ">; } ? { [key in keyof (Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])]?: ",
+          "StorageFieldTypeOf",
+          "<(Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object>> : never"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
         "deprecated": false,
@@ -1263,11 +1208,11 @@
             "signature": [
               "{ id?: string | undefined; version?: number | undefined; timeout?: ",
               "Duration",
-              " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
+              " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocumentType, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
               "Refresh",
               " | undefined; wait_for_active_shards?: ",
               "WaitForActiveShards",
-              " | undefined; require_alias?: boolean | undefined; if_primary_term?: number | undefined; if_seq_no?: number | undefined; version_type?: ",
+              " | undefined; include_source_on_error?: boolean | undefined; require_alias?: boolean | undefined; if_primary_term?: number | undefined; if_seq_no?: number | undefined; version_type?: ",
               "VersionType",
               " | undefined; op_type?: ",
               "OpType",
@@ -1290,11 +1235,11 @@
         "signature": [
           "{ id?: string | undefined; version?: number | undefined; timeout?: ",
           "Duration",
-          " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocument, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
+          " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: Omit<TDocument, \"_id\"> | undefined; pipeline?: string | undefined; refresh?: ",
           "Refresh",
           " | undefined; wait_for_active_shards?: ",
           "WaitForActiveShards",
-          " | undefined; require_alias?: boolean | undefined; if_primary_term?: number | undefined; if_seq_no?: number | undefined; version_type?: ",
+          " | undefined; include_source_on_error?: boolean | undefined; require_alias?: boolean | undefined; if_primary_term?: number | undefined; if_seq_no?: number | undefined; version_type?: ",
           "VersionType",
           " | undefined; op_type?: ",
           "OpType",
@@ -1414,7 +1359,7 @@
         "label": "StorageDocumentOf",
         "description": [],
         "signature": [
-          "({ type: \"object\"; properties: TStorageSettings[\"schema\"][\"properties\"]; } extends { properties: Record<string, ",
+          "{ [P in keyof ({ type: \"object\"; properties: TStorageSettings[\"schema\"][\"properties\"]; } extends { properties: Record<string, ",
           "StorageMappingProperty",
           ">; } ? { [key in keyof (Record<string, ",
           "StorageMappingProperty",
@@ -1422,7 +1367,15 @@
           "StorageFieldTypeOf",
           "<(Record<string, ",
           "StorageMappingProperty",
-          "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object) & { _id: string; }"
+          "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object)]?: ({ type: \"object\"; properties: TStorageSettings[\"schema\"][\"properties\"]; } extends { properties: Record<string, ",
+          "StorageMappingProperty",
+          ">; } ? { [key in keyof (Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])]?: ",
+          "StorageFieldTypeOf",
+          "<(Record<string, ",
+          "StorageMappingProperty",
+          "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object)[P] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
         "deprecated": false,

@@ -89,6 +89,7 @@ export const getComments: GetAssistantMessages = ({
               contentReferencesVisible={contentReferencesVisible}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               contentReferences={null}
+              messageRole="assistant"
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
               index={999}
@@ -135,6 +136,7 @@ export const getComments: GetAssistantMessages = ({
                 contentReferences={null}
                 contentReferencesVisible={contentReferencesVisible}
                 transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
+                messageRole={'assistant'}
                 // we never need to append to a code block in the system comment, which is what this index is used for
                 index={999}
               />
@@ -189,6 +191,7 @@ export const getComments: GetAssistantMessages = ({
               regenerateMessage={regenerateMessageOfConversation}
               setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}
+              messageRole={message.role}
             />
           ),
         };
@@ -215,6 +218,7 @@ export const getComments: GetAssistantMessages = ({
             refetchCurrentConversation={refetchCurrentConversation}
             setIsStreaming={setIsStreaming}
             transformMessage={transformMessage}
+            messageRole={message.role}
           />
         ),
       };

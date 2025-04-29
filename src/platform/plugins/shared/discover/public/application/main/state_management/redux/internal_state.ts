@@ -28,10 +28,11 @@ import {
   type TabState,
 } from './types';
 import { loadDataViewList, setTabs } from './actions';
-import { selectAllTabs } from './selectors';
+import { selectAllTabs, selectTab } from './selectors';
 import { createTabItem } from './utils';
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
+  lastPersistedGlobalState: {},
   dataViewId: undefined,
   isDataViewLoading: false,
   dataRequestParams: {},
@@ -62,7 +63,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { byId: {}, allIds: [] },
+  tabs: { byId: {}, allIds: [], unsafeCurrentId: '' },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -74,7 +75,7 @@ const withTab = <TAction extends TabAction>(
   action: TAction,
   fn: (tab: TabState) => void
 ) => {
-  const tab = state.tabs.byId[action.payload.tabId];
+  const tab = selectTab(state, action.payload.tabId);
 
   if (tab) {
     fn(tab);
@@ -92,7 +93,7 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setTabs: (state, action: PayloadAction<{ allTabs: TabState[] }>) => {
+    setTabs: (state, action: PayloadAction<{ allTabs: TabState[]; selectedTabId: string }>) => {
       state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
         (acc, tab) => ({
           ...acc,
@@ -101,6 +102,7 @@ export const internalStateSlice = createSlice({
         {}
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
+      state.tabs.unsafeCurrentId = action.payload.selectedTabId;
     },
 
     setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
@@ -203,7 +205,7 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
     ...defaultTabState,
     ...createTabItem(selectAllTabs(store.getState())),
   };
-  store.dispatch(setTabs({ allTabs: [defaultTab] }));
+  store.dispatch(setTabs({ allTabs: [defaultTab], selectedTabId: defaultTab.id }));
 
   return store;
 };
