@@ -8,8 +8,8 @@
 import React, { memo, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { PromptContext } from '@kbn/elastic-assistant';
-import { AlertSummary } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { AlertSummary } from './alert_summary';
 import { AlertSummaryOptionsMenu } from './settings_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIForSOCDetailsContext } from '../context';

@@ -13,8 +13,7 @@ import { AttackDiscoverySection } from './attack_discovery_section';
 import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 
 jest.mock('../context');
-jest.mock('@kbn/elastic-assistant/impl/alerts/attack_discovery', () => ({
-  ...jest.requireActual('@kbn/elastic-assistant/impl/alerts/attack_discovery'),
+jest.mock('./attack_discovery', () => ({
   AttackDiscoveryWidget: jest.fn(),
 }));
 

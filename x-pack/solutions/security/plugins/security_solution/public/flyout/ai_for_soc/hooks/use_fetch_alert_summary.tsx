@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/find_alert_summary_route.gen';
+import type { FindAlertSummaryResponse } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/find_alert_summary_route.gen';
 import { useQuery } from '@tanstack/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { useAssistantContext } from '../../..';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 
 export interface UseFetchAlertSummaryParams {
   signal?: AbortSignal | undefined;

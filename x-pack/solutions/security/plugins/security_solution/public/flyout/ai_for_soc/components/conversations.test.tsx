@@ -8,15 +8,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Conversations } from './conversations';
-import { useFetchCurrentUserConversations } from '../assistant/api';
-import { useAssistantContext } from '../assistant_context';
+import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 
 // Mock the custom hooks
-jest.mock('../assistant/api', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
   useFetchCurrentUserConversations: jest.fn(),
-}));
-
-jest.mock('../assistant_context', () => ({
   useAssistantContext: jest.fn(),
 }));
 

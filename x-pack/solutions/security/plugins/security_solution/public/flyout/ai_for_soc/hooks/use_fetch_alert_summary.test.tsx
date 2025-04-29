@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFetchAlertSummary } from './use_fetch_alert_summary';
-import { useAssistantContext } from '../../..';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { ReactNode } from 'react';
 
-jest.mock('../../..', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
 const args = {

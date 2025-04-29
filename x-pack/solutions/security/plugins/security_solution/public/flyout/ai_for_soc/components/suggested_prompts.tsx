@@ -8,10 +8,9 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useAssistantContext } from '../assistant_context';
-import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
-import type { PromptContext } from '../assistant/prompt_context/types';
-import * as i18n from './translations';
+import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
+import type { PromptContext } from '@kbn/elastic-assistant';
+import * as i18n from '../constants/translations';
 
 interface Props {
   getPromptContext: PromptContext['getPromptContext'];
