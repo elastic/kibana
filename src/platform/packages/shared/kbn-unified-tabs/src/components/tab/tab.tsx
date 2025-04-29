@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent, KeyboardEvent, useCallback, useState, useRef, useEffect } from 'react';
+import React, {
+  MouseEvent,
+  KeyboardEvent,
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -70,7 +78,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
-  const previewData = useMemo(() => getPreviewData(item), [item]);
+  const previewData = useMemo(() => getPreviewData(item), [getPreviewData, item]);
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
