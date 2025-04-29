@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
@@ -10,6 +12,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const LOCKS_INDEX_ALIAS = '.kibana_locks';
+const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
 export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
 export const LOCKS_COMPONENT_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-component`;
 export const LOCKS_INDEX_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-index-template`;
@@ -52,8 +55,6 @@ export async function ensureTemplatesAndIndexCreated(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> {
-  const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
-
   await esClient.cluster.putComponentTemplate({
     name: LOCKS_COMPONENT_TEMPLATE_NAME,
     template: {
@@ -87,11 +88,25 @@ export async function ensureTemplatesAndIndexCreated(
   });
   logger.info(`Index template ${LOCKS_INDEX_TEMPLATE_NAME} created or updated successfully.`);
 
-  await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
-  logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created or updated successfully.`);
+  try {
+    await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME });
+    logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created successfully.`);
+  } catch (error) {
+    const isIndexAlreadyExistsError =
+      error instanceof errors.ResponseError &&
+      error.body.error.type === 'resource_already_exists_exception';
+
+    if (isIndexAlreadyExistsError) {
+      logger.debug(`Index ${LOCKS_CONCRETE_INDEX_NAME} already exists. Skipping creation.`);
+      return;
+    }
+
+    logger.error(`Unable to create index ${LOCKS_CONCRETE_INDEX_NAME}: ${error.message}`);
+    throw error;
+  }
 }
 
-export async function setuplockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
+export async function setupLockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
   await removeLockIndexWithIncorrectMappings(esClient, logger); // TODO: should be removed in the future (after 9.1). See https://github.com/elastic/kibana/issues/218944
   await ensureTemplatesAndIndexCreated(esClient, logger);
 }
