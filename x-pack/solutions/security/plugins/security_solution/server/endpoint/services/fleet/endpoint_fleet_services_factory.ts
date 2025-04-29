@@ -116,6 +116,8 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentIds = [],
       options,
     }): Promise<void> => {
+      this.logger.debug(`EnsureInCurrentSpace(): Checking access for space [${spaceId}]`);
+
       return checkInCurrentSpace({
         soClient: getSoClient(),
         agentService: agent,

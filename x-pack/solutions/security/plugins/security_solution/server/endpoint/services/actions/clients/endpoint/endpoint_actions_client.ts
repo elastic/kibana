@@ -91,7 +91,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }> {
     const uniqueIds = [...new Set(ids)];
     const foundEndpointHosts = await this.options.endpointService
-      .getEndpointMetadataService()
+      .getEndpointMetadataService(this.options.spaceId)
       .getMetadataForEndpoints(uniqueIds);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
     const invalidIds = ids.filter((id) => !validIds.includes(id));
