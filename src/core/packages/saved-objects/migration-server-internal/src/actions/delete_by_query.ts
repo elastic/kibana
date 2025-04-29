@@ -27,6 +27,7 @@ export interface DeleteByQueryParams {
 
 /** @internal */
 export interface DeleteByQueryResponse {
+  type: 'delete_by_query_response';
   taskId: string;
 }
 
@@ -51,7 +52,7 @@ export const deleteByQuery =
         wait_for_completion: false,
       })
       .then(({ task: taskId }) => {
-        return Either.right({ taskId: String(taskId!) });
+        return Either.right({ type: 'delete_by_query_response' as const, taskId: String(taskId!) });
       })
       .catch(catchRetryableEsClientErrors);
   };
