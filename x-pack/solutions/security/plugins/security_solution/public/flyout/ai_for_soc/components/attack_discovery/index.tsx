@@ -18,6 +18,7 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { AttackDiscoveryPanel } from './panel';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import * as i18n from './translations';
 
@@ -28,10 +29,12 @@ interface Props {
 export const AttackDiscoveryWidget = memo(({ id }: Props) => {
   const { assistantAvailability, http } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
-
+  const { to, from } = useGlobalTime();
   const { isLoading, data } = useFindAttackDiscoveries({
     alertIds: [id],
     http,
+    start: from,
+    end: to,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
   });
   const [attackDiscovery, setAttackDiscovery] = useState<AttackDiscoveryAlert | null>(null);
@@ -60,7 +63,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
         <EuiLoadingSpinner />
       ) : attackDiscovery ? (
         <>
-          <AttackDiscoveryPanel attackDiscovery={attackDiscovery} />
+          <AttackDiscoveryPanel attackDiscovery={attackDiscovery} start={from} end={to} />
           {additionalAttackDiscoveries.length && (
             <EuiAccordion
               id={attackDiscoveryAccordionId}
@@ -68,7 +71,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
               buttonContent={i18n.ADDITIONAL_DISCOVERIES}
             >
               {additionalAttackDiscoveries.map((ad, i) => (
-                <AttackDiscoveryPanel key={i} attackDiscovery={ad} />
+                <AttackDiscoveryPanel key={i} attackDiscovery={ad} start={from} end={to} />
               ))}
             </EuiAccordion>
           )}

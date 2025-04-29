@@ -14,18 +14,26 @@ import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { AttackDiscoveryDetails } from './attack_discovery_details';
 import * as i18n from './translations';
 import { useIdsFromUrl } from '../../../../attack_discovery/pages/results/history/use_ids_from_url';
+import { useAttackDiscoveryHistoryTimerange } from '../../../../attack_discovery/pages/use_attack_discovery_history_timerange';
 
 interface Props {
   attackDiscovery: AttackDiscoveryAlert;
+  // timerange end
+  end: string;
+  // timerange start
+  start: string;
 }
 
-export const AttackDiscoveryPanel = memo(({ attackDiscovery }: Props) => {
+export const AttackDiscoveryPanel = memo(({ attackDiscovery, end, start }: Props) => {
   const { navigateTo } = useNavigateTo();
   const { pathname } = useLocation();
   const { setIdsUrl } = useIdsFromUrl();
   const { euiTheme } = useEuiTheme();
+  const { setHistoryEnd, setHistoryStart } = useAttackDiscoveryHistoryTimerange();
   const handleNavigateToAttackDiscovery = useCallback(
     (attackDiscoveryId: string) => {
+      setHistoryStart(start);
+      setHistoryEnd(end);
       if (pathname.includes('attack_discovery')) {
         setIdsUrl([attackDiscoveryId]);
       } else {
@@ -34,7 +42,7 @@ export const AttackDiscoveryPanel = memo(({ attackDiscovery }: Props) => {
         });
       }
     },
-    [pathname, setIdsUrl, navigateTo]
+    [setHistoryStart, start, setHistoryEnd, end, pathname, setIdsUrl, navigateTo]
   );
   return (
     <EuiPanel
