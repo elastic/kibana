@@ -98,6 +98,7 @@ export const getMonitorsEmbeddableFactory = (
                 pluginStart,
                 initialState: {
                   filters: filters$.getValue() || DEFAULT_FILTERS,
+                  view: view$.getValue(),
                 },
                 title: i18n.translate(
                   'xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.overview.title',
@@ -105,8 +106,10 @@ export const getMonitorsEmbeddableFactory = (
                     defaultMessage: 'Create monitors overview',
                   }
                 ),
+                type: SYNTHETICS_MONITORS_EMBEDDABLE,
               });
               filters$.next(result.filters);
+              view$.next(result.view);
             } catch (e) {
               return Promise.reject();
             }
