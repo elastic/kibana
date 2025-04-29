@@ -12,6 +12,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const LOCKS_INDEX_ALIAS = '.kibana_locks';
+const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
 export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
 export const LOCKS_COMPONENT_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-component`;
 export const LOCKS_INDEX_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-index-template`;
@@ -54,50 +55,38 @@ export async function ensureTemplatesAndIndexCreated(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> {
-  const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
-
-  try {
-    await esClient.cluster.putComponentTemplate({
-      name: LOCKS_COMPONENT_TEMPLATE_NAME,
-      template: {
-        mappings: {
-          dynamic: false,
-          properties: {
-            token: { type: 'keyword' },
-            metadata: { enabled: false },
-            createdAt: { type: 'date' },
-            expiresAt: { type: 'date' },
-          },
+  await esClient.cluster.putComponentTemplate({
+    name: LOCKS_COMPONENT_TEMPLATE_NAME,
+    template: {
+      mappings: {
+        dynamic: false,
+        properties: {
+          token: { type: 'keyword' },
+          metadata: { enabled: false },
+          createdAt: { type: 'date' },
+          expiresAt: { type: 'date' },
         },
       },
-    });
-    logger.info(
-      `Component template ${LOCKS_COMPONENT_TEMPLATE_NAME} created or updated successfully.`
-    );
-  } catch (error) {
-    logger.error(
-      `Unable to create component template ${LOCKS_COMPONENT_TEMPLATE_NAME}: ${error.message}`
-    );
-  }
+    },
+  });
+  logger.info(
+    `Component template ${LOCKS_COMPONENT_TEMPLATE_NAME} created or updated successfully.`
+  );
 
-  try {
-    await esClient.indices.putIndexTemplate({
-      name: LOCKS_INDEX_TEMPLATE_NAME,
-      index_patterns: [INDEX_PATTERN],
-      composed_of: [LOCKS_COMPONENT_TEMPLATE_NAME],
-      priority: 500,
-      template: {
-        settings: {
-          number_of_shards: 1,
-          auto_expand_replicas: '0-1',
-          hidden: true,
-        },
+  await esClient.indices.putIndexTemplate({
+    name: LOCKS_INDEX_TEMPLATE_NAME,
+    index_patterns: [INDEX_PATTERN],
+    composed_of: [LOCKS_COMPONENT_TEMPLATE_NAME],
+    priority: 500,
+    template: {
+      settings: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+        hidden: true,
       },
-    });
-    logger.info(`Index template ${LOCKS_INDEX_TEMPLATE_NAME} created or updated successfully.`);
-  } catch (error) {
-    logger.error(`Unable to create index template ${LOCKS_INDEX_TEMPLATE_NAME}: ${error.message}`);
-  }
+    },
+  });
+  logger.info(`Index template ${LOCKS_INDEX_TEMPLATE_NAME} created or updated successfully.`);
 
   try {
     await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME });
@@ -109,9 +98,11 @@ export async function ensureTemplatesAndIndexCreated(
 
     if (isIndexAlreadyExistsError) {
       logger.debug(`Index ${LOCKS_CONCRETE_INDEX_NAME} already exists. Skipping creation.`);
-    } else {
-      logger.error(`Unable to create index ${LOCKS_CONCRETE_INDEX_NAME}: ${error.message}`);
+      return;
     }
+
+    logger.error(`Unable to create index ${LOCKS_CONCRETE_INDEX_NAME}: ${error.message}`);
+    throw error;
   }
 }
 
