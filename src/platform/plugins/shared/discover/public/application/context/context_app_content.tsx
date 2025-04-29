@@ -105,7 +105,7 @@ export function ContextAppContent({
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
-  const [resetTabId, setResetTabId] = useState(uuidv4());
+  const [resetTabId, setResetTabId] = useState(() => uuidv4());
 
   const setExpandedDocWithInitialTab = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
