@@ -10,6 +10,7 @@ import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/publ
 import { IToasts } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { TimeState } from '@kbn/es-query';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
@@ -19,6 +20,7 @@ export type DetectedField = Simulation['detected_fields'][number];
 
 export interface SimulationMachineDeps {
   timeState$: BehaviorSubject<TimeState>;
+  data: DataPublicPluginStart;
   streamsRepositoryClient: StreamsRepositoryClient;
   toasts: IToasts;
 }

@@ -50,6 +50,7 @@ interface StreamDetailEnrichmentContentProps {
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
   const { core, dependencies } = useKibana();
   const {
+    data,
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
@@ -77,6 +78,7 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       definition={props.definition}
       refreshDefinition={props.refreshDefinition}
       core={core}
+      data={data}
       streamsRepositoryClient={streamsRepositoryClient}
       timeState$={timeState$}
     >

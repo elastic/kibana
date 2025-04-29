@@ -225,20 +225,42 @@ export const simulationMachine = setup({
         src: 'fetchSamples',
         input: ({ context }) => ({
           condition: context.samplingCondition,
+          filters: [],
+          query: {
+            query: '',
+            language: 'kuery',
+          },
           streamName: context.streamName,
         }),
-        onDone: [
+        // onSnapshot: {
+        //   actions: ({ event }) => {
+        //     console.log('sadasdas', event.snapshot.context); // 1, 2, 3, ...
+        //   },
+        // },
+        onSnapshot: [
           {
             guard: {
               type: 'hasProcessors',
               params: ({ context }) => ({ processors: context.processors }),
             },
             target: 'assertingSimulationRequirements',
-            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+            actions: [
+              {
+                type: 'storeSamples',
+                params: ({ event }) =>
+                  console.log('eventeee', event) || { samples: event.snapshot.context ?? [] },
+              },
+            ],
           },
           {
             target: 'idle',
-            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+            actions: [
+              {
+                type: 'storeSamples',
+                params: ({ event }) =>
+                  console.log('eventeee', event) || { samples: event.snapshot.context ?? [] },
+              },
+            ],
           },
         ],
         onError: {
@@ -291,12 +313,13 @@ export const simulationMachine = setup({
 });
 
 export const createSimulationMachineImplementations = ({
+  data,
   streamsRepositoryClient,
   toasts,
   timeState$,
 }: SimulationMachineDeps): MachineImplementationsFrom<typeof simulationMachine> => ({
   actors: {
-    fetchSamples: createSamplesFetchActor({ streamsRepositoryClient, timeState$ }),
+    fetchSamples: createSamplesFetchActor({ data, timeState$ }),
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
     subscribeTimeUpdates: createTimeUpdatesActor({ timeState$ }),
   },
