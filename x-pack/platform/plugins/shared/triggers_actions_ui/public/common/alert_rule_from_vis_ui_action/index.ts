@@ -145,13 +145,10 @@ export class AlertRuleFromVisAction implements Action<Context> {
           } catch {
             // Do nothing, continue to return statement
           }
-          return v
-            ? `${escapeFieldName(fieldName)} == ${
-                typeof v === 'number' ? v : formatStringForESQL(v)
-              }`
-            : '';
+          return `${escapeFieldName(fieldName)} == ${
+            typeof v === 'number' ? v : formatStringForESQL(v ?? '')
+          }`;
         })
-        .filter(Boolean)
         .join(' OR ')}`;
       return values.length === 1 ? queries : `(${queries})`;
     });
