@@ -58,7 +58,6 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const services = useKibana().services;
   const {
     charts,
-    dataViews,
     data,
     share: {
       url: { locators },

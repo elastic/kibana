@@ -49,7 +49,7 @@ describe('getViewInAppUrl', () => {
       startedAt,
       endedAt,
       searchConfiguration: {
-        index: {},
+        index: '',
         query: {
           language: '',
           query: 'mockedFilter',
@@ -109,7 +109,7 @@ describe('getViewInAppUrl', () => {
       startedAt,
       endedAt,
       searchConfiguration: {
-        index: {},
+        index: '',
         query: {
           language: '',
           query: 'mockedFilter',
@@ -207,7 +207,7 @@ describe('getViewInAppUrl', () => {
       startedAt,
       endedAt,
       searchConfiguration: {
-        index: {},
+        index: '',
         query: {
           language: '',
           query: 'mockedFilter',
