@@ -27,7 +27,6 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
 import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
 import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
@@ -473,7 +472,8 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                   tags: ['evaluation'],
                 }
               );
-              const output = (result.agentOutcome as AgentFinish).returnValues.output;
+              const lastMessage = result.messages[result.messages.length - 1];
+              const output = lastMessage.content as string;
               return output;
             };
 

@@ -14,6 +14,7 @@ import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
+import { AgentOutcomeParser } from './agent_outcome_parser';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;
@@ -59,7 +60,7 @@ export async function runAgent({
           savedObjectsClient,
         })
       : '';
-  const agentOutcome = await agentRunnable
+  const result = await agentRunnable
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(
       {
@@ -71,13 +72,17 @@ export async function runAgent({
         }`,
         // prepend any user prompt (gemini)
         input: `${userPrompt}${state.input}`,
-        chat_history: sanitizeChatHistory(state.messages), // TODO: Message de-dupe with ...state spread
+        chat_history: sanitizeChatHistory(state.chatHistory), // TODO: Message de-dupe with ...state spread
       },
       config
     );
 
+  const outcomeParser = AgentOutcomeParser({ logger });
+
+  const newMessage = outcomeParser(result);
+
   return {
-    agentOutcome,
+    messages: [newMessage],
     lastNode: NodeType.AGENT,
   };
 }

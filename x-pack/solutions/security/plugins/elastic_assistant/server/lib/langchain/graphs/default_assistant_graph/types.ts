@@ -6,17 +6,12 @@
  */
 
 import { BaseMessage } from '@langchain/core/messages';
-import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
+import { AgentStep } from '@langchain/core/agents';
 import type { Logger } from '@kbn/logging';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-
-export interface AgentStateBase {
-  agentOutcome?: AgentAction | AgentFinish;
-  steps: AgentStep[];
-}
 
 export interface GraphInputs {
   connectorId: string;
@@ -29,9 +24,10 @@ export interface GraphInputs {
   responseLanguage?: string;
 }
 
-export interface AgentState extends AgentStateBase {
+export interface AgentState {
   input: string;
-  messages: BaseMessage[];
+  messages: BaseMessage[]; // messages is a list of messages that were created during the graph execution
+  chatHistory: BaseMessage[]; // chat history is a list of messages that have been sent and received in the chat prior to the graph execution
   chatTitle: string;
   lastNode: string;
   hasRespondStep: boolean;
@@ -44,6 +40,7 @@ export interface AgentState extends AgentStateBase {
   conversation: ConversationResponse | undefined;
   conversationId: string;
   formattedTime: string;
+  steps: AgentStep[];
 }
 
 export interface NodeParamsBase {
