@@ -8,27 +8,34 @@
  */
 
 import {
+  ESQLSingleAstItem,
+  Walker,
   isIdentifier,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLLiteral,
   type ESQLSource,
-  ESQLSingleAstItem,
-  Walker,
 } from '@kbn/esql-ast';
-import { uniqBy } from 'lodash';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { uniqBy } from 'lodash';
+import { logicalOperators } from '../definitions/all_operators';
 import {
+  CommandSuggestParams,
+  FunctionDefinitionTypes,
+  Location,
   isParameterType,
+  isReturnType,
   type FunctionDefinition,
   type FunctionReturnType,
   type SupportedDataType,
-  isReturnType,
-  FunctionDefinitionTypes,
-  CommandSuggestParams,
-  Location,
 } from '../definitions/types';
+import {
+  EDITOR_MARKER,
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../shared/constants';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   findFinalWord,
   getColumnForASTNode,
@@ -40,27 +47,19 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
-import { compareTypesWithLiterals } from '../shared/esql_types';
+import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { listCompleteItem } from './complete_items';
 import {
   TIME_SYSTEM_PARAMS,
   buildVariablesDefinitions,
-  getFunctionSuggestions,
   getCompatibleLiterals,
   getDateLiterals,
+  getFunctionSuggestions,
+  getOperatorSuggestion,
   getOperatorSuggestions,
   getSuggestionsAfterNot,
-  getOperatorSuggestion,
 } from './factories';
-import {
-  EDITOR_MARKER,
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../shared/constants';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
-import { listCompleteItem } from './complete_items';
-import { removeMarkerArgFromArgsList } from '../shared/context';
-import { logicalOperators } from '../definitions/all_operators';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -219,7 +218,7 @@ export function getCompatibleTypesToSuggestNext(
 export function getOverlapRange(
   query: string,
   suggestionText: string
-): { start: number; end: number } {
+): { start: number; end: number } | undefined {
   let overlapLength = 0;
 
   // Convert both strings to lowercase for case-insensitive comparison
@@ -233,10 +232,13 @@ export function getOverlapRange(
     }
   }
 
-  // add one since Monaco columns are 1-based
+  if (overlapLength === 0) {
+    return;
+  }
+
   return {
-    start: query.length - overlapLength + 1,
-    end: query.length + 1,
+    start: query.length - overlapLength,
+    end: query.length,
   };
 }
 
@@ -366,8 +368,8 @@ export function handleFragment(
     return getSuggestionsForIncomplete('');
   } else {
     const rangeToReplace = {
-      start: innerText.length - fragment.length + 1,
-      end: innerText.length + 1,
+      start: innerText.length - fragment.length,
+      end: innerText.length,
     };
     if (isFragmentComplete(fragment)) {
       return getSuggestionsForComplete(fragment, rangeToReplace);
@@ -511,6 +513,29 @@ export function extractTypeFromASTArg(
   }
 }
 
+/**
+ * In several cases we don't want to count the last arg if it is
+ * of type unknown.
+ *
+ * this solves for the case where the user has typed a
+ * prefix (e.g. "keywordField != tex/")
+ *
+ * "tex" is not a recognizable identifier so it is of
+ * type "unknown" which leads us to continue suggesting
+ * fields/functions.
+ *
+ * Monaco will then filter our suggestions list
+ * based on the "tex" prefix which gives the correct UX
+ */
+function removeFinalUnknownIdentiferArg(
+  args: ESQLAstItem[],
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+) {
+  return getExpressionType(args[args.length - 1]) === 'unknown'
+    ? args.slice(0, args.length - 1)
+    : args;
+}
+
 // @TODO: refactor this to be shared with validation
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
@@ -523,7 +548,9 @@ export function checkFunctionInvocationComplete(
   if (!fnDefinition) {
     return { complete: false };
   }
-  const cleanedArgs = removeMarkerArgFromArgsList(func)!.args;
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
+
   const argLengthCheck = fnDefinition.signatures.some((def) => {
     if (def.minParams && cleanedArgs.length >= def.minParams) {
       return true;
@@ -604,7 +631,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
     // and suggest the next argument based on types
 
     // pick the last arg and check its type to verify whether is incomplete for the given function
-    const cleanedArgs = removeMarkerArgFromArgsList(operator)!.args;
+    const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
     const leftArgType = getExpressionType(operator.args[cleanedArgs.length - 1]);
 
     if (isFnComplete.reason === 'tooFewArgs') {
@@ -675,10 +702,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
     const overlap = getOverlapRange(queryText, s.text);
     return {
       ...s,
-      rangeToReplace: {
-        start: overlap.start,
-        end: overlap.end,
-      },
+      rangeToReplace: overlap,
     };
   });
 }
@@ -719,7 +743,11 @@ export const getExpressionPosition = (
   }
 
   if (expressionRoot) {
-    if (isColumnItem(expressionRoot)) {
+    if (
+      isColumnItem(expressionRoot) &&
+      // and not directly after the column name or prefix e.g. "colu/"
+      !new RegExp(`${expressionRoot.parts.join('\\.')}$`).test(innerText)
+    ) {
       return 'after_column';
     }
 
@@ -892,28 +920,21 @@ export async function suggestForExpression({
    * TODO - think about how to generalize this — issue: https://github.com/elastic/kibana/issues/209905
    */
   const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
-  if (hasNonWhitespacePrefix) {
-    // get index of first char of final word
-    const lastWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
-    suggestions.forEach((s) => {
-      if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
-        // this suggestion has spaces in it (e.g. "IS NOT NULL")
-        // so we need to see if there's an overlap
-        const overlap = getOverlapRange(innerText, s.text);
-        if (overlap.start < overlap.end) {
-          // there's an overlap so use that
-          s.rangeToReplace = overlap;
-          return;
-        }
-      }
-
-      // no overlap, so just replace from the last whitespace
+  suggestions.forEach((s) => {
+    if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
+      // this suggestion has spaces in it (e.g. "IS NOT NULL")
+      // so we need to see if there's an overlap
+      s.rangeToReplace = getOverlapRange(innerText, s.text);
+      return;
+    } else if (hasNonWhitespacePrefix) {
+      // get index of first char of final word
+      const lastNonWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
       s.rangeToReplace = {
-        start: lastWhitespaceIndex + 1,
+        start: lastNonWhitespaceIndex,
         end: innerText.length,
       };
-    });
-  }
+    }
+  });
 
   return suggestions;
 }

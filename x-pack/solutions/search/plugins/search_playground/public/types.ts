@@ -71,7 +71,7 @@ export interface AppPluginStartDependencies {
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
 
-export enum ChatFormFields {
+export enum PlaygroundFormFields {
   question = 'question',
   citations = 'citations',
   prompt = 'prompt',
@@ -86,19 +86,19 @@ export enum ChatFormFields {
   searchQuery = 'search_query',
 }
 
-export interface ChatForm {
-  [ChatFormFields.question]: string;
-  [ChatFormFields.prompt]: string;
-  [ChatFormFields.citations]: boolean;
-  [ChatFormFields.indices]: string[];
-  [ChatFormFields.summarizationModel]: LLMModel;
-  [ChatFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
-  [ChatFormFields.sourceFields]: { [index: string]: string[] };
-  [ChatFormFields.docSize]: number;
-  [ChatFormFields.queryFields]: { [index: string]: string[] };
-  [ChatFormFields.searchQuery]: string;
-  [ChatFormFields.userElasticsearchQuery]: string | null | undefined;
-  [ChatFormFields.userElasticsearchQueryValidations]: UserQueryValidations | undefined;
+export interface PlaygroundForm {
+  [PlaygroundFormFields.question]: string;
+  [PlaygroundFormFields.prompt]: string;
+  [PlaygroundFormFields.citations]: boolean;
+  [PlaygroundFormFields.indices]: string[];
+  [PlaygroundFormFields.summarizationModel]: LLMModel;
+  [PlaygroundFormFields.elasticsearchQuery]: { retriever: any }; // RetrieverContainer leads to "Type instantiation is excessively deep and possibly infinite" error
+  [PlaygroundFormFields.sourceFields]: { [index: string]: string[] };
+  [PlaygroundFormFields.docSize]: number;
+  [PlaygroundFormFields.queryFields]: { [index: string]: string[] };
+  [PlaygroundFormFields.searchQuery]: string;
+  [PlaygroundFormFields.userElasticsearchQuery]: string | null | undefined;
+  [PlaygroundFormFields.userElasticsearchQueryValidations]: UserQueryValidations | undefined;
 }
 
 export interface UserQueryValidations {

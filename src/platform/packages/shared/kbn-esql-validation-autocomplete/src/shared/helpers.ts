@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { uniqBy } from 'lodash';
 import {
   Walker,
   type ESQLAstItem,
@@ -17,21 +17,26 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
   type ESQLTimeInterval,
+  type ESQLAstCommand,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
   ESQLInlineCast,
+  ESQLLocation,
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
+
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
+import { collectVariables } from './variables';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
+import type { FieldType } from '../definitions/types';
 import {
   CommandDefinition,
   FunctionParameter,
@@ -45,8 +50,10 @@ import {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import type { ReasonTypes } from './types';
+import type { ReasonTypes, ESQLCallbacks } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
+import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
+
 import type { EditorContext } from '../autocomplete/types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -97,6 +104,9 @@ export function isAssignmentComplete(node: ESQLFunction | undefined) {
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
+
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
 
 function isMathFunction(query: string) {
   const queryTrimmed = query.trimEnd();
@@ -200,12 +210,21 @@ function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   return commandLookups!;
 }
 
-export function getCommandDefinition(name: string): CommandDefinition<string> {
-  return buildCommandLookup().get(name.toLowerCase())!;
+export function getCommandDefinition<CommandName extends string>(
+  name: CommandName
+): CommandDefinition<CommandName> {
+  return buildCommandLookup().get(name.toLowerCase()) as unknown as CommandDefinition<CommandName>;
 }
 
 export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
+}
+
+export function getCommandsByName(names: string[]): Array<CommandDefinition<string>> {
+  const commands = buildCommandLookup();
+  return names.map((name) => commands.get(name)).filter((command) => command) as Array<
+    CommandDefinition<string>
+  >;
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
@@ -910,4 +929,81 @@ export function getExpressionType(
   }
 
   return 'unknown';
+}
+
+export function transformMapToRealFields(inputMap: Map<string, ESQLVariable[]>): ESQLRealField[] {
+  const realFields: ESQLRealField[] = [];
+
+  for (const [, variables] of inputMap) {
+    for (const variable of variables) {
+      // Only include variables that have a known type
+      if (variable.type) {
+        realFields.push({
+          name: variable.name,
+          type: variable.type as FieldType,
+        });
+      }
+    }
+  }
+
+  return realFields;
+}
+
+async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
+  if (!resourceRetriever?.getFieldsMetadata) {
+    return undefined;
+  }
+  const client = await resourceRetriever?.getFieldsMetadata;
+  if (client.find) {
+    // Fetch full list of ECS field
+    // This list should be cached already by fieldsMetadataClient
+    const results = await client.find({ attributes: ['type'] });
+    return results?.fields;
+  }
+}
+// Get the fields from the FROM clause, enrich them with ECS metadata
+export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
+  const metadata = await getEcsMetadata();
+  const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
+  const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
+  return fieldsWithMetadata;
+}
+
+/**
+ * @param query, the ES|QL query
+ * @param commands, the AST commands
+ * @param previousPipeFields, the fields from the previous pipe
+ * @returns a list of fields that are available for the current pipe
+ */
+export async function getCurrentQueryAvailableFields(
+  query: string,
+  commands: ESQLAstCommand[],
+  previousPipeFields: ESQLRealField[]
+) {
+  const cacheCopy = new Map<string, ESQLRealField>();
+  previousPipeFields?.forEach((field) => cacheCopy.set(field.name, field));
+  const lastCommand = commands[commands.length - 1];
+  const commandDef = getCommandDefinition(lastCommand.name);
+
+  // If the command has a fieldsSuggestionsAfter function, use it to get the fields
+  if (commandDef.fieldsSuggestionsAfter) {
+    const userDefinedColumns = collectVariables([lastCommand], cacheCopy, query);
+    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+      userDefinedColumns ?? new Map<string, ESQLVariable[]>()
+    );
+
+    return commandDef.fieldsSuggestionsAfter(
+      lastCommand,
+      previousPipeFields,
+      arrayOfUserDefinedColumns
+    );
+  } else {
+    // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
+    const userDefinedColumns = collectVariables(commands, cacheCopy, query);
+    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+      userDefinedColumns ?? new Map<string, ESQLVariable[]>()
+    );
+    const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
+    return allFields;
+  }
 }

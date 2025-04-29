@@ -75,6 +75,7 @@ const testRuleTypes = [
   'test.longRunning',
   'test.exceedsAlertLimit',
   'test.always-firing-alert-as-data',
+  'test.always-firing-alert-as-data-with-dynamic-templates',
   'test.patternFiringAad',
   'test.waitingRule',
   'test.patternFiringAutoRecoverFalse',

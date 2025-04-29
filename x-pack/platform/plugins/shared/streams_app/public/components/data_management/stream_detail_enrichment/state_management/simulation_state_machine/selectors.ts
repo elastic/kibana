@@ -20,15 +20,15 @@ const EMPTY_ARRAY: [] = [];
  */
 export const selectPreviewDocuments = createSelector(
   [
-    (context: SimulationContext) => context.samples,
-    (context: SimulationContext) => context.previewDocsFilter,
-    (context: SimulationContext) => context.simulation?.documents,
+    (context: SimulationContext | undefined) => context?.samples,
+    (context: SimulationContext | undefined) => context?.previewDocsFilter,
+    (context: SimulationContext | undefined) => context?.simulation?.documents,
   ],
   (samples, previewDocsFilter, documents) => {
     return (
       ((previewDocsFilter && documents
         ? filterSimulationDocuments(documents, previewDocsFilter)
-        : samples.map(flattenObjectNestedLast)) as FlattenRecord[]) || EMPTY_ARRAY
+        : samples?.map(flattenObjectNestedLast)) as FlattenRecord[]) || EMPTY_ARRAY
     );
   }
 );

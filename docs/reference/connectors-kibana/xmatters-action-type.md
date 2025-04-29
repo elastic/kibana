@@ -14,15 +14,11 @@ The xMatters connector uses the [xMatters Workflow for Elastic](https://help.xma
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. You must choose between basic and URL authentication for the requests.
 
-:::{image} ../images/xmatters-connector-basic.png
-:alt: xMatters connector with basic authentication
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![xMatters connector with basic authentication](../images/xmatters-connector-basic.png)
 
-:::{image} ../images/xmatters-connector-url.png
-:alt: xMatters connector with url authentication
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![xMatters connector with url authentication](../images/xmatters-connector-url.png)
 
 
 ### Connector configuration [xmatters-connector-configuration]
@@ -49,10 +45,8 @@ Password
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../images/xmatters-params-test.png
-:alt: xMatters params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![xMatters params test](../images/xmatters-params-test.png)
 
 xMatters rules have the following properties:
 

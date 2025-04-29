@@ -988,6 +988,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           version: { type: 'keyword' },
@@ -1072,6 +1073,14 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 additional_spaces_installed_kibana: { type: 'flattened', index: false },
               },
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
             },
           ],
         },
@@ -1277,6 +1286,7 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
+  { key: 'kibana_api_key', dangerouslyExposeValue: true },
 ]);
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([

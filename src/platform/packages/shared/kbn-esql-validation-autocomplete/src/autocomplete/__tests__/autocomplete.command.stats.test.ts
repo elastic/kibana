@@ -555,7 +555,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `?interval` option', async () => {
-          const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
+          const suggestions = await suggest('FROM index_a | STATS BY BUCKET(@timestamp, /)', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [
@@ -576,6 +576,25 @@ describe('autocomplete.suggest', () => {
             detail: 'Named parameter',
             command: undefined,
             sortText: '1A',
+          });
+        });
+
+        test('suggests `Create control` option when ? is being typed', async () => {
+          const suggestions = await suggest('FROM index_b | STATS PERCENTILE(bytes, ?/)', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariables: () => [],
+              getColumnsFor: () => Promise.resolve([{ name: 'bytes', type: 'double' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: 'Create control',
+            text: '',
+            kind: 'Issue',
+            detail: 'Click to create',
+            command: { id: 'esql.control.values.create', title: 'Click to create' },
+            sortText: '1',
           });
         });
       });

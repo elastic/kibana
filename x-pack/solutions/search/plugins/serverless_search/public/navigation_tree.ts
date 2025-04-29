@@ -27,6 +27,24 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: 'analyze',
+            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
+              defaultMessage: 'Analyze',
+            }),
+            spaceBefore: 'm',
+            children: [
+              {
+                link: 'discover',
+              },
+              {
+                link: 'dashboards',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+                },
+              },
+            ],
+          },
+          {
             id: 'data',
             title: i18n.translate('xpack.serverlessSearch.nav.data', {
               defaultMessage: 'Data',
@@ -120,24 +138,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             ],
           },
           {
-            id: 'analyze',
-            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
-              defaultMessage: 'Analyze',
-            }),
-            spaceBefore: 'm',
-            children: [
-              {
-                link: 'discover',
-              },
-              {
-                link: 'dashboards',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                },
-              },
-            ],
-          },
-          {
             id: 'otherTools',
             title: i18n.translate('xpack.serverlessSearch.nav.otherTools', {
               defaultMessage: 'Other tools',
@@ -168,9 +168,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
-            link: 'ml:modelManagement',
+            link: 'management:trained_models',
             title: i18n.translate('xpack.serverlessSearch.nav.trainedModels', {
-              defaultMessage: 'Trained models',
+              defaultMessage: 'Trained Models',
             }),
           },
           {
@@ -222,6 +222,10 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
                 ],
+              },
+              {
+                title: 'Machine Learning',
+                children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
               },
               {
                 title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {

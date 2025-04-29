@@ -9,14 +9,14 @@
 
 import { uniq } from 'lodash';
 import {
-  type AstProviderFn,
+  parse,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -35,6 +35,7 @@ import {
   getAllCommands,
   getExpressionType,
 } from '../shared/helpers';
+import { ESQL_VARIABLES_PREFIX } from '../shared/constants';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLRealField, ESQLVariable } from '../validation/types';
 import {
@@ -49,6 +50,7 @@ import {
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
+  getControlSuggestionIfSupported,
 } from './factories';
 import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext } from '../shared/context';
@@ -86,13 +88,12 @@ export async function suggest(
   fullText: string,
   offset: number,
   context: EditorContext,
-  astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = await astProvider(correctedQuery);
+  const { ast } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
   if (astContext.type === 'comment') {
@@ -107,7 +108,8 @@ export async function suggest(
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
-    resourceRetriever
+    resourceRetriever,
+    innerText
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
@@ -131,7 +133,8 @@ export async function suggest(
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
-          resourceRetriever
+          resourceRetriever,
+          innerText
         );
         recommendedQueriesSuggestions.push(
           ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
@@ -144,8 +147,22 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
+  // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
+  const lastCharacterTyped = innerText[innerText.length - 1];
+  let controlSuggestions: SuggestionRawDefinition[] = [];
+  if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
+    controlSuggestions = getControlSuggestionIfSupported(
+      Boolean(supportsControls),
+      ESQLVariableType.VALUES,
+      getVariables,
+      false
+    );
+
+    return controlSuggestions;
+  }
+
   if (astContext.type === 'expression') {
-    return getSuggestionsWithinCommandExpression(
+    const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -159,9 +176,10 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
+    return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
-    return getFunctionArgsSuggestions(
+    const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -172,6 +190,7 @@ export async function suggest(
       getVariables,
       supportsControls
     );
+    return functionsSpecificSuggestions;
   }
   if (astContext.type === 'list') {
     return getListArgsSuggestions(
@@ -187,12 +206,17 @@ export async function suggest(
 }
 
 export function getFieldsByTypeRetriever(
-  queryString: string,
-  resourceRetriever?: ESQLCallbacks
+  queryForFields: string,
+  resourceRetriever?: ESQLCallbacks,
+  fullQuery?: string
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
-  const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
+  const helpers = getFieldsByTypeHelper(queryForFields, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
-  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+
+  const queryString = fullQuery ?? queryForFields;
+  const lastCharacterTyped = queryString[queryString.length - 1];
+  const lastCharIsQuestionMark = lastCharacterTyped === ESQL_VARIABLES_PREFIX;
   return {
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
@@ -201,7 +225,7 @@ export function getFieldsByTypeRetriever(
     ) => {
       const updatedOptions = {
         ...options,
-        supportsControls,
+        supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);

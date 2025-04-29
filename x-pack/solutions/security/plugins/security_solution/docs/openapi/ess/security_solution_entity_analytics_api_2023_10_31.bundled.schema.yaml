@@ -306,6 +306,35 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/init:
+    post:
+      operationId: InitMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      operationId: PrivMonHealth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+          description: Successful response
+      summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -1133,6 +1162,13 @@ components:
         - indexPattern
         - status
         - fieldHistoryLength
+    EngineMetadata:
+      type: object
+      properties:
+        Type:
+          type: string
+      required:
+        - Type
     EngineStatus:
       enum:
         - installing
@@ -1146,6 +1182,7 @@ components:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
+        - $ref: '#/components/schemas/GenericEntity'
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1240,7 +1277,42 @@ components:
         - user
         - host
         - service
+        - generic
       type: string
+    GenericEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            category:
+              type: string
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - id
+            - name
+            - type
+      required:
+        - entity
     HostEntity:
       type: object
       properties:
@@ -1257,13 +1329,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -1315,6 +1392,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - entity.id
       type: string
     IndexPattern:
       type: string
@@ -1342,6 +1420,14 @@ components:
       type: string
     Metadata:
       $ref: '#/components/schemas/TransformStatsMetadata'
+    MonitoringEngineDescriptor:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+      required:
+        - type
+        - status
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -1411,13 +1497,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -1525,13 +1616,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:

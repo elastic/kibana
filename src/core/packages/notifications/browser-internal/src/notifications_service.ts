@@ -11,13 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 import { Subscription } from 'rxjs';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { showErrorDialog, ToastsService } from './toasts';
 import { EventReporter, eventTypes } from './toasts/telemetry';
 
@@ -27,10 +25,8 @@ export interface SetupDeps {
 }
 
 export interface StartDeps {
-  i18n: I18nStart;
   overlays: OverlayStart;
-  theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  rendering: RenderingService;
   analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
 }

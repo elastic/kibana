@@ -21,10 +21,8 @@ The email connector uses the SMTP protocol to send mail messages. Email message 
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../images/email-connector.png
-:alt: Email connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Email connector](../images/email-connector.png)
 
 
 ### Connector configuration [email-connector-configuration]
@@ -72,10 +70,8 @@ Password
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../images/email-params-test.png
-:alt: Email params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Email params test](../images/email-params-test.png)
 
 Email actions have the following configuration properties.
 
@@ -158,48 +154,36 @@ The email connector uses Microsoft Graph REST API v1.0, in particular the [sendM
 
 Before you create an email connector for Microsoft Exchange, you must create and register the client integration application on the [Azure portal](https://go.microsoft.com/fwlink/?linkid=2083908):
 
-:::{image} ../images/exchange-register-app.png
-:alt: Register client application for MS Exchange
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Register client application for MS Exchange](../images/exchange-register-app.png)
 
 Next, open **Manage > API permissions**, and then define the permissions for the registered application to send emails. Refer to the [documentation](https://docs.microsoft.com/en-us/graph/api/user-sendmail?view=graph-rest-1.0&tabs=http#permissions) for the Microsoft Graph API.
 
-:::{image} ../images/exchange-api-permissions.png
-:alt: MS Exchange API permissions
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![MS Exchange API permissions](../images/exchange-api-permissions.png)
 
 Add the "Mail.Send" permission for Microsoft Graph. The permission appears in the list with the status "Not granted for <your Azure active directory>":
 
-:::{image} ../images/exchange-not-granted.png
-:alt: MS Exchange "Mail.Send" not granted
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![MS Exchange "Mail.Send" not granted](../images/exchange-not-granted.png)
 
 Click **Grant admin consent for <your Azure active directory>**.
 
-:::{image} ../images/exchange-grant-confirm.png
-:alt: MS Exchange grant confirmation
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![MS Exchange grant confirmation](../images/exchange-grant-confirm.png)
 
 Confirm that the status for the "Mail.Send" permission is now granted.
 
-:::{image} ../images/exchange-granted.png
-:alt: MS Exchange grant confirmation
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![MS Exchange grant confirmation](../images/exchange-granted.png)
 
 
 #### Configure the Microsoft Exchange Client secret [exchange-client-secret]
 
 To configure the Microsoft Exchange Client secret, open **Manage > Certificates & secrets**:
 
-:::{image} ../images/exchange-secrets.png
-:alt: MS Exchange secrets configuration
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![MS Exchange secrets configuration](../images/exchange-secrets.png)
 
 Add a new client secret, then copy the value and put it to the proper field in the Microsoft Exchange email connector.
 
@@ -208,9 +192,7 @@ Add a new client secret, then copy the value and put it to the proper field in t
 
 To find the Microsoft Exchange client and tenant IDs, open the **Overview** page:
 
-:::{image} ../images/exchange-client-tenant.png
-:alt: MS Exchange Client ID and Tenant ID configuration
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![MS Exchange Client ID and Tenant ID configuration](../images/exchange-client-tenant.png)
 
 Create a connector and set the **Service** to `MS Exchange Server`. Copy and paste the values into the proper fields.

@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  TINY_ELSER,
   deleteInferenceEndpoint,
   setupKnowledgeBase,
+  TINY_MODELS,
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -19,6 +20,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
+    // see details: https://github.com/elastic/kibana/issues/219217
+    this.tags(['failsOnMKI']);
+
     beforeEach(async () => {
       await setupKnowledgeBase(getService);
     });
@@ -34,9 +38,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.status).to.be(200);
 
-      expect(res.body.ready).to.be(true);
+      expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
       expect(res.body.enabled).to.be(true);
-      expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER.id);
+      expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_MODELS.ELSER);
     });
 
     it('returns correct status after model is deleted', async () => {
@@ -48,7 +52,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.status).to.be(200);
 
-      expect(res.body.ready).to.be(false);
+      expect(res.body.kbState).to.not.be(KnowledgeBaseState.READY);
       expect(res.body.enabled).to.be(true);
       expect(res.body.errorMessage).to.include.string(
         'No known trained model with model_id [pt_tiny_elser]'
@@ -64,7 +68,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.status).to.be(200);
 
-      expect(res.body.ready).to.be(false);
+      expect(res.body.kbState).to.not.be(KnowledgeBaseState.READY);
       expect(res.body.enabled).to.be(true);
       expect(res.body.errorMessage).to.include.string(
         'Inference endpoint not found [obs_ai_assistant_kb_inference]'

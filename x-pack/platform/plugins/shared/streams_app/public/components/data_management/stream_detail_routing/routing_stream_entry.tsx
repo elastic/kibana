@@ -22,8 +22,7 @@ import { RoutingDefinition, isDescendantOf, isNeverCondition } from '@kbn/stream
 import React from 'react';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { alwaysToEmptyEquals } from '../../../util/condition';
-import { ConditionEditor } from '../condition_editor';
+import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
 import { ControlBar } from './control_bar';
 
@@ -93,8 +92,8 @@ export function RoutingStreamEntry({
         )}
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={router.link('/{key}/{tab}/{subtab}', {
-              path: { key: child.destination, tab: 'management', subtab: 'route' },
+            href={router.link('/{key}/management/{tab}', {
+              path: { key: child.destination, tab: 'route' },
             })}
             data-test-subj="streamsAppRoutingStreamEntryButton"
           >
@@ -140,8 +139,8 @@ export function RoutingStreamEntry({
       </EuiFlexGroup>
       {edit && (
         <EuiFlexGroup direction="column" gutterSize="s">
-          <ConditionEditor
-            condition={alwaysToEmptyEquals(child.if)}
+          <RoutingConditionEditor
+            condition={child.if}
             onConditionChange={(condition) => {
               onChildChange({
                 ...child,

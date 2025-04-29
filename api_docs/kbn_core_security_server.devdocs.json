@@ -183,6 +183,94 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.AuthzDisabled",
+        "type": "Class",
+        "tags": [],
+        "label": "AuthzDisabled",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authz.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.AuthzDisabled.fromReason",
+            "type": "Function",
+            "tags": [],
+            "label": "fromReason",
+            "description": [],
+            "signature": [
+              "(reason: string) => { enabled: false; reason: string; }"
+            ],
+            "path": "src/core/packages/security/server/src/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.AuthzDisabled.fromReason.$1",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/security/server/src/authz.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.AuthzDisabled.delegateToESClient",
+            "type": "Object",
+            "tags": [],
+            "label": "delegateToESClient",
+            "description": [],
+            "signature": [
+              "{ enabled: false; reason: string; }"
+            ],
+            "path": "src/core/packages/security/server/src/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.AuthzDisabled.delegateToSOClient",
+            "type": "Object",
+            "tags": [],
+            "label": "delegateToSOClient",
+            "description": [],
+            "signature": [
+              "{ enabled: false; reason: string; }"
+            ],
+            "path": "src/core/packages/security/server/src/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.AuthzDisabled.serveStaticFiles",
+            "type": "Object",
+            "tags": [],
+            "label": "serveStaticFiles",
+            "description": [],
+            "signature": [
+              "{ enabled: false; reason: string; }"
+            ],
+            "path": "src/core/packages/security/server/src/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -2480,6 +2568,18 @@
         "label": "ApiOperation",
         "description": [],
         "path": "src/core/packages/security/server/src/api_privileges.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.AuthzOptOutReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "AuthzOptOutReason",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authz.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

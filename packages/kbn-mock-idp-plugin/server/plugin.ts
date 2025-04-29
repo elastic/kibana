@@ -39,6 +39,7 @@ const projectToAlias = new Map<string, string>([
   // TODO add new 'chat' solution
   // https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
   // https://github.com/elastic/kibana/issues/213469
+  // requires update of config/serverless.chat.yml (currently uses projectType 'search')
 ]);
 
 const readServerlessRoles = (projectType: string) => {

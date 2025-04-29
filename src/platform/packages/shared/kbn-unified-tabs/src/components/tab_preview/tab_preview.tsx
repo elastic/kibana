@@ -97,11 +97,11 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === keys.ESCAPE) {
+      if (showPreview && event.key === keys.ESCAPE) {
         setShowPreview(false);
       }
     },
-    [setShowPreview]
+    [setShowPreview, showPreview]
   );
 
   useEvent('keydown', onKeyDown);

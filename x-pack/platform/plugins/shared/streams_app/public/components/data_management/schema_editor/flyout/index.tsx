@@ -15,7 +15,7 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IngestStreamDefinition } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -43,6 +43,8 @@ export const SchemaEditorFlyout = ({
   withFieldSimulation = false,
 }: SchemaEditorFlyoutProps) => {
   const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
+  const [isValidAdvancedFieldMappings, setValidAdvancedFieldMappings] = useState(true);
+  const [isValidSimulation, setValidSimulation] = useState(true);
 
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
@@ -52,6 +54,8 @@ export const SchemaEditorFlyout = ({
       } as SchemaField),
     field
   );
+
+  const hasValidFieldType = nextField.type !== undefined;
 
   const [{ loading: isSaving }, saveChanges] = useAsyncFn(async () => {
     await onSave(nextField);
@@ -78,39 +82,52 @@ export const SchemaEditorFlyout = ({
           <AdvancedFieldMappingOptions
             field={nextField}
             onChange={setNextField}
+            onValidate={setValidAdvancedFieldMappings}
             isEditing={isEditing}
           />
           {withFieldSimulation && (
             <EuiFlexItem grow={false}>
-              <SamplePreviewTable stream={stream} nextField={nextField} />
+              <SamplePreviewTable
+                stream={stream}
+                nextField={nextField}
+                onValidate={setValidSimulation}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty
-            data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
-            iconType="cross"
-            onClick={onClose}
-            flush="left"
-          >
-            {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
-          <EuiButton
-            data-test-subj="streamsAppSchemaEditorFieldSaveButton"
-            isLoading={isSaving}
-            onClick={saveChanges}
-          >
-            {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
-              defaultMessage: 'Save changes',
-            })}
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      {isEditing && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiButtonEmpty
+              data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+            >
+              {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="streamsAppSchemaEditorFieldSaveButton"
+              disabled={
+                isSaving ||
+                !hasValidFieldType ||
+                !isValidAdvancedFieldMappings ||
+                !isValidSimulation
+              }
+              isLoading={isSaving}
+              onClick={saveChanges}
+            >
+              {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
+                defaultMessage: 'Save changes',
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 };

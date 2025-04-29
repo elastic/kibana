@@ -18,10 +18,9 @@
   "baseBranches": [
     "main",
     "9.0",
-    "8.x",
+    "8.19",
     "8.18",
     "8.17",
-    "8.16",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -135,8 +134,7 @@
       "matchBaseBranches": [
         "main",
         "/^[9].*/",
-        "8.x",
-        "8.18"
+        "8.19"
       ],
       "labels": [
         "Team:Operations",
@@ -1045,7 +1043,7 @@
       ],
       "allowedVersions": "<9.0.0",
       "matchBaseBranches": [
-        "8.x"
+        "8.19"
       ],
       "labels": [
         "release_note:skip",

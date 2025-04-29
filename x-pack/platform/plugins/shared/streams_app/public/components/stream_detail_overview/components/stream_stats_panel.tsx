@@ -24,6 +24,7 @@ import {
   formatIngestionRate,
 } from '../../data_management/stream_detail_lifecycle/helpers/format_bytes';
 import { useDataStreamStats } from '../../data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
+import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 
 interface StreamStatsPanelProps {
   definition: IngestStreamGetResponse;
@@ -123,15 +124,25 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
             <StatItem
               label={documentCountLabel}
               value={
-                dataStreamStats ? formatNumber(dataStreamStats.totalDocs || 0, 'decimal0') : '-'
+                <PrivilegesWarningIconWrapper
+                  hasPrivileges={definition.privileges.monitor}
+                  title="totalDocCount"
+                >
+                  {dataStreamStats ? formatNumber(dataStreamStats.totalDocs || 0, 'decimal0') : '-'}
+                </PrivilegesWarningIconWrapper>
               }
             />
             <StatItem
               label={storageSizeLabel}
               value={
-                dataStreamStats && dataStreamStats.sizeBytes
-                  ? formatBytes(dataStreamStats.sizeBytes)
-                  : '-'
+                <PrivilegesWarningIconWrapper
+                  hasPrivileges={definition.privileges.monitor}
+                  title="sizeBytes"
+                >
+                  {dataStreamStats && dataStreamStats.sizeBytes
+                    ? formatBytes(dataStreamStats.sizeBytes)
+                    : '-'}
+                </PrivilegesWarningIconWrapper>
               }
               withBorder
             />
@@ -144,7 +155,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                       'xpack.streams.streamDetailLifecycle.ingestionRateDetails',
                       {
                         defaultMessage:
-                          'Estimated average (stream total size divided by the number of days since creation).',
+                          'Approximate average (stream total size divided by the number of days since creation).',
                       }
                     )}
                     position="right"
@@ -152,7 +163,14 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                 </>
               }
               value={
-                dataStreamStats ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true) : '-'
+                <PrivilegesWarningIconWrapper
+                  hasPrivileges={definition.privileges.monitor}
+                  title="ingestionRate"
+                >
+                  {dataStreamStats
+                    ? formatIngestionRate(dataStreamStats.bytesPerDay || 0, true)
+                    : '-'}
+                </PrivilegesWarningIconWrapper>
               }
               withBorder
             />

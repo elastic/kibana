@@ -15,16 +15,19 @@ export enum EntityType {
   user = 'user',
   host = 'host',
   service = 'service',
+  generic = 'generic',
 }
 
 export enum EntityIdentifierFields {
   hostName = 'host.name',
   userName = 'user.name',
   serviceName = 'service.name',
+  generic = 'entity.id',
 }
 
 export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFields> = {
   [EntityType.host]: EntityIdentifierFields.hostName,
   [EntityType.user]: EntityIdentifierFields.userName,
   [EntityType.service]: EntityIdentifierFields.serviceName,
+  [EntityType.generic]: EntityIdentifierFields.generic,
 };

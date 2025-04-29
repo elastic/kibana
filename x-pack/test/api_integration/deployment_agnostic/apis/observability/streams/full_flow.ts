@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestStreamUpsertRequest } from '@kbn/streams-schema';
+import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -17,6 +17,7 @@ import {
   enableStreams,
   fetchDocument,
   forkStream,
+  getStream,
   indexAndAssertTargetStream,
   indexDocument,
   putStream,
@@ -180,6 +181,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('fails to fork logs to logs.nginx when already forked', async () => {
+        const body = {
+          stream: {
+            name: 'logs.nginx',
+          },
+          if: {
+            field: 'log.logger',
+            operator: 'eq' as const,
+            value: 'nginx',
+          },
+        };
+        const response = await forkStream(apiClient, 'logs', body, 409);
+        expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
       });
 
       it('Index an Nginx access log message, should goto logs.nginx', async () => {
@@ -439,6 +455,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dataStreams.data_streams.map((stream) => [stream.name, stream.indices.length])
         );
         expect(actualIndexCounts).to.eql(expectedIndexCounts);
+      });
+
+      it('removes routing from parent when child is deleted', async () => {
+        const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.nginx.access',
+            },
+          },
+        });
+        expect(deleteResponse.status).to.eql(200);
+
+        const streamResponse = await getStream(apiClient, 'logs.nginx');
+        expect((streamResponse.stream as WiredStreamDefinition).ingest.wired.routing).to.eql([
+          {
+            destination: 'logs.nginx.error',
+            if: {
+              field: 'log',
+              operator: 'eq',
+              value: 'error',
+            },
+          },
+        ]);
+      });
+
+      it('deletes children when parent is deleted', async () => {
+        const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.nginx',
+            },
+          },
+        });
+        expect(deleteResponse.status).to.eql(200);
+
+        await getStream(apiClient, 'logs.nginx', 404);
+        await getStream(apiClient, 'logs.nginx.error', 404);
       });
     });
   });

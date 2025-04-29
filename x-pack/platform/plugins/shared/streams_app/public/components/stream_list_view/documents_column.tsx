@@ -14,19 +14,16 @@ import {
   Chart,
   ScaleType,
   Settings,
-  LIGHT_THEME,
-  DARK_THEME,
   niceTimeFormatter,
   Tooltip,
   TooltipStickTo,
-  type SettingsProps,
 } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import { useTimeFilter } from '../../hooks/use_timefilter';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function DocumentsColumn({
   indexPattern,
@@ -42,25 +39,30 @@ export function DocumentsColumn({
       },
     },
   } = useKibana();
+  const chartBaseTheme = useElasticChartsTheme();
 
-  const { absoluteTimeRange } = useTimeFilter();
-  const minInterval = Math.floor((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints);
+  const { timeState } = useTimefilter();
+
+  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
 
   const histogramQueryFetch = useStreamsAppFetch(
-    async ({ signal }) => {
+    async ({ signal, timeState: { start, end } }) => {
       return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
             query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
-            start: absoluteTimeRange.start,
-            end: absoluteTimeRange.end,
+            start,
+            end,
           },
         },
         signal,
       });
     },
-    [streamsRepositoryClient, indexPattern, absoluteTimeRange, minInterval]
+    [streamsRepositoryClient, indexPattern, , minInterval],
+    {
+      withTimeRange: true,
+    }
   );
 
   const allTimeseries = React.useMemo(
@@ -77,7 +79,7 @@ export function DocumentsColumn({
     0
   );
 
-  const xFormatter = niceTimeFormatter([absoluteTimeRange.start, absoluteTimeRange.end]);
+  const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
 
   return (
     <EuiFlexGroup
@@ -112,8 +114,11 @@ export function DocumentsColumn({
             `}
           >
             <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
-              <SettingsWithTheme
-                xDomain={{ min: absoluteTimeRange.start, max: absoluteTimeRange.end, minInterval }}
+              <Settings
+                locale={i18n.getLocale()}
+                baseTheme={chartBaseTheme}
+                theme={{ background: { color: 'transparent' } }}
+                xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
                 noResults={<div />}
               />
               <Tooltip
@@ -136,17 +141,5 @@ export function DocumentsColumn({
         </>
       )}
     </EuiFlexGroup>
-  );
-}
-
-function SettingsWithTheme(props: SettingsProps) {
-  const { colorMode } = useEuiTheme();
-  return (
-    <Settings
-      locale={i18n.getLocale()}
-      baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME}
-      theme={{ background: { color: 'transparent' } }}
-      {...props}
-    />
   );
 }

@@ -7,8 +7,6 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IconType } from '@elastic/eui';
-import { get } from 'lodash/fp';
-import { getAllEntityTypes } from '../../../../common/entity_analytics/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
 import {
@@ -18,23 +16,21 @@ import {
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 
 export const getEntityType = (record: Entity): EntityType => {
-  const allEntityTypes = getAllEntityTypes();
+  // Looking at `entity.type` to keep backward compatibility
+  const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
 
-  const entityType = allEntityTypes.find((type) => {
-    return get(type, record) !== undefined;
-  });
-
-  if (!entityType) {
+  if (Object.keys(EntityType).indexOf(entityType) < 0) {
     throw new Error(`Unexpected entity: ${JSON.stringify(record)}`);
   }
 
-  return entityType;
+  return EntityType[entityType as keyof typeof EntityType];
 };
 
 export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.user]: 'user',
   [EntityType.host]: 'storage',
   [EntityType.service]: 'node',
+  [EntityType.generic]: 'globe',
 };
 
 export const sourceFieldToText = (source: string) => {
