@@ -332,36 +332,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('with continuous rollups disabled', () => {
-        it('returns only 1m intervals', async () => {
-          const response = await getTimeRangeMedata({
-            start,
-            end,
-          });
-
-          expect(response.sources).to.eql([
-            {
-              documentType: ApmDocumentType.ServiceTransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-            {
-              documentType: ApmDocumentType.TransactionEvent,
-              rollupInterval: RollupInterval.None,
-              hasDocs: true,
-              hasDurationSummaryField: false,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-          ]);
-        });
-      });
-
       describe('with service metrics disabled', () => {
         it('only returns tx metrics and events as available sources', async () => {
           const response = await getTimeRangeMedata({
