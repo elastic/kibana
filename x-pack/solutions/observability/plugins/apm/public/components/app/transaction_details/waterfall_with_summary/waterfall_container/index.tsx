@@ -11,7 +11,6 @@ import type { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
-import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 import { Waterfall } from './waterfall';
 import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 import { WaterfallFlyout } from './waterfall/waterfall_flyout';
@@ -64,18 +63,9 @@ export function WaterfallContainer({
       <EuiFlexItem>
         <EuiSwitch
           id="showCriticalPath"
-          label={
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
-                  defaultMessage: 'Show critical path',
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TechnicalPreviewBadge icon="beaker" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
+          label={i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+            defaultMessage: 'Show critical path',
+          })}
           checked={showCriticalPath}
           onChange={(event) => {
             onShowCriticalPathChange(event.target.checked);
