@@ -13,7 +13,7 @@ import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { USER_AVATAR_ITEM_TEST_ID } from '../../../../../../common/components/user_profiles/test_ids';
 import { useBulkGetUserProfiles } from '../../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import { type RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   RuleTranslationResult,
   SIEM_MIGRATIONS_ASSISTANT_USER,
@@ -21,7 +21,7 @@ import {
 import * as i18n from './translations';
 
 interface SummaryTabProps {
-  ruleMigration: RuleMigration;
+  ruleMigration: RuleMigrationRule;
 }
 
 export const SummaryTab: React.FC<SummaryTabProps> = React.memo(({ ruleMigration }) => {

@@ -349,11 +349,12 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
-  CreateRuleMigrationRequestParamsInput,
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
+  CreateRuleMigrationRulesRequestParamsInput,
+  CreateRuleMigrationRulesRequestBodyInput,
+  DeleteRuleMigrationRequestParamsInput,
   GetAllStatsRuleMigrationResponse,
-  GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
@@ -365,6 +366,9 @@ import type {
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationResourcesMissingRequestParamsInput,
   GetRuleMigrationResourcesMissingResponse,
+  GetRuleMigrationRulesRequestQueryInput,
+  GetRuleMigrationRulesRequestParamsInput,
+  GetRuleMigrationRulesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   GetRuleMigrationTranslationStatsRequestParamsInput,
@@ -378,8 +382,10 @@ import type {
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
-  UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationResponse,
+  UpdateRuleMigrationRulesRequestParamsInput,
+  UpdateRuleMigrationRulesRequestBodyInput,
+  UpdateRuleMigrationRulesResponse,
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
   UpsertRuleMigrationResourcesResponse,
@@ -666,13 +672,29 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Creates a new SIEM rules migration using the original vendor rules provided
+   * Creates a new migration and returns the corresponding migration_id
    */
   async createRuleMigration(props: CreateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
-        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Adds original vendor rules to an already existing migration.
+   */
+  async createRuleMigrationRules(props: CreateRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -794,6 +816,21 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Deletes a rule migration document stored in the system given the rule migration id
+   */
+  async deleteRuleMigration(props: DeleteRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteRuleMigration`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1412,7 +1449,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieves the rule documents stored in the system given the rule migration id
+   * Retrieves the rule migration document stored in the system given the rule migration id
    */
   async getRuleMigration(props: GetRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetRuleMigration`);
@@ -1423,8 +1460,6 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1511,6 +1546,23 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the rule documents stored in the system given the rule migration id
+   */
+  async getRuleMigrationRules(props: GetRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationRules`);
+    return this.kbnClient
+      .request<GetRuleMigrationRulesResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2332,6 +2384,21 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
+        method: 'PATCH',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Updates rules migrations attributes
+   */
+  async updateRuleMigrationRules(props: UpdateRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigrationRules`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationRulesResponse>({
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/rules', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
         method: 'PUT',
         body: props.body,
       })
@@ -2409,8 +2476,11 @@ export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
 export interface CreateRuleMigrationProps {
-  params: CreateRuleMigrationRequestParamsInput;
   body: CreateRuleMigrationRequestBodyInput;
+}
+export interface CreateRuleMigrationRulesProps {
+  params: CreateRuleMigrationRulesRequestParamsInput;
+  body: CreateRuleMigrationRulesRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
@@ -2431,6 +2501,9 @@ export interface DeleteNoteProps {
 }
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteRuleMigrationProps {
+  params: DeleteRuleMigrationRequestParamsInput;
 }
 export interface DeleteTimelinesProps {
   body: DeleteTimelinesRequestBodyInput;
@@ -2534,7 +2607,6 @@ export interface GetRuleExecutionResultsProps {
   params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
-  query: GetRuleMigrationRequestQueryInput;
   params: GetRuleMigrationRequestParamsInput;
 }
 export interface GetRuleMigrationPrebuiltRulesProps {
@@ -2546,6 +2618,10 @@ export interface GetRuleMigrationResourcesProps {
 }
 export interface GetRuleMigrationResourcesMissingProps {
   params: GetRuleMigrationResourcesMissingRequestParamsInput;
+}
+export interface GetRuleMigrationRulesProps {
+  query: GetRuleMigrationRulesRequestQueryInput;
+  params: GetRuleMigrationRulesRequestParamsInput;
 }
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
@@ -2666,7 +2742,10 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
-  body: UpdateRuleMigrationRequestBodyInput;
+}
+export interface UpdateRuleMigrationRulesProps {
+  params: UpdateRuleMigrationRulesRequestParamsInput;
+  body: UpdateRuleMigrationRulesRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {
   params: UpdateWorkflowInsightRequestParamsInput;

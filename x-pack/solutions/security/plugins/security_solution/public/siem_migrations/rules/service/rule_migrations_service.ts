@@ -19,7 +19,7 @@ import type {
   RuleMigrationTaskStats,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
-  CreateRuleMigrationRequestBody,
+  CreateRuleMigrationRulesRequestBody,
   GetRuleMigrationStatsResponse,
   StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
@@ -39,6 +39,7 @@ import {
   getMissingResources,
   upsertMigrationResources,
   getIntegrations,
+  addRulesToMigration,
 } from '../api';
 import {
   getMissingCapabilities,
@@ -119,20 +120,42 @@ export class SiemRulesMigrationsService {
       });
   }
 
-  public async createRuleMigration(body: CreateRuleMigrationRequestBody): Promise<string> {
-    const rulesCount = body.length;
+  public async addRulesToMigration(
+    migrationId: string,
+    rules: CreateRuleMigrationRulesRequestBody
+  ) {
+    const rulesCount = rules.length;
     if (rulesCount === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
 
     try {
-      let migrationId: string | undefined;
       // Batching creation to avoid hitting the max payload size limit of the API
       for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
-        const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-        const response = await createRuleMigration({ migrationId, body: bodyBatch });
-        migrationId = response.migration_id;
+        const rulesBatch = rules.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+        await addRulesToMigration({ migrationId, body: rulesBatch });
       }
+      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
+    } catch (error) {
+      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount, error });
+      throw error;
+    }
+  }
+
+  public async createRuleMigration(data: CreateRuleMigrationRulesRequestBody): Promise<string> {
+    const rulesCount = data.length;
+    if (rulesCount === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+
+    try {
+      // create the migration
+      const response = await createRuleMigration({});
+
+      const migrationId = response.migration_id;
+
+      await this.addRulesToMigration(migrationId, data);
+
       this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
       return migrationId as string;
     } catch (error) {

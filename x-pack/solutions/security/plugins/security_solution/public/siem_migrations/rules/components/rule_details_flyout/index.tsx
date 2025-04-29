@@ -28,7 +28,7 @@ import {
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
 import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   RuleOverviewTab,
@@ -70,7 +70,7 @@ export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) 
 );
 
 interface MigrationRuleDetailsFlyoutProps {
-  ruleMigration: RuleMigration;
+  ruleMigration: RuleMigrationRule;
   ruleActions?: React.ReactNode;
   matchedPrebuiltRule?: RuleResponse;
   size?: EuiFlyoutProps['size'];

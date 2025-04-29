@@ -11,12 +11,12 @@ import { EuiText } from '@elastic/eui';
 
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
 import * as i18n from './translations';
 
 interface UpdatedByLabelProps {
-  ruleMigration: RuleMigration;
+  ruleMigration: RuleMigrationRule;
 }
 
 export const UpdatedByLabel: React.FC<UpdatedByLabelProps> = React.memo(

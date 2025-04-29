@@ -24,7 +24,6 @@ import {
   getMissingResources,
   getIntegrations,
 } from '../api';
-import type { CreateRuleMigrationRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import {
   SiemMigrationRetryFilter,
@@ -37,6 +36,7 @@ import {
   REQUEST_POLLING_INTERVAL_SECONDS,
   SiemRulesMigrationsService,
 } from './rule_migrations_service';
+import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 // --- Mocks for external modules ---
 
@@ -132,7 +132,7 @@ describe('SiemRulesMigrationsService', () => {
     });
 
     it('should create migration with a single batch', async () => {
-      const body = [{ id: 'rule1' }] as CreateRuleMigrationRequestBody;
+      const body = [{ id: 'rule1' }] as CreateRuleMigrationRulesRequestBody;
       (createRuleMigration as jest.Mock).mockResolvedValue({ migration_id: 'mig-1' });
 
       const migrationId = await service.createRuleMigration(body);

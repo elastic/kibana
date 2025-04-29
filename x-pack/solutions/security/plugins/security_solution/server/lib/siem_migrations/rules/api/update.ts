@@ -8,10 +8,10 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
+import type { UpdateRuleMigrationRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
-  UpdateRuleMigrationRequestBody,
-  UpdateRuleMigrationRequestParams,
-  type UpdateRuleMigrationResponse,
+  UpdateRuleMigrationRulesRequestBody,
+  UpdateRuleMigrationRulesRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
@@ -24,7 +24,7 @@ export const registerSiemRuleMigrationsUpdateRoute = (
   logger: Logger
 ) => {
   router.versioned
-    .put({
+    .patch({
       path: SIEM_RULE_MIGRATION_PATH,
       access: 'internal',
       security: { authz },
@@ -34,13 +34,13 @@ export const registerSiemRuleMigrationsUpdateRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(UpdateRuleMigrationRequestParams),
-            body: buildRouteValidationWithZod(UpdateRuleMigrationRequestBody),
+            params: buildRouteValidationWithZod(UpdateRuleMigrationRulesRequestParams),
+            body: buildRouteValidationWithZod(UpdateRuleMigrationRulesRequestBody),
           },
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<UpdateRuleMigrationResponse>> => {
+        async (context, req, res): Promise<IKibanaResponse<UpdateRuleMigrationRulesResponse>> => {
           const { migration_id: migrationId } = req.params;
           const rulesToUpdate = req.body;
 

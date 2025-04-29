@@ -14,10 +14,8 @@ import {
   convertTranslationResultIntoText,
   useResultVisColors,
 } from '../../utils/translation_results';
-import {
-  RuleMigrationStatusEnum,
-  type RuleMigration,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { RuleMigrationStatusEnum } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
 const statusTextWrapperClassName = css`
@@ -26,7 +24,7 @@ const statusTextWrapperClassName = css`
 `;
 
 interface StatusBadgeProps {
-  migrationRule: RuleMigration;
+  migrationRule: RuleMigrationRule;
   'data-test-subj'?: string;
 }
 

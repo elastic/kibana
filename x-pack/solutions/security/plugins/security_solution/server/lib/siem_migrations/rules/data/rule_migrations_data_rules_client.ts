@@ -16,12 +16,12 @@ import type {
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
-import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
+import type { InternalUpdateRuleMigrationRule, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
@@ -30,14 +30,14 @@ import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
-export type CreateRuleMigrationInput = Omit<
-  RuleMigration,
+export type AddRuleMigrationRulesInput = Omit<
+  RuleMigrationRule,
   '@timestamp' | 'id' | 'status' | 'created_by'
 >;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
-export interface RuleMigrationGetOptions {
+export interface RuleMigrationGetRulesOptions {
   filters?: RuleMigrationFilters;
   sort?: RuleMigrationSort;
   from?: number;
@@ -53,11 +53,11 @@ const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
-  async create(ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
+  async create(ruleMigrations: AddRuleMigrationRulesInput[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let ruleMigrationsSlice: CreateRuleMigrationInput[];
+    let ruleMigrationsSlice: AddRuleMigrationRulesInput[];
     const createdAt = new Date().toISOString();
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
@@ -83,11 +83,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Updates an array of rule migrations to be processed */
-  async update(ruleMigrations: InternalUpdateRuleMigrationData[]): Promise<void> {
+  async update(ruleMigrations: InternalUpdateRuleMigrationRule[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let ruleMigrationsSlice: InternalUpdateRuleMigrationData[];
+    let ruleMigrationsSlice: InternalUpdateRuleMigrationRule[];
     const updatedAt = new Date().toISOString();
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
@@ -117,14 +117,14 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Retrieves an array of rule documents of a specific migrations */
   async get(
     migrationId: string,
-    { filters = {}, sort: sortParam = {}, from, size }: RuleMigrationGetOptions = {}
+    { filters = {}, sort: sortParam = {}, from, size }: RuleMigrationGetRulesOptions = {}
   ): Promise<{ total: number; data: StoredRuleMigration[] }> {
     const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId, filters);
     const sort = sortParam.sortField ? getSortingOptions(sortParam) : undefined;
 
     const result = await this.esClient
-      .search<RuleMigration>({ index, query, sort, from, size })
+      .search<RuleMigrationRule>({ index, query, sort, from, size })
       .catch((error) => {
         this.logger.error(`Error searching rule migrations: ${error.message}`);
         throw error;
@@ -144,7 +144,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const query = this.getFilterQuery(migrationId, filters);
     const search = { query, sort: '_doc', scroll, size }; // sort by _doc to ensure consistent order
     try {
-      return this.getSearchBatches<RuleMigration>(search);
+      return this.getSearchBatches<RuleMigrationRule>(search);
     } catch (error) {
       this.logger.error(`Error scrolling rule migrations: ${error.message}`);
       throw error;

@@ -12,7 +12,7 @@ import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import type { CreateRuleMigrationRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { CreateRuleMigrationRulesRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
 import { FILE_UPLOAD_ERROR } from '../../../../translations';
@@ -31,7 +31,7 @@ export interface RulesFileUploadProps {
 }
 export const RulesFileUpload = React.memo<RulesFileUploadProps>(
   ({ createMigration, apiError, isLoading, isCreated }) => {
-    const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRequestBody>([]);
+    const [rulesToUpload, setRulesToUpload] = useState<CreateRuleMigrationRulesRequestBody>([]);
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {

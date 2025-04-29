@@ -7,9 +7,9 @@
 
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type {
-  RuleMigration,
   RuleMigrationResource,
   RuleMigrationResourceType,
+  RuleMigrationRule,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
@@ -54,7 +54,7 @@ export class RuleResourceRetriever {
     this.existingResources = existingRuleResources;
   }
 
-  public async getResources(ruleMigration: RuleMigration): Promise<RuleMigrationResources> {
+  public async getResources(ruleMigration: RuleMigrationRule): Promise<RuleMigrationResources> {
     const originalRule = ruleMigration.original_rule;
     const existingResources = this.existingResources;
     if (!existingResources) {

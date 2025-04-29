@@ -21,7 +21,7 @@ import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
-import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
 import * as i18n from './translations';
 import {
@@ -32,7 +32,7 @@ import { TranslationCallOut } from './callout';
 import { OriginalRuleQuery, TranslatedRuleQuery } from './query_details';
 
 interface TranslationTabProps {
-  ruleMigration: RuleMigration;
+  ruleMigration: RuleMigrationRule;
   matchedPrebuiltRule?: RuleResponse;
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }

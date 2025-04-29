@@ -21,7 +21,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { EmptyMigration } from './empty_migration';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
@@ -79,7 +79,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-    const [sortField, setSortField] = useState<keyof RuleMigration>(DEFAULT_SORT_FIELD);
+    const [sortField, setSortField] = useState<keyof RuleMigrationRule>(DEFAULT_SORT_FIELD);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     const [searchTerm, setSearchTerm] = useState<string | undefined>();
 
@@ -107,13 +107,13 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       },
     });
 
-    const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigration[]>([]);
-    const tableSelection: EuiTableSelectionType<RuleMigration> = useMemo(
+    const [selectedRuleMigrations, setSelectedRuleMigrations] = useState<RuleMigrationRule[]>([]);
+    const tableSelection: EuiTableSelectionType<RuleMigrationRule> = useMemo(
       () => ({
-        selectable: (item: RuleMigration) => {
+        selectable: (item: RuleMigrationRule) => {
           return !item.elastic_rule?.id && item.translation_result === RuleTranslationResult.FULL;
         },
-        selectableMessage: (selectable: boolean, item: RuleMigration) => {
+        selectableMessage: (selectable: boolean, item: RuleMigrationRule) => {
           if (selectable) {
             return '';
           }
@@ -144,17 +144,20 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       };
     }, [sortDirection, sortField]);
 
-    const onTableChange = useCallback(({ page, sort }: CriteriaWithPagination<RuleMigration>) => {
-      if (page) {
-        setPageIndex(page.index);
-        setPageSize(page.size);
-      }
-      if (sort) {
-        const { field, direction } = sort;
-        setSortField(field);
-        setSortDirection(direction);
-      }
-    }, []);
+    const onTableChange = useCallback(
+      ({ page, sort }: CriteriaWithPagination<RuleMigrationRule>) => {
+        if (page) {
+          setPageIndex(page.index);
+          setPageSize(page.size);
+        }
+        if (sort) {
+          const { field, direction } = sort;
+          setSortField(field);
+          setSortDirection(direction);
+        }
+      },
+      []
+    );
 
     const handleOnSearch = useCallback((value: string) => {
       setSearchTerm(value.trim());
@@ -169,7 +172,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const [isTableLoading, setTableLoading] = useState(false);
     const installSingleRule = useCallback(
-      async (ruleMigration: RuleMigration, enabled?: boolean) => {
+      async (ruleMigration: RuleMigrationRule, enabled?: boolean) => {
         setTableLoading(true);
         try {
           await installMigrationRule({ ruleMigration, enabled });
@@ -222,7 +225,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
 
     const ruleActionsFactory = useCallback(
-      (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
+      (ruleMigration: RuleMigrationRule, closeRulePreview: () => void) => {
         const canMigrationRuleBeInstalled =
           !isRulesLoading &&
           !ruleMigration.elastic_rule?.id &&
@@ -348,7 +351,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
-                <EuiBasicTable<RuleMigration>
+                <EuiBasicTable<RuleMigrationRule>
                   loading={isTableLoading}
                   items={ruleMigrations}
                   pagination={pagination}

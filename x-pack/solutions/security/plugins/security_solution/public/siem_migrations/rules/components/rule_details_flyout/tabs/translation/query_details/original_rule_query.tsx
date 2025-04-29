@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import type { RuleMigration } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { QueryHeader } from './header';
 import { QueryViewer } from './query_viewer';
 import * as i18n from './translations';
 
 interface OriginalRuleQueryProps {
-  ruleMigration: RuleMigration;
+  ruleMigration: RuleMigrationRule;
 }
 
 export const OriginalRuleQuery: React.FC<OriginalRuleQueryProps> = React.memo(

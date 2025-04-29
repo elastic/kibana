@@ -26,7 +26,7 @@ export class RuleMigrationsDataBaseClient {
   protected esClient: ElasticsearchClient;
 
   constructor(
-    protected getIndexName: IndexNameProvider,
+    public getIndexName: IndexNameProvider,
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,
     protected logger: Logger,

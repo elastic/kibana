@@ -11,7 +11,7 @@ import type {
   QueryLanguage,
   RuleResponse,
 } from '../../../../../../../../common/api/detection_engine';
-import type { RuleMigration } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { VALIDATION_WARNING_CODES } from '../../../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
 import { useFormWithWarnings } from '../../../../../../../common/hooks/use_form_with_warnings';
 import type { RuleTranslationSchema } from '../types';
@@ -35,7 +35,7 @@ const transformQueryLanguage = (language: QueryLanguage) => {
 };
 
 interface TranslatedRuleQueryProps {
-  ruleMigration: RuleMigration;
+  ruleMigration: RuleMigrationRule;
   matchedPrebuiltRule?: RuleResponse;
   onTranslationUpdate?: (ruleName: string, ruleQuery: string) => Promise<void>;
 }

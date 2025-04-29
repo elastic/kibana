@@ -13,9 +13,9 @@ import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
-  RuleMigration,
+  RuleMigrationRule,
   RuleMigrationTranslationResult,
-  UpdateRuleMigrationData,
+  UpdateRuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { type RuleMigrationResource } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
@@ -30,7 +30,7 @@ export interface SiemMigration {
 }
 export type StoredSiemMigration = Stored<SiemMigration>;
 
-export type StoredRuleMigration = Stored<RuleMigration>;
+export type StoredRuleMigration = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
 export interface SiemRuleMigrationsClientDependencies {
@@ -60,7 +60,7 @@ export interface RuleMigrationPrebuiltRule {
 
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 
-export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
+export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
   translation_result?: RuleMigrationTranslationResult;
 };
 

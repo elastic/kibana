@@ -8,8 +8,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import type {
-  RuleMigration,
-  UpdateRuleMigrationData,
+  RuleMigrationRule,
+  UpdateRuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
 import type { UpdateRuleMigrationResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -22,7 +22,7 @@ import { updateMigrationRules } from '../api';
 
 export const UPDATE_MIGRATION_RULE_MUTATION_KEY = ['PUT', SIEM_RULE_MIGRATION_PATH];
 
-export const useUpdateMigrationRule = (ruleMigration: RuleMigration) => {
+export const useUpdateMigrationRule = (ruleMigration: RuleMigrationRule) => {
   const { addError } = useAppToasts();
   const { telemetry } = useKibana().services.siemMigrations.rules;
 
@@ -38,7 +38,7 @@ export const useUpdateMigrationRule = (ruleMigration: RuleMigration) => {
   const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
   const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
-  return useMutation<UpdateRuleMigrationResponse, Error, UpdateRuleMigrationData>(
+  return useMutation<UpdateRuleMigrationResponse, Error, UpdateRuleMigrationRule>(
     (ruleUpdateData) => updateMigrationRules({ migrationId, rulesToUpdate: [ruleUpdateData] }),
     {
       mutationKey: UPDATE_MIGRATION_RULE_MUTATION_KEY,

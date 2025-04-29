@@ -13,8 +13,8 @@ export const SIEM_RULE_MIGRATIONS_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as cons
 export const SIEM_RULE_MIGRATIONS_ALL_STATS_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/stats` as const;
 export const SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH =
   `${SIEM_RULE_MIGRATIONS_PATH}/integrations` as const;
-export const SIEM_RULE_MIGRATION_CREATE_PATH =
-  `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id?}` as const;
+export const SIEM_RULE_MIGRATION_RULES_PATH =
+  `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}` as const;
 export const SIEM_RULE_MIGRATION_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}` as const;
 export const SIEM_RULE_MIGRATION_START_PATH = `${SIEM_RULE_MIGRATION_PATH}/start` as const;
 export const SIEM_RULE_MIGRATION_STATS_PATH = `${SIEM_RULE_MIGRATION_PATH}/stats` as const;

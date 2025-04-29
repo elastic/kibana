@@ -8,6 +8,8 @@
 import { v4 as uuidV4 } from 'uuid';
 import type { StoredSiemMigration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import type { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
+import type { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 
 export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseClient {
   async create(): Promise<string> {
@@ -46,6 +48,67 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
       })
       .catch((error) => {
         this.logger.error(`Error getting migration ${id}: ${error}`);
+        throw error;
+      });
+  }
+
+  /**
+   *
+   * Deletes the migration document and all the rules and resources associated with it.
+   *
+   * */
+  async delete({
+    id,
+    rulesClient,
+    resourcesClient,
+  }: {
+    id: string;
+    rulesClient: RuleMigrationsDataRulesClient;
+    resourcesClient: RuleMigrationsDataResourcesClient;
+  }): Promise<void> {
+    const index = await this.getIndexName();
+
+    const resourcesIndexName = await resourcesClient.getIndexName();
+    const resourcesToBeDeleted = await resourcesClient.get(id);
+    const resourcesToBeDeletedDocIds = resourcesToBeDeleted.map((resource) => resource.id);
+
+    const ruleIndexName = await rulesClient.getIndexName();
+    const rulesToBeDeleted = await rulesClient.get(id);
+    const rulesToBeDeletedDocIds = rulesToBeDeleted.data.map((rule) => rule.id);
+
+    const rulesDeleteOperations = rulesToBeDeletedDocIds.map((docId) => ({
+      delete: {
+        _id: docId,
+        _index: ruleIndexName,
+      },
+    }));
+
+    const resourcesDeleteOperations = resourcesToBeDeletedDocIds.map((docId) => ({
+      delete: {
+        _id: docId,
+        _index: resourcesIndexName,
+      },
+    }));
+
+    return this.esClient
+      .bulk({
+        refresh: 'wait_for',
+        operations: [
+          {
+            delete: {
+              _index: index,
+              _id: id,
+            },
+          },
+          ...rulesDeleteOperations,
+          ...resourcesDeleteOperations,
+        ],
+      })
+      .then(() => {
+        this.logger.info(`Deleted migration ${id}`);
+      })
+      .catch((error) => {
+        this.logger.error(`Error deleting migration ${id}: ${error}`);
         throw error;
       });
   }

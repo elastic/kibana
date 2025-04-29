@@ -9,8 +9,8 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
 import type {
-  RuleMigration,
   RuleMigrationResourceType,
+  RuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
@@ -125,7 +125,7 @@ export class SiemRulesMigrationsTelemetry {
 
   // Translated rule actions
 
-  reportTranslatedRuleUpdate = (params: { ruleMigration: RuleMigration; error?: Error }) => {
+  reportTranslatedRuleUpdate = (params: { ruleMigration: RuleMigrationRule; error?: Error }) => {
     const { ruleMigration, error } = params;
     this.telemetryService.reportEvent(SiemMigrationsEventTypes.TranslatedRuleUpdate, {
       eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleUpdate],
@@ -136,7 +136,7 @@ export class SiemRulesMigrationsTelemetry {
   };
 
   reportTranslatedRuleInstall = (params: {
-    ruleMigration: RuleMigration;
+    ruleMigration: RuleMigrationRule;
     enabled: boolean;
     error?: Error;
   }) => {

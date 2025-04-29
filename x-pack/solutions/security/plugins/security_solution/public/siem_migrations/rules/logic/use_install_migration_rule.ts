@@ -7,8 +7,8 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../common/siem_migrations/constants';
 import type { InstallMigrationRulesResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -20,7 +20,7 @@ import { installMigrationRules } from '../api';
 export const INSTALL_MIGRATION_RULE_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
 
 interface InstallMigrationRuleParams {
-  ruleMigration: RuleMigration;
+  ruleMigration: RuleMigrationRule;
   enabled?: boolean;
 }
 

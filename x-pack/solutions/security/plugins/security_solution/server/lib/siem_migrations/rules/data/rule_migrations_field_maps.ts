@@ -7,12 +7,12 @@
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 import type {
-  RuleMigration,
   RuleMigrationResource,
+  RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigration, RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
-export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
+export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationRule, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
   migration_id: { type: 'keyword', required: true },
   created_by: { type: 'keyword', required: true },
