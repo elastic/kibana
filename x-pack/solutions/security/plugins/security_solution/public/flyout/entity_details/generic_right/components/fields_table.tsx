@@ -18,8 +18,6 @@ interface FlattenedItem {
   value: unknown;
 }
 
-const TABLE_PINS_STORAGE_KEY = 'pinned_fields';
-
 const isValidEcsField = (fieldName: string): fieldName is keyof typeof EcsFlat =>
   fieldName in EcsFlat;
 
@@ -73,37 +71,13 @@ export interface FieldsTableProps {
    * If not provided, pinning functionality will be disabled.
    */
   tableStorageKey?: string;
-
-  /**
-   * Disables the search box when set to true.
-   * Default is false, enabling the search box.
-   */
-  disableSearch?: boolean;
-
-  /**
-   * If true, only pinned fields will be shown in the table.
-   * Default is false, showing all fields.
-   */
-  onlyShowPinnedFields?: boolean;
-
-  /**
-   * If true, hides the pinning functionality (no pin buttons are shown).
-   * Default is false, where pinning functionality is enabled.
-   */
-  hidePins?: boolean;
 }
 
 /**
  * Displays a table of flattened fields and values with an option to pin items to the top.
  */
-export const FieldsTable: React.FC<FieldsTableProps> = ({
-  document,
-  tableStorageKey,
-  disableSearch = false,
-  onlyShowPinnedFields = false,
-  hidePins = false,
-}) => {
-  const storageKey = tableStorageKey ? `${TABLE_PINS_STORAGE_KEY}-${tableStorageKey}` : null;
+export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorageKey }) => {
+  const storageKey = tableStorageKey ? tableStorageKey : null;
   const [pinnedFields, setPinnedFields] = useState<string[]>([]);
 
   // load pinned fields from localStorage into state if a storageKey is provided
@@ -113,24 +87,6 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
     if (storedPinned) {
       setPinnedFields(JSON.parse(storedPinned));
     }
-  }, [storageKey]);
-
-  // Listen to changes from other tabs or components
-  useEffect(() => {
-    if (!storageKey) return;
-
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === storageKey) {
-        const newPinnedFields = event.newValue ? JSON.parse(event.newValue) : [];
-        setPinnedFields(newPinnedFields);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
   }, [storageKey]);
 
   const togglePin = useCallback(
@@ -145,7 +101,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
         const updatedPinnedString = JSON.stringify(updatedPinned);
         localStorage.setItem(storageKey, updatedPinnedString);
 
-        // Fire custom event for same-tab listeners
+        // Dispatch event to notify other components
         window.dispatchEvent(
           new StorageEvent('storage', {
             key: storageKey,
@@ -162,14 +118,9 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
 
   const sortedItems = getSortedFlattenedItems(document, pinnedFields);
 
-  // Only show pinned fields if `onlyShowPinnedFields` is true
-  const displayedItems = onlyShowPinnedFields
-    ? sortedItems.filter((item) => pinnedFields.includes(item.key))
-    : sortedItems;
-
   const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = useMemo(
     () => [
-      ...(storageKey && !hidePins
+      ...(storageKey
         ? [
             {
               field: 'key',
@@ -214,15 +165,15 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
         ),
       },
     ],
-    [pinnedFields, storageKey, togglePin, hidePins]
+    [pinnedFields, storageKey, togglePin]
   );
 
   return (
     <EuiInMemoryTable
-      items={displayedItems}
+      items={sortedItems}
       columns={columns}
       sorting={{ sort: { field: 'key', direction: 'asc' } }}
-      search={disableSearch ? undefined : { box: { incremental: true } }}
+      search={{ box: { incremental: true } }}
       pagination={{ initialPageSize: 100, showPerPageOptions: false }}
     />
   );
