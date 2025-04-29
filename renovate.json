@@ -293,7 +293,6 @@
         "deep-freeze-strict",
         "enzyme",
         "enzyme-to-json",
-        "fflate",
         "history",
         "lz-string",
         "rison-node",
