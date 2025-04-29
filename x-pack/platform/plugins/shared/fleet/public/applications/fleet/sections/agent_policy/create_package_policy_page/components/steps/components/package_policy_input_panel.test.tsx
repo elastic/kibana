@@ -525,6 +525,18 @@ describe('PackagePolicyInputPanel', () => {
         ).toBeInTheDocument();
       });
     });
+    it('should not render multiple toggles when theres only one stream', async () => {
+      //  Only send one input and then it should not be rendered, only the top level switch should render
+      render(mockPackageInfo, mockPackageInputStreams.slice(0, 1));
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
+        ).toBeInTheDocument();
+        expect(
+          await renderResult.queryByText('Sample logs hidden in agentless')
+        ).not.toBeInTheDocument();
+      });
+    });
 
     it('should render inputs when hide_in_deployment_modes is not present', async () => {
       const packageInputStreams: RegistryStreamWithDataStream[] = [

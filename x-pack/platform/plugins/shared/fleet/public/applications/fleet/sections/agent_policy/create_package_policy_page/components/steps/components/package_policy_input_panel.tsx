@@ -95,7 +95,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   }) => {
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
-
+    const showTopLevelDescription = packagePolicyInput.streams.length === 1;
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
       shouldShowStreamsByDefault(
@@ -199,7 +199,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             />
             <EuiSpacer size="s" />
             {/* show the description under the top level toggle if theres only one stream */}
-            {packagePolicyInput.streams.length === 1 && (
+            {showTopLevelDescription && (
               <EuiText size="s" color="subdued">
                 <ReactMarkdown>
                   {String(inputStreams[0].packageInputStream.description)}
