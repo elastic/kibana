@@ -84,6 +84,7 @@ packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
+<<<<<<< HEAD
 src/platform/packages/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/platform/plugins/private/cloud_integrations/cloud_data_migration @elastic/kibana-management
@@ -122,6 +123,53 @@ src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-d
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-program-team
 examples/controls_example @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
+=======
+packages/kbn-dependency-ownership @elastic/kibana-security
+packages/kbn-dependency-usage @elastic/kibana-security
+packages/kbn-docs-utils @elastic/kibana-operations
+packages/kbn-eslint-config @elastic/kibana-operations
+packages/kbn-eslint-plugin-disable @elastic/kibana-operations
+packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
+packages/kbn-eslint-plugin-eui-a11y @elastic/obs-ux-infra_services-team
+packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
+packages/kbn-eslint-plugin-imports @elastic/kibana-operations
+packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
+packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
+packages/kbn-find-used-node-modules @elastic/kibana-operations
+packages/kbn-generate @elastic/kibana-operations
+packages/kbn-generate-console-definitions @elastic/kibana-management
+packages/kbn-import-locator @elastic/kibana-operations
+packages/kbn-json-ast @elastic/kibana-operations
+packages/kbn-kibana-manifest-schema @elastic/kibana-operations
+packages/kbn-lint-packages-cli @elastic/kibana-operations
+packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
+packages/kbn-lock-manager @elastic/obs-ai-assistant
+packages/kbn-managed-vscode-config @elastic/kibana-operations
+packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
+packages/kbn-manifest @elastic/kibana-core
+packages/kbn-mock-idp-plugin @elastic/kibana-security
+packages/kbn-optimizer @elastic/kibana-operations
+packages/kbn-peggy-loader @elastic/kibana-operations
+packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
+packages/kbn-picomatcher @elastic/kibana-operations
+packages/kbn-plugin-check @elastic/appex-sharedux
+packages/kbn-plugin-generator @elastic/kibana-operations
+packages/kbn-plugin-helpers @elastic/kibana-operations
+packages/kbn-relocate @elastic/kibana-core
+packages/kbn-repo-file-maps @elastic/kibana-operations
+packages/kbn-repo-linter @elastic/kibana-operations
+packages/kbn-repo-source-classifier @elastic/kibana-operations
+packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-set-map @elastic/kibana-operations
+packages/kbn-sort-package-json @elastic/kibana-operations
+packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
+packages/kbn-ts-projects @elastic/kibana-operations
+packages/kbn-ts-type-check-cli @elastic/kibana-operations
+packages/kbn-validate-next-docs-cli @elastic/kibana-operations
+packages/kbn-web-worker-stub @elastic/kibana-operations
+packages/kbn-whereis-pkg-cli @elastic/kibana-operations
+packages/kbn-yarn-lock-validator @elastic/kibana-operations
+>>>>>>> 8b8d569986f ([LockManager] Expose as package (#219220))
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core

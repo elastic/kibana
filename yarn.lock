@@ -6006,6 +6006,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/lock-manager@link:packages/kbn-lock-manager":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:src/platform/packages/shared/kbn-logging-mocks":
   version "0.0.0"
   uid ""
