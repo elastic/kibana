@@ -122,7 +122,6 @@ const getTestUtils = (
 
   describe('Artifacts', () => {
     it('should return the artifacts correctly', async () => {
-
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -150,11 +149,11 @@ const getTestUtils = (
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/${
-            describeType === 'public' ? 'api' : 'internal'
-          }/alerting/rule/${createdAlert.id}`
-        );
-      
+        `${getUrlPrefix(Spaces.space1.id)}/${
+          describeType === 'public' ? 'api' : 'internal'
+        }/alerting/rule/${createdAlert.id}`
+      );
+
       if (describeType === 'public') {
         expect(response.body.artifacts).to.be(undefined);
       } else if (describeType === 'internal') {
