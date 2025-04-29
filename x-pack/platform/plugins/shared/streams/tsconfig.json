@@ -46,7 +46,6 @@
     "@kbn/es-types",
     "@kbn/alerts-as-data-utils",
     "@kbn/rule-registry-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/rule-data-utils",
     "@kbn/features-plugin",
     "@kbn/i18n"
