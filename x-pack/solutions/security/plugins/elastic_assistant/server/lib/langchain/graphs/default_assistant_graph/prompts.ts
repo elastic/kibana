@@ -7,7 +7,13 @@
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
-export const formatPrompt = ({prompt, additionalPrompt}:{prompt: string, additionalPrompt?: string}) =>
+export const formatPrompt = ({
+  prompt,
+  additionalPrompt,
+}: {
+  prompt: string;
+  additionalPrompt?: string;
+}) =>
   ChatPromptTemplate.fromMessages([
     ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
     ['placeholder', '{knowledge_history}'],
