@@ -10,7 +10,7 @@ import { EventHit } from '../../../../../common/search_strategy';
 import { buildObjectRecursive } from './build_object_recursive';
 
 describe('buildObjectRecursive', () => {
-  let eventHitKeys = Object.keys(eventHit.fields ?? {});
+  const eventHitKeys = Object.keys(eventHit.fields ?? {});
   it('builds an object from a single non-nested field', () => {
     expect(buildObjectRecursive('@timestamp', eventHit.fields, eventHitKeys)).toEqual({
       '@timestamp': ['2020-11-17T14:48:08.922Z'],
@@ -76,7 +76,9 @@ describe('buildObjectRecursive', () => {
   });
 
   it('builds intermediate objects at multiple levels', () => {
-    expect(buildObjectRecursive('threat.enrichments.matched.atomic', eventHit.fields, eventHitKeys)).toEqual({
+    expect(
+      buildObjectRecursive('threat.enrichments.matched.atomic', eventHit.fields, eventHitKeys)
+    ).toEqual({
       threat: {
         enrichments: [
           {
@@ -120,7 +122,9 @@ describe('buildObjectRecursive', () => {
   });
 
   it('preserves multiple values for a single leaf', () => {
-    expect(buildObjectRecursive('threat.enrichments.matched.field', eventHit.fields, eventHitKeys)).toEqual({
+    expect(
+      buildObjectRecursive('threat.enrichments.matched.field', eventHit.fields, eventHitKeys)
+    ).toEqual({
       threat: {
         enrichments: [
           {
@@ -191,7 +195,9 @@ describe('buildObjectRecursive', () => {
     });
 
     it('includes objects without the field', () => {
-      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf', nestedHit.fields, nestedHitKeys)).toEqual({
+      expect(
+        buildObjectRecursive('nested_1.foo.nested_2.bar.leaf', nestedHit.fields, nestedHitKeys)
+      ).toEqual({
         nested_1: {
           foo: [
             {
@@ -210,7 +216,9 @@ describe('buildObjectRecursive', () => {
     });
 
     it('groups multiple leaf values', () => {
-      expect(buildObjectRecursive('nested_1.foo.nested_2.bar.leaf_2', nestedHit.fields, nestedHitKeys)).toEqual({
+      expect(
+        buildObjectRecursive('nested_1.foo.nested_2.bar.leaf_2', nestedHit.fields, nestedHitKeys)
+      ).toEqual({
         nested_1: {
           foo: [
             {

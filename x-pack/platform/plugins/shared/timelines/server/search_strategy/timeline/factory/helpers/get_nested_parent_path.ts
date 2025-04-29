@@ -8,7 +8,5 @@
 /**
  * If a prefix of our full field path is present as a field, we know that our field is nested
  */
-export const getNestedParentPath = (
-  fieldPath: string,
-  fields: string[],
-): string | undefined => fields.find((field) => field !== fieldPath && fieldPath.startsWith(`${field}.`));
+export const getNestedParentPath = (fieldPath: string, fields: string[]): string | undefined =>
+  fields.find((field) => field !== fieldPath && fieldPath.startsWith(`${field}.`));
