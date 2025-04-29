@@ -12,43 +12,35 @@ import type {
 } from '../../../../../../../common/routes/rule/response';
 
 describe('transformGetResponse', () => {
+  const mockedRule = {
+    id: '1',
+    alertTypeId: '1',
+    schedule: { interval: '10s' },
+    params: {
+      bar: true,
+    },
+    createdAt: new Date('2020-08-20T19:23:38Z'),
+    updatedAt: new Date('2020-08-20T19:23:38Z'),
+    actions: [],
+    consumer: 'bar',
+    name: 'abc',
+    tags: ['foo'],
+    enabled: true,
+    muteAll: false,
+    notifyWhen: 'onActionGroupChange' as const,
+    createdBy: '',
+    updatedBy: '',
+    apiKeyOwner: '',
+    throttle: '30s',
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown' as const,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
+    revision: 0,
+  };
   describe('includeArtifacts is not specified', () => {
     it('should not return artifacts by default', () => {
-      const mockedRule = {
-        id: '1',
-        alertTypeId: '1',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        createdAt: new Date('2020-08-20T19:23:38Z'),
-        updatedAt: new Date('2020-08-20T19:23:38Z'),
-        actions: [],
-        consumer: 'bar',
-        name: 'abc',
-        tags: ['foo'],
-        enabled: true,
-        muteAll: false,
-        notifyWhen: 'onActionGroupChange' as const,
-        createdBy: '',
-        updatedBy: '',
-        apiKeyOwner: '',
-        throttle: '30s',
-        mutedInstanceIds: [],
-        executionStatus: {
-          status: 'unknown' as const,
-          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        },
-        revision: 0,
-        artifacts: {
-          dashboards: [
-            {
-              id: 'dashboard-1'
-            }
-          ],
-        },
-      };
-  
       const expectedResult: RuleResponseV1<RuleParamsV1> = {
         id: '1',
         rule_type_id: '1',
@@ -76,49 +68,23 @@ describe('transformGetResponse', () => {
         },
         revision: 0,
       };
-  
-      const result = transformGetResponse(mockedRule);
+
+      const result = transformGetResponse({
+        ...mockedRule,
+        artifacts: {
+          dashboards: [
+            {
+              id: 'dashboard-1',
+            },
+          ],
+        },
+      });
       expect(result).toEqual(expectedResult);
     });
   });
 
   describe('includeArtifacts is true', () => {
     it('should return artifacts if artifacts are specified', () => {
-      const mockedRule = {
-        id: '1',
-        alertTypeId: '1',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        createdAt: new Date('2020-08-20T19:23:38Z'),
-        updatedAt: new Date('2020-08-20T19:23:38Z'),
-        actions: [],
-        consumer: 'bar',
-        name: 'abc',
-        tags: ['foo'],
-        enabled: true,
-        muteAll: false,
-        notifyWhen: 'onActionGroupChange' as const,
-        createdBy: '',
-        updatedBy: '',
-        apiKeyOwner: '',
-        throttle: '30s',
-        mutedInstanceIds: [],
-        executionStatus: {
-          status: 'unknown' as const,
-          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        },
-        revision: 0,
-        artifacts: {
-          dashboards: [
-            {
-              id: 'dashboard-1'
-            }
-          ],
-        },
-      };
-  
       const expectedResult: RuleResponseV1<RuleParamsV1> = {
         id: '1',
         rule_type_id: '1',
@@ -148,45 +114,29 @@ describe('transformGetResponse', () => {
         artifacts: {
           dashboards: [
             {
-              id: 'dashboard-1'
-            }
+              id: 'dashboard-1',
+            },
           ],
         },
       };
-  
-      const result = transformGetResponse(mockedRule, true);
+
+      const result = transformGetResponse(
+        {
+          ...mockedRule,
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+            ],
+          },
+        },
+        true
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('should not return any artifacts if no artifacts are specified', () => {
-      const mockedRule = {
-        id: '1',
-        alertTypeId: '1',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        createdAt: new Date('2020-08-20T19:23:38Z'),
-        updatedAt: new Date('2020-08-20T19:23:38Z'),
-        actions: [],
-        consumer: 'bar',
-        name: 'abc',
-        tags: ['foo'],
-        enabled: true,
-        muteAll: false,
-        notifyWhen: 'onActionGroupChange' as const,
-        createdBy: '',
-        updatedBy: '',
-        apiKeyOwner: '',
-        throttle: '30s',
-        mutedInstanceIds: [],
-        executionStatus: {
-          status: 'unknown' as const,
-          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        },
-        revision: 0,
-      };
-  
       const expectedResult: RuleResponseV1<RuleParamsV1> = {
         id: '1',
         rule_type_id: '1',
@@ -214,50 +164,14 @@ describe('transformGetResponse', () => {
         },
         revision: 0,
       };
-  
+
       const result = transformGetResponse(mockedRule, true);
       expect(result).toEqual(expectedResult);
-    })
-
+    });
   });
 
   describe('includeArtifacts is false', () => {
     it('should not return any artifacts', () => {
-      const mockedRule = {
-        id: '1',
-        alertTypeId: '1',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        createdAt: new Date('2020-08-20T19:23:38Z'),
-        updatedAt: new Date('2020-08-20T19:23:38Z'),
-        actions: [],
-        consumer: 'bar',
-        name: 'abc',
-        tags: ['foo'],
-        enabled: true,
-        muteAll: false,
-        notifyWhen: 'onActionGroupChange' as const,
-        createdBy: '',
-        updatedBy: '',
-        apiKeyOwner: '',
-        throttle: '30s',
-        mutedInstanceIds: [],
-        executionStatus: {
-          status: 'unknown' as const,
-          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        },
-        revision: 0,
-        artifacts: {
-          dashboards: [
-            {
-              id: 'dashboard-1'
-            }
-          ],
-        },
-      };
-  
       const expectedResult: RuleResponseV1<RuleParamsV1> = {
         id: '1',
         rule_type_id: '1',
@@ -285,10 +199,21 @@ describe('transformGetResponse', () => {
         },
         revision: 0,
       };
-  
-      const result = transformGetResponse(mockedRule, false);
+
+      const result = transformGetResponse(
+        {
+          ...mockedRule,
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+            ],
+          },
+        },
+        false
+      );
       expect(result).toEqual(expectedResult);
     });
   });
 });
-
