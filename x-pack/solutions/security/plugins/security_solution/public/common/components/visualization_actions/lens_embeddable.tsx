@@ -69,6 +69,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
   casesAttachmentMetadata,
+  esql,
 }) => {
   const styles = useMemo(
     () => getStyles(wrapperWidth, wrapperHeight),
@@ -101,6 +102,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     scopeId,
     stackByField,
     title: '',
+    esql,
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
 

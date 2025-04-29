@@ -6,28 +6,23 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { AddDataSourcePanel } from './add_data_source';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 
 const mockUseNavigation = jest.fn().mockReturnValue({
   navigateTo: jest.fn(),
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
-
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
   return {
     ...original,
     useNavigation: () => mockUseNavigation(),
   };
 });
 
-jest.mock('../../../common/hooks/integrations/use_integration_link_state', () => ({
-  useIntegrationLinkState: jest.fn(() => ({})),
-}));
-
-jest.mock('./hooks/use_integrations', () => ({
+jest.mock('../hooks/use_integrations', () => ({
   useEntityAnalyticsIntegrations: jest.fn(() => [
     {
       name: 'Okta',
@@ -76,8 +71,8 @@ describe('AddDataSourcePanel', () => {
     const integrationCards = await screen.findAllByTestId('entity_analytics-integration-card');
     expect(integrationCards.length).toBe(3);
 
-    const firstButton = integrationCards[0]?.querySelector('button')!;
-    fireEvent.click(firstButton);
+    const firstCard = integrationCards[0];
+    fireEvent.click(within(firstCard).getByRole('button'));
     expect(mockNavigateTo).toHaveBeenCalled();
   });
 

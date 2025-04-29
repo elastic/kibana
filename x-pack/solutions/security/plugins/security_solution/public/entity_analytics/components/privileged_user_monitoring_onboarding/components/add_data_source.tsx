@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiCard,
   EuiFlexGrid,
@@ -20,11 +20,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useBoolean } from '@kbn/react-hooks';
 import { IndexSelectorModal } from './select_index_modal';
 import { IntegrationCards } from './integrations_cards';
 
 export const AddDataSourcePanel = () => {
-  const [isIndexModalOpen, setIsIndexModalOpen] = useState(false);
+  const [isIndexModalOpen, { on: showIndexModal, off: hideIndexModal }] = useBoolean(false);
 
   return (
     <EuiPanel paddingSize="xl" hasShadow={false} hasBorder={false}>
@@ -95,16 +96,9 @@ export const AddDataSourcePanel = () => {
                 defaultMessage="Select an index that contains relevant user activity data"
               />
             }
-            onClick={() => {
-              setIsIndexModalOpen(true);
-            }}
+            onClick={showIndexModal}
           />
-          <IndexSelectorModal
-            isOpen={isIndexModalOpen}
-            onClose={() => {
-              setIsIndexModalOpen(false);
-            }}
-          />
+          <IndexSelectorModal isOpen={isIndexModalOpen} onClose={hideIndexModal} />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiCard
