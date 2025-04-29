@@ -18,12 +18,14 @@ import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_c
 import { populateMissingSemanticTextFieldWithLock } from './populate_missing_semantic_text_fields';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { updateExistingIndexAssets } from '../index_assets/update_existing_index_assets';
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
 
-// This function populates the `semantic_text` field for knowledge base entries during the plugin's startup process.
-// It ensures all missing fields are updated in batches and uses a distributed lock to prevent conflicts in distributed environments.
-// If the knowledge base index does not support the `semantic_text` field, it is re-indexed.
+// This function performs necessary startup migrations for the observability AI assistant:
+// 1. Updates index assets to ensure mappings are correct
+// 2. If the knowledge base index does not support the `semantic_text` field, it is re-indexed.
+// 3. Populates the `semantic_text` field for knowledge base entries
 export async function runStartupMigrations({
   core,
   logger,
@@ -33,6 +35,9 @@ export async function runStartupMigrations({
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
 }) {
+  // update index assets to ensure mappings are correct
+  await updateExistingIndexAssets({ logger, core });
+
   const [coreStart] = await core.getStartServices();
   const esClient = coreStart.elasticsearch.client;
 

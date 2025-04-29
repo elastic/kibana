@@ -11,6 +11,7 @@ import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/commo
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   TINY_ELSER_INFERENCE_ID,
+  TINY_ELSER_MODEL_ID,
   createTinyElserInferenceEndpoint,
   deleteTinyElserModelAndInferenceEndpoint,
   importTinyElserModel,
@@ -19,6 +20,7 @@ import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
   restoreIndexAssets,
+  runStartupMigrations,
 } from '../utils/index_assets';
 import { restoreKbSnapshot } from '../utils/snapshots';
 
@@ -94,7 +96,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           snapshotName: 'my_snapshot',
         });
         await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
-        await runStartupMigrations();
+        await runStartupMigrations(observabilityAIAssistantAPIClient);
       });
 
       it('has an index created version later than 8.18', async () => {
@@ -115,8 +117,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             endpoint: 'GET /internal/observability_ai_assistant/kb/status',
           });
 
-          expect(body.endpoint?.inference_id).to.eql('.elser-2-elasticsearch');
-          expect(body.endpoint?.service_settings.model_id).to.eql('.elser_model_2');
+          expect(body.endpoint?.inference_id).to.eql(TINY_ELSER_INFERENCE_ID);
+          expect(body.endpoint?.service_settings.model_id).to.eql(TINY_ELSER_MODEL_ID);
         });
       });
 
@@ -152,12 +154,5 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     const { settings } = Object.values(indexSettings)[0];
     return parseInt(settings?.index?.version?.created ?? '', 10);
-  }
-
-  async function runStartupMigrations() {
-    const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
-    });
-    expect(status).to.be(200);
   }
 }

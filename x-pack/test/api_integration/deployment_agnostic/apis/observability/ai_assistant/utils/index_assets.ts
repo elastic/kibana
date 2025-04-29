@@ -9,12 +9,27 @@ import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
+import { TINY_ELSER_INFERENCE_ID } from './knowledge_base';
+
+export async function runStartupMigrations(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
+) {
+  const { status } = await observabilityAIAssistantAPIClient.editor({
+    endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
+  });
+  expect(status).to.be(200);
+}
 
 export async function createOrUpdateIndexAssets(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
 ) {
   const { status } = await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/index_assets',
+    params: {
+      query: {
+        inference_id: TINY_ELSER_INFERENCE_ID,
+      },
+    },
   });
   expect(status).to.be(200);
 }
@@ -29,7 +44,7 @@ export async function deleteIndexAssets(es: Client) {
 
   // delete index templates
   await es.indices.deleteIndexTemplate(
-    { name: '.kibana-observability-ai-assistant-index-template*' },
+    { name: Object.values(resourceNames.indexTemplate) },
     { ignore: [404] }
   );
 

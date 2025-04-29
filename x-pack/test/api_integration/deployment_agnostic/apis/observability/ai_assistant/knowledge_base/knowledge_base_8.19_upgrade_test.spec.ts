@@ -19,6 +19,7 @@ import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
   restoreIndexAssets,
+  runStartupMigrations,
 } from '../utils/index_assets';
 import { restoreKbSnapshot } from '../utils/snapshots';
 
@@ -47,7 +48,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         snapshotName: 'my_snapshot',
       });
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
-      await runStartupMigrations();
+      await runStartupMigrations(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
@@ -104,12 +105,5 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     const { settings } = Object.values(indexSettings)[0];
     return parseInt(settings?.index?.version?.created ?? '', 10);
-  }
-
-  async function runStartupMigrations() {
-    const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
-    });
-    expect(status).to.be(200);
   }
 }

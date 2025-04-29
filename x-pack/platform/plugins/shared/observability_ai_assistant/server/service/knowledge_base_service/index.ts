@@ -282,10 +282,7 @@ export class KnowledgeBaseService {
         },
         sort:
           sortBy === 'title'
-            ? [
-                { ['title.keyword']: { order: sortDirection } },
-                { doc_id: { order: sortDirection } }, // sort by doc_id for backwards compatibility
-              ]
+            ? [{ ['title.keyword']: { order: sortDirection } }]
             : [{ [String(sortBy)]: { order: sortDirection } }],
         size: 500,
         _source: {

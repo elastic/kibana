@@ -15,7 +15,7 @@ import {
   deployTinyElserAndSetupKb,
   TINY_ELSER_INFERENCE_ID,
 } from '../utils/knowledge_base';
-import { restoreIndexAssets } from '../utils/index_assets';
+import { restoreIndexAssets, runStartupMigrations } from '../utils/index_assets';
 
 interface InferenceChunk {
   text: string;
@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
 
-  async function getKnowledgeBaseEntries() {
+  async function getKnowledgeBaseEntriesFromEs() {
     const res = (await es.search({
       index: '.kibana-observability-ai-assistant-kb*',
       // Add fields parameter to include inference metadata
@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('before migrating', () => {
       it('the docs do not have semantic_text embeddings', async () => {
-        const hits = await getKnowledgeBaseEntries();
+        const hits = await getKnowledgeBaseEntriesFromEs();
         const hasSemanticTextEmbeddings = hits.some((hit) => hit._source?.semantic_text);
         expect(hasSemanticTextEmbeddings).to.be(false);
       });
@@ -91,15 +91,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('after migrating', () => {
       before(async () => {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
-        });
-        expect(status).to.be(200);
+        await runStartupMigrations(observabilityAIAssistantAPIClient);
       });
 
       it('the docs have semantic_text embeddings', async () => {
         await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntries();
+          const hits = await getKnowledgeBaseEntriesFromEs();
           const hasSemanticTextEmbeddings = hits.every((hit) => hit._source?.semantic_text);
           expect(hasSemanticTextEmbeddings).to.be(true);
 
