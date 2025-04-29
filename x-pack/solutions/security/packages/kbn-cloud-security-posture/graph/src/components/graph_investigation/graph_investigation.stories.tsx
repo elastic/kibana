@@ -85,7 +85,7 @@ const meta = {
       const { shouldShowSearchBarTour, isLoading } = context.args;
       localStorage.setItem(
         SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
-        shouldShowSearchBarTour.toString()
+        shouldShowSearchBarTour?.toString() || 'true'
       );
       const mockData = {
         useFetchGraphDataMock: {
@@ -102,7 +102,7 @@ const meta = {
       );
     },
   ],
-} satisfies Meta<GraphInvestigationPropsAndCustomArgs>;
+} satisfies Meta<Partial<GraphInvestigationPropsAndCustomArgs>>;
 
 export default meta;
 export const Investigation: StoryObj<Partial<GraphInvestigationProps>> = {};
