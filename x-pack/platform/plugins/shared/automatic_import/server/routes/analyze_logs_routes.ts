@@ -31,11 +31,6 @@ export function registerAnalyzeLogsRoutes(router: IRouter<AutomaticImportRouteHa
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
-      security: {
-        authz: {
-          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
-        },
-      },
     })
     .addVersion(
       {
