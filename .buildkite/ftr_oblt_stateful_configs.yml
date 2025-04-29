@@ -22,7 +22,7 @@ defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test/alerting_api_integration/observability/config.ts
   - x-pack/test/api_integration/apis/logs_ui/config.ts
-  - x-pack/test/api_integration/apis/logs_shared/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/logs_shared/config.ts
   - x-pack/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
