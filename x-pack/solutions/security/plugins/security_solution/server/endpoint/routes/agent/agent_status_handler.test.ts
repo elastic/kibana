@@ -118,6 +118,7 @@ describe('Agent Status API route handler', () => {
         apiTestSetup.endpointAppContextMock.service.savedObjects.createInternalScopedSoClient(),
       connectorActionsClient: (await httpHandlerContextMock.actions).getActionsClient(),
       endpointService: apiTestSetup.endpointAppContextMock.service,
+      spaceId: 'default',
     });
   });
 

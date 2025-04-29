@@ -82,8 +82,7 @@ describe('EndpointAgentStatusClient', () => {
     );
     expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
       expect.anything(),
-      expect.anything(),
-      expect.anything(),
+      'default',
       agentIds
     );
   });
