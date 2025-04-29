@@ -27,13 +27,21 @@ async function generateParser({
 
   const systemPrompt = `You are given a system's documentation and log files.
       
-      Your goal is to write a TypeScript files that exports two functions:
+      Your goal is to write a TypeScript files that exports three functions:
       
       - \`getTimestamp ( logLine:string ):number\`: extract the timestamp
       from the logline and return it as epoch milliseconds
       - \`replaceTimestamp ( logLine:string, timestamp:number ):string\`:
       replace the timestamp with the new timestamp, in the format that is
       used in the log line.
+      - \`getFakeMetadata ( logLine:string ):object\`: invent fake resource metadata that
+      is not in the log line, but is useful for the system. It's up to you what
+      to put in there, but it should be realistic, for example, it could be a host name,
+      a user name, a process name, kubernetes metadata, etc. The metadata should
+      be a JSON object and use ECS field name where possible (e.g. host.name, etc.). Add some randomness
+      to the metadata, so that it is not always exactly the same (e.g. use a random
+      number for the process id, a random host name, etc.). Make sure the metadata
+      makes sense for the system and the log line (especially for the system)
       
       Generally, you will want to generate
       a regular expression that can be used to A) extract the values
