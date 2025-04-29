@@ -21,9 +21,9 @@ import type {
   IndexNameProviders,
 } from '../types';
 import {
-  integrationsFieldMap,
+  getIntegrationsFieldMap,
+  getPrebuiltRulesFieldMap,
   migrationsFieldMaps,
-  prebuiltRulesFieldMap,
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
 } from './rule_migrations_field_maps';
@@ -45,7 +45,7 @@ interface CreateAdapterParams {
 export class RuleMigrationsDataService {
   private readonly adapters: Adapters;
 
-  constructor(private logger: Logger, private kibanaVersion: string) {
+  constructor(private logger: Logger, private kibanaVersion: string, elserInferenceId?: string) {
     this.adapters = {
       migrations: this.createIndexPatternAdapter({
         adapterId: 'migrations',
@@ -61,11 +61,11 @@ export class RuleMigrationsDataService {
       }),
       integrations: this.createIndexAdapter({
         adapterId: 'integrations',
-        fieldMap: integrationsFieldMap,
+        fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
       }),
       prebuiltrules: this.createIndexAdapter({
         adapterId: 'prebuiltrules',
-        fieldMap: prebuiltRulesFieldMap,
+        fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
       }),
     };
   }
