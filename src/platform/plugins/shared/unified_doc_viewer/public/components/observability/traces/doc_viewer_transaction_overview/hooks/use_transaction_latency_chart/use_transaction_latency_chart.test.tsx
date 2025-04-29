@@ -72,53 +72,62 @@ describe('useTransactionLatencyChart', () => {
     serviceName: 'test-service',
   };
 
-  it('should fetch and set data successfully', async () => {
-    mockHttpPost.mockResolvedValue({
-      overallHistogram: [{ x: 1, y: 2 }],
-      percentileThresholdValue: 123,
+  describe('when parameters are NOT missing', () => {
+    it('should fetch and set data successfully', async () => {
+      mockHttpPost.mockResolvedValue({
+        overallHistogram: [{ x: 1, y: 2 }],
+        percentileThresholdValue: 123,
+      });
+
+      const { result } = renderHook(() => useTransactionLatencyChart(params));
+
+      await waitFor(() => !result.current.loading);
+      await waitFor(() => !!result.current.data);
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.hasError).toBe(false);
+      expect(result.current.data).toBeDefined();
+      expect(result.current.data?.transactionDistributionChartData).toHaveLength(1);
+      expect(result.current.data?.percentileThresholdValue).toBe(123);
     });
-
-    const { result } = renderHook(() => useTransactionLatencyChart(params));
-
-    await waitFor(() => !result.current.loading);
-    await waitFor(() => !!result.current.data);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.data).toBeDefined();
-    expect(result.current.data?.transactionDistributionChartData).toHaveLength(1);
-    expect(result.current.data?.percentileThresholdValue).toBe(123);
   });
 
-  it('should handle error and show toast', async () => {
-    mockHttpPost.mockRejectedValue(new Error('Fetch error'));
+  describe('when parameters are missing', () => {
+    it('should return null data and stop loading ', async () => {
+      const { result } = renderHook(() =>
+        useTransactionLatencyChart({
+          transactionName: '',
+          transactionType: '',
+          serviceName: '',
+        })
+      );
 
-    const { result } = renderHook(() => useTransactionLatencyChart(params));
+      await waitFor(() => !result.current.loading);
 
-    await waitFor(() => !result.current.loading);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.data).toBeNull();
-    expect(mockAddDanger).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'An error occurred while fetching the latency histogram',
-        text: 'Fetch error',
-      })
-    );
+      expect(result.current.loading).toBe(false);
+      expect(result.current.hasError).toBe(false);
+      expect(result.current.data).toBeNull();
+      expect(mockHttpPost).not.toHaveBeenCalled();
+    });
   });
 
-  it('should return null data and stop loading when parameters are missing', async () => {
-    const { result } = renderHook(() =>
-      useTransactionLatencyChart({
-        transactionName: '',
-        transactionType: '',
-        serviceName: '',
-      })
-    );
+  describe('when an error occurs', () => {
+    it('should handle error and show toast', async () => {
+      mockHttpPost.mockRejectedValue(new Error('Fetch error'));
 
-    await waitFor(() => !result.current.loading);
+      const { result } = renderHook(() => useTransactionLatencyChart(params));
 
-    expect(result.current.loading).toBe(false);
-    expect(result.current.data).toBeNull();
-    expect(mockHttpPost).not.toHaveBeenCalled();
+      await waitFor(() => !result.current.loading);
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.hasError).toBe(true);
+      expect(result.current.data).toBeUndefined();
+      expect(mockAddDanger).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'An error occurred while fetching the latency histogram',
+          text: 'Fetch error',
+        })
+      );
+    });
   });
 });

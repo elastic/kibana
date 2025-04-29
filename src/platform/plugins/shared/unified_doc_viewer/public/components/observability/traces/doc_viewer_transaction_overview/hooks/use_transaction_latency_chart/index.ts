@@ -9,11 +9,12 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import type { HistogramItem } from '@kbn/apm-ui-shared';
 import { DurationDistributionChartData } from '@kbn/apm-ui-shared';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface GetTransactionDistributionChartDataParams {
@@ -100,62 +101,44 @@ export const useTransactionLatencyChart = ({
   const { core } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
 
-  const [data, setData] = useState<TransactionLatencyChartData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { loading, value, error } = useAbortableAsync(
+    async ({ signal }) => {
+      if (!transactionName || !transactionType || !serviceName) {
+        return null;
+      }
+
+      const result = await getTransactionLatencyChart({
+        core,
+        signal,
+        transactionName,
+        transactionType,
+        serviceName,
+      });
+
+      return {
+        transactionDistributionChartData: getTransactionDistributionChartData({
+          euiTheme,
+          transactionHistogram: result.overallHistogram,
+        }),
+        percentileThresholdValue: result.percentileThresholdValue,
+      };
+    },
+    [core, euiTheme, serviceName, transactionName, transactionType]
+  );
 
   useEffect(() => {
-    if (!transactionName || !transactionType || !serviceName) {
-      setData(null);
-      setLoading(false);
-      return;
+    if (error) {
+      core.notifications.toasts.addDanger({
+        title: i18n.translate(
+          'unifiedDocViewer.observability.traces.useTransactionLatencyChart.error',
+          {
+            defaultMessage: 'An error occurred while fetching the latency histogram',
+          }
+        ),
+        text: error.message,
+      });
     }
+  }, [error, core]);
 
-    const controller = new AbortController();
-    const { signal } = controller;
-
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const result = await getTransactionLatencyChart({
-          core,
-          signal,
-          transactionName,
-          transactionType,
-          serviceName,
-        });
-
-        setData({
-          transactionDistributionChartData: getTransactionDistributionChartData({
-            euiTheme,
-            transactionHistogram: result.overallHistogram,
-          }),
-          percentileThresholdValue: result.percentileThresholdValue,
-        });
-      } catch (err) {
-        if (!signal.aborted) {
-          const error = err as Error;
-          core.notifications.toasts.addDanger({
-            title: i18n.translate(
-              'unifiedDocViewer.observability.traces.useTransactionLatencyChart.error',
-              {
-                defaultMessage: 'An error occurred while fetching the latency histogram',
-              }
-            ),
-            text: error.message,
-          });
-          setData(null);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-
-    return function onUnmount() {
-      controller.abort();
-    };
-  }, [core, euiTheme, serviceName, transactionName, transactionType]);
-
-  return { loading, data };
+  return { loading, hasError: !!error, data: value as TransactionLatencyChartData | null };
 };
