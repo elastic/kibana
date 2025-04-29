@@ -6,21 +6,13 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import {
-  CONVERSATION_COUNT_TEST_ID,
-  Conversations,
-  LOADING_SKELETON_TEST_ID,
-  VIEW_CONVERSATIONS_BUTTON_TEST_ID,
-} from './conversations';
-import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant'; // Mock the custom hooks
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Conversations } from './conversations';
+import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 
 // Mock the custom hooks
-jest.mock('../assistant/api', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
   useFetchCurrentUserConversations: jest.fn(),
-}));
-
-jest.mock('../assistant_context', () => ({
   useAssistantContext: jest.fn(),
 }));
 
@@ -43,9 +35,9 @@ describe('Conversations', () => {
       isFetched: false,
     });
 
-    render(<Conversations alertId="test-id" />);
+    render(<Conversations id="test-id" />);
 
-    expect(screen.getByTestId(LOADING_SKELETON_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId('loading-skeleton')).toBeInTheDocument();
   });
 
   it('renders conversations when loaded', () => {
@@ -57,9 +49,9 @@ describe('Conversations', () => {
       isFetched: true,
     });
 
-    render(<Conversations alertId="test-id" />);
+    render(<Conversations id="test-id" />);
 
-    expect(screen.getByTestId(CONVERSATION_COUNT_TEST_ID)).toHaveTextContent('2');
+    expect(screen.getByTestId('conversation-count')).toHaveTextContent('2');
   });
 
   it('opens and closes the popover when the view button is clicked', () => {
@@ -70,13 +62,13 @@ describe('Conversations', () => {
       isFetched: true,
     });
 
-    render(<Conversations alertId="test-id" />);
+    render(<Conversations id="test-id" />);
 
-    fireEvent.click(screen.getByTestId(VIEW_CONVERSATIONS_BUTTON_TEST_ID));
+    fireEvent.click(screen.getByTestId('view-conversations'));
 
     expect(screen.getByText('Conversation 1')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId(VIEW_CONVERSATIONS_BUTTON_TEST_ID));
+    fireEvent.click(screen.getByTestId('view-conversations'));
     expect(screen.queryByText('Conversation 1')).not.toBeVisible();
   });
 
@@ -88,9 +80,9 @@ describe('Conversations', () => {
       isFetched: true,
     });
 
-    render(<Conversations alertId="test-id" />);
+    render(<Conversations id="test-id" />);
 
-    fireEvent.click(screen.getByTestId(VIEW_CONVERSATIONS_BUTTON_TEST_ID));
+    fireEvent.click(screen.getByTestId('view-conversations'));
     const conversationItem = screen.getByText('Conversation 1');
     fireEvent.click(conversationItem);
 

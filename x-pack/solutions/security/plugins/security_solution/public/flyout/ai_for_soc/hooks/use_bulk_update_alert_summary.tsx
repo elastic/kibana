@@ -7,16 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback, useRef, useState } from 'react';
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
-import {
+import type {
   PerformAlertSummaryBulkActionRequestBody,
   PerformAlertSummaryBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
-import { useAssistantContext } from '../../..';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 
 interface BulkUpdateAlertSummaryProps {
   alertSummary: PerformAlertSummaryBulkActionRequestBody;
@@ -48,7 +48,7 @@ export const useBulkUpdateAlertSummary = (): UseBulkUpdateAlertSummary => {
         });
       } catch (error) {
         toasts?.addDanger(
-          i18n.translate('xpack.elasticAssistant.alertSummary.bulkActionsError', {
+          i18n.translate('xpack.securitySolution.alertSummary.bulkActionsError', {
             defaultMessage: 'Failed to update alert summaries: {error}',
             values: { error: error instanceof Error ? error.message : String(error) },
           })

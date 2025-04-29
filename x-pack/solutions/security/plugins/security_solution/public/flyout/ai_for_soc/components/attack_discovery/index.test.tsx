@@ -10,16 +10,16 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { AttackDiscoveryWidget } from '.';
-import { useAssistantContext } from '../../assistant_context';
-import { useFindAttackDiscoveries } from './use_find_attack_discoveries';
-import * as i18n from './translations';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
+import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 
 // Mock the custom hooks
-jest.mock('../../assistant_context', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
 
-jest.mock('./use_find_attack_discoveries', () => ({
+jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
   useFindAttackDiscoveries: jest.fn(),
 }));
 jest.mock('react-router-dom', () => ({
@@ -27,6 +27,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
 }));
 jest.mock('react-router-dom-v5-compat');
+jest.mock('@kbn/security-solution-navigation');
 const mockData = {
   id: '123',
   alertIds: ['alert-id-xyz789'],
@@ -40,7 +41,7 @@ const mockData = {
   title: 'Suspicious Rundll32 Network Activity',
 };
 describe('AttackDiscoveryWidget', () => {
-  const mockNavigateToApp = jest.fn();
+  const mockNavigateTo = jest.fn();
   const mockHttp = {};
 
   const searchParamsSetMock = jest.fn();
@@ -54,9 +55,10 @@ describe('AttackDiscoveryWidget', () => {
       assistantAvailability: {
         isAssistantEnabled: true,
       },
-      navigateToApp: mockNavigateToApp,
     });
-
+    (useNavigateTo as jest.Mock).mockReturnValue({
+      navigateTo: mockNavigateTo,
+    });
     (useSearchParams as jest.Mock).mockReturnValue([searchParamsMock, setSearchParamsMock]);
   });
 
@@ -79,7 +81,7 @@ describe('AttackDiscoveryWidget', () => {
 
     render(<AttackDiscoveryWidget id={'123'} />);
 
-    expect(screen.getByText(i18n.NO_RESULTS)).toBeInTheDocument();
+    expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 
   it('renders attack discovery details when data is available', () => {
@@ -104,7 +106,7 @@ describe('AttackDiscoveryWidget', () => {
 
     fireEvent.click(screen.getByTestId('attackDiscoveryViewDetails'));
 
-    expect(mockNavigateToApp).toHaveBeenCalledWith('security', {
+    expect(mockNavigateTo).toHaveBeenCalledWith({
       path: 'attack_discovery?id=123',
     });
     expect(searchParamsSetMock).not.toHaveBeenCalled();
@@ -126,6 +128,6 @@ describe('AttackDiscoveryWidget', () => {
 
     expect(searchParamsSetMock).toHaveBeenCalledWith('id', '123');
     expect(setSearchParamsMock).toHaveBeenCalledWith(searchParamsMock);
-    expect(mockNavigateToApp).not.toHaveBeenCalled();
+    expect(mockNavigateTo).not.toHaveBeenCalled();
   });
 });

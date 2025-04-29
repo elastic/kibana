@@ -7,26 +7,11 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-<<<<<<<< HEAD:x-pack/platform/packages/shared/kbn-elastic-assistant/impl/alerts/alert_summary/index.test.tsx
 import { AlertSummary } from '.';
-import type { PromptContext } from '../../..';
-import { useAlertSummary } from './use_alert_summary';
-
-jest.mock('./use_alert_summary');
-========
-import {
-  ALERT_SUMMARY_TEST_ID,
-  AlertSummary,
-  GENERATE_INSIGHTS_BUTTON_TEST_ID,
-  REGENERATE_INSIGHTS_BUTTON_TEST_ID,
-} from './alert_summary';
 import type { PromptContext } from '@kbn/elastic-assistant';
-import { useAlertSummary } from '../hooks/use_alert_summary';
-import { MESSAGE_TEXT_TEST_ID } from './message_text';
+import { useAlertSummary } from '../../hooks/use_alert_summary';
 
-jest.mock('../hooks/use_alert_summary');
-
->>>>>>>> 8d7178638c76 ([AI4DSOC] Alert flyout code cleanup (#219810)):x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components/alert_summary.test.tsx
+jest.mock('../../hooks/use_alert_summary');
 const promptContext: PromptContext = {
   category: 'alert',
   description: 'Alert summary',
@@ -64,7 +49,7 @@ describe('AlertSummary', () => {
     });
   });
 
-  it('should render the loading state when `isLoading` is true', () => {
+  it('renders the loading state when `isLoading` is true', () => {
     (useAlertSummary as jest.Mock).mockReturnValue({
       alertSummary: '',
       recommendedActions: '',
@@ -76,13 +61,11 @@ describe('AlertSummary', () => {
         replacements: {},
       },
     });
-
     render(<AlertSummary {...defaultProps} />);
-
-    expect(screen.getByTestId(ALERT_SUMMARY_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId('generating-summary')).toBeInTheDocument();
   });
 
-  it('should render the alert summary when `hasAlertSummary` is true and `isLoading` is false', () => {
+  it('renders the alert summary when `hasAlertSummary` is true and `isLoading` is false', () => {
     (useAlertSummary as jest.Mock).mockReturnValue({
       alertSummary: 'Test alert summary',
       recommendedActions: 'Test recommended actions',
@@ -94,16 +77,12 @@ describe('AlertSummary', () => {
         replacements: {},
       },
     });
-
     render(<AlertSummary {...defaultProps} />);
-
-    expect(screen.getAllByTestId(MESSAGE_TEXT_TEST_ID)[0]).toHaveTextContent('Test alert summary');
-    expect(screen.getAllByTestId(MESSAGE_TEXT_TEST_ID)[1]).toHaveTextContent(
-      'Test recommended actions'
-    );
+    expect(screen.getAllByTestId('messageText')[0]).toHaveTextContent('Test alert summary');
+    expect(screen.getAllByTestId('messageText')[1]).toHaveTextContent('Test recommended actions');
   });
 
-  it('should render the generate button when `hasAlertSummary` is false', () => {
+  it('renders the generate button when `hasAlertSummary` is false', () => {
     const fetchAISummary = jest.fn();
     (useAlertSummary as jest.Mock).mockReturnValue({
       alertSummary: '',
@@ -116,15 +95,12 @@ describe('AlertSummary', () => {
         replacements: {},
       },
     });
-
     render(<AlertSummary {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId(GENERATE_INSIGHTS_BUTTON_TEST_ID));
-
+    fireEvent.click(screen.getByTestId('generateInsights'));
     expect(fetchAISummary).toHaveBeenCalled();
   });
 
-  it('should render the regenerate button when `hasAlertSummary` is true', () => {
+  it('renders the regenerate button when `hasAlertSummary` is true', () => {
     const fetchAISummary = jest.fn();
     (useAlertSummary as jest.Mock).mockReturnValue({
       alertSummary: 'Test alert summary',
@@ -137,11 +113,8 @@ describe('AlertSummary', () => {
         replacements: {},
       },
     });
-
     render(<AlertSummary {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId(REGENERATE_INSIGHTS_BUTTON_TEST_ID));
-
+    fireEvent.click(screen.getByTestId('regenerateInsights'));
     expect(fetchAISummary).toHaveBeenCalled();
   });
 });

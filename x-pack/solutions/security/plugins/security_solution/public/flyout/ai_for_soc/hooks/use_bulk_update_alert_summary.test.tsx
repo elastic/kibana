@@ -6,9 +6,9 @@
  */
 import { renderHook, act } from '@testing-library/react';
 import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
-import { useAssistantContext } from '../../..';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 
-jest.mock('../../..', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
 

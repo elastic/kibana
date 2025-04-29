@@ -13,7 +13,7 @@ import { AttackDiscoverySection } from './attack_discovery_section';
 import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 
 jest.mock('../context');
-jest.mock('./attack_discovery_widget', () => ({
+jest.mock('./attack_discovery', () => ({
   AttackDiscoveryWidget: jest.fn(),
 }));
 
