@@ -11,10 +11,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
     artifacts: {
-      type: 'object',
       properties: {
         investigation_guide: {
-          type: 'object',
           properties: {
             blob: {
               type: 'text',
