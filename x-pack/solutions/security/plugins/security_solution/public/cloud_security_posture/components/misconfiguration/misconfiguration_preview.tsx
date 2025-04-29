@@ -27,10 +27,17 @@ import {
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
+interface MisconfigurationPreviewDistributionBarProps {
+  key: string;
+  count: number;
+  color: string;
+}
+
 export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+  const misconfigurationStats: MisconfigurationPreviewDistributionBarProps[] = [];
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
-  return [
-    {
+  if (passedFindingsStats > 0) {
+    misconfigurationStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
         {
@@ -39,8 +46,10 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
       ),
       count: passedFindingsStats,
       color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
-    },
-    {
+    });
+  }
+  if (failedFindingsStats > 0) {
+    misconfigurationStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
         {
@@ -49,8 +58,9 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
       ),
       count: failedFindingsStats,
       color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
-    },
-  ];
+    });
+  }
+  return misconfigurationStats;
 };
 
 const MisconfigurationPreviewScore = ({

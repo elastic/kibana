@@ -45,15 +45,25 @@ type MisconfigurationSortFieldType =
   | 'resource'
   | 'rule';
 
+interface MisconfigurationDetailsDistributionBarProps {
+  key: string;
+  count: number;
+  color: string;
+  filter: () => void;
+  isCurrentFilter: boolean;
+  reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
+}
+
 const getFindingsStats = (
   passedFindingsStats: number,
   failedFindingsStats: number,
   filterFunction: (filter: string) => void,
   currentFilter: string
 ) => {
+  const misconfigurationStats: MisconfigurationDetailsDistributionBarProps[] = [];
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
-  return [
-    {
+  if (passedFindingsStats > 0) {
+    misconfigurationStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
         {
@@ -70,8 +80,10 @@ const getFindingsStats = (
         filterFunction('');
         event?.stopPropagation();
       },
-    },
-    {
+    });
+  }
+  if (failedFindingsStats > 0) {
+    misconfigurationStats.push({
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
         {
@@ -88,8 +100,9 @@ const getFindingsStats = (
         filterFunction('');
         event?.stopPropagation();
       },
-    },
-  ];
+    });
+  }
+  return misconfigurationStats;
 };
 
 /**
