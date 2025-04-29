@@ -78,7 +78,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
       expect(res.status).to.be(200);
       expect(res.body.entries).to.have.length(1);
-      expect(res.body.entries[0].title).to.be('My title');
+      expect(res.body.entries[0].text).to.be(
+        'The user has a 10 meter tall pet dinosaur. It loves carrots.'
+      );
     });
 
     it('can add new entries to KB', async () => {
