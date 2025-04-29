@@ -286,7 +286,7 @@
       "matchDepNames": [
         "@elastic/filesaver",
         "@elastic/numeral",
-        "@wojtekmaj/enzyme-adapter-react-17",
+        "@cfaester/enzyme-adapter-react-18",
         "base64-js",
         "blurhash",
         "classnames",
