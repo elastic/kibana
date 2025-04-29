@@ -1235,6 +1235,7 @@ components:
                   description: End date of the manual rule run
               required:
                 - start_date
+                - end_date
           required:
             - action
             - run
