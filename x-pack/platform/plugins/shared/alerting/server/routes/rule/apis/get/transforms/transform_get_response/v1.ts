@@ -10,8 +10,8 @@ import type { Rule, RuleParams } from '../../../../../../application/rule/types'
 
 export const transformGetResponse = <Params extends RuleParams>(
   rule: Rule<Params>,
-  excludeArtifacts: boolean = false
+  includeArtifacts: boolean = true
 ) => ({
   ...transformRuleToRuleResponseV1<Params>(rule),
-  ...(!excludeArtifacts && rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
+  ...(includeArtifacts && rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
 });

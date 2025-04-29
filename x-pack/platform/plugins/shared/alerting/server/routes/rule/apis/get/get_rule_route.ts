@@ -75,9 +75,14 @@ const buildGetRuleRoute = ({
           excludeFromPublicApi,
           includeSnoozeData: true,
         })) as Rule<RuleParamsV1>;
-
+        let includeArtifacts;
+        if (excludeFromPublicApi) { // public get route
+          includeArtifacts = false;
+        } else {
+          includeArtifacts = true; // internal get route
+        }
         const response: GetRuleResponseV1<RuleParamsV1> = {
-          body: transformGetResponseV1<RuleParamsV1>(rule, excludeFromPublicApi),
+          body: transformGetResponseV1<RuleParamsV1>(rule, includeArtifacts),
         };
         return res.ok(response);
       })
