@@ -17,8 +17,8 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import { DashboardLocatorParams } from '../../../../common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { DashboardLocatorParams } from '../../../../common';
 import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { SharedDashboardState } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
