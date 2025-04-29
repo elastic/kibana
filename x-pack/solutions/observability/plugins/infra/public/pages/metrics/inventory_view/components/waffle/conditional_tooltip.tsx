@@ -66,7 +66,6 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
 
   return (
     <div
-      role="tooltip"
       style={{ minWidth: 220 }}
       data-test-subj={`conditionalTooltipContent-${node.name}`}
       aria-label={node.name}
