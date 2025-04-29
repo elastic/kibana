@@ -39,8 +39,8 @@ module.exports = (_, argv) => {
         'buffer',
         'punycode',
         'util',
-        'url',
-        'qs',
+        // 'url',
+        // 'qs',
 
         /**
          * babel runtime helpers referenced from entry chunks
