@@ -26,12 +26,9 @@ import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { matchers } from '@emotion/jest';
 import { FormattedColumns, TableVisConfig, TableVisData } from '../types';
 import TableVisualizationComponent from './table_visualization';
 import { useUiState } from '../utils';
-
-expect.extend(matchers);
 
 describe('TableVisualizationComponent', () => {
   const coreStartMock = coreMock.createStart();
