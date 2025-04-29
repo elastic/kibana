@@ -56,7 +56,7 @@ export const IndexSearchExample = ({
           <p>
             <FormattedMessage
               id="xpack.searchIndices.indexDetail.searchExample.description"
-              defaultMessage="A search query is a request for information about data in Elasticsearch indices or datastreams."
+              defaultMessage="A search query finds relevant documents in your Elasticsearch data using exact matches, patterns, or similarity scoring."
             />
           </p>
         </EuiText>
@@ -81,7 +81,7 @@ export const IndexSearchExample = ({
           <p>
             <FormattedMessage
               id="xpack.searchIndices.indexDetail.searchExample.playground.description"
-              defaultMessage="Try several query options and preview the results."
+              defaultMessage="Try out different queries and preview the results."
             />
           </p>
         </EuiText>
