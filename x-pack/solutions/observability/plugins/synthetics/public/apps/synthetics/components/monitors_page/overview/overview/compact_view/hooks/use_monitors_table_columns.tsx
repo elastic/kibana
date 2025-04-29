@@ -19,7 +19,7 @@ import { getFilterForTypeMessage } from '../../../../management/monitor_list_tab
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
-import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, DURATION } from '../labels';
+import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, DURATION, URL, NO_URL } from '../labels';
 import { MonitorsDuration } from '../components/monitors_duration';
 
 export const useMonitorsTableColumns = ({
@@ -91,6 +91,24 @@ export const useMonitorsTableColumns = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
+      },
+      {
+        field: 'urls',
+        name: URL,
+        render: (url: OverviewStatusMetaData['urls']) =>
+          url ? (
+            <EuiLink
+              data-test-subj="syntheticsCompactViewUrl"
+              href={url}
+              target="_blank"
+              color="text"
+              external
+            >
+              {url}
+            </EuiLink>
+          ) : (
+            <EuiText>{NO_URL}</EuiText>
+          ),
       },
       {
         field: 'locationLabel',

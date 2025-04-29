@@ -218,7 +218,9 @@ export class OverviewStatusService {
   }
 
   processOverviewStatus(
-    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>,
+    monitors: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >,
     statusData: Map<string, LocationStatus>
   ) {
     let up = 0;
@@ -314,7 +316,9 @@ export class OverviewStatusService {
 
     const { filtersStr } = this.filterData;
 
-    return await this.routeContext.monitorConfigRepository.getAll({
+    return this.routeContext.monitorConfigRepository.getAll<
+      EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
+    >({
       showFromAllSpaces,
       search: query ? `${query}*` : '',
       filter: filtersStr,
@@ -330,11 +334,16 @@ export class OverviewStatusService {
         ConfigKey.TAGS,
         ConfigKey.PROJECT_ID,
         ConfigKey.ALERT_CONFIG,
+        ConfigKey.URLS,
       ],
     });
   }
 
-  getMonitorMeta(monitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>) {
+  getMonitorMeta(
+    monitor: SavedObjectsFindResult<
+      EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
+    >
+  ) {
     return {
       name: monitor.attributes[ConfigKey.NAME],
       configId: monitor.attributes[ConfigKey.CONFIG_ID],
@@ -346,6 +355,7 @@ export class OverviewStatusService {
       isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
       updated_at: monitor.updated_at,
       spaceId: monitor.namespaces?.[0],
+      urls: monitor.attributes[ConfigKey.URLS],
     };
   }
 }
