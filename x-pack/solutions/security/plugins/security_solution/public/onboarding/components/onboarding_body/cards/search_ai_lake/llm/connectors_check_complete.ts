@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { loadAiConnectors } from '../../common/connectors/ai_connectors';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
-import type { AIConnectorCardMetadata } from './types';
+import type { AssistantCardMetadata } from '../../assistant/types';
 
 const completeBadgeText = (count: number) =>
   i18n.translate('xpack.securitySolution.onboarding.llmConnector.badge.completeText', {
@@ -17,7 +17,7 @@ const completeBadgeText = (count: number) =>
   });
 
 export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
-  AIConnectorCardMetadata
+  AssistantCardMetadata
 > = async ({ http, application }) => {
   const authz = getConnectorsAuthz(application.capabilities);
 

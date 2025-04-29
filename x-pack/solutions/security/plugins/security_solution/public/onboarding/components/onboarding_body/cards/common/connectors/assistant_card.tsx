@@ -18,19 +18,19 @@ import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_dat
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
-import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
-import { OnboardingCardId } from '../../../../constants';
-import type { OnboardingCardComponent } from '../../../../types';
+import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
+import { OnboardingCardId } from '../../../../../constants';
+import type { OnboardingCardComponent } from '../../../../../types';
+import { ConnectorsMissingPrivilegesCallOut } from './missing_privileges';
+import { useStoredAssistantConnectorId } from '../../../../hooks/use_stored_state';
+import { useOnboardingContext } from '../../../../onboarding_context';
+import { OnboardingCardContentPanel } from '../card_content_panel';
+import { ConnectorCards } from './connector_cards';
+import { CardCallOut } from '../card_callout';
+import { CardSubduedText } from '../card_subdued_text';
+import type { AIConnector } from './types';
 import * as i18n from './translations';
-import { ConnectorsMissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
-import { useStoredAssistantConnectorId } from '../../../hooks/use_stored_state';
-import { useOnboardingContext } from '../../../onboarding_context';
-import { OnboardingCardContentPanel } from '../common/card_content_panel';
-import { ConnectorCards } from '../common/connectors/connector_cards';
-import { CardCallOut } from '../common/card_callout';
-import { CardSubduedText } from '../common/card_subdued_text';
-import type { AIConnector } from '../common/connectors/types';
-import type { AssistantCardMetadata } from './types';
+import type { AssistantCardMetadata } from '../../assistant/types';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,

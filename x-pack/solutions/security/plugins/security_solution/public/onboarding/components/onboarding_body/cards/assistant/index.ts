@@ -22,7 +22,7 @@ export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = 
     () =>
       import(
         /* webpackChunkName: "onboarding_assistant_card" */
-        './assistant_card'
+        '../common/connectors/assistant_card'
       )
   ),
   checkComplete: checkAssistantCardComplete,

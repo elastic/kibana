@@ -35,3 +35,22 @@ export const REQUIRED_PRIVILEGES_CONNECTORS_ALL = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges.connectorsAll',
   { defaultMessage: 'Management > Actions & Connectors: All' }
 );
+export const ASSISTANT_CARD_CALLOUT_INTEGRATIONS_BUTTON = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsButton',
+  {
+    defaultMessage: 'Add integrations step',
+  }
+);
+export const ASSISTANT_CARD_CALLOUT_INTEGRATIONS_TEXT = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsText',
+  {
+    defaultMessage: 'To add Elastic rules add integrations first.',
+  }
+);
+export const ASSISTANT_CARD_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.description',
+  {
+    defaultMessage:
+      'Choose and configure any AI provider available to use with Elastic AI Assistant.',
+  }
+);
