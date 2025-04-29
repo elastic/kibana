@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { TestProviders } from '../../../common/mock';
 
 import { mockAnomalies } from '../../../common/components/ml/mock';
@@ -63,13 +64,13 @@ describe('User Summary Component', () => {
   });
 
   test('it renders the default User Summary', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <UserOverview {...mockProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('UserOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the panel view User Summary', () => {
@@ -78,13 +79,13 @@ describe('User Summary Component', () => {
       isInDetailsSidePanel: true,
     };
 
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <UserOverview {...panelViewProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('UserOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders user risk score and level', () => {

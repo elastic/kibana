@@ -6,7 +6,7 @@
  */
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
@@ -33,7 +33,6 @@ import { getTransformQueryComposite } from './utils/get_transform_compite_query'
 
 export class CreateSLO {
   constructor(
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
     private transformManager: TransformManager,
@@ -50,12 +49,12 @@ export class CreateSLO {
 
     await Promise.all([
       this.assertSLOInexistant(slo),
-      assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient),
+      assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser),
     ]);
 
     const rollbackOperations = [];
     const createPromise = this.repository.create(slo);
-    rollbackOperations.push(() => this.repository.deleteById(slo.id, true));
+    rollbackOperations.push(() => this.repository.deleteById(slo.id, { ignoreNotFound: true }));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
@@ -131,7 +130,7 @@ export class CreateSLO {
   async createTempSummaryDocument(slo: SLODefinition) {
     return await retryTransientEsErrors(
       () =>
-        this.esClient.index({
+        this.scopedClusterClient.asCurrentUser.index({
           index: SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
@@ -144,7 +143,7 @@ export class CreateSLO {
   async deleteTempSummaryDocument(slo: SLODefinition) {
     return await retryTransientEsErrors(
       () =>
-        this.esClient.delete({
+        this.scopedClusterClient.asCurrentUser.delete({
           index: SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           refresh: true,

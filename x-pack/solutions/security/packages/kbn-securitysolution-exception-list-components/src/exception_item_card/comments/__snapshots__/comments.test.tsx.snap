@@ -133,7 +133,7 @@ Object {
                         >
                           <span
                             class="euiAvatar__icon"
-                            data-euiicon-type="userAvatar"
+                            data-euiicon-type="user"
                           />
                         </div>
                       </div>
@@ -172,7 +172,7 @@ Object {
                         >
                           <span
                             class="euiAvatar__icon"
-                            data-euiicon-type="userAvatar"
+                            data-euiicon-type="user"
                           />
                         </div>
                       </div>
@@ -270,7 +270,7 @@ Object {
                       >
                         <span
                           class="euiAvatar__icon"
-                          data-euiicon-type="userAvatar"
+                          data-euiicon-type="user"
                         />
                       </div>
                     </div>
@@ -309,7 +309,7 @@ Object {
                       >
                         <span
                           class="euiAvatar__icon"
-                          data-euiicon-type="userAvatar"
+                          data-euiicon-type="user"
                         />
                       </div>
                     </div>
@@ -463,7 +463,7 @@ Object {
                         >
                           <span
                             class="euiAvatar__icon"
-                            data-euiicon-type="userAvatar"
+                            data-euiicon-type="user"
                           />
                         </div>
                       </div>
@@ -502,7 +502,7 @@ Object {
                         >
                           <span
                             class="euiAvatar__icon"
-                            data-euiicon-type="userAvatar"
+                            data-euiicon-type="user"
                           />
                         </div>
                       </div>
@@ -599,7 +599,7 @@ Object {
                       >
                         <span
                           class="euiAvatar__icon"
-                          data-euiicon-type="userAvatar"
+                          data-euiicon-type="user"
                         />
                       </div>
                     </div>
@@ -638,7 +638,7 @@ Object {
                       >
                         <span
                           class="euiAvatar__icon"
-                          data-euiicon-type="userAvatar"
+                          data-euiicon-type="user"
                         />
                       </div>
                     </div>

@@ -93,5 +93,6 @@
     "@kbn/data-usage-plugin",
     "@kbn/observability-plugin",
     "@kbn/scout-info",
+    "@kbn/streams-schema",
   ]
 }

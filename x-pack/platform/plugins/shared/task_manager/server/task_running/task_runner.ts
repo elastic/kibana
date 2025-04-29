@@ -15,9 +15,18 @@ import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import type { ExecutionContextStart, Logger } from '@kbn/core/server';
+import type {
+  ExecutionContextStart,
+  FakeRawRequest,
+  Headers,
+  IBasePath,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -104,6 +113,7 @@ export interface Updatable {
 }
 
 type Opts = {
+  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
@@ -163,6 +173,7 @@ export class TaskManagerRunner implements TaskRunner {
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
+  private readonly basePathService: IBasePath;
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
@@ -181,6 +192,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @memberof TaskManagerRunner
    */
   constructor({
+    basePathService,
     instance,
     definitions,
     logger,
@@ -196,6 +208,7 @@ export class TaskManagerRunner implements TaskRunner {
     strategy,
     getPollInterval,
   }: Opts) {
+    this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
     this.logger = logger;
@@ -375,7 +388,12 @@ export class TaskManagerRunner implements TaskRunner {
     );
 
     try {
-      this.task = definition.createTaskRunner(modifiedContext);
+      const sanitizedTaskInstance = omit(modifiedContext.taskInstance, ['apiKey', 'userScope']);
+      const fakeRequest = this.getFakeKibanaRequest(
+        modifiedContext.taskInstance.apiKey,
+        modifiedContext.taskInstance.userScope?.spaceId
+      );
+      this.task = definition.createTaskRunner({ taskInstance: sanitizedTaskInstance, fakeRequest });
 
       const ctx = {
         type: 'task manager',
@@ -825,6 +843,25 @@ export class TaskManagerRunner implements TaskRunner {
 
   private getMaxAttempts() {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
+  }
+
+  private getFakeKibanaRequest(apiKey?: string, spaceId?: string): KibanaRequest | undefined {
+    if (apiKey) {
+      const requestHeaders: Headers = {};
+
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
+      const path = addSpaceIdToPath('/', spaceId || 'default');
+
+      const fakeRawRequest: FakeRawRequest = {
+        headers: requestHeaders,
+        path: '/',
+      };
+
+      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+      this.basePathService.set(fakeRequest, path);
+
+      return fakeRequest;
+    }
   }
 }
 

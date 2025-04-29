@@ -16,6 +16,7 @@
     "@kbn/test-jest-helpers",
     "@kbn/config",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/encrypted-saved-objects-shared",
   ],
   "exclude": [
     "target/**/*",

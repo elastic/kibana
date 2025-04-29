@@ -2129,13 +2129,13 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.17.1":
-  version "8.17.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.17.1.tgz#97baa241f1f7bdd9b9b5c7479c64996e4c54adea"
-  integrity sha512-EaDP4/jfNu0nhnHZjxk9bL9ofKWKX9QUdEJ8QsGa+/KMPBEwD+HMyYXH4FSRlg7YONI0UbdO/mMZobvcEnMFBA==
+"@elastic/elasticsearch@^8.18.2":
+  version "8.18.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.18.2.tgz#0916b6e3b5bde29ad12c2f2a241b14bf7429e4a7"
+  integrity sha512-2pOc/hGdxkbaDavfAlnUfjJdVsFRCGqg7fpsWJfJ2UzpgViIyojdViHg8zOCT1J14lAwvDgb9CNETWa3SBZRfw==
   dependencies:
-    "@elastic/transport" "^8.9.1"
-    apache-arrow "^18.0.0"
+    "@elastic/transport" "^8.9.6"
+    apache-arrow "18.x - 19.x"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.6.3":
@@ -2157,22 +2157,22 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-common@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.1.0.tgz#fa74c7f72b4ca69ff1f7a5cf45e55c979064ab73"
-  integrity sha512-2Pm9PeEr4QXjtL/YYM6faXbQ2Fm/mJXzV7QLBxUW8iHov70IHZy1e3xJOio0lI1IbO3S7t79EIS6J3/uNffJfA==
+"@elastic/eui-theme-common@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.2.0.tgz#570a988f58c24076c6f867475e70930769f3cff5"
+  integrity sha512-g2n38Uk4G9UqQU/wim+ZKWusWtO1bdudvDy/7+sdCYaxtgbINT5hhMHoU9M49D+7FJSsPuHn7gVfdYKMN9bTdQ==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@101.3.0-classic.0":
-  version "101.3.0-classic.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.3.0-classic.0.tgz#c7b0632b062257342210850a958d2e353e829026"
-  integrity sha512-REt71u2yfnVyXX3+2MWLk3VzBdHAbCeSiPcs5MHY6h4TQR1WsD8+qs9RGFFfvW9ZSXTtyimrwOjQFt6Ph64s2Q==
+"@elastic/eui@101.4.0-amsterdam.0":
+  version "101.4.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.4.0-amsterdam.0.tgz#27360ebeb71e86052f99f5e88814b197ae97558e"
+  integrity sha512-zhWSRQYFFk2lm6mycBnpX8SJOeNzKjYJ7XwTv9RFfRUR6MGe/GfUIjHGCAg52NDNUTcYPlLuPhJKcNtAMasEOQ==
   dependencies:
-    "@elastic/eui-theme-common" "0.1.0"
-    "@elastic/prismjs-esql" "^1.0.0"
+    "@elastic/eui-theme-common" "0.2.0"
+    "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -2235,10 +2235,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
 
-"@elastic/prismjs-esql@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.0.0.tgz#370c996536dcea8840f2c2288a97aca4982e13c5"
-  integrity sha512-kEQcj9wg7pUaFkW7m7zs0fz4cmg0kWUMQv6SyENXKvLGMecgDjNciEoN3CMg22PYURelbnhM7ii6nFv9hAr2NA==
+"@elastic/prismjs-esql@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.0.tgz#c7f84de21bb453831df7e8565be7430b1b078836"
+  integrity sha512-k2zZfCL4l+qCXfmc9jrnDdEWW2jDPFAHlCq1JAh3x7zWN6Eyc6ACn3oj9oy49xsuAO+BAhQ345uueL8K/3UIKg==
 
 "@elastic/react-search-ui-views@1.20.2", "@elastic/react-search-ui-views@^1.20.2":
   version "1.20.2"
@@ -2331,13 +2331,13 @@
     undici "^5.28.3"
     yaml "^2.2.2"
 
-"@elastic/transport@^8.3.1", "@elastic/transport@^8.9.1":
-  version "8.9.4"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.9.4.tgz#8acdc0b95cd0be8022e4e16ec5a755ab65ac5ea0"
-  integrity sha512-y6kjy5s0MQE3MQx9ItmvQ8th7GlGcZfzZ7ZDvI8bUhaKua2dJk01k9ia/bdJ4dnPpWpOyFTRgkgBZS31ZTLpcg==
+"@elastic/transport@^8.3.1", "@elastic/transport@^8.9.6":
+  version "8.9.6"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.9.6.tgz#f17eb2d042ea8fa2836dab56ed2446ca117146b1"
+  integrity sha512-v71jgmZtgPg2ouXF5KTPxU1a6z7YYc8nazAS7jLySteC/vrShs1OJh6oEEeo5oDc19MYUofV/JV1h5vqJVBXOw==
   dependencies:
     "@opentelemetry/api" "1.x"
-    debug "^4.3.7"
+    debug "^4.4.0"
     hpagent "^1.2.0"
     ms "^2.1.3"
     secure-json-parse "^3.0.1"
@@ -4098,6 +4098,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-packs-schema@link:x-pack/platform/packages/shared/kbn-content-packs-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""
@@ -5294,6 +5298,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/encrypted-saved-objects-shared@link:src/platform/packages/shared/kbn-encrypted-saved-objects-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/enterprise-search-plugin@link:x-pack/solutions/search/plugins/enterprise_search":
   version "0.0.0"
   uid ""
@@ -5466,10 +5474,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
@@ -5478,15 +5482,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-image-plugin@link:src/platform/plugins/shared/expression_image":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
@@ -5498,23 +5494,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-tagcloud-plugin@link:src/platform/plugins/shared/chart_expressions/expression_tagcloud":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-utils@link:src/platform/packages/private/kbn-expression-utils":
   version "0.0.0"
   uid ""
 
@@ -6386,6 +6366,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-schema@link:x-pack/solutions/observability/packages/kbn-observability-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-shared-plugin@link:x-pack/solutions/observability/plugins/observability_shared":
   version "0.0.0"
   uid ""
@@ -6683,6 +6667,10 @@
   uid ""
 
 "@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-alerts-filters-form@link:src/platform/packages/shared/response-ops/alerts-filters-form":
   version "0.0.0"
   uid ""
 
@@ -7519,6 +7507,10 @@
   uid ""
 
 "@kbn/synthetics-private-location@link:x-pack/packages/kbn-synthetics-private-location":
+  version "0.0.0"
+  uid ""
+
+"@kbn/task-manager-dependencies-plugin@link:x-pack/platform/plugins/private/task_manager_dependencies":
   version "0.0.0"
   uid ""
 
@@ -12567,10 +12559,10 @@
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.0.0"
 
-"@xstate5/react@npm:@xstate/react@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.2.tgz#92185d20efedac97350c996cda29749c2e3fdbf1"
-  integrity sha512-x5GOrE0ZYjU2ba986u0CCp7SaPwzElSn1SW0mZ9MuBgsZ+BW7vTLVOvGmURynwojdso8d6nVbK3c2+MRVqGVgA==
+"@xstate5/react@npm:@xstate/react@^5.0.3":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@xstate/react/-/react-5.0.3.tgz#3cd48ea64510aa2cc4ecc0c9f17747134173d363"
+  integrity sha512-Zdnn0VTPcVdoaAiW0OX6Nkvdoe7SNGjfaZqM61NKhjt2aNULqiicmDu2tOd1ChzlRWYDxGTdbzVqqVyMLpoHJw==
   dependencies:
     use-isomorphic-layout-effect "^1.1.2"
     use-sync-external-store "^1.2.0"
@@ -12613,9 +12605,9 @@
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
 
 "@zip.js/zip.js@^2.7.53":
-  version "2.7.53"
-  resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.7.53.tgz#bf88e90d8eed562182c01339643bc405446b0578"
-  integrity sha512-G6Bl5wN9EXXVaTUIox71vIX5Z454zEBe+akKpV4m1tUboIctT5h7ID3QXCJd/Lfy2rSvmkTmZIucf1jGRR4f5A==
+  version "2.7.60"
+  resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.7.60.tgz#0de96b93519cad804c82f96faebceda836cb24c0"
+  integrity sha512-vA3rLyqdxBrVo1FWSsbyoecaqWTV+vgPRf0QKeM7kVDG0r+lHUqd7zQDv1TO9k4BcAoNzNDSNrrel24Mk6addA==
 
 a-sync-waterfall@^1.0.0:
   version "1.0.1"
@@ -12921,10 +12913,10 @@ anymatch@^3.0.0, anymatch@^3.0.3, anymatch@^3.1.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-apache-arrow@^18.0.0:
-  version "18.1.0"
-  resolved "https://registry.yarnpkg.com/apache-arrow/-/apache-arrow-18.1.0.tgz#bb17a9e91e4e2f7b5cf4efcb9c1ab57cedac7e2a"
-  integrity sha512-v/ShMp57iBnBp4lDgV8Jx3d3Q5/Hac25FWmQ98eMahUiHPXcvwIMKJD0hBIgclm/FCG+LwPkAKtkRO1O/W0YGg==
+"apache-arrow@18.x - 19.x":
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/apache-arrow/-/apache-arrow-18.0.0.tgz#a187bd55318a7a68b6ff09835d05e89e019eba2e"
+  integrity sha512-gFlPaqN9osetbB83zC29AbbZqGiCuFH1vyyPseJ+B7SIbfBtESV62mMT/CkiIt77W6ykC/nTWFzTXFs0Uldg4g==
   dependencies:
     "@swc/helpers" "^0.5.11"
     "@types/command-line-args" "^5.2.3"
@@ -16064,7 +16056,7 @@ debug@2.6.9, debug@^2.2.0, debug@^2.3.3, debug@^2.6.9:
   dependencies:
     ms "2.0.0"
 
-debug@4, debug@^4.0.0, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.3, debug@^4.3.4, debug@^4.3.5, debug@^4.3.7, debug@^4.4.0:
+debug@4, debug@^4.0.0, debug@^4.1.0, debug@^4.1.1, debug@^4.3.1, debug@^4.3.2, debug@^4.3.3, debug@^4.3.4, debug@^4.3.5, debug@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.4.0.tgz#2b3f2aea2ffeb776477460267377dc8710faba8a"
   integrity sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==
@@ -26316,10 +26308,10 @@ react-remove-scroll@^2.5.6:
     use-callback-ref "^1.3.0"
     use-sidecar "^1.1.2"
 
-react-reverse-portal@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.2.0.tgz#0a119f8ab00885fa8aebc03a9fd2111d0e76303c"
-  integrity sha512-y4odW09uzTtyJWs9E9YbY50FypJeRzEMhEjQUpzLOXZeTHCFE88WfklvRUddTJsizFWTzMOLTE4wNgYdzeQ7uw==
+react-reverse-portal@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.3.0.tgz#ab926f551082a1ca3a0e0d7e2ed53cae1b43f23b"
+  integrity sha512-kvbPfLPKg6Y3S6tVq83us2RghvDpOS4GcJxbI7cZ0V0tuzUaSzblRIhVnKLOucfqF4lN/i9oWvEmpEi6bAOYlQ==
 
 react-router-config@^5.1.1:
   version "5.1.1"

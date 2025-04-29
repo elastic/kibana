@@ -51,6 +51,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import {
@@ -115,6 +116,7 @@ export interface ElasticAssistantPluginStart {
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   alerting: AlertingServerSetup;
+  eventLog: IEventLogService; // for writing to the event log
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
@@ -133,6 +135,8 @@ export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  eventLogger: IEventLogger;
+  eventLogIndex: string;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
@@ -179,6 +183,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   indexTemplate: {
@@ -187,6 +192,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   aliases: {
@@ -195,6 +201,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   indexPatterns: {
@@ -203,6 +210,7 @@ export interface AssistantResourceNames {
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   pipelines: {
@@ -240,6 +248,7 @@ export type AssistantToolLlm =
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
+  assistantContext?: ElasticAssistantApiRequestHandlerContext;
   anonymizationFields?: AnonymizationFieldResponse[];
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
@@ -262,4 +271,8 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
+  createLlmInstance?: () =>
+    | ActionsClientChatBedrockConverse
+    | ActionsClientChatVertexAI
+    | ActionsClientChatOpenAI;
 }

@@ -17,6 +17,7 @@ import { useFindAttackDiscoverySchedules } from '../logic/use_find_schedules';
 import { useEnableAttackDiscoverySchedule } from '../logic/use_enable_schedule';
 import { useDisableAttackDiscoverySchedule } from '../logic/use_disable_schedule';
 import { useDeleteAttackDiscoverySchedule } from '../logic/use_delete_schedule';
+import { DetailsFlyout } from '../details_flyout';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'name';
@@ -72,13 +73,14 @@ export const SchedulesTable: React.FC = React.memo(() => {
   );
 
   const [isTableLoading, setTableLoading] = useState(false);
+  const [scheduleDetailsId, setScheduleDetailsId] = useState<string | undefined>(undefined);
 
   const { mutateAsync: enableAttackDiscoverySchedule } = useEnableAttackDiscoverySchedule();
   const { mutateAsync: disableAttackDiscoverySchedule } = useDisableAttackDiscoverySchedule();
   const { mutateAsync: deleteAttackDiscoverySchedule } = useDeleteAttackDiscoverySchedule();
 
   const openScheduleDetails = useCallback((scheduleId: string) => {
-    // TODO: implement attack discovery schedule details
+    setScheduleDetailsId(scheduleId);
   }, []);
   const enableSchedule = useCallback(
     async (id: string) => {
@@ -145,6 +147,12 @@ export const SchedulesTable: React.FC = React.memo(() => {
         data-test-subj={'schedulesTable'}
         columns={rulesColumns}
       />
+      {scheduleDetailsId && (
+        <DetailsFlyout
+          scheduleId={scheduleDetailsId}
+          onClose={() => setScheduleDetailsId(undefined)}
+        />
+      )}
     </div>
   );
 });

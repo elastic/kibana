@@ -10,6 +10,7 @@
 import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
+import type { KibanaRequest } from '@kbn/core/server';
 import { isErr, tryAsResult } from './lib/result_type';
 import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -54,6 +55,12 @@ export interface RunContext {
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
+
+  /**
+   * If an API key is associated with the task, a fake KibanaRequest object
+   * is generated using the API key and passed as part of the run context.
+   */
+  fakeRequest?: KibanaRequest;
 }
 
 /**
@@ -250,6 +257,12 @@ export interface IntervalSchedule {
   interval: Interval;
 }
 
+export interface TaskUserScope {
+  apiKeyId: string;
+  spaceId?: string;
+  apiKeyCreatedByUser: boolean;
+}
+
 /*
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
@@ -355,6 +368,16 @@ export interface TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their API key
+   */
+  apiKey?: string;
+
+  /**
+   * Meta data related to the API key associated with this task
+   */
+  userScope?: TaskUserScope;
 
   /*
    * Optionally override the priority defined in the task type for this specific task instance
@@ -502,8 +525,16 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
+  apiKey?: string;
+  userScope?: TaskUserScope;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
   id: SerializedConcreteTaskInstance['id'];
 };
+
+export interface ApiKeyOptions {
+  request?: KibanaRequest;
+}
+
+export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

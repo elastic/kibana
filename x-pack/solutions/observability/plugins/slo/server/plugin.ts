@@ -29,9 +29,17 @@ import { registerServerRoutes } from './routes/register_routes';
 import { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
-import { DefaultResourceInstaller } from './services';
+import {
+  DefaultResourceInstaller,
+  DefaultSummaryTransformManager,
+  DefaultTransformManager,
+  KibanaSavedObjectsSLORepository,
+} from './services';
+import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
+import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task';
+import { createTransformGenerators } from './services/transform_generators';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -133,7 +141,7 @@ export class SLOPlugin
 
     registerSloUsageCollector(plugins.usageCollection);
 
-    const routeHandlerPlugins = mapValues(plugins, (value, key) => {
+    const mappedPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
         start: () =>
@@ -147,11 +155,58 @@ export class SLOPlugin
       core,
       dependencies: {
         corePlugins: core,
-        plugins: routeHandlerPlugins,
+        plugins: mappedPlugins,
+        config: {
+          isServerless: this.isServerless,
+        },
+        getScopedClients: async ({ request, logger }) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+
+          const internalSoClient = new SavedObjectsClient(
+            coreStart.savedObjects.createInternalRepository()
+          );
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+
+          const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
+            pluginsStart.dataViews.dataViewsServiceFactory(
+              soClient,
+              scopedClusterClient.asCurrentUser
+            ),
+            pluginsStart.alerting.getRulesClientWithRequest(request),
+            pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
+            pluginsStart.ruleRegistry.getRacClientWithRequest(request),
+          ]);
+
+          const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+          const transformManager = new DefaultTransformManager(
+            createTransformGenerators(spaceId, dataViewsService, this.isServerless),
+            scopedClusterClient,
+            logger
+          );
+          const summaryTransformManager = new DefaultSummaryTransformManager(
+            new DefaultSummaryTransformGenerator(),
+            scopedClusterClient,
+            logger
+          );
+
+          return {
+            scopedClusterClient,
+            soClient,
+            internalSoClient,
+            dataViewsService,
+            rulesClient,
+            spaceId,
+            repository,
+            transformManager,
+            summaryTransformManager,
+            racClient,
+          };
+        },
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
-      isServerless: this.isServerless,
     });
 
     core
@@ -176,6 +231,12 @@ export class SLOPlugin
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
       config: this.config,
+    });
+
+    new BulkDeleteTask({
+      core,
+      plugins: mappedPlugins,
+      logFactory: this.initContext.logger,
     });
 
     return {};

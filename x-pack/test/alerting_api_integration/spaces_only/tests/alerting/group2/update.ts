@@ -7,6 +7,9 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
@@ -20,6 +23,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('update', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -492,6 +496,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           enabled: true,
           updatedBy: null,
           apiKeyOwner: null,
+          artifacts: {
+            dashboards: [],
+          },
           apiKeyCreatedByUser: null,
           muteAll: false,
           mutedInstanceIds: [],
@@ -521,6 +528,76 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           type: RULE_SAVED_OBJECT_TYPE,
           id: createdAlert.id,
         });
+      });
+    });
+    describe('artifacts', () => {
+      it('should not return dashboards in the response', async () => {
+        const expectedArtifacts = {
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+            ],
+          },
+        };
+
+        const createResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData(expectedArtifacts))
+          .expect(200);
+
+        const esResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${createResponse.body.id}`,
+          },
+          { meta: true }
+        );
+
+        expect((esResponse.body._source as any)?.alert.artifacts.dashboards ?? []).to.eql([
+          {
+            refId: 'dashboard_0',
+          },
+        ]);
+
+        const updateResponse = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'bcd',
+            tags: ['foo'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            artifacts: {
+              dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+            },
+          })
+          .expect(200);
+
+        expect(updateResponse.body.artifacts).to.be(undefined);
+
+        const esUpdateResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${updateResponse.body.id}`,
+          },
+          { meta: true }
+        );
+        expect((esUpdateResponse.body._source as any)?.alert.artifacts.dashboards ?? {}).to.eql([
+          {
+            refId: 'dashboard_0',
+          },
+          {
+            refId: 'dashboard_1',
+          },
+        ]);
       });
     });
   });

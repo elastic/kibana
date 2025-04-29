@@ -12,17 +12,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  /*
-   * Enables experimental feature flag for eql sequence alert suppression.
-   *
-   * Ticket: https://github.com/elastic/security-team/issues/9608
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-engine
-   * Added: on October 1st, 2024 in https://github.com/elastic/kibana/pull/189725
-   * Turned: on (TBD)
-   * Expires: on (TBD)
-   */
-  alertSuppressionForSequenceEqlRuleEnabled: true,
-
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
@@ -113,6 +102,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
+
+  /**
+   * Enables advanced ESQL generation for the Assistant.
+   */
+  advancedEsqlGeneration: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.

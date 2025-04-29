@@ -40,8 +40,8 @@ const SquareContent = ({
   </div>
 );
 
-const NodeContainer = ({ children, ...props }: NodeProps) => (
-  <div
+const NodeContainer = ({ children, ...props }: NodeProps<HTMLButtonElement>) => (
+  <button
     css={css`
       position: relative;
       cursor: pointer;
@@ -49,11 +49,14 @@ const NodeContainer = ({ children, ...props }: NodeProps) => (
     {...props}
   >
     {children}
-  </div>
+  </button>
 );
 
-const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string }) => (
-  <div
+const NodeContainerSmall = ({
+  children,
+  ...props
+}: NodeProps<HTMLButtonElement> & { color: string }) => (
+  <button
     css={css`
       cursor: pointer;
       position: relative;
@@ -65,7 +68,7 @@ const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string 
     {...props}
   >
     {children}
-  </div>
+  </button>
 );
 const ValueInner = ({ children, ...props }: NodeProps) => (
   <div
@@ -160,6 +163,7 @@ export const NodeSquare = ({
   nodeName,
   value,
   showBorder,
+  nodeMetric,
 }: {
   squareSize: number;
   togglePopover: UseBooleanHandlers['toggle'];
@@ -167,12 +171,13 @@ export const NodeSquare = ({
   nodeName: string;
   value: string;
   showBorder?: boolean;
+  nodeMetric?: string;
 }) => {
   const valueMode = squareSize > 70;
   const ellipsisMode = squareSize > 30;
   const nodeAriaLabel = i18n.translate('xpack.infra.node.ariaLabel', {
-    defaultMessage: '{nodeName}, click to open menu',
-    values: { nodeName },
+    defaultMessage: '{nodeName} {value} {nodeMetric} ',
+    values: { nodeName, nodeMetric, value },
   });
   const style: CSSProperties | undefined = showBorder ? { border: 'solid 4px #000' } : undefined;
 
@@ -181,7 +186,6 @@ export const NodeSquare = ({
       data-test-subj="nodeContainer"
       style={{ width: squareSize || 0, height: squareSize || 0 }}
       onClick={togglePopover}
-      onKeyPress={togglePopover}
       className="buttonContainer"
     >
       <SquareOuter color={color} style={style}>
@@ -199,7 +203,7 @@ export const NodeSquare = ({
             ellipsisMode && (
               <ValueInner aria-label={nodeAriaLabel}>
                 {}
-                <Label color={color}>...</Label>
+                <Label color={color}>{'...'}</Label>
               </ValueInner>
             )
           )}

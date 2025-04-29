@@ -154,6 +154,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           scheduledTaskId: response.body.scheduledTaskId,
           updatedBy: null,
           apiKeyOwner: null,
+          artifacts: {
+            dashboards: [],
+          },
           apiKeyCreatedByUser: null,
           throttle: '1m',
           notifyWhen: 'onThrottleInterval',

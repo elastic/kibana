@@ -122,7 +122,6 @@ describe('Bulk update rules route', () => {
       expect(response.body).toEqual([
         {
           error: { message: 'either "id" or "rule_id" must be set', status_code: 400 },
-          rule_id: '(unknown id)',
         },
       ]);
     });

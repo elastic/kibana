@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
@@ -25,13 +26,12 @@ import {
   EuiMarkdownFormat,
   getDefaultEuiMarkdownPlugins,
   useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
 import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
-
-import './_deprecation_details_flyout.scss';
 
 export interface DeprecationDetailsFlyoutProps {
   deprecation: KibanaDeprecationDetails;
@@ -168,6 +168,7 @@ export const DeprecationDetailsFlyout = ({
   }, [deprecation, resolveDeprecation]);
 
   const { lineHeight: lineHeightMedium } = useEuiFontSize('m');
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -262,7 +263,10 @@ export const DeprecationDetailsFlyout = ({
                         <li
                           data-test-subj="manualStepsListItem"
                           key={`step-${stepIndex}`}
-                          className="upgResolveStep eui-textBreakWord"
+                          className="eui-textBreakWord"
+                          css={css`
+                            margin-bottom: ${euiTheme.size.l};
+                          `}
                         >
                           {step}
                         </li>

@@ -50,7 +50,8 @@ export const GridItemsByGroup = ({
     values: getSyntheticsFilterDisplayValues(locations, 'locations', allLocations),
     otherValues: {
       label: 'Without any location',
-      items: allConfigs?.filter((monitor) => get(monitor, 'locations', []).length === 0),
+      // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
+      items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
     },
   };
 
@@ -80,7 +81,8 @@ export const GridItemsByGroup = ({
               defaultMessage: 'Without any location',
             }
           ),
-          items: allConfigs?.filter((monitor) => !get(monitor, 'location')),
+          // All monitors should have a locationId. This array tracks monitors that are missing it, which helps identify potential issues
+          items: allConfigs?.filter((monitor) => !get(monitor, 'locationId')),
         },
       };
       break;

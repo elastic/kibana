@@ -93,6 +93,7 @@ const ALL_SPACE_RESULTS: Space[] = [
       'siem',
       'siemV2',
       'slo',
+      'streams',
       'uptime',
     ],
   },

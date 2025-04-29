@@ -96,6 +96,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({
     lists,
     actions,
+    docLinks,
     logger,
     config,
     publicBaseUrl,
@@ -302,6 +303,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 privileges,
                 ruleExecutionLogger,
                 uiSettingsClient,
+                docLinks,
               });
 
               if (readIndexWarningMessage != null) {
@@ -515,7 +517,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               // as the current status of the rule.
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join(', '),
+                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join('\n\n'),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,

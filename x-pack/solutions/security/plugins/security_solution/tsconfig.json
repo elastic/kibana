@@ -246,8 +246,14 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/security-ai-prompts",
     "@kbn/deeplinks-analytics",
+    "@kbn/inference-common",
+    "@kbn/esql-ast",
+    "@kbn/inference-langchain",
     "@kbn/scout-security",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/security-plugin-types-common",
+    "@kbn/actions-types",
+    "@kbn/triggers-actions-ui-types",
+    "@kbn/inference-endpoint-ui-common",
   ]
 }

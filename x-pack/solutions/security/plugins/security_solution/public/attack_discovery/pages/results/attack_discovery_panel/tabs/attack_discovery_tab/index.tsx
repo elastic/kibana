@@ -105,7 +105,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
         </>
       )}
 
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem grow={false}>
           <ViewInAiAssistant attackDiscovery={attackDiscovery} replacements={replacements} />
         </EuiFlexItem>
@@ -121,6 +121,8 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
               alignItems="center"
               data-test-subj="investigateInTimelineButton"
               gutterSize="xs"
+              responsive={false}
+              wrap={false}
             >
               <EuiFlexItem grow={false}>
                 <EuiIcon data-test-subj="timelineIcon" type="timeline" />

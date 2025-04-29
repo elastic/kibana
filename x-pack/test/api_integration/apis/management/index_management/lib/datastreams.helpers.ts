@@ -32,7 +32,6 @@ export function datastreamsHelpers(getService: FtrProviderContext['getService'])
             },
           },
           lifecycle: {
-            // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
             enabled: true,
           },
         },

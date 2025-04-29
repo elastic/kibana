@@ -1124,9 +1124,11 @@ const updateExistingDataStream = async ({
     }
   }
 
-  const filterDimensionMappings = (templates?: Array<Record<string, MappingDynamicTemplate>>) =>
+  const filterDimensionMappings = (
+    templates?: Array<Record<string, MappingDynamicTemplate | undefined>>
+  ) =>
     templates?.filter(
-      (template) => (Object.values(template)[0].mapping as any)?.time_series_dimension
+      (template) => (Object.values(template)[0]?.mapping as any)?.time_series_dimension
     ) ?? [];
 
   const currentDynamicDimensionMappings = filterDimensionMappings(
@@ -1135,8 +1137,8 @@ const updateExistingDataStream = async ({
   const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
 
   const sortMappings = (
-    a: Record<string, MappingDynamicTemplate>,
-    b: Record<string, MappingDynamicTemplate>
+    a: Record<string, MappingDynamicTemplate | undefined>,
+    b: Record<string, MappingDynamicTemplate | undefined>
   ) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]);
 
   const dynamicDimensionMappingsChanged = !deepEqual(

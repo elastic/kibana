@@ -83,7 +83,11 @@ jest.mock('../../hooks/use_fetch_rule', () => {
     }),
   };
 });
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+  useBreadcrumbs: jest.fn(),
+  TagsList: jest.fn(),
+}));
 jest.mock('@kbn/ebt-tools');
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;

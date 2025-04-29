@@ -178,7 +178,6 @@ const NetworkDetailsComponent: React.FC = () => {
           <SecuritySolutionPageWrapper>
             <HeaderPage
               border
-              data-test-subj="network-details-headline"
               subtitle={
                 <LastEventTime
                   indexKey={LastEventIndexKey.ipDetails}

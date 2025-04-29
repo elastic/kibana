@@ -234,6 +234,26 @@ export const flattenObject = (obj: AdditionalContext, prefix: string = ''): Addi
     return acc;
   }, {});
 
+export const getGroupByObject = (
+  groupBy: string | string[] | undefined,
+  resultGroupSet: Set<string>
+): Record<string, object> => {
+  const groupByKeysObjectMapping: Record<string, object> = {};
+  if (groupBy) {
+    resultGroupSet.forEach((groupSet) => {
+      const groupSetKeys = groupSet.split(',');
+      groupByKeysObjectMapping[groupSet] = unflattenObject(
+        Array.isArray(groupBy)
+          ? groupBy.reduce((result, group, index) => {
+              return { ...result, [group]: groupSetKeys[index]?.trim() };
+            }, {})
+          : { [groupBy]: groupSet }
+      );
+    });
+  }
+  return groupByKeysObjectMapping;
+};
+
 export const getFormattedGroupBy = (
   groupBy: string | string[] | undefined,
   groupSet: Set<string>

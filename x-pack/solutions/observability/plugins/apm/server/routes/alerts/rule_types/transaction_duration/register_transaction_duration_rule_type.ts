@@ -30,6 +30,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ALERT_RULE_PARAMETERS,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
@@ -75,6 +76,7 @@ import {
 import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
 import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import { unflattenObject } from '../utils/unflatten_object';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -89,6 +91,7 @@ export const transactionDurationActionVariables = [
   apmActionVariables.transactionType,
   apmActionVariables.triggerValue,
   apmActionVariables.viewInAppUrl,
+  apmActionVariables.grouping,
 ];
 
 type TransactionDurationRuleTypeParams = ApmRuleParamsType[ApmRuleType.TransactionDuration];
@@ -296,6 +299,7 @@ export function registerTransactionDurationRuleType({
           )
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
 
         const context = {
           alertDetailsUrl,
@@ -309,6 +313,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 
@@ -335,7 +340,16 @@ export function registerTransactionDurationRuleType({
         const recoveredAlertId = recoveredAlert.alert.getId();
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
-        const groupByFields: Record<string, string> = allGroupByFields.reduce(
+
+        const ruleParamsOfRecoveredAlert = alertHits?.[
+          ALERT_RULE_PARAMETERS
+        ] as TransactionDurationRuleTypeParams;
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
+          ApmRuleType.TransactionDuration,
+          groupByFieldsOfRecoveredAlert
+        );
+        const groupByFields: Record<string, string> = allGroupByFieldsOfRecoveredAlert.reduce(
           (acc, sourceField: string) => {
             if (alertHits?.[sourceField] !== undefined) {
               acc[sourceField] = alertHits[sourceField];
@@ -359,6 +373,8 @@ export function registerTransactionDurationRuleType({
           alertHits?.[ALERT_EVALUATION_VALUE]
         ).formatted;
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const groupingObject = unflattenObject(groupByFields);
+
         const recoveredContext = {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
@@ -371,6 +387,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
+          grouping: groupingObject,
           ...groupByActionVariables,
         };
 

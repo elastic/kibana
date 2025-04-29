@@ -51,6 +51,7 @@ describe('createAwsS3accessLogsDataSourceProfileProvider', () => {
       context: { category: DataSourceCategory.Logs },
     });
     expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
+      breakdownField: 'log.level',
       columns: [
         { name: 'timestamp', width: 212 },
         { name: 'aws.s3.bucket.name', width: 200 },

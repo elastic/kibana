@@ -182,6 +182,25 @@ const createActions = (testBed: TestBed) => {
       });
       component.update();
     },
+    clickReadOnlyButton: async () => {
+      await act(async () => {
+        find('startIndexReadonlyButton').simulate('click');
+      });
+
+      component.update();
+    },
+    checkMigrationWarningCheckbox: async () => {
+      await act(async () => {
+        find('warninStepCheckbox')
+          .find('input.euiCheckbox__input')
+          .simulate('change', {
+            target: {
+              checked: true,
+            },
+          });
+      });
+      component.update();
+    },
   };
   const dataStreamDeprecationFlyout = {
     clickReindexButton: async () => {

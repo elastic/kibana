@@ -107,7 +107,7 @@
       "matchBaseBranches": [
         "main",
         "/^[9].*/",
-        "8.x",
+        "8.19",
         "8.18"
       ],
       "labels": [

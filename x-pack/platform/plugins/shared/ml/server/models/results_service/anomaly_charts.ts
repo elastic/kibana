@@ -531,6 +531,11 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
         record.partition_field_name ?? record.by_field_name ?? record.over_field_name;
       const firstFieldValue =
         record.partition_field_value ?? record.by_field_value ?? record.over_field_value;
+
+      if (fieldsSafe([firstFieldName, firstFieldValue]) === false) {
+        return;
+      }
+
       if (firstFieldName !== undefined && firstFieldValue !== undefined) {
         const groupsForDetector = detectorsForJob[detectorIndex];
 
@@ -567,25 +572,31 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           const secondFieldName = record.over_field_name ?? record.by_field_name;
           const secondFieldValue = record.over_field_value ?? record.by_field_value;
 
-          if (secondFieldName !== undefined && secondFieldValue !== undefined) {
-            if (dataForGroupValue[secondFieldName] === undefined) {
-              dataForGroupValue[secondFieldName] = Object.create(null);
-            }
+          if (
+            secondFieldName === undefined ||
+            secondFieldValue === undefined ||
+            fieldsSafe([secondFieldName, secondFieldValue]) === false
+          ) {
+            return;
+          }
 
-            const splitsForGroup = dataForGroupValue[secondFieldName];
-            if (splitsForGroup[secondFieldValue] === undefined) {
-              splitsForGroup[secondFieldValue] = Object.create(null);
-            }
+          if (dataForGroupValue[secondFieldName] === undefined) {
+            dataForGroupValue[secondFieldName] = Object.create(null);
+          }
 
-            const dataForSplitValue = splitsForGroup[secondFieldValue];
-            if (dataForSplitValue.maxScoreRecord === undefined) {
+          const splitsForGroup = dataForGroupValue[secondFieldName];
+          if (splitsForGroup[secondFieldValue] === undefined) {
+            splitsForGroup[secondFieldValue] = Object.create(null);
+          }
+
+          const dataForSplitValue = splitsForGroup[secondFieldValue];
+          if (dataForSplitValue.maxScoreRecord === undefined) {
+            dataForSplitValue.maxScore = record.record_score;
+            dataForSplitValue.maxScoreRecord = record;
+          } else {
+            if (record.record_score > dataForSplitValue.maxScore) {
               dataForSplitValue.maxScore = record.record_score;
               dataForSplitValue.maxScoreRecord = record;
-            } else {
-              if (record.record_score > dataForSplitValue.maxScore) {
-                dataForSplitValue.maxScore = record.record_score;
-                dataForSplitValue.maxScoreRecord = record;
-              }
             }
           }
         }
@@ -646,6 +657,15 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     recordsForSeries = sortBy(recordsForSeries, 'record_score').reverse();
 
     return { records: recordsForSeries, errors: errorMessages };
+  }
+
+  function fieldsSafe(fields: Array<string | number | undefined>) {
+    return fields.every((field) => {
+      if (typeof field === 'string') {
+        return field !== '__proto__' && field !== 'prototype';
+      }
+      return true;
+    });
   }
 
   function buildConfigFromDetector(job: MlJob, detectorIndex: number) {
@@ -948,9 +968,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       (record) => (record.function_description || record.function) === ML_JOB_AGGREGATION.LAT_LONG
     );
 
-    const seriesConfigs = recordsToPlot.map((record) =>
-      buildConfig(record, combinedJobRecords[record.job_id])
-    );
+    const seriesConfigs = recordsToPlot
+      .filter((record) => record.job_id !== undefined)
+      .map((record) => buildConfig(record, combinedJobRecords[record.job_id]));
 
     const seriesConfigsNoGeoData = [];
 
