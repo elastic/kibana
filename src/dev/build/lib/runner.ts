@@ -23,7 +23,7 @@ interface Options {
 export interface GlobalTask {
   global: true;
   description: string;
-  run(config: Config, log: ToolingLog, builds: Build[]): Promise<void>;
+  run(config: Config, log: ToolingLog): Promise<void>;
 }
 
 export interface Task {
@@ -33,8 +33,12 @@ export interface Task {
 }
 
 export function createRunner({ config, log, bufferLogs = false }: Options) {
-  async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
-    if (!bufferLogs) {
+  async function execTask(desc: string, task: GlobalTask): Promise<void>;
+  async function execTask(desc: string, task: Task, build: Build): Promise<void>;
+  async function execTask(desc: string, task: GlobalTask | Task, build?: Build): Promise<void> {
+    if (!task.global && build && bufferLogs) {
+      build.pushToLogBuffer(desc);
+    } else {
       log.info(desc);
     }
     try {
@@ -48,7 +52,15 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
         };
 
         try {
-          await task.run(config, log, lastArg);
+          if (task.global) {
+            await task.run(config, log);
+          } else {
+            // This shouldn't ever happen since we're passing the builds in below, but needed for TS
+            if (!build) {
+              throw new Error('Task is not global, but no build was provided');
+            }
+            await task.run(config, log, build);
+          }
           log.success(chalk.green('✓'), time());
         } catch (error) {
           if (!isErrorLogged(error)) {
@@ -66,7 +78,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
   }
 
   const builds: Build[] = [];
-  builds.push(new Build(config, bufferLogs, [log.info(desc)]));
+  builds.push(new Build(config, bufferLogs));
 
   /**
    * Run a task by calling its `run()` method with three arguments:
@@ -76,7 +88,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
    */
   return async function run(task: Task | GlobalTask) {
     if (task.global) {
-      await execTask(chalk`{dim [  global  ]} ${task.description}`, task, builds);
+      await execTask(chalk`{dim [  global  ]} ${task.description}`, task);
     } else {
       for (const build of builds) {
         await execTask(`${build.getLogTag()} ${task.description}`, task, build);
