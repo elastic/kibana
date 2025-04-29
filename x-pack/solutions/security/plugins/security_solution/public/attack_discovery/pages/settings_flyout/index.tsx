@@ -22,6 +22,7 @@ import {
   DEFAULT_END,
   DEFAULT_START,
 } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { useKibana } from '../../../common/lib/kibana';
@@ -33,14 +34,17 @@ import type { AlertsSelectionSettings } from './types';
 import { MIN_FLYOUT_WIDTH } from './constants';
 import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
 import { getDefaultQuery } from '../helpers';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 export const DEFAULT_STACK_BY_FIELD = 'kibana.alert.rule.name';
 
 export interface Props {
+  connectorId: string | undefined;
   end: string | undefined;
   filters: Filter[] | undefined;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
   onClose: () => void;
+  onConnectorIdSelected: (connectorId: string) => void;
   query: Query | undefined;
   setEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
   setFilters: React.Dispatch<React.SetStateAction<Filter[] | undefined>>;
@@ -48,13 +52,16 @@ export interface Props {
   setQuery: React.Dispatch<React.SetStateAction<Query | undefined>>;
   setStart: React.Dispatch<React.SetStateAction<string | undefined>>;
   start: string | undefined;
+  stats: AttackDiscoveryStats | null;
 }
 
 const SettingsFlyoutComponent: React.FC<Props> = ({
+  connectorId,
   end,
   filters,
   localStorageAttackDiscoveryMaxAlerts,
   onClose,
+  onConnectorIdSelected,
   query,
   setEnd,
   setFilters,
@@ -62,10 +69,12 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   setQuery,
   setStart,
   start,
+  stats,
 }) => {
   const {
     services: { featureFlags },
   } = useKibana();
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoverySettingsFlyoutTitle',
@@ -117,17 +126,24 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   ]);
 
   const { settingsView, actionButtons: settingsActionButtons } = useSettingsView({
-    settings,
+    connectorId,
+    onConnectorIdSelected,
     onSettingsReset,
     onSettingsSave,
     onSettingsChanged: setSettings,
+    settings,
+    showConnectorSelector: true,
+    stats,
   });
 
   const { tabsContainer, actionButtons: tabsActionButtons } = useTabsView({
-    settings,
+    connectorId,
+    onConnectorIdSelected,
     onSettingsReset,
     onSettingsSave,
     onSettingsChanged: setSettings,
+    settings,
+    stats,
   });
 
   const content = useMemo(() => {
@@ -144,25 +160,32 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
     return settingsActionButtons;
   }, [isAttackDiscoverySchedulingEnabled, settingsActionButtons, tabsActionButtons]);
 
+  const hasBorder =
+    isAttackDiscoverySchedulingEnabled || attackDiscoveryAlertsEnabled ? false : true;
+
   return (
     <EuiFlyoutResizable
       aria-labelledby={flyoutTitleId}
       data-test-subj="settingsFlyout"
       minWidth={MIN_FLYOUT_WIDTH}
       onClose={onClose}
-      paddingSize="m"
+      paddingSize={attackDiscoveryAlertsEnabled ? 'l' : 'm'}
       side="right"
-      size="s"
+      size={attackDiscoveryAlertsEnabled ? 'm' : 's'}
       type="overlay"
     >
-      <EuiFlyoutHeader hasBorder={!isAttackDiscoverySchedulingEnabled}>
+      <EuiFlyoutHeader hasBorder={hasBorder}>
         <EuiTitle data-test-subj="title" size="m">
-          <h2 id={flyoutTitleId}>{i18n.ATTACK_DISCOVERY_SETTINGS}</h2>
+          <h2 id={flyoutTitleId}>
+            {attackDiscoveryAlertsEnabled
+              ? i18n.ATTACK_DISCOVERY_SETTINGS_AND_SCHEDULE
+              : i18n.ATTACK_DISCOVERY_SETTINGS}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiSpacer size="s" />
+        {attackDiscoveryAlertsEnabled ? null : <EuiSpacer size="s" />}
         {content}
       </EuiFlyoutBody>
 
