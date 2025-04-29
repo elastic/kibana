@@ -7,9 +7,7 @@
 
 import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import {
-  AssistantFeatures,
-} from '@kbn/elastic-assistant-common';
+import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
