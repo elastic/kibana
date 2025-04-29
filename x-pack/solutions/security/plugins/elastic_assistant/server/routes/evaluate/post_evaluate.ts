@@ -73,7 +73,7 @@ export const postEvaluateRoute = (
       },
       options: {
         timeout: {
-          idleSocket: ROUTE_HANDLER_TIMEOUT,
+          idleSocket: RESPONSE_TIMEOUT,
         },
       },
     })
