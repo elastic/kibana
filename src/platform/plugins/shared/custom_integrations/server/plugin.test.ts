@@ -116,8 +116,7 @@ describe('CustomIntegrationsPlugin', () => {
           description: 'Index data to Elasticsearch with the Rust client.',
           type: 'ui_link',
           shipper: 'language_clients',
-          uiInternalPath:
-            'https://www.elastic.co/docs/reference/elasticsearch/clients/rust',
+          uiInternalPath: 'https://www.elastic.co/docs/reference/elasticsearch/clients/rust',
           isBeta: false,
           icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'elasticsearch_sdk'],
