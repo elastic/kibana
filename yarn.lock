@@ -2388,11 +2388,12 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@^8.17.0":
-  version "8.17.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.17.0.tgz#d2ef8f99f5a3e6c03a51859ad03e0e8a0d450032"
-  integrity sha512-f5WmQBbTdaDw9KrhVTuHeYbu0kulZfRUN9cNdFgCD78CRAVa353K1iqH5imikZ7NLIltN9itm5q5yyLvbHhs+w==
+"@elastic/request-converter@^8.18.1":
+  version "8.18.1"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.18.1.tgz#b8c50abf503531a128a7a313103a2c1731c2efe5"
+  integrity sha512-c5Q0aIxfK0RfkHhqX3sMsMmBwo1iNJviJezRNDZ006JCASGE3peAXKlyGiFcgV5MCxW3X0KHUdz/AEOdCCMXig==
   dependencies:
+    base64url "^3.0.1"
     commander "^12.1.0"
     find-my-way-ts "^0.1.2"
     handlebars "^4.7.8"
