@@ -97,7 +97,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     label: i18n.translate('xpack.apm.agentConfig.loggingLevel.label', {
       defaultMessage: 'Logging level',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.logLevel.description', {
+    description: i18n.translate('xpack.apm.agentConfig.loggingLevel.description', {
       defaultMessage: 'Sets the logging level for the agent',
     }),
     options: [
