@@ -24,7 +24,7 @@ export abstract class OpenApiTool<T> {
       return args.operation.getOperationId();
     }
   );
-  private llmType: LlmType | undefined;
+  protected llmType: LlmType | undefined;
 
   protected constructor(args: { dereferencedOas: Oas, llmType: LlmType | undefined }) {
     const { dereferencedOas } = args;
@@ -43,47 +43,52 @@ export abstract class OpenApiTool<T> {
     return this.getParametersAsZodSchemaMemoized(args);;
   }
 
-  // 
+  // Modify JSON schema to be compatible with LLM providers
   protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
-    if(this.llmType == 'gemini' && schema.type === 'integer' && schema.enum && schema.enum.some(val=>typeof val === 'number')) { // Gemini does not support number enums
-      schema.enum = schema.enum.map((x) => (x as number).toString())
-      return jsonSchemaToZodWithParserOverride(schema)
-    }
-    if(this.llmType == 'gemini' && schema.exclusiveMinimum) { 
-      delete schema.exclusiveMinimum // Gemini does not support exclusiveMinimum
-      return jsonSchemaToZodWithParserOverride(schema)
-    }
-    if(this.llmType == 'gemini' && schema.exclusiveMaximum) { 
-      delete schema.exclusiveMaximum // Gemini does not support exclusiveMaximum
-      return jsonSchemaToZodWithParserOverride(schema)
-    }
-    if (this.llmType == 'gemini' && schema.oneOf) { 
-      return z.any().describe(schema.description ?? ''); // Gemini does not support oneOf so we use any
-    }
-    if (this.llmType == 'gemini' && schema.anyOf && Array.isArray(schema.anyOf) && schema.anyOf.length > 1) {  // Gemini does not support types with multiple values so making sure to use only the first one
-      schema.anyOf = [schema.anyOf[0]]
-      return jsonSchemaToZodWithParserOverride(schema)
-    }
-    if (this.llmType == 'gemini' && Array.isArray(schema.type)) { 
-      schema.type = schema.type[0] // Gemini does not support multiple types so we use the first one
-      return jsonSchemaToZodWithParserOverride(schema)
-    }
     if (schema.enum && schema.enum.every((x) => typeof x === 'string')) {
       return z.enum(schema.enum as [string]); // Gemini does not support literals so must use enums
-    }
-    if (schema.anyOf && schema.default) {
-      delete schema.default // Gemini does not support keys alongside anyOf
-      return jsonSchemaToZodWithParserOverride(schema)
     }
     if (schema.type === "array" && isEmpty(schema.items)) {
       return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]) // OpenAi requires items in array to be defined
     }
+    if (this.llmType == 'gemini' && schema.oneOf !== undefined && Array.isArray(schema.oneOf)) { // Gemini does not support oneOf so we use any
+      return z.any().describe(schema.description ?? ''); // Gemini does not support oneOf so we use any
+    }
+    let modified = false;
+    if(this.llmType == 'gemini' && schema.type === 'integer' && schema.enum && schema.enum.some(val=>typeof val === 'number')) { // Gemini does not support number enums
+      schema.enum = schema.enum.map((x) => (x as number).toString())
+      modified = true;
+    }
+    if(this.llmType == 'gemini' && schema.exclusiveMinimum !== undefined) { 
+      delete schema.exclusiveMinimum // Gemini does not support exclusiveMinimum
+      modified = true;
+    }
+    if(this.llmType == 'gemini' && schema.exclusiveMaximum !== undefined) { 
+      delete schema.exclusiveMaximum // Gemini does not support exclusiveMaximum
+      modified = true;
+    }
+    if (this.llmType == 'gemini' && schema.anyOf && Array.isArray(schema.anyOf) && schema.anyOf.length > 1) {  // Gemini does not support types with multiple values so making sure to use only the first one
+      schema.anyOf = [schema.anyOf[0]]
+      modified = true;
+    }
+    if (this.llmType == 'gemini' && Array.isArray(schema.type)) { 
+      schema.type = schema.type[0] // Gemini does not support multiple types so we use the first one
+      modified = true;
+    }
+    if (schema.anyOf !== undefined && schema.default !== undefined) {
+      delete schema.default // Gemini does not support keys alongside anyOf
+      modified = true;
+    }
     if (schema.format !== undefined) {
       delete schema.format // Gemini does not support contentEncoding
-      return jsonSchemaToZodWithParserOverride(schema)
+      modified = true;
     }
-    if (schema.type == 'array' && schema.items && typeof schema.items !== 'boolean' && !Array.isArray(schema.items) && schema.items.type == null) {
-      schema.items.type = 'string' // openAi requires item type to be defined
+    if (schema.type == 'array' && schema.items && typeof schema.items !== 'boolean' && !Array.isArray(schema.items) && schema.items.type === undefined) {
+      schema.items.type = 'string' // requires item type to be defined
+      modified = true;
+    }
+
+    if(modified) {
       return jsonSchemaToZodWithParserOverride(schema)
     }
 
@@ -110,10 +115,6 @@ export abstract class OpenApiTool<T> {
     const schemaTypeToZod = Object.keys(schemaTypeToSchemaObject).reduce((total, next) => {
       const schema = schemaTypeToSchemaObject[next];
       const zodSchema = jsonSchemaToZodWithParserOverride(schema as JsonSchema);
-      /*  if(operation.getOperationId() === 'createAgentKey') {
-         console.log(JSON.stringify(schema, null, 2))
-         console.log(JSON.stringify(zodToJsonSchema(zodSchema), null, 2))
-       } */
       return { ...total, [next]: zodSchema };
     }, {} as Record<'query' | 'body' | 'header' | 'path' | 'cookie' | 'formData', z.ZodTypeAny>);
 
@@ -160,6 +161,8 @@ export abstract class OpenApiTool<T> {
         });
         return internalNode;
       });
+
+
 
     const { name, description } = this.getRootToolDetails(args);
 

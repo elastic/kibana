@@ -212,12 +212,12 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     }
   ): Promise<StructuredToolInterface> {
     const { tools, name, description, assistantToolParams } = args;
-    const agent = createReactAgent({
-      llm: assistantToolParams.createLlmInstance(),
-      tools: await tools,
-    });
     return tool(
       async ({ input }) => {
+        const agent = createReactAgent({
+          llm: assistantToolParams.createLlmInstance(),
+          tools: await tools,
+        });
         const inputs = {
           messages: [
             new SystemMessage({
@@ -226,7 +226,8 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
                 ' the Kibana APIs. Use the functions at your disposal to action requested by the user. ' +
                 'You do not need to confirm with the user before using a function. If the tool' +
                 ' input did not match expected schema, try to fix it and call the tool again.' +
-                ' Include as much information as possible in the final response.',
+                ' In your response include all the information from the function result. Try fixing any ' +
+                'malformed function calls.',
             }),
             new HumanMessage({ content: input }),
           ],

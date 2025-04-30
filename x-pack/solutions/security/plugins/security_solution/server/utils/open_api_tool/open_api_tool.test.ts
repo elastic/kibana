@@ -13,27 +13,41 @@ import fs from 'node:fs';
 import { parse } from 'yaml';
 import Oas from 'oas';
 import path from 'node:path';
+import { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 
-class TestableOpenApiTool extends OpenApiTool<{}> {
+class MockOpenApiTool extends OpenApiTool<{}> {
   protected getRootToolDetails(args: {}): { name: string; description: string; } {
-      throw new Error('Method not implemented.');
+    return {
+      name: 'root name',
+      description: 'root tool description',
+    }
   }
   protected getToolForOperation(args: { operation: Operation }): Promise<StructuredToolInterface> {
-    throw new Error('Method not implemented.');
+    return Promise.resolve({
+      operationId: args.operation.getOperationId(),
+    }) as unknown as Promise<StructuredToolInterface>;
   }
   protected getInternalNode(args: {
     tools: Promise<StructuredToolInterface[]>;
     name: string;
     description: string;
   }): Promise<StructuredToolInterface> {
-    throw new Error('Method not implemented.');
+    return Promise.resolve({
+      name: args.name,
+      description: args.description,
+      tools: args.tools,
+    }) as unknown as Promise<StructuredToolInterface>;
   }
 
   callGetParametersAsZodSchema(...args: Parameters<typeof this.getParametersAsZodSchema>) {
     return this.getParametersAsZodSchema(...args);
   }
 
-  static async createTestableOpenApiTool() {
+  static async createTestableOpenApiTool({
+    llmType,
+  }: {
+    llmType?: LlmType;
+  }) {
     const yamlOpenApiSpec = await fs.promises.readFile(
       path.join(__dirname, 'sample_open_api_spec.yml'),
       'utf8'
@@ -41,7 +55,7 @@ class TestableOpenApiTool extends OpenApiTool<{}> {
     const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
     const dereferencedOas = new Oas(jsonOpenApiSpec);
     await dereferencedOas.dereference();
-    return new this({ dereferencedOas, llmType: undefined });
+    return new this({ dereferencedOas, llmType: llmType });
   }
 }
 
@@ -54,170 +68,284 @@ const mockPostOperation = {
       schema: {
         type: 'object',
         properties: {
-          id: {
-            type: 'string',
-            $schema: 'http://json-schema.org/draft-04/schema#',
+          enumIds: {
+            type: 'integer',
+            enum: [1, 2, 3],
             description: 'An identifier for the connector.',
           },
+          exclusiveNumber: {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 100,
+          },
+          oneOf: {
+            type: ["string", "number"],
+            "oneOf": [
+              { "type": "string" },
+              { "type": "number" }
+            ]
+          },
+          anyOf: {
+            type: ["string", "number"],
+            anyOf: [
+              { "type": "string" },
+              { "type": "number" }
+            ],
+            default: "defaultValue"
+          },
+          arrayType: {
+            type: ["string", "number"],
+          },
+          emptyArray: {
+            type: "array",
+            items: {
+            },
+          },
+          email: {
+            type: "string",
+            format: "email",
+          },
+          emptyArrayWithDescription: {
+            type: "array",
+            items: {
+              description: "An array of strings",
+            },
+          },
+          "singleEnum": {
+            type: "string",
+            "enum": [
+              "active",
+            ]
+          }
         },
         required: ['id'],
-      },
-    },
-    {
-      type: 'query',
-      label: 'query Params',
-      schema: {
-        type: 'object',
-        properties: {
-          'test-query-param': {
-            type: 'string',
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            description: 'A test query param',
-          },
-        },
-        required: ['test-query-param'],
-      },
-    },
-    {
-      type: 'body',
-      label: 'Body Params',
-      schema: {
-        type: 'object',
-        properties: {
-          test: {
-            type: 'string',
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            description: 'A test query param',
-          },
-        },
-        required: ['test'],
-      },
-    },
-    {
-      type: 'header',
-      label: 'headers',
-      schema: {
-        type: 'object',
-        properties: {
-          auth: {
-            type: 'string',
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            description: 'A test query param',
-          },
-        },
-        required: ['auth'],
-      },
-    },
-    {
-      type: 'cookie',
-      label: 'cookie',
-      schema: {
-        type: 'object',
-        properties: {
-          foo: {
-            type: 'string',
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            description: 'A test query param',
-          },
-        },
-        required: ['foo'],
-      },
-    },
-    {
-      type: 'formData',
-      label: 'formData',
-      schema: {
-        type: 'object',
-        properties: {
-          bar: {
-            type: 'string',
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            description: 'A test query param',
-          },
-        },
-        required: ['bar'],
       },
     },
   ],
 } as unknown as Operation;
 
 describe('OpenApiTool', () => {
-  it('getParametersAsZodSchema', async () => {
-    const openApiTool = await TestableOpenApiTool.createTestableOpenApiTool();
-    const result = openApiTool.callGetParametersAsZodSchema({ operation: mockPostOperation });
-    expect(zodToJsonSchema(result)).toEqual({
-      $schema: 'http://json-schema.org/draft-07/schema#',
-      additionalProperties: false,
-      properties: {
-        body: {
-          additionalProperties: false,
-          properties: {
-            test: {
-              description: 'A test query param',
-              type: 'string',
-            },
-          },
-          required: ['test'],
-          type: 'object',
-        },
-        cookie: {
-          additionalProperties: false,
-          properties: {
-            foo: {
-              description: 'A test query param',
-              type: 'string',
-            },
-          },
-          required: ['foo'],
-          type: 'object',
-        },
-        formData: {
-          additionalProperties: false,
-          properties: {
-            bar: {
-              description: 'A test query param',
-              type: 'string',
-            },
-          },
-          required: ['bar'],
-          type: 'object',
-        },
-        header: {
-          additionalProperties: false,
-          properties: {
-            auth: {
-              description: 'A test query param',
-              type: 'string',
-            },
-          },
-          required: ['auth'],
-          type: 'object',
-        },
-        path: {
-          additionalProperties: false,
-          properties: {
-            id: {
-              description: 'An identifier for the connector.',
-              type: 'string',
-            },
-          },
-          required: ['id'],
-          type: 'object',
-        },
-        query: {
-          additionalProperties: false,
-          properties: {
-            'test-query-param': {
-              description: 'A test query param',
-              type: 'string',
-            },
-          },
-          required: ['test-query-param'],
-          type: 'object',
-        },
-      },
-      required: ['formData', 'cookie', 'header', 'body', 'query', 'path'],
-      type: 'object',
+  it("returns tool agents grouped by tags", async () => {
+    const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
+      llmType: "openai"
     });
-  });
+
+    const rootTool = await openApiTool.getTool({}) as any;
+
+    expect(rootTool).toEqual({
+      name: 'root name',
+      description: 'root tool description',
+      tools: expect.any(Promise),
+    });
+
+    const tools = await rootTool.tools;
+
+    expect(tools).toEqual([
+      {
+        name: 'debug_agent',
+        description: 'listPets',
+        tools: expect.any(Promise),
+      },
+      {
+        name: 'pets_agent',
+        description: 'createPets\nshowPetById',
+        tools: expect.any(Promise),
+      }
+    ])
+
+    const [debugAgent, petsAgent] = tools
+
+    const [debugAgentTools, petsAgentTools] = await Promise.all([
+      debugAgent.tools,
+      petsAgent.tools,
+    ]);
+
+    expect(debugAgentTools).toEqual([{
+      operationId: 'listPets'
+    }])
+
+    expect(petsAgentTools).toEqual([
+      expect.objectContaining({
+        operationId: 'createPets'
+      }),
+      expect.objectContaining({
+        operationId: 'showPetById'
+      }),
+    ])
+  })
+
+  describe('parses schema correctly', () => {
+    it('openai', async () => {
+      const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
+        llmType: "openai"
+      });
+
+      const result = openApiTool.callGetParametersAsZodSchema({ operation: mockPostOperation });
+      expect(zodToJsonSchema(result)).toEqual(
+        {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "additionalProperties": false,
+              "properties": {
+                "anyOf": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                },
+                "arrayType": {
+                  "type": [
+                    "string",
+                    "number"
+                  ]
+                },
+                "emptyArray": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "items": {
+                        "type": "number"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "items": {
+                        "type": "boolean"
+                      },
+                      "type": "array"
+                    }
+                  ]
+                },
+                email: {
+                  type: "string",
+                },
+                "emptyArrayWithDescription": {
+                  "items": {
+                    "description": "An array of strings",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "enumIds": {
+                  "description": "An identifier for the connector.",
+                  "enum": [
+                    1,
+                    2,
+                    3
+                  ],
+                  "type": "number"
+                },
+                "exclusiveNumber": {
+                  "exclusiveMaximum": 100,
+                  "exclusiveMinimum": 0,
+                  "type": "integer"
+                },
+                "oneOf": {},
+                "singleEnum": {
+                  "enum": [
+                    "active"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "type": "object"
+        }
+      );
+    });
+
+    it('gemini', async () => {
+      const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
+        llmType: "gemini"
+      });
+
+      const result = openApiTool.callGetParametersAsZodSchema({ operation: mockPostOperation });
+      expect(zodToJsonSchema(result)).toEqual(
+        {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "additionalProperties": false,
+              "properties": {
+                "anyOf": {
+                  "type": "string"
+                },
+                "arrayType": {
+                  "type": "string"
+                },
+                "emptyArray": {
+                  "anyOf": [
+                    {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "items": {
+                        "type": "number"
+                      },
+                      "type": "array"
+                    },
+                    {
+                      "items": {
+                        "type": "boolean"
+                      },
+                      "type": "array"
+                    }
+                  ]
+                },
+                email: {
+                  type: "string",
+                },
+                "emptyArrayWithDescription": {
+                  "items": {
+                    "description": "An array of strings",
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "enumIds": {
+                  "enum": [
+                    "1",
+                    "2",
+                    "3"
+                  ],
+                  "type": "string"
+                },
+                "exclusiveNumber": {
+                  "type": "integer"
+                },
+                "oneOf": {},
+                "singleEnum": {
+                  "enum": [
+                    "active"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "type": "object"
+        }
+      );
+    });
+  })
 });
