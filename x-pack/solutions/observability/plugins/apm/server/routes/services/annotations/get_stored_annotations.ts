@@ -15,7 +15,7 @@ import {
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { Annotation as ESAnnotation } from '@kbn/observability-plugin/common/annotations';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import { environmentQuery } from '../../../../common/utils/environment_query';
+import { environmentQueryAnnotations } from '../../../../common/utils/environment_query';
 import type { Annotation } from '../../../../common/annotations';
 import { AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -48,7 +48,7 @@ export function getStoredAnnotations({
             { term: { tags: 'apm' } },
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
-            ...environmentQuery(environment),
+            ...environmentQueryAnnotations(environment),
           ],
         },
       },
