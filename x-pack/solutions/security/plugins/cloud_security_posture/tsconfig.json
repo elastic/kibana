@@ -58,7 +58,6 @@
     "@kbn/grouping",
     "@kbn/alerting-plugin",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock",
     "@kbn/search-types",
     "@kbn/react-kibana-mount",
     "@kbn/spaces-plugin",
