@@ -4446,7 +4446,8 @@
       ],
       "labels": [
         "Team:ESQL",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:version"
       ],
       "enabled": true
     },
