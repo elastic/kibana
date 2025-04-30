@@ -73,9 +73,7 @@ export function createTestConfig(
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const xPackAPITestsConfig = await readConfigFile(
-      require.resolve('../../api_integration/config.ts')
-    );
+    const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
     const services = xPackAPITestsConfig.get('services');
     const servers = xPackAPITestsConfig.get('servers');

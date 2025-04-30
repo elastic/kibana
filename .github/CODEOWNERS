@@ -2704,7 +2704,7 @@ x-pack/platform/plugins/private/translations/translations
 x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
-x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/test/api_integration/profiling @elastic/obs-ux-infra_services-team
 
 # Observability shared profiling
 x-pack/solutions/observability/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
