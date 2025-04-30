@@ -17,6 +17,8 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 
 // IMPORT_STATUS and Statuses are copied over from old code.
 // this file should use new status code
+// the DocCountChart is currently unused, but keeping it here so
+// it can be added back in later
 export enum IMPORT_STATUS {
   INCOMPLETE = 'incomplete',
   COMPLETE = 'complete',

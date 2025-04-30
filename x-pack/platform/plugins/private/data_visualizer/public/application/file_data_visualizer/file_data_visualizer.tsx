@@ -92,6 +92,7 @@ export const FileDataVisualizer: FC<Props> = ({
         <CloudContext>
           <FileUploadContext.Provider value={fileUploadContextValue}>
             <FileUploadView
+              data-test-subj="dataVisualizerPageFileUpload"
               getAdditionalLinks={getAdditionalLinks}
               resultLinks={resultLinks}
               setUploadResults={setUploadResults}

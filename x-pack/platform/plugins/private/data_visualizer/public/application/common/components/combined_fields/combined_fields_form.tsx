@@ -80,8 +80,6 @@ export class CombinedFieldsForm extends Component<Props, State> {
 
     const newMappings = addToMappings(mappings);
     this.props.onMappingsChange(JSON.stringify(newMappings, null, 2));
-    // this.props.onMappingsStringChange(JSON.stringify(newMappings, null, 2));
-    // this.props.onPipelineStringChange(JSON.stringify(newPipeline, null, 2));
 
     this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
 
@@ -102,32 +100,6 @@ export class CombinedFieldsForm extends Component<Props, State> {
     );
     this.props.onCombinedFieldsChange(updatedCombinedFields);
   };
-
-  // parseMappings() {
-  //   try {
-  //     return JSON.parse(this.props.mappingsString);
-  //   } catch (error) {
-  //     throw new Error(
-  //       i18n.translate('xpack.dataVisualizer.combinedFieldsForm.mappingsParseError', {
-  //         defaultMessage: 'Error parsing mappings: {error}',
-  //         values: { error: error.message },
-  //       })
-  //     );
-  //   }
-  // }
-
-  // parsePipeline() {
-  //   try {
-  //     return JSON.parse(this.props.pipelineString);
-  //   } catch (error) {
-  //     throw new Error(
-  //       i18n.translate('xpack.dataVisualizer.combinedFieldsForm.pipelineParseError', {
-  //         defaultMessage: 'Error parsing pipeline: {error}',
-  //         values: { error: error.message },
-  //       })
-  //     );
-  //   }
-  // }
 
   hasNameCollision = (name: string) => {
     const fieldExists = getFieldsFromMappings(this.props.mappings).some(
