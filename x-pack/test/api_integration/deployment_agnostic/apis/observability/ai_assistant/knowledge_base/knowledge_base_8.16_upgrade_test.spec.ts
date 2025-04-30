@@ -18,6 +18,7 @@ import {
 import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
+  restoreIndexAssets,
   runStartupMigrations,
 } from '../utils/index_assets';
 import { restoreKbSnapshot } from '../utils/snapshots';
