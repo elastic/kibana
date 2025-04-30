@@ -10,9 +10,9 @@ import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/commo
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  TINY_ELSER,
   deleteInferenceEndpoint,
   setupKnowledgeBase,
+  TINY_MODELS,
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -20,6 +20,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
+    // see details: https://github.com/elastic/kibana/issues/219217
+    this.tags(['failsOnMKI']);
+
     beforeEach(async () => {
       await setupKnowledgeBase(getService);
     });
@@ -37,7 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
       expect(res.body.enabled).to.be(true);
-      expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER.id);
+      expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_MODELS.ELSER);
     });
 
     it('returns correct status after model is deleted', async () => {

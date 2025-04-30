@@ -21,7 +21,7 @@ import { searchConnectorsMock } from '@kbn/content-connectors-plugin/public/plug
 export const core = coreMock.createStart();
 export const services = {
   cloud: cloudMock.createStart(),
-  searchConnectors: searchConnectorsMock.createStart(),
+  contentConnectors: searchConnectorsMock.createStart(),
   share: sharePluginMock.createStartContract(),
   userProfile: userProfileMock.createWithSecurity(),
 };
