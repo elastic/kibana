@@ -18,6 +18,7 @@ import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { DimensionType } from '@kbn/visualizations-plugin/common/utils';
 import { pick, snakeCase } from 'lodash';
 
 interface Context {
@@ -223,7 +224,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
   const datatable = getDataTableFromEmbeddable(embeddable);
   const thresholdValues = datatable
     ? datatable.columns
-        .filter((col) => col.meta.dimensionName === 'Vertical axis')
+        .filter((col) => col.meta.dimensionType === DimensionType.Y_AXIS)
         .reduce((result, { meta }) => {
           const { sourceField = missingYFieldPlaceholder } = meta.sourceParams ?? {};
           return {
@@ -238,7 +239,9 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
         }, {})
     : {};
 
-  const xColumns = datatable?.columns.filter((col) => col.meta.dimensionName === 'Horizontal axis');
+  const xColumns = datatable?.columns.filter(
+    (col) => (col.meta.dimensionType = DimensionType.X_AXIS)
+  );
   const isTimeViz = xColumns?.some(({ meta }) => meta.type === 'date');
   const splitValues =
     isTimeViz || !xColumns

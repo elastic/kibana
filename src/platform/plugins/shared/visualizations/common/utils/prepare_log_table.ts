@@ -13,7 +13,20 @@ import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension
 
 type DimensionColumn = ExpressionValueVisDimension | ExpressionValueXYDimension | string;
 
+export enum DimensionType {
+  Y_AXIS = 'y',
+  X_AXIS = 'x',
+  REFERENCE_LINE = 'reference',
+  BREAKDOWN = 'breakdown',
+  MARK_SIZE = 'markSize',
+  SPLIT_COLUMN = 'splitCol',
+  SPLIT_ROW = 'splitRow',
+}
 export type Dimension = [DimensionColumn[] | undefined, string];
+export type LayerDimension = [DimensionColumn[] | undefined, string, DimensionType];
+const isLayerDimensions = (
+  dimensions: Dimension[] | LayerDimension[]
+): dimensions is LayerDimension[] => dimensions[0].length === 3;
 
 const isColumnEqualToAccessor = (
   column: DatatableColumn,
@@ -45,7 +58,7 @@ const getAccessorFromDimension = (dimension: DimensionColumn) => {
 const getDimensionName = (
   column: DatatableColumn,
   columnIndex: number,
-  dimensions: Dimension[]
+  dimensions: LayerDimension[] | Dimension[]
 ) => {
   for (const dimension of dimensions) {
     if (
@@ -58,9 +71,25 @@ const getDimensionName = (
   }
 };
 
+const getDimensionType = (
+  column: DatatableColumn,
+  columnIndex: number,
+  dimensions: LayerDimension[]
+) => {
+  for (const dimension of dimensions) {
+    if (
+      dimension[0]?.find((d) =>
+        isColumnEqualToAccessor(column, columnIndex, getAccessorFromDimension(d))
+      )
+    ) {
+      return dimension[2];
+    }
+  }
+};
+
 export const prepareLogTable = (
   datatable: Datatable,
-  dimensions: Dimension[],
+  dimensions: LayerDimension[] | Dimension[],
   removeUnmappedColumns: boolean = false
 ) => {
   return {
@@ -72,6 +101,9 @@ export const prepareLogTable = (
           meta: {
             ...column.meta,
             dimensionName: getDimensionName(column, columnIndex, dimensions),
+            ...(isLayerDimensions(dimensions)
+              ? { dimensionType: getDimensionType(column, columnIndex, dimensions) }
+              : {}),
           },
         };
       })
