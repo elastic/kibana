@@ -47,7 +47,6 @@ RUNTIME_DEPS = [
   "@npm//@tanstack/react-query",
   "@npm//@tanstack/react-query-devtools",
   "@npm//classnames",
-  "@npm//fflate",
   "@npm//fastest-levenshtein",
   "@npm//history",
   "@npm//jquery",
