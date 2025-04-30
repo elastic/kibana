@@ -13,7 +13,7 @@ import {
   isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { partition } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { StreamsClient } from '../../../lib/streams/client';
@@ -29,11 +29,13 @@ export async function readStream({
   assetClient,
   streamsClient,
   scopedClusterClient,
+  logger,
 }: {
   name: string;
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
+  logger: Logger;
 }): Promise<StreamGetResponse> {
   const [streamDefinition, dashboardsAndQueries] = await Promise.all([
     streamsClient.getStream(name),
@@ -71,6 +73,7 @@ export async function readStream({
   ]);
 
   if (isUnwiredStreamDefinition(streamDefinition)) {
+    logger.info(`Unwired stream data stream stats\n${JSON.stringify(dataStream, null, 2)}`);
     return {
       stream: streamDefinition,
       privileges,
