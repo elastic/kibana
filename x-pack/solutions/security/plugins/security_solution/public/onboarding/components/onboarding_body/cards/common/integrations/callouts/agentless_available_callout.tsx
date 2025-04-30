@@ -14,14 +14,14 @@ import { useKibana } from '../../../../../../../common/lib/kibana';
 import { LinkAnchor } from '../../../../../../../common/components/links';
 import { CardCallOut } from '../../card_callout';
 import { TELEMETRY_AGENTLESS_LEARN_MORE } from '../constants';
-import { useOnboardingContext } from '../../../../../onboarding_context';
+import { useIntegrationContext } from '../../../../../../../common/lib/integrations/hooks/integration_context';
 
 export const AgentlessAvailableCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { docLinks } = useKibana().services;
   const {
     telemetry: { reportLinkClick },
-  } = useOnboardingContext();
+  } = useIntegrationContext();
 
   const onClick = useCallback(() => {
     reportLinkClick?.(TELEMETRY_AGENTLESS_LEARN_MORE);
