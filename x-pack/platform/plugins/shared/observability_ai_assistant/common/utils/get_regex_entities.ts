@@ -7,6 +7,15 @@
 import objectHash from 'object-hash';
 import { DetectedEntity } from '../types';
 
+export function getHashedEntity(
+  entity: string,
+  className: string,
+  normalize: boolean = false
+): string {
+  const textForHash = normalize ? entity.toLowerCase() : entity;
+  return objectHash({ entity: textForHash, class_name: className });
+}
+
 const urlRegex = /https?:\/\/[^\s]+/gi;
 const ipRegex = /\b(?:\d{1,3}\.){3}\d{1,3}\b/g;
 const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
@@ -24,8 +33,7 @@ function getMatches(
     const entityText = match[0];
     const start = match.index;
     const end = start + entityText.length;
-    const textForHash = normalize ? entityText.toLowerCase() : entityText;
-    const hash = objectHash({ entity: textForHash, class_name: className });
+    const hash = getHashedEntity(entityText, className, normalize);
     result.push({
       entity: entityText,
       class_name: className,
