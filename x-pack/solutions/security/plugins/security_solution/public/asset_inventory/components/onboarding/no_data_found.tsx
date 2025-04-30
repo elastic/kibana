@@ -52,7 +52,7 @@ export const NoDataFound = () => {
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.onboarding.startOnboardingAssetsDescription"
-                  defaultMessage="It looks like there's no asset data available yet. To get started, connect your organization's data sources—such as identity providers, cloud service providers, and other IT systems—to populate your inventory with the we discover assets."
+                  defaultMessage="It looks like there's no asset data available yet. To get started, connect your organization's data sources—such as identity providers, cloud service providers, and other IT systems—to populate your asset inventory."
                 />
               </p>
             </EuiText>
