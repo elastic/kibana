@@ -7,7 +7,28 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { GET_STARTED_URL } from '../../../urls/navigation';
+import {
+  ASSETS_URL,
+  ALERTS_URL,
+  ASSET_INVENTORY_URL,
+  CREATE_RULE_URL,
+  CSP_DASHBOARD_URL,
+  CSP_BENCHMARKS_URL,
+  CSP_FINDINGS_URL,
+  CSP_VULNERABILITIES_URL,
+  DASHBOARDS_URL,
+  ENTITY_ANALYTICS_MANAGEMENT_URL,
+  ENTITY_ANALYTICS_ENTITY_STORE_URL,
+  EXPLORE_URL,
+  GET_STARTED_URL,
+  INVESTIGATIONS_URL,
+  HOSTS_URL,
+  NETWORK_URL,
+  NOTES_URL,
+  OVERVIEW_URL,
+  TIMELINES_URL,
+  USERS_URL,
+} from '../../../urls/navigation';
 import { AI_SOC_NAVIGATION } from '../../../screens/ai_soc';
 
 const visibleLinks = ['alert_summary', 'attack_discovery', 'cases', 'configurations', 'discover'];
@@ -23,11 +44,34 @@ const notVisibleLinks = [
   'rules',
 ];
 
+const redirectedLinks = [
+  ALERTS_URL,
+  ASSETS_URL,
+  ASSET_INVENTORY_URL,
+  CREATE_RULE_URL,
+  CSP_DASHBOARD_URL,
+  CSP_FINDINGS_URL,
+  CSP_VULNERABILITIES_URL,
+  CSP_BENCHMARKS_URL,
+  DASHBOARDS_URL,
+  ENTITY_ANALYTICS_MANAGEMENT_URL,
+  ENTITY_ANALYTICS_ENTITY_STORE_URL,
+  EXPLORE_URL,
+  HOSTS_URL,
+  INVESTIGATIONS_URL,
+  NETWORK_URL,
+  NOTES_URL,
+  OVERVIEW_URL,
+  TIMELINES_URL,
+  USERS_URL,
+];
+
 describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
     visit(GET_STARTED_URL);
   });
+
   describe('renders links correctly', () => {
     it('should contain the specified links', () => {
       cy.get(AI_SOC_NAVIGATION)
@@ -78,6 +122,15 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
             'Discover - Search not yet saved'
           );
         }
+      });
+    });
+  });
+
+  describe('Redirected pages', () => {
+    it('should redirect to the "get started page"', () => {
+      redirectedLinks.forEach((link) => {
+        cy.visit(link);
+        cy.url().should('include', GET_STARTED_URL);
       });
     });
   });
