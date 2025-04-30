@@ -15,16 +15,19 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
 import { RulesParams } from '@kbn/observability-plugin/public';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import {
+  DeleteConfirmation,
+  SloDeleteModal,
+} from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
@@ -32,6 +35,8 @@ import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_ba
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
+import { useDeleteSlo } from '../../../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../../../hooks/use_delete_slo_instance';
 import { useDisableSlo } from '../../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
@@ -87,6 +92,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: deleteSloInstance } = useDeleteSloInstance();
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
   const [sloToDelete, setSloToDelete] = useState<SLOWithSummaryResponse | undefined>(undefined);
@@ -94,8 +101,15 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const [sloToEnable, setSloToEnable] = useState<SLOWithSummaryResponse | undefined>(undefined);
   const [sloToDisable, setSloToDisable] = useState<SLOWithSummaryResponse | undefined>(undefined);
 
-  const handleDeleteConfirm = () => {
-    setSloToDelete(undefined);
+  const handleDeleteConfirm = (params: DeleteConfirmation) => {
+    if (sloToDelete) {
+      if (params.type === 'instance') {
+        deleteSloInstance({ slo: sloToDelete, excludeRollup: params.excludeRollup });
+      } else {
+        deleteSlo({ id: sloToDelete.id, name: sloToDelete.name });
+      }
+      setSloToDelete(undefined);
+    }
   };
 
   const handleDeleteCancel = () => {
@@ -538,7 +552,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         <SloDeleteModal
           slo={sloToDelete}
           onCancel={handleDeleteCancel}
-          onSuccess={handleDeleteConfirm}
+          onConfirm={handleDeleteConfirm}
         />
       ) : null}
 

@@ -19,7 +19,10 @@ import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
-import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import {
+  DeleteConfirmation,
+  SloDeleteModal,
+} from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
@@ -35,6 +38,8 @@ import { SloDisableConfirmationModal } from '../../../components/slo/disable_con
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { useDisableSlo } from '../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../hooks/use_enable_slo';
+import { useDeleteSloInstance } from '../../../hooks/use_delete_slo_instance';
+import { useDeleteSlo } from '../../../hooks/use_delete_slo';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -73,6 +78,8 @@ export function HeaderControl({ slo }: Props) {
   const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: deleteSloInstance } = useDeleteSloInstance();
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: [slo.id],
@@ -149,7 +156,12 @@ export function HeaderControl({ slo }: Props) {
     setDeleteConfirmationModalOpen(false);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = async (params: DeleteConfirmation) => {
+    if (params.type === 'instance') {
+      deleteSloInstance({ slo, excludeRollup: params.excludeRollup });
+    } else {
+      deleteSlo({ id: slo.id, name: slo.name });
+    }
     removeDeleteQueryParam();
     setDeleteConfirmationModalOpen(false);
     navigate(basePath.prepend(paths.slos));
@@ -414,7 +426,7 @@ export function HeaderControl({ slo }: Props) {
       ) : null}
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onSuccess={handleDeleteConfirm} />
+        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirm} />
       ) : null}
 
       {isResetConfirmationModalOpen ? (

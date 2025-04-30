@@ -51,7 +51,7 @@ export function SloManagementTableWrapper() {
           <SloDeleteModal
             slo={action.item}
             onCancel={() => setAction(undefined)}
-            onSuccess={() => {
+            onConfirm={() => {
               deleteSlo({ id: action.item.id, name: action.item.name });
               setAction(undefined);
             }}

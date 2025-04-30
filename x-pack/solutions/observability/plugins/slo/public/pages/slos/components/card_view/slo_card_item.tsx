@@ -18,10 +18,15 @@ import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@k
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import {
+  DeleteConfirmation,
+  SloDeleteModal,
+} from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useDeleteSlo } from '../../../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../../../hooks/use_delete_slo_instance';
 import { useDisableSlo } from '../../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -89,17 +94,28 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
     setIsAddRuleFlyoutOpen,
   });
 
-  const closeDeleteModal = () => {
-    setDeleteConfirmationModalOpen(false);
-  };
-
   const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: deleteSloInstance } = useDeleteSloInstance();
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   const handleResetConfirm = () => {
     resetSlo({ id: slo.id, name: slo.name });
     setResetConfirmationModalOpen(false);
+  };
+
+  const handleDeleteConfirm = async (params: DeleteConfirmation) => {
+    if (params.type === 'instance') {
+      deleteSloInstance({ slo, excludeRollup: params.excludeRollup });
+    } else {
+      deleteSlo({ id: slo.id, name: slo.name });
+    }
+    setDeleteConfirmationModalOpen(false);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmationModalOpen(false);
   };
 
   const handleResetCancel = () => {
@@ -202,7 +218,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
+        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirm} />
       ) : null}
 
       {isResetConfirmationModalOpen ? (

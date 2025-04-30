@@ -23,41 +23,32 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE, SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-import { useDeleteSlo } from '../../../hooks/use_delete_slo';
-import { useDeleteSloInstance } from '../../../hooks/use_delete_slo_instance';
 
-export interface Props {
+export type DeleteConfirmation =
+  | {
+      type: 'instance';
+      excludeRollup: boolean;
+    }
+  | {
+      type: 'all';
+    };
+
+interface Props {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
-  onSuccess: () => void;
+  onConfirm: (params: DeleteConfirmation) => void;
 }
 
-export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
+export function SloDeleteModal({ slo, onCancel, onConfirm }: Props) {
+  const modalTitleId = useGeneratedHtmlId();
   const { name, groupBy } = slo;
   const instanceId =
     'instanceId' in slo && slo.instanceId !== ALL_VALUE ? slo.instanceId : undefined;
   const hasGroupBy = [groupBy].flat().some((group) => group !== ALL_VALUE);
 
-  const modalTitleId = useGeneratedHtmlId();
-
-  const { mutateAsync: deleteSloInstance, isLoading: isDeleteInstanceLoading } =
-    useDeleteSloInstance();
-  const { mutateAsync: deleteSlo, isLoading: isDeleteLoading } = useDeleteSlo();
-
   const [isDeleteRollupDataChecked, toggleDeleteRollupDataSwitch] = useState<boolean>(false);
   const onDeleteRollupDataSwitchChange = () =>
     toggleDeleteRollupDataSwitch(!isDeleteRollupDataChecked);
-
-  const handleDeleteInstance = async () => {
-    // @ts-ignore
-    await deleteSloInstance({ slo, excludeRollup: isDeleteRollupDataChecked === false });
-    onSuccess();
-  };
-
-  const handleDeleteAll = async () => {
-    await deleteSlo({ id: slo.id, name: slo.name });
-    onSuccess();
-  };
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={onCancel}>
@@ -69,7 +60,7 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
       <EuiModalBody>
         {hasGroupBy && instanceId ? (
           <EuiForm component="form">
-            <EuiFlexItem grow style={{ marginBottom: '2rem' }}>
+            <EuiFlexItem grow css={{ marginBottom: '2rem' }}>
               <FormattedMessage
                 id="xpack.slo.deleteConfirmationModal.groupByDisclaimerText"
                 defaultMessage="This SLO is an instance of many SLO instances."
@@ -97,7 +88,6 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
         <EuiButtonEmpty
           data-test-subj="observabilitySolutionSloDeleteModalCancelButton"
           onClick={onCancel}
-          disabled={isDeleteLoading || isDeleteInstanceLoading}
         >
           <FormattedMessage
             id="xpack.slo.deleteConfirmationModal.cancelButtonLabel"
@@ -110,8 +100,9 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
             data-test-subj="observabilitySolutionSloDeleteModalConfirmButton"
             type="submit"
             color="danger"
-            onClick={handleDeleteInstance}
-            disabled={isDeleteLoading || isDeleteInstanceLoading}
+            onClick={() =>
+              onConfirm({ type: 'instance', excludeRollup: isDeleteRollupDataChecked === false })
+            }
             fill
           >
             <FormattedMessage
@@ -125,8 +116,7 @@ export function SloDeleteModal({ slo, onCancel, onSuccess }: Props) {
           data-test-subj="observabilitySolutionSloDeleteModalConfirmButton"
           type="submit"
           color="danger"
-          onClick={handleDeleteAll}
-          disabled={isDeleteLoading || isDeleteInstanceLoading}
+          onClick={() => onConfirm({ type: 'all' })}
           fill
         >
           {hasGroupBy && instanceId ? (

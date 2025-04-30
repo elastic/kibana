@@ -9,10 +9,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import {
+  DeleteConfirmation,
+  SloDeleteModal,
+} from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useDeleteSlo } from '../../../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../../../hooks/use_delete_slo_instance';
 import { useDisableSlo } from '../../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
@@ -54,6 +59,8 @@ export function SloListItem({
   const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: deleteSloInstance } = useDeleteSloInstance();
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   const { sloDetailsUrl } = useSloFormattedSummary(slo);
 
@@ -63,7 +70,16 @@ export function SloListItem({
     setIsAddRuleFlyoutOpen,
   });
 
-  const closeDeleteModal = () => {
+  const handleDeleteConfirm = async (params: DeleteConfirmation) => {
+    if (params.type === 'instance') {
+      deleteSloInstance({ slo, excludeRollup: params.excludeRollup });
+    } else {
+      deleteSlo({ id: slo.id, name: slo.name });
+    }
+    setDeleteConfirmationModalOpen(false);
+  };
+
+  const handleDeleteCancel = () => {
     setDeleteConfirmationModalOpen(false);
   };
 
@@ -160,7 +176,7 @@ export function SloListItem({
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
+        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirm} />
       ) : null}
 
       {isResetConfirmationModalOpen ? (
