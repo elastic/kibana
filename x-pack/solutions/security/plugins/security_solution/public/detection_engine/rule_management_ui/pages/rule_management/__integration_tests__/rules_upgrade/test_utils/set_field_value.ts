@@ -6,6 +6,7 @@
  */
 
 import { act, fireEvent, within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
 import { invariant } from '../../../../../../../../common/utils/invariant';
 import { toSimpleRuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
@@ -200,7 +201,8 @@ export async function inputFieldValue(
 
 async function fireEnterEvent(el: HTMLElement): Promise<void> {
   await act(async () => {
-    fireEvent.keyDown(el, { key: 'Enter', code: 'Enter', charCode: 13 });
+    el.focus();
+    await userEvent.keyboard('{Enter}');
   });
 }
 
@@ -256,11 +258,8 @@ async function inputSeverityMapping(
     } else {
       // Clear mapping value for the current severity level
       await act(async () => {
-        fireEvent.keyDown(sourceFieldComboboxInput, {
-          key: 'Backspace',
-          code: 'Backspace',
-          charCode: 8,
-        });
+        sourceFieldComboboxInput.focus();
+        await userEvent.keyboard('{Backspace}');
       });
     }
   }
@@ -510,11 +509,8 @@ async function inputRuleNameOverride(
     });
   } else {
     await act(async () => {
-      fireEvent.keyDown(within(fieldFinalSide).getByTestId('comboBoxSearchInput'), {
-        key: 'Backspace',
-        code: 'Backspace',
-        charCode: 8,
-      });
+      within(fieldFinalSide).getByTestId('comboBoxSearchInput').focus();
+      await userEvent.keyboard('{Backspace}');
     });
   }
 }
@@ -535,11 +531,8 @@ async function inputTimestampOverride(
     });
   } else {
     await act(async () => {
-      fireEvent.keyDown(within(fieldFinalSide).getByTestId('comboBoxSearchInput'), {
-        key: 'Backspace',
-        code: 'Backspace',
-        charCode: 8,
-      });
+      within(fieldFinalSide).getByTestId('comboBoxSearchInput').focus();
+      await userEvent.keyboard('{Backspace}');
     });
   }
 }
