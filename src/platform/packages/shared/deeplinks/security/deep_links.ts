@@ -62,6 +62,7 @@ export enum SecurityPageName {
   rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
+  rulesManagement = 'rules-management',
   siemMigrationsRules = 'siem_migrations-rules',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
