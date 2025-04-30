@@ -133,6 +133,7 @@ export const basicESCaseFields: CasePersistedAttributes = {
   total_alerts: -1,
   total_comments: -1,
   category: null,
+  incremental_id: null,
 };
 
 export const basicCaseFields: CaseAttributes = {
@@ -166,6 +167,7 @@ export const basicCaseFields: CaseAttributes = {
   category: null,
   customFields: [],
   observables: [],
+  incremental_id: null,
 };
 
 export const createCaseSavedObjectResponse = ({
