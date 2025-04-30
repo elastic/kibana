@@ -3763,6 +3763,7 @@
         "type": "date"
       },
       "schedule": {
+        "dynamic": false,
         "properties": {
           "interval": {
             "type": "keyword"
