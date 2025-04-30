@@ -120,6 +120,7 @@
     "@kbn/controls-plugin",
     "@kbn/core-http-browser",
     "@kbn/dashboard-plugin",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": ["target/**/*"]
 }
