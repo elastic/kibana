@@ -174,9 +174,6 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     queryName: ALERTS_QUERY_NAMES.BY_STATUS,
   });
 
-  console.log('data', data);
-  console.log('signalIndexName', signalIndexName);
-
   useEffect(() => {
     setAlertsQuery(
       getAlertsByStatusQuery({
@@ -219,6 +216,5 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     queryId,
     loading: isLoading,
   });
-
   return { items, isLoading, updatedAt };
 };

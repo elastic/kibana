@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
+import { useDocumentDetailsContext } from '../../document_details/shared/context';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
@@ -29,12 +30,13 @@ export const GenericEntityFlyoutContent = ({
   entityDocId,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
+  const { scopeId } = useDocumentDetailsContext();
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    field: 'agent.type',
-    value: 'cloudbeat',
+    field: 'entity.id',
+    value: source.entity.id,
     entityDocId,
-    scopeId: 'table',
+    scopeId,
     panelTab: 'fields',
   });
 
@@ -117,8 +119,8 @@ export const GenericEntityFlyoutContent = ({
       <EuiHorizontalRule />
 
       <EntityInsight
-        field={'agent.type'}
-        value={'cloudbeat'}
+        field={'entity.id'}
+        value={source.entity.id}
         isPreviewMode={false}
         isLinkEnabled={true}
         openDetailsPanel={openDetailsPanel}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -15,8 +15,8 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useDocumentDetailsContext } from '../../document_details/shared/context';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
-import { GenericEntityDetailsPanelKey } from '../generic_details_left';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
@@ -67,40 +67,12 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
     }
   }, [getGenericEntity.data?._id]);
 
-  // const { eventId, indexName, scopeId, isPreview } = useDocumentDetailsContext();
-
-  const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    field: 'agent.type',
-    value: 'cloudbeat',
-    entityDocId,
-    scopeId: 'table',
-    panelTab: 'fields',
-  });
-
-  const expandDetails = useCallback(() => {
-    openLeftPanel({
-      id: GenericEntityDetailsPanelKey,
-      params: {
-        entityDocId,
-        name: 'name',
-        field: 'agent.type',
-        value: 'cloudbeat',
-        scopeId: 'table',
-        isRiskScoreExist: false,
-        hasMisconfigurationFindings: true,
-        hasVulnerabilitiesFindings: true,
-        hasNonClosedAlerts: true,
-        path: {
-          tab: 'csp_insights',
-        },
-      },
-    });
-  }, [openLeftPanel]);
+  const { scopeId } = useDocumentDetailsContext();
 
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
       <>
-        <EuiLoadingSpinner size="xl" css={{ position: 'absolute', inset: '50%' }} />
+        <EuiLoadingSpinner size="xxl" css={{ position: 'absolute', inset: '50%' }} />
       </>
     );
   }
@@ -141,6 +113,14 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
+
+  const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
+    field: 'entity.id',
+    value: source?.entity.id,
+    panelTab: 'fields',
+    entityDocId,
+    scopeId,
+  });
 
   return (
     <>

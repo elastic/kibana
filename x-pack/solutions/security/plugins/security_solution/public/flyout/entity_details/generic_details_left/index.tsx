@@ -22,9 +22,9 @@ import {
 import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
 
 export interface GenericEntityDetailsPanelProps extends Record<string, unknown> {
-  isRiskScoreExist: boolean;
-  name: string;
   entityDocId: string;
+  value: string;
+  field: string;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
