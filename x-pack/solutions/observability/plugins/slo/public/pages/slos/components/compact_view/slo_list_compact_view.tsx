@@ -42,7 +42,7 @@ import {
   createRemoteSloEnableUrl,
   createRemoteSloResetUrl,
 } from '../../../../utils/slo/remote_slo_urls';
-import { useActionModal } from '../../../slo_management/context/action_modal';
+import { useActionModal } from '../../../../context/action_modal';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SLOGroupings } from '../common/slo_groupings';
@@ -76,7 +76,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const { data: permissions } = usePermissions();
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
-  const { setAction } = useActionModal();
+  const { triggerAction } = useActionModal();
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
 
@@ -219,7 +219,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         if (!!remoteUrl) {
           window.open(remoteUrl, '_blank');
         } else {
-          setAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
+          triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
         }
       },
     },
@@ -238,7 +238,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       enabled: (slo: SLOWithSummaryResponse) =>
         (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
-        setAction({ item: slo, type: 'clone' });
+        triggerAction({ item: slo, type: 'clone' });
       },
     },
     {
@@ -260,7 +260,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         if (!!remoteDeleteUrl) {
           window.open(remoteDeleteUrl, '_blank');
         } else {
-          setAction({ item: slo, type: 'delete' });
+          triggerAction({ item: slo, type: 'delete' });
         }
       },
     },
@@ -283,7 +283,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         if (!!remoteResetUrl) {
           window.open(remoteResetUrl, '_blank');
         } else {
-          setAction({ item: slo, type: 'reset' });
+          triggerAction({ item: slo, type: 'reset' });
         }
       },
     },

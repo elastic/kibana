@@ -7,14 +7,14 @@
 
 import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { ReactNode, createContext, useContext, useState } from 'react';
-import { SloBulkDeleteConfirmationModal } from '../../../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
-import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
-import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { useCloneSlo } from '../../../hooks/use_clone_slo';
+import { SloBulkDeleteConfirmationModal } from '../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
+import { SloDeleteConfirmationModal } from '../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDisableConfirmationModal } from '../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
+import { SloEnableConfirmationModal } from '../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
+import { SloResetConfirmationModal } from '../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useCloneSlo } from '../hooks/use_clone_slo';
 
-export type Action = SingleAction | BulkAction;
+type Action = SingleAction | BulkAction;
 
 interface BaseAction {
   onConfirm?: () => void;
@@ -32,23 +32,23 @@ interface BulkAction extends BaseAction {
 }
 
 interface ActionModalContextValue {
-  setAction: (action: Action | undefined) => void;
+  triggerAction: (action: Action) => void;
 }
 
 const ActionModalContext = createContext<ActionModalContextValue | undefined>(undefined);
 
 export function ActionModalProvider({ children }: { children: ReactNode }) {
-  const [action, setAction] = useState<Action>();
+  const [action, triggerAction] = useState<Action>();
 
   const navigateToClone = useCloneSlo();
 
   function handleOnCancel() {
-    setAction(undefined);
+    triggerAction(undefined);
     action?.onCancel?.();
   }
 
   function handleOnConfirm() {
-    setAction(undefined);
+    triggerAction(undefined);
     action?.onConfirm?.();
   }
 
@@ -104,7 +104,7 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ActionModalContext.Provider value={{ setAction }}>
+    <ActionModalContext.Provider value={{ triggerAction }}>
       {children}
       {handleAction()}
     </ActionModalContext.Provider>

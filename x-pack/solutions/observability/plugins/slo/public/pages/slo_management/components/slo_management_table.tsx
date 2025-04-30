@@ -29,7 +29,7 @@ import { paths } from '../../../../common/locators/paths';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
-import { useActionModal } from '../context/action_modal';
+import { useActionModal } from '../../../context/action_modal';
 import { useBulkOperation } from '../context/bulk_operation';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloManagementBulkActions } from './slo_management_bulk_actions';
@@ -44,7 +44,7 @@ export function SloManagementTable() {
       application: { navigateToUrl },
     },
   } = useKibana();
-  const { setAction } = useActionModal();
+  const { triggerAction } = useActionModal();
 
   const { data: permissions } = usePermissions();
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
@@ -97,7 +97,7 @@ export function SloManagementTable() {
         defaultMessage: 'Clone',
       }),
       'data-test-subj': 'sloActionsClone',
-      onClick: (slo: SLODefinitionResponse) => setAction({ item: slo, type: 'clone' }),
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'clone' }),
     },
     {
       type: 'icon',
@@ -122,7 +122,7 @@ export function SloManagementTable() {
       enabled: () => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => {
         const isEnabled = slo.enabled;
-        setAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
+        triggerAction({ item: slo, type: isEnabled ? 'disable' : 'enable' });
       },
     },
     {
@@ -136,7 +136,7 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsDelete',
       enabled: (slo: SLODefinitionResponse) => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => setAction({ item: slo, type: 'delete' }),
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'delete' }),
     },
 
     {
@@ -150,7 +150,7 @@ export function SloManagementTable() {
       }),
       'data-test-subj': 'sloActionsReset',
       enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => setAction({ item: slo, type: 'reset' }),
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'reset' }),
     },
   ];
 

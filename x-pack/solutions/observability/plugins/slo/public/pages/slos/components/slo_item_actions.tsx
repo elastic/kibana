@@ -23,7 +23,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { BurnRateRuleParams } from '../../../typings';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
-import { useActionModal } from '../../slo_management/context/action_modal';
+import { useActionModal } from '../../../context/action_modal';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -71,7 +71,7 @@ export function SloItemActions({
   const executionContextName = executionContext.get().name;
   const isDashboardContext = executionContextName === 'dashboards';
   const { data: permissions } = usePermissions();
-  const { setAction } = useActionModal();
+  const { triggerAction } = useActionModal();
 
   const {
     handleNavigateToRules,
@@ -97,15 +97,14 @@ export function SloItemActions({
   };
 
   const handleClone = () => {
-    setAction({ type: 'clone', item: slo });
+    triggerAction({ type: 'clone', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
   };
 
   const handleDelete = () => {
     if (!!remoteDeleteUrl) {
       window.open(remoteDeleteUrl, '_blank');
     } else {
-      setAction({ type: 'delete', item: slo });
-      setIsActionsPopoverOpen(false);
+      triggerAction({ type: 'delete', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
     }
   };
 
@@ -113,8 +112,7 @@ export function SloItemActions({
     if (!!remoteResetUrl) {
       window.open(remoteResetUrl, '_blank');
     } else {
-      setAction({ type: 'reset', item: slo });
-      setIsActionsPopoverOpen(false);
+      triggerAction({ type: 'reset', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
     }
   };
 
@@ -122,8 +120,7 @@ export function SloItemActions({
     if (!!remoteEnableUrl) {
       window.open(remoteEnableUrl, '_blank');
     } else {
-      setAction({ type: 'enable', item: slo });
-      setIsActionsPopoverOpen(false);
+      triggerAction({ type: 'enable', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
     }
   };
 
@@ -131,8 +128,11 @@ export function SloItemActions({
     if (!!remoteDisableUrl) {
       window.open(remoteDisableUrl, '_blank');
     } else {
-      setAction({ type: 'disable', item: slo });
-      setIsActionsPopoverOpen(false);
+      triggerAction({
+        type: 'disable',
+        item: slo,
+        onConfirm: () => setIsActionsPopoverOpen(false),
+      });
     }
   };
 

@@ -34,7 +34,7 @@ import { useGetQueryParams } from './hooks/use_get_query_params';
 import { useSelectedTab } from './hooks/use_selected_tab';
 import { useSloDetailsTabs } from './hooks/use_slo_details_tabs';
 import type { SloDetailsPathParams } from './types';
-import { ActionModalProvider } from '../slo_management/context/action_modal';
+import { ActionModalProvider } from '../../context/action_modal';
 
 export function SloDetailsPage() {
   const { onPageReady } = usePerformanceContext();

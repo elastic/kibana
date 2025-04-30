@@ -18,7 +18,7 @@ import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloOutdatedFilterCallout } from './components/slo_management_outdated_filter_callout';
 import { SloManagementTable } from './components/slo_management_table';
-import { ActionModalProvider } from './context/action_modal';
+import { ActionModalProvider } from '../../context/action_modal';
 import { BulkOperationProvider } from './context/bulk_operation';
 
 export function SloManagementPage() {

@@ -23,7 +23,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
-import { useActionModal } from '../../slo_management/context/action_modal';
+import { useActionModal } from '../../../context/action_modal';
 import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
 import { useGetQueryParams } from '../hooks/use_get_query_params';
 import { useSloActions } from '../hooks/use_slo_actions';
@@ -43,7 +43,7 @@ export function HeaderControl({ slo }: Props) {
 
   const hasApmReadCapabilities = capabilities.apm.show;
   const { data: permissions } = usePermissions();
-  const { setAction } = useActionModal();
+  const { triggerAction } = useActionModal();
 
   const {
     isDeletingSlo,
@@ -76,7 +76,7 @@ export function HeaderControl({ slo }: Props) {
 
   useEffect(() => {
     if (isDeletingSlo) {
-      setAction({
+      triggerAction({
         type: 'delete',
         item: slo,
         onConfirm: () => {
@@ -85,20 +85,20 @@ export function HeaderControl({ slo }: Props) {
       });
     }
     if (isResettingSlo) {
-      setAction({ type: 'reset', item: slo });
+      triggerAction({ type: 'reset', item: slo });
     }
     if (isEnablingSlo) {
-      setAction({ type: 'enable', item: slo });
+      triggerAction({ type: 'enable', item: slo });
     }
     if (isDisablingSlo) {
-      setAction({ type: 'disable', item: slo });
+      triggerAction({ type: 'disable', item: slo });
     }
   }, [
     isDeletingSlo,
     isResettingSlo,
     isEnablingSlo,
     isDisablingSlo,
-    setAction,
+    triggerAction,
     slo,
     basePath,
     navigate,
@@ -135,14 +135,14 @@ export function HeaderControl({ slo }: Props) {
   };
 
   const handleClone = () => {
-    setAction({ type: 'clone', item: slo });
+    triggerAction({ type: 'clone', item: slo });
   };
 
   const handleDelete = () => {
     if (!!remoteDeleteUrl) {
       window.open(remoteDeleteUrl, '_blank');
     } else {
-      setAction({
+      triggerAction({
         type: 'delete',
         item: slo,
         onConfirm: () => {
@@ -158,7 +158,7 @@ export function HeaderControl({ slo }: Props) {
     if (!!remoteResetUrl) {
       window.open(remoteResetUrl, '_blank');
     } else {
-      setAction({
+      triggerAction({
         type: 'reset',
         item: slo,
         onConfirm: () => {
@@ -173,7 +173,7 @@ export function HeaderControl({ slo }: Props) {
     if (!!remoteEnableUrl) {
       window.open(remoteEnableUrl, '_blank');
     } else {
-      setAction({
+      triggerAction({
         type: 'enable',
         item: slo,
         onConfirm: () => {
@@ -188,7 +188,7 @@ export function HeaderControl({ slo }: Props) {
     if (!!remoteDisableUrl) {
       window.open(remoteDisableUrl, '_blank');
     } else {
-      setAction({
+      triggerAction({
         type: 'disable',
         item: slo,
         onConfirm: () => {
