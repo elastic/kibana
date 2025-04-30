@@ -10,7 +10,6 @@ import type {
   AlertRuleFromVisUIActionData,
   RuleTypeRegistryContract,
 } from '@kbn/alerts-ui-shared';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
@@ -91,7 +90,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
       const esqlFunctionRegex = /[A-Z]+\(.*?\)/;
       if (esqlFunctionRegex.test(fieldName) || fieldName.includes(' ')) {
         // If there are any backticks in the field name, change them to double backticks
-        const sanitizedFieldName = sanitazeESQLInput(fieldName);
+        const sanitizedFieldName = fieldName.replace('`', '``');
 
         // Convert the function to a lowercase, snake_cased variable
         // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
