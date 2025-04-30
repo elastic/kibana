@@ -1163,6 +1163,52 @@ describe('MetricVisComponent', function () {
       expect(screen.getByTitle('number-394.2393')).toBeInTheDocument();
       expect(screen.getByText('number-983123.984')).toBeInTheDocument();
     });
+
+    it('still call the string formatter for ES|QL keyword value', async () => {
+      await renderChart({
+        data: {
+          type: 'datatable',
+          columns: [
+            {
+              id: 'a',
+              name: 'alpha',
+              meta: {
+                esType: 'keyword',
+                type: 'string',
+                sourceParams: {
+                  indexPattern: 'index',
+                },
+              },
+            },
+          ],
+          rows: [{ a: '12h50m30s' }],
+          meta: {
+            type: 'es_ql',
+          },
+        },
+        config: {
+          dimensions: {
+            metric: 'a',
+          },
+          metric: {
+            color: '#FFFFFF',
+            iconAlign: 'left',
+            maxCols: 3,
+            titlesTextAlign: 'left',
+            valueFontSize: 'default',
+            valuesTextAlign: 'right',
+            secondaryTrend: {
+              visuals: undefined,
+              baseline: undefined,
+              palette: undefined,
+            },
+          },
+        },
+      });
+      expect(mockDeserialize).toHaveBeenCalledTimes(1);
+      expect(mockDeserialize).toHaveBeenCalledWith({ id: 'string' });
+      expect(screen.getByText('string-12h50m30s')).toBeInTheDocument();
+    });
   });
 
   describe('overrides', () => {
@@ -1181,53 +1227,6 @@ describe('MetricVisComponent', function () {
       });
 
       expect(screen.getByRole('figure')).toHaveStyle({ borderColor: color });
-    });
-  });
-
-  describe('ES|QL metric chart', () => {
-    it('keyword value should remain string', () => {
-      const dataFromESQL: Datatable = {
-        type: 'datatable',
-        columns: [
-          {
-            id: 'a',
-            name: 'alpha',
-            meta: {
-              esType: 'keyword',
-              type: 'string',
-              sourceParams: {
-                indexPattern: 'index',
-              },
-            },
-          },
-        ],
-        rows: [{ a: '12h50m30s' }],
-        meta: {
-          type: 'es_ql',
-        },
-      };
-
-      const config: Props['config'] = {
-        dimensions: {
-          metric: 'a',
-        },
-        metric: {
-          color: '#FFFFFF',
-          iconAlign: 'left',
-          maxCols: 3,
-          titlesTextAlign: 'left',
-          valueFontSize: 'default',
-          valuesTextAlign: 'right',
-        },
-      };
-
-      const component = shallow(
-        <MetricVis config={config} data={dataFromESQL} {...defaultProps} />
-      );
-
-      const { data } = component.find(Metric).props();
-      const formattedMetricValue = data[0][0]!.value;
-      expect(formattedMetricValue).toEqual('string-12h50m30s');
     });
   });
 });

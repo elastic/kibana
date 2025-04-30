@@ -12,7 +12,7 @@ import { type PaletteOutput, CUSTOM_PALETTE } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { type SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { type ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { getFormatService, getPaletteService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
@@ -38,7 +38,9 @@ export const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
-  const serializedFieldFormat = getFormatByAccessor(accessor, columns);
+  const type = getColumnByAccessor(accessor, columns)?.meta.type;
+  const defaultFormat = type ? { id: type } : undefined;
+  const serializedFieldFormat = getFormatByAccessor(accessor, columns, defaultFormat);
   const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
   return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
