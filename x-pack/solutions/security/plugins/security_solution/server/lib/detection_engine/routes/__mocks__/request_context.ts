@@ -179,6 +179,8 @@ const createSecuritySolutionRequestContextMock = (
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),
+    getPadPrecheckAndInstallClient: jest.fn(),
+    getRemovePadInstallationClient: jest.fn(),
   };
 };
 

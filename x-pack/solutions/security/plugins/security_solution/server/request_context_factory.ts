@@ -274,7 +274,8 @@ export class RequestContextFactory implements IRequestContextFactory {
           soClient: coreContext.savedObjects.client,
           logger: options.logger,
           namespace: getSpaceId(),
-          indexPatterns: startPlugins.dataViews,
+          dataViewsService,
+          // auditService: getAuditLogger(),
         });
       }),
       getRemovePadInstallationClient: memoize(() => {

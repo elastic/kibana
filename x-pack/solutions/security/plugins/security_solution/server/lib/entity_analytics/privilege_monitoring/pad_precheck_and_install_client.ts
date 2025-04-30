@@ -10,6 +10,7 @@ import type {
   IScopedClusterClient,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  //   CoreAuditService,
 } from '@kbn/core/server';
 
 import {
@@ -18,14 +19,20 @@ import {
   bulkInstallPackages,
 } from '@kbn/fleet-plugin/server/services/epm/packages';
 
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
+// import { getMlClient, MlAuditLogger } from '@kbn/ml-plugin/server/lib/ml_client';
+// import type { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
+// import type { MLSavedObjectService } from '@kbn/ml-plugin/server/saved_objects';
+// x-pack/platform/plugins/shared/ml/server/lib/ml_client/index.ts
 interface PadPrecheckAndInstallClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
   namespace: string;
   soClient: SavedObjectsClientContract;
-  indexPatterns: DataViewsServerPluginStart;
+  dataViewsService: DataViewsService;
+  //   mlSavedObjectService: MLSavedObjectService;
+  //   auditService: CoreAuditService;
 }
 
 export class PadPrecheckAndInstallClient {
@@ -33,12 +40,10 @@ export class PadPrecheckAndInstallClient {
   private soClient: SavedObjectsClientContract;
   private installationStatus: Record<string, unknown> = {};
   private packageVersion: string = '';
-  private indexPatterns: DataViewsServerPluginStart;
 
   constructor(private readonly opts: PadPrecheckAndInstallClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
     this.soClient = opts.soClient;
-    this.indexPatterns = opts.indexPatterns;
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
@@ -62,7 +67,7 @@ export class PadPrecheckAndInstallClient {
   }
 
   private async fetchMlJobs(jobPrefix: string) {
-    const allJobs = await this.esClient.ml.getJobs();
+    // const allJobs = await this.esClient.ml.getJobs();
     const stats = await this.esClient.ml.getJobStats({ job_id: `${jobPrefix}*` });
 
     return stats.jobs.map((job) => ({
@@ -103,19 +108,54 @@ export class PadPrecheckAndInstallClient {
   private async isIngestPipelinePresent(pipelineName: string) {
     try {
       const pipelineResponse = await this.esClient.ingest.getPipeline({ id: pipelineName });
-      this.log('debug', `[VERIFIED] Ingest pipeline exists: ${pipelineName}`);
-      this.installationStatus.ingest_pipeline = {
-        status: 'exists',
-        pipeline_id: pipelineName,
-        description:
-          pipelineResponse[pipelineName]?.description || 'Custom pipeline for PAD integration',
-        processors: pipelineResponse[pipelineName]?.processors || [],
-      };
-      return pipelineResponse;
+
+      if (pipelineResponse[pipelineName]) {
+        this.log('debug', `[VERIFIED] Ingest pipeline exists: ${pipelineName}`);
+        const processors = pipelineResponse[pipelineName]?.processors || [];
+
+        const mlPadProcessorName = `${this.packageVersion}-ml_pad_ingest_pipeline`;
+        const alreadyHasProcessor = processors.some(
+          (proc) => proc.pipeline?.name === mlPadProcessorName
+        );
+
+        this.installationStatus.ingest_pipeline = {
+          status: 'exists',
+          pipeline_id: pipelineName,
+          description:
+            pipelineResponse[pipelineName]?.description || 'Custom pipeline for PAD integration',
+          processors,
+          needs_update: !alreadyHasProcessor,
+        };
+
+        return { exists: true, alreadyHasProcessor, processors };
+      }
+
+      return { exists: false, alreadyHasProcessor: false, processors: [] };
     } catch (error) {
       this.log('info', '[VERIFIED] Ingest pipeline does not exist');
-      return false;
+      return { exists: false, alreadyHasProcessor: false, processors: [] };
     }
+  }
+
+  private async setupMlJob() {
+    const mlModuleSetupResponse = await this.esClient.transport.request({
+      method: 'POST',
+      path: '/_ml/modules/setup',
+      body: {
+        module_id: 'pad-ml',
+        prefix: 'pad_',
+        index_pattern_name:
+          'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all',
+        useDedicatedIndex: true,
+        start: 'now-1h',
+        end: 'now',
+      },
+    });
+    this.log('debug', `ML module setup response: ${JSON.stringify(mlModuleSetupResponse)}`);
+    this.installationStatus.ml_module_setup = {
+      status: 'success',
+      response: mlModuleSetupResponse,
+    };
   }
 
   private async checkAndUpdateComponentTemplateMappings() {
@@ -226,37 +266,42 @@ export class PadPrecheckAndInstallClient {
 
   private async checkandUpdateDataViews() {
     const title = 'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all';
-    const dataViews = await this.indexPatterns.dataViewsServiceFactory(
-      this.soClient,
-      this.esClient
+
+    // Use soClient to search for existing data view
+    const existing = await this.soClient.find({
+      type: 'index-pattern',
+      search: `"${title}"`,
+      searchFields: ['title'],
+      perPage: 1,
+      namespaces: [this.opts.namespace], // Adjust if not using spaces
+    });
+
+    const alreadyExists = existing.saved_objects.find(
+      (obj) => obj.attributes && (obj.attributes as { title: string }).title === title
     );
 
-    // Split title into individual patterns
-    const titleArray = title.split(',');
+    if (!alreadyExists) {
+      this.log('info', `Data view "${title}" does not exist. Creating...`);
 
-    // Loop through titleArray and check if each data view exists
-    for (const pattern of titleArray) {
-      const existing = await dataViews.find(pattern); // Find data view by each pattern
-      const alreadyExists = existing.some((dv) => dv.title === pattern); // Check if the data view exists
+      const { dataViewsService } = this.opts;
 
-      if (!alreadyExists) {
-        this.log('info', `Data view ${pattern} does not exist`);
-        await dataViews.createAndSave({
-          title: pattern,
-          timeFieldName: '@timestamp',
-          name: pattern,
-        });
-        this.installationStatus.data_view = {
-          status: 'created',
-          data_view_id: pattern,
-        };
-      } else {
-        this.log('info', `Data view ${pattern} already exists`);
-        this.installationStatus.data_view = {
-          status: 'exists',
-          data_view_id: pattern,
-        };
-      }
+      const newDataView = await dataViewsService.createAndSave({
+        title,
+        timeFieldName: '@timestamp',
+        name: 'Data view for PAD integration package',
+      });
+
+      this.installationStatus.data_view = {
+        status: 'created',
+        data_view_id: newDataView.id,
+      };
+    } else {
+      this.log('info', `Data view "${title}" already exists`);
+
+      this.installationStatus.data_view = {
+        status: 'exists',
+        data_view_id: alreadyExists.id,
+      };
     }
   }
 
@@ -304,6 +349,7 @@ export class PadPrecheckAndInstallClient {
     };
     this.log('debug', `PAD package installed: ${availablePad.version}`);
     await this.checkIfPadPackageInstalled();
+    // await this.setupMlJob();
   }
 
   public async runPadPrecheckAndInstall(): Promise<Record<string, unknown>> {
@@ -315,67 +361,38 @@ export class PadPrecheckAndInstallClient {
     // ############### INGEST PIPELINE #####################
     this.log('debug', 'Checking if PAD ingest pipeline present or not..');
     const pipelineName = 'logs-endpoint.events.process@custom';
-    const pipelinesPresent = await this.isIngestPipelinePresent(pipelineName);
-    if (!pipelinesPresent) {
-      const putPipelineResponse = await this.esClient.ingest.putPipeline({
+    const { exists, alreadyHasProcessor, processors } = await this.isIngestPipelinePresent(
+      pipelineName
+    );
+
+    if (exists && !alreadyHasProcessor) {
+      this.log('info', `Appending ml_pad_ingest_pipeline to ${pipelineName}`);
+
+      const updatedProcessors = [
+        ...processors,
+        {
+          pipeline: {
+            name: `${this.packageVersion}-ml_pad_ingest_pipeline`,
+            on_failure: [
+              {
+                set: {
+                  field: '_ingest.error',
+                  value: 'Failed to execute ml_pad_ingest_pipeline',
+                },
+              },
+            ],
+          },
+        },
+      ];
+      await this.esClient.ingest.putPipeline({
         id: pipelineName,
         description: 'Custom pipeline for PAD integration',
-        processors: [
-          {
-            pipeline: {
-              name: `${this.packageVersion}-ml_pad_ingest_pipeline`,
-              on_failure: [
-                {
-                  set: {
-                    field: '_ingest.error',
-                    value: 'Failed to execute ml_pad_ingest_pipeline',
-                  },
-                },
-              ],
-            },
-          },
-        ],
+        processors: updatedProcessors,
       });
-      this.log('debug', `Ingest pipeline created: ${JSON.stringify(putPipelineResponse)}`);
 
-      // After creating pipeline, fetch it to get the details
-      const createdPipeline = await this.esClient.ingest.getPipeline({ id: pipelineName });
-
-      this.installationStatus.ingest_pipeline = {
-        status: 'created',
-        pipeline_id: 'logs-endpoint.events.process@custom',
-        description:
-          createdPipeline[pipelineName]?.description || 'Custom pipeline for PAD integration',
-        processors: createdPipeline[pipelineName]?.processors || [],
-      };
-    } else {
-      const existingProcessors = pipelinesPresent[pipelineName]?.processors || [];
-      const newProcessors = {
-        pipeline: {
-          name: `${this.packageVersion}-ml_pad_ingest_pipeline`,
-          on_failure: [
-            {
-              set: {
-                field: '_ingest.error',
-                value: 'Failed to execute ml_pad_ingest_pipeline',
-              },
-            },
-          ],
-        },
-      };
-      const updatedPipeline = {
-        processors: [...existingProcessors, newProcessors],
-      };
-
-      try {
-        const updatePipelineResponse = await this.esClient.ingest.putPipeline({
-          id: pipelineName,
-          body: updatedPipeline as Record<string, unknown>,
-        });
-        this.log('debug', `Ingest pipeline updated: ${JSON.stringify(updatePipelineResponse)}`);
-      } catch (err) {
-        this.log('debug', `Failed to upsert pipeline ${pipelineName}: ${err}`);
-      }
+      this.installationStatus.ingest_pipeline.status = 'updated';
+    } else if (exists && alreadyHasProcessor) {
+      this.log('info', `Pipeline ${pipelineName} already has the ml_pad_ingest_pipeline processor`);
     }
 
     // ############### COMPONENT TEMPLATE MAPPINGS #####################
@@ -392,6 +409,7 @@ export class PadPrecheckAndInstallClient {
 
     // ############### ML JOBS #####################
     try {
+      await this.setupMlJob();
       const mlJobs = await this.fetchMlJobs('pad');
       this.installationStatus.ml_jobs = {
         count: mlJobs.length,
