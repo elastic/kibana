@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -13,7 +12,6 @@ import {
   deleteTinyElserModelAndInferenceEndpoint,
   deployTinyElserAndSetupKb,
   getKnowledgeBaseEntries,
-  TINY_ELSER_INFERENCE_ID,
 } from '../utils/knowledge_base';
 import {
   createOrUpdateIndexAssets,
