@@ -9,9 +9,12 @@ import moment from 'moment';
 import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
-import type { Frequency } from '@kbn/rrule';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  BulkUpdateTaskResult,
+  Frequency,
+} from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;

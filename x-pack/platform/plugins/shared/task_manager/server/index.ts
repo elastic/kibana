@@ -23,6 +23,7 @@ export type {
   IntervalSchedule,
 } from './task';
 
+export { Frequency, Weekday } from '@kbn/rrule';
 export type { RruleSchedule } from './saved_objects';
 export { scheduleRruleSchema } from './saved_objects';
 
