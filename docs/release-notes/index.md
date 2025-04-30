@@ -40,7 +40,7 @@ For the Elastic Security 9.0.1 release information, refer to [Elastic Security S
 * Fixes an issue where keywords could be incorrectly formatted in a metric visualization [#218233](https://github.com/elastic/kibana/pull/218233).
 
 **Discover**:
-*Fixes incorrect behavior for requests on fields where the Allow hidden and system indices (`allow_hidden`) option of the data view could be ignored [#217628](https://github.com/elastic/kibana/pull/217628).
+* Fixes incorrect behavior for requests on fields where the Allow hidden and system indices (`allow_hidden`) option of the data view could be ignored [#217628](https://github.com/elastic/kibana/pull/217628).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.0.1 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
