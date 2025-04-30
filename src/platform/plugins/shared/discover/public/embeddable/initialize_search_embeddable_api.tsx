@@ -209,12 +209,11 @@ export const initializeSearchEmbeddableApi = async (
       rowHeight: (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
       headerRowHeight: (a, b) =>
         (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
-      /** The following can't currently be changed from the dashboard */
-      serializedSearchSource: 'skip',
-      viewMode: 'skip',
-      density: 'skip',
+      serializedSearchSource: 'referenceEquality',
+      viewMode: 'referenceEquality',
+      density: 'referenceEquality',
     },
-    reinitializeState: (lastSaved?: SearchEmbeddableSerializedState) => {
+    reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => {
       sort$.next(lastSaved?.sort);
       columns$.next(lastSaved?.columns);
       grid$.next(lastSaved?.grid);
