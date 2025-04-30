@@ -145,6 +145,8 @@ module.exports = (_, argv) => {
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
+        // NOTE: We use this to make sure that buffer and punycode bundled are the ones
+        // installed from node-stdlib-browser and are in sync in between shared deps and plugins bundles
         buffer: [
           Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/buffer'),
           require.resolve('buffer'),
