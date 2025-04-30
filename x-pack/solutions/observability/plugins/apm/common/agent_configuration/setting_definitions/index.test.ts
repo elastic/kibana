@@ -197,6 +197,7 @@ describe('filterByAgent', () => {
         'send_logs',
         'send_metrics',
         'send_traces',
+        'logging_level',
       ]);
     });
 
