@@ -40416,10 +40416,6 @@ paths:
                               - name
                               - enabled
                               - inputs
-                              - updated_at
-                              - updated_by
-                              - created_at
-                              - created_by
                       type: array
                     hasErrors:
                       type: boolean
