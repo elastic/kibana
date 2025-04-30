@@ -34,6 +34,7 @@ describe('utils', () => {
       ['tool?name', 'tool_name'],
       ['tool  name', 'tool__name'],
       ['tool name ', 'tool_name_'],
+      ['tool-name ', 'tool_name_'],
     ])("formats tool name '%s' to '%s'", (input: string, expected: string) => {
       expect(formatToolName(input)).toEqual(expected);
     });

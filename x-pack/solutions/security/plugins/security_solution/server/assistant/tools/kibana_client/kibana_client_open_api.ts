@@ -90,10 +90,11 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     return undefined;
   }
 
-  static async create(args?: { options?: Options }) {
+  static async create(args?: { options?: Partial<Options> }) {
     const options = {
       ...defaultOptions,
-      ...(args?.options ?? {}),
+      ...(args?.options ?? {
+      }),
     };
     const yamlOpenApiSpec = await fs.promises.readFile(options.apiSpecPath, 'utf8');
     const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
@@ -193,7 +194,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
             .getTags()
             .map((tag) => tag.description)
             .filter((tag) => !!tag),
-        ].join('\n'),
+        ].join('\n') || operation.getOperationId(),
         tags: operation.getTags().map((tag) => tag.name),
         verboseParsingErrors: true,
         schema: this.getParametersAsZodSchema({
@@ -224,7 +225,8 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
                 'You are Kibana API Client agent. You are an expert in using functions that call' +
                 ' the Kibana APIs. Use the functions at your disposal to action requested by the user. ' +
                 'You do not need to confirm with the user before using a function. If the tool' +
-                ' input did not match expected schema, try to fix it and call the tool again. ',
+                ' input did not match expected schema, try to fix it and call the tool again.' +
+                ' Include as much information as possible in the final response.',
             }),
             new HumanMessage({ content: input }),
           ],
@@ -242,20 +244,20 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           input: z
             .string()
             .describe(
-              'The action that should be performed and any relevant parameters provided in the conversation. Include as much detail as possible.'
+              'The action that should be performed and any relevant information provided in the conversation. Include as much detail as possible.'
             ),
         }),
       }
     );
   }
 
-  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny, operation: Operation) {
+  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
     if (schema.properties && schema.properties["kbn-xsrf"] && Array.isArray(schema.required) && schema.required.includes("kbn-xsrf")) {
       // Remove kbn-xsrf from required properties, it will be added to headers manually
       schema.required = schema.required.filter((item) => item !== "kbn-xsrf");
       return jsonSchemaToZodWithParserOverride(schema)
     }
-    return super.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride, operation);
+    return super.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride);
   }
 }
 
