@@ -58,7 +58,7 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query: 'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*)',
+        query: 'FROM index | STATS count = COUNT(*)',
         thresholdValues: { count: 210 },
         splitValues: {},
       },
@@ -68,7 +68,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*)
+      FROM index | STATS count = COUNT(*)
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE count >= 210",
           },
@@ -83,8 +83,7 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query:
-          'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY uhhhhhhhh.field',
+        query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
         thresholdValues: { count: 210 },
         splitValues: { 'uhhhhhhhh.field': ['zoop'] },
       },
@@ -94,7 +93,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY uhhhhhhhh.field
+      FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE uhhhhhhhh.field == \\"zoop\\" AND count >= 210",
           },
@@ -109,8 +108,7 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query:
-          'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY uhhhhhhhh.field',
+        query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
         thresholdValues: { count: 210 },
         splitValues: { 'uhhhhhhhh.field': ['zoop', 'boop'] },
       },
@@ -120,7 +118,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY uhhhhhhhh.field
+      FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE (uhhhhhhhh.field == \\"zoop\\" OR uhhhhhhhh.field == \\"boop\\") AND count >= 210",
           },
@@ -135,7 +133,7 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query: 'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | KEEP tags, something.else',
+        query: 'FROM index | KEEP tags, something.else',
         thresholdValues: { 'something.else': 3087 },
         splitValues: { tags: ['["shibbity", "beep", "bop", "doowop"]'] },
       },
@@ -145,7 +143,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | KEEP tags, something.else
+      FROM index | KEEP tags, something.else
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE tags IN (\\"shibbity\\",\\"beep\\",\\"bop\\",\\"doowop\\") AND something.else >= 3087",
           },
@@ -160,7 +158,7 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query: 'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | KEEP tags, something.else',
+        query: 'FROM index | KEEP tags, something.else',
         thresholdValues: { 'something.else': 3087 },
         splitValues: { tags: ['["shibbity", ""]'] },
       },
@@ -170,7 +168,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | KEEP tags, something.else
+      FROM index | KEEP tags, something.else
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE tags IN (\\"shibbity\\",\\"\\") AND something.else >= 3087",
           },
@@ -185,8 +183,7 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query:
-          'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*), p99 = PERCENTILE(owowo, 99)',
+        query: 'FROM index | STATS count = COUNT(*), p99 = PERCENTILE(owowo, 99)',
         thresholdValues: { count: 210, p99: 42.6 },
         splitValues: {},
       },
@@ -196,7 +193,7 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*), p99 = PERCENTILE(owowo, 99)
+      FROM index | STATS count = COUNT(*), p99 = PERCENTILE(owowo, 99)
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
       | WHERE count >= 210 AND p99 >= 42.6",
           },
@@ -212,7 +209,7 @@ describe('AlertRuleFromVisAction', () => {
       embeddable: embeddableMock,
       data: {
         query:
-          'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
+          'FROM index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
         thresholdValues: {
           'COUNT(*)': 210,
           'PERCENTILE(owowo, 99)': 42.6,
@@ -226,9 +223,9 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
+      FROM index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | EVAL _count = \`COUNT(*)\`| RENAME \`PERCENTILE(owowo, 99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`)\` as _count_meow_bytes 
+      | EVAL _count = \`\`COUNT(*)\`\`| RENAME \`\`PERCENTILE(owowo, 99)\`\` as _percentile_owowo_99 | RENAME \`\`COUNT(\`\`meow bytes\`\`)\`\` as _count_meow_bytes 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
       | WHERE _count >= 210 AND _percentile_owowo_99 >= 42.6 AND _count_meow_bytes >= 1312",
           },
@@ -243,8 +240,7 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query:
-          'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY CATEGORIZE(message)',
+        query: 'FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)',
         thresholdValues: {
           'COUNT(*)': 1,
         },
@@ -260,9 +256,9 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY CATEGORIZE(message)
+      FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | EVAL _count = \`COUNT(*)\`| RENAME \`CATEGORIZE(message)\` as _categorize_message 
+      | EVAL _count = \`\`COUNT(*)\`\`| RENAME \`\`CATEGORIZE(message)\`\` as _categorize_message 
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE _categorize_message == \\".*?GET .+?HTTP/1\\\\\\\\.1.+?Mozilla/5\\\\\\\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\\\\\\\.0a\\" AND _count >= 1",
           },
@@ -277,7 +273,7 @@ describe('AlertRuleFromVisAction', () => {
     it('derives data from the embeddable and uses placeholder threshold values', () => {
       const embeddable = getLensApiMock({
         query$: new BehaviorSubject({
-          esql: 'FROM eyyyy_look_at_my_index | STATS count = COUNT(*)',
+          esql: 'FROM index | STATS count = COUNT(*)',
         }),
         getInspectorAdapters: jest.fn(() => ({
           tables: {
@@ -327,7 +323,7 @@ describe('AlertRuleFromVisAction', () => {
           "params": Object {
             "esqlQuery": Object {
               "esql": "// Original ES|QL query derived from the visualization:
-        FROM eyyyy_look_at_my_index | STATS count = COUNT(*)
+        FROM index | STATS count = COUNT(*)
         // Modify the following conditions to set an alert threshold for this rule:
         | WHERE count >= [THRESHOLD]",
             },
@@ -340,7 +336,7 @@ describe('AlertRuleFromVisAction', () => {
     it('uses placeholder split values when the X axis is not a timestamp', () => {
       const embeddable = getLensApiMock({
         query$: new BehaviorSubject({
-          esql: 'FROM eyyyy_look_at_my_index | STATS count = COUNT(*) BY group',
+          esql: 'FROM index | STATS count = COUNT(*) BY group',
         }),
         getInspectorAdapters: jest.fn(() => ({
           tables: {
@@ -390,7 +386,7 @@ describe('AlertRuleFromVisAction', () => {
           "params": Object {
             "esqlQuery": Object {
               "esql": "// Original ES|QL query derived from the visualization:
-        FROM eyyyy_look_at_my_index | STATS count = COUNT(*) BY group
+        FROM index | STATS count = COUNT(*) BY group
         // Modify the following conditions to set an alert threshold for this rule:
         | WHERE group == \\"[VALUE]\\" AND count >= [THRESHOLD]",
             },

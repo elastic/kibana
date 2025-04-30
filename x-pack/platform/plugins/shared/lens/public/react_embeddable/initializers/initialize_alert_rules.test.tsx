@@ -60,7 +60,7 @@ describe('Alert rules API', () => {
           params: {
             searchType: 'esqlQuery',
             esqlQuery: {
-              esql: "FROM were_no_strangers_to_love | STATS `you know the rules and so do i` = COUNT(*) BY `a full commitment's what i'm thinking of`, `you wouldn't get this from any other guy`",
+              esql: 'FROM index | STATS `number of documents` = COUNT(*)',
             },
           },
         },
@@ -73,7 +73,7 @@ describe('Alert rules API', () => {
           "name": "Elasticsearch query rule from visualization",
           "params": Object {
             "esqlQuery": Object {
-              "esql": "FROM were_no_strangers_to_love | STATS \`you know the rules and so do i\` = COUNT(*) BY \`a full commitment's what i'm thinking of\`, \`you wouldn't get this from any other guy\`",
+              "esql": "FROM index | STATS \`number of documents\` = COUNT(*)",
             },
             "searchType": "esqlQuery",
             "timeWindowSize": 7,
@@ -85,27 +85,15 @@ describe('Alert rules API', () => {
 
     it('should parse esql variables in the query', async () => {
       parentApiMock.esqlVariables$.next([
-        { type: ESQLVariableType.FIELDS, key: 'field', value: 'never.gonna.give.you.up' },
-        { type: ESQLVariableType.FIELDS, key: 'field1', value: 'never.gonna.let.you.down' },
-        {
-          type: ESQLVariableType.FIELDS,
-          key: 'field2',
-          value: 'never.gonna.run.around.and.desert.you',
-        },
-        { type: ESQLVariableType.FIELDS, key: 'field3', value: 'never.gonna.make.you.cry' },
-        { type: ESQLVariableType.FIELDS, key: 'field4', value: 'never.gonna.say.goodbye' },
-        {
-          type: ESQLVariableType.FIELDS,
-          key: 'field5',
-          value: 'never.gonna.tell.a.lie.and.hurt.you',
-        },
+        { type: ESQLVariableType.FIELDS, key: 'field', value: 'field.zero' },
+        { type: ESQLVariableType.FIELDS, key: 'field1', value: 'field.one' },
       ]);
       api.createAlertRule(
         {
           params: {
             searchType: 'esqlQuery',
             esqlQuery: {
-              esql: 'FROM i_just_wanna_tell_you_how_im_feeling | STATS `got to make you understand` = ??field, ??field1, ??field2, ??field3, ??field4, ??field5',
+              esql: 'FROM index | STATS aggregatedFields = ??field, ??field1',
             },
           },
         },
@@ -118,7 +106,7 @@ describe('Alert rules API', () => {
           "name": "Elasticsearch query rule from visualization",
           "params": Object {
             "esqlQuery": Object {
-              "esql": "FROM i_just_wanna_tell_you_how_im_feeling | STATS \`got to make you understand\` = never.gonna.give.you.up, never.gonna.let.you.down, never.gonna.run.around.and.desert.you, never.gonna.make.you.cry, never.gonna.say.goodbye, never.gonna.tell.a.lie.and.hurt.you",
+              "esql": "FROM index | STATS aggregatedFields = field.zero, field.one",
             },
             "searchType": "esqlQuery",
             "timeWindowSize": 7,
