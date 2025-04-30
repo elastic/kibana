@@ -36,7 +36,7 @@ describe('isNativeCspFinding', () => {
     expect(isNativeCspFinding(finding)).toBe(false);
   });
 
-  it('should return false when finding object has data_stream property but missing dataset property', () => {
+  it('should return false  when finding object has data_stream property but missing dataset property', () => {
     const finding = {
       data_stream: {},
     } as CspFinding;
@@ -44,13 +44,12 @@ describe('isNativeCspFinding', () => {
     expect(isNativeCspFinding(finding)).toBe(false);
   });
 
-  it('should return false when dataset property is null or undefined', () => {
+  it('should return false  when dataset property is null or undefined', () => {
     const findingWithUndefinedDataset = {
       data_stream: {
         dataset: undefined,
       },
     } as CspFinding;
-
     expect(isNativeCspFinding(findingWithUndefinedDataset)).toBe(false);
   });
 });

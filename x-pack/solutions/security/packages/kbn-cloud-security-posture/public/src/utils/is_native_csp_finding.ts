@@ -13,4 +13,4 @@ export const isNativeCspFinding = (finding: CspFinding | CspVulnerabilityFinding
   finding.data_stream?.dataset === CSP_MISCONFIGURATIONS_DATASET ||
   finding.data_stream?.dataset === CSP_VULN_DATASET ||
   finding.data_stream?.dataset === WIZ_VULN_DATASET ||
-  finding?.data_stream?.dataset?.startsWith(QUALYS_VULN_DATASET);
+  (finding.data_stream?.dataset?.startsWith(QUALYS_VULN_DATASET) ?? false);
