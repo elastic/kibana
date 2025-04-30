@@ -44,7 +44,7 @@ export interface UserMessageGetterProps {
   visualization: Visualization | undefined;
   visualizationState: VisualizationState | undefined;
   activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
+  activeDatasourceState: DatasourceState | null;
   dataViews: DataViewsState;
   core: CoreStart;
 }
