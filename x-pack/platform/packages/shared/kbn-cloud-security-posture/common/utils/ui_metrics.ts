@@ -33,9 +33,9 @@ export const ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS =
   'entity-flyout-expand-misconfiguration-view-visits' as const;
 export const ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS =
   'entity-flyout-expand-vulnerability-view-visits' as const;
-export const NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT =
+export const NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT =
   'nav-to-findings-by-host-name-from-entity-flyout' as const;
-export const NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT =
+export const NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT =
   'nav-to-findings-by-rule-name-from-entity-flyout' as const;
 export const CREATE_DETECTION_RULE_FROM_FLYOUT = 'create-detection-rule-from-flyout' as const;
 export const CREATE_DETECTION_FROM_TABLE_ROW_ACTION =
@@ -58,8 +58,8 @@ export type CloudSecurityUiCounters =
   | typeof ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW
   | typeof ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS
   | typeof ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS
-  | typeof NAV_TO_FINDINGS_BY_HOST_NAME_FRPOM_ENTITY_FLYOUT
-  | typeof NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
+  | typeof NAV_TO_FINDINGS_BY_HOST_NAME_FROM_ENTITY_FLYOUT
+  | typeof NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
   | typeof VULNERABILITIES_FLYOUT_VISITS
   | typeof OPEN_FINDINGS_FLYOUT
   | typeof CREATE_DETECTION_RULE_FROM_FLYOUT

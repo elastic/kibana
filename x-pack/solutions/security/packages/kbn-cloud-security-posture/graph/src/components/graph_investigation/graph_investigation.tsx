@@ -138,16 +138,24 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
-      const filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
-        return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
-      }, searchFilters);
 
-      if (query.query.trim() !== '' && originEventIds.length > 0) {
-        query.query = `(${query.query})${originEventIds
-          .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
-          .join('')}`;
+      let filters = [...searchFilters];
+
+      const hasKqlQuery = query.query.trim() !== '';
+
+      if (originEventIds.length > 0) {
+        if (!hasKqlQuery || searchFilters.length > 0) {
+          filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
+            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
+          }, searchFilters);
+        }
+
+        if (hasKqlQuery) {
+          query.query = `(${query.query})${originEventIds
+            .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
+            .join('')}`;
+        }
       }
-
       onInvestigateInTimeline?.(query, filters, timeRange);
     }, [dataView?.id, onInvestigateInTimeline, originEventIds, kquery, searchFilters, timeRange]);
 
