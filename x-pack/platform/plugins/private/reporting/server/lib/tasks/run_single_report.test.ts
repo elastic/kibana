@@ -104,7 +104,7 @@ const fakeRawRequest: FakeRawRequest = {
   path: '/',
 };
 
-describe('Execute Report Task', () => {
+describe('Run Single Report Task', () => {
   let mockReporting: ReportingCore;
   let configType: ReportingConfigType;
   beforeAll(async () => {

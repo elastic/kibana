@@ -10,12 +10,7 @@ import { JOB_STATUS, numberToDuration } from '@kbn/reporting-common';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import moment from 'moment';
-import {
-  ReportTaskParams,
-  ReportingTask,
-  SCHEDULED_REPORTING_EXECUTE_TYPE,
-  ScheduledReportTaskParams,
-} from '.';
+import { ReportTaskParams, SCHEDULED_REPORTING_EXECUTE_TYPE, ScheduledReportTaskParams } from '.';
 import type { SavedReport } from '../store';
 import { Report } from '../store';
 import { errorLogger } from './error_logger';
@@ -26,10 +21,7 @@ import { PrepareJobResults, RunReportTask } from './run_report';
 type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;
 };
-export class RunScheduledReportTask
-  extends RunReportTask<ScheduledReportTaskParams>
-  implements ReportingTask
-{
+export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskParams> {
   public get TYPE() {
     return SCHEDULED_REPORTING_EXECUTE_TYPE;
   }

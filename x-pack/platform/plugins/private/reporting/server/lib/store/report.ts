@@ -190,6 +190,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       payload: omit(this.payload, 'headers'),
       output: omit(this.output, 'content'),
       metrics: this.metrics,
+      scheduled_report_id: this.scheduled_report_id,
     };
   }
 }

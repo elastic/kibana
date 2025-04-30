@@ -15,6 +15,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   CancellationToken,
   KibanaShuttingDownError,
+  MissingAuthenticationError,
   ReportingError,
   durationToNumber,
 } from '@kbn/reporting-common';
@@ -275,7 +276,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     }
 
     if (!decryptedHeaders && !apiKeyAuthHeaders) {
-      throw new Error('No headers found to execute report');
+      throw new MissingAuthenticationError();
     }
 
     let headersToUse: Headers = {};
