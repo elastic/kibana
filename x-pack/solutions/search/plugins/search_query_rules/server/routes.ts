@@ -110,7 +110,12 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         headers: {
           'content-type': 'application/json',
         },
-        body: rulesetData,
+        body:
+          rulesetData ??
+          response.customError({
+            statusCode: 404,
+            body: 'Ruleset not found',
+          }),
       });
     })
   );
