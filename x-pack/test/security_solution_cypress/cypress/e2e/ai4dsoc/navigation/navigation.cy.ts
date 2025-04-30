@@ -10,11 +10,20 @@ import { visit } from '../../../tasks/navigation';
 import { GET_STARTED_URL } from '../../../urls/navigation';
 import { AI_SOC_NAVIGATION } from '../../../screens/ai_soc';
 
-const visibleLinks = ['discover', 'attack_discovery', 'case', 'alert_summary', 'configurations'];
+const visibleLinks = ['alert_summary', 'attack_discovery', 'cases', 'configurations', 'discover'];
+const notVisibleLinks = [
+  'securityGroup:rules',
+  'alerts',
+  'cloud_security_posture-findings',
+  'threat_intelligence',
+  'securityGroup:explore',
+  'securityGroup:assets',
+  'securityGroup:machine_learning',
+  'alerts',
+  'rules',
+];
 
-const notVisibleLinks = ['machine_learning-landing', 'alerts', 'rules'];
-
-describe('AI$DSOC Navigation', { tags: '@serverless' }, () => {
+describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
     visit(GET_STARTED_URL);
@@ -32,6 +41,44 @@ describe('AI$DSOC Navigation', { tags: '@serverless' }, () => {
             cy.getByTestSubjContains(`nav-item-id-${link}`).should('not.exist');
           });
         });
+    });
+  });
+
+  describe('renders pages within links correctly', () => {
+    it('should show the correct page for visible links when navigating', () => {
+      cy.get(AI_SOC_NAVIGATION).should('exist');
+
+      visibleLinks.forEach((link) => {
+        cy.getByTestSubjContains(`nav-item-id-${link}`).click();
+        cy.url().should('include', `/${link}`);
+        cy.getByTestSubjContains(`nav-item-id-${link}`).click();
+
+        if (link === 'alert_summary') {
+          cy.getByTestSubjContains('alert-summary-landing-page-prompt');
+        }
+
+        if (link === 'attack_discovery') {
+          cy.getByTestSubjContains('attackDiscoveryPageTitle').contains('Attack discovery');
+        }
+
+        if (link === 'cases') {
+          cy.getByTestSubjContains('header-page-title').contains('Cases');
+        }
+
+        if (link === 'configurations') {
+          cy.url().should('include', `/${link}/integrations`);
+          cy.get('.euiTab').then((tabs) => {
+            const tabNames = Array.from(tabs).map((tab) => tab.innerText);
+            expect(tabNames).to.deep.equal(['Integrations', 'Rules', 'AI settings']);
+          });
+        }
+
+        if (link === 'discover') {
+          cy.getByTestSubjContains('discoverSavedSearchTitle').contains(
+            'Discover - Search not yet saved'
+          );
+        }
+      });
     });
   });
 });
