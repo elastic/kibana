@@ -233,6 +233,7 @@ export class AlertingPlugin {
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
+  private readonly disabledRuleTypes: Set<string>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -249,6 +250,7 @@ export class AlertingPlugin {
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
   }
 
   public setup(
@@ -440,6 +442,11 @@ export class AlertingPlugin {
           AlertData
         >
       ) => {
+        if (this.disabledRuleTypes.has(ruleType.id)) {
+          this.logger.info(`rule type "${ruleType.id}" disabled by configuration`);
+          return;
+        }
+
         if (!(ruleType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${ruleType.minimumLicenseRequired}" is not a valid license type`);
         }
