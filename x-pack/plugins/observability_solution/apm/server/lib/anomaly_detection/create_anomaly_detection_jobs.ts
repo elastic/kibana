@@ -60,11 +60,11 @@ export async function createAnomalyDetectionJobs({
     for (const environment of uniqueMlJobEnvs) {
       try {
         const response = await createAnomalyDetectionJob({
-            mlClient,
-            esClient,
-            environment,
-            apmMetricIndex,
-            esCapabilities,
+          mlClient,
+          esClient,
+          environment,
+          apmMetricIndex,
+          esCapabilities,
         });
         if (response.jobs[0].success || !response.jobs[0].error) {
           responses.push(response);
