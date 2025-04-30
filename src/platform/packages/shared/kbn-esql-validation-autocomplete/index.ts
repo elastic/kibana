@@ -27,12 +27,12 @@ export { suggest } from './src/autocomplete/autocomplete';
  */
 export type {
   ValidationErrors,
-  ESQLVariable,
+  ESQLUserDefinedColumn,
   ESQLRealField,
   ESQLPolicy,
   ErrorTypes as ESQLValidationErrorTypes,
 } from './src/validation/types';
-export { collectVariables } from './src/shared/variables';
+export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
 export {
   getAllFunctions,
   isSupportedFunction,

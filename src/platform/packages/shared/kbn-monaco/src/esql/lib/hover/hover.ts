@@ -16,7 +16,7 @@ import {
   isSourceItem,
   type ESQLCallbacks,
   getPolicyHelper,
-  collectVariables,
+  collectUserDefinedColumns,
   ESQLRealField,
 } from '@kbn/esql-validation-autocomplete';
 import { correctQuerySyntax } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
@@ -76,11 +76,11 @@ async function getHoverItemForFunction(
       return undefined;
     }
     const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-    const anyVariables = collectVariables(commands, fieldsMap, innerText);
+    const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
     const references = {
       fields: fieldsMap,
-      variables: anyVariables,
+      userDefinedColumns: anyUserDefinedColumns,
     };
 
     const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
