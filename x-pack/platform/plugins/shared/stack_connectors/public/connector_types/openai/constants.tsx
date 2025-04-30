@@ -267,29 +267,31 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
       ),
     },
   },
-  {
+{
     id: 'verificationMode',
-    label: i18n.VERIFICATION_MODE_LABEL,
-    type: 'select',
-    defaultValue: 'full',
-    isRequired: false,
-    options: [
-      { value: 'full', label: i18n.VERIFICATION_MODE_FULL },
-      { value: 'certificate', label: i18n.VERIFICATION_MODE_CERTIFICATE },
-      { value: 'none', label: i18n.VERIFICATION_MODE_NONE },
-    ],
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing)."
-        id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
-      />
-    ),
-    euiFieldProps: {
-      append: (
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
+    Component: SelectField,
+    config: {
+      label: i18n.VERIFICATION_MODE_LABEL,
+      defaultValue: 'full',
+      options: [
+        { value: 'full', text: i18n.VERIFICATION_MODE_FULL },
+        { value: 'certificate', text: i18n.VERIFICATION_MODE_CERTIFICATE },
+        { value: 'none', text: i18n.VERIFICATION_MODE_NONE },
+      ],
+      helpText: (
+        <FormattedMessage
+          defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing)."
+          id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
+        />
       ),
+      euiFieldProps: {
+        append: (
+          <EuiText size="xs" color="subdued">
+            {i18n.OPTIONAL_LABEL}
+          </EuiText>
+        ),
+        'data-test-subj': 'verificationModeSelect',
+      },
     },
   },
 ];
