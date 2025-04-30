@@ -13,7 +13,6 @@ import {
 import { omit } from 'lodash';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { SavedObjectReference } from '@kbn/core/types';
-import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
@@ -60,13 +59,7 @@ export function initializeIntegrations(
           attributeService.extractReferences(currentState)
         );
         if (cleanedState.rawState.savedObjectId) {
-          return {
-            ...cleanedState,
-            rawState: {
-              ...cleanedState.rawState,
-              attributes: undefined,
-            },
-          };
+          return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
         }
         return cleanedState;
       },
