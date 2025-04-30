@@ -43,6 +43,14 @@ export const CONFIG_EDITOR_CLEAR_FILTERS_LABEL = i18n.translate(
   }
 );
 
+export const CONFIG_EDITOR_PANEL_DESCRIPTION = i18n.translate(
+  'xpack.embeddableAlertsTable.configEditorFlyout.panelDescription',
+  {
+    defaultMessage:
+      'This panel will display a list of your alerts. You can filter by rule types or tags.',
+  }
+);
+
 export const RULE_TYPES_LOAD_ERROR_TITLE = i18n.translate(
   'xpack.embeddableAlertsTable.ruleTypesLoadErrorTitle',
   {

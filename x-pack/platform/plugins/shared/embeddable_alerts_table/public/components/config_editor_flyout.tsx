@@ -19,6 +19,8 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiTitle,
+  logicalCSS,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { AlertsFiltersFormHandle } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
 import { AlertsFiltersForm } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
@@ -33,6 +35,7 @@ import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-f
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { EuiSuperSelect } from '@elastic/eui/src/components/form/super_select/super_select';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { css } from '@emotion/react';
 import { SAVE_CONFIG_BUTTON_SUBJ } from '../constants';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import {
@@ -48,6 +51,7 @@ import {
   SWITCH_SOLUTION_CONFIRM_MESSAGE,
   SWITCH_SOLUTION_CONFIRM_TITLE,
   CONFIG_EDITOR_CLEAR_FILTERS_LABEL,
+  CONFIG_EDITOR_PANEL_DESCRIPTION,
 } from '../translations';
 
 export interface ConfigEditorFlyoutProps {
@@ -70,6 +74,7 @@ export const ConfigEditorFlyout = ({
   services,
 }: ConfigEditorFlyoutProps) => {
   const { http, overlays } = services;
+  const { euiTheme } = useEuiTheme();
   const flyoutBodyRef = useRef<HTMLDivElement>(null);
   const solutionSelectorRef = useRef<EuiSuperSelect<RuleTypeSolution>>(null);
   const [filters, setFilters] = useState<
@@ -152,7 +157,7 @@ export const ConfigEditorFlyout = ({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m" ref={flyoutBodyRef}>
           <EuiFlexItem>
-            {availableSolutions && availableSolutions.length > 1 && (
+            {availableSolutions && availableSolutions.length > 1 ? (
               <AlertsSolutionSelector
                 ref={solutionSelectorRef}
                 availableSolutions={availableSolutions}
@@ -161,6 +166,14 @@ export const ConfigEditorFlyout = ({
                 solution={solution}
                 onSolutionChange={onSolutionChange}
               />
+            ) : (
+              <p
+                css={css`
+                  ${logicalCSS('padding-vertical', euiTheme.size.s)}
+                `}
+              >
+                {CONFIG_EDITOR_PANEL_DESCRIPTION}
+              </p>
             )}
           </EuiFlexItem>
           {solution && (
