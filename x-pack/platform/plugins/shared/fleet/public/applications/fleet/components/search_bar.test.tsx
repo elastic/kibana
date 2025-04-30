@@ -235,6 +235,13 @@ describe('getFieldSpecs', () => {
         searchable: true,
         type: 'date',
       },
+      {
+        aggregatable: true,
+        esTypes: ['boolean'],
+        name: 'hidden',
+        searchable: true,
+        type: 'boolean',
+      },
     ]);
   });
 
