@@ -311,6 +311,10 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     );
   };
 
+  const getTask = async (taskId: string) => {
+    return await esSupertest.get(`/.kibana_task_manager/_doc/task:${taskId}`);
+  };
+
   return {
     logTaskManagerHealth,
     initEcommerce,
@@ -341,5 +345,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     makeAllReportingIndicesUnmanaged,
     getJobErrorCode,
     getScheduledReportSO,
+    getTask,
   };
 }
