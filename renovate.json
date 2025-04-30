@@ -411,23 +411,6 @@
       "enabled": true
     },
     {
-      "matchDepNames": [
-        "fflate"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:SharedUX",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "lz-string dependencies",
       "matchDepNames": [
         "lz-string",
