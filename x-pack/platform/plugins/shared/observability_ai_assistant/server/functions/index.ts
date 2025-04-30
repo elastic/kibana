@@ -67,6 +67,35 @@ export const registerFunctions: RegistrationCallback = async ({
     })
   );
 
+  const inferenceClient = (await resources.plugins.inference.start()).getClient({
+    request: resources.request,
+  });
+
+  const mcpTools = await inferenceClient.listMCPTools();
+
+  mcpTools.servers.forEach((server) => {
+    server.tools.forEach((tool) => {
+      functions.registerFunction(
+        {
+          name: tool.name,
+          description: tool.description ?? '',
+          parameters: tool.inputSchema as CompatibleJSONSchema,
+        },
+        async ({ arguments: args }) => {
+          const result = await inferenceClient.callMCPTool({
+            connectorId: server.connectorId,
+            name: tool.name,
+            arguments: args as Record<string, any>,
+          });
+
+          return {
+            content: result.content.map((part) => part.text).join(''),
+          };
+        }
+      );
+    });
+  });
+
   if (isKnowledgeBaseReady) {
     registerSummarizationFunction(registrationParameters);
   }

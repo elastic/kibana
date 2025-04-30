@@ -17,6 +17,7 @@ import { getConnectorById } from '../util/get_connector_by_id';
 import { createPromptApi } from '../prompt';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { bindClient } from '../../common/inference_client/bind_client';
+import { createMCPApis } from '../mcp/api';
 
 export function createInferenceClient({
   request,
@@ -41,6 +42,8 @@ export function createInferenceClient({
     regexWorker,
     esClient,
   });
+  const { callMCPTool, listMCPTools } = createMCPApis({ request, actions, logger });
+
   const client: InferenceClient = {
     chatComplete,
     prompt: createPromptApi({
@@ -52,6 +55,8 @@ export function createInferenceClient({
       esClient,
     }),
     output: createOutputApi(chatComplete),
+    callMCPTool,
+    listMCPTools,
     getConnectorById: async (connectorId: string) => {
       return await getConnectorById({ connectorId, actions, request });
     },

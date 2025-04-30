@@ -41,6 +41,17 @@ export interface InferenceClient {
    * Create a {@link BoundInferenceClient}.
    */
   bindTo: (options: BoundOptions) => BoundInferenceClient;
+  /**
+   * `listMCPTools` returns the available tools from MCP connectors.
+   */
+  listMCPTools: () => Promise<InferenceListToolsResponse>;
+  /**
+   * `callMCPTool` executes a MCP tool by sending a request to the
+   * specified MCP Server.
+   * @param request
+   * @returns
+   */
+  callMCPTool: (request: InferenceCallToolRequest) => Promise<InferenceCallToolResponseResolved>;
 }
 
 /**

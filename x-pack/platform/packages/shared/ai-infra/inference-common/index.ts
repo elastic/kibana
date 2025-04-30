@@ -127,6 +127,14 @@ export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
 
 export { elasticModelDictionary } from './src/const';
 
+export type {
+  InferenceCallToolRequest,
+  InferenceCallToolResponseResolved,
+  InferenceCallToolResponse,
+  InferenceListToolsResponse,
+  InferenceMCPConnector,
+} from './src/mcp';
+
 export { truncateList } from './src/truncate_list';
 export {
   InferenceConnectorType,

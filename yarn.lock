@@ -7143,6 +7143,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mcp-connector-common@link:x-pack/platform/packages/shared/kbn-mcp-connector-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/mcp-connector-server@link:x-pack/platform/packages/shared/kbn-mcp-connector-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
   version "0.0.0"
   uid ""
