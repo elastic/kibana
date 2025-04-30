@@ -32,6 +32,7 @@ export interface Props {
   isOnFailure: boolean;
   form: FormHook<Fields>;
   onOpen: () => void;
+  esDocsBasePath: string;
   closeFlyout: () => void;
   handleSubmit: (shouldCloseFlyout?: boolean) => Promise<void>;
 }
@@ -64,6 +65,7 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
   isOnFailure,
   onOpen,
   form,
+  esDocsBasePath,
   closeFlyout,
   handleSubmit,
 }) => {
