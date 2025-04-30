@@ -16,21 +16,17 @@ interface Props {
   fields: Field[];
   detectorChangeHandler: (options: DropDownLabel[]) => void;
   selectedOptions: DropDownProps;
-  maxWidth?: number;
   removeOptions: AggFieldPair[];
 }
-
-const MAX_WIDTH = 560;
 
 export const MetricSelector: FC<Props> = ({
   fields,
   detectorChangeHandler,
   selectedOptions,
-  maxWidth,
   removeOptions,
 }) => {
   return (
-    <EuiFlexGroup style={{ maxWidth: maxWidth !== undefined ? maxWidth : MAX_WIDTH }}>
+    <EuiFlexGroup>
       <AggSelect
         fields={fields}
         changeHandler={detectorChangeHandler}

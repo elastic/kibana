@@ -96,6 +96,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
 
   return (
     <EuiDescribedFormGroup
+      ratio="third"
       title={
         <h3 id={aggregationSelectTitleId}>
           {i18n.translate('xpack.ml.newJob.wizard.aggSelect.title', {
@@ -105,12 +106,10 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
       }
     >
       <EuiFormRow
+        fullWidth
         error={validation.message}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardAggSelection"
-        label={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric', {
-          defaultMessage: 'Add metric',
-        })}
       >
         <OptionListWithFieldStats
           singleSelection={true}
