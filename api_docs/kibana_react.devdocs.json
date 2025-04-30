@@ -2004,7 +2004,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"warning\" | \"success\" | \"primary\" | \"danger\" | undefined"
+              "\"success\" | \"warning\" | \"primary\" | \"danger\" | undefined"
             ],
             "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,

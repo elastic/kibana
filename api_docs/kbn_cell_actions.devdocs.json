@@ -865,7 +865,7 @@
           "CellActionsMode",
           "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; extraActionsIconType?: ",
           "IconType",
-          " | undefined; extraActionsColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined; } & { children?: React.ReactNode; }"
+          " | undefined; extraActionsColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,
