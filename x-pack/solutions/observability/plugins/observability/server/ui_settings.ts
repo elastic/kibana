@@ -42,7 +42,6 @@ import {
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
-  profilingFetchTopNFunctionsFromStacktraces,
   searchExcludedDataTiers,
   apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
@@ -628,22 +627,6 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [profilingFetchTopNFunctionsFromStacktraces]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingFetchTopNFunctionsFromStacktraces', {
-      defaultMessage: 'Switch to fetch the TopN Functions from the Stacktraces API.',
-    }),
-    description: i18n.translate(
-      'xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription',
-      {
-        defaultMessage: `The topN functions pages use the topN/functions API, turn it on to switch to the stacktraces api`,
-      }
-    ),
-    value: false,
-    schema: schema.boolean(),
-    requiresPageReload: false,
     solution: 'oblt',
   },
   [searchExcludedDataTiers]: {
