@@ -54,10 +54,6 @@ export type StatusOverviewApi = DefaultEmbeddableApi<OverviewMonitorsEmbeddableS
   PublishesTitle &
   HasEditCapabilities;
 
-const defaultOverviewState: OverviewState = {
-  filters: DEFAULT_FILTERS,
-};
-
 export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
@@ -70,7 +66,7 @@ export const getMonitorsEmbeddableFactory = (
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
       const filters$ = new BehaviorSubject(initialState.rawState.filters);
-      const view$ = new BehaviorSubject(state.view);
+      const view$ = new BehaviorSubject(initialState.rawState.view);
 
       function serializeState() {
         return {
@@ -86,16 +82,20 @@ export const getMonitorsEmbeddableFactory = (
         parentApi,
         uuid,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, filters$, view$).pipe(map(() => undefined)),
+        anyStateChange$: merge(titleManager.anyStateChange$, filters$, view$).pipe(
+          map(() => undefined)
+        ),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
           view: 'referenceEquality',
         }),
-        defaultState: defaultOverviewState,
+        defaultState: {
+          filters: DEFAULT_FILTERS,
+        },
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? defaultOverviewState.filters);
+          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
           if (lastSaved?.rawState) view$.next(lastSaved?.rawState.view);
         },
       });
@@ -116,7 +116,7 @@ export const getMonitorsEmbeddableFactory = (
               coreStart,
               pluginStart,
               initialState: {
-                filters: filters$.getValue(),
+                filters: filters$.getValue() || DEFAULT_FILTERS,
                 view: view$.getValue(),
               },
               title: i18n.translate(
