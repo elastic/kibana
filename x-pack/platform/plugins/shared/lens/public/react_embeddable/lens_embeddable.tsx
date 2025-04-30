@@ -150,16 +150,16 @@ export const createLensEmbeddableFactory = (
         ),
         getComparators: () => {
           return {
+            ...stateConfig.getComparators(),
             ...actionsConfig.getComparators(),
             ...dashboardServicesComparators,
             ...searchContextComparators,
-            ...stateConfig.getComparators(),
             isNewPanel: 'skip',
             references: 'skip',
           };
         },
         onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved);
+          actionsConfig.reinitializeState(lastSaved?.rawState);
           dashboardConfig.reinitializeState(lastSaved?.rawState);
           searchContextConfig.reinitializeState(lastSaved?.rawState);
           if (!lastSaved) return;
