@@ -11,17 +11,20 @@ import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
-import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { VisualizationDimensionEditorProps } from '../../types';
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { DataType } from '../../types';
 import { MetricVisualizationState } from './types';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   DimensionEditorDataExtraComponent,
+  Props,
   SupportingVisType,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
 import { GROUP_ID } from './constants';
+import { getDefaultConfigForMode } from './helpers';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
@@ -54,19 +57,10 @@ describe('dimension editor', () => {
     collapseFn: 'sum',
     subtitle: faker.lorem.word(5),
     secondaryPrefix: faker.lorem.word(3),
-    secondaryColorMode: 'static',
-    secondaryColor: faker.color.rgb(),
-    secondaryTrend: {
-      visuals: 'both',
-      baselineValue: 0,
-      palette: {
-        name: faker.lorem.word(),
-        stops: [faker.color.rgb(), faker.color.rgb(), faker.color.rgb()],
-      },
-    },
+    secondaryTrend: { type: 'none' },
     progressDirection: 'vertical',
     maxCols: 5,
-    color: faker.internet.color(),
+    color: faker.color.rgb(),
     palette,
     icon: 'tag',
     showBar: true,
@@ -82,9 +76,7 @@ describe('dimension editor', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };
 
-  let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
-    paletteService: PaletteRegistry;
-  };
+  let props: Props;
 
   const getNonNumericDatasource = () =>
     createMockDatasource('formBased', {
@@ -236,10 +228,10 @@ describe('dimension editor', () => {
 
       it('sets color', async () => {
         const { typeColor, clearColor } = renderPrimaryMetricEditor({
-          state: { ...metricAccessorState, palette: undefined, color: faker.internet.color() },
+          state: { ...metricAccessorState, palette: undefined, color: faker.color.rgb() },
         });
 
-        const newColor = faker.internet.color().toUpperCase();
+        const newColor = faker.color.rgb().toUpperCase();
         await typeColor(newColor);
         await waitFor(() =>
           expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ color: newColor }))
@@ -256,7 +248,7 @@ describe('dimension editor', () => {
 
   describe('secondary metric dimension', () => {
     const accessor = 'secondary-metric-col-id';
-    function renderSecondaryMetricEditor(overrides = {}) {
+    function renderSecondaryMetricEditor(overrides: Partial<Props> = {}) {
       const rtlRender = render(
         <DimensionEditor
           {...props}
@@ -280,7 +272,14 @@ describe('dimension editor', () => {
         await userEvent.type(customPrefixTextbox, prefix);
       };
 
-      const getBaselineGroup = () => screen.getByRole('group', { name: 'Baseline' });
+      const getBaselineGroup = () => screen.getByRole('group', { name: 'Compare to' });
+      const clickOnBaselineMode = async (mode: 'static' | 'primary') => {
+        const baselineOption = getByTitle(getBaselineGroup(), mode, { exact: false });
+        if (!baselineOption) {
+          throw new Error(`Supported baseline mode ${mode} not found`);
+        }
+        await userEvent.click(baselineOption);
+      };
       const getCustomBaselineTextbox = () => screen.queryByRole('textbox', { name: 'Baseline' });
       const typeBaseline = async (baseline: number) => {
         const customBaselineTextbox = getCustomBaselineTextbox();
@@ -289,6 +288,17 @@ describe('dimension editor', () => {
         }
         await userEvent.clear(customBaselineTextbox);
         await userEvent.type(customBaselineTextbox, baseline.toString());
+      };
+
+      const getPalettePicker = () => screen.queryByRole('group', { name: 'Color palette' });
+      const pickPalette = async (paletteName: string) => {
+        const palettePicker = getPalettePicker();
+        if (!palettePicker) {
+          throw new Error('palette picker not found');
+        }
+        await userEvent.click(palettePicker);
+        const paletteOption = screen.getByRole('option', { name: paletteName });
+        await userEvent.click(paletteOption);
       };
 
       const colorModeGroup = screen.getByRole('group', { name: /Color by value/i });
@@ -300,9 +310,10 @@ describe('dimension editor', () => {
         await userEvent.click(colorByValueOption);
       };
 
-      const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
+      const getStaticColorPicker = () => screen.queryByTestId(SELECTORS.COLOR_PICKER);
 
       const typeColor = async (color: string) => {
+        const staticColorPicker = getStaticColorPicker();
         if (!staticColorPicker) {
           throw new Error('Static color picker not found');
         }
@@ -311,6 +322,7 @@ describe('dimension editor', () => {
       };
 
       const clearColor = async () => {
+        const staticColorPicker = getStaticColorPicker();
         if (!staticColorPicker) {
           throw new Error('Static color picker not found');
         }
@@ -323,14 +335,17 @@ describe('dimension editor', () => {
         getSettingCustom: () => getByTitle(customPrefixGroup, 'custom', { exact: false }),
         getCustomPrefixTextbox,
         typePrefix,
+        getPalettePicker,
+        pickPalette,
         getCustomBaselineTextbox,
         getBaselineGroup,
         typeBaseline,
+        clickOnBaselineMode,
         getColorByValueNone: () => getByTitle(colorModeGroup, 'none', { exact: false }),
         getColorByValueStatic: () => getByTitle(colorModeGroup, 'static', { exact: false }),
         getColorByValueDynamic: () => getByTitle(colorModeGroup, 'dynamic', { exact: false }),
         clickOnColorMode,
-        staticColorPicker,
+        getStaticColorPicker,
         typeColor,
         clearColor,
         ...rtlRender,
@@ -346,7 +361,11 @@ describe('dimension editor', () => {
     });
 
     it(`doesn't break when layer data is missing`, () => {
-      renderSecondaryMetricEditor({ frame: { activeData: { first: undefined } } });
+      renderSecondaryMetricEditor({
+        frame: createMockFramePublicAPI({
+          activeData: { first: undefined as unknown as Datatable },
+        }),
+      });
       expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
     });
 
@@ -437,103 +456,129 @@ describe('dimension editor', () => {
         secondaryMetricAccessor: accessor,
       };
       describe('coloring', () => {
-        it('should change the color mode to static', async () => {
-          const setState = jest.fn();
-          const { clickOnColorMode } = renderSecondaryMetricEditor({
-            setState,
-            state: { ...localState },
-          });
-
-          // click on the static color mode
-          await clickOnColorMode('static');
-
-          // check for setState to be called with mode correct
-          expect(setState).toHaveBeenCalledWith(
-            expect.objectContaining({ secondaryColorMode: 'static' })
-          );
+        function createOperationByType(type: DataType) {
+          return {
+            dataType: type,
+            hasTimeShift: false,
+            label: 'label',
+            isBucketed: false,
+            hasReducedTimeRange: false,
+          };
+        }
+        it('should show no color controls if none is selected', async () => {
+          const { getColorByValueNone, getStaticColorPicker, getPalettePicker } =
+            renderSecondaryMetricEditor({
+              state: { ...localState },
+            });
+          expect(getColorByValueNone()).toHaveAttribute('aria-pressed', 'true');
+          // make sure no other color controls are shown
+          expect(getStaticColorPicker()).not.toBeInTheDocument();
+          expect(getPalettePicker()).not.toBeInTheDocument();
         });
 
-        it('should move from none to static and prefill the UI with the correct defaults', async () => {
-          const setState = jest.fn();
-          const { staticColorPicker, getColorByValueStatic } = renderSecondaryMetricEditor({
-            setState,
-            state: { ...localState, secondaryColorMode: 'static' },
-          });
+        it.each([{ mode: 'static' }, { mode: 'dynamic' }] as Array<{ mode: 'static' | 'dynamic' }>)(
+          'should change the color mode to $mode',
+          async ({ mode }) => {
+            const setState = jest.fn();
+            const { clickOnColorMode } = renderSecondaryMetricEditor({
+              setState,
+              state: { ...localState },
+            });
 
-          // check for color picker
-          expect(staticColorPicker).toBeInTheDocument();
-          expect(getColorByValueStatic()).toHaveAttribute('aria-pressed', 'true');
-        });
+            // click on the static color mode
+            await clickOnColorMode(mode);
+
+            // check for setState to be called with mode correct
+            expect(setState).toHaveBeenCalledWith(
+              expect.objectContaining({ secondaryTrend: getDefaultConfigForMode(mode) })
+            );
+          }
+        );
 
         it('should prevent the dynamic coloring if the value type is not numeric', async () => {
-          const setState = jest.fn();
-          const getOperationForColumnId = jest.fn((id: string) =>
-            id === accessor
-              ? {
-                  dataType: 'string',
-                }
-              : {
-                  hasReducedTimeRange: false,
-                  dataType: 'number',
-                }
-          );
           const { getColorByValueDynamic } = renderSecondaryMetricEditor({
-            setState,
-            state: { ...localState },
-            datasource: { ...props.datasource, getOperationForColumnId },
+            state: {
+              ...localState,
+              secondaryTrend: getDefaultConfigForMode('dynamic'),
+            },
+            datasource: createMockDatasource('formBased', {
+              getOperationForColumnId: jest.fn((id: string) =>
+                createOperationByType(id === accessor ? 'string' : 'number')
+              ),
+            }).publicAPIMock,
           });
 
           // check dynamic button to be disabled
           expect(getColorByValueDynamic()).toBeDisabled();
         });
 
-        it('should move from none to dynamic and prefill the UI with the correct defaults', async () => {
-          const setState = jest.fn();
-          const { staticColorPicker, getBaselineGroup } = renderSecondaryMetricEditor({
-            setState,
-            state: { ...localState, secondaryColorMode: 'dynamic' },
-          });
-
-          // check for palette/baseline/etc... to be prefilled with the correct values
-          expect(staticColorPicker).not.toBeInTheDocument();
-          expect(getBaselineGroup()).toBeInTheDocument();
-        });
-
         it('should disable the "Primary metric" baseline if the primary is not of number type', async () => {
-          const setState = jest.fn();
-          const getOperationForColumnId = jest.fn((id: string) =>
-            id !== accessor
-              ? {
-                  // primary metric
-                  dataType: 'string',
-                }
-              : {
-                  // secondary metric
-                  hasReducedTimeRange: false,
-                  dataType: 'number',
-                }
-          );
-          renderSecondaryMetricEditor({
-            setState,
-            state: { ...localState, secondaryColorMode: 'dynamic' },
-            datasource: { ...props.datasource, getOperationForColumnId },
+          const { getBaselineGroup } = renderSecondaryMetricEditor({
+            state: {
+              ...localState,
+              secondaryTrend: {
+                type: 'dynamic',
+                visuals: 'both',
+                reversed: false,
+                paletteId: 'compare_to',
+                baselineValue: 'primary',
+              },
+            },
+            datasource: createMockDatasource('formBased', {
+              getOperationForColumnId: jest.fn((id: string) =>
+                createOperationByType(id !== accessor ? 'string' : 'number')
+              ),
+            }).publicAPIMock,
           });
 
-          const baseLineGroup = screen.getByRole('group', { name: 'Baseline' });
+          const baselineGroup = getBaselineGroup();
 
-          expect(baseLineGroup).toBeInTheDocument();
-          expect(getByTitle(baseLineGroup, 'Primary metric')).toBeDisabled();
+          expect(baselineGroup).toBeInTheDocument();
+          expect(getByTitle(baselineGroup, 'Primary metric')).toBeDisabled();
         });
       });
 
-      it('should hide the baseline textbox if Primary Metric baseline is chosen', async () => {
+      it('should change the baselineValue to "primary" when changing the baseline mode from static', async () => {
         const setState = jest.fn();
-        const { getCustomBaselineTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
+        const { clickOnBaselineMode } = renderSecondaryMetricEditor({
           setState,
           state: {
             ...localState,
-            secondaryColorMode: 'dynamic',
-            secondaryTrend: { baselineValue: 'primary' },
+            secondaryTrend: {
+              type: 'dynamic',
+              visuals: 'both',
+              reversed: false,
+              paletteId: 'compare_to',
+              baselineValue: 0,
+            },
+          },
+        });
+
+        await clickOnBaselineMode('primary');
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            secondaryTrend: {
+              type: 'dynamic',
+              visuals: 'both',
+              reversed: false,
+              paletteId: 'compare_to',
+              baselineValue: 'primary',
+            },
+          })
+        );
+      });
+
+      it('should not show the baseline textbox if Primary Metric baseline is chosen', async () => {
+        const { getCustomBaselineTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
+          state: {
+            ...localState,
+            secondaryTrend: {
+              type: 'dynamic',
+              visuals: 'both',
+              reversed: false,
+              paletteId: 'compare_to',
+              baselineValue: 'primary',
+            },
           },
         });
 
@@ -545,14 +590,17 @@ describe('dimension editor', () => {
       });
 
       it('should set a default prefix if auto is set and Primary Metric is chosen', async () => {
-        const setState = jest.fn();
         const { getCustomPrefixTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
-          setState,
           state: {
             ...localState,
             secondaryPrefix: undefined,
-            secondaryColorMode: 'dynamic',
-            secondaryTrend: { baselineValue: 'primary' },
+            secondaryTrend: {
+              type: 'dynamic',
+              visuals: 'both',
+              reversed: false,
+              paletteId: 'compare_to',
+              baselineValue: 'primary',
+            },
           },
         });
 
@@ -575,7 +623,6 @@ describe('dimension editor', () => {
       ])(
         'should preserve the current prefix is set to $name and Primary Metric is chosen',
         async ({ name, value }) => {
-          const setState = jest.fn();
           const {
             getCustomPrefixTextbox,
             getBaselineGroup,
@@ -583,12 +630,16 @@ describe('dimension editor', () => {
             getSettingCustom,
             getSettingNone,
           } = renderSecondaryMetricEditor({
-            setState,
             state: {
               ...localState,
               secondaryPrefix: value,
-              secondaryColorMode: 'dynamic',
-              secondaryTrend: { baselineValue: 'primary' },
+              secondaryTrend: {
+                type: 'dynamic',
+                visuals: 'both',
+                reversed: false,
+                paletteId: 'compare_to',
+                baselineValue: 'primary',
+              },
             },
           });
 

@@ -5,82 +5,38 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed, EuiThemeShape } from '@elastic/eui';
-import { type euiDarkVars as EuiThemeVariables } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { MetricVisualizationState, TrendEUIColors } from './types';
+import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
+import type { CoreTheme } from '@kbn/core/public';
+import { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { VisualizationDimensionEditorProps } from '../../types';
+import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
 
 export function getColorMode(
-  colorMode: MetricVisualizationState['secondaryColorMode'],
+  secondaryTrend: MetricVisualizationState['secondaryTrend'],
   isMetricNumeric: boolean
-): Required<MetricVisualizationState['secondaryColorMode']> {
-  if (!colorMode || colorMode === 'none') {
+): SecondaryTrendType {
+  if (!secondaryTrend || secondaryTrend.type === 'none') {
     return 'none';
   }
-  if (!isMetricNumeric || colorMode === 'static') {
+  if (!isMetricNumeric || secondaryTrend.type === 'static') {
     return 'static';
   }
   return 'dynamic';
 }
 
-export function isEUIColor(color: string, euiTheme: EuiThemeComputed<{}>): color is TrendEUIColors {
-  return color in euiTheme.colors || color in euiTheme.colors.vis;
-}
-
-export function getColorFromEUI(color: string, euiTheme: EuiThemeComputed<{}>): string | undefined {
-  if (typeof color !== 'string') {
-    return undefined;
-  }
-  if (isEUIColor(color, euiTheme)) {
-    if (color in euiTheme.colors.vis) {
-      return euiTheme.colors.vis[color as keyof typeof euiTheme.colors.vis];
-    }
-    return euiTheme.colors[
-      color as Exclude<keyof typeof euiTheme.colors, 'vis' | 'DARK' | 'LIGHT'>
-    ];
-  }
-  return color;
-}
-
-/**
- * Unfortunately theme context is available only thru React context
- * so here it will rebuild the colors portion of the theme object from the
- * static JSON
- * @returns EuiThemeComputed
- */
-export function getEuiThemeColors(euiVariables: typeof EuiThemeVariables) {
-  const prefix = 'euiColor';
-  const colorsLookup: Partial<EuiThemeComputed<{}>['colors']> = {};
-  for (const [key, value] of Object.entries(euiVariables)) {
-    if (key.startsWith(prefix)) {
-      if (/euiColorVis/.test(key)) {
-        if (!('vis' in colorsLookup)) {
-          colorsLookup.vis = {} as EuiThemeComputed<{}>['colors']['vis'];
-        }
-        if (colorsLookup.vis) {
-          colorsLookup.vis[key as keyof EuiThemeShape['colors']['vis']] = value as string;
-        }
-      } else {
-        const postFixKey = key.replace(prefix, '');
-        const newKey = (postFixKey.charAt(0).toLowerCase() +
-          postFixKey.slice(1)) as keyof EuiThemeShape['colors']['LIGHT'];
-        colorsLookup[newKey] = value as string;
-      }
-    }
-  }
-  return { colors: colorsLookup } as EuiThemeComputed<{}>;
-}
-
 export function getPrefixSelected(
   state: VisualizationDimensionEditorProps<MetricVisualizationState>['state'],
-  defaultPrefix: string
+  { defaultPrefix, colorMode }: { defaultPrefix: string; colorMode: SecondaryTrendType }
 ): { mode: 'auto' | 'none' } | { mode: 'custom'; label: string } {
   const isAutoPrefix = state.secondaryPrefix === undefined;
   const hasPrefixOverride =
     isAutoPrefix &&
-    state.secondaryColorMode === 'dynamic' &&
-    state.secondaryTrend?.baselineValue === 'primary';
+    // use colorMode as gatekeeper to avoid checking the secondaryTrend as dynamic when
+    // it is not enabled due to other conflicts (i.e. primary metric is not numeric)
+    colorMode === 'dynamic' &&
+    state.secondaryTrend?.type === 'dynamic' &&
+    state.secondaryTrend.baselineValue === 'primary';
 
   if (isAutoPrefix) {
     return hasPrefixOverride
@@ -96,4 +52,49 @@ export function getPrefixSelected(
     return { mode: 'none' };
   }
   return { mode: 'custom', label: state.secondaryPrefix ?? defaultPrefix };
+}
+
+export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTrend {
+  if (mode === 'none') {
+    return { type: 'none' };
+  }
+  if (mode === 'static') {
+    return {
+      type: 'static',
+      color: SECONDARY_DEFAULT_STATIC_COLOR,
+    };
+  }
+  return {
+    type: 'dynamic',
+    visuals: 'both',
+    paletteId: KbnPalette.CompareTo,
+    reversed: false,
+    baselineValue: 0,
+  };
+}
+
+function getRawPaletteId(paletteId: string) {
+  return paletteId.replace('--reversed', '');
+}
+
+export function getTrendPalette(
+  colorMode: SecondaryTrendType,
+  secondaryTrend: MetricVisualizationState['secondaryTrend'],
+  theme: CoreTheme
+): [string, string, string] | undefined {
+  if (colorMode !== 'dynamic') {
+    return undefined;
+  }
+  if (!secondaryTrend || secondaryTrend.type !== colorMode) {
+    const defaultConfig = getDefaultConfigForMode(colorMode) as Extract<
+      SecondaryTrend,
+      { type: 'dynamic' }
+    >;
+    const palette = getKbnPalettes(theme).get(getRawPaletteId(defaultConfig.paletteId));
+    const colors = palette?.colors(3);
+    return (defaultConfig.reversed ? colors.reverse() : colors) as [string, string, string];
+  }
+  const palette = getKbnPalettes(theme).get(getRawPaletteId(secondaryTrend.paletteId));
+  const colors = palette?.colors(3);
+  return (secondaryTrend.reversed ? colors.reverse() : colors) as [string, string, string];
 }

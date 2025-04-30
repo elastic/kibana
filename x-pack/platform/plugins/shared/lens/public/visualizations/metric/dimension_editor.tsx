@@ -18,7 +18,7 @@ import {
   EuiColorPalettePicker,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   PaletteRegistry,
@@ -32,20 +32,20 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
+import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { EuiColorPalettePickerPaletteFixedProps, MetricVisualizationState } from './types';
+import { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
-import { getColorFromEUI, getColorMode, getPrefixSelected } from './helpers';
-import { nonNullable } from '../../utils';
+import { getColorMode, getDefaultConfigForMode, getPrefixSelected } from './helpers';
 import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
-type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
+export type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
 };
 
@@ -125,70 +125,62 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
   return null;
 }
 
-function getDefaultPalette(): EuiColorPalettePickerPaletteFixedProps {
-  return {
-    title: i18n.translate(
-      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trend.label',
-      {
-        defaultMessage: 'Trend',
-      }
-    ),
-    value: 'default_trend_palette',
-    // the #24C292 value here is the vis green color missing token from EUI
-    palette: ['euiColorVis6', 'backgroundBaseDisabled', '#24C292'],
-    append: undefined,
-    type: 'fixed',
-  };
+interface TrendPalette {
+  // select id
+  id: string;
+  // original ref to the palette
+  paletteId: string;
+  name: string;
+  reversed?: boolean;
+  colors: [string, string, string];
 }
 
-function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
-  const defaultPalette = getDefaultPalette();
-  const reversedPalette: EuiColorPalettePickerPaletteFixedProps = {
-    ...getDefaultPalette(),
-    title: i18n.translate(
-      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trendReversed.label',
-      {
-        defaultMessage: 'Trend reversed',
-      }
-    ),
-    value: 'reversed_trend_palette',
-    palette: defaultPalette.palette
-      .slice()
-      .reverse() as EuiColorPalettePickerPaletteFixedProps['palette'],
-  };
-  // Add 2 temperature & complementary palettes using vis colors
-  const temperaturePalette: EuiColorPalettePickerPaletteFixedProps = {
-    ...getDefaultPalette(),
-    title: i18n.translate(
-      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.temperature.label',
-      {
-        defaultMessage: 'Temperature',
-      }
-    ),
-    value: 'temperature_trend_palette',
-    palette: ['euiColorVis2', 'backgroundBaseDisabled', 'euiColorVis6'],
-  };
-  const complementaryPalette: EuiColorPalettePickerPaletteFixedProps = {
-    ...getDefaultPalette(),
-    title: i18n.translate(
-      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.complementary.label',
-      {
-        defaultMessage: 'Complementary',
-      }
-    ),
-    value: 'complementary_trend_palette',
-    palette: ['euiColorVis2', 'backgroundBaseDisabled', 'euiColorVis8'],
-  };
-  return [defaultPalette, reversedPalette, temperaturePalette, complementaryPalette];
-}
+type SecondaryTrendConfigByType<T extends SecondaryTrendType> = Extract<
+  NonNullable<MetricVisualizationState['secondaryTrend']>,
+  { type: T }
+>;
 
-export function getDefaultTrendConfig() {
-  const defaultPalette = getDefaultPalette();
-  return {
-    visuals: 'both' as const,
-    palette: { name: defaultPalette.value, stops: defaultPalette.palette },
-    baselineValue: 0,
-  };
+function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendPalette[] } {
+  const palettes = useKbnPalettes();
+  const computedPalettes = useMemo(() => {
+    const defaultKbnPalette = palettes.get(KbnPalette.CompareTo);
+    const trendPalettes = new Set<string>([KbnPalette.Complementary, KbnPalette.Temperature]);
+    const defaultPalette = {
+      id: defaultKbnPalette.id,
+      paletteId: defaultKbnPalette.id,
+      name: defaultKbnPalette.name,
+      reversed: false,
+      colors: defaultKbnPalette.colors(3) as [string, string, string],
+    };
+    return {
+      defaultPalette,
+      allPalettes: [
+        defaultPalette,
+        {
+          ...defaultPalette,
+          id: `${KbnPalette.CompareTo}--reversed`,
+          name: i18n.translate(
+            'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trendReversed.label',
+            {
+              defaultMessage: 'Trend reversed',
+            }
+          ),
+          reversed: true,
+        },
+        ...palettes
+          .getAll()
+          .filter(({ id }) => trendPalettes.has(id))
+          .map(({ id, colors, name }) => ({
+            id,
+            paletteId: id,
+            name,
+            colors: colors(3) as [string, string, string],
+            reversed: false,
+          })),
+      ],
+    };
+  }, [palettes]);
+  return computedPalettes;
 }
 
 function TrendEditor({
@@ -200,31 +192,35 @@ function TrendEditor({
 }: Pick<SubProps, 'accessor' | 'idPrefix' | 'setState' | 'state' | 'datasource'>) {
   const { isNumeric: secondaryMetricCanTrend } = getAccessorType(datasource, accessor);
   const { isNumeric: primaryMetricCanTrend } = getAccessorType(datasource, state?.metricAccessor);
-  const { euiTheme } = useEuiTheme();
-  const defaultPalette = getDefaultPalette();
+  const { defaultPalette, allPalettes } = useTrendPalettes();
+
+  // Translate palette to show it on the picker UI
+  const palettesToShow = useMemo(
+    () =>
+      allPalettes.map(({ id, name, colors, reversed }) => ({
+        value: id,
+        title: name,
+        palette: reversed ? colors.slice().reverse() : colors,
+        type: 'fixed' as const,
+      })),
+    [allPalettes]
+  );
 
   const canShowTrend = secondaryMetricCanTrend;
   if (!canShowTrend) {
     return null;
   }
+  const secondaryTrend = state.secondaryTrend;
+  if (!secondaryTrend || secondaryTrend.type !== 'dynamic') {
+    return null;
+  }
 
-  const allPalettes = getAllPalettes();
-
-  const selectedPalette = state.secondaryTrend?.palette
-    ? allPalettes.find(({ value }) => value === state.secondaryTrend?.palette.name) ||
-      defaultPalette
+  const selectedPalette = secondaryTrend
+    ? allPalettes.find(({ id }) => id === secondaryTrend.paletteId) || defaultPalette
     : defaultPalette;
 
-  // Translate palette from EUI tokens into hex values
-  const palettesToShow = allPalettes.map((paletteConfig) => ({
-    ...paletteConfig,
-    palette:
-      paletteConfig.palette?.map((stop) => getColorFromEUI(stop, euiTheme)).filter(nonNullable) ||
-      [],
-  }));
-
   const isPrimaryMetricOptionSelected =
-    state.secondaryTrend?.baselineValue === 'primary' && primaryMetricCanTrend;
+    secondaryTrend.baselineValue === 'primary' && primaryMetricCanTrend;
 
   return (
     <>
@@ -244,20 +240,20 @@ function TrendEditor({
           compressed
           palettes={palettesToShow}
           onChange={(newPalette) => {
-            const palette = allPalettes.find(({ value }) => value === newPalette);
-            if (!palette?.palette) {
+            const paletteDefinition = allPalettes.find(({ id }) => id === newPalette);
+            if (!paletteDefinition) {
               return;
             }
             setState({
               ...state,
               secondaryTrend: {
-                ...getDefaultTrendConfig(),
-                ...state.secondaryTrend,
-                palette: { name: palette.value, stops: palette.palette },
+                ...secondaryTrend,
+                paletteId: paletteDefinition.id,
+                reversed: Boolean(paletteDefinition.reversed),
               },
             });
           }}
-          valueOfSelected={selectedPalette.value}
+          valueOfSelected={selectedPalette.id}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -297,23 +293,19 @@ function TrendEditor({
               'data-test-subj': 'lnsMetric_secondary_trend_display_both',
             },
           ]}
-          idSelected={`${idPrefix}display_${state.secondaryTrend?.visuals || 'both'}`}
+          idSelected={`${idPrefix}display_${secondaryTrend?.visuals || 'both'}`}
           onChange={(id) => {
-            const visualsMode = id.replace(`${idPrefix}display_`, '') as NonNullable<
-              MetricVisualizationState['secondaryTrend']
-            >['visuals'];
-
-            const params = {
-              secondaryTrend: {
-                ...getDefaultTrendConfig(),
-                ...state.secondaryTrend,
-                visuals: visualsMode || ('both' as const),
-              },
-            };
+            const visualsMode = id.replace(
+              `${idPrefix}display_`,
+              ''
+            ) as SecondaryTrendConfigByType<'dynamic'>['visuals'];
 
             setState({
               ...state,
-              ...params,
+              secondaryTrend: {
+                ...secondaryTrend,
+                visuals: visualsMode || ('both' as const),
+              },
             });
           }}
         />
@@ -337,7 +329,7 @@ function TrendEditor({
             isFullWidth
             buttonSize="compressed"
             legend={i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.baseline', {
-              defaultMessage: 'Baseline',
+              defaultMessage: 'Compare to',
             })}
             data-test-subj="lnsMetric_secondary_trend_baseline_buttons"
             options={[
@@ -375,38 +367,32 @@ function TrendEditor({
             onChange={(id) => {
               const baselineMode = id.replace(idPrefix, '') as 'static' | 'primary';
 
-              const params = {
-                secondaryTrend: {
-                  ...getDefaultTrendConfig(),
-                  ...state.secondaryTrend,
-                  baselineValue: baselineMode === 'primary' ? ('primary' as const) : 0,
-                },
-              };
-
               setState({
                 ...state,
-                ...params,
+                secondaryTrend: {
+                  ...secondaryTrend,
+                  baselineValue: baselineMode === 'primary' ? ('primary' as const) : 0,
+                },
               });
             }}
           />
           <EuiSpacer size="s" />
-          {state.secondaryTrend?.baselineValue !== 'primary' ? (
+          {secondaryTrend.baselineValue !== 'primary' ? (
             <DebouncedInput
               data-test-subj="lnsMetric_secondary_trend_baseline_input"
               compressed
               fullWidth
               defaultValue={'0'}
               value={
-                typeof state.secondaryTrend?.baselineValue === 'number'
-                  ? String(state.secondaryTrend.baselineValue)
+                typeof secondaryTrend?.baselineValue === 'number'
+                  ? String(secondaryTrend.baselineValue)
                   : ''
               }
               onChange={(newValue) => {
                 setState({
                   ...state,
                   secondaryTrend: {
-                    ...getDefaultTrendConfig(),
-                    ...state.secondaryTrend,
+                    ...secondaryTrend,
                     baselineValue: Number(newValue),
                   },
                 });
@@ -431,21 +417,31 @@ function SecondaryMetricEditor({
   const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
   const defaultPrefix = columnName || '';
   const { isNumeric: isNumericType } = getAccessorType(datasource, accessor);
-  const colorMode = getColorMode(state.secondaryColorMode, isNumericType);
+  const colorMode = getColorMode(state.secondaryTrend, isNumericType);
+  const [prevColorConfig, setPrevColorConfig] = useState<{
+    static: SecondaryTrendConfigByType<'static'> | undefined;
+    dynamic: SecondaryTrendConfigByType<'dynamic'> | undefined;
+  }>({
+    dynamic: undefined,
+    static: undefined,
+  });
 
   const setColor = useCallback(
     (color: string) => {
-      setState({ ...state, secondaryColor: color === '' ? undefined : color });
+      setState({ ...state, secondaryTrend: { type: 'static', color } });
     },
     [setState, state]
   );
 
   const getColor = useCallback(
-    () => state.secondaryColor || SECONDARY_DEFAULT_STATIC_COLOR,
+    () =>
+      state.secondaryTrend?.type === 'static'
+        ? state.secondaryTrend.color
+        : SECONDARY_DEFAULT_STATIC_COLOR,
     [state]
   );
 
-  const prefixConfig = getPrefixSelected(state, defaultPrefix);
+  const prefixConfig = getPrefixSelected(state, { defaultPrefix, colorMode });
 
   return (
     <>
@@ -561,18 +557,25 @@ function SecondaryMetricEditor({
           ]}
           idSelected={`${idPrefix}${colorMode}`}
           onChange={(id) => {
-            const newColorMode = id.replace(
-              idPrefix,
-              ''
-            ) as MetricVisualizationState['secondaryColorMode'];
+            const newColorMode = id.replace(idPrefix, '') as SecondaryTrendType;
 
-            const params = {
-              secondaryColorMode: newColorMode,
-            };
+            const secondaryTrend: SecondaryTrend =
+              newColorMode !== 'none' && prevColorConfig[newColorMode] != null
+                ? prevColorConfig[newColorMode]!
+                : getDefaultConfigForMode(newColorMode);
+
             setState({
               ...state,
-              ...params,
+              secondaryTrend,
             });
+
+            // save previous trend config
+            if (state.secondaryTrend?.type !== 'none') {
+              setPrevColorConfig({
+                ...prevColorConfig,
+                [state.secondaryTrend!.type]: state.secondaryTrend,
+              });
+            }
           }}
         />
       </EuiFormRow>
