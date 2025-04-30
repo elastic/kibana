@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.18.1>>
 * <<release-notes-8.18.0>>
 * <<release-notes-8.17.5>>
 * <<release-notes-8.17.4>>
@@ -93,6 +94,43 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.18.1]]
+== {kib} 8.18.1
+
+The 8.18.1 release includes the following fixes.
+
+[float]
+[[enhancement-v8.18.1]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.18.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.18.1]]
+=== Fixes
+Dashboards and Visualizations::
+* Syncs the dashboard ES|QL query and filters with the ones in the corresponding *Lens* visualization ({kibana-pull}218997[#218997]).
+* Correctly formats keywords in metric visualizations ({kibana-pull}218233[#218233]).
+Discover::
+* Fixes the result of the *Generate CSV report* action for ES|QL panels ({kibana-pull}216325[#216325]).
+Elastic Observability Solution::
+* Prevents unnecessary suggestion requests when interacting with inputs on the APM *Custom Links* page ({kibana-pull}218927[#218927]).
+* Filters out null values from `sourceDataStreams` ({kibana-pull}218772[#218772]).
+* Fixes a bug with navigating to the *Search Connectors* tab in the AI Assistant Settings ({kibana-pull}217749[#217749]).
+* Improves `aria-label` attributes for correlations ({kibana-pull}217512[#217512]).
+Elastic Security solution::
+For the Elastic Security 8.18.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes broken icons in integrations coming from the Home plugin ({kibana-pull}219206[#219206]).
+Kibana security::
+* Removes check for unused connector role ({kibana-pull}219358[#219358]).
+Machine Learning::
+* Fixes error when switching Service providers in the *Inference Endpoint* flyout ({kibana-pull}219020[#219020]).
+* Corrects quotes in ES|QL queries for function arguments ({kibana-pull}217680[#217680]).
+Management::
+* Fixes missing `allow_hidden` usage for data views in the request for fields ({kibana-pull}217628[#217628]).
+Platform::
+* Shows the correct request and response for any successful scenario in Inspector ({kibana-pull}216519[#216519]).
 
 [[release-notes-8.18.0]]
 == {kib} 8.18.0
