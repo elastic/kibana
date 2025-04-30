@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { getTestScenarios } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import type { TestUser } from '../../../saved_object_api_integration/common/lib/types';
+import { getTestScenarios } from '@kbn/test-suites-xpack-platform/saved_object_api_integration/common/lib/saved_object_test_utils';
+import type { TestUser } from '@kbn/test-suites-xpack-platform/saved_object_api_integration/common/lib/types';
+
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SPACES } from '../../common/lib/spaces';
 import type { DisableLegacyUrlAliasesTestDefinition } from '../../common/suites/disable_legacy_url_aliases';
