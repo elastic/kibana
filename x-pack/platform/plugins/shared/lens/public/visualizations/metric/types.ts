@@ -13,11 +13,18 @@ import type { LayerType } from '../../../common/types';
 
 export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 
-interface SecondaryTrendType {
-  visuals: 'icon' | 'value' | 'both';
-  palette: { name: string; stops: [string, string, string] };
-  baselineValue: number | 'primary';
-}
+export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
+
+export type SecondaryTrend =
+  | { type: 'none' }
+  | { type: 'static'; color: string }
+  | {
+      type: 'dynamic';
+      visuals: 'icon' | 'value' | 'both';
+      paletteId: string;
+      reversed: boolean;
+      baselineValue: number | 'primary';
+    };
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -31,9 +38,7 @@ export interface MetricVisualizationState {
   collapseFn?: CollapseFunction;
   subtitle?: string;
   secondaryPrefix?: string;
-  secondaryColorMode?: 'none' | 'static' | 'dynamic';
-  secondaryColor?: string;
-  secondaryTrend?: SecondaryTrendType;
+  secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
