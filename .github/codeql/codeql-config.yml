@@ -98,6 +98,7 @@ paths-ignore:
   - x-pack/examples
   - x-pack/packages/ai-infra/product-doc-artifact-builder
   - x-pack/platform/packages/shared/kbn-inference-cli
+  - x-pack/platform/test
   - x-pack/performance
   - x-pack/scripts
   - x-pack/test
