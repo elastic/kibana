@@ -63,4 +63,4 @@ export {
 
 export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';
 
-export { esqlFunctionNames } from './src/definitions/generated/functions';
+export { esqlFunctionNames } from './src/definitions/generated/function_names';
