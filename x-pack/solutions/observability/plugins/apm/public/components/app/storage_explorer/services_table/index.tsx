@@ -62,6 +62,9 @@ interface Props {
   loadingSummaryStats: boolean;
 }
 
+const initialSortField = StorageExplorerFieldName.ServiceName;
+const initialSortDirection = 'asc';
+
 export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
@@ -138,10 +141,6 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
 
   const serviceStatisticsItems = serviceStatisticsFetch.data?.serviceStatistics ?? [];
   const preloadedServices = sortedAndFilteredServicesFetch.data?.services || [];
-
-  const initialSortField = StorageExplorerFieldName.ServiceName;
-
-  const initialSortDirection = 'asc';
 
   const loading = serviceStatisticsFetch.status === FETCH_STATUS.LOADING;
 
