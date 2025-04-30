@@ -49,11 +49,17 @@ properties:
     minLength: 1
   verificationMode:
     type: string
-    description: SSL verification mode for PKI authentication.
+    description: SSL verification mode for PKI authentication. Only used if hasPKI is true.
     enum: ['full', 'certificate', 'none']
     default: 'full'
-  headers:
+  __internal__:
     type: object
-    description: Optional HTTP headers to include in requests.
-    additionalProperties:
-      type: string
+    properties:
+      hasHeaders:
+        type: boolean
+        description: Indicates whether custom headers are enabled.
+        default: false
+      hasPKI:
+        type: boolean
+        description: Indicates whether PKI authentication is enabled. If false, PKI-related fields (certificateFile, certificateData, privateKeyFile, privateKeyData, verificationMode) are ignored.
+        default: false
