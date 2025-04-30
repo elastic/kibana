@@ -829,7 +829,12 @@ export class CasesConnectorExecutor {
     const staticSuffixEnd = `${oracleCounterString} (${AUTO_CREATED_TITLE})`;
 
     const ruleName = params.rule.name;
-    const ruleNameTrimmed = ruleName.slice(0, MAX_RULE_NAME_LENGTH - totalDots);
+
+    const ruleNameTrimmed =
+      ruleName.length > MAX_RULE_NAME_LENGTH
+        ? ruleName.slice(0, MAX_RULE_NAME_LENGTH - totalDots)
+        : ruleName;
+
     const ruleNameTrimmedWithDots =
       ruleName.length > ruleNameTrimmed.length
         ? `${ruleNameTrimmed}${'.'.repeat(totalDots)}`

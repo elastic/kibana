@@ -732,6 +732,34 @@ describe('CasesConnectorExecutor', () => {
           expect(suffix.length).toBeLessThanOrEqual(MAX_SUFFIX_LENGTH);
         });
 
+        it(`does not trim the title if it is shorter than ${MAX_TITLE_LENGTH}`, async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          const ruleName = 'a'.repeat(15);
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, name: ruleName },
+            groupingBy: ['rule.name'],
+          });
+
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+          expect(title).not.toContain('...');
+        });
+
         it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {
           mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
           casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
