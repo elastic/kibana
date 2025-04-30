@@ -1163,7 +1163,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /src/platform/test/functional/apps/management/data_views @elastic/kibana-data-discovery
 /src/platform/test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
 /x-pack/test/accessibility/apps/group3/search_sessions.ts @elastic/kibana-data-discovery
-/x-pack/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
+/x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
 /x-pack/test/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
@@ -2108,7 +2108,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/search/ @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/search/config.ts @elastic/search-kibana  @elastic/appex-qa
-x-pack/test/api_integration/apis/management/index_management/inference_endpoints.ts @elastic/search-kibana
+/x-pack/platform/test/api_integration/apis/management/index_management/inference_endpoints.ts @elastic/search-kibana
 /x-pack/test_serverless/api_integration/test_suites/search @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
@@ -2189,7 +2189,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test_serverless/functional/test_suites/common/management/landing_page.ts @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/dev_tools/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/grok_debugger/ @elastic/kibana-management
-/x-pack/test/api_integration/apis/management/ @elastic/kibana-management
+/x-pack/platform/test/api_integration/apis/management/ @elastic/kibana-management
 /x-pack/test/api_integration/deployment_agnostic/apis/management/ @elastic/kibana-management
 /x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/ @elastic/kibana-management
 /x-pack/test/functional/apps/rollup_job/ @elastic/kibana-management

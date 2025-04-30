@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import type { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('management', () => {
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./cross_cluster_replication'));

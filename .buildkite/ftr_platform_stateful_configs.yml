@@ -151,7 +151,7 @@ enabled:
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
-  - x-pack/test/api_integration/apis/management/config.ts
+  - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/test/api_integration/apis/ml/config.ts
   - x-pack/test/api_integration/apis/monitoring/config.ts
