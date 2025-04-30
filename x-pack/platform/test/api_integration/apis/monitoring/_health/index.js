@@ -15,9 +15,9 @@ import { esBeatsResponse } from './fixtures/response_es_beats';
 import { esPackageResponse } from './fixtures/response_es_package';
 
 const ELASTICSEARCH_PACKAGE_ARCHIVE =
-  'x-pack/test/api_integration/apis/monitoring/es_archives/_health/elasticsearch_package_error';
+  'x-pack/platform/test/api_integration/apis/monitoring/es_archives/_health/elasticsearch_package_error';
 const METRICBEAT_ARCHIVE =
-  'x-pack/test/api_integration/apis/monitoring/es_archives/_health/metricbeat_8';
+  'x-pack/platform/test/api_integration/apis/monitoring/es_archives/_health/metricbeat_8';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
@@ -41,8 +41,8 @@ export default function ({ getService }) {
 
     describe('with metricbeat data', () => {
       const archives = [
-        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_es_8',
-        'x-pack/test/api_integration/apis/monitoring/es_archives/_health/monitoring_beats_8',
+        'x-pack/platform/test/api_integration/apis/monitoring/es_archives/_health/monitoring_es_8',
+        'x-pack/platform/test/api_integration/apis/monitoring/es_archives/_health/monitoring_beats_8',
         METRICBEAT_ARCHIVE,
       ];
       const { setup, tearDown } = getLifecycleMethods(getService);
