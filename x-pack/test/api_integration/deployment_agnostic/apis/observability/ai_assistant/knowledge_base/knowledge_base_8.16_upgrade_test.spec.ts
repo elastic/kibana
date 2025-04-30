@@ -51,10 +51,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deployTinyElserAndSetupKb(getService);
     });
 
-    // after(async () => {
-    //   await deleteTinyElserModelAndInferenceEndpoint(getService);
-    //   await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-    // });
+    after(async () => {
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+    });
 
     describe('before migrating', () => {
       it('the docs do not have semantic_text embeddings', async () => {

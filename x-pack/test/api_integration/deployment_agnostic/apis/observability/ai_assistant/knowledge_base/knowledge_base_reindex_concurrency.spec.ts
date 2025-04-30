@@ -15,7 +15,7 @@ import {
   deleteKbIndices,
   addSampleDocsToInternalKb,
   getConcreteWriteIndexFromAlias,
-  TINY_ELSER_INFERENCE_ID,
+  reIndexKnowledgeBase,
 } from '../utils/knowledge_base';
 import { createOrUpdateIndexAssets } from '../utils/index_assets';
 import { animalSampleDocs } from '../utils/sample_docs';
@@ -50,7 +50,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         await addSampleDocsToInternalKb(getService, animalSampleDocs);
 
-        results = await Promise.all(times(20).map(() => reIndexKnowledgeBase()));
+        results = await Promise.all(times(20).map(() => _reIndexKnowledgeBase()));
       });
 
       it('makes 20 requests to the reindex endpoint', async () => {
@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         results = [];
         for (const _ of times(iterations)) {
-          results.push(await reIndexKnowledgeBase());
+          results.push(await _reIndexKnowledgeBase());
         }
       });
 
@@ -119,15 +119,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
   });
 
-  async function reIndexKnowledgeBase() {
-    const res = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
-      params: {
-        query: {
-          inference_id: TINY_ELSER_INFERENCE_ID,
-        },
-      },
-    });
+  async function _reIndexKnowledgeBase() {
+    const res = await reIndexKnowledgeBase(observabilityAIAssistantAPIClient);
 
     return {
       status: res.status,
