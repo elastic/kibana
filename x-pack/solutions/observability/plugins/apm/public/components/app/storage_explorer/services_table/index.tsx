@@ -144,7 +144,10 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
 
   const loading = serviceStatisticsFetch.status === FETCH_STATUS.LOADING;
 
-  const items = joinByKey([...preloadedServices, ...serviceStatisticsItems], 'serviceName');
+  const items = joinByKey(
+    [...preloadedServices, ...serviceStatisticsItems],
+    StorageExplorerFieldName.ServiceName
+  );
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
     {
