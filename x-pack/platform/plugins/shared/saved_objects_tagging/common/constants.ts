@@ -29,4 +29,5 @@ export const taggableTypes = [
   'osquery-pack',
   'osquery-pack-asset',
   'osquery-saved-query',
+  'security-ai-prompt',
 ];

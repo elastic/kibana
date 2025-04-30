@@ -16,5 +16,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
     },
+
+    kbnTestServer: {
+      ...baseConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseConfig.get('kbnTestServer.serverArgs'),
+        // this will be removed in 9.2 when security AI prompts feature is GA
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'securityAIPromptsEnabled',
+        ])}`,
+      ],
+    },
   };
 }
