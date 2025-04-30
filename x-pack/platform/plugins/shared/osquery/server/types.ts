@@ -23,7 +23,6 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { createActionService } from './handlers/action/create_action_service';
 
 export interface OsqueryPluginSetup {
@@ -42,7 +41,6 @@ export interface SetupPlugins {
   taskManager?: TaskManagerPluginSetup;
   telemetry?: TelemetryPluginSetup;
   licensing: LicensingPluginSetup;
-  spaces?: SpacesPluginSetup;
 }
 
 export interface StartPlugins {
@@ -53,5 +51,4 @@ export interface StartPlugins {
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
-  spaces?: SpacesPluginStart;
 }

@@ -30,8 +30,7 @@
       "home",
       "lens",
       "telemetry",
-      "cases",
-      "spaces"
+      "cases"
     ],
     "requiredBundles": [
       "esUiShared",

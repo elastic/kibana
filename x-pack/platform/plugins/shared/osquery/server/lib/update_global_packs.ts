@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { SavedObjectsClient } from '@kbn/core/server';
 import { set } from '@kbn/safer-lodash-set';
 import { has, map, mapKeys } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import produce from 'immer';
-import type { SavedObjectsClient } from '@kbn/core/server';
 import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
@@ -24,6 +24,7 @@ export const updateGlobalPacksCreateCallback = async (
   osqueryContext: OsqueryAppContextService
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
+
   const agentPoliciesResult = await agentPolicyService?.getByIds(
     packsClient,
     packagePolicy.policy_ids
