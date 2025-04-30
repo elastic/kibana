@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TestRunnerConfig } from '@storybook/test-runner';
+import { getStoryContext, type TestRunnerConfig } from '@storybook/test-runner';
 import { injectAxe, checkA11y } from 'axe-playwright';
 
 /*
@@ -18,7 +18,12 @@ const config: TestRunnerConfig = {
   async preVisit(page) {
     await injectAxe(page);
   },
-  async postVisit(page) {
+  async postVisit(page, context) {
+     const storyContext = await getStoryContext(page, context);
+     // Do not run a11y tests on disabled stories.
+    // if (storyContext.parameters.a11y.test === 'todo') {
+    //   return;
+    // }
     await checkA11y(page, 'body', {
       detailedReport: true,
       detailedReportOptions: {

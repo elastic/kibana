@@ -19,6 +19,9 @@ type Args = ComponentProps<typeof MobileErrorGroupList>;
 const stories: Meta<Args> = {
   title: 'app/ErrorGroupOverview/MobileErrorGroupList',
   component: MobileErrorGroupList,
+  parameters: {
+    a11y: { test: 'todo' },
+  },
   decorators: [
     (StoryComponent) => {
       return (
@@ -94,9 +97,6 @@ export const Example: StoryObj<Args> = {
     ],
     serviceName: 'test service',
   },
-  parameters: {
-    a11y: { test: 'todo' },
-  },
 };
 
 export const EmptyState: StoryObj<Args> = {
@@ -107,8 +107,5 @@ export const EmptyState: StoryObj<Args> = {
   args: {
     mainStatistics: [],
     serviceName: 'test service',
-  },
-  parameters: {
-    a11y: { test: 'todo' },
   },
 };
