@@ -311,7 +311,7 @@ const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
  */
 function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
   let locationsAvailable =
-    ESFunctionDefinition.type === FunctionDefinitionTypes.SCALAR
+    ESFunctionDefinition.type === 'eval'
       ? defaultScalarFunctionLocations
       : defaultAggFunctionLocations;
 
@@ -320,7 +320,12 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     locationsAvailable = [Location.WHERE];
   }
   const ret = {
-    type: ESFunctionDefinition.type,
+    type:
+      ESFunctionDefinition.name === 'bucket'
+        ? 'grouping'
+        : ESFunctionDefinition.type === 'eval'
+        ? 'scalar'
+        : ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     operator: ESFunctionDefinition.operator,
     locationsAvailable,
@@ -951,37 +956,12 @@ ${
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
-    const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
 
     if (functionDefinition.name.toLowerCase() === 'match') {
       scalarFunctionDefinitions.push({
         ...functionDefinition,
         type: FunctionDefinitionTypes.SCALAR,
       });
-      continue;
-    }
-
-    if (arePredicates) {
-      const nullFunctions: FunctionDefinition[] = [
-        {
-          name: 'is null',
-          description: 'Predicate for NULL comparison: returns true if the value is NULL',
-          operator: 'is null',
-        },
-        {
-          name: 'is not null',
-          description: 'Predicate for NULL comparison: returns true if the value is not NULL',
-          operator: 'is not null',
-        },
-      ].map<FunctionDefinition>(({ name, description, operator }) => {
-        return {
-          ...functionDefinition,
-          name,
-          operator,
-          description,
-        };
-      });
-      operatorDefinitions.push(...nullFunctions);
       continue;
     }
 
