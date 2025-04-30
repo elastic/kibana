@@ -11,7 +11,7 @@ import { OnboardingContextProvider } from '../../../onboarding_context';
 import KnowledgeSourceCard from './knowledge_source_card';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
-jest.mock('../../../../../../common/experimental_features_service', () => ({
+jest.mock('../../../../../common/experimental_features_service', () => ({
   ExperimentalFeaturesService: { get: jest.fn() },
 }));
 const mockExperimentalFeatures = ExperimentalFeaturesService.get as jest.Mock;

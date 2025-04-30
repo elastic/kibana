@@ -14,7 +14,7 @@ import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
 import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
 import { startMigrationCardConfig } from './cards/siem_migrations/start_migration';
-import { integrationsSearchAILakeCardConfig } from './cards/integrations_search_ai_lake';
+import { integrationsExternalDetectionsCardConfig } from './cards/integrations_external_detections';
 import { knowledgeSourceCardConfig } from './cards/knowledge_source';
 
 export const defaultBodyConfig: OnboardingGroupConfig[] = [
@@ -24,7 +24,7 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
     }),
     cards: [
       integrationsCardConfig,
-      integrationsSearchAILakeCardConfig,
+      integrationsExternalDetectionsCardConfig,
       dashboardsCardConfig,
       knowledgeSourceCardConfig,
     ],
