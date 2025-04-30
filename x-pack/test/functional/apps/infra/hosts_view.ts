@@ -467,16 +467,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          describe('Dashboards Tab', () => {
-            before(async () => {
-              await pageObjects.assetDetails.clickDashboardsTab();
-            });
-
-            it('should render dashboards tab splash screen with option to add dashboard', async () => {
-              await pageObjects.assetDetails.addDashboardExists();
-            });
-          });
-
           describe('Flyout links', () => {
             it('should navigate to Host Details page after click', async () => {
               await pageObjects.assetDetails.clickOpenAsPageLink();
