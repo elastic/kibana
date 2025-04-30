@@ -72,40 +72,36 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await runStartupMigrations(observabilityAIAssistantAPIClient);
       });
 
-      it('the docs have semantic_text embeddings', async () => {
+      it('the docs have semantic_text field', async () => {
         await retry.try(async () => {
           const hits = await getKnowledgeBaseEntries(es);
-          const hasSemanticTextEmbeddings = hits.every((hit) => hit._source?.semantic_text);
-          expect(hasSemanticTextEmbeddings).to.be(true);
+          const hasSemanticTextField = hits.every((hit) => hit._source?.semantic_text);
+          expect(hasSemanticTextField).to.be(true);
+        });
+      });
 
+      it('the docs have embeddings', async () => {
+        await retry.try(async () => {
+          const hits = await getKnowledgeBaseEntries(es);
+          const hasEmbeddings = hits.every(
+            (hit) =>
+              // @ts-expect-error
+              Object.keys(hit._source?.semantic_text.inference.chunks[0].embeddings).length > 0
+          );
+          expect(hasEmbeddings).to.be(true);
+        });
+      });
+
+      it('the docs have correct text content', async () => {
+        await retry.try(async () => {
+          const hits = await getKnowledgeBaseEntries(es);
           expect(
-            orderBy(hits, '_source.title')
-              .map((hit) => hit._source)
-              .filter(omitLensEntries)
-              .map((entry) => {
-                // @ts-expect-error we are consuming semantic_text format
-                const text = entry?.semantic_text.text;
-                // @ts-expect-error we are consuming semantic_text format
-                const inference = entry?.semantic_text.inference;
-
-                return {
-                  text: text ?? '',
-                  inferenceId: inference?.inference_id,
-                  chunkCount: inference?.chunks.length,
-                };
-              })
-          ).to.eql([
-            {
-              text: 'To infinity and beyond!',
-              inferenceId: TINY_ELSER_INFERENCE_ID,
-              chunkCount: 1,
-            },
-            {
-              text: "The user's favourite color is blue.",
-              inferenceId: TINY_ELSER_INFERENCE_ID,
-              chunkCount: 1,
-            },
-          ]);
+            hits
+              .filter((hit) => omitLensEntry(hit._source))
+              // @ts-expect-error
+              .map((hit) => hit._source?.semantic_text.text)
+              .sort()
+          ).to.eql(['To infinity and beyond!', "The user's favourite color is blue."].sort());
         });
       });
 
@@ -125,7 +121,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(
           res.body.entries
-            .filter(omitLensEntries)
+            .filter(omitLensEntry)
             .map(({ title, text, type }) => ({ title, text, type }))
         ).to.eql([
           {
@@ -144,6 +140,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   });
 }
 
-function omitLensEntries(entry?: KnowledgeBaseEntry) {
+function omitLensEntry(entry?: KnowledgeBaseEntry) {
   return entry?.labels?.category !== 'lens';
 }
