@@ -43,7 +43,7 @@ const getAzureAccountTypeOptions = (): AssetRadioGroupProps['options'] => [
 ];
 
 const getAzureAccountType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>
 ): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
 
 export const AzureAccountTypeSelect = ({
@@ -53,7 +53,7 @@ export const AzureAccountTypeSelect = ({
   disabled,
   setupTechnology,
 }: {
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;

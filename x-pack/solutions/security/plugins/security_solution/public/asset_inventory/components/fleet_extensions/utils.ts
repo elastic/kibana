@@ -60,7 +60,7 @@ const getAssetType = (policyTemplateInput: AssetInput) => {
     case CLOUDBEAT_AWS:
     case CLOUDBEAT_AZURE:
     case CLOUDBEAT_GCP:
-      return 'asset_inventory';
+      return 'asset_discovery';
     default:
       return 'n/a';
   }
@@ -261,7 +261,7 @@ export const getAssetInputHiddenVars = (
 };
 
 const assetInventoryIntegrations: CloudAssetDiscoveryIntegrations = {
-  asset_inventory: {
+  asset_discovery: {
     policyTemplate: ASSET_POLICY_TEMPLATE,
     name: i18n.translate(
       'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.nameTitle',
@@ -332,7 +332,7 @@ const assetInventoryIntegrations: CloudAssetDiscoveryIntegrations = {
 };
 
 export const getPolicyTemplateInputOptions = () =>
-  assetInventoryIntegrations.asset_inventory.options.map((o) => ({
+  assetInventoryIntegrations.asset_discovery.options.map((o) => ({
     tooltip: o.tooltip,
     value: o.type,
     id: o.type,
@@ -363,7 +363,7 @@ export const getAssetCloudShellDefaultValue = (packageInfo: PackageInfo): string
 };
 
 export const getAwsCredentialsType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_aws' }>
 ): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
 export const isBelowMinVersion = (version: string, minVersion: string) => {
@@ -376,17 +376,17 @@ export const getDefaultCloudCredentialsType = (
   isAgentless: boolean,
   inputType: Extract<
     AssetInput,
-    | 'cloudbeat/asset_inventory_aws'
-    | 'cloudbeat/asset_inventory_azure'
-    | 'cloudbeat/asset_inventory_gcp'
+    | 'cloudbeat/asset_discovery_aws'
+    | 'cloudbeat/asset_discovery_azure'
+    | 'cloudbeat/asset_discovery_gcp'
   >
 ) => {
   const credentialsTypes: Record<
     Extract<
       AssetInput,
-      | 'cloudbeat/asset_inventory_aws'
-      | 'cloudbeat/asset_inventory_azure'
-      | 'cloudbeat/asset_inventory_gcp'
+      | 'cloudbeat/asset_discovery_aws'
+      | 'cloudbeat/asset_discovery_azure'
+      | 'cloudbeat/asset_discovery_gcp'
     >,
     {
       [key: string]: {
@@ -395,7 +395,7 @@ export const getDefaultCloudCredentialsType = (
       };
     }
   > = {
-    'cloudbeat/asset_inventory_aws': {
+    'cloudbeat/asset_discovery_aws': {
       'aws.credentials.type': {
         value: isAgentless
           ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
@@ -403,7 +403,7 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    'cloudbeat/asset_inventory_gcp': {
+    'cloudbeat/asset_discovery_gcp': {
       'gcp.credentials.type': {
         value: isAgentless
           ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
@@ -411,7 +411,7 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    'cloudbeat/asset_inventory_azure': {
+    'cloudbeat/asset_discovery_azure': {
       'azure.credentials.type': {
         value: isAgentless
           ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET

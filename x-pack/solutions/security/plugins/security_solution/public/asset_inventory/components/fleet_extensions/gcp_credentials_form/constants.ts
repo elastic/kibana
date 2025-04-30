@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const CLOUDBEAT_GCP = 'cloudbeat/asset_inventory_gcp';
+export const CLOUDBEAT_GCP = 'cloudbeat/asset_discovery_gcp';
 export const GCP_SINGLE_ACCOUNT = 'single-account';
 export const GCP_ORGANIZATION_ACCOUNT = 'organization-account';

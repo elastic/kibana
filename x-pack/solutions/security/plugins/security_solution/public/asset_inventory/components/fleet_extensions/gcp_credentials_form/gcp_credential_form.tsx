@@ -331,7 +331,7 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
 
 export interface GcpFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   // setIsValid?: (isValid: boolean) => void;
@@ -355,7 +355,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFiel
     });
 
 const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>
 ): SetupFormatGCP => {
   const credentialsType = getGcpCredentialsType(input);
 
@@ -431,7 +431,7 @@ const useCloudShellUrl = ({
 };
 
 export const getGcpCredentialsType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>
 ): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
 
 export const GcpCredentialsForm = ({

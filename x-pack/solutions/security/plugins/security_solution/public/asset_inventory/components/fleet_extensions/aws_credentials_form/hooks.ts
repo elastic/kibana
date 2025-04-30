@@ -27,7 +27,7 @@ import { assetIntegrationDocsNavigation } from '../../../constants';
  */
 
 const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>,
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_aws' }>,
   hasCloudFormationTemplate: boolean
 ): AwsSetupFormat => {
   const credentialsType = getAwsCredentialsType(input);
@@ -49,7 +49,7 @@ export const useAwsCredentialsForm = ({
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_aws' }>;
   packageInfo: PackageInfo;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {

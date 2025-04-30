@@ -9,7 +9,7 @@ import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
 import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 
-export const ASSET_POLICY_TEMPLATE = 'asset_inventory';
+export const ASSET_POLICY_TEMPLATE = 'asset_discovery';
 
 export const SUPPORTED_POLICY_TEMPLATES = [ASSET_POLICY_TEMPLATE] as const;
 export const SUPPORTED_CLOUDBEAT_INPUTS = [CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE] as const;

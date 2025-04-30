@@ -94,7 +94,7 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
 
 export interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   disabled: boolean;

@@ -182,12 +182,12 @@ describe('<CloudAssetDiscoveryPolicyTemplateForm />', () => {
   //   // enable all inputs of a policy template, same as fleet does
   //   policy.inputs = policy.inputs.map((input) => ({
   //     ...input,
-  //     enabled: input.policy_template === 'asset_inventory',
+  //     enabled: input.policy_template === 'asset_discovery',
   //   }));
-  //   policy.name = 'cloud_asset_inventory-1';
+  //   policy.name = 'cloud_asset_discovery-1';
 
   //   (useParams as jest.Mock).mockReturnValue({
-  //     integration: 'cloud_asset_inventory',
+  //     integration: 'cloud_asset_discovery',
   //   });
 
   //   // (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
@@ -221,7 +221,7 @@ describe('<CloudAssetDiscoveryPolicyTemplateForm />', () => {
 
   //   const updatedPolicy = {
   //     ...getMockPolicyAWS(),
-  //     name: 'cloud_asset_inventory-1',
+  //     name: 'cloud_asset_discovery-1',
   //     inputs: policy.inputs.map((input) => {
   //       if (input.type === CLOUDBEAT_AWS) {
   //         return {
@@ -254,7 +254,7 @@ describe('<CloudAssetDiscoveryPolicyTemplateForm />', () => {
   //   //       }
   //   //       return input;
   //   //     }),
-  //   //     name: 'cloud_asset_inventory-1',
+  //   //     name: 'cloud_asset_discovery-1',
   //   //   },
   //   // });
 
@@ -262,9 +262,9 @@ describe('<CloudAssetDiscoveryPolicyTemplateForm />', () => {
   //     ...getMockPolicyAWS(),
   //     inputs: policy.inputs.map((input) => ({
   //       ...input,
-  //       enabled: input.policy_template === 'cloud_asset_inventory',
+  //       enabled: input.policy_template === 'cloud_asset_discovery',
   //     })),
-  //     name: 'cloud_asset_inventory-2',
+  //     name: 'cloud_asset_discovery-2',
   //   };
 
   //   onChange({

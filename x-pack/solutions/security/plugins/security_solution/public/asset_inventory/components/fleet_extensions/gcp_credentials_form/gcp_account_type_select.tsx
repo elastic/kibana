@@ -42,7 +42,7 @@ const getGcpAccountTypeOptions = (): AssetRadioGroupProps['options'] => [
 ];
 
 const getGcpAccountType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>
 ): GcpAccountType | undefined => input.streams[0].vars?.['gcp.account_type']?.value;
 
 export const GcpAccountTypeSelect = ({
@@ -52,7 +52,7 @@ export const GcpAccountTypeSelect = ({
   packageInfo,
   disabled,
 }: {
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   packageInfo: PackageInfo;

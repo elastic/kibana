@@ -23,7 +23,6 @@ import {
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { PolicyTemplateInputSelector, PolicyTemplateVarsForm } from './policy_template_selectors';
-import { useKibana } from '../../../common/lib/kibana';
 import type { AssetInput, NewPackagePolicyAssetInput } from './types';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_select';
 import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
@@ -85,10 +84,7 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
-      const { cloud } = useKibana().services;
-      const isServerless = !!cloud?.serverless.projectType;
       const input = getSelectedOption(newPolicy.inputs);
-
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
         input,
         isAgentlessEnabled,
@@ -218,12 +214,11 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
               input={input}
               newPolicy={newPolicy}
               updatePolicy={updatePolicy}
-              packageInfo={packageInfo}
               disabled={isEditPage}
             />
           )}
 
-          {input.type === 'cloudbeat/asset_inventory_gcp' && (
+          {input.type === 'cloudbeat/asset_discovery_gcp' && (
             <GcpAccountTypeSelect
               input={input}
               newPolicy={newPolicy}
@@ -233,12 +228,11 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
             />
           )}
 
-          {input.type === 'cloudbeat/asset_inventory_azure' && (
+          {input.type === 'cloudbeat/asset_discovery_azure' && (
             <AzureAccountTypeSelect
               input={input}
               newPolicy={newPolicy}
               updatePolicy={updatePolicy}
-              packageInfo={packageInfo}
               disabled={isEditPage}
               setupTechnology={setupTechnology}
             />
@@ -250,7 +244,6 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
 
           {shouldRenderAgentlessSelector && (
             <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
               disabled={isEditPage}
               setupTechnology={setupTechnology}
               onSetupTechnologyChange={(value) => {
@@ -263,9 +256,9 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
                       value === SetupTechnology.AGENTLESS,
                       input.type as Extract<
                         AssetInput,
-                        | 'cloudbeat/asset_inventory_aws'
-                        | 'cloudbeat/asset_inventory_azure'
-                        | 'cloudbeat/asset_inventory_gcp'
+                        | 'cloudbeat/asset_discovery_aws'
+                        | 'cloudbeat/asset_discovery_azure'
+                        | 'cloudbeat/asset_discovery_gcp'
                       >
                     )
                   )

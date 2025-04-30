@@ -18,7 +18,7 @@ import type { NewPackagePolicyAssetInput } from '../types';
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 
 const getAwsAccountType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_aws' }>
 ): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
 
 const getAwsAccountTypeOptions = (): AssetRadioGroupProps['options'] => {
