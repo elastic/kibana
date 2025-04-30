@@ -105,6 +105,15 @@ export {
 export { generateFakeToolCallId } from './src/utils';
 export { elasticModelDictionary } from './src/const';
 
+export type {
+  InferenceCallToolRequest,
+  InferenceCallToolResponseRejected,
+  InferenceCallToolResponseResolved,
+  InferenceCallToolResponse,
+  InferenceListToolsResponse,
+  InferenceMCPConnector,
+} from './src/mcp';
+
 export { truncateList } from './src/truncate_list';
 export {
   InferenceConnectorType,

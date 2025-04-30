@@ -12,6 +12,7 @@ import type { InferenceClient } from './types';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { getConnectorById } from '../util/get_connector_by_id';
+import { createMCPApis } from '../mcp/api';
 
 export function createInferenceClient({
   request,
@@ -23,9 +24,13 @@ export function createInferenceClient({
   actions: ActionsPluginStart;
 }): InferenceClient {
   const chatComplete = createChatCompleteApi({ request, actions, logger });
+  const { callMCPTool, listMCPTools } = createMCPApis({ request, actions, logger });
+
   return {
     chatComplete,
     output: createOutputApi(chatComplete),
+    callMCPTool,
+    listMCPTools,
     getConnectorById: async (connectorId: string) => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       return await getConnectorById({ connectorId, actionsClient });

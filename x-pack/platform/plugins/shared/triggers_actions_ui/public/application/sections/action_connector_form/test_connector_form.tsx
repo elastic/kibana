@@ -34,7 +34,7 @@ export interface TestConnectorFormProps {
   connector: ActionConnector;
   executeEnabled: boolean;
   isExecutingAction: boolean;
-  setActionParams: (params: Record<string, unknown>) => void;
+  setActionParams: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
   actionParams: Record<string, unknown>;
   onExecutionAction: () => Promise<void>;
   executionResult: Option<ActionTypeExecutorResult<unknown> | undefined>;
@@ -88,10 +88,10 @@ export const TestConnectorForm = ({
               index={0}
               errors={actionErrors}
               editAction={(field, value) =>
-                setActionParams({
-                  ...actionParams,
+                setActionParams((prev) => ({
+                  ...prev,
                   [field]: value,
-                })
+                }))
               }
               messageVariables={[]}
               actionConnector={connector}
