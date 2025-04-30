@@ -97,19 +97,18 @@ describe('RuleMigrationTaskEvaluator', () => {
 
         expect(result).toEqual({
           score: false,
-          comment: 'Incorrect, expected partial',
+          comment: 'Incorrect, expected "partial" but got "full"',
         });
       });
 
-      it('should return false score when expected result is missing', () => {
+      it('should ignore score when expected result is missing', () => {
         const mockRun = { outputs: { translation_result: 'full' } } as unknown as Run;
         const mockExample = { outputs: {} } as unknown as Example;
 
         const result = evaluator({ run: mockRun, example: mockExample });
 
         expect(result).toEqual({
-          score: false,
-          comment: 'Missing expected translation result',
+          comment: 'No translation result expected',
         });
       });
 
@@ -192,15 +191,14 @@ describe('RuleMigrationTaskEvaluator', () => {
         expect(result.score).toEqual(0.474);
       });
 
-      it('should handle case when no custom query is expected', () => {
+      it('should ignore score when no custom query is expected', () => {
         const mockRun = { outputs: { elastic_rule: {} } } as unknown as Run;
         const mockExample = { outputs: { elastic_rule: {} } } as unknown as Example;
 
         const result = evaluator({ run: mockRun, example: mockExample });
 
         expect(result).toEqual({
-          score: 1,
-          comment: 'Not a custom translation, as expected',
+          comment: 'No custom translation expected',
         });
       });
 
@@ -215,19 +213,6 @@ describe('RuleMigrationTaskEvaluator', () => {
         expect(result).toEqual({
           score: 0,
           comment: 'Custom translation expected, but not received',
-        });
-      });
-
-      it('should handle case when custom query is returned but not expected', () => {
-        const mockRun = {
-          outputs: { elastic_rule: { query: 'process.name:test' } },
-        } as unknown as Run;
-        const mockExample = { outputs: { elastic_rule: {} } } as unknown as Example;
-
-        const result = evaluator({ run: mockRun, example: mockExample });
-
-        expect(result).toEqual({
-          comment: 'Not expected custom translation received, can not score',
         });
       });
     });
@@ -265,7 +250,7 @@ describe('RuleMigrationTaskEvaluator', () => {
 
         expect(result).toEqual({
           score: false,
-          comment: 'Incorrect match, expected ID is rule-456',
+          comment: 'Incorrect match, expected ID is "rule-456" but got "rule-123"',
         });
       });
 
@@ -276,8 +261,7 @@ describe('RuleMigrationTaskEvaluator', () => {
         const result = evaluator({ run: mockRun, example: mockExample });
 
         expect(result).toEqual({
-          score: true,
-          comment: 'Not a prebuilt rule, as expected',
+          comment: 'No prebuilt rule expected',
         });
       });
 
@@ -292,19 +276,6 @@ describe('RuleMigrationTaskEvaluator', () => {
         expect(result).toEqual({
           score: false,
           comment: 'Prebuilt rule expected, but not received',
-        });
-      });
-
-      it('should handle case when prebuilt rule is returned but not expected', () => {
-        const mockRun = {
-          outputs: { elastic_rule: { prebuilt_rule_id: 'rule-123' } },
-        } as unknown as Run;
-        const mockExample = { outputs: { elastic_rule: {} } } as unknown as Example;
-
-        const result = evaluator({ run: mockRun, example: mockExample });
-
-        expect(result).toEqual({
-          comment: 'Not expected prebuilt rule received, can not score',
         });
       });
     });

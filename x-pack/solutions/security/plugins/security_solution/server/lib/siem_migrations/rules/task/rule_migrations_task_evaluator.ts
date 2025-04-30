@@ -94,7 +94,7 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
       const expectedResult = (example?.outputs as MigrateRuleState)?.translation_result;
 
       if (!expectedResult) {
-        return { score: false, comment: 'Missing expected translation result' };
+        return { comment: 'No translation result expected' };
       }
       if (!runResult) {
         return { score: false, comment: 'No translation result received' };
@@ -104,7 +104,10 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
         return { score: true, comment: 'Correct' };
       }
 
-      return { score: false, comment: `Incorrect, expected ${expectedResult}` };
+      return {
+        score: false,
+        comment: `Incorrect, expected "${expectedResult}" but got "${runResult}"`,
+      };
     },
 
     custom_query_accuracy: ({ run, example }) => {
@@ -112,10 +115,7 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
       const expectedQuery = (example?.outputs as MigrateRuleState)?.elastic_rule?.query;
 
       if (!expectedQuery) {
-        if (!runQuery) {
-          return { score: 1, comment: 'Not a custom translation, as expected' };
-        }
-        return { comment: 'Not expected custom translation received, can not score' };
+        return { comment: 'No custom translation expected' };
       }
       if (!runQuery) {
         return { score: 0, comment: 'Custom translation expected, but not received' };
@@ -141,10 +141,7 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
         ?.prebuilt_rule_id;
 
       if (!expectedPrebuiltRuleId) {
-        if (!runPrebuiltRuleId) {
-          return { score: true, comment: 'Not a prebuilt rule, as expected' };
-        }
-        return { comment: 'Not expected prebuilt rule received, can not score' };
+        return { comment: 'No prebuilt rule expected' };
       }
       if (!runPrebuiltRuleId) {
         return { score: false, comment: 'Prebuilt rule expected, but not received' };
@@ -155,7 +152,7 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
       }
       return {
         score: false,
-        comment: `Incorrect match, expected ID is ${expectedPrebuiltRuleId}`,
+        comment: `Incorrect match, expected ID is "${expectedPrebuiltRuleId}" but got "${runPrebuiltRuleId}"`,
       };
     },
   };
