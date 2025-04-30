@@ -120,7 +120,7 @@ describe('kibana_client_open_api', () => {
     const kibanaClientTool = await KibanaClientTool.create({
       options: {
         apiSpecPath: kibanaOpenApiSpec,
-        llmType: undefined
+        llmType: undefined,
       },
     });
 
@@ -131,7 +131,7 @@ describe('kibana_client_open_api', () => {
     const kibanaClientTool = await KibanaClientTool.create({
       options: {
         apiSpecPath: kibanaServerlessOpenApiSpec,
-        llmType: undefined
+        llmType: undefined,
       },
     });
 
@@ -148,7 +148,7 @@ describe('kibana_client_open_api', () => {
         const kibanaClientTool = await KibanaClientTool.create({
           options: {
             apiSpecPath: 'fake-path',
-            llmType: undefined
+            llmType: undefined,
           },
         });
 

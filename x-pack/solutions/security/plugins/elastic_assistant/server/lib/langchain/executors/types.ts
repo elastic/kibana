@@ -27,7 +27,11 @@ import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { CoreRequestHandlerContext } from '@kbn/core/server';
 import { ResponseBody } from '../types';
-import type { AssistantTool, ElasticAssistantApiRequestHandlerContext, LlmType } from '../../../types';
+import type {
+  AssistantTool,
+  ElasticAssistantApiRequestHandlerContext,
+  LlmType,
+} from '../../../types';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';

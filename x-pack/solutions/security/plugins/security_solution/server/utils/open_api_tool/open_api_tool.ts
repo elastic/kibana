@@ -12,9 +12,9 @@ import type { SchemaObject } from 'oas/dist/types.cjs';
 import { z } from '@kbn/zod';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import { groupBy, isEmpty, memoize } from 'lodash';
+import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 import { formatToolName, isOperation } from './utils';
 import type { Operation } from './utils';
-import { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 
 export abstract class OpenApiTool<T> {
   protected dereferencedOas: Oas;
@@ -26,7 +26,7 @@ export abstract class OpenApiTool<T> {
   );
   protected llmType: LlmType | undefined;
 
-  protected constructor(args: { dereferencedOas: Oas, llmType: LlmType | undefined }) {
+  protected constructor(args: { dereferencedOas: Oas; llmType: LlmType | undefined }) {
     const { dereferencedOas } = args;
     this.dereferencedOas = dereferencedOas;
     this.llmType = args.llmType;
@@ -40,56 +40,79 @@ export abstract class OpenApiTool<T> {
   }
 
   protected getParametersAsZodSchema(args: { operation: Operation }) {
-    return this.getParametersAsZodSchemaMemoized(args);;
+    return this.getParametersAsZodSchemaMemoized(args);
   }
 
   // Modify JSON schema to be compatible with LLM providers
-  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
+  protected getParserOverride(
+    schema: JsonSchemaObject,
+    refs: Refs,
+    jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny
+  ) {
     if (schema.enum && schema.enum.every((x) => typeof x === 'string')) {
       return z.enum(schema.enum as [string]); // Gemini does not support literals so must use enums
     }
-    if (schema.type === "array" && isEmpty(schema.items)) {
-      return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]) // OpenAi requires items in array to be defined
+    if (schema.type === 'array' && isEmpty(schema.items)) {
+      return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]); // OpenAi requires items in array to be defined
     }
-    if (this.llmType == 'gemini' && schema.oneOf !== undefined && Array.isArray(schema.oneOf)) { // Gemini does not support oneOf so we use any
+    if (this.llmType == 'gemini' && schema.oneOf !== undefined && Array.isArray(schema.oneOf)) {
+      // Gemini does not support oneOf so we use any
       return z.any().describe(schema.description ?? ''); // Gemini does not support oneOf so we use any
     }
     let modified = false;
-    if(this.llmType == 'gemini' && schema.type === 'integer' && schema.enum && schema.enum.some(val=>typeof val === 'number')) { // Gemini does not support number enums
-      schema.enum = schema.enum.map((x) => (x as number).toString())
+    if (
+      this.llmType == 'gemini' &&
+      schema.type === 'integer' &&
+      schema.enum &&
+      schema.enum.some((val) => typeof val === 'number')
+    ) {
+      // Gemini does not support number enums
+      schema.enum = schema.enum.map((x) => (x as number).toString());
       modified = true;
     }
-    if(this.llmType == 'gemini' && schema.exclusiveMinimum !== undefined) { 
-      delete schema.exclusiveMinimum // Gemini does not support exclusiveMinimum
+    if (this.llmType == 'gemini' && schema.exclusiveMinimum !== undefined) {
+      delete schema.exclusiveMinimum; // Gemini does not support exclusiveMinimum
       modified = true;
     }
-    if(this.llmType == 'gemini' && schema.exclusiveMaximum !== undefined) { 
-      delete schema.exclusiveMaximum // Gemini does not support exclusiveMaximum
+    if (this.llmType == 'gemini' && schema.exclusiveMaximum !== undefined) {
+      delete schema.exclusiveMaximum; // Gemini does not support exclusiveMaximum
       modified = true;
     }
-    if (this.llmType == 'gemini' && schema.anyOf && Array.isArray(schema.anyOf) && schema.anyOf.length > 1) {  // Gemini does not support types with multiple values so making sure to use only the first one
-      schema.anyOf = [schema.anyOf[0]]
+    if (
+      this.llmType == 'gemini' &&
+      schema.anyOf &&
+      Array.isArray(schema.anyOf) &&
+      schema.anyOf.length > 1
+    ) {
+      // Gemini does not support types with multiple values so making sure to use only the first one
+      schema.anyOf = [schema.anyOf[0]];
       modified = true;
     }
-    if (this.llmType == 'gemini' && Array.isArray(schema.type)) { 
-      schema.type = schema.type[0] // Gemini does not support multiple types so we use the first one
+    if (this.llmType == 'gemini' && Array.isArray(schema.type)) {
+      schema.type = schema.type[0]; // Gemini does not support multiple types so we use the first one
       modified = true;
     }
     if (schema.anyOf !== undefined && schema.default !== undefined) {
-      delete schema.default // Gemini does not support keys alongside anyOf
+      delete schema.default; // Gemini does not support keys alongside anyOf
       modified = true;
     }
     if (schema.format !== undefined) {
-      delete schema.format // Gemini does not support contentEncoding
+      delete schema.format; // Gemini does not support contentEncoding
       modified = true;
     }
-    if (schema.type == 'array' && schema.items && typeof schema.items !== 'boolean' && !Array.isArray(schema.items) && schema.items.type === undefined) {
-      schema.items.type = 'string' // requires item type to be defined
+    if (
+      schema.type == 'array' &&
+      schema.items &&
+      typeof schema.items !== 'boolean' &&
+      !Array.isArray(schema.items) &&
+      schema.items.type === undefined
+    ) {
+      schema.items.type = 'string'; // requires item type to be defined
       modified = true;
     }
 
-    if(modified) {
-      return jsonSchemaToZodWithParserOverride(schema)
+    if (modified) {
+      return jsonSchemaToZodWithParserOverride(schema);
     }
 
     return undefined;
@@ -108,9 +131,10 @@ export abstract class OpenApiTool<T> {
     const jsonSchemaToZodWithParserOverride = (schema: JsonSchema): z.ZodTypeAny => {
       return jsonSchemaToZod(schema as JsonSchema, {
         // Overrides to ensure schema is compatible with LLM provider
-        parserOverride: (schema, refs) => this.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride),
-      })
-    }
+        parserOverride: (schema, refs) =>
+          this.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride),
+      });
+    };
 
     const schemaTypeToZod = Object.keys(schemaTypeToSchemaObject).reduce((total, next) => {
       const schema = schemaTypeToSchemaObject[next];
@@ -162,8 +186,6 @@ export abstract class OpenApiTool<T> {
         return internalNode;
       });
 
-
-
     const { name, description } = this.getRootToolDetails(args);
 
     // Create root tool
@@ -177,14 +199,12 @@ export abstract class OpenApiTool<T> {
     return rootTool;
   }
 
-  protected getRootToolDetails(
-    args: T
-  ): {
+  protected getRootToolDetails(args: T): {
     name: string;
     description: string;
   } {
     throw new Error('Method not implemented.');
-  };
+  }
 
   protected abstract getToolForOperation(
     args: T & { operation: Operation }

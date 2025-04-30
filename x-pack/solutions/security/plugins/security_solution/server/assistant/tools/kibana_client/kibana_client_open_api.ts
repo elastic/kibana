@@ -18,12 +18,12 @@ import Oas from 'oas';
 import { parse } from 'yaml';
 import type { BuildFlavor } from '@kbn/config';
 import axios from 'axios';
+import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
+import { Command, END } from '@langchain/langgraph';
+import type { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
-import { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
-import { Command, END } from '@langchain/langgraph';
-import { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
 
 export const kibanaServerlessOpenApiSpec = path.join(
   __dirname,
@@ -93,8 +93,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
   static async create(args?: { options?: Partial<Options> }) {
     const options = {
       ...defaultOptions,
-      ...(args?.options ?? {
-      }),
+      ...(args?.options ?? {}),
     };
     const yamlOpenApiSpec = await fs.promises.readFile(options.apiSpecPath, 'utf8');
     const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
@@ -106,13 +105,14 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     });
   }
 
-  protected getRootToolDetails(args: RuntimeOptions): { name: string; description: string; } {
+  protected getRootToolDetails(args: RuntimeOptions): { name: string; description: string } {
     return {
       name: 'kibana_client',
-      description: 'This function interacts with the Kibana API. It takes a natural language request,' +
+      description:
+        'This function interacts with the Kibana API. It takes a natural language request,' +
         ' finds out the correct endpoint to call and returns the result of the API call. This function ' +
         'should be used when the user requests information, configurations or changes in Kibana.',
-    }
+    };
   }
 
   protected async getToolForOperation({
@@ -150,10 +150,10 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         try {
           const result = await axios({
             method: operation.method.toUpperCase(),
-            headers: { ...input.header, ...headers, "kbn-xsrf": 'mock-kbn-xsrf' },
+            headers: { ...input.header, ...headers, 'kbn-xsrf': 'mock-kbn-xsrf' },
             url: url.toString(),
             data: input.body ? JSON.stringify(input.body) : undefined,
-          })
+          });
 
           return new Command({
             goto: END, // This is not working, potential bug in langchain
@@ -162,25 +162,27 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
                 new ToolMessage({
                   content: JSON.stringify(result.data),
                   tool_call_id: config.toolCall.id,
-                })
-              ]
-            }
-          })
+                }),
+              ],
+            },
+          });
         } catch (error) {
           if (axios.isAxiosError(error)) {
             const status = error.response?.status;
             if (status && status >= 400 && status < 500) {
               return new Command({
-                goto: "agent",
+                goto: 'agent',
                 update: {
                   messages: [
                     new ToolMessage({
-                      content: `Client error: ${status} - ${error.response?.data?.message || error.message}`,
+                      content: `Client error: ${status} - ${
+                        error.response?.data?.message || error.message
+                      }`,
                       tool_call_id: config.toolCall.id,
-                    })
-                  ]
-                }
-              })
+                    }),
+                  ],
+                },
+              });
             }
           }
           throw error;
@@ -188,13 +190,14 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
       },
       {
         name: operation.getOperationId(),
-        description: [
-          operation.getDescription(),
-          ...operation
-            .getTags()
-            .map((tag) => tag.description)
-            .filter((tag) => !!tag),
-        ].join('\n') || operation.getOperationId(),
+        description:
+          [
+            operation.getDescription(),
+            ...operation
+              .getTags()
+              .map((tag) => tag.description)
+              .filter((tag) => !!tag),
+          ].join('\n') || operation.getOperationId(),
         tags: operation.getTags().map((tag) => tag.name),
         verboseParsingErrors: true,
         schema: this.getParametersAsZodSchema({
@@ -235,7 +238,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         const result = await agent.invoke(inputs);
         const lastMessage = result.messages[result.messages.length - 1];
 
-        return lastMessage
+        return lastMessage;
       },
       {
         name,
@@ -252,11 +255,20 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     );
   }
 
-  protected getParserOverride(schema: JsonSchemaObject, refs: Refs, jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny) {
-    if (schema.properties && schema.properties["kbn-xsrf"] && Array.isArray(schema.required) && schema.required.includes("kbn-xsrf")) {
+  protected getParserOverride(
+    schema: JsonSchemaObject,
+    refs: Refs,
+    jsonSchemaToZodWithParserOverride: (schema: JsonSchema) => z.ZodTypeAny
+  ) {
+    if (
+      schema.properties &&
+      schema.properties['kbn-xsrf'] &&
+      Array.isArray(schema.required) &&
+      schema.required.includes('kbn-xsrf')
+    ) {
       // Remove kbn-xsrf from required properties, it will be added to headers manually
-      schema.required = schema.required.filter((item) => item !== "kbn-xsrf");
-      return jsonSchemaToZodWithParserOverride(schema)
+      schema.required = schema.required.filter((item) => item !== 'kbn-xsrf');
+      return jsonSchemaToZodWithParserOverride(schema);
     }
     return super.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride);
   }
