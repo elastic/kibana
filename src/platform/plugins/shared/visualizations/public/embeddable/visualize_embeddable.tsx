@@ -194,21 +194,28 @@ export const getVisualizeEmbeddableFactory: (deps: {
           savedVis: linkedToLibrary
             ? 'skip'
             : (a, b) => {
-                function cleanSavedVis(savedVis?: SerializedVis<VisParams>) {
-                  return savedVis
-                    ? {
-                        ...omitBy(savedVis, isEmpty),
-                        data: {
-                          ...omitBy(savedVis.data, isNil),
-                          searchSource: {
-                            ...omitBy(savedVis.data.searchSource, isNil),
-                          },
-                        },
-                        params: omitBy(savedVis.params, isNil),
+                function deepOmitBy(value: any) {
+                  if (value && !Array.isArray(value) && typeof value === 'object') {
+                    const cleanedValue: Record<string, unknown> = {};
+                    const keys = Object.keys(value);
+                    if (!keys.length) return;
+                    keys.forEach(key => {
+                      const cleanedSubvalue = deepOmitBy(value[key]);
+                      if (cleanedSubvalue) {
+                        cleanedValue[key] = cleanedSubvalue;
                       }
-                    : {};
+                    });
+                    return cleanedValue; 
+                  }
+                
+                  return value;
                 }
-                return isEqual(cleanSavedVis(a), cleanSavedVis(b));
+
+                console.log('a', a);
+                console.log('b', b);
+                console.log('deepOmitBy a', deepOmitBy(a));
+                console.log('deepOmitBy b', deepOmitBy(b));
+                return isEqual(deepOmitBy(a).data.aggs[1].params, deepOmitBy(b).data.aggs[1].params);
               },
         };
       },
