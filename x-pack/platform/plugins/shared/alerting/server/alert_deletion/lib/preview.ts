@@ -30,10 +30,7 @@ export const previewTask = async (
     }
   }
 
-  const ruleTypes =
-    categoryIds && categoryIds.length > 0
-      ? context.ruleTypeRegistry.getAllTypesForCategories(categoryIds)
-      : context.ruleTypeRegistry.getAllTypes();
+  const ruleTypes = context.ruleTypeRegistry.getAllTypesForCategories(categoryIds);
   const indices = context.getAlertIndicesAlias(ruleTypes, spaceId);
 
   let numAlertsToBeDeleted = 0;

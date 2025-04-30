@@ -73,7 +73,7 @@ export const DELETE_CONFIRMATION = i18n.translate('responseOpsAlertDelete.delete
 });
 
 export const THRESHOLD_ERROR_MAX = i18n.translate('responseOpsAlertDelete.thresholdErrorMax', {
-  defaultMessage: 'Threshold limit of 1000 days',
+  defaultMessage: 'Threshold limit of 3 years',
 });
 
 export const THRESHOLD_ERROR_MIN = i18n.translate('responseOpsAlertDelete.thresholdErrorMin', {

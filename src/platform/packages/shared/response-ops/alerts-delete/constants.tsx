@@ -17,10 +17,10 @@ export const THRESHOLD_UNITS: EuiSelectOption[] = [
 ];
 
 export const MIN_THRESHOLD_DAYS = 1;
-export const MAX_THRESHOLD_DAYS = 1000;
+export const MAX_THRESHOLD_DAYS = 3 * 365;
 
 export const DEFAULT_THRESHOLD_ENABLED = false;
 export const DEFAULT_THRESHOLD = 3;
-export const DEFAULT_THRESHOLD_UNIT: EuiSelectOption = THRESHOLD_UNITS[1];
+export const DEFAULT_THRESHOLD_UNIT: EuiSelectOption = THRESHOLD_UNITS[1]; // months
 
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';

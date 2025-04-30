@@ -60,12 +60,16 @@ describe('previewTask', () => {
         isInactiveAlertDeleteEnabled: true,
         activeAlertDeleteThreshold: 1,
         inactiveAlertDeleteThreshold: 30,
+        categoryIds: ['observability', 'management', 'securitySolution'],
       },
       'space-1'
     );
 
-    expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalled();
-    expect(ruleTypeRegistry.getAllTypesForCategories).not.toHaveBeenCalled();
+    expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith([
+      'observability',
+      'management',
+      'securitySolution',
+    ]);
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],
@@ -86,12 +90,17 @@ describe('previewTask', () => {
         isInactiveAlertDeleteEnabled: false,
         activeAlertDeleteThreshold: 45,
         inactiveAlertDeleteThreshold: 1,
+        categoryIds: ['observability', 'management', 'securitySolution'],
       },
       'space-1'
     );
 
-    expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalled();
-    expect(ruleTypeRegistry.getAllTypesForCategories).not.toHaveBeenCalled();
+    expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith([
+      'observability',
+      'management',
+      'securitySolution',
+    ]);
+    expect(ruleTypeRegistry.getAllTypes).not.toHaveBeenCalled();
     expect(esClient.count).toHaveBeenCalledTimes(1);
     expect(esClient.count).toHaveBeenCalledWith({
       index: ['index1', 'index2'],
@@ -116,6 +125,7 @@ describe('previewTask', () => {
         isInactiveAlertDeleteEnabled: true,
         activeAlertDeleteThreshold: 45,
         inactiveAlertDeleteThreshold: 30,
+        categoryIds: ['observability', 'securitySolution', 'management'],
       },
       'space-1'
     );
@@ -187,6 +197,7 @@ describe('previewTask', () => {
           isInactiveAlertDeleteEnabled: true,
           activeAlertDeleteThreshold: 1,
           inactiveAlertDeleteThreshold: 30,
+          categoryIds: ['observability', 'management', 'securitySolution'],
         },
         'space-1'
       )

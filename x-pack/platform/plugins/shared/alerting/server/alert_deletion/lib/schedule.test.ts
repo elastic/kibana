@@ -76,6 +76,7 @@ describe('scheduleTask', () => {
         isInactiveAlertDeleteEnabled: true,
         activeAlertDeleteThreshold: 1,
         inactiveAlertDeleteThreshold: 30,
+        categoryIds: ['observability', 'management', 'securitySolution'],
       },
       ['space-1', 'default']
     );
@@ -88,6 +89,7 @@ describe('scheduleTask', () => {
           isInactiveAlertDeleteEnabled: true,
           activeAlertDeleteThreshold: 1,
           inactiveAlertDeleteThreshold: 30,
+          categoryIds: ['observability', 'management', 'securitySolution'],
         },
         spaceIds: ['space-1', 'default'],
       },
@@ -117,6 +119,7 @@ describe('scheduleTask', () => {
           isInactiveAlertDeleteEnabled: true,
           activeAlertDeleteThreshold: 1,
           inactiveAlertDeleteThreshold: 30,
+          categoryIds: ['observability', 'management', 'securitySolution'],
         },
         ['space-1']
       )

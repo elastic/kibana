@@ -12,7 +12,7 @@ const alertDeleteSettingsSchema = {
   active_alert_delete_threshold: schema.maybe(
     schema.number({
       min: 1,
-      max: 1000,
+      max: 3 * 365,
       meta: {
         description: 'Threshold (in days) for deleting active alerts older than this value',
       },
@@ -21,36 +21,34 @@ const alertDeleteSettingsSchema = {
   inactive_alert_delete_threshold: schema.maybe(
     schema.number({
       min: 1,
-      max: 1000,
+      max: 3 * 365,
       meta: {
         description:
           'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value',
       },
     })
   ),
-  category_ids: schema.maybe(
-    schema.oneOf(
-      [
-        schema.arrayOf(
-          schema.oneOf([
-            schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
-            schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
-            schema.literal(alertDeleteCategoryIds.MANAGEMENT),
-          ]),
-          {
-            minSize: 1,
-          }
-        ),
-        schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
-        schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
-        schema.literal(alertDeleteCategoryIds.MANAGEMENT),
-      ],
-      {
-        meta: {
-          description: 'Solutions to delete alerts from',
-        },
-      }
-    )
+  category_ids: schema.oneOf(
+    [
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
+          schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
+          schema.literal(alertDeleteCategoryIds.MANAGEMENT),
+        ]),
+        {
+          minSize: 1,
+        }
+      ),
+      schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
+      schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
+      schema.literal(alertDeleteCategoryIds.MANAGEMENT),
+    ],
+    {
+      meta: {
+        description: 'Solutions to delete alerts from',
+      },
+    }
   ),
 };
 
