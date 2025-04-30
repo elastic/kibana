@@ -23,13 +23,6 @@ export const buildEsqlTheme = ({
     { token: 'delimiter', foreground: colors.textParagraph },
     { token: 'source', foreground: colors.textParagraph },
 
-    // The "@timestamp" identifier
-    {
-      token: 'identifier.timestamp',
-      foreground: colors.textParagraph,
-      fontStyle: 'bold',
-    },
-
     // --------------------------------------------------- strings & string-like
 
     { token: 'string', foreground: colors.accent },
