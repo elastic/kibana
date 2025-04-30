@@ -41109,11 +41109,7 @@
                               "required": [
                                 "name",
                                 "enabled",
-                                "inputs",
-                                "updated_at",
-                                "updated_by",
-                                "created_at",
-                                "created_by"
+                                "inputs"
                               ],
                               "type": "object"
                             }
