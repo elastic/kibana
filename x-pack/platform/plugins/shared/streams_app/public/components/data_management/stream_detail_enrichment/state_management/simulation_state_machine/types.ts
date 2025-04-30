@@ -9,10 +9,10 @@ import { Condition, FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
-import { TimeState } from '@kbn/es-query';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Query, TimeState } from '@kbn/es-query';
+import { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { PreviewDocsFilterOption } from './simulation_documents_search';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
@@ -28,8 +28,13 @@ export interface SimulationMachineDeps {
 export type ProcessorMetrics =
   Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
+export interface SimulationSearchParams extends Required<QueryState> {
+  query: Query;
+}
+
 export interface SimulationInput {
   processors: ProcessorDefinitionWithUIAttributes[];
+  search?: SimulationSearchParams;
   streamName: string;
 }
 
@@ -40,6 +45,7 @@ export type SimulationEvent =
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'simulation.changeSearchParams'; search: Partial<SimulationSearchParams> }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'simulation.reset' };
@@ -51,6 +57,7 @@ export interface SimulationContext {
   processors: ProcessorDefinitionWithUIAttributes[];
   samples: SampleDocument[];
   samplingCondition?: Condition;
+  search: SimulationSearchParams;
   simulation?: Simulation;
   streamName: string;
 }

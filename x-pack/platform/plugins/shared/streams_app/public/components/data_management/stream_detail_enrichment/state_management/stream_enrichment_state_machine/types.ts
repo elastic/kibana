@@ -13,7 +13,11 @@ import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
-import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
+import {
+  PreviewDocsFilterOption,
+  SimulationActorRef,
+  SimulationSearchParams,
+} from '../simulation_state_machine';
 import { MappedSchemaField } from '../../../schema_editor/types';
 
 export interface StreamEnrichmentServiceDependencies {
@@ -43,6 +47,7 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'simulation.changeSearchParams'; search: Partial<SimulationSearchParams> }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }

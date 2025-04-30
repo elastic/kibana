@@ -9,7 +9,7 @@ import { Condition, FieldDefinition, UnaryOperator, getProcessorConfig } from '@
 import { isEmpty, uniq } from 'lodash';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { PreviewDocsFilterOption } from './simulation_documents_search';
 import { DetectedField, Simulation } from './types';
 import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';

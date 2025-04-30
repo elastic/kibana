@@ -13,13 +13,16 @@ import {
   EuiSpacer,
   EuiProgress,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import useAsync from 'react-use/lib/useAsync';
+import { useKibana } from '../../../hooks/use_kibana';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -40,9 +43,9 @@ export const ProcessorOutcomePreview = () => {
   return (
     <>
       <div>
-        <StreamsAppSearchBar showDatePicker showFilterBar showQueryInput showQueryMenu />
+        <PreviedDocumentsSearchBar />
         <EuiSpacer size="s" />
-        <PreviewDocumentGroupBy />
+        <PreviewDocumentsGroupBy />
       </div>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
@@ -50,6 +53,46 @@ export const ProcessorOutcomePreview = () => {
     </>
   );
 };
+
+const PreviedDocumentsSearchBar = () => {
+  const {
+    dependencies: {
+      start: { data },
+    },
+  } = useKibana();
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const search = useSimulatorSelector((state) => state.context.search);
+  const { changeSearchParams } = useStreamEnrichmentEvents();
+
+  const { value: streamDataView } = useAsync(() =>
+    data.dataViews.create({
+      title: definition.stream.name,
+      timeFieldName: '@timestamp',
+    })
+  );
+
+  return (
+    streamDataView && (
+      <StreamsAppSearchBar
+        showDatePicker
+        showFilterBar
+        showQueryInput
+        filters={search.filters}
+        query={search.query}
+        isRefreshPaused={search.refreshInterval.pause}
+        refreshInterval={search.refreshInterval.value}
+        onFiltersUpdated={(filters) => changeSearchParams({ filters })}
+        onQuerySubmit={({ query, dateRange }) => changeSearchParams({ query, time: dateRange })}
+        onRefresh={() => changeSearchParams({})}
+        onRefreshChange={({ isPaused, refreshInterval }) => {
+          changeSearchParams({ refreshInterval: { pause: isPaused, value: refreshInterval } });
+        }}
+        indexPatterns={[streamDataView]}
+      />
+    )
+  );
+};
+
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'percent',
   maximumFractionDigits: 0,
@@ -58,7 +101,7 @@ const formatter = new Intl.NumberFormat('en-US', {
 const formatRateToPercentage = (rate?: number) =>
   (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
 
-const PreviewDocumentGroupBy = () => {
+const PreviewDocumentsGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);

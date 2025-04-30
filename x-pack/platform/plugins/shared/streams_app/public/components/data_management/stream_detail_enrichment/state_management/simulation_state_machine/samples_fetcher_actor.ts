@@ -13,12 +13,11 @@ import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
 import { Observable, filter, map } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { getFormattedError } from '../../../../../util/errors';
-import { SimulationMachineDeps } from './types';
+import { SimulationMachineDeps, SimulationSearchParams } from './types';
 
 export interface SamplesFetchInput {
   condition?: Condition;
-  filters: Filter[];
-  query: Query;
+  search: SimulationSearchParams;
   streamName: string;
 }
 
@@ -30,7 +29,7 @@ export function createSamplesFetchActor({
     const abortController = new AbortController();
     // const { asAbsoluteTimeRange } = timeState$.getValue();
 
-    const { query, filters, time } = data.query.getState();
+    const { query, filters, time } = input.search;
 
     return new Observable((observer) => {
       const subscription = data.search
@@ -40,7 +39,7 @@ export function createSamplesFetchActor({
               condition: input.condition,
               filters,
               index: input.streamName,
-              query: query as Query,
+              query,
               timeRange: time,
             }),
           },

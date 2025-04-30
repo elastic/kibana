@@ -8,7 +8,6 @@ import {
   ActorRefFrom,
   MachineImplementationsFrom,
   SnapshotFrom,
-  and,
   assign,
   fromEventObservable,
   setup,
@@ -32,8 +31,9 @@ import {
   SimulationEvent,
   Simulation,
   SimulationMachineDeps,
+  SimulationSearchParams,
 } from './types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { PreviewDocsFilterOption, defaultSearch } from './simulation_documents_search';
 import {
   createSamplesFetchActor,
   createSamplesFetchFailureNofitier,
@@ -87,6 +87,13 @@ export const simulationMachine = setup({
     storeSamples: assign((_, params: { samples: SampleDocument[] }) => ({
       samples: params.samples,
     })),
+    storeSearchParams: assign(
+      ({ context }, params: { search: Partial<SimulationSearchParams> }) => {
+        return {
+          search: { ...context.search, ...params.search },
+        };
+      }
+    ),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
     })),
@@ -134,13 +141,14 @@ export const simulationMachine = setup({
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBFlHSXplFXVDPRl1ZVlNUwsES2VJR3oRw0dDeXUXR04ZX390MODSUKCI+hTYMDxy0WqUYLrEKdcx9T15ecNJPVlO6X6rQ3V6SddDdzd5K-llRyLEDrcIkUhMJJ5OCwQhJWD0ABU+0qh2OlXqkhmikc8kkhmU6hm+n08meg3xzU4-3aUy0kmmyiBINWEKhsBhSWitCiYCwyP4giOtXRpxGynoBhmhkMsipLlJ5isb2U13u8mk6qmRl0TOWGzBrJ57Nh0TidA4PAOgrRoHqhL07w6elpBL0GjJlkcDoBvWkcr0k0ahl1gVBZEN0JNEF5uwtFQFNREIoQ0oU9GmOlusr9KrJNkULlkmLdk2l6g0IZWEXBkKNHPo0awsfYknjVWtwttpzmdnkuNubk6KscZL7dkL8g+-3V0hllf1kRQxCFOCwKAAXkuoKR+e3E8QTggRo43r9NGOs6m87J6L0epxnZcFPIOvOw-Qlyu15u6DvW1b90PMVmnUdwvC8GxnSuMkXCUSCvE6B4mimN9ggbMAACNCAwYgoi3ABhM0YFgGs2XrWJ4jjAChSTLsEF+aQJXuTgNT0J9Og9HF7FVV4Az9RwCVkVDNmjLCcLwuhCMokixFgPBKHoHAADNSgAClE7DcLAAAVdAwAASjWPV3w08SCKIuBd1RTtxCkWwQJfRxpFAjwNUmPNOBvGQix0dUNHuV5hJIdCxNw8zpNIWT5LYRSVLAJJ1MwzSeV0tADKM0M0NMsLJIs2AWzbazaNso8WJvbR-leTRhlkExFRTXp7G0bQOmkcZXCEvxgWMtCsEIHAIC3ABlHA0CYJsSIgEgwA-YhUkIABrGbYFG8a4AKXZYnigBBKI8FhKyO2KjEVE4JrGnmRwvSuiYPLsVRJ1eB9XAEq4gsiPqBuG1aJtIeLIU5cb8CU2E0HoFaxomja8C2pJdv2spLRRI6D2TQx5jeSQeh6X4XxkBUBhse6qUmctB1e+R3sU9l4oIOghp6iIqDAABHDAUBSNLiDwEjDsA5N6SaehbhYr08SlOqBiLM7CU8kYri+Nr1CpnAaaSOmoAZzKmdZ9nObAbnef-ZH+bowWzvslVZVuFVMRgnRhZmOR3AZS6qaSHDl3pxmwSm4gZqXealvBn3iCoT2dr2g6kYTGjUbouQb1UVQ5g8IwVFkUdJiUUDdCcAE3Wmd3PeG0O-qSAH6CBvAQaSMHmSZiO4ajxHCpRw9nbGDx5kHbQvT0MkCUYrHrnkHR3C0QEgWIQho3gSoG+Kor45KvsHT0ZjWPYyROJPFpqSxhRug1Tgp6WbXgs-AhVw3LdqJtEqxRvOZBJUMeRnUAmlRvNr+-+XRMTlmkFTFAEAmz3xsvUQs9BP7qjxP8DeFIyQakUAhF2fxdAbyptlCSUApLmnnrHB+doRhKF6P8ekWhuh23qpILG6YaqT0QqfZ0VNPqDXpj9OAEDjpSF6M0CYk41StC9EYD01wmq2FlAGB4rw+yUy6ovSIqsdjq1LhfMOusOZgC5jzHhK8MQPAdNoDebhpTox6E8eqXxRi3BGM5U+E8R7F2IF7TWod9FAVsGdAk-9nSunlIPboYw5jZjmE5ekytfDeCAA */
   id: 'simulation',
-  context: ({ input, self, spawn }) => ({
+  context: ({ input }) => ({
     detectedSchemaFields: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     processors: input.processors,
     samples: [],
     samplingCondition: composeSamplingCondition(input.processors),
+    search: input.search ?? defaultSearch,
     streamName: input.streamName,
   }),
   initial: 'loadingSamples',
@@ -152,6 +160,10 @@ export const simulationMachine = setup({
     'dateRange.update': '.loadingSamples',
     'simulation.changePreviewDocsFilter': {
       actions: [{ type: 'storePreviewDocsFilter', params: ({ event }) => event }],
+    },
+    'simulation.changeSearchParams': {
+      target: '.loadingSamples',
+      actions: [{ type: 'storeSearchParams', params: ({ event }) => event }],
     },
     'simulation.reset': {
       target: '.idle',
@@ -226,11 +238,7 @@ export const simulationMachine = setup({
         src: 'fetchSamples',
         input: ({ context }) => ({
           condition: context.samplingCondition,
-          filters: [],
-          query: {
-            query: '',
-            language: 'kuery',
-          },
+          search: context.search,
           streamName: context.streamName,
         }),
         onSnapshot: [

@@ -6,6 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SimulationSearchParams } from './types';
+
+export const defaultSearch: SimulationSearchParams = {
+  filters: [],
+  query: {
+    query: '',
+    language: 'kuery',
+  },
+  refreshInterval: {
+    pause: true,
+    value: 60000,
+  },
+  time: {
+    from: 'now-15m',
+    to: 'now',
+  },
+};
 
 export const previewDocsFilterOptions = {
   outcome_filter_all: {
