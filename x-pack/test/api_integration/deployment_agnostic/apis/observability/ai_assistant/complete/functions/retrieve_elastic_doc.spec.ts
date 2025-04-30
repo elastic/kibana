@@ -16,17 +16,11 @@ import {
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  installProductDoc,
-  uninstallProductDoc,
-  createProductDoc,
-} from '../../utils/product_doc_base';
-import { mockKibanaProductDoc } from '../product_docs/products';
+import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-  const kibanaServer = getService('kibanaServer');
 
   describe('retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
@@ -95,9 +89,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
       before(async () => {
-        const kibanaVersion = await kibanaServer.version.get();
-        await createProductDoc(kibanaVersion);
-
         llmProxy = await createLlmProxy(log);
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
@@ -186,9 +177,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const document = parsedContent.documents[0];
           expect(document).to.not.be(undefined);
           expect(document).to.eql({
-            title: mockKibanaProductDoc.content_title,
-            url: mockKibanaProductDoc.url,
-            content: mockKibanaProductDoc.content_body?.text,
+            title: 'Lens',
+            url: 'https://www.elastic.co/docs/explore-analyze/visualize/lens',
+            content:
+              '## Lens\nTo create a visualization, drag the data fields you want to visualize to the workspace, then Lens uses visualization best practices to apply the fields and create a visualization that best displays the data.\n\nWith Lens, you can:\n\n- Create area, line, and bar charts with layers to display multiple indices and chart types.\n- Change the aggregation function to change the data in the visualization.\n- Create custom tables.\n- Perform math on aggregations using Formula.\n- Use time shifts to compare the data in two time intervals, such as month over month.\n- Add annotations and reference lines.',
             summarized: false,
           });
         });
