@@ -8,9 +8,8 @@
  */
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import type { ESQLControlState } from '@kbn/esql/public';
 
 export function initializeESQLControlSelections(initialState: ESQLControlState) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
