@@ -16,6 +16,9 @@ jest.mock('../app_context', () => ({
     getLogger: jest.fn().mockReturnValue({
       error: jest.fn(),
     }),
+    getConfig: jest.fn().mockReturnValue({
+      enableManagedLogsAndMetricsDataviews: true,
+    }),
   },
 }));
 

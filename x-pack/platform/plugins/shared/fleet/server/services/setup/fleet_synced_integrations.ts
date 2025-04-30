@@ -138,6 +138,10 @@ export async function createCCSIndexPatterns(
     return;
   }
 
+  if (appContextService.getConfig()?.enableManagedLogsAndMetricsDataviews !== true) {
+    return;
+  }
+
   const remoteInfo = await esClient.cluster.remoteInfo();
   const remoteClusterNames = Object.keys(remoteInfo);
 
