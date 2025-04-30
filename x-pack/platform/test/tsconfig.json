@@ -52,5 +52,16 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/aiops-test-utils",
     "@kbn/ml-agg-utils",
+    "@kbn/share-plugin",
+    "@kbn/tooling-log",
+    "@kbn/cross-cluster-replication-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/snapshot-restore-plugin",
+    "@kbn/monitoring-plugin",
+    "@kbn/automatic-import-plugin",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/utils",
+    "@kbn/repo-info",
+    "@kbn/core",
   ]
 }
