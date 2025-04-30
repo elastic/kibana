@@ -113,7 +113,8 @@ interface FieldDescriptor {
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
 
-export const mapProcessorTypeToDescriptor: ( docLinks: CoreStart['docLinks']
+export const mapProcessorTypeToDescriptor: (
+  docLinks: CoreStart['docLinks']
 ) => MapProcessorTypeToDescriptor = (docLinks: CoreStart['docLinks']) => ({
   append: {
     category: processorCategories.DATA_ENRICHMENT,
