@@ -91,7 +91,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
 
   const { mutate: resetSlo } = useResetSlo();
   const { mutate: enableSlo } = useEnableSlo();
-  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: disableSlo } = useDisableSlo();
   const { mutate: deleteSloInstance } = useDeleteSloInstance();
   const { mutate: deleteSlo } = useDeleteSlo();
 
@@ -577,7 +577,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           slo={sloToDisable}
           onCancel={handleDisableCancel}
           onConfirm={handleDisableConfirm}
-          isLoading={isDisableLoading}
         />
       ) : null}
     </>

@@ -14,10 +14,9 @@ export interface Props {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
   onConfirm: () => void;
-  isLoading?: boolean;
 }
 
-export function SloDisableConfirmationModal({ slo, onCancel, onConfirm, isLoading }: Props) {
+export function SloDisableConfirmationModal({ slo, onCancel, onConfirm }: Props) {
   const { name } = slo;
   return (
     <EuiConfirmModal
@@ -35,7 +34,6 @@ export function SloDisableConfirmationModal({ slo, onCancel, onConfirm, isLoadin
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      isLoading={isLoading}
     >
       {i18n.translate('xpack.slo.disableConfirmationModal.descriptionText', {
         defaultMessage: 'Disabling this SLO will stop generating data until it is enabled again.',

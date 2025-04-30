@@ -58,7 +58,7 @@ export function SloListItem({
 
   const { mutate: resetSlo } = useResetSlo();
   const { mutate: enableSlo } = useEnableSlo();
-  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+  const { mutate: disableSlo } = useDisableSlo();
   const { mutate: deleteSloInstance } = useDeleteSloInstance();
   const { mutate: deleteSlo } = useDeleteSlo();
 
@@ -204,7 +204,6 @@ export function SloListItem({
           slo={slo}
           onCancel={handleDisableCancel}
           onConfirm={handleDisableConfirm}
-          isLoading={isDisableLoading}
         />
       ) : null}
     </EuiPanel>
