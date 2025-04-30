@@ -158,14 +158,14 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
       } catch (error) {
         let value;
-        const { response, body } = error as IHttpFetchError;
+        const { response, body: errorBody } = error as IHttpFetchError;
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
-        if (statusCode === 200 && !body) {
+        if (statusCode === 200 && !errorBody) {
           value = 'OK';
-        } else if (body) {
-          value = JSON.stringify(body, null, 2);
+        } else if (errorBody) {
+          value = JSON.stringify(errorBody, null, 2);
         } else {
           value = 'Request failed to get to the server (status code: ' + statusCode + ')';
         }
