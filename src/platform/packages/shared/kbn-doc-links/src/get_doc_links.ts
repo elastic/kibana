@@ -514,7 +514,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${KIBANA_SERVERLESS_APIS}group/endpoint-saved-objects`
         : `${KIBANA_APIS}group/endpoint-saved-objects`,
       apiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
-
     },
     ml: {
       guide: `${ELASTIC_DOCS}explore-analyze/machine-learning`,
@@ -968,7 +967,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       repeatedTimeoutRequests: `${ELASTIC_DOCS}troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail`,
       routingAllocationDisabled: `${ELASTIC_DOCS}troubleshoot/kibana/migration-failures#routing-allocation-disabled`,
       clusterShardLimitExceeded: `${ELASTIC_DOCS}troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded`,
-
     },
     searchUI: {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
