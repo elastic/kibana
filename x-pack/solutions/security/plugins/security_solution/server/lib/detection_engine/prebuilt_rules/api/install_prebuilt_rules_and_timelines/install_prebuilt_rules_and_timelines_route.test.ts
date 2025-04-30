@@ -13,15 +13,15 @@ import {
   getBasicEmptySearchResponse,
 } from '../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../routes/__mocks__';
-import {
-  installPrebuiltRulesAndTimelinesRoute,
-  createPrepackagedRules,
-} from './install_prebuilt_rules_and_timelines_route';
+import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines_route';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
+
+// eslint-disable-next-line no-restricted-imports
+import { legacyCreatePrepackagedRules } from './legacy_create_prepackaged_rules';
 
 jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {
@@ -235,7 +235,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('createPrepackagedRules', () => {
     test('uses exception lists client from context when available', async () => {
-      await createPrepackagedRules(
+      await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
         mockExceptionsClient
@@ -248,7 +248,7 @@ describe('add_prepackaged_rules_route', () => {
     test('uses passed in exceptions list client when lists client not available in context', async () => {
       context.securitySolution.getExceptionListClient.mockImplementation(() => null);
 
-      await createPrepackagedRules(
+      await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
         mockExceptionsClient
