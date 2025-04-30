@@ -30,7 +30,7 @@ type LocationStatus = Array<{
   status: string;
   locationId: string;
   timestamp: string;
-  monitorUrl: string;
+  monitorUrl?: string;
 }>;
 
 export const SUMMARIES_PAGE_SIZE = 5000;
@@ -212,12 +212,18 @@ export class OverviewStatusService {
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
-          const monitorUrl = String(statusAgg.top?.[0].metrics?.['url.full.keyword']);
+          const monitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
+
           const timestamp = String(statusAgg.top[0].sort[0]);
           if (!monitorByIds.has(String(monitorId))) {
             monitorByIds.set(monitorId, []);
           }
-          monitorByIds.get(monitorId)?.push({ status, locationId, timestamp, monitorUrl });
+          monitorByIds.get(monitorId)?.push({
+            status,
+            locationId,
+            timestamp,
+            monitorUrl: monitorUrl ? String(monitorUrl) : undefined,
+          });
         });
       } while (hasMoreData && afterKey);
       return monitorByIds;
