@@ -37,7 +37,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
+import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
@@ -52,7 +52,6 @@ import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import { VisualizeApi, VisualizeOutputState, VisualizeSerializedState } from './types';
 import { initializeEditApi } from './initialize_edit_api';
-import { VisParams } from '../types';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
@@ -159,7 +158,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       linkedToLibraryArg: boolean
     ) => {
       return serializeState({
-        serializedVis: vis$.getValue().serialize(),
+        serializedVis: serializedVis$.value,
         titles: titleManager.getLatestState(),
         id: savedObjectId,
         linkedToLibrary: linkedToLibraryArg,
@@ -194,21 +193,25 @@ export const getVisualizeEmbeddableFactory: (deps: {
           savedVis: linkedToLibrary
             ? 'skip'
             : (a, b) => {
-                function cleanSavedVis(savedVis?: SerializedVis<VisParams>) {
-                  return savedVis
-                    ? {
-                        ...omitBy(savedVis, isEmpty),
-                        data: {
-                          ...omitBy(savedVis.data, isNil),
-                          searchSource: {
-                            ...omitBy(savedVis.data.searchSource, isNil),
-                          },
-                        },
-                        params: omitBy(savedVis.params, isNil),
+                function deepOmitBy(value: any) {
+                  if (value && !Array.isArray(value) && typeof value === 'object') {
+                    const keys = Object.keys(value);
+                    if (!keys.length) return;
+
+                    const cleanedValue: Record<string, unknown> = {};
+                    keys.forEach((key) => {
+                      const cleanedSubvalue = deepOmitBy(value[key]);
+                      if (cleanedSubvalue) {
+                        cleanedValue[key] = cleanedSubvalue;
                       }
-                    : {};
+                    });
+                    return cleanedValue;
+                  }
+
+                  return value;
                 }
-                return isEqual(cleanSavedVis(a), cleanSavedVis(b));
+
+                return isEqual(deepOmitBy(a), deepOmitBy(b));
               },
         };
       },
