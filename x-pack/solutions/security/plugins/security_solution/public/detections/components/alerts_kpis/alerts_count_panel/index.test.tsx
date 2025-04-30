@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
-import { mount } from 'enzyme';
+import { act, fireEvent, render } from '@testing-library/react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
 
@@ -60,6 +59,10 @@ const defaultProps = {
   extraActions: [{ id: 'resetGroupByFields' }] as Action[],
 };
 
+const MockedVisualizationEmbeddable = VisualizationEmbeddable as jest.MockedFunction<
+  typeof VisualizationEmbeddable
+>;
+
 describe('AlertsCountPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -76,15 +79,13 @@ describe('AlertsCountPanel', () => {
   });
 
   it('renders with the specified `alignHeader` alignment', () => {
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
-    ).toContain('flexEnd');
+    expect(getByTestId('headerSectionInnerFlexGroup').className).toContain('flexEnd');
   });
 
   it('renders the inspect button by default', () => {
@@ -121,12 +122,12 @@ it('it does NOT render the inspect button when a `chartOptionsContextMenu` is pr
 describe('toggleQuery', () => {
   it('toggles', async () => {
     await act(async () => {
-      const wrapper = mount(
+      const { getByTestId } = render(
         <TestProviders>
           <AlertsCountPanel {...defaultProps} />
         </TestProviders>
       );
-      wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
+      fireEvent.click(getByTestId('query-toggle-header'));
       expect(mockSetIsExpanded).toBeCalledWith(false);
     });
   });
@@ -160,33 +161,33 @@ describe('Visualization', () => {
   });
 
   it('should render with provided height', () => {
-    mount(
+    render(
       <TestProviders>
         <AlertsCountPanel {...defaultProps} />
       </TestProviders>
     );
-    expect((VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(218);
+    expect(MockedVisualizationEmbeddable.mock.calls[0][0].height).toEqual(218);
   });
 
   it('should render with extra actions', () => {
-    mount(
+    render(
       <TestProviders>
         <AlertsCountPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(
-      (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
-    ).toEqual('resetGroupByFields');
+    expect(MockedVisualizationEmbeddable.mock.calls[0][0].extraActions?.[0]?.id).toEqual(
+      'resetGroupByFields'
+    );
   });
 
   it('should render with extra options', () => {
-    mount(
+    render(
       <TestProviders>
         <AlertsCountPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(
-      (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions.breakdownField
-    ).toEqual(defaultProps.stackByField1);
+    expect(MockedVisualizationEmbeddable.mock.calls[0][0].extraOptions?.breakdownField).toEqual(
+      defaultProps.stackByField1
+    );
   });
 });
