@@ -51,7 +51,7 @@ export interface VegaVisualizationDependencies {
 /** @internal */
 export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
 }
@@ -95,7 +95,7 @@ export class VegaPlugin implements Plugin<void, void> {
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
     expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
 
-    visualizations.createBaseVisualization(vegaVisType);
+    visualizations?.createBaseVisualization(vegaVisType);
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {

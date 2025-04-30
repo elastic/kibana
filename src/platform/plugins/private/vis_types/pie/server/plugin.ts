@@ -23,7 +23,7 @@ export class VisTypePieServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = this.initializerContext.config.get<PieConfig>();
     if (readOnly) {
-      plugins.visualizations.registerReadOnlyVisType('pie');
+      plugins.visualizations?.registerReadOnlyVisType('pie');
     }
 
     return {};

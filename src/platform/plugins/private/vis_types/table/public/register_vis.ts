@@ -21,7 +21,7 @@ export const registerTableVis = async (
   const [coreStart, { usageCollection }] = await core.getStartServices();
   expressions.registerFunction(createTableVisFn);
   expressions.registerRenderer(getTableVisRenderer(coreStart, usageCollection));
-  visualizations.createBaseVisualization({
+  visualizations?.createBaseVisualization({
     ...tableVisTypeDefinition,
     disableCreate: readOnly,
     disableEdit: readOnly,

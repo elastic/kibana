@@ -23,7 +23,7 @@ export interface VisTypeXyPluginStart {}
 
 /** @internal */
 export interface VisTypeXyPluginSetupDependencies {
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   charts: ChartsPluginSetup;
 }
 
@@ -54,7 +54,7 @@ export class VisTypeXyPlugin
 
     const { readOnly } = this.initializerContext.config.get<XyPublicConfig>();
     visTypesDefinitions.forEach((visTypeDefinition) =>
-      visualizations.createBaseVisualization({
+      visualizations?.createBaseVisualization({
         ...visTypeDefinition,
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),

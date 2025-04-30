@@ -17,7 +17,7 @@ import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   charts: ChartsPluginSetup;
 }
 
@@ -46,7 +46,7 @@ export class TagCloudPlugin
     };
 
     const { readOnly } = this.initializerContext.config.get<TagcloudPublicConfig>();
-    visualizations.createBaseVisualization({
+    visualizations?.createBaseVisualization({
       ...getTagCloudVisTypeDefinition(visualizationDependencies),
       disableCreate: Boolean(readOnly),
       disableEdit: Boolean(readOnly),

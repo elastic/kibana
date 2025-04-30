@@ -20,7 +20,7 @@ import { registerTableVis } from './register_vis';
 /** @internal */
 export interface TablePluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
 }
 
 /** @internal */

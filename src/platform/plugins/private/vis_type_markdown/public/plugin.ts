@@ -21,7 +21,7 @@ import { getMarkdownVisRenderer } from './markdown_renderer';
 
 interface MarkdownSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
 }
 
 export interface MarkdownStartDependencies {
@@ -39,7 +39,7 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup, { expressions, visualizations }: MarkdownSetupDependencies) {
-    visualizations.createBaseVisualization(markdownVisType);
+    visualizations?.createBaseVisualization(markdownVisType);
     expressions.registerRenderer(getMarkdownVisRenderer({ getStartDeps: core.getStartServices }));
     expressions.registerFunction(createMarkdownVisFn);
   }

@@ -34,7 +34,7 @@ import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   contentManagement: ContentManagementPublicSetup;
 }
 
@@ -81,7 +81,7 @@ export class LinksPlugin
         return getLinksEmbeddableFactory();
       });
 
-      plugins.visualizations.registerAlias({
+      plugins.visualizations?.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
         name: CONTENT_ID,
         title: APP_NAME,

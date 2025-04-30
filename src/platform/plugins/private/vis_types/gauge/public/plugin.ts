@@ -19,7 +19,7 @@ import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypeGaugeSetupDependencies {
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
 }
 
 /** @internal */
@@ -42,12 +42,12 @@ export class VisTypeGaugePlugin {
     if (!core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       const { readOnly } = this.initializerContext.config.get<GaugePublicConfig>();
       const visTypeProps = { showElasticChartsOptions: true };
-      visualizations.createBaseVisualization({
+      visualizations?.createBaseVisualization({
         ...gaugeVisType(visTypeProps),
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
       });
-      visualizations.createBaseVisualization({
+      visualizations?.createBaseVisualization({
         ...goalVisType(visTypeProps),
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),

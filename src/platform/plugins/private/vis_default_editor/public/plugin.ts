@@ -14,7 +14,7 @@ import { DefaultEditorController } from './default_editor_controller';
 import { setAnalytics, setCoreStart, setTheme } from './services';
 
 export interface VisDefaultEditorSetupDependencies {
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
 }
 
 export class VisDefaultEditorPlugin
@@ -24,7 +24,7 @@ export class VisDefaultEditorPlugin
     setAnalytics(core.analytics);
     setTheme(core.theme);
     if (visualizations) {
-      visualizations.visEditorsRegistry.registerDefault(DefaultEditorController);
+      visualizations?.visEditorsRegistry.registerDefault(DefaultEditorController);
     }
   }
 

@@ -41,7 +41,7 @@ export interface InputControlVisDependencies {
 /** @internal */
 export interface InputControlVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   data: DataPublicPluginSetup;
   unifiedSearch: UnifiedSearchPluginSetup;
 }
@@ -49,7 +49,7 @@ export interface InputControlVisPluginSetupDependencies {
 /** @internal */
 export interface InputControlVisPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
-  visualizations: VisualizationsStart;
+  visualizations?: VisualizationsStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
@@ -76,7 +76,7 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     expressions.registerFunction(createInputControlVisFn);
     expressions.registerRenderer(getInputControlVisRenderer(visualizationDependencies));
     const { readOnly } = this.initializerContext.config.get<InputControlPublicConfig>();
-    visualizations.createBaseVisualization(
+    visualizations?.createBaseVisualization(
       createInputControlVisTypeDefinition(visualizationDependencies, Boolean(readOnly))
     );
   }

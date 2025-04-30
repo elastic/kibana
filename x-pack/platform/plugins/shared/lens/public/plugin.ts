@@ -156,7 +156,7 @@ export interface LensPluginSetupDependencies {
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   embeddable?: EmbeddableSetup;
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -445,7 +445,7 @@ export class LensPlugin {
       );
     }
 
-    visualizations.registerAlias(lensVisTypeAlias);
+    visualizations?.registerAlias(lensVisTypeAlias);
 
     uiActionsEnhanced.registerDrilldown(
       new OpenInDiscoverDrilldown({

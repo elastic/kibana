@@ -26,7 +26,7 @@ export const plugin = (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = initializerContext.config.get<TagcloudConfig>();
     if (readOnly) {
-      plugins.visualizations.registerReadOnlyVisType('tagcloud');
+      plugins.visualizations?.registerReadOnlyVisType('tagcloud');
     }
 
     return {};

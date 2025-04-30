@@ -27,7 +27,7 @@ export const plugin = (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = initializerContext.config.get<TableConfig>();
     if (readOnly) {
-      plugins.visualizations.registerReadOnlyVisType(VIS_TYPE_TABLE);
+      plugins.visualizations?.registerReadOnlyVisType(VIS_TYPE_TABLE);
     }
 
     return {};

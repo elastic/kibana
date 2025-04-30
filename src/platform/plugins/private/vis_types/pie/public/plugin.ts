@@ -25,7 +25,7 @@ import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypePieSetupDependencies {
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   charts: ChartsPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
@@ -63,7 +63,7 @@ export class VisTypePiePlugin {
     { visualizations, charts, usageCollection }: VisTypePieSetupDependencies
   ) {
     const { readOnly } = this.initializerContext.config.get<PiePublicConfig>();
-    visualizations.createBaseVisualization({
+    visualizations?.createBaseVisualization({
       ...pieVisType({
         showElasticChartsOptions: true,
         palettes: charts.palettes,

@@ -27,7 +27,7 @@ export const plugin = async (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = initializerContext.config.get<MetricConfig>();
     if (readOnly) {
-      plugins.visualizations.registerReadOnlyVisType('metric');
+      plugins.visualizations?.registerReadOnlyVisType('metric');
     }
 
     return {};

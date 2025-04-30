@@ -34,7 +34,7 @@ import { goalVisTypeDefinition } from './goal';
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations: VisualizationsSetup;
+  visualizations?: VisualizationsSetup;
   charts: ChartsPluginSetup;
 }
 
@@ -65,7 +65,7 @@ export class VisTypeVislibPlugin
 
     if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       // register vislib heatmap chart
-      visualizations.createBaseVisualization({
+      visualizations?.createBaseVisualization({
         ...heatmapVisTypeDefinition,
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
@@ -74,12 +74,12 @@ export class VisTypeVislibPlugin
 
     if (core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       // register vislib gauge and goal charts
-      visualizations.createBaseVisualization({
+      visualizations?.createBaseVisualization({
         ...gaugeVisTypeDefinition,
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
       });
-      visualizations.createBaseVisualization({
+      visualizations?.createBaseVisualization({
         ...goalVisTypeDefinition,
         disableCreate: Boolean(readOnly),
         disableEdit: Boolean(readOnly),
