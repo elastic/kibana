@@ -7,3 +7,4 @@
 
 require('../../src/setup_node_env');
 require('../dev-tools/api_debug').apiDebug();
+require('../dev-tools/api_debug').apiDebug();
