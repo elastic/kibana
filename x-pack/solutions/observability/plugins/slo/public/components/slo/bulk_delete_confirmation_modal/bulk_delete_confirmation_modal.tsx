@@ -31,9 +31,12 @@ export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: P
       cancelButtonText={i18n.translate('xpack.slo.bulkDeleteConfirmationModal.cancelButtonLabel', {
         defaultMessage: 'Cancel',
       })}
-      confirmButtonText={i18n.translate('xpack.slo.bulkDeleteConfirmationModal.enableButtonLabel', {
-        defaultMessage: 'Delete',
-      })}
+      confirmButtonText={i18n.translate(
+        'xpack.slo.bulkDeleteConfirmationModal.confirmButtonLabel',
+        {
+          defaultMessage: 'Delete',
+        }
+      )}
       onCancel={onCancel}
       onConfirm={() => {
         bulkDelete({ items: items.map((item) => ({ id: item.id, name: item.name })) });
