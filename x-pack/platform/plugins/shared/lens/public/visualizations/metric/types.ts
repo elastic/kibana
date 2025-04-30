@@ -8,7 +8,6 @@
 import type { LayoutDirection, MetricStyle } from '@elastic/charts';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
-import type { EuiColorPalettePickerPaletteProps, EuiThemeShape } from '@elastic/eui';
 import type { LayerType } from '../../../common/types';
 
 export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
