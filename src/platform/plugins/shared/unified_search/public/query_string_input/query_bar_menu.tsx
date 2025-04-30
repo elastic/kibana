@@ -159,6 +159,7 @@ function QueryBarMenuComponent({
         display="empty"
         onClick={onButtonClick}
         isDisabled={isDisabled}
+        color="text"
         {...buttonProps}
         css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         iconType="filter"

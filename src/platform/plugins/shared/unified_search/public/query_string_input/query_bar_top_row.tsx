@@ -658,7 +658,10 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
-              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
+              buttonProps={{
+                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
+                display: 'empty',
+              }}
               isDisabled={props.isDisabled}
               suggestionsAbstraction={props.suggestionsAbstraction}
             />

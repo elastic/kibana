@@ -87,6 +87,7 @@ export function QueryHistoryAction({
           <EuiButtonEmpty
             size="xs"
             color="primary"
+            flush="both"
             onClick={toggleHistory}
             css={css`
               padding-inline: 0;

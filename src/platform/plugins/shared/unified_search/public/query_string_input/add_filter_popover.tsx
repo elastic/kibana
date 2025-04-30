@@ -74,6 +74,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         onClick={() => setShowAddFilterPopover((isOpen) => !isOpen)}
         size="m"
         disabled={isDisabled}
+        color="text"
         {...buttonProps}
         css={[buttonProps?.css, customButtonStyles]}
       />

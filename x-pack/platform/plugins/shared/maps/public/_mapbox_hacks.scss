@@ -31,7 +31,7 @@
     transition: background $euiAnimSpeedNormal ease-in-out;
 
     &:hover {
-      background-color: transparentize($euiColorDarkShade, .9);
+      background-color: lightOrDarkTheme($euiColorPrimary100Alpha8, $euiColorPlainLightAlpha12);
     }
   }
 
