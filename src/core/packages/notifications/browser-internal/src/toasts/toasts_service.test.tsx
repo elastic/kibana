@@ -39,13 +39,6 @@ describe('#setup()', () => {
 });
 
 describe('#start()', () => {
-  // const coordinator = notificationCoordinator.bind(new Coordinator());
-
-  // const toastsTelemetry = new ToastsTelemetry();
-  // toastsTelemetry.setup({ analytics: mockAnalyticsSetup });
-
-  // const eventReporter = toastsTelemetry.start({ analytics: mockAnalytics });
-
   it('renders the GlobalToastList into the targetDomElement param', async () => {
     const targetDomElement = document.createElement('div');
     targetDomElement.setAttribute('test', 'target-dom-element');

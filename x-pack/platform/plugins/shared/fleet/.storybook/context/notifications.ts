@@ -26,12 +26,6 @@ const notifications: NotificationsStart = {
     remove: () => {},
     get$: () => of([]),
   },
-  intercepts: {
-    add: (params) => {
-      action('add Intercept')(params);
-      return params.id;
-    },
-  },
   showErrorDialog: () => {},
 };
 
