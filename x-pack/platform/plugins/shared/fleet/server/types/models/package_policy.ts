@@ -435,20 +435,24 @@ export const OrphanedPackagePoliciesResponseSchema = schema.object({
   total: schema.number(),
 });
 
-export const DryRunPackagePolicySchema = schema.object({
-  ...PackagePolicyBaseSchema,
-  id: schema.maybe(schema.string()),
-  force: schema.maybe(schema.boolean()),
-  errors: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        message: schema.string(),
-        key: schema.maybe(schema.string()),
-      })
-    )
-  ),
-  missingVars: schema.maybe(schema.arrayOf(schema.string())),
-});
+export const DryRunPackagePolicySchema = PackagePolicySchema.extends(
+  {
+    id: schema.maybe(schema.string()),
+    force: schema.maybe(schema.boolean()),
+    errors: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          message: schema.string(),
+          key: schema.maybe(schema.string()),
+        })
+      )
+    ),
+    missingVars: schema.maybe(schema.arrayOf(schema.string())),
+  },
+  {
+    unknowns: 'allow',
+  }
+);
 
 export const PackagePolicyStatusResponseSchema = schema.object({
   id: schema.string(),
