@@ -589,6 +589,16 @@
           }
         }
       },
+      "incremental_id": {
+        "properties": {
+          "numerical_id": {
+            "type": "integer"
+          },
+          "space_id": {
+            "type": "keyword"
+          }
+        }
+      },
       "observables": {
         "properties": {
           "typeKey": {
@@ -719,6 +729,20 @@
     "properties": {
       "owner": {
         "type": "keyword"
+      }
+    }
+  },
+  "cases-incrementing-id": {
+    "dynamic": false,
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "last_id": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },
