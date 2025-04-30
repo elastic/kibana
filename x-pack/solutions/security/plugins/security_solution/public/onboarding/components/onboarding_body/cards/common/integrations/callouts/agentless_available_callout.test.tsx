@@ -10,10 +10,10 @@ import React from 'react';
 import { TestProviders } from '../../../../../../../common/mock/test_providers';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { useKibana } from '../../../../../../../common/lib/kibana';
-import { mockReportLinkClick } from '../../../../../__mocks__/mocks';
+import { mockReportLinkClick } from '../../../../../../../common/lib/integrations/hooks/__mocks__/mocks';
 
 jest.mock('../../../../../../../common/lib/kibana');
-jest.mock('../../../../../onboarding_context');
+jest.mock('../../../../../../../common/lib/integrations/hooks/integration_context');
 
 describe('AgentlessAvailableCallout', () => {
   const mockUseKibana = useKibana as jest.Mock;
