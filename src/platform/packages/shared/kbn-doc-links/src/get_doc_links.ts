@@ -1029,8 +1029,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     synonyms: {
       synonymsAPIDocumentation: isServerless
-      ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-synonyms`
-      : `${ELASTICSEARCH_APIS}group/endpoint-synonyms`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-synonyms`
+        : `${ELASTICSEARCH_APIS}group/endpoint-synonyms`,
     },
     queryRules: {
       queryRulesAPIDocumentation: isServerless
