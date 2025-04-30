@@ -53,6 +53,11 @@ export const ConfigSchema = schema.oneOf([
       )
     ),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    __internal__: schema.maybe(
+      schema.object({
+        hasPKI: schema.boolean({ defaultValue: false }),
+      })
+    ),
   }),
 ]);
 
