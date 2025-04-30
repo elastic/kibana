@@ -53,6 +53,7 @@
     "@kbn/core-security-common",
     "@kbn/core-http-server-utils",
     "@kbn/core-saved-objects-server",
+    "@kbn/rrule",
   ],
   "exclude": [
     "target/**/*",
