@@ -39,15 +39,23 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'Synthetics Stats Overview',
   });
 
-interface OverviewState {
-  filters: MonitorFilters;
+const DEFAULT_FILTERS: MonitorFilters = {
+  projects: [],
+  tags: [],
+  locations: [],
+  monitorIds: [],
+  monitorTypes: [],
+};
+
+export interface OverviewStatsEmbeddableCustomState {
+  filters?: MonitorFilters;
 }
 
-export type OverviewEmbeddableState = SerializedTitles &
+export type OverviewStatsEmbeddableState = SerializedTitles &
   DynamicActionsSerializedState &
-  OverviewState;
+  OverviewStatsEmbeddableCustomState;
 
-export type StatsOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
+export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
   HasEditCapabilities &
@@ -63,14 +71,7 @@ type DynamicActionsData = {
 >;
 
 const defaultOverviewState: OverviewState = {
-  filters: {
-    projects: [],
-    tags: [],
-    monitorIds: [],
-    monitorTypes: [],
-    locations: [],
-  },
-};
+  filters: DEFAULT_FILTERS;
 
 const getDynamicActionsData = (
   extractor?: () => EmbeddableDynamicActionsManager
@@ -109,7 +110,7 @@ const getDynamicActionsData = (
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: EmbeddableFactory<OverviewEmbeddableState, StatsOverviewApi> = {
+  const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
@@ -188,11 +189,12 @@ export const getStatsOverviewEmbeddableFactory = (
               coreStart,
               pluginStart,
               initialState: {
-                filters: filters$.getValue(),
+                filters: filters$.getValue()|| DEFAULT_FILTERS,
               },
               title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
                 defaultMessage: 'Create monitor stats',
               }),
+              type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
             });
             filters$.next(result.filters);
           } catch (e) {
@@ -226,7 +228,7 @@ export const getStatsOverviewEmbeddableFactory = (
               }}
               data-shared-item="" // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
             >
-              <StatsOverviewComponent reload$={reload$} filters={filters} />
+              <StatsOverviewComponent reload$={reload$} filters={filters || DEFAULT_FILTERS} />
             </div>
           );
         },

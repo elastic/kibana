@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import type { ESQLControlState } from '@kbn/esql/public';
+import type { ESQLControlState } from '@kbn/esql-types';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
 

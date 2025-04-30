@@ -20,11 +20,15 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSelector } from 'react-redux';
+import { OverviewStatsEmbeddableCustomState } from '../../../../embeddables/stats_overview/stats_overview_embeddable_factory';
 import { ClientPluginsStart } from '../../../../../plugin';
 import {
   SYNTHETICS_MONITORS_EMBEDDABLE,
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from '../../../../embeddables/constants';
+import { selectOverviewState } from '../../../state';
+import { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -38,11 +42,18 @@ export const useAddToDashboard = ({
     defaultMessage: 'Status Overview',
   }),
 }: {
-  type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE | typeof SYNTHETICS_MONITORS_EMBEDDABLE;
-  embeddableInput?: Record<string, unknown>;
   objectType?: string;
   documentTitle?: string;
-}) => {
+} & (
+  | {
+      type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE;
+      embeddableInput?: OverviewStatsEmbeddableCustomState;
+    }
+  | {
+      type: typeof SYNTHETICS_MONITORS_EMBEDDABLE;
+      embeddableInput?: OverviewMonitorsEmbeddableCustomState;
+    }
+)) => {
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = React.useState(false);
 
   const { embeddable } = useKibana<ClientPluginsStart>().services;
@@ -90,9 +101,11 @@ export const AddToDashboard = ({
   type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE | typeof SYNTHETICS_MONITORS_EMBEDDABLE;
   asButton?: boolean;
 }) => {
-  const { setDashboardAttachmentReady, MaybeSavedObjectSaveModalDashboard } = useAddToDashboard({
-    type,
-  });
+  const { view } = useSelector(selectOverviewState);
+
+  const { setDashboardAttachmentReady, MaybeSavedObjectSaveModalDashboard } = useAddToDashboard(
+    type === SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE ? { type } : { type, embeddableInput: { view } }
+  );
 
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const closePopover = () => {
