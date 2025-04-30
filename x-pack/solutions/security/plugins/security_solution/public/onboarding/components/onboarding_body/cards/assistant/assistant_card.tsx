@@ -21,6 +21,7 @@ import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conve
 import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
+import * as i18n from './translations';
 import { ConnectorsMissingPrivilegesCallOut } from '../common/connectors/missing_privileges';
 import { useStoredAssistantConnectorId } from '../../../hooks/use_stored_state';
 import { useOnboardingContext } from '../../../onboarding_context';
@@ -29,7 +30,6 @@ import { ConnectorCards } from '../common/connectors/connector_cards';
 import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
 import type { AIConnector } from '../common/connectors/types';
-import * as i18n from './translations';
 import type { AssistantCardMetadata } from './types';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
