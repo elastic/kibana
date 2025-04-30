@@ -97,6 +97,24 @@ describe('RuleMigrationsDataMigrationClient', () => {
         id: response._id,
       });
     });
+
+    test('should retrurn undefined if the migration is not found', async () => {
+      const id = 'testId';
+      const response = {
+        _index: '.kibana-siem-rule-migrations',
+        found: false,
+      };
+
+      (
+        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
+      ).mockRejectedValueOnce({
+        message: JSON.stringify(response),
+      });
+
+      const result = await ruleMigrationsDataMigrationClient.get({ id });
+
+      expect(result).toBeUndefined();
+    });
     test('should throw an error if an error occurs', async () => {
       const id = 'testId';
       (

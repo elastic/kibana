@@ -10,6 +10,7 @@ import type { StoredSiemMigration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import type { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
 import type { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
+import { isStringValidJSON } from './utils';
 
 export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseClient {
   async create(): Promise<string> {
@@ -47,9 +48,11 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         return this.processHit(document);
       })
       .catch((error) => {
-        const message = JSON.parse(error.message);
-        if (Object.hasOwn(message, 'found') && message.found === false) {
-          return undefined;
+        if (isStringValidJSON(error.message)) {
+          const message = JSON.parse(error.message);
+          if (Object.hasOwn(message, 'found') && message.found === false) {
+            return undefined;
+          }
         }
         this.logger.error(`Error getting migration ${id}: ${error}`);
         throw error;

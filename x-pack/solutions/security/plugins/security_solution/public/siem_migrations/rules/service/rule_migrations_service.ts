@@ -150,9 +150,7 @@ export class SiemRulesMigrationsService {
 
     try {
       // create the migration
-      const response = await createRuleMigration({});
-
-      const migrationId = response.migration_id;
+      const { migration_id: migrationId } = await createRuleMigration({});
 
       await this.addRulesToMigration(migrationId, data);
 
