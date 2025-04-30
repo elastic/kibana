@@ -19,7 +19,7 @@ import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { pick } from 'lodash';
+import { pick, snakeCase } from 'lodash';
 
 interface Context {
   data?: AlertRuleFromVisUIActionData;
@@ -95,14 +95,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
 
         // Convert the function to a lowercase, snake_cased variable
         // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
-        const colName = `_${fieldName
-          .toLowerCase()
-          // Replace opening paren and spaces with underscores
-          .replace(/[\( ]/g, '_')}`
-          // Eliminate non-alphanumeric and non-underscore characters
-          .replace(/[^a-z0-9_]/g, '')
-          // If last escaped character is an underscore, remove it
-          .replace(/_$/, '');
+        const colName = `_${snakeCase(fieldName)}`;
         // Add this to the renameQuery as a side effect
         if (fieldName.includes('*')) {
           // Wildcards cannot be used in RENAME
