@@ -64,7 +64,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
       ) : attackDiscovery ? (
         <>
           <AttackDiscoveryPanel attackDiscovery={attackDiscovery} start={from} end={to} />
-          {additionalAttackDiscoveries.length && (
+          {additionalAttackDiscoveries.length ? (
             <EuiAccordion
               id={attackDiscoveryAccordionId}
               arrowDisplay="right"
@@ -74,7 +74,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
                 <AttackDiscoveryPanel key={i} attackDiscovery={ad} start={from} end={to} />
               ))}
             </EuiAccordion>
-          )}
+          ) : null}
         </>
       ) : (
         <EuiPanel
