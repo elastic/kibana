@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Monitoring', () => {
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./beats'));
