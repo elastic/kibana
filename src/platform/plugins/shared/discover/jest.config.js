@@ -16,7 +16,4 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/src/platform/plugins/shared/discover/{common,public,server}/**/*.{js,ts,tsx}',
   ],
-  globals: {
-    Uint8Array: Uint8Array,
-  },
 };
