@@ -20,12 +20,12 @@ export const AgentlessAvailableCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { docLinks } = useKibana().services;
   const {
-    telemetry: { trackLinkClick },
+    telemetry: { reportLinkClick },
   } = useOnboardingContext();
 
   const onClick = useCallback(() => {
-    trackLinkClick?.(TELEMETRY_AGENTLESS_LEARN_MORE);
-  }, [trackLinkClick]);
+    reportLinkClick?.(TELEMETRY_AGENTLESS_LEARN_MORE);
+  }, [reportLinkClick]);
 
   /* @ts-expect-error: add the blog link to `packages/kbn-doc-links/src/get_doc_links.ts` when it is ready and remove this exit condition*/
   if (!docLinks.links.fleet.agentlessBlog) {
