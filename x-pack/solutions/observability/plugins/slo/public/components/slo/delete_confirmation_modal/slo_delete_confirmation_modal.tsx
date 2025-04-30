@@ -23,24 +23,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE, SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-
-export type DeleteConfirmation =
-  | {
-      type: 'instance';
-      excludeRollup: boolean;
-    }
-  | {
-      type: 'all';
-    };
+import { useDeleteSlo } from '../../../hooks/use_delete_slo';
+import { useDeleteSloInstance } from '../../../hooks/use_delete_slo_instance';
 
 interface Props {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
-  onConfirm: (params: DeleteConfirmation) => void;
+  onConfirm: () => void;
 }
 
 export function SloDeleteConfirmationModal({ slo, onCancel, onConfirm }: Props) {
   const modalTitleId = useGeneratedHtmlId();
+  const { mutate: deleteSlo } = useDeleteSlo();
+  const { mutate: deleteSloInstance } = useDeleteSloInstance();
+
   const { name, groupBy } = slo;
   const instanceId =
     'instanceId' in slo && slo.instanceId !== ALL_VALUE ? slo.instanceId : undefined;
@@ -100,9 +96,13 @@ export function SloDeleteConfirmationModal({ slo, onCancel, onConfirm }: Props) 
             data-test-subj="observabilitySolutionSloDeleteModalConfirmButton"
             type="submit"
             color="danger"
-            onClick={() =>
-              onConfirm({ type: 'instance', excludeRollup: isDeleteRollupDataChecked === false })
-            }
+            onClick={() => {
+              deleteSloInstance({
+                slo: { id: slo.id, instanceId, name: slo.name },
+                excludeRollup: isDeleteRollupDataChecked === false,
+              });
+              onConfirm();
+            }}
             fill
           >
             <FormattedMessage
@@ -116,7 +116,10 @@ export function SloDeleteConfirmationModal({ slo, onCancel, onConfirm }: Props) 
           data-test-subj="observabilitySolutionSloDeleteModalConfirmButton"
           type="submit"
           color="danger"
-          onClick={() => onConfirm({ type: 'all' })}
+          onClick={() => {
+            deleteSlo({ id: slo.id, name: slo.name });
+            onConfirm();
+          }}
           fill
         >
           {hasGroupBy && instanceId ? (

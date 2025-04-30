@@ -9,6 +9,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { useEnableSlo } from '../../../hooks/use_enable_slo';
 
 export interface Props {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
@@ -17,14 +18,15 @@ export interface Props {
 }
 
 export function SloEnableConfirmationModal({ slo, onCancel, onConfirm }: Props) {
-  const { name } = slo;
+  const { mutate: enableSlo } = useEnableSlo();
+
   return (
     <EuiConfirmModal
       buttonColor="primary"
       data-test-subj="sloEnableConfirmationModal"
       title={i18n.translate('xpack.slo.enableConfirmationModal.title', {
         defaultMessage: 'Enable {name}?',
-        values: { name },
+        values: { name: slo.name },
       })}
       cancelButtonText={i18n.translate('xpack.slo.enableConfirmationModal.cancelButtonLabel', {
         defaultMessage: 'Cancel',
@@ -33,7 +35,10 @@ export function SloEnableConfirmationModal({ slo, onCancel, onConfirm }: Props) 
         defaultMessage: 'Enable',
       })}
       onCancel={onCancel}
-      onConfirm={onConfirm}
+      onConfirm={() => {
+        enableSlo({ id: slo.id, name: slo.name });
+        onConfirm();
+      }}
     >
       {i18n.translate('xpack.slo.enableConfirmationModal.descriptionText', {
         defaultMessage: 'Enabling this SLO will generate the missing data since it was disabled.',

@@ -9,15 +9,11 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { Action } from './slo_management_table_wrapper';
+import { useActionModal } from '../context/action_modal';
 
-export function SloManagementBulkActions({
-  items,
-  setAction,
-}: {
-  items: SLODefinitionResponse[];
-  setAction: (action: Action) => void;
-}) {
+export function SloManagementBulkActions({ items }: { items: SLODefinitionResponse[] }) {
+  const { setAction } = useActionModal();
+
   return (
     <EuiButtonEmpty
       data-test-subj="sloSloManagementTableBulkDeleteButton"

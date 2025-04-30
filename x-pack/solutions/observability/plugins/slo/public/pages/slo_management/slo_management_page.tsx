@@ -17,7 +17,8 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloOutdatedFilterCallout } from './components/slo_management_outdated_filter_callout';
-import { SloManagementTableWrapper } from './components/slo_management_table_wrapper';
+import { SloManagementTable } from './components/slo_management_table';
+import { ActionModalProvider } from './context/action_modal';
 import { BulkOperationProvider } from './context/bulk_operation';
 
 export function SloManagementPage() {
@@ -75,10 +76,12 @@ export function SloManagementPage() {
     >
       <HeaderMenu />
       <BulkOperationProvider>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <SloOutdatedFilterCallout />
-          <SloManagementTableWrapper />
-        </EuiFlexGroup>
+        <ActionModalProvider>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <SloOutdatedFilterCallout />
+            <SloManagementTable />
+          </EuiFlexGroup>
+        </ActionModalProvider>
       </BulkOperationProvider>
     </ObservabilityPageTemplate>
   );

@@ -29,13 +29,13 @@ import { paths } from '../../../../common/locators/paths';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
+import { useActionModal } from '../context/action_modal';
+import { useBulkOperation } from '../context/bulk_operation';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloManagementBulkActions } from './slo_management_bulk_actions';
 import { SloManagementSearchBar } from './slo_management_search_bar';
-import type { Action } from './slo_management_table_wrapper';
-import { useBulkOperation } from '../context/bulk_operation';
 
-export function SloManagementTable({ setAction }: { setAction: (action: Action) => void }) {
+export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
   const { search, page, perPage, tags, includeOutdatedOnly } = state;
   const {
@@ -44,6 +44,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
       application: { navigateToUrl },
     },
   } = useKibana();
+  const { setAction } = useActionModal();
 
   const { data: permissions } = usePermissions();
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
@@ -265,7 +266,7 @@ export function SloManagementTable({ setAction }: { setAction: (action: Action) 
           })}
         </EuiText>
       ) : (
-        <SloManagementBulkActions items={selectedItems} setAction={setAction} />
+        <SloManagementBulkActions items={selectedItems} />
       )}
 
       <EuiSpacer size="s" />

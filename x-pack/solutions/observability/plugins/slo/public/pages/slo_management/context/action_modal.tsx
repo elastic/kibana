@@ -5,56 +5,64 @@
  * 2.0.
  */
 
-import { SLODefinitionResponse } from '@kbn/slo-schema';
-import React, { useState } from 'react';
+import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { ReactNode, createContext, useContext, useState } from 'react';
 import { SloBulkDeleteConfirmationModal } from '../../../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
-import { useDeleteSlo } from '../../../hooks/use_delete_slo';
-import { useDisableSlo } from '../../../hooks/use_disable_slo';
-import { useEnableSlo } from '../../../hooks/use_enable_slo';
-import { useResetSlo } from '../../../hooks/use_reset_slo';
-import { useBulkDeleteSlo } from '../hooks/use_bulk_delete_slo';
-import { SloManagementTable } from './slo_management_table';
 
 export type Action = SingleAction | BulkAction;
 
-interface SingleAction {
-  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable';
-  item: SLODefinitionResponse;
+interface BaseAction {
+  onConfirm?: () => void;
+  onCancel?: () => void;
 }
 
-interface BulkAction {
+interface SingleAction extends BaseAction {
+  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable';
+  item: SLODefinitionResponse | SLOWithSummaryResponse;
+}
+
+interface BulkAction extends BaseAction {
   type: 'bulk_delete';
   items: SLODefinitionResponse[];
 }
 
-export function SloManagementTableWrapper() {
+interface ActionModalContextValue {
+  setAction: (action: Action | undefined) => void;
+}
+
+const ActionModalContext = createContext<ActionModalContextValue | undefined>(undefined);
+
+export function ActionModalProvider({ children }: { children: ReactNode }) {
   const [action, setAction] = useState<Action>();
 
-  const { mutate: deleteSlo } = useDeleteSlo();
-  const { mutate: resetSlo } = useResetSlo();
-  const { mutate: enableSlo } = useEnableSlo();
-  const { mutate: disableSlo } = useDisableSlo();
-  const { mutate: bulkDelete } = useBulkDeleteSlo();
   const navigateToClone = useCloneSlo();
+
+  function handleOnCancel() {
+    setAction(undefined);
+    action?.onCancel?.();
+  }
+
+  function handleOnConfirm() {
+    setAction(undefined);
+    action?.onConfirm?.();
+  }
 
   function handleAction() {
     switch (action?.type) {
       case 'clone':
-        return navigateToClone(action.item);
+        navigateToClone(action.item);
+        return;
       case 'delete':
         return (
           <SloDeleteConfirmationModal
             slo={action.item}
-            onCancel={() => setAction(undefined)}
-            onConfirm={() => {
-              deleteSlo({ id: action.item.id, name: action.item.name });
-              setAction(undefined);
-            }}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
           />
         );
 
@@ -62,44 +70,32 @@ export function SloManagementTableWrapper() {
         return (
           <SloResetConfirmationModal
             slo={action.item}
-            onCancel={() => setAction(undefined)}
-            onConfirm={() => {
-              resetSlo({ id: action.item.id, name: action.item.name });
-              setAction(undefined);
-            }}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
           />
         );
       case 'enable':
         return (
           <SloEnableConfirmationModal
             slo={action.item}
-            onCancel={() => setAction(undefined)}
-            onConfirm={() => {
-              enableSlo({ id: action.item.id, name: action.item.name });
-              setAction(undefined);
-            }}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
           />
         );
       case 'disable':
         return (
           <SloDisableConfirmationModal
             slo={action.item}
-            onCancel={() => setAction(undefined)}
-            onConfirm={() => {
-              disableSlo({ id: action.item.id, name: action.item.name });
-              setAction(undefined);
-            }}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
           />
         );
       case 'bulk_delete':
         return (
           <SloBulkDeleteConfirmationModal
             items={action.items}
-            onCancel={() => setAction(undefined)}
-            onConfirm={() => {
-              bulkDelete({ items: action.items.map((item) => ({ id: item.id, name: item.name })) });
-              setAction(undefined);
-            }}
+            onCancel={handleOnCancel}
+            onConfirm={handleOnConfirm}
           />
         );
       default:
@@ -108,9 +104,17 @@ export function SloManagementTableWrapper() {
   }
 
   return (
-    <>
-      <SloManagementTable setAction={setAction} />
+    <ActionModalContext.Provider value={{ setAction }}>
+      {children}
       {handleAction()}
-    </>
+    </ActionModalContext.Provider>
   );
+}
+
+export function useActionModal() {
+  const context = useContext(ActionModalContext);
+  if (!context) {
+    throw new Error('useActionModal must be used within an ActionModalProvider');
+  }
+  return context;
 }

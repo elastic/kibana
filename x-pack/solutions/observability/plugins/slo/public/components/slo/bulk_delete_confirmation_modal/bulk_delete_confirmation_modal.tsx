@@ -9,6 +9,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { useBulkDeleteSlo } from '../../../pages/slo_management/hooks/use_bulk_delete_slo';
 
 export interface Props {
   onCancel: () => void;
@@ -17,6 +18,8 @@ export interface Props {
 }
 
 export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: Props) {
+  const { mutate: bulkDelete } = useBulkDeleteSlo();
+
   return (
     <EuiConfirmModal
       buttonColor="danger"
@@ -32,7 +35,10 @@ export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: P
         defaultMessage: 'Delete',
       })}
       onCancel={onCancel}
-      onConfirm={onConfirm}
+      onConfirm={() => {
+        bulkDelete({ items: items.map((item) => ({ id: item.id, name: item.name })) });
+        onConfirm();
+      }}
     >
       {i18n.translate('xpack.slo.bulkDeleteConfirmationModal.descriptionText', {
         defaultMessage: 'This will delete the SLOs, their instances and all their data.',

@@ -19,20 +19,16 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { BurnRateRuleParams } from '../../../typings';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
+import { useActionModal } from '../../slo_management/context/action_modal';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isActionsPopoverOpen: boolean;
   setIsActionsPopoverOpen: (value: boolean) => void;
-  setDeleteConfirmationModalOpen: (value: boolean) => void;
-  setResetConfirmationModalOpen: (value: boolean) => void;
-  setEnableConfirmationModalOpen: (value: boolean) => void;
-  setDisableConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
   setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady?: (value: boolean) => void;
@@ -65,10 +61,6 @@ export function SloItemActions({
   setIsActionsPopoverOpen,
   setIsAddRuleFlyoutOpen,
   setIsEditRuleFlyoutOpen,
-  setDeleteConfirmationModalOpen,
-  setResetConfirmationModalOpen,
-  setEnableConfirmationModalOpen,
-  setDisableConfirmationModalOpen,
   setDashboardAttachmentReady,
   btnProps,
 }: Props) {
@@ -79,7 +71,7 @@ export function SloItemActions({
   const executionContextName = executionContext.get().name;
   const isDashboardContext = executionContextName === 'dashboards';
   const { data: permissions } = usePermissions();
-  const navigateToClone = useCloneSlo();
+  const { setAction } = useActionModal();
 
   const {
     handleNavigateToRules,
@@ -105,14 +97,14 @@ export function SloItemActions({
   };
 
   const handleClone = () => {
-    navigateToClone(slo);
+    setAction({ type: 'clone', item: slo });
   };
 
   const handleDelete = () => {
     if (!!remoteDeleteUrl) {
       window.open(remoteDeleteUrl, '_blank');
     } else {
-      setDeleteConfirmationModalOpen(true);
+      setAction({ type: 'delete', item: slo });
       setIsActionsPopoverOpen(false);
     }
   };
@@ -121,7 +113,7 @@ export function SloItemActions({
     if (!!remoteResetUrl) {
       window.open(remoteResetUrl, '_blank');
     } else {
-      setResetConfirmationModalOpen(true);
+      setAction({ type: 'reset', item: slo });
       setIsActionsPopoverOpen(false);
     }
   };
@@ -130,7 +122,7 @@ export function SloItemActions({
     if (!!remoteEnableUrl) {
       window.open(remoteEnableUrl, '_blank');
     } else {
-      setEnableConfirmationModalOpen(true);
+      setAction({ type: 'enable', item: slo });
       setIsActionsPopoverOpen(false);
     }
   };
@@ -139,7 +131,7 @@ export function SloItemActions({
     if (!!remoteDisableUrl) {
       window.open(remoteDisableUrl, '_blank');
     } else {
-      setDisableConfirmationModalOpen(true);
+      setAction({ type: 'disable', item: slo });
       setIsActionsPopoverOpen(false);
     }
   };
