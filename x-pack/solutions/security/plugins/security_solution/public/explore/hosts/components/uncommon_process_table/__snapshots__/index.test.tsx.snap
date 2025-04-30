@@ -64,7 +64,8 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
   data-test-subj="table-uncommonProcesses-loading-false"
 >
   <header
-    class="toggle-expand siemHeaderSection css-125xqyz-header"
+    class="toggle-expand siemHeaderSection"
+    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
     data-test-subj="header-section"
   >
     <div

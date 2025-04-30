@@ -17,7 +17,6 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       <button
         aria-controls="network-stat-accordion-groupauditbeat"
         aria-expanded="false"
-        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
@@ -171,7 +170,6 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       <button
         aria-controls="network-stat-accordion-groupfilebeat"
         aria-expanded="false"
-        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
@@ -537,7 +535,6 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
       <button
         aria-controls="network-stat-accordion-grouppacketbeat"
         aria-expanded="false"
-        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"

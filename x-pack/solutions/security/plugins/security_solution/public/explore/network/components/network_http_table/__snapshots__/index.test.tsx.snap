@@ -1,6 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkHttp Table Component rendering it renders the default NetworkHttp table 1`] = `
+.c4 {
+  color: #98a2b3;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -32,10 +36,6 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c4 {
-  color: #98a2b3;
 }
 
 .c2 .siemSubtitle__item {
@@ -81,7 +81,8 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
     data-test-subj="table-http-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection"
+      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
       data-test-subj="header-section"
     >
       <div

@@ -47,7 +47,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-page--OverviewWrapper"
     data-test-subj="host-overview"
   >
     <button
@@ -69,7 +69,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -132,7 +132,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -144,7 +144,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -218,7 +218,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -263,7 +263,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -305,7 +305,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -317,7 +317,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -362,7 +362,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -407,7 +407,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -452,7 +452,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -494,7 +494,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -506,7 +506,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -551,7 +551,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -596,7 +596,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -641,7 +641,7 @@ exports[`Host Summary Component it renders the default Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -730,14 +730,14 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-page--OverviewWrapper"
     data-test-subj="host-overview"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -800,7 +800,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -812,7 +812,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -886,7 +886,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -931,7 +931,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -973,7 +973,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -985,7 +985,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -1030,7 +1030,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -1075,7 +1075,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -1120,7 +1120,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -1162,7 +1162,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left-page--baseStyles-page--DescriptionListStyled"
         data-type="row"
       >
         <dt
@@ -1174,7 +1174,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -1219,7 +1219,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -1264,7 +1264,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div
@@ -1309,7 +1309,7 @@ exports[`Host Summary Component it renders the panel view Host Summary 1`] = `
           class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           <span
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-default_renderer--DefaultFieldRendererComponent"
             data-test-subj="DefaultFieldRendererComponent"
           >
             <div

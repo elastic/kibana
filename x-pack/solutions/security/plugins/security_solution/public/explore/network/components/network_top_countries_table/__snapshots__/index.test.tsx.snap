@@ -97,7 +97,8 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
     data-test-subj="table-topCountriesSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection"
+      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
       data-test-subj="header-section"
     >
       <div
@@ -360,7 +361,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇩🇪
@@ -416,7 +417,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the IP Details
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇺🇸
@@ -748,7 +749,8 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
     data-test-subj="table-topCountriesSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection"
+      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
       data-test-subj="header-section"
     >
       <div
@@ -1040,7 +1042,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇩🇪
@@ -1105,7 +1107,7 @@ exports[`NetworkTopCountries Table Component rendering it renders the default Ne
                 class="euiTableCellContent emotion-euiTableCellContent-wrapText"
               >
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇺🇸

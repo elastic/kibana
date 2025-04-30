@@ -47,7 +47,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
   >
     <button
       aria-label="Inspect"
@@ -68,7 +68,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt
@@ -82,6 +82,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
+            
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
@@ -185,7 +186,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt
@@ -224,7 +225,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt
@@ -305,7 +306,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt
@@ -401,13 +402,13 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-stretch-column"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt
@@ -421,6 +422,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
+            
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
@@ -524,7 +526,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt
@@ -563,7 +565,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt
@@ -644,7 +646,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left-baseStyles-DescriptionListStyled"
+        class="euiDescriptionList emotion-EuiDescriptionList"
         data-type="row"
       >
         <dt

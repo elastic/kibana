@@ -97,7 +97,8 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection"
+      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
       data-test-subj="header-section"
     >
       <div
@@ -387,7 +388,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇺🇸
@@ -480,7 +481,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇲🇾
@@ -499,7 +500,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 test.domain.net
                  
                 <div
-                  class="css-19lowmu-subtext"
+                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                 >
                   <div
                     class="euiPopover emotion-euiPopover-inline-block"
@@ -845,7 +846,8 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection"
+      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
       data-test-subj="header-section"
     >
       <div
@@ -1164,7 +1166,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇺🇸
@@ -1266,7 +1268,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-19nn5cj"
                   data-test-subj="country-flag"
                 >
                   🇲🇾
@@ -1285,7 +1287,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 test.domain.net
                  
                 <div
-                  class="css-19lowmu-subtext"
+                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                 >
                   <div
                     class="euiPopover emotion-euiPopover-inline-block"

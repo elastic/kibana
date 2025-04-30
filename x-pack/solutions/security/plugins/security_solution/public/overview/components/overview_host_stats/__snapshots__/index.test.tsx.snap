@@ -17,7 +17,6 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       <button
         aria-controls="host-stat-accordion-groupauditbeat"
         aria-expanded="false"
-        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
@@ -435,7 +434,6 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       <button
         aria-controls="host-stat-accordion-groupendgame"
         aria-expanded="false"
-        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
@@ -906,7 +904,6 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       <button
         aria-controls="host-stat-accordion-groupfilebeat"
         aria-expanded="false"
-        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
@@ -1059,7 +1056,6 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
       <button
         aria-controls="host-stat-accordion-groupwinlogbeat"
         aria-expanded="false"
-        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"

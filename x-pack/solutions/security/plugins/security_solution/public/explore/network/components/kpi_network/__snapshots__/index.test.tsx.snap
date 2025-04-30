@@ -17,14 +17,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
             data-test-subj="networkEvents"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -54,7 +54,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle emotion-euiTitle-xxxs"
                       >
                         Network events
                       </h6>
@@ -66,7 +66,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -99,14 +99,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
             data-test-subj="dnsQueries"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -136,7 +136,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle emotion-euiTitle-xxxs"
                       >
                         DNS queries
                       </h6>
@@ -148,7 +148,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -188,14 +188,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
             data-test-subj="uniqueFlowId"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -225,7 +225,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle emotion-euiTitle-xxxs"
                       >
                         Unique flow IDs
                       </h6>
@@ -237,7 +237,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -270,14 +270,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
           class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
             data-test-subj="tlsHandshakes"
           >
             <div
               class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
             >
               <div
-                class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -307,7 +307,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle emotion-euiTitle-xxxs"
                       >
                         TLS handshakes
                       </h6>
@@ -319,7 +319,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <div
                     class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -354,14 +354,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
       class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
         data-test-subj="uniqueIps"
       >
         <div
           class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
-            class="euiFlexGroup ee8xehw3 emotion-euiFlexGroup-responsive-none-flexStart-stretch-row-FlexGroup"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -391,7 +391,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h6
-                    class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                    class="euiTitle emotion-euiTitle-xxxs"
                   >
                     Unique private IPs
                   </h6>
@@ -403,16 +403,16 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
             class="euiFlexGroup metricEmbeddable emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
-                    color="#EE72A6"
+                    color="#d36186"
                     data-euiicon-type="visMapCoordinate"
                     data-test-subj="stat-icon"
                   />
@@ -429,10 +429,10 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <p
-                    class="euiTitle ee8xehw1 emotion-euiTitle-m-StatValue"
+                    class="euiTitle emotion-euiTitle-m"
                     data-test-subj="stat-title"
                   >
                     source
@@ -441,16 +441,16 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
               </div>
             </div>
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
               >
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
-                    color="#61A2FF"
+                    color="#9170b8"
                     data-euiicon-type="visMapCoordinate"
                     data-test-subj="stat-icon"
                   />
@@ -467,10 +467,10 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <p
-                    class="euiTitle ee8xehw1 emotion-euiTitle-m-StatValue"
+                    class="euiTitle emotion-euiTitle-m"
                     data-test-subj="stat-title"
                   >
                     destination
@@ -486,14 +486,14 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
                 data-test-subj="mock-lens-embeddable"
               />
             </div>
             <div
-              class="euiFlexItem ee8xehw2 emotion-euiFlexItem-grow-1-FlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
                 data-test-subj="mock-lens-embeddable"
