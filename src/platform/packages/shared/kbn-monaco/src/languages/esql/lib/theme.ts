@@ -17,6 +17,8 @@ export const buildEsqlTheme = ({
   const { colors } = euiTheme;
 
   const rules: monaco.editor.IStandaloneThemeData['rules'] = [
+    { token: 'keyword', foreground: colors.primary },
+
     // -------------------------------------------------------------- plain text
 
     { token: 'identifier', foreground: colors.textParagraph },
@@ -82,6 +84,13 @@ export const buildEsqlTheme = ({
     // Source commands.
     {
       token: `keyword.command.source`,
+      foreground: colors.primary,
+      fontStyle: 'bold',
+    },
+
+    // Command option, such as "METADATA", "BY", etc..
+    {
+      token: 'keyword.option',
       foreground: colors.primary,
       fontStyle: 'bold',
     },
