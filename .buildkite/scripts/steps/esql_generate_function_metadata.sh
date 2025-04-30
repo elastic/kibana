@@ -89,7 +89,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base 8.19 --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base 8.19 --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' --label 'backport:skip'
 }
 
 main
