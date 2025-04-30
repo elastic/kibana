@@ -393,9 +393,6 @@ $$$observability-profiling-aws-cost-discount-rate$$$`observability:profilingAWSC
 $$$observability-profiling-azure-cost-discount-rate$$$`observability:profilingAzureCostDiscountRate`
 :   If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
 
-$$$observability-profiling-use-topNFunctions-from-stacktraces$$$`observability:profilingFetchTopNFunctionsFromStacktraces`
-:   Switch to fetch the TopN Functions from the Stacktraces API.
-
 $$$observability-profiling-cost-per-vcpu-per-hour$$$`observability:profilingCostPervCPUPerHour`
 :   Default Hourly Cost per CPU Core for machines not on AWS or Azure.
 
