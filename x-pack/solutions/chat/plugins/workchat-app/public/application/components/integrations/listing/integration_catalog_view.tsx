@@ -132,7 +132,7 @@ const integrationCards: Record<IntegrationType, IntegrationCardData> = {
 export const IntegrationCatalogView: React.FC = () => {
   const { navigateToWorkchatUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
   const isLarge = useIsWithinBreakpoints(['l']);
   const columns = isMobile ? 1 : isLarge ? 2 : 3;
 
@@ -174,7 +174,7 @@ export const IntegrationCatalogView: React.FC = () => {
           {Object.entries(integrationCards)
             .filter(([_, cardData]) => !cardData.disabled)
             .map(([type, cardData]) => (
-              <EuiFlexItem>
+              <EuiFlexItem key={type}>
                 <EuiCard
                   layout="horizontal"
                   icon={
@@ -212,7 +212,7 @@ export const IntegrationCatalogView: React.FC = () => {
           {Object.entries(integrationCards)
             .filter(([_, cardData]) => cardData.disabled)
             .map(([type, cardData]) => (
-              <EuiFlexItem>
+              <EuiFlexItem key={type}>
                 <EuiCard
                   layout="horizontal"
                   icon={
