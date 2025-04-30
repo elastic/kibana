@@ -83,7 +83,6 @@
     "@kbn/ui-actions-browser",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/esql-utils"
   ],
   "exclude": ["target/**/*"]
 }
