@@ -377,6 +377,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/logstash/config.ts
   - x-pack/platform/test/api_integration/apis/maps/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
+  - x-pack/platform/test/api_integration/apis/osquery/config.ts
   - x-pack/platform/test/api_integration/apis/search/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
