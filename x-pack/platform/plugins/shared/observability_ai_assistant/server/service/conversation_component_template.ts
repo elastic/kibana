@@ -29,10 +29,6 @@ const boolean = {
   type: 'boolean' as const,
 };
 
-const integer = {
-  type: 'integer' as const,
-};
-
 export const conversationComponentTemplate: ClusterComponentTemplate['component_template']['template'] =
   {
     mappings: {
@@ -94,14 +90,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                 },
                 detected_entities: {
                   type: 'object',
-                  properties: {
-                    entity: keyword,
-                    class_name: keyword,
-                    start_pos: integer,
-                    end_pos: integer,
-                    type: keyword,
-                    hash: keyword,
-                  },
+                  enabled: false,
                 },
               },
             },
