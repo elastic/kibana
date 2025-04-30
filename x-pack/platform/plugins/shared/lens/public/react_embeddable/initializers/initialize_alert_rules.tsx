@@ -40,6 +40,23 @@ export function initializeAlertRules(
         ruleTypeRegistry: RuleTypeRegistryContract,
         actionTypeRegistry: ActionTypeRegistryContract
       ) => {
+        const { coreStart } = startDependencies;
+        const ruleFormPlugins = {
+          ...startDependencies,
+          ...coreStart,
+          http: startDependencies.coreHttp,
+        };
+        const canShowRuleForm =
+          isValidRuleFormPlugins(ruleFormPlugins) && ruleTypeRegistry && actionTypeRegistry;
+
+        if (!canShowRuleForm) {
+          throw new Error(
+            i18n.translate('xpack.lens.createAlertRuleError', {
+              defaultMessage: 'Unable to open the alert rule form, some services are missing',
+            })
+          );
+        }
+
         const { timeRange$ } = apiPublishesUnifiedSearch(parentApi)
           ? parentApi
           : { timeRange$: undefined };
@@ -68,23 +85,6 @@ export function initializeAlertRules(
               esqlQuery: parseEsqlVariables(initialValues.params?.esqlQuery, esqlVariables),
             },
           };
-        }
-
-        const { coreStart } = startDependencies;
-        const ruleFormPlugins = {
-          ...startDependencies,
-          ...startDependencies.coreStart,
-          http: startDependencies.coreHttp,
-        };
-        const canShowRuleForm =
-          isValidRuleFormPlugins(ruleFormPlugins) && ruleTypeRegistry && actionTypeRegistry;
-
-        if (!canShowRuleForm) {
-          throw new Error(
-            i18n.translate('xpack.lens.createAlertRuleError', {
-              defaultMessage: 'Unable to open the alert rule form, some services are missing',
-            })
-          );
         }
 
         const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
