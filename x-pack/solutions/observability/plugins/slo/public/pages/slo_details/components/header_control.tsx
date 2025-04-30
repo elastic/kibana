@@ -18,16 +18,16 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
+import { paths } from '../../../../common/locators/paths';
+import { useActionModal } from '../../../context/action_modal';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
-import { useActionModal } from '../../../context/action_modal';
 import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
 import { useGetQueryParams } from '../hooks/use_get_query_params';
 import { useSloActions } from '../hooks/use_slo_actions';
-import { paths } from '../../../../common/locators/paths';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -83,26 +83,21 @@ export function HeaderControl({ slo }: Props) {
           navigate(basePath.prepend(paths.slos));
         },
       });
+      removeDeleteQueryParam();
     }
     if (isResettingSlo) {
       triggerAction({ type: 'reset', item: slo });
+      removeResetQueryParam();
     }
     if (isEnablingSlo) {
       triggerAction({ type: 'enable', item: slo });
+      removeEnableQueryParam();
     }
     if (isDisablingSlo) {
       triggerAction({ type: 'disable', item: slo });
+      removeDisableQueryParam();
     }
-  }, [
-    isDeletingSlo,
-    isResettingSlo,
-    isEnablingSlo,
-    isDisablingSlo,
-    triggerAction,
-    slo,
-    basePath,
-    navigate,
-  ]);
+  });
 
   const onCloseRuleFlyout = () => {
     setRuleFlyoutVisibility(false);
