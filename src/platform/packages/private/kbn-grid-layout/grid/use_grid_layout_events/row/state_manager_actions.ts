@@ -8,20 +8,12 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, pick } from 'lodash';
+import { pick } from 'lodash';
 
-import {
-  GridLayoutData,
-  GridLayoutStateManager,
-  GridPanelData,
-  GridRowData,
-  OrderedLayout,
-} from '../../types';
-import { getRowKeysInOrder, resolveGridRow } from '../../utils/resolve_grid_row';
+import { GridLayoutStateManager, GridRowData, OrderedLayout } from '../../types';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { getGridLayout, getOrderedLayout } from '../../utils/conversions';
-import { isLayoutEqual } from '../../utils/equality_checks';
+import { resolveGridRow } from '../../utils/resolve_grid_row';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -62,65 +54,162 @@ export const moveAction = (
   const {
     runtimeSettings$: { value: runtimeSettings },
     layoutRef: { current: gridLayoutElement },
-    rowRefs: { current: gridRowElements },
     headerRefs: { current: gridHeaderElements },
+    rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
 
-  // console.log(
-  //   'UNDER',
-  //   document.elementsFromPoint(currentPointer.clientX - 10, currentPointer.clientY)
-  // );
-
   const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
-  const { gutterSize, rowHeight, columnCount } = runtimeSettings;
-  const targetedGridTop = gridLayoutElement?.getBoundingClientRect().top ?? 0;
-  let localYCoordinate = currentPointer.clientY - targetedGridTop;
-  Object.entries(gridRowElements).forEach(([id, row]) => {
-    if (!row) return;
-    if (!currentLayout[id].isMainSection) {
-      const { top, height } = row.getBoundingClientRect();
-      if (top <= currentPointer.clientY) {
-        const overlap = Math.min(currentPointer.clientY - top, height);
-        localYCoordinate -= overlap;
-        localYCoordinate += rowHeight + gutterSize;
+
+  const activeRowRect = gridHeaderElements[currentActiveRowEvent.id]?.getBoundingClientRect() ?? {
+    top: 0,
+    bottom: 0,
+  };
+  const targetRowId: string | undefined = (() => {
+    let currentTargetRow;
+    Object.entries(gridRowElements).forEach(([id, row]) => {
+      const { top, bottom } = row?.getBoundingClientRect() ?? { top: 0, bottom: 0 };
+      if (activeRowRect.top >= top && activeRowRect.bottom <= bottom) {
+        currentTargetRow = id;
+      }
+    });
+    return currentTargetRow;
+    // console.log({ currentTargetRow, activeRowRect });
+  })();
+
+  if (!targetRowId || !currentLayout[targetRowId].isMainSection) {
+    //  || !currentLayout[targetRowId].isMainSection
+    const sortedRows = Object.entries({ ...gridHeaderElements, ...gridRowElements })
+      .map(([id, row]) => {
+        // by spreading in this way, we use the grid wrapper elements for expanded sections and the headers for collapsed sections
+        const { top, height } = row?.getBoundingClientRect() ?? { top: 0, height: 0 };
+        return { id, middle: top + height / 2 };
+      })
+      .sort(({ middle: middleA }, { middle: middleB }) => middleA - middleB);
+
+    const ordersAreEqual = sortedRows.every((row, index) => currentLayout[row.id].order === index);
+    if (!ordersAreEqual) {
+      const orderedLayout: OrderedLayout = {};
+      sortedRows.forEach((row, index) => {
+        orderedLayout[row.id] = {
+          ...currentLayout[row.id],
+          order: index,
+        };
+      });
+      gridLayoutStateManager.gridLayout$.next(orderedLayout);
+    }
+  } else {
+    const { gutterSize, rowHeight } = runtimeSettings;
+
+    const targetRow = (() => {
+      const targetedGridRow = gridRowElements[targetRowId];
+      const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
+      const targetedGridTop = targetedGridRowRect?.top ?? 0;
+      const localYCoordinate = activeRowRect.top - targetedGridTop;
+      return Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+    })();
+
+    // rebuild layout by splittng the targetted rowId into 2
+    let order = 0;
+    let mainSectionCount = 0;
+    const firstSectionOrder = currentLayout[targetRowId].order;
+    const anotherLayout: OrderedLayout = {};
+    Object.entries(currentLayout)
+      .sort(([idA, { order: orderA }], [idB, { order: orderB }]) => orderA - orderB)
+      .forEach(([id, row]) => {
+        if (id === currentActiveRowEvent.id) return;
+
+        if (row.order < firstSectionOrder) {
+          anotherLayout[id] = row;
+        } else if (row.order === firstSectionOrder) {
+          // split this section into 2 - one main section above the dragged section, and one below
+          const topSectionPanels: GridRowData['panels'] = {};
+          const bottomSectionPanels: GridRowData['panels'] = {};
+          let startingRow: number;
+          Object.values(row.panels).forEach((panel) => {
+            if (panel.row < targetRow) {
+              topSectionPanels[panel.id] = panel;
+            } else {
+              if (!startingRow) startingRow = panel.row;
+              bottomSectionPanels[panel.id] = { ...panel, row: panel.row - startingRow };
+            }
+          });
+
+          if (Object.keys(topSectionPanels).length > 0) {
+            anotherLayout[`main-${mainSectionCount}`] = {
+              id: `main-${mainSectionCount}`,
+              isMainSection: true,
+              order,
+              panels: topSectionPanels,
+            };
+            order++;
+            mainSectionCount++;
+          }
+          anotherLayout[currentActiveRowEvent.id] = {
+            ...currentLayout[currentActiveRowEvent.id],
+            order,
+          };
+          order++;
+
+          if (Object.keys(bottomSectionPanels).length > 0) {
+            anotherLayout[`main-${mainSectionCount}`] = {
+              id: `main-${mainSectionCount}`,
+              isMainSection: true,
+              order,
+              panels: bottomSectionPanels,
+            };
+          }
+        } else {
+          // push each other rows down
+          const rowId = row.isMainSection ? `main-${mainSectionCount}` : id;
+          anotherLayout[rowId] = { ...row, id: rowId, order };
+        }
+        order++;
+        if (row.isMainSection) mainSectionCount++;
+      });
+
+    // combine sequential main layouts
+    const sortedSections = Object.values(anotherLayout).sort(
+      ({ order: orderA, order: orderB }) => orderA - orderB
+    );
+    const finalLayout: OrderedLayout = {};
+    mainSectionCount = 0;
+    for (let i = 0; i < sortedSections.length; i++) {
+      const firstSection = sortedSections[i];
+      if (firstSection.isMainSection) {
+        let combinedPanels = { ...firstSection.panels };
+        while (i + 1 < sortedSections.length && sortedSections[i + 1].isMainSection) {
+          const secondSection = sortedSections[i + 1];
+          Object.values(secondSection.panels).forEach((panel) => {
+            panel.row = panel.row + 100; // add row to enforce order
+          });
+          combinedPanels = { ...combinedPanels, ...secondSection.panels };
+          i++;
+        }
+        const resolvedCombinedPanels = resolveGridRow(combinedPanels);
+        finalLayout[`main-${mainSectionCount}`] = {
+          ...firstSection,
+          order: i,
+          panels: resolvedCombinedPanels,
+          id: `main-${mainSectionCount}`,
+        };
+        mainSectionCount++;
+      } else {
+        if (firstSection.isMainSection) {
+          finalLayout[`main-${mainSectionCount}`] = {
+            ...firstSection,
+            id: `main-${mainSectionCount}`,
+            order: i,
+          };
+          mainSectionCount++;
+        } else {
+          finalLayout[firstSection.id] = { ...firstSection, order: i };
+        }
       }
     }
-  });
-  const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
 
-  const mainLayout = getGridLayout(currentLayout);
-  const mainPanels: GridRowData['panels'] = {};
-  Object.values(mainLayout).forEach((widget) => {
-    if (widget.type === 'section') {
-      mainPanels[widget.id] = {
-        id: widget.id,
-        row: widget.row,
-        column: 0,
-        height: 1,
-        width: columnCount,
-      };
-    } else {
-      mainPanels[widget.id] = widget;
-    }
-  }, {} as GridRowData['panels']);
-
-  // console.log({ localYCoordinate, targetRow, mainLayout, mainPanels });
-
-  // treat the dragged row header like a full width, height of 1, panel to resolve
-  const resolvedMainGrid = resolveGridRow(mainPanels, {
-    id: currentActiveRowEvent.id,
-    row: targetRow,
-    column: 0,
-    height: 1,
-    width: columnCount,
-  });
-  const updatedLayout: GridLayoutData = {};
-  Object.keys(resolvedMainGrid).forEach((id) => {
-    updatedLayout[id] = {
-      ...mainLayout[id],
-      row: resolvedMainGrid[id].row,
-    };
-  });
+    if (!deepEqual(currentLayout, finalLayout))
+      gridLayoutStateManager.gridLayout$.next(finalLayout);
+  }
 
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
@@ -129,9 +218,4 @@ export const moveAction = (
       left: currentPointer.clientX - startingPointer.clientX,
     },
   });
-
-  if (!isLayoutEqual(mainLayout, updatedLayout)) {
-    const orderedLayout = getOrderedLayout(updatedLayout);
-    gridLayoutStateManager.gridLayout$.next(orderedLayout);
-  }
 };

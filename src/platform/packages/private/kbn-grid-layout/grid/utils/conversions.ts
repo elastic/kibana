@@ -53,6 +53,7 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
 
   let order = 0;
   let sectionCount = 0;
+  let mainRow = 0;
   for (let i = 0; i < widgets.length; i++) {
     const { type, id } = widgets[i];
     if (type === 'panel') {
@@ -63,19 +64,22 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
         isMainSection: true,
       };
       const startingRow = (layout[widgets[i].id] as GridPanelData).row;
+      let maxRow = -Infinity;
       while (i < widgets.length && widgets[i].type === 'panel') {
-        if (i >= widgets.length) break;
         const panel = layout[widgets[i].id] as GridPanelData;
         panel.row -= startingRow;
+        maxRow = Math.max(maxRow, panel.row + panel.height);
         orderedLayout[`main-${sectionCount}`].panels[panel.id] = panel;
         i++;
       }
       i--;
+      mainRow += maxRow;
       order++;
     } else {
       const sectionId = id;
       const section = layout[sectionId] as GridRowData;
-      orderedLayout[sectionId] = { ...omit(section, 'row'), order };
+      orderedLayout[sectionId] = { ...section, order };
+      mainRow++;
       order++;
       sectionCount++;
     }

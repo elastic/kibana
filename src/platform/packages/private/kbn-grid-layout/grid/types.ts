@@ -33,14 +33,14 @@ export interface GridRowData {
   };
 }
 
-export type GridLayoutWidget =
-  | (GridPanelData & { type: 'panel' })
-  | (GridRowData & { type: 'section' });
-
 export type GridLayoutElementsInOrder = Array<{
   type: 'header' | 'footer' | 'panel' | 'wrapper';
   id: string;
 }>;
+
+export type GridLayoutWidget =
+  | (GridPanelData & { type: 'panel' })
+  | (GridRowData & { type: 'section' });
 
 export interface GridLayoutData {
   [key: string]: GridLayoutWidget;
