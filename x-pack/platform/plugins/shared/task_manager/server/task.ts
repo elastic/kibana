@@ -271,15 +271,6 @@ interface RruleCommon {
   interval: number;
   tzid: string;
 }
-
-interface RruleMinutely extends RruleCommon {
-  freq: Frequency.MINUTELY;
-  bymonthday?: number[];
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: Weekday[];
-}
-
 interface RruleMonthly extends RruleCommon {
   freq: Frequency.MONTHLY;
   bymonthday?: number[];
@@ -300,6 +291,13 @@ interface RruleDaily extends RruleCommon {
   byminute?: number[];
   byweekday?: Weekday[];
   bymonthday?: never;
+}
+interface RruleMinutely extends RruleCommon {
+  freq: Frequency.MINUTELY;
+  bymonthday?: number[];
+  byhour?: number[];
+  byminute?: number[];
+  byweekday?: Weekday[];
 }
 
 export interface TaskUserScope {

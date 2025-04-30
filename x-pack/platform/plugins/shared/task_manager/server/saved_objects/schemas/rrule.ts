@@ -28,14 +28,6 @@ const byhour = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 })));
 const byweekday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 7 })));
 const bymonthday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 })));
 
-const rruleMinutely = rruleCommon.extends({
-  freq: schema.literal(Frequency.MINUTELY),
-  byhour,
-  byminute,
-  byweekday,
-  bymonthday,
-});
-
 const rruleMonthly = rruleCommon.extends({
   freq: schema.literal(Frequency.MONTHLY),
   byhour,
@@ -58,6 +50,14 @@ const rruleDaily = rruleCommon.extends({
   byminute,
   byweekday,
   bymonthday: schema.never(),
+});
+
+const rruleMinutely = rruleCommon.extends({
+  freq: schema.literal(Frequency.MINUTELY),
+  byhour,
+  byminute,
+  byweekday,
+  bymonthday,
 });
 
 export const rruleSchedule = schema.oneOf([rruleMonthly, rruleWeekly, rruleDaily, rruleMinutely]);

@@ -672,7 +672,7 @@ And there are 2 different config options for scheduling a task:
 
 Monthly schedule options:
 
-```
+```typescript
   freq: Frequency.MONTHLY, -> Import the enum Frequency from TaskManager (Required field)
   interval: number; -> Any number. 1 means `every 1 month` (Required field)
   tzid: string; -> Timezone e.g.: 'UTC' (Required field)
@@ -684,7 +684,7 @@ Monthly schedule options:
 
 Weekly schedule options:
 
-```
+```typescript
   freq: Frequency.WEEKLY, -> Import the enum Frequency from TaskManager (Required field)
   interval: number; -> Any number. 1 means `every 1 week` (Required field)
   tzid: string; -> Timezone e.g.: 'UTC' (Required field)
@@ -695,11 +695,84 @@ Weekly schedule options:
 
 Daily schedule options:
 
-```
+```typescript
   freq: Frequency.DAILY, -> Import the enum Frequency from TaskManager (Required field)
   interval: number; -> Any number. 1 means `every 1 day` (Required field)
   tzid: string; -> Timezone e.g.: 'UTC' (Required field)
   byhour?: number[]; -> number between 0 and 23
   byminute?: number[]; -> number between 0 and 59
   byweekday?: Weekday[]; -> Import the enum Weekday from TaskManager. Weekday.MO is monday
+```
+
+Examples:
+
+Every day at current time:
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.DAILY,
+      tzid: 'UTC',
+      interval: 1
+    }
+  }
+```
+
+Every day at 13:15:
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.DAILY,
+      tzid: 'UTC',
+      interval: 1,
+      byhour: [13],
+      byminute: [15]
+    }
+  }
+```
+
+Every Monday at 17:30
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.DAILY,
+      tzid: 'UTC',
+      interval: 1,
+      byhour: [17],
+      byminute: [30]
+      byweekday: Weekday.MO
+    }
+  }
+```
+
+Every 2 weeks on Friday at 08:45
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.WEEKLY,
+      tzid: 'UTC',
+      interval: 2,
+      byhour: [8],
+      byminute: [45]
+      byweekday: Weekday.FR
+    }
+  }
+```
+
+Every Month on 1st, 15th and 30th at 12:10 and 18:10
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.MONTHLY,
+      tzid: 'UTC',
+      interval: 1,
+      byhour: [12,18],
+      byminute: [10]
+      bymonthday: [1,15,30]
+    }
+  }
 ```
