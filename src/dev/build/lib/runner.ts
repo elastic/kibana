@@ -38,6 +38,7 @@ export function createRunner({ config, log, bufferLogs = false }: Options) {
   async function execTask(desc: string, task: GlobalTask | Task, build?: Build): Promise<void> {
     if (!task.global && build && bufferLogs) {
       build.pushToLogBuffer(desc);
+      log.info(`Buffering logs for Task: ${desc}`);
     } else {
       log.info(desc);
     }

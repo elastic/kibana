@@ -28,18 +28,38 @@ export async function exec(
   args: string[],
   { level = 'debug', cwd, env, exitAfter, build }: Options = {}
 ) {
-  if (build?.getBufferLogs()) {
+  const bufferLogs = build && build?.getBufferLogs();
+
+  if (bufferLogs) {
     build.pushToLogBuffer(`${chalk.dim('$')} ${cmd} ${args.join(' ')}`);
   } else {
     log[level](chalk.dim('$'), cmd, ...args);
   }
 
   const proc = execa(cmd, args, {
-    stdio: ['ignore', 'pipe', 'pipe'],
     cwd,
     env,
     preferLocal: true,
+    ...(bufferLogs
+      ? {
+          stdio: ['ignore', 'pipe', 'pipe'],
+          all: true,
+          buffer: false,
+        }
+      : { stdio: ['ignore', 'pipe', 'pipe'] }),
   });
 
-  await watchStdioForLine(proc, (line) => log[level](line), exitAfter, build);
+  const logFn = (line: string) => log[level](line);
+
+  if (bufferLogs) {
+    proc.all!.on('data', (chunk) => {
+      build.pushToLogBuffer(chunk.toString());
+    });
+
+    await proc.finally(() => {
+      build.getLogBuffer().forEach(logFn);
+    });
+  } else {
+    await watchStdioForLine(proc, logFn, exitAfter);
+  }
 }
