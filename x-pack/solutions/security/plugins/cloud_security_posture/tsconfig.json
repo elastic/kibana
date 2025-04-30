@@ -66,6 +66,7 @@
     "@kbn/analytics",
     "@kbn/management-settings-ids",
     "@kbn/expandable-flyout",
+    "@kbn/code-editor-mock",
   ],
   "exclude": ["target/**/*"]
 }
