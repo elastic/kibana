@@ -31,7 +31,6 @@ import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
 import { useInspect } from '../inspect/use_inspect';
-import { getTotalCountFromTables } from './get_total_count_from_tables';
 
 const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
@@ -206,13 +205,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [attributes?.state?.adHocDataViews]
   );
 
-  const totalCount = useMemo(() => getTotalCountFromTables(tables), [tables]);
-
   if (!searchSessionId) {
     return null;
   }
 
-  if (!attributes || (totalCount != null && totalCount === 0)) {
+  if (!attributes) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>

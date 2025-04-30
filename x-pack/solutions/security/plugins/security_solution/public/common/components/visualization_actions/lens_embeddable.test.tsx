@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { screen, render, waitFor } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -180,39 +180,6 @@ describe('LensEmbeddable', () => {
         </TestProviders>
       );
       expect(container).toBeEmptyDOMElement();
-    });
-  });
-
-  describe('when totalCount is 0', () => {
-    it('should render no data text', async () => {
-      useVisualizationResponseMocked.mockReturnValue({
-        searchSessionId: mockSearchSessionId,
-        loading: false,
-        tables: {
-          'layer-id-0': {
-            meta: {
-              statistics: {
-                totalCount: 0,
-              },
-            },
-          } as unknown as Datatable,
-        },
-      });
-
-      const { container } = render(
-        <TestProviders store={store}>
-          <LensEmbeddable
-            id="testId"
-            lensAttributes={kpiHostMetricLensAttributes}
-            timerange={{ from: '2022-10-27T23:00:00.000Z', to: '2022-11-04T10:46:16.204Z' }}
-          />
-        </TestProviders>
-      );
-
-      // to syppress act() warning
-      await waitFor(() => {
-        expect(container.textContent).toBe('No data to display');
-      });
     });
   });
 });

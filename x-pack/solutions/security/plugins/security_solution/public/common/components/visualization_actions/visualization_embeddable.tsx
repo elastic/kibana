@@ -73,7 +73,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
           searchSessionId: session.current.start(),
           refetch: refetchByRestartingSession,
           loading: isLoading,
-          inspect: { dsl: requests, response: responses },
+          inspect: isLoading ? null : { dsl: requests, response: responses },
           tables,
         })
       );
