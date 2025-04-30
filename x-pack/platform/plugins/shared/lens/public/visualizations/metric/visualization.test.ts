@@ -17,6 +17,7 @@ import {
   generateActiveData,
 } from '../../mocks';
 import {
+  DataType,
   DatasourceLayers,
   DatasourcePublicAPI,
   OperationDescriptor,
@@ -25,10 +26,11 @@ import {
 } from '../../types';
 import { GROUP_ID } from './constants';
 import { getMetricVisualization } from './visualization';
-import { themeServiceMock } from '@kbn/core/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { MetricVisualizationState } from './types';
+import { getDefaultConfigForMode } from './helpers';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
@@ -60,16 +62,6 @@ describe('metric visualization', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   } as const;
 
-  // Keep it commented for now as reference
-  // const secondaryTrendProps = {
-  //   secondaryTrend: {
-  //     visuals: 'icon' as const,
-  //     palette: { name: 'palette', stops: ['red', 'green', 'blue'] as [string, string, string] },
-  //     baselineValue: 50,
-  //   },
-  //   secondaryColor: 'red',
-  // };
-
   const fullState: Required<
     Omit<
       MetricVisualizationState,
@@ -79,7 +71,6 @@ describe('metric visualization', () => {
       | 'trendlineSecondaryMetricAccessor'
       | 'trendlineTimeAccessor'
       | 'trendlineBreakdownByAccessor'
-      | 'secondaryTrend'
       | 'secondaryColor'
     >
   > = {
@@ -102,7 +93,7 @@ describe('metric visualization', () => {
     valuesTextAlign: 'right',
     iconAlign: 'left',
     valueFontMode: 'default',
-    secondaryColorMode: 'none',
+    secondaryTrend: { type: 'none' },
   };
 
   const fullStateWTrend: Required<
@@ -248,8 +239,9 @@ describe('metric visualization', () => {
       describe('secondary metric', () => {
         test('static coloring', () => {
           expect(
-            getMetricFromConfiguration('secondaryMetric', { secondaryColorMode: 'static' })
-              ?.accessors[0]
+            getMetricFromConfiguration('secondaryMetric', {
+              secondaryTrend: getDefaultConfigForMode('static'),
+            })?.accessors[0]
           ).toMatchInlineSnapshot(`
             Object {
               "color": "#E4E8F1",
@@ -274,14 +266,19 @@ describe('metric visualization', () => {
             },
           });
           expect(
-            getMetricFromConfiguration('secondaryMetric', { secondaryColorMode: 'dynamic' }, frame)
-              ?.accessors[0]
+            getMetricFromConfiguration(
+              'secondaryMetric',
+              {
+                secondaryTrend: getDefaultConfigForMode('dynamic'),
+              },
+              frame
+            )?.accessors[0]
           ).toMatchInlineSnapshot(`
             Object {
               "columnId": "secondary-metric-col-id",
               "palette": Array [
-                "#B9A888",
-                "#ABB4C4",
+                "#F6726A",
+                "#ECF1F9",
                 "#24C292",
               ],
               "triggerIconType": "colorBy",
@@ -994,7 +991,7 @@ describe('metric visualization', () => {
             ...fullState,
             progressDirection: undefined,
             showBar: true,
-            secondaryColorMode: 'dynamic',
+            secondaryTrend: getDefaultConfigForMode('dynamic'),
           },
           datasourceLayers
         );
@@ -1032,14 +1029,12 @@ describe('metric visualization', () => {
             ...fullState,
             progressDirection: undefined,
             showBar: true,
-            secondaryColorMode: 'dynamic',
             secondaryTrend: {
+              type: 'dynamic',
+              reversed: false,
               baselineValue: 'primary',
               visuals: 'icon',
-              palette: {
-                name: 'palette',
-                stops: ['red', 'green', 'blue'] as [string, string, string],
-              },
+              paletteId: 'compare_to',
             },
           },
           datasourceLayers
@@ -1049,7 +1044,11 @@ describe('metric visualization', () => {
           // even if color mode is dynamic it should fallback to static color as dataType is not numeric
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
-          expect(secondaryMetricAST.secondaryTrendPalette).toEqual(['red', 'green', 'blue']);
+          expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
+            '#F6726A',
+            '#ECF1F9',
+            '#24C292',
+          ]);
         } else {
           fail('AST is not an object');
         }
@@ -1104,6 +1103,63 @@ describe('metric visualization', () => {
       fullStateWTrend.layerId,
       fullStateWTrend.trendlineLayerId,
     ]);
+  });
+
+  describe('getPersistedState', () => {
+    it('should return the state as is when there are no conflicts', () => {
+      expect(visualization.getPersistableState?.(fullState)).toEqual(
+        expect.objectContaining({ state: fullState })
+      );
+    });
+
+    it('should rewrite the secondary trend state when in conflict', () => {
+      function createOperationByType(type: DataType) {
+        return {
+          dataType: type,
+          hasTimeShift: false,
+          label: 'label',
+          isBucketed: false,
+          hasReducedTimeRange: false,
+        };
+      }
+
+      expect(
+        visualization.getPersistableState?.(
+          {
+            ...fullState,
+            secondaryTrend: {
+              type: 'dynamic',
+              reversed: false,
+              baselineValue: 'primary',
+              visuals: 'icon',
+              paletteId: 'compare_to',
+            },
+          },
+          createMockDatasource('formBased', {
+            getOperationForColumnId: jest.fn((id: string) =>
+              // make primary result in a string type
+              createOperationByType(id !== fullState.secondaryMetricAccessor ? 'string' : 'number')
+            ),
+          }),
+          // just need to pass a state to make it work
+          {
+            state: {
+              layers: {
+                first: {
+                  indexPatternId: '1',
+                  columnOrder: ['col1', 'col2'],
+                  columns: {},
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({ secondaryTrend: getDefaultConfigForMode('static') }),
+        })
+      );
+    });
   });
 
   test('getLayersToLinkTo', () => {

@@ -1115,7 +1115,11 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /** Description is displayed as the clickable text in the chart switcher */
   getDescription: (state: T, layerId?: string) => { icon?: IconType; label: string };
   /** Visualizations can have references as well */
-  getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  getPersistableState?: (
+    state: T,
+    datasource?: Datasource,
+    datasourceState?: { state: unknown }
+  ) => { state: P; savedObjectReferences: SavedObjectReference[] };
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */

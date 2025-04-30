@@ -8,11 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, getOverridePaletteStops } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { euiDarkVars, euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
+import { ThemeServiceStart } from '@kbn/core/public';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
@@ -29,7 +30,6 @@ import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
-  getDefaultTrendConfig,
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { Toolbar } from './toolbar';
@@ -37,8 +37,8 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import { MetricVisualizationState } from './types';
-import { getColorFromEUI, getColorMode, getEuiThemeColors } from './helpers';
+import { MetricVisualizationState, SecondaryTrend } from './types';
+import { getColorMode, getDefaultConfigForMode, getTrendPalette } from './helpers';
 import { getAccessorType } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
@@ -68,8 +68,8 @@ export const metricLabel = i18n.translate('xpack.lens.metric.label', {
 
 const getMetricLayerConfiguration = (
   paletteService: PaletteRegistry,
-  props: VisualizationConfigProps<MetricVisualizationState>,
-  theme: ThemeServiceStart
+  theme: ThemeServiceStart,
+  props: VisualizationConfigProps<MetricVisualizationState>
 ): {
   groups: VisualizationDimensionGroupConfig[];
 } => {
@@ -102,28 +102,29 @@ const getMetricLayerConfiguration = (
   );
 
   const getSecondaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
-    const colorMode = getColorMode(props.state.secondaryColorMode, isSecondaryMetricNumeric);
+    const colorMode = getColorMode(props.state.secondaryTrend, isSecondaryMetricNumeric);
 
     if (colorMode === 'dynamic') {
-      const stops = (props.state.secondaryTrend || getDefaultTrendConfig()).palette.stops;
+      const stops = getTrendPalette(colorMode, props.state.secondaryTrend, theme.getTheme());
+      if (stops == null) {
+        return {};
+      }
 
       return {
         triggerIconType: 'colorBy',
-        palette: stops
-          ?.map((color) =>
-            getColorFromEUI(
-              color,
-              getEuiThemeColors(theme.getTheme().darkMode ? euiDarkVars : euiLightVars)
-            )
-          )
-          .filter(nonNullable),
+        palette: stops,
       };
     }
 
     if (colorMode === 'static') {
+      const color =
+        props.state.secondaryTrend?.type === 'static'
+          ? props.state.secondaryTrend.color
+          : (getDefaultConfigForMode(colorMode) as Extract<SecondaryTrend, { type: 'static' }>)
+              .color;
       return {
         triggerIconType: 'color',
-        color: props.state.secondaryColor ?? '#E4E8F1',
+        color,
       };
     }
     return {};
@@ -323,7 +324,6 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
   delete state.secondaryPrefix;
-  delete state.secondaryColorMode;
   delete state.secondaryTrend;
 };
 
@@ -401,7 +401,7 @@ export const getMetricVisualization = ({
 
   getConfiguration(props) {
     return props.layerId === props.state.layerId
-      ? getMetricLayerConfiguration(paletteService, props, theme)
+      ? getMetricLayerConfiguration(paletteService, theme, props)
       : getTrendlineLayerConfiguration(props);
   },
 
@@ -543,7 +543,33 @@ export const getMetricVisualization = ({
   },
 
   toExpression: (state, datasourceLayers, _attributes, datasourceExpressionsByLayers) =>
-    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
+    toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, theme),
+
+  getPersistableState: (state, datasource, datasourceState) => {
+    const datasourceLayer = datasource?.getPublicAPI({
+      state: datasourceState?.state,
+      layerId: state.layerId,
+      indexPatterns: {},
+    });
+    // early return if there's no datasource found
+    if (!datasourceLayer) {
+      return { state, savedObjectReferences: [] };
+    }
+    // this should clean up the secondary trend state if in conflict
+    const { isNumeric: isMetricNumeric } = getAccessorType(datasourceLayer, state.metricAccessor);
+    const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
+    // if there are no conflicts, it's all persistable as is
+    if (colorMode === state.secondaryTrend?.type) {
+      return { state, savedObjectReferences: [] };
+    }
+    return {
+      state: {
+        ...state,
+        secondaryTrend: getDefaultConfigForMode(colorMode),
+      },
+      savedObjectReferences: [],
+    };
+  },
 
   setDimension({ prevState, columnId, groupId }) {
     const updated = { ...prevState };
