@@ -569,9 +569,6 @@
     "policy_id",
     "token_plain"
   ],
-  "globaltype": [
-    "title"
-  ],
   "graph-workspace": [
     "description",
     "kibanaSavedObjectMeta",
@@ -588,9 +585,6 @@
     "isActive"
   ],
   "guided-onboarding-plugin-state": [],
-  "hiddentype": [
-    "title"
-  ],
   "index-pattern": [
     "name",
     "title",
@@ -750,16 +744,6 @@
     "use_space_awareness_migration_status"
   ],
   "inventory-view": [],
-  "isolatedtype": [
-    "description",
-    "kibanaSavedObjectMeta",
-    "kibanaSavedObjectMeta.searchSourceJSON",
-    "savedSearchId",
-    "title",
-    "uiStateJSON",
-    "version",
-    "visState"
-  ],
   "kql-telemetry": [],
   "legacy-url-alias": [
     "disabled",
@@ -911,9 +895,6 @@
     "title",
     "titleKeyword"
   ],
-  "resolvetype": [
-    "title"
-  ],
   "risk-engine-configuration": [
     "alertSampleSizePerShard",
     "dataViewId",
@@ -966,12 +947,6 @@
     "sourceIndex",
     "updated",
     "version"
-  ],
-  "sharecapabletype": [
-    "title"
-  ],
-  "sharedtype": [
-    "title"
   ],
   "siem-detection-engine-rule-actions": [
     "actions",
