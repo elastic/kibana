@@ -17,6 +17,25 @@ function validateTimezone(timezone: string) {
   return 'string is not a valid timezone: ' + timezone;
 }
 
+const validateRecurrenceByWeekday = (array: string[]) => {
+  if (array.length === 0) {
+    return 'rRule byweekday cannot be empty';
+  }
+
+  const byWeekDayRegex = new RegExp('^(((\\+|-)[1-4])?(MO|TU|WE|TH|FR|SA|SU))$');
+  const invalidDays: string[] = [];
+
+  array.forEach((day) => {
+    if (!byWeekDayRegex.test(day)) {
+      invalidDays.push(day);
+    }
+  });
+
+  if (invalidDays.length > 0) {
+    return `invalid byweekday values in rRule byweekday: ${invalidDays.join(',')}`;
+  }
+};
+
 const rruleCommon = schema.object({
   freq: schema.maybe(
     schema.oneOf([
@@ -29,30 +48,26 @@ const rruleCommon = schema.object({
       schema.literal(6),
     ])
   ),
-  interval: schema.number({ min: 1 }),
+  interval: schema.maybe(
+    schema.number({
+      validate: (interval: number) => {
+        if (!Number.isInteger(interval)) {
+          return 'rRule interval must be an integer greater than 0';
+        }
+      },
+      min: 1,
+    })
+  ),
   tzid: schema.string({ validate: validateTimezone, defaultValue: 'UTC' }),
 });
 
 const byminute = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }), { minSize: 1 }));
 const byhour = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }), { minSize: 1 }));
 const byweekday = schema.maybe(
-  schema.arrayOf(
-    schema.oneOf([
-      schema.oneOf([
-        schema.literal('MO'),
-        schema.literal('TU'),
-        schema.literal('WE'),
-        schema.literal('TH'),
-        schema.literal('FR'),
-        schema.literal('SA'),
-        schema.literal('SU'),
-      ]),
-      schema.number({ min: 1, max: 7 }),
-    ]),
-    {
-      minSize: 1,
-    }
-  )
+  schema.arrayOf(schema.string(), {
+    minSize: 1,
+    validate: validateRecurrenceByWeekday,
+  })
 );
 const bymonthday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 }));
 
