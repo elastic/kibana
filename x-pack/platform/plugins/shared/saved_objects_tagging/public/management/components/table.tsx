@@ -82,7 +82,20 @@ export const TagTable: FC<TagTableProps> = ({
               <div css={{ marginLeft: euiTheme.size.s }}>
                 <EuiIconTip
                   type="lock"
-                  content="This tag is managed by Elastic and cannot be deleted, edited, or assigned to objects."
+                  content={i18n.translate(
+                    'xpack.savedObjectsTagging.management.table.managedTagTooltip',
+                    {
+                      defaultMessage:
+                        'This tag is managed by Elastic and cannot be deleted, edited, or assigned to objects.',
+                    }
+                  )}
+                  aria-label={i18n.translate(
+                    'xpack.savedObjectsTagging.management.table.managedTagAriaLabel',
+                    {
+                      defaultMessage: 'Tag: {tagName}',
+                      values: { tagName: tag.name },
+                    }
+                  )}
                 />
               </div>
             )}
@@ -131,6 +144,7 @@ export const TagTable: FC<TagTableProps> = ({
                 onShowRelations(tag);
               }
             }}
+            aria-label={`View connections ${tag.name} tag`}
           >
             {columnText}
           </EuiLink>
