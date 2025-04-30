@@ -177,10 +177,8 @@ describe('kibana_client_open_api', () => {
       operation: mockPostOperation,
     });
 
-
-
     await toolForOperation.invoke({
-      type: "tool_call",
+      type: 'tool_call',
       id: '123',
       name: 'get_actions_connector_id',
       args: {
@@ -192,7 +190,7 @@ describe('kibana_client_open_api', () => {
         },
         body: {
           test: 'test',
-        }
+        },
       },
     });
 
