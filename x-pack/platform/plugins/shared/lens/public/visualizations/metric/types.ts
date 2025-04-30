@@ -57,13 +57,3 @@ export interface MetricVisualizationState {
   trendlineSecondaryMetricAccessor?: string;
   trendlineBreakdownByAccessor?: string;
 }
-
-export type EuiColorPalettePickerPaletteFixedProps = Omit<
-  Extract<EuiColorPalettePickerPaletteProps, { type: 'fixed' }>,
-  'palette'
-> & { palette: [string, string, string] };
-
-export type TrendEUIColors = (
-  | keyof EuiThemeShape['colors']['LIGHT']
-  | keyof EuiThemeShape['colors']['vis']
-) & {};
