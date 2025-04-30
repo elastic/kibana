@@ -35,8 +35,6 @@ export function DashboardActions({ dashboardId }: DashboardActionsProps) {
 
   const handleUnlinkDashboard = () => {};
 
-  const handleDuplicateDashboard = () => {};
-
   const btn = (
     <EuiButtonIcon
       data-test-subj="o11ySloListItemButton"
@@ -63,15 +61,6 @@ export function DashboardActions({ dashboardId }: DashboardActionsProps) {
           <EuiContextMenuItem key="viewDashboard" icon="dashboardApp" onClick={handleGoToDashboard}>
             {i18n.translate('xpack.observability.dashboardActions.viewDashboard', {
               defaultMessage: 'Go to dashboard',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            key="duplicateDashboard"
-            icon="copy"
-            onClick={handleDuplicateDashboard}
-          >
-            {i18n.translate('xpack.observability.dashboardActions.duplicateDashboard', {
-              defaultMessage: 'Duplicate dashboard',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem key="unlinkDashboard" icon="unlink" onClick={handleUnlinkDashboard}>
