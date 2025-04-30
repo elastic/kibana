@@ -106,6 +106,7 @@ export const createRuleMonitoringService = (
       return createDetectionEngineHealthClient(
         ruleSpacesClient,
         ruleObjectsHealthClient,
+        rulesClient,
         eventLogHealthClient,
         internalSavedObjectsImporter,
         logger

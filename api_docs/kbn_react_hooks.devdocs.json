@@ -21,6 +21,97 @@
     "functions": [
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useAbortableAsync",
+        "type": "Function",
+        "tags": [],
+        "label": "useAbortableAsync",
+        "description": [],
+        "signature": [
+          "(fn: ({}: { signal: AbortSignal; }) => T | Promise<T>, deps: any[], options: ",
+          "UseAbortableAsyncOptions",
+          "<T> | undefined) => ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.AbortableAsyncState",
+            "text": "AbortableAsyncState"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useAbortableAsync.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "({}: { signal: AbortSignal; }) => T | Promise<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useAbortableAsync.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useAbortableAsync.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "UseAbortableAsyncOptions",
+              "<T> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useAbortController",
+        "type": "Function",
+        "tags": [],
+        "label": "useAbortController",
+        "description": [],
+        "signature": [
+          "() => { signal: AbortSignal; abort: () => void; refresh: () => void; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abort_controller/use_abort_controller.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.useBoolean",
         "type": "Function",
         "tags": [],
@@ -61,6 +152,68 @@
       },
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useDebounceFn",
+        "type": "Function",
+        "tags": [
+          "throws",
+          "caveat"
+        ],
+        "label": "useDebounceFn",
+        "description": [
+          "\nCustom hook that returns a React safe debounced version of the provided function.\n"
+        ],
+        "signature": [
+          "(fn: T, options: ",
+          "DebounceOptions",
+          " | undefined) => { run: _.DebouncedFunc<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T> | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebounceFn.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "- The function to debounce."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebounceFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration options for debounce."
+            ],
+            "signature": [
+              "DebounceOptions",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "- An object containing the debounced function (`run`), and methods to cancel (`cancel`) or flush (`flush`) the debounce."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.useErrorTextStyle",
         "type": "Function",
         "tags": [],
@@ -74,6 +227,131 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useThrottleFn",
+        "type": "Function",
+        "tags": [
+          "throws",
+          "caveat"
+        ],
+        "label": "useThrottleFn",
+        "description": [
+          "\nCustom hook that returns a React safe  throttled version of the provided function.\n"
+        ],
+        "signature": [
+          "(fn: T, options: ",
+          "ThrottleOptions",
+          " | undefined) => { run: _.DebouncedFuncLeading<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useThrottleFn.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [
+              "- The function to throttle."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useThrottleFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration options for throttle."
+            ],
+            "signature": [
+              "ThrottleOptions",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "- An object containing the throttled function (`run`), and methods to cancel (`cancel`) or flush (`flush`) the throttle."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useTruncateText",
+        "type": "Function",
+        "tags": [],
+        "label": "useTruncateText",
+        "description": [],
+        "signature": [
+          "(text: string, maxLength?: number, maxCharLength?: number) => { displayText: string; isExpanded: boolean; toggleExpanded: () => void; shouldTruncate: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useTruncateText.$1",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useTruncateText.$2",
+            "type": "number",
+            "tags": [],
+            "label": "maxLength",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useTruncateText.$3",
+            "type": "number",
+            "tags": [],
+            "label": "maxCharLength",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -159,6 +437,110 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.AbortableAsyncState",
+        "type": "Type",
+        "tags": [],
+        "label": "AbortableAsyncState",
+        "description": [],
+        "signature": [
+          "(T extends Promise<infer TReturn> ? State<TReturn> : State<T>) & { refresh: () => void; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.UseAbortableAsync",
+        "type": "Type",
+        "tags": [],
+        "label": "UseAbortableAsync",
+        "description": [],
+        "signature": [
+          "<T>(fn: ({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>, deps: any[], options?: (",
+          "UseAbortableAsyncOptions",
+          "<T> & TAdditionalOptions) | undefined) => ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.AbortableAsyncState",
+            "text": "AbortableAsyncState"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseAbortableAsync.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/react-hooks",
+                "id": "def-common.UseAbortableAsync.$1.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ signal: AbortSignal; } & TAdditionalParameters"
+                ],
+                "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseAbortableAsync.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              "any[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseAbortableAsync.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "(",
+              "UseAbortableAsyncOptions",
+              "<T> & TAdditionalOptions) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.UseBooleanResult",

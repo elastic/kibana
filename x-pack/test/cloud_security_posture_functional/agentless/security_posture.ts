@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -25,7 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 
-  // Failing: See https://github.com/elastic/kibana/issues/208533
   describe('Agentless Security Posture Integration Options', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
@@ -39,8 +38,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it(`should show kspm without agentless option`, async () => {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickOptionButton(KSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -57,8 +57,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should show cnvm without agentless option`, async () => {
       //   const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickOptionButton(CNVM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -72,10 +73,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(hasAgentBased).to.be(true);
     });
 
-    it.skip(`should show cspm with agentless option`, async () => {
+    it(`should show cspm with agentless option`, async () => {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickOptionButton(CSPM_RADIO_OPTION);
       await pageObjects.header.waitUntilLoadingHasFinished();

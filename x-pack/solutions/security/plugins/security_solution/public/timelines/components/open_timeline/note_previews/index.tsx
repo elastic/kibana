@@ -20,6 +20,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
@@ -31,11 +33,11 @@ import * as i18n from './translations';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -52,7 +54,16 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
+
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();

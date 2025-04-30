@@ -21,12 +21,12 @@ import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../t
 import { mockRule, mockLogResponse } from './test_helpers';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
-import { getMaintenanceWindowMockMap } from '../../alerts_table/maintenance_windows/index.mock';
-import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
+import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
+import { getMaintenanceWindowsMock } from '@kbn/response-ops-alerts-table/mocks/maintenance_windows.mock';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 
-jest.mock('../../../lib/rule_api/rule_types');
-jest.mocked(loadRuleTypes).mockResolvedValue([]);
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+jest.mocked(getRuleTypes).mockResolvedValue([]);
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -38,7 +38,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
-jest.mock('../../alerts_table/hooks/use_bulk_get_maintenance_windows');
+jest.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows');
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
   loadExecutionLogAggregations: jest.fn(),
 }));
@@ -46,9 +46,9 @@ jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
 const mockAlertsTable = jest.fn(() => {
   return <div data-test-subj="alertsTable" />;
 });
-jest.mock('../../alerts_table/alerts_table_state', () => ({
+jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
   __esModule: true,
-  AlertsTableState: mockAlertsTable,
+  AlertsTable: mockAlertsTable,
   default: mockAlertsTable,
 }));
 
@@ -71,7 +71,7 @@ const ruleTypeR: RuleTypeModel = {
 };
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindows as jest.Mock;
+const useBulkGetMaintenanceWindowsMock = useBulkGetMaintenanceWindowsQuery as jest.Mock;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -89,7 +89,7 @@ const mockAPIs = {
 };
 
 let capabilities: Capabilities;
-const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+const maintenanceWindowsMap = getMaintenanceWindowsMock();
 
 beforeAll(async () => {
   jest.clearAllMocks();
@@ -300,7 +300,7 @@ describe('rules', () => {
       enabled: false,
     });
     const ruleType = mockRuleType({
-      hasFieldsForAAD: true,
+      hasAlertsMappings: true,
     });
     const ruleSummary = mockRuleSummary();
     jest.setSystemTime(fake2MinutesAgo);
@@ -603,6 +603,7 @@ function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
     category: 'my-category',
+    isExportable: true,
     ...overloads,
   };
 }

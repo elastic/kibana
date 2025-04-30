@@ -89,4 +89,3 @@ export {
   getRestApiKeyWithKibanaPrivilegesSchema,
 } from './src/authentication';
 export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './src/authorization';
-export { ApiOperation } from './src/authorization';

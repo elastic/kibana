@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RawAlertInstance } from '../../common';
-import { AlertingConfig } from '../config';
+import type { RawAlertInstance } from '../../common';
+import type { AlertingConfig } from '../config';
 
 interface Resolvable<T> {
   resolve: (arg: T) => void;
@@ -71,6 +71,7 @@ export function generateAlertingConfig(): AlertingConfig {
         },
       },
     },
-    rulesSettings: { cacheInterval: 60000 },
+    rulesSettings: { enabled: true, cacheInterval: 60000 },
+    maintenanceWindow: { enabled: true },
   };
 }

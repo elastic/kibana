@@ -2,8 +2,8 @@
 
 exports[`EmptyIndexListPrompt should render normally 1`] = `
 <EuiPanel
-  className="inpEmptyState"
   color="subdued"
+  css="unknown styles"
   data-test-subj="indexPatternEmptyState"
   hasShadow={false}
   paddingSize="xl"

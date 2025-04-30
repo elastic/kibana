@@ -21,3 +21,4 @@
 .buildkite/scripts/steps/checks/styled_components_mapping.sh
 .buildkite/scripts/steps/checks/dependencies_missing_owner.sh
 .buildkite/scripts/steps/checks/validate_pipelines.sh
+.buildkite/scripts/steps/checks/check_scout_config.sh

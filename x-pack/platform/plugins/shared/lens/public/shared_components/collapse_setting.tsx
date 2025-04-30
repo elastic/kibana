@@ -21,9 +21,11 @@ const options = [
 export function CollapseSetting({
   value,
   onChange,
+  display,
 }: {
   value: string;
   onChange: (value: CollapseFunction) => void;
+  display?: 'rowCompressed' | 'columnCompressed';
 }) {
   return (
     <>
@@ -45,7 +47,7 @@ export function CollapseSetting({
             </span>
           </EuiToolTip>
         }
-        display="rowCompressed"
+        display={display ?? 'rowCompressed'}
         fullWidth
       >
         <EuiSelect

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './toolbar.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -35,8 +34,9 @@ import {
   isCollapsed,
 } from './visualization';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { getSortedAccessorsForGroup } from './to_expression';
 
-type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
+export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;
   palettes: KbnPalettes;
   isDarkMode: boolean;
@@ -103,9 +103,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return null;
   }
 
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (id) => !isCollapsed(id, currentLayer)
+  const originalGroupOrder = getSortedAccessorsForGroup(
+    props.datasource,
+    currentLayer,
+    'primaryGroups'
   );
+  const firstNonCollapsedColumnId = originalGroupOrder.find((id) => !isCollapsed(id, currentLayer));
 
   const showColorPicker =
     currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
@@ -130,7 +133,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentLayer.colorMapping
   );
   const table = props.frame.activeData?.[currentLayer.layerId];
-  const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
+  const splitCategories = getColorCategories(table?.rows, props.accessor);
 
   return (
     <>

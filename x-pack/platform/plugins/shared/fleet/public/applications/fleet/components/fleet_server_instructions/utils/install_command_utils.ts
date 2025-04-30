@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { DownloadSource, FleetProxy } from '../../../../../../common/types';
+import type { DownloadSource, FleetProxy, FleetServerHost } from '../../../../../../common/types';
 import {
   getDownloadBaseUrl,
   getDownloadSourceProxyArgs,
 } from '../../../../../components/enrollment_instructions/manual';
 import type { PLATFORM_TYPE } from '../../../hooks';
+import { PLATFORM_WITH_INSTALL_SERVERS } from '../../../hooks';
 
 export type CommandsByPlatform = {
   [key in PLATFORM_TYPE]: string;
@@ -34,18 +35,32 @@ function getArtifact(
     : '';
 
   const artifactMap: Record<PLATFORM_TYPE, { downloadCommand: string }> = {
-    linux: {
+    linux_aarch64: {
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-arm64.tar.gz${appendCurlDownloadSourceProxyArgs}`,
+        `tar xzvf elastic-agent-${kibanaVersion}-linux-arm64.tar.gz`,
+        `cd elastic-agent-${kibanaVersion}-linux-arm64`,
+      ].join(`\n`),
+    },
+    linux_x86_64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz${appendCurlDownloadSourceProxyArgs}`,
         `tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
         `cd elastic-agent-${kibanaVersion}-linux-x86_64`,
       ].join(`\n`),
     },
-    mac: {
+    mac_aarch64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz${appendCurlDownloadSourceProxyArgs}`,
         `tar xzvf elastic-agent-${kibanaVersion}-darwin-aarch64.tar.gz`,
         `cd elastic-agent-${kibanaVersion}-darwin-aarch64`,
+      ].join(`\n`),
+    },
+    mac_x86_64: {
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz${appendCurlDownloadSourceProxyArgs}`,
+        `tar xzvf elastic-agent-${kibanaVersion}-darwin-x86_64.tar.gz`,
+        `cd elastic-agent-${kibanaVersion}-darwin-x86_64`,
       ].join(`\n`),
     },
     windows: {
@@ -56,16 +71,34 @@ function getArtifact(
         `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
       ].join(`\n`),
     },
-    deb: {
+    windows_msi: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb${appendCurlDownloadSourceProxyArgs}`,
-        `sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
+        `$ProgressPreference = 'SilentlyContinue'`,
+        `Invoke-WebRequest -Uri ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.msi -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.msi${appendWindowsDownloadSourceProxyArgs}`,
       ].join(`\n`),
     },
-    rpm: {
+    deb_aarch64: {
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-arm64.deb${appendCurlDownloadSourceProxyArgs}`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-${kibanaVersion}-arm64.deb`,
+      ].join(`\n`),
+    },
+    deb_x86_64: {
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb${appendCurlDownloadSourceProxyArgs}`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
+      ].join(`\n`),
+    },
+    rpm_aarch64: {
+      downloadCommand: [
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-aarch64.rpm${appendCurlDownloadSourceProxyArgs}`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-${kibanaVersion}-aarch64.rpm`,
+      ].join(`\n`),
+    },
+    rpm_x86_64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm${appendCurlDownloadSourceProxyArgs}`,
-        `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
       ].join(`\n`),
     },
     kubernetes: {
@@ -94,21 +127,21 @@ export function getInstallCommandForPlatform({
   esOutputProxy?: FleetProxy | undefined;
   serviceToken: string;
   policyId?: string;
-  fleetServerHost?: string;
+  fleetServerHost?: FleetServerHost | null;
   isProductionDeployment?: boolean;
   sslCATrustedFingerprint?: string;
   kibanaVersion?: string;
   downloadSource?: DownloadSource;
   downloadSourceProxy?: FleetProxy;
 }): string {
-  const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
+  const newLineSeparator = platform === 'windows' || platform === 'windows_msi' ? '`\n' : '\\\n';
 
   const artifact = getArtifact(platform, kibanaVersion ?? '', downloadSource, downloadSourceProxy);
 
   const commandArguments = [];
 
   if (isProductionDeployment && fleetServerHost) {
-    commandArguments.push(['url', fleetServerHost]);
+    commandArguments.push(['url', fleetServerHost?.host_urls[0]]);
   }
 
   commandArguments.push(['fleet-server-es', esOutputHost]);
@@ -122,15 +155,30 @@ export function getInstallCommandForPlatform({
   }
 
   if (isProductionDeployment) {
-    commandArguments.push(['certificate-authorities', '<PATH_TO_CA>']);
+    const certificateAuthorities = fleetServerHost?.ssl?.certificate_authorities
+      ? `'${fleetServerHost?.ssl?.certificate_authorities}'`
+      : '<PATH_TO_CA>';
+    const fleetServerCert = fleetServerHost?.ssl?.certificate
+      ? `'${fleetServerHost?.ssl?.certificate}'`
+      : '<PATH_TO_FLEET_SERVER_CERT>';
+
+    commandArguments.push(['certificate-authorities', certificateAuthorities]);
+
     if (!sslCATrustedFingerprint) {
-      commandArguments.push(['fleet-server-es-ca', '<PATH_TO_ES_CERT>']);
+      const esCert = fleetServerHost?.ssl?.es_certificate
+        ? `'${fleetServerHost?.ssl?.es_certificate}'`
+        : '<PATH_TO_ES_CERT>';
+      commandArguments.push(['fleet-server-es-ca', esCert]);
     }
-    commandArguments.push(['fleet-server-cert', '<PATH_TO_FLEET_SERVER_CERT>']);
+    commandArguments.push(['fleet-server-cert', fleetServerCert]);
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
   }
 
   commandArguments.push(['fleet-server-port', '8220']);
+
+  if (PLATFORM_WITH_INSTALL_SERVERS.includes(platform)) {
+    commandArguments.push(['install-servers']);
+  }
 
   const enrollmentProxyArgs = [];
   if (esOutputProxy) {
@@ -151,11 +199,16 @@ export function getInstallCommandForPlatform({
     .trim();
 
   const commands = {
-    linux: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
-    mac: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
+    linux_aarch64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
+    linux_x86_64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
+    mac_aarch64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
+    mac_x86_64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
-    deb: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
-    rpm: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
+    windows_msi: `${artifact.downloadCommand}\n.\\elastic-agent.msi --% INSTALLARGS="${commandArgumentsStr}"`,
+    deb_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
+    deb_x86_64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
+    rpm_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
+    rpm_x86_64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     kubernetes: '',
     cloudFormation: '',
     googleCloudShell: '',

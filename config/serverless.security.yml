@@ -1,18 +1,13 @@
 # Security Project config
 
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'security']
+
+# Ess plugins
+xpack.securitySolutionEss.enabled: false
+
 ## Disable plugins
-enterpriseSearch.enabled: false
-xpack.apm.enabled: false
-xpack.infra.enabled: false
-xpack.observabilityLogsExplorer.enabled: false
-xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
-xpack.search.notebooks.enabled: false
-xpack.searchPlayground.enabled: false
-xpack.searchInferenceEndpoints.enabled: false
-xpack.inventory.enabled: false
-xpack.searchIndices.enabled: false
-xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -43,6 +38,33 @@ xpack.features.overrides:
           privileges: [ "all" ]
         - feature: "maps_v2"
           privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siem:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+        - feature: "maps_v2"
+          privileges: [ "all" ]
         - feature: "savedQueryManagement"
           privileges: [ "all" ]
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
@@ -58,33 +80,6 @@ xpack.features.overrides:
         - feature: "maps_v2"
           privileges: [ "read" ]
         - feature: "savedQueryManagement"
-          privileges: [ "read" ]
-
-  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
-  siem:
-    privileges:
-      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
-      ### Visualize features.
-      all.composedOf:
-        - feature: "discover"
-          privileges: [ "all" ]
-        - feature: "dashboard"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-        - feature: "maps"
-          privileges: [ "all" ]
-      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
-      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
-      ### Dashboard, and Visualize apps.
-      read.composedOf:
-        - feature: "discover"
-          privileges: [ "read" ]
-        - feature: "dashboard"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-        - feature: "maps"
           privileges: [ "read" ]
 
 ## Cloud settings
@@ -107,9 +102,6 @@ newsfeed.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
-
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
@@ -175,9 +167,8 @@ console.ui.embeddedEnabled: false
 # Enable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: true
 
-# Experimental Security Solution features
+# Increase task manager capacity because security projects have more resources (Memory and CPU)
+xpack.task_manager.capacity: 20
 
-# These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental: 
-  - entityStoreDisabled
-  - siemMigrationsDisabled
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true

@@ -44,19 +44,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'enterpriseSearch',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearch',
-        });
 
-        // check the Content > Indices section
+        // check the Data > Indices section
         await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'management:index_management',
+          deepLinkId: 'elasticsearchIndexManagement',
         });
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'management:index_management',
+          deepLinkId: 'elasticsearchIndexManagement',
         });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Indices',
@@ -64,9 +61,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // navigate to a different section
         await solutionNavigation.sidenav.openSection('project_settings_project_nav');
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
@@ -74,7 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'enterpriseSearch',
         });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearch',
+          text: 'Data',
         });
 
         await expectNoPageReload();

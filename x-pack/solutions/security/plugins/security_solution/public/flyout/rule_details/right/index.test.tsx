@@ -12,7 +12,7 @@ import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
 import { useRuleDetailsLink } from '../../document_details/shared/hooks/use_rule_details_link';
 import { RulePanel } from '.';
-import { getStepsData } from '../../../detections/pages/detection_engine/rules/helpers';
+import { getStepsData } from '../../../detection_engine/common/helpers';
 import { useRuleDetails } from '../hooks/use_rule_details';
 import {
   mockAboutStepRule,
@@ -23,14 +23,14 @@ import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { BODY_TEST_ID, LOADING_TEST_ID } from './test_ids';
 import { RULE_PREVIEW_FOOTER_TEST_ID } from '../preview/test_ids';
 import type {
-  FlyoutPanelProps,
-  ExpandableFlyoutState,
   ExpandableFlyoutApi,
+  ExpandableFlyoutState,
+  FlyoutPanelHistory,
 } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
-  useExpandableFlyoutState,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 
 jest.mock('../../document_details/shared/hooks/use_rule_details_link');
@@ -39,7 +39,7 @@ const mockUseRuleDetails = useRuleDetails as jest.Mock;
 jest.mock('../hooks/use_rule_details');
 
 const mockGetStepsData = getStepsData as jest.Mock;
-jest.mock('../../../detections/pages/detection_engine/rules/helpers');
+jest.mock('../../../detection_engine/common/helpers');
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -51,7 +51,9 @@ const flyoutContextValue = {
   closeLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-const flyoutHistory = [{ id: 'id1', params: {} }] as unknown as FlyoutPanelProps[];
+const flyoutHistory: FlyoutPanelHistory[] = [
+  { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
+];
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 const rule = { name: 'rule name', description: 'rule description' } as RuleResponse;

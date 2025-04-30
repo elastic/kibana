@@ -21,15 +21,16 @@ describe('RowCellsRenderer', () => {
 
   const originalRenderCellValue = jest.fn(getRenderCellValueMock(testData));
 
+  const getRenderCellValueWrappedMock = () =>
+    jest.fn(wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue, 'black', 'green'));
+
   beforeEach(() => {
     originalRenderCellValue.mockClear();
   });
 
   it('renders cells in row 0', async () => {
     const onRowProcessed = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const rowIndex = 0;
     const inTableSearchTerm = 'a';
@@ -61,9 +62,7 @@ describe('RowCellsRenderer', () => {
 
   it('renders cells in row 1', async () => {
     const onRowProcessed = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const rowIndex = 1;
     const inTableSearchTerm = 'bb';
@@ -96,9 +95,7 @@ describe('RowCellsRenderer', () => {
 
   it('should call onRowProcessed even in case of errors', async () => {
     const onRowProcessed = jest.fn();
-    const renderCellValue = jest.fn(
-      wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
-    );
+    const renderCellValue = getRenderCellValueWrappedMock();
     const visibleColumns = ['columnA', 'columnB'];
     const rowIndex = 3;
     const inTableSearchTerm = 'test';

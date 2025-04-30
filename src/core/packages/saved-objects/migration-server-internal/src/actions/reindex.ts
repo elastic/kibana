@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
+import * as Option from 'fp-ts/Option';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -62,29 +62,27 @@ export const reindex =
         // Require targetIndex to be an alias. Prevents a new index from being
         // created if targetIndex doesn't exist.
         require_alias: requireAlias,
-        body: {
-          // Ignore version conflicts from existing documents
-          conflicts: 'proceed',
-          source: {
-            index: sourceIndex,
-            // Set reindex batch size
-            size: batchSize,
-            // Exclude saved object types
-            query: excludeOnUpgradeQuery,
-          },
-          dest: {
-            index: targetIndex,
-            // Don't override existing documents, only create if missing
-            op_type: 'create',
-          },
-          script: Option.fold<string, undefined | { source: string; lang: 'painless' }>(
-            () => undefined,
-            (script) => ({
-              source: script,
-              lang: 'painless',
-            })
-          )(reindexScript),
+        // Ignore version conflicts from existing documents
+        conflicts: 'proceed',
+        source: {
+          index: sourceIndex,
+          // Set reindex batch size
+          size: batchSize,
+          // Exclude saved object types
+          query: excludeOnUpgradeQuery,
         },
+        dest: {
+          index: targetIndex,
+          // Don't override existing documents, only create if missing
+          op_type: 'create',
+        },
+        script: Option.fold<string, undefined | { source: string; lang: 'painless' }>(
+          () => undefined,
+          (script) => ({
+            source: script,
+            lang: 'painless',
+          })
+        )(reindexScript),
         // force a refresh so that we can query the target index
         refresh: true,
         // Create a task and return task id instead of blocking until complete

@@ -37,12 +37,15 @@ import type {
   SLOPublicStart,
 } from './types';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
+import { registerSloUiActions } from './ui_actions/register_ui_actions';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2: { enabled: false },
+  };
 
   constructor(private readonly initContext: PluginInitializerContext<SLOConfig>) {
     this.experimentalFeatures =
@@ -177,14 +180,7 @@ export class SLOPlugin
           });
         });
 
-        const registerAsyncSloUiActions = async () => {
-          if (plugins.uiActions) {
-            const { registerSloUiActions } = await import('./ui_actions');
-
-            registerSloUiActions(plugins.uiActions, coreStart, pluginsStart, sloClient);
-          }
-        };
-        registerAsyncSloUiActions();
+        registerSloUiActions(plugins.uiActions, coreStart, pluginsStart, sloClient);
       }
     };
     registerEmbeddables();

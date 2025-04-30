@@ -44,6 +44,8 @@ import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/packag
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
 import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
+import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/privilege_monitoring_data_client.mock';
+import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -76,6 +78,7 @@ export const createMockClients = () => {
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
     entityStoreDataClient: entityStoreDataClientMock.create(),
+    privilegeMonitorDataClient: privilegeMonitorDataClientMock.create(),
 
     internalFleetServices: {
       packages: packageServiceMock.createClient(),
@@ -83,6 +86,7 @@ export const createMockClients = () => {
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     getInferenceClient: jest.fn(),
     assetInventoryDataClient: AssetInventoryDataClientMock.create(),
+    productFeaturesService: createProductFeaturesServiceMock(),
   };
 };
 
@@ -168,10 +172,13 @@ const createSecuritySolutionRequestContextMock = (
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),
     getDataViewsService: jest.fn(),
+    getEntityStoreApiKeyManager: jest.fn(),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
+    getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
+    getProductFeatureService: jest.fn(() => clients.productFeaturesService),
   };
 };
 

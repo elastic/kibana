@@ -18,22 +18,12 @@ export const mockMl = mlPluginServerMock.createSetupContract();
 
 export const mockConfig: ConfigType = {
   enabled: true,
-  host: 'http://localhost:3002',
-  accessCheckTimeout: 5000,
-  accessCheckTimeoutWarning: 300,
-  ssl: {
-    verificationMode: 'none',
-  },
   hasConnectors: true,
   hasDefaultIngestPipeline: true,
   hasDocumentLevelSecurityEnabled: true,
   hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
-  isCloud: false,
-  ui: {
-    enabled: true,
-  },
 };
 
 /**

@@ -304,6 +304,107 @@ describe('PackagePolicyInputPanel', () => {
         ],
       },
     },
+    // Duplicated items to make sure they show up in the UI as we now only show multiple switches/descriptions when theres more than one input
+    {
+      input: 'logfile',
+      title: 'Sample logs hidden in agentless (duplicated)',
+      template_path: 'stream.yml.hbs',
+      vars: [
+        {
+          name: 'paths',
+          type: 'text',
+          title: 'Paths',
+          multi: false,
+          default: ['/var/log/*.log'],
+          required: false,
+          show_user: true,
+          hide_in_deployment_modes: ['agentless'],
+        },
+      ],
+      description: 'Collect sample logs - hidden in agentless',
+      data_stream: {
+        title: 'Default data stream',
+        release: 'ga',
+        type: 'logs',
+        package: 'agentless_test_package',
+        dataset: 'agentless_test_package.default_data_stream',
+        path: 'default_data_stream',
+        elasticsearch: {
+          'ingest_pipeline.name': 'default',
+        },
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            title: 'Sample logs hidden in agentless',
+            template_path: 'stream.yml.hbs',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: false,
+                default: ['/var/log/*.log'],
+                required: false,
+                show_user: true,
+                hide_in_deployment_modes: ['agentless'],
+              },
+            ],
+            description: 'Collect sample logs - hidden in agentless',
+          },
+        ],
+      },
+    },
+    {
+      input: 'logfile',
+      title: 'Sample logs on Agentless (duplicated)',
+      template_path: 'stream.yml.hbs',
+      vars: [
+        {
+          name: 'paths',
+          type: 'text',
+          title: 'Paths',
+          multi: true,
+          default: ['/var/log/*.log'],
+          required: false,
+          show_user: true,
+          hide_in_deployment_modes: ['default'],
+        },
+      ],
+      description: 'Collect sample logs on Agentless only',
+      data_stream: {
+        title: 'Logs Stream on Agentless',
+        release: 'ga',
+        type: 'logs',
+        package: 'agentless_test_package',
+        dataset: 'agentless_test_package.logs_stream',
+        path: 'logs_stream',
+        elasticsearch: {
+          'ingest_pipeline.name': 'default',
+        },
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            title: 'Sample logs on Agentless',
+            template_path: 'stream.yml.hbs',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                default: ['/var/log/*.log'],
+                required: false,
+                show_user: true,
+                hide_in_deployment_modes: ['default'],
+              },
+            ],
+            description: 'Collect sample logs on Agentless only',
+          },
+        ],
+      },
+    },
   ];
   const mockUpdatePackagePolicyInput = jest.fn().mockImplementation((val: any) => {
     return undefined;
@@ -360,8 +461,11 @@ describe('PackagePolicyInputPanel', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: true,
+        isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isServerless: false,
+        isCloud: true,
       });
     });
 
@@ -392,8 +496,11 @@ describe('PackagePolicyInputPanel', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
+        isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
+        isServerless: false,
+        isCloud: false,
       });
     });
 
@@ -418,6 +525,18 @@ describe('PackagePolicyInputPanel', () => {
         ).toBeInTheDocument();
       });
     });
+    it('should not render multiple toggles when theres only one stream', async () => {
+      //  Only send one input and then it should not be rendered, only the top level switch should render
+      render(mockPackageInfo, mockPackageInputStreams.slice(0, 1));
+      await waitFor(async () => {
+        expect(
+          await renderResult.findByTestId('PackagePolicy.InputStreamConfig.Switch')
+        ).toBeInTheDocument();
+        expect(
+          await renderResult.queryByText('Sample logs hidden in agentless')
+        ).not.toBeInTheDocument();
+      });
+    });
 
     it('should render inputs when hide_in_deployment_modes is not present', async () => {
       const packageInputStreams: RegistryStreamWithDataStream[] = [
@@ -437,6 +556,55 @@ describe('PackagePolicyInputPanel', () => {
             },
           ],
           description: 'Collect sample logs',
+          data_stream: {
+            title: 'Default data stream',
+            release: 'ga',
+            type: 'logs',
+            package: 'agentless_test_package',
+            dataset: 'agentless_test_package.default_data_stream',
+            path: 'default_data_stream',
+            elasticsearch: {
+              'ingest_pipeline.name': 'default',
+            },
+            ingest_pipeline: 'default',
+            streams: [
+              {
+                input: 'logfile',
+                title: 'Sample logs',
+                template_path: 'stream.yml.hbs',
+                vars: [
+                  {
+                    name: 'paths',
+                    type: 'text',
+                    title: 'Paths',
+                    multi: false,
+                    default: ['/var/log/*.log'],
+                    required: false,
+                    show_user: true,
+                  },
+                ],
+                description: 'Collect sample log - hidden in agentless',
+              },
+            ],
+          },
+        },
+        //  Duplicated items to make sure they show up in the UI as we now only show multiple switches/descriptions when theres more than one input
+        {
+          input: 'logfile',
+          title: 'Sample logs (duplicated)',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              default: ['/var/log/*.log'],
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Collect sample logs (duplicated)',
           data_stream: {
             title: 'Default data stream',
             release: 'ga',
@@ -514,7 +682,7 @@ describe('PackagePolicyInputPanel', () => {
         ).toBeInTheDocument();
       });
       await waitFor(async () => {
-        expect(await renderResult.findByText('Sample logs')).toBeInTheDocument();
+        expect(await renderResult.queryByText('Sample logs')).toBeInTheDocument();
       });
       await waitFor(async () => {
         expect(await renderResult.findByText('Collect sample logs')).toBeInTheDocument();

@@ -19,6 +19,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
+import {
+  KIBANA_GROUPS,
+  type KibanaGroup,
+  type ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
@@ -67,8 +72,8 @@ export const PackageCommand: GenerateCommand = {
 
     const web = !!flags.web;
     const dev = !!flags.dev;
-    let group: 'platform' | 'observability' | 'security' | 'search' = 'platform';
-    let visibility: 'private' | 'shared' = 'private';
+    let group: KibanaGroup = 'platform';
+    let visibility: ModuleVisibility = 'private';
     let calculatedPackageDir: string;
 
     const owner =
@@ -88,19 +93,35 @@ export const PackageCommand: GenerateCommand = {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
     }
 
+    let isCliScript = false;
     if (dev) {
+      isCliScript = (
+        await inquirer.prompt<{ cli: boolean }>({
+          type: 'list',
+          default: false,
+          choices: [
+            { name: 'Yes, it can go in /packages', value: true },
+            { name: 'No, it will be used from platform / solutions code', value: false },
+          ],
+          name: 'cli',
+          message: `Is the package going to be used exclusively from tooling / CLI scripts?`,
+        })
+      ).cli;
+    }
+
+    if (isCliScript) {
       calculatedPackageDir = determineDevPackageDir(pkgId);
     } else {
       group = (
         await inquirer.prompt<{
-          group: 'platform' | 'observability' | 'security' | 'search';
+          group: KibanaGroup;
         }>({
           type: 'list',
           choices: [
-            { name: 'Platform', value: 'platform' },
-            { name: 'Observability', value: 'observability' },
-            { name: 'Security', value: 'security' },
-            { name: 'Search', value: 'search' },
+            ...KIBANA_GROUPS.map((groupName) => ({
+              name: groupName,
+              value: groupName,
+            })),
           ],
           name: 'group',
           message: `What group is this package part of?`,
@@ -127,7 +148,7 @@ export const PackageCommand: GenerateCommand = {
 
       visibility = (
         await inquirer.prompt<{
-          visibility: 'private' | 'shared';
+          visibility: ModuleVisibility;
         }>({
           type: 'list',
           choices: [

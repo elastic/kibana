@@ -339,9 +339,31 @@
         "label": "RuleForm",
         "description": [],
         "signature": [
-          "(props: ",
-          "RuleFormProps",
-          ") => React.JSX.Element"
+          "<MetaData extends ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeMetaData",
+            "text": "RuleTypeMetaData"
+          },
+          " = ",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.RuleTypeMetaData",
+            "text": "RuleTypeMetaData"
+          },
+          ">(props: ",
+          {
+            "pluginId": "@kbn/response-ops-rule-form",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsRuleFormPluginApi",
+            "section": "def-public.RuleFormProps",
+            "text": "RuleFormProps"
+          },
+          "<MetaData>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
         "deprecated": false,
@@ -355,7 +377,14 @@
             "label": "props",
             "description": [],
             "signature": [
-              "RuleFormProps"
+              {
+                "pluginId": "@kbn/response-ops-rule-form",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsRuleFormPluginApi",
+                "section": "def-public.RuleFormProps",
+                "text": "RuleFormProps"
+              },
+              "<MetaData>"
             ],
             "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
@@ -1545,6 +1574,390 @@
             "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormPlugins.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.RuleFormProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleFormProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-rule-form",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsRuleFormPluginApi",
+            "section": "def-public.RuleFormProps",
+            "text": "RuleFormProps"
+          },
+          "<MetaData>"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-rule-form",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsRuleFormPluginApi",
+                "section": "def-public.RuleFormPlugins",
+                "text": "RuleFormPlugins"
+              }
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.ruleTypeId",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.isFlyout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isFlyout",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.onSubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onSubmit",
+            "description": [],
+            "signature": [
+              "((ruleId: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-rule-form",
+                "id": "def-public.RuleFormProps.onSubmit.$1",
+                "type": "string",
+                "tags": [],
+                "label": "ruleId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.onChangeMetaData",
+            "type": "Function",
+            "tags": [],
+            "label": "onChangeMetaData",
+            "description": [],
+            "signature": [
+              "((metadata: MetaData) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-rule-form",
+                "id": "def-public.RuleFormProps.onChangeMetaData.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "metadata",
+                "description": [],
+                "signature": [
+                  "MetaData"
+                ],
+                "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.consumer",
+            "type": "string",
+            "tags": [],
+            "label": "consumer",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.connectorFeatureId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorFeatureId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.multiConsumerSelection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "multiConsumerSelection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.RuleCreationValidConsumer",
+                "text": "RuleCreationValidConsumer"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.hideInterval",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideInterval",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.validConsumers",
+            "type": "Array",
+            "tags": [],
+            "label": "validConsumers",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rule-data-utils",
+                "scope": "common",
+                "docId": "kibKbnRuleDataUtilsPluginApi",
+                "section": "def-common.RuleCreationValidConsumer",
+                "text": "RuleCreationValidConsumer"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.filteredRuleTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "filteredRuleTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.shouldUseRuleProducer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldUseRuleProducer",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.canShowConsumerSelection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canShowConsumerSelection",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.showMustacheAutocompleteSwitch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showMustacheAutocompleteSwitch",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.initialValues",
+            "type": "Object",
+            "tags": [],
+            "label": "initialValues",
+            "description": [],
+            "signature": [
+              "Partial<Omit<",
+              {
+                "pluginId": "@kbn/response-ops-rule-form",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsRuleFormPluginApi",
+                "section": "def-public.RuleFormData",
+                "text": "RuleFormData"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ">, \"ruleTypeId\">> | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.initialMetadata",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "initialMetadata",
+            "description": [],
+            "signature": [
+              "MetaData | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-rule-form",
+            "id": "def-public.RuleFormProps.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1564,7 +1977,7 @@
             "section": "def-public.RuleFormState",
             "text": "RuleFormState"
           },
-          "<Params>"
+          "<Params, MetaData>"
         ],
         "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
@@ -1669,10 +2082,10 @@
           },
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
-            "id": "def-public.RuleFormState.aadTemplateFields",
+            "id": "def-public.RuleFormState.alertFields",
             "type": "Array",
             "tags": [],
-            "label": "aadTemplateFields",
+            "label": "alertFields",
             "description": [],
             "signature": [
               {
@@ -1875,12 +2288,12 @@
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
             "id": "def-public.RuleFormState.metadata",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "metadata",
             "description": [],
             "signature": [
-              "Record<string, unknown> | undefined"
+              "MetaData | undefined"
             ],
             "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
@@ -2353,7 +2766,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -2559,7 +2972,8 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
-              }
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
             "deprecated": false,
@@ -2698,6 +3112,22 @@
       },
       {
         "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.NOTIFY_WHEN_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "NOTIFY_WHEN_OPTIONS",
+        "description": [],
+        "signature": [
+          "NotifyWhenSelectOptions",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
         "id": "def-public.ResolvedRule",
         "type": "Type",
         "tags": [],
@@ -2783,6 +3213,21 @@
             "text": "RuleTypeWithDescription"
           },
           ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.RuleTypeMetaData",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeMetaData",
+        "description": [],
+        "signature": [
+          "{ [x: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/rule_types.ts",
         "deprecated": false,

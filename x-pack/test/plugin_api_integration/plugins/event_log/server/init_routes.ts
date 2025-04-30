@@ -25,6 +25,12 @@ export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger
   router.post(
     {
       path: `/api/log_event_fixture/{id}/_log`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         // removed validation as schema is currently broken in tests
         // blocked by: https://github.com/elastic/kibana/issues/61652
@@ -67,6 +73,12 @@ export const registerProviderActionsRoute = (
   router.post(
     {
       path: '/api/log_event_fixture/{provider}/_registerProviderActions',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: (value) => ({ value }),
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
@@ -99,6 +111,12 @@ export const isProviderActionRegisteredRoute = (
   router.get(
     {
       path: `/api/log_event_fixture/{provider}/{action}/_isProviderActionRegistered`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
@@ -128,6 +146,12 @@ export const getProviderActionsRoute = (
   router.get(
     {
       path: `/api/log_event_fixture/{provider}/getProviderActions`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
       },
@@ -155,6 +179,12 @@ export const isIndexingEntriesRoute = (
   router.get(
     {
       path: `/api/log_event_fixture/isIndexingEntries`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -176,6 +206,12 @@ export const isEventLogServiceEnabledRoute = (
   router.get(
     {
       path: `/api/log_event_fixture/isEventLogServiceEnabled`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -197,6 +233,12 @@ export const isEventLogServiceLoggingEntriesRoute = (
   router.get(
     {
       path: `/api/log_event_fixture/isEventLogServiceLoggingEntries`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -214,6 +256,12 @@ export const getEventLogRoute = (router: IRouter, core: CoreSetup<EventLogFixtur
   router.get(
     {
       path: '/_test/event_log/{type}/{id}/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -252,6 +300,12 @@ export const getEventLogByIdsRoute = (
   router.post(
     {
       path: '/_test/event_log/{type}/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

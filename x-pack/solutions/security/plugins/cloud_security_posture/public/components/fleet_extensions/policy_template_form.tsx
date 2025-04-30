@@ -63,7 +63,6 @@ import {
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import {
   GCP_CREDENTIALS_TYPE,
-  GCP_SETUP_ACCESS,
   gcpField,
   getInputVarsFields,
 } from './gcp_credentials_form/gcp_credential_form';
@@ -198,7 +197,7 @@ const AwsAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -304,7 +303,7 @@ const GcpAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -444,7 +443,7 @@ const AzureAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
   setupTechnology: SetupTechnology;
@@ -549,7 +548,7 @@ const useEnsureDefaultNamespace = ({
 }: {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
 }) => {
   useEffect(() => {
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
@@ -573,7 +572,7 @@ const usePolicyTemplateInitialName = ({
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
   useEffect(() => {
@@ -587,14 +586,18 @@ const usePolicyTemplateInitialName = ({
 
     const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
 
-    if (newPolicy.name === currentIntegrationName) {
-      return;
-    }
-
-    updatePolicy({
-      ...newPolicy,
-      name: currentIntegrationName,
-    });
+    /*
+     * If 'packagePolicyListByIntegration' is undefined it means policies were still not feteched - Array.isArray(undefined) = false
+     * if policie were fetched its an array - the check will return true
+     */
+    const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
+    updatePolicy(
+      {
+        ...newPolicy,
+        name: currentIntegrationName,
+      },
+      isPoliciesLoaded
+    );
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -630,7 +633,7 @@ const useCloudFormationTemplate = ({
 }: {
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
 }) => {
   useEffect(() => {
     const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
@@ -727,7 +730,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           'gcp.credentials.type': {
             value: isAgentless
               ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
-              : GCP_SETUP_ACCESS.CLOUD_SHELL,
+              : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
           },
         },
@@ -745,8 +748,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     };
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy) => {
-        onChange({ isValid, updatedPolicy });
+      (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
+        onChange({ isValid, updatedPolicy, isExtensionLoaded });
       },
       [onChange, isValid]
     );
@@ -976,6 +979,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
         {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
+            showLimitationsMessage={!isServerless}
             disabled={isEditPage}
             setupTechnology={setupTechnology}
             onSetupTechnologyChange={(value) => {

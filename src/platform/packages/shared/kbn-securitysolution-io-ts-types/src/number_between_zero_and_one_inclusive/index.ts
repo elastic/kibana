@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/Either';
 
 /**
  * Types a number between 0 and 1 inclusive. Useful for specifying a probability, weighting, etc.

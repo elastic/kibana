@@ -78,6 +78,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
     mutate(data, !!isEdit);
   }, [form, isEdit, mutate]);
 
+  const isPreconfigured = inferenceEndpoint?.config.inferenceId.startsWith('.');
+
   return (
     <EuiFlyout
       ownFocus
@@ -92,27 +94,30 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <Form form={form}>
-          <InferenceServiceFormFields http={http} toasts={toasts} isEdit={isEdit} />
+          <InferenceServiceFormFields
+            http={http}
+            toasts={toasts}
+            isEdit={isEdit}
+            isPreconfigured={isPreconfigured}
+          />
           <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="success"
-                size="m"
-                isLoading={form.isSubmitting || isLoading}
-                disabled={
-                  (!form.isValid && form.isSubmitted) ||
-                  isLoading ||
-                  inferenceEndpoint?.config.inferenceId.startsWith('.') // Disable edit option for preconfigured endpoints
-                }
-                data-test-subj="inference-endpoint-submit-button"
-                onClick={handleSubmit}
-              >
-                {LABELS.SAVE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {isPreconfigured ? null : (
+            <EuiFlexGroup justifyContent="flexStart">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="success"
+                  size="m"
+                  isLoading={form.isSubmitting || isLoading}
+                  disabled={(!form.isValid && form.isSubmitted) || isLoading}
+                  data-test-subj="inference-endpoint-submit-button"
+                  onClick={handleSubmit}
+                >
+                  {LABELS.SAVE}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

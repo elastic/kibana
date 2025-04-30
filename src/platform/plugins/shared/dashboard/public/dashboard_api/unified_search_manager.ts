@@ -24,7 +24,7 @@ import {
   compareFilters,
   isFilterPinned,
 } from '@kbn/es-query';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
@@ -46,8 +46,9 @@ import {
 import { dataService } from '../services/kibana_services';
 import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
-import { DashboardCreationOptions, DashboardState } from './types';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { DashboardCreationOptions } from './types';
+import { DashboardState } from '../../common';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
@@ -357,11 +358,11 @@ export function initializeUnifiedSearchManager(
         });
         return {
           state: {
-            filters: filter ?? DEFAULT_DASHBOARD_INPUT.filters,
-            query: (query as Query) ?? DEFAULT_DASHBOARD_INPUT.query,
+            filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
+            query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
             refreshInterval: refreshInterval$.value,
             timeRange: timeRange$.value,
-            timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_INPUT.timeRestore,
+            timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
           },
           references,
         };

@@ -6,20 +6,20 @@
  */
 
 import React from 'react';
-import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
+import { type ComponentType as EnzymeComponentType, mount } from 'enzyme';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 
-import { StepRuleActions, stepActionsDefaultValue } from '.';
+import { stepActionsDefaultValue, StepRuleActions } from '.';
 import {
   defaultSchedule,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import { useRuleForms } from '../../../rule_creation_ui/pages/form';
 import type { FormHook } from '../../../../shared_imports';
-import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { ActionsStepRule } from '../../../common/types';
 import { FrequencyDescription } from './notification_action';
 
 jest.mock('../../../../common/lib/kibana', () => ({

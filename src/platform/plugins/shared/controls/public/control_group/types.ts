@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { PublishesESQLVariables } from '@kbn/esql-variables-types';
+import { PublishesESQLVariables } from '@kbn/esql-types';
 import { Filter } from '@kbn/es-query';
 import {
   HasSaveNotification,
@@ -65,7 +65,7 @@ export type ControlGroupApi = PresentationContainer &
     labelPosition: PublishingSubject<ControlLabelPosition>;
 
     asyncResetUnsavedChanges: () => Promise<void>;
-    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    controlFetch$: (controlUuid: string, onReload?: () => void) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
       onSave?: () => void;

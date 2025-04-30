@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subject, combineLatestWith } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatestWith } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -19,12 +19,13 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import type {
   SecuritySolutionAppWrapperFeature,
   SecuritySolutionCellRendererFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -42,8 +43,10 @@ import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
-import { updateAppLinks, type LinksPermissions } from './common/links';
-import { registerDeepLinksUpdater } from './common/links/deep_links';
+import {
+  applicationLinksUpdater,
+  type ApplicationLinksUpdateParams,
+} from './app/links/application_links_updater';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
@@ -77,7 +80,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _store?: SecurityAppStore;
   private _securityStoreForDiscover?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
-  private _alertsTableRegistered?: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -100,7 +102,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, triggersActionsUi, usageCollection, management, cases } = plugins;
+    const { home, usageCollection, management, cases } = plugins;
+    const { productFeatureKeys$ } = this.contract;
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
@@ -131,7 +134,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
 
         await this.registerActions(store, params.history, core, services);
-        await this.registerAlertsTableConfiguration(triggersActionsUi);
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
@@ -204,6 +206,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
       },
     });
+
+    productFeatureKeys$
+      .pipe(combineLatestWith(plugins.licensing.license$))
+      .subscribe(([productFeatureKeys, license]) => {
+        if (!productFeatureKeys || !license) {
+          return;
+        }
+
+        const shouldShowAssistantManagement =
+          productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
+          license?.hasAtLeast('enterprise');
+        const assistantManagementApp = management?.sections.section.kibana.getApp(
+          'securityAiAssistantManagement'
+        );
+
+        if (!shouldShowAssistantManagement) {
+          assistantManagementApp?.disable();
+        }
+      });
 
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
@@ -300,14 +322,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
-        cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
-        assets: new subPluginClasses.Assets(),
-        investigations: new subPluginClasses.Investigations(),
-        machineLearning: new subPluginClasses.MachineLearning(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        configurations: new subPluginClasses.Configurations(),
       };
     }
     return this._subPlugins;
@@ -325,7 +344,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
-      cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
@@ -339,12 +357,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       entityAnalytics: subPlugins.entityAnalytics.start(
         this.experimentalFeatures.riskScoringRoutesEnabled
       ),
-      assets: subPlugins.assets.start(),
-      investigations: subPlugins.investigations.start(),
-      machineLearning: subPlugins.machineLearning.start(),
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
+      configurations: subPlugins.configurations.start(),
     };
   }
 
@@ -406,25 +422,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(store, history, coreSetup, services);
+      await registerActions(store, history, coreSetup, services);
       this._actionsRegistered = true;
-    }
-  }
-
-  /**
-   * Registers the alerts tables configurations to the triggersActionsUi plugin.
-   */
-  private async registerAlertsTableConfiguration(
-    triggersActionsUi: TriggersAndActionsUIPublicPluginSetup
-  ) {
-    if (!this._alertsTableRegistered) {
-      const { registerAlertsTableConfiguration } =
-        await this.lazyRegisterAlertsTableConfiguration();
-      registerAlertsTableConfiguration(
-        triggersActionsUi.alertsTableConfigurationRegistry,
-        this.storage
-      );
-      this._alertsTableRegistered = true;
     }
   }
 
@@ -434,18 +433,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private async registerPluginUpdates(core: CoreStart, plugins: StartPlugins) {
     const { license$ } = plugins.licensing;
     const { capabilities } = core.application;
-    const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
+    const { upsellingService, solutionNavigationTree$ } = this.contract;
 
-    // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (
-      !hasAccessToSecuritySolution(capabilities) &&
-      !capabilities.securitySolutionCasesV2?.read_cases
-    ) {
-      this.appUpdater$.next(() => ({
-        status: AppStatus.inaccessible,
-        visibleIn: [],
-      }));
-      // no need to register the links updater when the plugin is inaccessible
+    // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
+    // This is necessary to hide security solution from the selectable solutions in the spaces UI
+    if (!hasAccessToSecuritySolution(capabilities)) {
+      this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      // no need to register the links updater when the plugin is inaccessible. return early
       return;
     }
 
@@ -453,27 +447,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const {
       appLinks: initialAppLinks,
       getFilteredLinks,
-      solutionAppLinksSwitcher,
+      registerDeepLinksUpdater,
     } = await this.lazyApplicationLinks();
 
-    registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$);
+    registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
 
-    const appLinksToUpdate$ = new Subject<AppLinkItems>();
-    appLinksToUpdate$.next(initialAppLinks);
+    const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(initialAppLinks);
 
-    appLinksToUpdate$
-      .pipe(combineLatestWith(license$, isSolutionNavigationEnabled$))
-      .subscribe(([appLinks, license, isSolutionNavigationEnabled]) => {
-        const links = isSolutionNavigationEnabled ? solutionAppLinksSwitcher(appLinks) : appLinks;
-        const linksPermissions: LinksPermissions = {
-          experimentalFeatures: this.experimentalFeatures,
-          upselling: upsellingService,
-          capabilities,
-          uiSettingsClient: core.uiSettings,
-          ...(license.type != null && { license }),
-        };
-        updateAppLinks(links, linksPermissions);
-      });
+    appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinks, license]) => {
+      const params: ApplicationLinksUpdateParams = {
+        experimentalFeatures: this.experimentalFeatures,
+        upselling: upsellingService,
+        capabilities,
+        uiSettingsClient: core.uiSettings,
+        ...(license.type != null && { license }),
+      };
+      applicationLinksUpdater.update(appLinks, params);
+    });
 
     const filteredLinks = await getFilteredLinks(core, plugins);
     appLinksToUpdate$.next(filteredLinks);
@@ -597,17 +587,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
   }
 
-  private lazyRegisterAlertsTableConfiguration() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "lazy_register_alerts_table_configuration" */
-      './common/lib/triggers_actions_ui/register_alerts_table_configuration'
-    );
-  }
-
   private lazyApplicationLinks() {
     /**
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
@@ -615,7 +594,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_app_links" */
-      './app_links'
+      './app/links'
     );
   }
 

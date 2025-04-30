@@ -72,7 +72,7 @@ const runningAd = {
 describe('postAttackDiscoveryRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
     context.elasticAssistant.actions = actionsMock.createStart();
     postAttackDiscoveryRoute(server.router);
@@ -93,7 +93,7 @@ describe('postAttackDiscoveryRoute', () => {
   });
 
   it('should handle missing authenticated user', async () => {
-    context.elasticAssistant.getCurrentUser.mockReturnValue(null);
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
     const response = await server.inject(
       postAttackDiscoveryRequest(mockRequestBody),
       requestContextMock.convertContext(context)

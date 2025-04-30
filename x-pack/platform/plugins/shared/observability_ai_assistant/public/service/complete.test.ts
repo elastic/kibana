@@ -28,14 +28,8 @@ const client = {
 
 const connectorId = 'foo';
 
+const systemMessage = 'System message';
 const messages: Message[] = [
-  {
-    '@timestamp': new Date().toISOString(),
-    message: {
-      role: MessageRole.System,
-      content: 'System message',
-    },
-  },
   {
     '@timestamp': new Date().toISOString(),
     message: {
@@ -97,6 +91,7 @@ describe('complete', () => {
         client,
         connectorId,
         getScreenContexts: () => [],
+        systemMessage,
         messages,
         persist: false,
         disableFunctions: false,

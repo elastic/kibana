@@ -26,19 +26,34 @@ import { EndpointSelection } from './endpoint_selection';
 import { AuthSelection } from './auth_selection';
 import { GenerationError } from '../../generation_error';
 import { useTelemetry } from '../../../../../telemetry';
+import type { IntegrationSettings } from '../../../../types';
 
 export const translateDisplayAuthToType = (auth: string): string => {
   return auth === 'API Token' ? 'Header' : auth;
 };
 
+const API_TOKEN_OAS_AUTH_TYPES: string[] = ['Header', 'Bearer', 'apiKey'];
+
 const translateAuthTypeToDisplay = (auth: string): string => {
-  return auth === 'Header' ? 'API Token' : auth;
+  return API_TOKEN_OAS_AUTH_TYPES.includes(auth) ? 'API Token' : auth;
 };
 
 const getSpecifiedAuthForPath = (apiSpec: Oas | undefined, path: string) => {
   const authMethods = apiSpec?.operation(path, 'get').prepareSecurity();
-  const specifiedAuth = authMethods ? Object.keys(authMethods) : [];
+  const specifiedAuth = authMethods
+    ? Object.keys(authMethods).map((auth) =>
+        API_TOKEN_OAS_AUTH_TYPES.includes(auth) ? 'API Token' : auth
+      )
+    : [];
   return specifiedAuth;
+};
+
+const loadPaths = (integrationSettings: IntegrationSettings | undefined): string[] => {
+  const pathObjs = integrationSettings?.apiSpec?.getPaths();
+  if (!pathObjs) {
+    return [];
+  }
+  return Object.keys(pathObjs).filter((path) => pathObjs[path].get);
 };
 
 interface ConfirmSettingsStepProps {
@@ -146,9 +161,8 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
         setSelectedAuth(auth);
 
         if (auth) {
-          const translatedAuth = translateDisplayAuthToType(auth);
           if (specifiedAuthForPath) {
-            setUnspecifiedAuth(!specifiedAuthForPath.includes(translatedAuth));
+            setUnspecifiedAuth(!specifiedAuthForPath.includes(auth));
           }
           setFieldValidationErrors((current) => ({ ...current, auth: false }));
         } else {
@@ -207,7 +221,12 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           const authOptions = endpointOperation?.prepareSecurity();
           const endpointAuth = getAuthDetails(auth, authOptions);
 
-          const schemas = reduceSpecComponents(oas, path);
+          let schemas;
+          try {
+            schemas = reduceSpecComponents(oas, path);
+          } catch (parsingError) {
+            throw new Error('Error parsing OpenAPI spec for required components');
+          }
 
           const celRequest: CelInputRequestBody = {
             dataStreamTitle: integrationSettings.dataStreamTitle ?? '',
@@ -264,6 +283,8 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           });
 
           setError(errorMessage);
+          onUpdateValidation(!!errorMessage);
+          onUpdateNeedsGeneration(true);
         } finally {
           setIsFlyoutGenerating(false);
         }
@@ -285,6 +306,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       setIsFlyoutGenerating,
       reportCelGenerationComplete,
       onCelInputGenerationComplete,
+      onUpdateValidation,
     ]);
 
     const onCancel = useCallback(() => {
@@ -296,7 +318,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmSettingsStep">
         <EuiPanel hasShadow={false} hasBorder={false}>
           <EndpointSelection
-            integrationSettings={integrationSettings}
+            allPaths={loadPaths(integrationSettings)}
             pathSuggestions={suggestedPaths}
             selectedPath={selectedPath}
             selectedOtherPath={selectedOtherPath}
@@ -330,7 +352,10 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
               <EuiButton
                 fill
                 fullWidth={false}
-                isDisabled={isFlyoutGenerating}
+                isDisabled={
+                  isFlyoutGenerating ||
+                  (showValidation && (fieldValidationErrors.path || fieldValidationErrors.auth))
+                }
                 isLoading={isFlyoutGenerating}
                 iconSide="right"
                 color="primary"

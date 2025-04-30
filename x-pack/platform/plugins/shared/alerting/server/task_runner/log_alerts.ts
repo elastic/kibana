@@ -6,12 +6,12 @@
  */
 
 import apm from 'elastic-apm-node';
-import { Logger } from '@kbn/core/server';
-import { Alert } from '../alert';
+import type { Logger } from '@kbn/core/server';
+import type { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import type { AlertInstanceContext, AlertInstanceState } from '../types';
+import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface LogAlertsParams<
   State extends AlertInstanceState,

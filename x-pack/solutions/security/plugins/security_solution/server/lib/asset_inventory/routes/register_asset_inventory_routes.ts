@@ -8,12 +8,10 @@
 import type { AssetInventoryRoutesDeps } from '../types';
 import { deleteAssetInventoryRoute } from './delete';
 import { enableAssetInventoryRoute } from './enablement';
+import { statusAssetInventoryRoute } from './status';
 
-export const registerAssetInventoryRoutes = ({
-  router,
-  logger,
-  config,
-}: AssetInventoryRoutesDeps) => {
-  enableAssetInventoryRoute(router, logger, config);
+export const registerAssetInventoryRoutes = ({ router, logger }: AssetInventoryRoutesDeps) => {
+  enableAssetInventoryRoute(router, logger);
   deleteAssetInventoryRoute(router, logger);
+  statusAssetInventoryRoute(router, logger);
 };

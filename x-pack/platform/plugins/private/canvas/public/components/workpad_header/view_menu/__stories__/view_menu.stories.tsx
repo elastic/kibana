@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ViewMenu } from '../view_menu.component';
@@ -24,8 +23,12 @@ const handlers = {
   enableAutoplay: action('enableAutoplay'),
 };
 
-storiesOf('components/WorkpadHeader/ViewMenu', module)
-  .add('edit mode', () => (
+export default {
+  title: 'components/WorkpadHeader/ViewMenu',
+};
+
+export const EditMode = {
+  render: () => (
     <ViewMenu
       isWriteable={true}
       zoomScale={1}
@@ -34,8 +37,13 @@ storiesOf('components/WorkpadHeader/ViewMenu', module)
       autoplayEnabled={false}
       {...handlers}
     />
-  ))
-  .add('read only mode', () => (
+  ),
+
+  name: 'edit mode',
+};
+
+export const ReadOnlyMode = {
+  render: () => (
     <ViewMenu
       isWriteable={false}
       zoomScale={1}
@@ -44,8 +52,13 @@ storiesOf('components/WorkpadHeader/ViewMenu', module)
       autoplayEnabled={false}
       {...handlers}
     />
-  ))
-  .add('with refresh enabled', () => (
+  ),
+
+  name: 'read only mode',
+};
+
+export const WithRefreshEnabled = {
+  render: () => (
     <ViewMenu
       isWriteable={false}
       zoomScale={1}
@@ -54,8 +67,13 @@ storiesOf('components/WorkpadHeader/ViewMenu', module)
       autoplayEnabled={false}
       {...handlers}
     />
-  ))
-  .add('with autoplay enabled', () => (
+  ),
+
+  name: 'with refresh enabled',
+};
+
+export const WithAutoplayEnabled = {
+  render: () => (
     <ViewMenu
       isWriteable={false}
       zoomScale={1}
@@ -64,4 +82,7 @@ storiesOf('components/WorkpadHeader/ViewMenu', module)
       autoplayEnabled={true}
       {...handlers}
     />
-  ));
+  ),
+
+  name: 'with autoplay enabled',
+};

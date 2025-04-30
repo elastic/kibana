@@ -22,7 +22,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
-import { useAssetCriticalityEntityTypes } from '../../../hooks/use_enabled_entity_types';
+import type { EntityType } from '../../../../../common/entity_analytics/types';
+import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 
 import {
@@ -38,7 +39,13 @@ interface AssetCriticalityFilePickerStepProps {
   errorMessage?: string;
 }
 
-const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
+type SupportedEntityType = EntityType.user | EntityType.host | EntityType.service;
+
+const entityCSVMap: Record<SupportedEntityType, string> = {
+  user: `user,user-001,low_impact\nuser,user-002,medium_impact`,
+  host: `host,host-001,extreme_impact`,
+  service: `service,service-001,extreme_impact`,
+};
 
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
@@ -54,7 +61,13 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
       line-height: ${useEuiFontSize('s').lineHeight};
     `;
 
-    const entityTypes = useAssetCriticalityEntityTypes();
+    const entityTypes = useEntityAnalyticsTypes();
+
+    const sampleCSVContent = entityTypes
+      .filter((entity): entity is SupportedEntityType => entity in entityCSVMap)
+      .map((entity) => entityCSVMap[entity])
+      .join('\n');
+
     const i18nOrList = (items: string[]) =>
       formatListToParts(items, {
         type: 'disjunction',

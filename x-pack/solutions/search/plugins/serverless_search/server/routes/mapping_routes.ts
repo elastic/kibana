@@ -18,6 +18,12 @@ export const registerMappingRoutes = ({ logger, router }: RouteDependencies) => 
           index_name: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;

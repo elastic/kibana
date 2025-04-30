@@ -1,7 +1,7 @@
 post:
   summary: Lookup single agent configuration
   description: |
-    This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.
+    This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
   operationId: searchSingleConfiguration
   tags:
     - APM agent configuration
@@ -14,6 +14,9 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/search_agent_configuration_object.yaml'
+        examples:
+          searchSingleConfigurationRequest1:
+            $ref: '../components/examples/agent_configuration_intake_object_search_request1.yaml'
   responses:
     '200':
       description: Successful response
@@ -21,6 +24,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/search_agent_configuration_response.yaml'
+          examples:
+            searchSingleConfigurationResponse1:
+              $ref: '../components/examples/agent_configuration_intake_object_search_200_response1.yaml'
     '400':
       description: Bad Request response
       content:

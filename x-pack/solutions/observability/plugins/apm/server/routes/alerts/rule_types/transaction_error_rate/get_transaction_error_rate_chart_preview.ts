@@ -76,46 +76,44 @@ export async function getTransactionErrorRateChartPreview({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termFilterQuery,
-            ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
-            ...rangeQuery(start, end),
-            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-            {
-              terms: {
-                [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termFilterQuery,
+          ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
+          ...rangeQuery(start, end),
+          ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+          {
+            terms: {
+              [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      series: {
+        multi_terms: {
+          terms: getGroupByTerms(allGroupByFields),
+          size: 1000,
+          order: { _count: 'desc' as const },
+        },
+        aggs: {
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: interval,
+              extended_bounds: {
+                min: start,
+                max: end,
               },
             },
-          ],
-        },
-      },
-      aggs: {
-        series: {
-          multi_terms: {
-            terms: getGroupByTerms(allGroupByFields),
-            size: 1000,
-            order: { _count: 'desc' as const },
-          },
-          aggs: {
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: interval,
-                extended_bounds: {
-                  min: start,
-                  max: end,
-                },
-              },
-              aggs: {
-                outcomes: {
-                  terms: {
-                    field: EVENT_OUTCOME,
-                  },
+            aggs: {
+              outcomes: {
+                terms: {
+                  field: EVENT_OUTCOME,
                 },
               },
             },

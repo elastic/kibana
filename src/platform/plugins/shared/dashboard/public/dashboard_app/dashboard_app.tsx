@@ -18,9 +18,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions } from '..';
-import { SharedDashboardState } from '../../common';
-import { DASHBOARD_APP_ID } from '../plugin_constants';
-import { DashboardRedirect } from '../dashboard_container/types';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
   coreServices,
@@ -32,21 +30,25 @@ import {
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
-import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
+import { loadDashboardHistoryLocationState } from '../../common/locator/load_dashboard_history_location_state';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
-import { type DashboardEmbedSettings } from './types';
+import { DashboardRedirect, type DashboardEmbedSettings } from './types';
 import {
   createSessionRestorationDataProvider,
   getSearchSessionIdFromURL,
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
-import { DashboardRenderer } from '../dashboard_container/external_api/dashboard_renderer';
+import {
+  loadAndRemoveDashboardState,
+  startSyncingExpandedPanelState,
+  type SharedDashboardState,
+} from './url/url_utils';
+import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 
 export interface DashboardAppProps {

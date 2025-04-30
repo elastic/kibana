@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -18,16 +18,14 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock'
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import {
-  AlertingAuthorization,
-  WriteOperations,
-  AlertingAuthorizationEntity,
-} from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { getRule } from '../get/get_rule';
@@ -186,8 +184,12 @@ describe('fillGapById', () => {
     const expectedBackfill = [
       {
         ruleId: '1',
-        start: '2023-11-16T08:00:00.000Z',
-        end: '2023-11-16T08:20:00.000Z',
+        ranges: [
+          {
+            start: '2023-11-16T08:00:00.000Z',
+            end: '2023-11-16T08:20:00.000Z',
+          },
+        ],
       },
     ];
 
@@ -224,13 +226,16 @@ describe('fillGapById', () => {
     const expectedBackfill = [
       {
         ruleId: '1',
-        start: '2023-11-16T08:00:00.000Z',
-        end: '2023-11-16T08:20:00.000Z',
-      },
-      {
-        ruleId: '1',
-        start: '2023-11-16T09:00:00.000Z',
-        end: '2023-11-16T09:20:00.000Z',
+        ranges: [
+          {
+            start: '2023-11-16T08:00:00.000Z',
+            end: '2023-11-16T08:20:00.000Z',
+          },
+          {
+            start: '2023-11-16T09:00:00.000Z',
+            end: '2023-11-16T09:20:00.000Z',
+          },
+        ],
       },
     ];
 
@@ -304,5 +309,17 @@ describe('fillGapById', () => {
       })
     );
     expect(scheduleBackfill).not.toHaveBeenCalled();
+  });
+
+  it('should refresh event log after fill gap', async () => {
+    const params = { ruleId: '1', gapId: 'gap1' };
+    const gap = getMockGap();
+
+    (findGapsById as jest.Mock).mockResolvedValue([gap]);
+    (scheduleBackfill as jest.Mock).mockResolvedValue('success');
+
+    await rulesClient.fillGapById(params);
+
+    expect(eventLogClient.refreshIndex).toHaveBeenCalled();
   });
 });

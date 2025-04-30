@@ -17,7 +17,7 @@ import { ObservabilityAIAssistantClient } from './client';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
-import { setupConversationAndKbIndexAssets } from './setup_conversation_and_kb_index_assets';
+import { createOrUpdateIndexAssets } from './startup_migrations/create_or_update_index_assets';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -40,11 +40,15 @@ export const resourceNames = {
     conversations: getResourceName('index-template-conversations'),
     kb: getResourceName('index-template-kb'),
   },
+  concreteIndexName: {
+    conversations: getResourceName('conversations-000001'),
+    kb: getResourceName('kb-000001'),
+  },
 };
 
 const createIndexAssetsOnce = once(
   (logger: Logger, core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>) =>
-    pRetry(() => setupConversationAndKbIndexAssets({ logger, core }))
+    pRetry(() => createOrUpdateIndexAssets({ logger, core }))
 );
 
 export class ObservabilityAIAssistantService {

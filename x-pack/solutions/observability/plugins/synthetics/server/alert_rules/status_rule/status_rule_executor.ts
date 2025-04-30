@@ -13,11 +13,13 @@ import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,
   AlertStatusMetaData,
   StaleDownConfig,
+  StatusRuleInspect,
 } from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
 import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
@@ -34,14 +36,10 @@ import {
   getUngroupedReasonMessage,
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
-import { parseArrayFilters } from '../../routes/common';
+import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -65,22 +63,26 @@ export class StatusRuleExecutor {
   options: StatusRuleExecutorOptions;
   logger: Logger;
   ruleName: string;
+  monitorConfigRepository: MonitorConfigRepository;
 
   constructor(
+    esClient: SyntheticsEsClient,
     server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient,
     options: StatusRuleExecutorOptions
   ) {
     const { services, params, previousStartedAt, rule } = options;
-    const { scopedClusterClient, savedObjectsClient } = services;
+    const { savedObjectsClient } = services;
     this.ruleName = rule.name;
     this.logger = server.logger;
     this.previousStartedAt = previousStartedAt;
     this.params = params;
     this.soClient = savedObjectsClient;
-    this.esClient = new SyntheticsEsClient(this.soClient, scopedClusterClient.asCurrentUser, {
-      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
-    });
+    this.esClient = esClient;
+    this.monitorConfigRepository = new MonitorConfigRepository(
+      savedObjectsClient,
+      server.encryptedSavedObjects.getClient()
+    );
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.hasCustomCondition = !isEmpty(this.params);
@@ -97,6 +99,7 @@ export class StatusRuleExecutor {
     this.dateFormat = await uiSettingsClient.get('dateFormat');
     const timezone = await uiSettingsClient.get('dateFormat:tz');
     this.tz = timezone === 'Browser' ? 'UTC' : timezone;
+    return await this.getMonitors();
   }
 
   async getMonitors() {
@@ -110,29 +113,45 @@ export class StatusRuleExecutor {
       ruleParams: this.params,
     });
 
+    if (this.params.kqlQuery && isEmpty(configIds)) {
+      this.debug(`No monitor found with the given KQL query ${this.params.kqlQuery}`);
+      return processMonitors([]);
+    }
+
+    const locationIds = await parseLocationFilter(
+      {
+        savedObjectsClient: this.soClient,
+        server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
+      },
+      this.params.locations
+    );
+
     const { filtersStr } = parseArrayFilters({
       configIds,
       filter: baseFilter,
-      tags: this.params?.tags,
-      locations: this.params?.locations,
-      monitorTypes: this.params?.monitorTypes,
-      monitorQueryIds: this.params?.monitorIds,
-      projects: this.params?.projects,
+      tags: this.params.tags,
+      locations: locationIds,
+      monitorTypes: this.params.monitorTypes,
+      monitorQueryIds: this.params.monitorIds,
+      projects: this.params.projects,
     });
 
-    this.monitors = await getAllMonitors({
-      soClient: this.soClient,
+    this.monitors = await this.monitorConfigRepository.getAll({
       filter: filtersStr,
     });
 
-    this.debug(`Found ${this.monitors.length} monitors for params ${JSON.stringify(this.params)}`);
+    this.debug(
+      `Found ${this.monitors.length} monitors for params ${JSON.stringify(
+        this.params
+      )} | parsed location filter is ${JSON.stringify(locationIds)} `
+    );
     return processMonitors(this.monitors);
   }
 
   async getDownChecks(prevDownConfigs: AlertStatusConfigs = {}): Promise<AlertOverviewStatus> {
-    await this.init();
     const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorLocationsMap } =
-      await this.getMonitors();
+      await this.init();
 
     const range = this.getRange(maxPeriod);
 
@@ -146,6 +165,7 @@ export class StatusRuleExecutor {
         staleDownConfigs,
         enabledMonitorQueryIds,
         pendingConfigs: {},
+        maxPeriod,
       };
     }
 
@@ -198,6 +218,7 @@ export class StatusRuleExecutor {
       ...currentStatus,
       staleDownConfigs,
       pendingConfigs: {},
+      maxPeriod,
     };
   }
 
@@ -274,7 +295,7 @@ export class StatusRuleExecutor {
             statusConfig,
           });
 
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation,
             alertId,
             monitorSummary,
@@ -302,7 +323,7 @@ export class StatusRuleExecutor {
           const monitorSummary = this.getUngroupedDownSummary({
             statusConfigs: configs,
           });
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation: configId,
             alertId,
             monitorSummary,
@@ -425,6 +446,18 @@ export class StatusRuleExecutor {
       context,
     });
   }
+
+  getRuleThresholdOverview = async (): Promise<StatusRuleInspect> => {
+    const data = await this.getDownChecks({});
+    return {
+      ...data,
+      monitors: this.monitors.map((monitor) => ({
+        id: monitor.id,
+        name: monitor.attributes.name,
+        type: monitor.attributes.type,
+      })),
+    };
+  };
 }
 
 export const getDoesMonitorMeetLocationThreshold = ({

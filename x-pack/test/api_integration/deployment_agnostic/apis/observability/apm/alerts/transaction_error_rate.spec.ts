@@ -163,6 +163,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(Object.keys(results[0]).sort()).to.eql([
             'alertDetailsUrl',
             'environment',
+            'grouping',
             'interval',
             'reason',
             'serviceName',
@@ -185,6 +186,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             threshold: '40',
             transactionType: 'request',
             triggerValue: '50',
+            grouping:
+              '{"service":{"name":"opbeans-java","environment":"production"},"transaction":{"type":"request","name":"tx-java"}}',
           });
 
           const url = new URL(results[0].viewInAppUrl);

@@ -167,11 +167,14 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public sendAsync(channel: TelemetryChannel, events: unknown[]): void {
-    this.composite.sendAsync(channel, events);
+    const result = this.composite.simulateSendAsync(channel, events);
+    this.sentMessages = [...this.sentMessages, ...result];
   }
 
   public simulateSendAsync(channel: TelemetryChannel, events: unknown[]): string[] {
-    return this.composite.simulateSendAsync(channel, events);
+    const result = this.composite.simulateSendAsync(channel, events);
+    this.sentMessages = [...this.sentMessages, ...result];
+    return result;
   }
 
   public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {

@@ -45,7 +45,6 @@ export const mockKibanaProps: KibanaLogicProps = {
     isCloudEnabled: false,
   },
   config: {
-    host: 'http://localhost:3002',
     ui: {
       enabled: true,
     },

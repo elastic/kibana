@@ -49,7 +49,7 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
         const logger = assistantContext.logger.get('evaluate');
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,
@@ -60,8 +60,9 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
           return checkResponse.response;
         }
 
-        // Fetch datasets from LangSmith // TODO: plumb apiKey so this will work in cloud w/o env vars
-        const datasets = await fetchLangSmithDatasets({ logger });
+        const datasets = await fetchLangSmithDatasets({
+          logger,
+        });
 
         try {
           return response.ok({ body: { graphs: Object.keys(ASSISTANT_GRAPH_MAP), datasets } });

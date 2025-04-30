@@ -37,7 +37,7 @@ const ChartSettingsPopoverComponent: React.FC<Props> = ({
       <EuiButtonIcon
         aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
         color="text"
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         onClick={onButtonClick}
         size="xs"
       />

@@ -50,7 +50,11 @@
     "@kbn/core-lifecycle-server",
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
-    "@kbn/ai-assistant-icon"
+    "@kbn/ai-assistant-icon",
+    "@kbn/core-http-browser",
+    "@kbn/sse-utils",
+    "@kbn/core-security-server",
+    "@kbn/lock-manager"
   ],
   "exclude": ["target/**/*"]
 }

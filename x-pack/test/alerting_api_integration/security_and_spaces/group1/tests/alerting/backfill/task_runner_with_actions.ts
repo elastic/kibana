@@ -11,7 +11,7 @@ import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { asyncForEach } from '../../../../../../functional/services/transform/api';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   TEST_ACTIONS_INDEX,
   indexTestDocs,
@@ -107,7 +107,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId, start, end, run_actions: true }])
+        .send([{ rule_id: ruleId, ranges: [{ start, end }], run_actions: true }])
         .expect(200);
 
       const scheduleResult = response.body;
@@ -129,7 +129,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         // verify that the correct number of actions were executed
         const actions = await es.search({
           index: TEST_ACTIONS_INDEX,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         // 3 backfill executions resulted in alerts so 3 notifications should have
@@ -169,7 +169,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId, start, end, run_actions: true }])
+        .send([{ rule_id: ruleId, ranges: [{ start, end }], run_actions: true }])
         .expect(200);
 
       const scheduleResult = response.body;
@@ -191,7 +191,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         // verify that the correct number of actions were executed
         const actions = await es.search({
           index: TEST_ACTIONS_INDEX,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         // 3 backfill executions resulted in 9 alerts so 9 notifications should have
@@ -231,7 +231,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId, start, end, run_actions: false }])
+        .send([{ rule_id: ruleId, ranges: [{ start, end }], run_actions: false }])
         .expect(200);
 
       const scheduleResult = response.body;
@@ -257,7 +257,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
       // verify that the correct number of actions were executed
       const actions = await es.search({
         index: TEST_ACTIONS_INDEX,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
 
       // no actions should be generated

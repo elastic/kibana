@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
-import {
-  getGapsSummaryByRuleIdsBodySchemaV1,
+import type { IRouter } from '@kbn/core/server';
+import type {
   GetGapsSummaryByRuleIdsBodyV1,
   GetGapsSummaryByRuleIdsResponseV1,
 } from '../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
-import { ILicenseState } from '../../../../lib';
+import { getGapsSummaryByRuleIdsBodySchemaV1 } from '../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 
 export const getGapsSummaryByRuleIdsRoute = (
@@ -25,6 +23,12 @@ export const getGapsSummaryByRuleIdsRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: getGapsSummaryByRuleIdsBodySchemaV1,
       },

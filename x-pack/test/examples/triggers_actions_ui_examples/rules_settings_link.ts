@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should be able to open the modal', async () => {
       await testSubjects.click('rulesSettingsLink');
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
-      await testSubjects.existOrFail('rulesSettingsModal');
+      await testSubjects.existOrFail('rulesSettingsFlyout');
     });
   });
 };

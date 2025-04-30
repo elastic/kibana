@@ -1,15 +1,9 @@
 # Search Project Config
 
-## Disable APM and Uptime, enable Enterprise Search
-xpack.apm.enabled: false
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'search']
 
-xpack.cloudSecurityPosture.enabled: false
-xpack.infra.enabled: false
-xpack.observabilityLogsExplorer.enabled: false
-xpack.observability.enabled: false
-xpack.securitySolution.enabled: false
-xpack.serverless.observability.enabled: false
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
@@ -43,6 +37,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
   # Profiling integrations
   'profiler_agent',
+
+  # Search connectors
+  'elastic_connectors',
 ]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
@@ -63,9 +60,6 @@ xpack.features.overrides:
   observabilityAIAssistant:
     name: "AI Assistant"
     category: "enterpriseSearch"
-  ### AI Assistant enables the Inventory feature, moving to Search
-  inventory:
-    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
@@ -76,15 +70,12 @@ xpack.serverless.search.enabled: true
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
 
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
-
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini']
+  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
@@ -116,10 +107,9 @@ xpack.ml.compatibleModuleType: 'search'
 data_visualizer.resultLinks.fileBeat.enabled: false
 
 # Search Notebooks
-xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
+xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
 # Semantic text UI
-
 xpack.index_management.dev.enableSemanticText: true
 
 # AI Assistant config
@@ -128,9 +118,9 @@ xpack.searchAssistant.enabled: true
 xpack.searchAssistant.ui.enabled: true
 xpack.observabilityAIAssistant.scope: "search"
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
-xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
-xpack.observabilityAiAssistantManagement.spacesEnabled: false
-xpack.observabilityAiAssistantManagement.visibilityEnabled: false
 
-# Synonyms UI
-xpack.searchSynonyms.enabled: true
+# Query Rules UI
+xpack.searchQueryRules.enabled: false
+
+## Search Connectors in stack management
+xpack.contentConnectors.ui.enabled: false

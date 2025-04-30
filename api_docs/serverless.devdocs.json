@@ -138,15 +138,7 @@
             "NavigationTreeDefinition",
             "<",
             "AppDeepLinkId",
-            ", string, string>>, config?: { dataTestSubj?: string | undefined; panelContentProvider?: ",
-            {
-              "pluginId": "@kbn/shared-ux-chrome-navigation",
-              "scope": "public",
-              "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-              "section": "def-public.ContentProvider",
-              "text": "ContentProvider"
-            },
-            " | undefined; } | undefined) => void"
+            ", string, string>>, config?: { dataTestSubj?: string | undefined; } | undefined) => void"
           ],
           "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
           "deprecated": false,
@@ -207,27 +199,6 @@
                   "description": [],
                   "signature": [
                     "string | undefined"
-                  ],
-                  "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
-                  "deprecated": false,
-                  "trackAdoption": false
-                },
-                {
-                  "parentPluginId": "serverless",
-                  "id": "def-public.ServerlessPluginStart.initNavigation.$3.panelContentProvider",
-                  "type": "Function",
-                  "tags": [],
-                  "label": "panelContentProvider",
-                  "description": [],
-                  "signature": [
-                    {
-                      "pluginId": "@kbn/shared-ux-chrome-navigation",
-                      "scope": "public",
-                      "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                      "section": "def-public.ContentProvider",
-                      "text": "ContentProvider"
-                    },
-                    " | undefined"
                   ],
                   "path": "x-pack/platform/plugins/shared/serverless/public/types.ts",
                   "deprecated": false,
@@ -426,23 +397,6 @@
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "serverless",
-        "id": "def-common.API_SWITCH_PROJECT",
-        "type": "string",
-        "tags": [],
-        "label": "API_SWITCH_PROJECT",
-        "description": [
-          "Internal API route responsible for switching between project configurations."
-        ],
-        "signature": [
-          "\"/internal/serverless/switch_project\""
-        ],
-        "path": "x-pack/platform/plugins/shared/serverless/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "serverless",
         "id": "def-common.PLUGIN_ID",
