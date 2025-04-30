@@ -219,14 +219,14 @@ export class SyncPrivateLocationMonitorsTask {
     paramsBySpace: Record<string, Record<string, string>>
   ) {
     const configsBySpaces: Record<string, HeartbeatConfig[]> = {};
-    const spaceIds: string[] = [];
+    const spaceIds = new Set<string>();
 
     for (const monitor of monitors) {
       const spaceId = monitor.namespaces?.[0];
       if (!spaceId) {
         continue;
       }
-      spaceIds.push(spaceId);
+      spaceIds.add(spaceId);
       const normalizedMonitor = normalizeSecrets(monitor).attributes as MonitorFields;
       const { str: paramsString } = mixParamsWithGlobalParams(
         paramsBySpace[spaceId],
