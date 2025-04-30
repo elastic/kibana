@@ -30,6 +30,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const ml = getService('ml');
 
+  // In 8.18 inference happens via the custom inference endpoint "obs_ai_assistant_kb_inference"
   // In 8.19 / 9.1 the custom inference endpoint ("obs_ai_assistant_kb_inference") is replaced with the preconfigured endpoint ".elser-2-elasticsearch"
   // We need to make sure that the custom inference endpoint continues to work after the migration
 
@@ -44,7 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await restoreKbSnapshot({
         log,
         es,
-        snapshotRepoName: 'snapshot_kb_8.18',
+        snapshotFolderName: 'snapshot_kb_8.18',
         snapshotName: 'kb_snapshot_8.18',
       });
 

@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await restoreKbSnapshot({
           log,
           es,
-          snapshotRepoName: 'snapshot_kb_8.10',
+          snapshotFolderName: 'snapshot_kb_8.10',
           snapshotName: 'my_snapshot',
         });
         await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
@@ -96,7 +96,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await restoreKbSnapshot({
           log,
           es,
-          snapshotRepoName: 'snapshot_kb_8.10',
+          snapshotFolderName: 'snapshot_kb_8.10',
           snapshotName: 'my_snapshot',
         });
         await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);

@@ -14,19 +14,20 @@ import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/sta
 export async function restoreKbSnapshot({
   log,
   es,
-  snapshotRepoName,
+  snapshotFolderName,
   snapshotName,
 }: {
   log: ToolingLog;
   es: Client;
-  snapshotRepoName: string;
+  snapshotFolderName: string;
   snapshotName: string;
 }) {
-  const snapshotLocation = path.join(AI_ASSISTANT_SNAPSHOT_REPO_PATH, snapshotRepoName);
+  const snapshotLocation = path.join(AI_ASSISTANT_SNAPSHOT_REPO_PATH, snapshotFolderName);
 
-  log.debug(`Creating snapshot repository "${snapshotRepoName}" in "${snapshotLocation}"`);
+  const snapshotRepoName = `my_repo_${snapshotFolderName}`;
+  log.debug(`Creating snapshot repository "${snapshotRepoName}" from "${snapshotLocation}"`);
   await es.snapshot.createRepository({
-    name: snapshotRepoName,
+    name: snapshotFolderName,
     repository: {
       type: 'fs',
       settings: { location: snapshotLocation },
@@ -36,7 +37,7 @@ export async function restoreKbSnapshot({
   try {
     log.debug(`Restoring snapshot of "${resourceNames.concreteWriteIndexName.kb}"`);
     await es.snapshot.restore({
-      repository: snapshotRepoName,
+      repository: snapshotFolderName,
       snapshot: snapshotName,
       wait_for_completion: true,
       indices: resourceNames.concreteWriteIndexName.kb,
@@ -45,7 +46,7 @@ export async function restoreKbSnapshot({
     log.error(`Error restoring snapshot: ${error.message}`);
     throw error;
   } finally {
-    log.debug(`Deleting snapshot repository "${snapshotRepoName}"`);
-    await es.snapshot.deleteRepository({ name: snapshotRepoName });
+    log.debug(`Deleting snapshot repository "${snapshotFolderName}"`);
+    await es.snapshot.deleteRepository({ name: snapshotFolderName });
   }
 }

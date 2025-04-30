@@ -7,6 +7,7 @@
 
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
+import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteTinyElserModelAndInferenceEndpoint,
@@ -14,20 +15,22 @@ import {
   getKnowledgeBaseEntries,
   TINY_ELSER_INFERENCE_ID,
 } from '../utils/knowledge_base';
-import { restoreIndexAssets, runStartupMigrations } from '../utils/index_assets';
+import {
+  createOrUpdateIndexAssets,
+  deleteIndexAssets,
+  runStartupMigrations,
+} from '../utils/index_assets';
+import { restoreKbSnapshot } from '../utils/snapshots';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-  const esArchiver = getService('esArchiver');
   const es = getService('es');
   const retry = getService('retry');
+  const log = getService('log');
 
-  const archive =
-    'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
-
-  // In 8.17 semantic text field is added to the knowledge base index and inference endpoint is introduced
-  // Prior to this ML embeddings were used.
-  // We need to ensure that the semantic_text field is populated when upgrading from 8.16
+  // In 8.16 and earlier embeddings were stored in the `ml.tokens` field
+  // In 8.17 `ml.tokens` is replaced with `semantic_text` field and the custom ELSER inference endpoint "obs_ai_assistant_kb_inference" is introduced
+  // When upgrading we must ensure that the semantic_text field is populated
   describe('when upgrading from 8.16 to 8.17', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
@@ -35,20 +38,30 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await deleteTinyElserModelAndInferenceEndpoint(getService);
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      await esArchiver.load(archive);
+      await deleteIndexAssets(es);
+      await restoreKbSnapshot({
+        log,
+        es,
+        snapshotFolderName: 'snapshot_kb_8.16',
+        snapshotName: 'kb_snapshot_8.16',
+      });
+
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+
       await deployTinyElserAndSetupKb(getService);
     });
 
-    after(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-    });
+    // after(async () => {
+    //   await deleteTinyElserModelAndInferenceEndpoint(getService);
+    //   await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+    // });
 
     describe('before migrating', () => {
       it('the docs do not have semantic_text embeddings', async () => {
         const hits = await getKnowledgeBaseEntries(es);
         const hasSemanticTextEmbeddings = hits.some((hit) => hit._source?.semantic_text);
+
+        expect(hits.length).to.be(10);
         expect(hasSemanticTextEmbeddings).to.be(false);
       });
     });
@@ -65,16 +78,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(hasSemanticTextEmbeddings).to.be(true);
 
           expect(
-            orderBy(hits, '_source.title').map(({ _source }) => {
-              const text = _source?.semantic_text;
-              const inference = _source?._inference_fields?.semantic_text?.inference;
+            orderBy(hits, '_source.title')
+              .map((hit) => hit._source)
+              .filter(omitLensEntries)
+              .map((entry) => {
+                // @ts-expect-error we are consuming semantic_text format
+                const text = entry?.semantic_text.text;
+                // @ts-expect-error we are consuming semantic_text format
+                const inference = entry?.semantic_text.inference;
 
-              return {
-                text: text ?? '',
-                inferenceId: inference?.inference_id,
-                chunkCount: inference?.chunks?.semantic_text?.length,
-              };
-            })
+                return {
+                  text: text ?? '',
+                  inferenceId: inference?.inference_id,
+                  chunkCount: inference?.chunks.length,
+                };
+              })
           ).to.eql([
             {
               text: 'To infinity and beyond!',
@@ -105,17 +123,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(res.status).to.be(200);
 
         expect(
-          res.body.entries.map(({ title, text, role, type }) => ({ title, text, role, type }))
+          res.body.entries
+            .filter(omitLensEntries)
+            .map(({ title, text, type }) => ({ title, text, type }))
         ).to.eql([
           {
-            role: 'user_entry',
-            title: 'Toy Story quote',
+            title: 'movie_quote',
             type: 'contextual',
             text: 'To infinity and beyond!',
           },
           {
-            role: 'assistant_summarization',
-            title: "User's favourite color",
+            title: 'user_color',
             type: 'contextual',
             text: "The user's favourite color is blue.",
           },
@@ -123,4 +141,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
   });
+}
+
+function omitLensEntries(entry?: KnowledgeBaseEntry) {
+  return entry?.labels?.category !== 'lens';
 }
