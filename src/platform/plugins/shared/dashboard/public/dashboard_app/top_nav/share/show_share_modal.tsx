@@ -19,7 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
+import { DashboardPanelMap } from '../../../../common';
 import {
   getDashboardBackupService,
   PANELS_CONTROL_GROUP_KEY,
@@ -28,7 +30,7 @@ import { coreServices, dataService, shareService } from '../../../services/kiban
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
-import { DashboardLocatorParams } from '../../../dashboard_api/types';
+import { DashboardLocatorParams } from '../../../../common';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -269,5 +271,11 @@ export function ShowShareModal({
       },
     },
     toasts: coreServices.notifications.toasts,
+    shareableUrlLocatorParams: {
+      locator: shareService.url.locators.get(
+        DASHBOARD_APP_LOCATOR
+      ) as LocatorPublic<DashboardLocatorParams>,
+      params: locatorParams,
+    },
   });
 }

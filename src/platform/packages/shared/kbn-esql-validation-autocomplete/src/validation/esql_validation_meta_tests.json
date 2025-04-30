@@ -2792,19 +2792,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\"",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | grok doubleField \"%{firstWord}\"",
+      "query": "from a_index | grok doubleField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [
         "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\" | keep firstWord",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\" | keep textPrts",
       "error": [],
       "warning": []
     },
@@ -5470,7 +5470,7 @@
       ]
     },
     {
-      "query": "from a_index | eval var0 = log(-1, -20)",
+      "query": "from a_index | eval col0 = log(-1, -20)",
       "error": [],
       "warning": [
         "Log of a negative number results in null: -1",
@@ -6825,7 +6825,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)",
+      "query": "from a_index | eval result = case(false, 0, 1) | stats col0 = sum(result)",
       "error": [],
       "warning": []
     },
@@ -9211,69 +9211,69 @@
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 ",
+      "query": "from a_index | enrich policy on textField with col0 ",
       "error": [
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = c ",
+      "query": "from a_index | enrich policy on textField with col0 = c ",
       "error": [
-        "Unknown column [var0]",
+        "Unknown column [col0]",
         "Unknown column [c]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = , ",
+      "query": "from a_index |enrich policy on doubleField with col0 = , ",
       "error": [
         "SyntaxError: mismatched input ',' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 ",
       "error": [
-        "Unknown column [var1]"
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, yetAnotherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, yetAnotherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = otherField, var1 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = otherField, col1 = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var1]"
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 = yetAnotherField",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, `this``is fine` = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, `this``is fine` = yetAnotherField",
       "error": [],
       "warning": []
     },
@@ -9295,7 +9295,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy with var0 = otherField | eval var0",
+      "query": "from a_index | enrich policy with col0 = otherField | eval col0",
       "error": [],
       "warning": []
     },
