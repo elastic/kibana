@@ -94,7 +94,7 @@ export const getPartitionVisRenderer: (
     handlers
   ) => {
     const performanceTracker = createPerformanceTracker({
-      type: PERFORMANCE_TRACKER_TYPES.LENS,
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
       instance: PARTITION_VIS_RENDERER_NAME,
     });
 

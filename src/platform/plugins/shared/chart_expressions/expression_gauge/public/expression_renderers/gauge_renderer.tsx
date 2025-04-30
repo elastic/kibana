@@ -44,7 +44,7 @@ export const gaugeRenderer: (
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const performanceTracker = createPerformanceTracker({
-      type: PERFORMANCE_TRACKER_TYPES.LENS,
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
       instance: EXPRESSION_GAUGE_NAME,
     });
 

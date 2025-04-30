@@ -132,7 +132,7 @@ function reportPerformanceMetrics({
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
   const groupedPerformanceMarkers = getPerformanceTrackersGroupedById(
-    PERFORMANCE_TRACKER_TYPES.LENS
+    PERFORMANCE_TRACKER_TYPES.PANEL
   );
 
   // `groupedPerformanceMarkers` is a map of performance markers grouped by id.
@@ -185,12 +185,12 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
-    key8: 'mean_lens_prerender',
+    key8: 'mean_panel_prerender',
     value8: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION), 2),
-    key9: 'mean_lens_rendering',
+    key9: 'mean_panel_rendering',
     value9: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION), 2),
   };
 
   reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);
-  clearPerformanceTrackersByType(PERFORMANCE_TRACKER_TYPES.LENS);
+  clearPerformanceTrackersByType(PERFORMANCE_TRACKER_TYPES.PANEL);
 }

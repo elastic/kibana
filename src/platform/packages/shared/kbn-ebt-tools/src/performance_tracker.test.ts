@@ -48,7 +48,7 @@ describe('Performance Tracker', () => {
   describe('createPerformanceTracker', () => {
     it('creates a tracker with the correct mark method', () => {
       const tracker = createPerformanceTracker({
-        type: PERFORMANCE_TRACKER_TYPES.LENS,
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
         instance: 'testInstance',
       });
 
@@ -59,7 +59,7 @@ describe('Performance Tracker', () => {
 
     it('generates mark names with the correct format', () => {
       const tracker = createPerformanceTracker({
-        type: PERFORMANCE_TRACKER_TYPES.LENS,
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
         instance: 'testInstance',
       });
 
@@ -81,7 +81,7 @@ describe('Performance Tracker', () => {
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
 
-      const result = getPerformanceTrackersByType('Lens');
+      const result = getPerformanceTrackersByType('Panel');
 
       expect(mockGetEntriesByType).toHaveBeenCalledWith('mark');
       expect(result).toHaveLength(2);
@@ -94,7 +94,7 @@ describe('Performance Tracker', () => {
         { name: 'Other:test:preRender', startTime: 300, detail: { id: 'id3' } },
       ]);
 
-      const result = getPerformanceTrackersByType('Lens');
+      const result = getPerformanceTrackersByType('Panel');
 
       expect(result).toHaveLength(0);
     });
@@ -110,7 +110,7 @@ describe('Performance Tracker', () => {
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
 
-      const result = getPerformanceTrackersGroupedById('Lens');
+      const result = getPerformanceTrackersGroupedById('Panel');
 
       // Check the structure of the result - should be grouped by id
       expect(Object.keys(result).length).toBe(2);
@@ -127,7 +127,7 @@ describe('Performance Tracker', () => {
 
     it('returns empty object when no marks match', () => {
       mockGetEntriesByType.mockReturnValue([]);
-      const result = getPerformanceTrackersGroupedById('Lens');
+      const result = getPerformanceTrackersGroupedById('Panel');
       expect(Object.keys(result).length).toBe(0);
     });
   });
@@ -141,7 +141,7 @@ describe('Performance Tracker', () => {
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
 
-      clearPerformanceTrackersByType('Lens');
+      clearPerformanceTrackersByType('Panel');
 
       expect(mockClearMarks).toHaveBeenCalledTimes(2);
       expect(mockClearMarks).toHaveBeenCalledWith('Lens:test1:preRender');
@@ -151,7 +151,7 @@ describe('Performance Tracker', () => {
     it('does nothing when no marks match', () => {
       mockGetEntriesByType.mockReturnValue([]);
 
-      clearPerformanceTrackersByType('Lens');
+      clearPerformanceTrackersByType('Panel');
 
       expect(mockClearMarks).not.toHaveBeenCalled();
     });

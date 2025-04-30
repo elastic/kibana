@@ -63,7 +63,7 @@ export const getMetricVisRenderer = (
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig, overrides }, handlers) => {
       const performanceTracker = createPerformanceTracker({
-        type: PERFORMANCE_TRACKER_TYPES.LENS,
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
         instance: EXPRESSION_METRIC_NAME,
       });
 

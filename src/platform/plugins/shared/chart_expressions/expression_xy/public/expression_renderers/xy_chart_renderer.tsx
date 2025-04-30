@@ -210,7 +210,7 @@ export const getXyChartRenderer = ({
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers) => {
     const performanceTracker = createPerformanceTracker({
-      type: PERFORMANCE_TRACKER_TYPES.LENS,
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
       instance: 'xyVis',
     });
 

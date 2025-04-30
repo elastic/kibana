@@ -17,7 +17,7 @@ import type { Logger } from '@kbn/logging';
  * the mark name. They are used to group marks and measures by type.
  */
 export const PERFORMANCE_TRACKER_TYPES = {
-  LENS: 'Lens',
+  PANEL: 'Panel',
 } as const;
 export type PerformanceTrackerTypes =
   (typeof PERFORMANCE_TRACKER_TYPES)[keyof typeof PERFORMANCE_TRACKER_TYPES];
