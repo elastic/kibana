@@ -560,7 +560,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   // }));
 
   const scoutGroups = pluginsWithScoutConfigs.flatMap((plugin) =>
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((index) => ({
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((index) => ({
       title: `${plugin}-${index}`,
       key: plugin,
       usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
