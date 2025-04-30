@@ -191,6 +191,9 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
+];
+
+export const pkiConfig: ConfigFieldSchema[] = [
   {
     id: 'certificateFile',
     label: i18n.CERT_FILE_LABEL,
