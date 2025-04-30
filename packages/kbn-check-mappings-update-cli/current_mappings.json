@@ -1898,6 +1898,13 @@
       }
     }
   },
+  "globaltype": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
   "graph-workspace": {
     "properties": {
       "description": {
@@ -1945,6 +1952,13 @@
   "guided-onboarding-plugin-state": {
     "dynamic": false,
     "properties": {}
+  },
+  "hiddentype": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
   },
   "index-pattern": {
     "dynamic": false,
@@ -2477,6 +2491,35 @@
     "dynamic": false,
     "properties": {}
   },
+  "isolatedtype": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {
+          "searchSourceJSON": {
+            "type": "text"
+          }
+        }
+      },
+      "savedSearchId": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text"
+      },
+      "uiStateJSON": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      },
+      "visState": {
+        "type": "text"
+      }
+    }
+  },
   "kql-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -2976,6 +3019,13 @@
       }
     }
   },
+  "resolvetype": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
@@ -3131,6 +3181,20 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "sharecapabletype": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "sharedtype": {
+    "properties": {
+      "title": {
+        "type": "text"
       }
     }
   },
