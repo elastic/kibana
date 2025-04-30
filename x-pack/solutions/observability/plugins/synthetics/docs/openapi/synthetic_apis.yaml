@@ -112,6 +112,23 @@ paths:
             oneOf:
               - type: string
               - type: array
+        - name: useLogicalAndFor
+          description: >
+            Specifies whether to apply logical AND filtering for specific fields.
+            Accepts either a string with values "tags" or "locations" or an array containing both.
+          in: query
+          schema:
+            oneOf:
+              - type: string
+                enum:
+                  - tags
+                  - locations
+              - type: array
+                items:
+                  type: string
+                  enum:
+                    - tags
+                    - locations
       responses:
         '200':
           description: A successful response.
