@@ -44,8 +44,10 @@ import {
   providerOptions,
   openAiConfig,
 } from './constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const { emptyField } = fieldValidators;
+
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   const { euiTheme } = useEuiTheme();
   const { getFieldDefaultValue } = useFormContext();
@@ -60,6 +62,12 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
       getFieldDefaultValue<OpenAiProviderType>('config.apiProvider') ?? OpenAiProviderType.OpenAi,
     [getFieldDefaultValue]
   );
+
+  const verificationModeOptions = [
+    { value: 'full', text: i18n.VERIFICATION_MODE_FULL },
+    { value: 'certificate', text: i18n.VERIFICATION_MODE_CERTIFICATE },
+    { value: 'none', text: i18n.VERIFICATION_MODE_NONE },
+  ];
 
   return (
     <>
@@ -95,7 +103,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           secretsFormSchema={openAiSecrets}
         />
       )}
-      {/* ^v These are intentionally not if/else because of the way the `config.defaultValue` renders */}
       {config != null && config.apiProvider === OpenAiProviderType.AzureAi && (
         <SimpleConnectorForm
           isEdit={isEdit}
@@ -105,34 +112,64 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
         />
       )}
       {config != null && config.apiProvider === OpenAiProviderType.Other && (
-        <SimpleConnectorForm
-          isEdit={isEdit}
-          readOnly={readOnly}
-          configFormSchema={otherOpenAiConfig}
-          secretsFormSchema={otherOpenAiSecrets}
-          configValidations={[
-            {
-              validator: ({ certificateFile, certificateData, privateKeyFile, privateKeyData }) => {
-                if (
-                  (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
-                  !(certificateFile || certificateData)
-                ) {
-                  return {
-                    message: i18n.MISSING_CERTIFICATE,
-                  };
-                }
-                if (
-                  (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
-                  !(privateKeyFile || privateKeyData)
-                ) {
-                  return {
-                    message: i18n.MISSING_PRIVATE_KEY,
-                  };
-                }
+        <>
+          <SimpleConnectorForm
+            isEdit={isEdit}
+            readOnly={readOnly}
+            configFormSchema={otherOpenAiConfig.filter(field => field.id !== 'verificationMode')}
+            secretsFormSchema={otherOpenAiSecrets}
+            configValidations={[
+              {
+                validator: ({ certificateFile, certificateData, privateKeyFile, privateKeyData }) => {
+                  if (
+                    (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                    !(certificateFile || certificateData)
+                  ) {
+                    return {
+                      message: i18n.MISSING_CERTIFICATE,
+                    };
+                  }
+                  if (
+                    (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                    !(privateKeyFile || privateKeyData)
+                  ) {
+                    return {
+                      message: i18n.MISSING_PRIVATE_KEY,
+                    };
+                  }
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+          <EuiSpacer size="s" />
+          <UseField
+            path="config.verificationMode"
+            component={SelectField}
+            config={{
+              label: i18n.VERIFICATION_MODE_LABEL,
+              defaultValue: 'full',
+              helpText: (
+                <FormattedMessage
+                  defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing)."
+                  id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
+                />
+              ),
+            }}
+            componentProps={{
+              euiFieldProps: {
+                options: verificationModeOptions,
+                'data-test-subj': 'verificationModeSelect',
+                fullWidth: true,
+                disabled: readOnly,
+                append: (
+                  <EuiText size="xs" color="subdued">
+                    {i18n.OPTIONAL_LABEL}
+                  </EuiText>
+                ),
+              },
+            }}
+          />
+        </>
       )}
       <UseField
         path="__internal__.hasHeaders"
@@ -167,8 +204,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                           label: i18nAuth.KEY_LABEL,
                         }}
                         component={TextField}
-                        // This is needed because when you delete
-                        // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
                         componentProps={{
                           euiFieldProps: { readOnly, ['data-test-subj']: 'openAIHeadersKeyInput' },
