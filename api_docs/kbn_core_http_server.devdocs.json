@@ -4161,6 +4161,10 @@
                 "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
               {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
+              },
+              {
                 "plugin": "searchSynonyms",
                 "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
@@ -4939,6 +4943,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -13965,6 +13973,10 @@
               },
               {
                 "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/get/find_attack_discoveries.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery.ts"
               },
               {
@@ -14010,6 +14022,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/get_defend_insights.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery_generations.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -14282,6 +14298,14 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -14757,6 +14781,14 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -15519,6 +15551,10 @@
               },
               {
                 "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery_bulk.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/create_route.ts"
               },
               {
@@ -15564,6 +15600,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/post_defend_insights.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/post/post_attack_discovery_generations_dismiss.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -15768,6 +15808,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/install.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/evaluation/evaluate.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16302,6 +16346,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes/saved_playgrounds.ts"
               },
               {
                 "plugin": "@kbn/core",
