@@ -124,8 +124,8 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
     const collapsedStateSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
         map((gridLayout) => {
-          const row = gridLayout[rowId] as GridRowData;
-          return row && row.isCollapsed;
+          const row = gridLayout[rowId];
+          return row && (row.isMainSection || row.isCollapsed);
         })
       )
       .subscribe((collapsed) => {

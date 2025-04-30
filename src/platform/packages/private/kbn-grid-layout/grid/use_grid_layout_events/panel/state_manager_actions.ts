@@ -11,15 +11,15 @@ import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
 import { GridLayoutStateManager, GridPanelData, GridRowData } from '../../types';
-import { isGridDataEqual, isLayoutEqual } from '../../utils/equality_checks';
-import { resolveGridRow, resolveMainGrid } from '../../utils/resolve_grid_row';
+import { isGridDataEqual } from '../../utils/equality_checks';
+import { resolveGridRow } from '../../utils/resolve_grid_row';
 import { getSensorType, isKeyboardEvent } from '../sensors';
-import { PointerPosition, UseractivePanel } from '../types';
+import { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 import { GridLayoutContextType } from '../../use_grid_layout_context';
 
 export const startAction = (
-  e: UseractivePanel,
+  e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   type: 'drag' | 'resize',
   rowId: string,
@@ -41,7 +41,7 @@ export const startAction = (
 };
 
 export const moveAction = (
-  e: UseractivePanel,
+  e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutContextType['gridLayoutStateManager'],
   pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
@@ -90,6 +90,7 @@ export const moveAction = (
       return `main-0`;
     }
 
+    /** TODO: we can probably just use section headers + the top of the panel for this */
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
     Object.keys(currentLayout).forEach((rowId) => {
@@ -169,7 +170,7 @@ export const moveAction = (
       // push other sections down
       Object.keys(nextLayout).forEach((rowId) => {
         if (nextLayout[rowId].order > nextOrder) {
-          nextLayout[rowId].order += 2;
+          nextLayout[rowId].order += 1;
         }
       });
       // add the new section
@@ -201,10 +202,18 @@ export const moveAction = (
         !Object.keys(nextLayout[lastRowId].panels).length
       ) {
         // delete empty main section rows
+        const { order: prevOrder } = nextLayout[lastRowId];
         delete nextLayout[lastRowId];
+        // push other sections up
+        Object.keys(nextLayout).forEach((rowId) => {
+          if (nextLayout[rowId].order > prevOrder) {
+            nextLayout[rowId].order -= 1;
+          }
+        });
       }
     }
     if (currentLayout && !deepEqual(currentLayout, nextLayout)) {
+      // && isLayoutEqual
       console.log({ nextLayout });
       gridLayout$.next(nextLayout);
     }

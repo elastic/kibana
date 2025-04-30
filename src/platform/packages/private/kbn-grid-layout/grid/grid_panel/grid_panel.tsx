@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { distinctUntilChanged, map, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -66,11 +66,13 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   useEffect(
     () => {
       /** Update the styles of the panel via a subscription to prevent re-renders */
-      const activePanelStyleSubscription = gridLayoutStateManager.activePanel$
+      const activePanelStyleSubscription = combineLatest([
+        gridLayoutStateManager.activePanel$,
+        panel$,
+      ])
         .pipe(skip(1))
-        .subscribe((activePanel) => {
+        .subscribe(([activePanel, currentPanel]) => {
           const ref = gridLayoutStateManager.panelRefs.current[panelId];
-          const currentPanel = panel$.getValue();
           const isPanelActive = activePanel?.id === currentPanel?.id;
           if (!ref || !currentPanel) return;
 

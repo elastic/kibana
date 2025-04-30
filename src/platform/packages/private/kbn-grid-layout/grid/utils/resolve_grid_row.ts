@@ -138,48 +138,6 @@ const compactGridRow = (originalLayout: GridRowData['panels']) => {
   return nextRowData;
 };
 
-export const resolveMainGrid = (
-  gridLayout: OrderedLayout,
-  dragRequest?: GridPanelData
-): GridLayoutData => {
-  const nextLayoutData = { ...gridLayout };
-
-  const sortedLayout = getMainLayoutInOrder(nextLayoutData);
-  const sectionsAsPanels: GridRowData['panels'] = sortedLayout.reduce((prev, widget) => {
-    return {
-      ...prev,
-      [widget.id]:
-        widget.type === 'panel'
-          ? (nextLayoutData[widget.id] as GridPanelData)
-          : ({
-              id: widget.id,
-              row: nextLayoutData[widget.id].row - 1,
-              column: 0,
-              height: 1,
-              width: 48,
-            } as GridPanelData),
-    };
-  }, {} as GridRowData['panels']);
-
-  const newLayoutData: GridLayoutData = Object.values(
-    resolveGridRow(sectionsAsPanels, dragRequest)
-  ).reduce((prev, sectionOrPanel) => {
-    const { type, id } =
-      dragRequest && sectionOrPanel.id === dragRequest.id
-        ? { ...dragRequest, type: 'panel' }
-        : nextLayoutData[sectionOrPanel.id];
-    return {
-      ...prev,
-      [id]:
-        type === 'panel'
-          ? { type: 'panel', ...sectionOrPanel }
-          : { ...nextLayoutData[id], row: sectionOrPanel.row },
-    };
-  }, {} as GridLayoutData);
-
-  return newLayoutData;
-};
-
 export const resolveGridRow = (
   originalRowData: GridRowData['panels'],
   dragRequest?: GridPanelData

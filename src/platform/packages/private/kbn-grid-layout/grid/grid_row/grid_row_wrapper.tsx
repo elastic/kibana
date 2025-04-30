@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import classNames from 'classnames';
 
 export interface GridRowProps {
   rowId: string;
@@ -20,6 +19,14 @@ export interface GridRowProps {
 
 export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
+
+  const styles = useMemo(() => {
+    return css({
+      gridColumn: `1 / -1`,
+      gridRowStart: `gridRow-${rowId}`,
+      gridRowEnd: `end-${rowId}`,
+    });
+  }, [rowId]);
 
   useEffect(() => {
     return () => {
@@ -29,33 +36,11 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const initialStyles = useMemo(() => {
-    return css({
-      gridColumn: `1 / -1`,
-      gridRowStart: `gridRow-${rowId}`,
-      gridRowEnd: `end-${rowId}`,
-    });
-  }, [rowId]);
-
-  const onMount = useCallback(
-    (rowRef: HTMLDivElement | null) => {
-      gridLayoutStateManager.rowRefs.current[rowId] = rowRef;
-      if (!rowRef) return;
-      const targetRow = gridLayoutStateManager.activePanel$.getValue()?.targetRow;
-      if (rowId === targetRow) {
-        rowRef.classList.add('kbnGridRow--targeted');
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rowId]
-  );
-
   useEffect(
     () => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
-      const interactionStyleSubscription = gridLayoutStateManager.activePanel$
-        // .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-        .subscribe((activePanel) => {
+      const interactionStyleSubscription = gridLayoutStateManager.activePanel$.subscribe(
+        (activePanel) => {
           const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
           if (!rowRef) return;
           const targetRow = activePanel?.targetRow;
@@ -64,7 +49,8 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
           } else {
             rowRef.classList.remove('kbnGridRow--targeted');
           }
-        });
+        }
+      );
 
       return () => {
         interactionStyleSubscription.unsubscribe();
@@ -76,11 +62,11 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
 
   return (
     <span
-      css={initialStyles}
-      ref={onMount}
-      className={classNames('kbnGridRowBackground', {
-        'kbnGridRow--targeted': gridLayoutStateManager.activePanel$.getValue()?.targetRow === rowId,
-      })}
+      css={styles}
+      ref={(rowRef: HTMLDivElement | null) => {
+        gridLayoutStateManager.rowRefs.current[rowId] = rowRef;
+      }}
+      className={'kbnGridRowBackground'}
     />
   );
 });

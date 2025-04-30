@@ -25,8 +25,7 @@ import {
   RuntimeGridSettings,
 } from './types';
 import { shouldShowMobileView } from './utils/mobile_view';
-import { resolveGridRow } from './utils/resolve_grid_row';
-import { getOrderedLayout } from './use_ordered_grid_layout';
+import { getOrderedLayout } from './utils/conversions';
 
 export const useGridLayoutState = ({
   layout,
@@ -52,7 +51,7 @@ export const useGridLayoutState = ({
 
   const expandedPanelId$ = useMemo(
     () => new BehaviorSubject<string | undefined>(expandedPanelId),
-    // eslint-disable-next-line react-hooks/exhaustive-depss
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   useEffect(() => {
@@ -87,12 +86,13 @@ export const useGridLayoutState = ({
   }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
-    const resolvedLayout = getOrderedLayout(layout);
+    const resolvedLayout = cloneDeep(layout);
+    // resolve GRID LAYOUT
     // Object.values(resolvedLayout).forEach((row) => {
     //   resolvedLayout[row.id] = resolveGridRow(row);
     // });
 
-    const gridLayout$ = new BehaviorSubject<OrderedLayout>(resolvedLayout);
+    const gridLayout$ = new BehaviorSubject<OrderedLayout>(getOrderedLayout(resolvedLayout));
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const activePanel$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);

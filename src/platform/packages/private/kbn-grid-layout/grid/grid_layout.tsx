@@ -126,7 +126,7 @@ export const GridLayout = ({
           /** Panels */
           if (!section.isCollapsed) {
             let maxRow = -Infinity;
-            Object.values((section as GridRowData).panels).forEach((panel) => {
+            Object.values((section as unknown as GridRowData).panels).forEach((panel) => {
               maxRow = Math.max(maxRow, panel.row + panel.height);
               currentElementsInOrder.push({
                 type: 'panel',
