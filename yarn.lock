@@ -2157,21 +2157,21 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-common@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.2.0.tgz#570a988f58c24076c6f867475e70930769f3cff5"
-  integrity sha512-g2n38Uk4G9UqQU/wim+ZKWusWtO1bdudvDy/7+sdCYaxtgbINT5hhMHoU9M49D+7FJSsPuHn7gVfdYKMN9bTdQ==
+"@elastic/eui-theme-common@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.0.0.tgz#c5e7b7597c4ebe71fc533b18458415a14a93794d"
+  integrity sha512-9+P21npVm05OmFr0OPkA5DSdts9teOo/OEotbJFAVkqBLkNf+Eevv6q89B8eQ6r383RnVwTl7vBzb6M9PnULJg==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@101.4.0-amsterdam.0":
-  version "101.4.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.4.0-amsterdam.0.tgz#27360ebeb71e86052f99f5e88814b197ae97558e"
-  integrity sha512-zhWSRQYFFk2lm6mycBnpX8SJOeNzKjYJ7XwTv9RFfRUR6MGe/GfUIjHGCAg52NDNUTcYPlLuPhJKcNtAMasEOQ==
+"@elastic/eui@102.0.0-amsterdam.0":
+  version "102.0.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.0.0-amsterdam.0.tgz#9fc738d18a4b148e97ac1b4d7ddfb311314d1b97"
+  integrity sha512-C6ZS83SyQ83d5sSqaZYf+nrJeRIU5WPoAWAAr5UIqloJGBk1nuMNY8wH12PT9GiqdXFUdf6ezSsQvYCqHrWWWw==
   dependencies:
-    "@elastic/eui-theme-common" "0.2.0"
+    "@elastic/eui-theme-common" "1.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
