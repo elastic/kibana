@@ -56,7 +56,7 @@ tags:
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
       description: Alerting documentation
-      url: https://www.elastic.co/guide/en/kibana/master/alerting-getting-started.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
     x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
@@ -78,7 +78,7 @@ tags:
     name: cases
     externalDocs:
       description: Cases documentation
-      url: https://www.elastic.co/guide/en/kibana/master/cases.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
   - name: CCR Remote synced integrations
   - name: connectors
@@ -86,7 +86,7 @@ tags:
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
     externalDocs:
       description: Connector documentation
-      url: https://www.elastic.co/guide/en/kibana/current/action-types.html
+      url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: Dashboards
   - name: Data streams
@@ -254,6 +254,11 @@ tags:
     description: |
       Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
     x-displayName: Streams
+  - name: synthetics
+    x-displayName: Synthetics
+    externalDocs:
+      description: Synthetic monitoring
+      url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
   - name: system
     x-displayName: System
     description: |
@@ -264,7 +269,7 @@ tags:
     x-displayName: System
   - externalDocs:
       description: Task manager
-      url: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
+      url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
     x-displayName: Task manager
   - description: The assistant helps you prepare for the next major version of Elasticsearch.
@@ -1328,6 +1333,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -2147,6 +2166,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2677,6 +2710,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3372,6 +3419,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3663,6 +3724,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -5052,6 +5127,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -5545,7 +5634,10 @@ paths:
         - alerting
   /api/apm/agent_keys:
     post:
-      description: Create a new agent key for APM.
+      description: |
+        Create a new agent key for APM.
+        The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.
+        After it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.
       operationId: createAgentKey
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5553,6 +5645,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createAgentKeyRequest1:
+                $ref: '#/components/examples/APM_UI_agent_keys_object_post_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_agent_keys_object'
         required: true
@@ -5560,6 +5655,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createAgentKeyResponse1:
+                  $ref: '#/components/examples/APM_UI_agent_keys_object_post_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_agent_keys_response'
           description: Agent key created successfully
@@ -5667,6 +5765,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createAnnotationResponse1:
+                  $ref: '#/components/examples/APM_UI_annotation_object_post_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_create_annotation_response'
           description: Annotation created successfully
@@ -5697,6 +5798,21 @@ paths:
       summary: Create a service annotation
       tags:
         - APM annotations
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST \
+            http://localhost:5601/api/apm/services/opbeans-java/annotation \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+            -d '{
+                "@timestamp": "2020-05-08T10:31:30.452Z",
+                "service": {
+                    "version": "1.2"
+                },
+                "message": "Deployment 1.2"
+                }'
   /api/apm/services/{serviceName}/annotation/search:
     get:
       description: Search for annotations related to a specific service.
@@ -5764,6 +5880,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteAgentConfigurationRequest1:
+                $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_delete_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_service_object'
         required: true
@@ -5809,6 +5928,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentConfigurationsResponseExample1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_get_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_agent_configurations_response'
           description: Successful response
@@ -5846,6 +5968,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createUpdateAgentConfigurationRequestExample1:
+                $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_put_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_agent_configuration_intake_object'
         required: true
@@ -5966,7 +6091,7 @@ paths:
   /api/apm/settings/agent-configuration/search:
     post:
       description: |
-        This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.
+        This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
       operationId: searchSingleConfiguration
       parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
@@ -5974,6 +6099,9 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              searchSingleConfigurationRequest1:
+                $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_search_request1'
             schema:
               $ref: '#/components/schemas/APM_UI_search_agent_configuration_object'
         required: true
@@ -5981,6 +6109,9 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                searchSingleConfigurationResponse1:
+                  $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_search_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_search_agent_configuration_response'
           description: Successful response
@@ -11831,6 +11962,9 @@ paths:
     post:
       description: |
         Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
+
+        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+        The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
         > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
@@ -11854,42 +11988,64 @@ paths:
         content:
           application/json:
             examples:
-              example1:
-                description: The following request activates all rules with the test tag
-                summary: Enable all rules with the test tag
+              example01:
+                description: The following request activates all rules with the test tag.
+                summary: Enable - Enable all rules with the test tag
                 value:
                   action: enable
                   query: 'alert.attributes.tags: "test"'
-              example2:
+              example02:
                 description: The following request enables the rule with the specified ID.
-                summary: Enable a specific rule by ID
+                summary: Enable - Enable a specific rule by ID.
                 value:
                   action: enable
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
-              example3:
+              example03:
                 description: The following request disables the rule with the specified ID.
-                summary: Disable a specific rule by ID
+                summary: Disable - Disable a specific rule by ID
                 value:
                   action: disable
                   ids:
                     - 748694f0-6977-4ea5-8384-cd2e39730779
-              example4:
-                description: The following request adds tags tag-1 and tag-2 to the rules that have the IDs sent in the payload
-                summary: Add tags to rules
+              example04:
+                description: The following request duplicates rules with the specified IDs, including exceptions but not expired exceptions.
+                summary: Duplicate - Duplicate rules with specific IDs
                 value:
-                  action: edit
-                  edit:
-                    - type: add_tags
-                      value:
-                        - tag-1
-                        - tag-2
+                  action: duplicate
+                  duplicate:
+                    include_exceptions: true
+                    include_expired_exceptions: false
                   ids:
-                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
-                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
-              example5:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                    - 461a4c22-416e-4009-a9a7-cf79656454bf
+              example05:
+                description: The following request deletes the rule with the specified ID.
+                summary: Delete - Delete a specific rule by ID
+                value:
+                  action: delete
+                  ids:
+                    - cf4abfd1-7c37-4519-ab0f-5ea5c75fac60
+              example06:
+                description: The following request runs the rule with the specified ID within the given date range.
+                summary: Run - Run a specific rule by ID
+                value:
+                  action: run
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                  run:
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
+              example07:
+                description: The following request exports the rules with the specified IDs.
+                summary: Export - Export specific rules by ID
+                value:
+                  action: export
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+              example08:
                 description: The following request will validate that the add_index_patterns bulk action can be successfully applied to three rules. The dry_run parameter is specified in query parameters, e.g. POST api/detection_engine/rules/_bulk_action?dry_run=true
-                summary: Dry run - Validate add_index_patterns bulk action
+                summary: Edit - dry run - Validate add_index_patterns bulk action
                 value:
                   action: edit
                   edit:
@@ -11900,42 +12056,250 @@ paths:
                     - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
                     - dc015d10-0831-11ed-ac8b-05a222bd8d4a
                     - de8f5af0-0831-11ed-ac8b-05a222bd8d4a
-              example6:
-                description: The following request duplicates rules with the specified IDs, including exceptions but not expired exceptions.
-                summary: Duplicate rules with specific IDs
+              example09:
+                description: The following request adds the tag "tag-1" to the rules with the specified IDs. If the tag already exists for a rule, no changes are made.
+                summary: Edit - Add a tag to rules (idempotent)
                 value:
-                  action: duplicate
-                  duplicate:
-                    include_exceptions: true
-                    include_expired_exceptions: false
+                  action: edit
+                  edit:
+                    - type: add_tags
+                      value:
+                        - tag-1
                   ids:
-                    - 748694f0-6977-4ea5-8384-cd2e39730779
-                    - 461a4c22-416e-4009-a9a7-cf79656454bf
-              example7:
-                description: The following request deletes the rule with the specified ID.
-                summary: Delete a specific rule by ID
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example10:
+                description: The following request adds two tags at the same time, tag-1 and tag-2, to the rules that have the IDs sent in the payload. If the tags already exist for a rule, no changes are made.
+                summary: Edit - Add two tags to rules (idempotent)
                 value:
-                  action: delete
+                  action: edit
+                  edit:
+                    - type: add_tags
+                      value:
+                        - tag-1
+                        - tag-2
                   ids:
-                    - cf4abfd1-7c37-4519-ab0f-5ea5c75fac60
-              example8:
-                description: The following request runs the rule with the specified ID within the given date range.
-                summary: Run a specific rule by ID
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example11:
+                description: The following request removes the tag "tag-1" from the rules with the specified IDs. If the tag does not exist for a rule, no changes are made.
+                summary: Edit - Delete a tag from rules (idempotent)
                 value:
-                  action: run
+                  action: edit
+                  edit:
+                    - type: delete_tags
+                      value:
+                        - tag-1
                   ids:
-                    - 748694f0-6977-4ea5-8384-cd2e39730779
-                  run:
-                    end_date: '2025-03-10T23:59:59.999Z'
-                    start_date: '2025-03-01T00:00:00.000Z'
-              example9:
-                description: The following request exports the rules with the specified IDs.
-                summary: Export specific rules by ID
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example12:
+                description: The following request sets the tags "tag-1" and "tag-2" for the rules with the specified IDs, overwriting any existing tags. If the set of tags is the same as the existing tags, no changes are made.
+                summary: Edit - Set (overwrite existing) tags for rules (idempotent)
                 value:
-                  action: export
+                  action: edit
+                  edit:
+                    - type: set_tags
+                      value:
+                        - tag-1
+                        - tag-2
                   ids:
-                    - 748694f0-6977-4ea5-8384-cd2e39730779
-                    - 13199674-aff1-418a-9e93-04f585fe36d1
+                    - 8bc7dad0-9320-11ec-9265-8b772383a08d
+                    - 8e5c1a40-9320-11ec-9265-8b772383a08d
+              example13:
+                description: The following request adds the index pattern "test-*" to the rules with the specified IDs. If the index pattern already exists for a rule, no changes are made.
+                summary: Edit - Add index patterns to rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: add_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+              example14:
+                description: The following request removes the index pattern "test-*" from the rules with the specified IDs. If the index pattern does not exist for a rule, no changes are made.
+                summary: Edit - Remove index patterns from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+              example15:
+                description: The following request sets the index patterns "test-*" and "prod-*" for the rules with the specified IDs, overwriting any existing index patterns. If the set of index patterns is the same as the existing index patterns, no changes are made.
+                summary: Edit - Set (overwrite existing) index patterns for rules patterns (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_index_patterns
+                      value:
+                        - test-*
+                  ids:
+                    - 81aa0480-06af-11ed-94fb-dd1a0597d8d2
+                    - dc015d10-0831-11ed-ac8b-05a222bd8d4a
+              example16:
+                description: The following request adds investigation field to the rules with the specified IDs.
+                summary: Edit - Add investigation field to rules
+                value:
+                  action: edit
+                  edit:
+                    - type: add_investigation_fields
+                      value:
+                        field_names:
+                          - alert.status
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example17:
+                description: The following request deletes investigation fields from the rules with the specified IDs. If the field does not exist for a rule, no changes are made.
+                summary: Edit - Delete investigation fields from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_investigation_fields
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+                  value:
+                    - field1
+                    - field2
+              example18:
+                description: The following request sets investigation fields for the rules with the specified IDs, overwriting any existing investigation fields. If the set of investigation fields is the same as the existing investigation fields, no changes are made.
+                summary: Edit - Set (overwrite existing) investigation fields for rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_investigation_fields
+                      value:
+                        - field1
+                        - field2
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example19:
+                description: The following request sets a timeline template for the rules with the specified IDs. If the same timeline template is already set for a rule, no changes are made.
+                summary: Edit - Set (overwrite existing) timeline template for rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_timeline
+                      value:
+                        timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                        timeline_title: Alerts Involving a Single User Timeline
+                  ids:
+                    - eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+              example20:
+                description: The following request sets a schedule for the rules with the specified IDs. If the same schedule is already set for a rule, no changes are made.
+                summary: Edit - Set (overwrite existing) schedule for rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_schedule
+                      value:
+                        interval: 1h
+                        lookback: 30m
+                  ids:
+                    - 99887766-5544-3322-1100-aabbccddeeff
+              example21:
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules (non-idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191928
+              example22:
+                description: The following request sets rule actions for the rules with the specified IDs. Each action receives its own unique ID.
+                summary: Edit - Set (overwrite existing) rule actions for rules (non-idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_rule_actions
+                      value:
+                        actions:
+                          - group: default
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191928
+              example23:
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for a webhook connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              body: The message body
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+              example24:
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for an email connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              message: The message body
+                              subject: Subject
+                              to: address@domain.com
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+              example25:
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for a slack connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              message: The content of the message
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
+              example26:
+                description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
+                summary: Edit - Add rule actions to rules for a PagerDuty connector
+                value:
+                  action: edit
+                  edit:
+                    - type: add_rule_actions
+                      value:
+                        actions:
+                          - group: default3
+                            id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                            params:
+                              eventAction: trigger
+                              severity: critical
+                              summary: The message body
+                              timestamp: '2023-10-31T00:00:00.000Z'
+                  ids:
+                    - 9e946bfc-3118-4c77-bb25-67d781191921
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
@@ -11950,7 +12314,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                example01:
                   description: In this response one rule was updated and one was skipped. Objects returned in attributes.results.skipped will only include rules' id, name, and skip_reason.
                   summary: Successful response
                   value:
@@ -12020,7 +12384,7 @@ paths:
                         total: 2
                     rules_count: 1
                     success: true
-                example2:
+                example02:
                   description: If processing of any rule fails, a partial error outputs the ID and/or name of the affected rule and the corresponding error, as well as successfully processed rules (in the same format as a successful 200 request).
                   summary: Partial failure
                   value:
@@ -12127,7 +12491,7 @@ paths:
                       rules_count: 2
                       status_code: 500
                       success: false
-                example3:
+                example03:
                   description: The attributes.errors section of the response shows that two rules failed to update and one succeeded. The same results would be returned if you ran the request without dry run mode enabled. Notice that there are no arrays in attributes.results. In dry run mode, rule updates are not applied and saved to Elasticsearch, so the endpoint wouldn’t return results for rules that have been updated, created, or deleted.
                   summary: Dry run
                   value:
@@ -12157,6 +12521,431 @@ paths:
                         total: 3
                     message: Bulk edit partially failed
                     status_code: 500
+                example04:
+                  description: This example presents the successful setting of tags for 2 rules. There was a difference between the set of tags that were being added and the tags that were already set in the rules, that's why the rules were updated.
+                  summary: Set tags successsully for 2 rules
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated:
+                          - actions: []
+                            author: []
+                            created_at: '2025-03-25T11:46:41.899Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-6m
+                            id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 5m
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Rule 1
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 1
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 6fb746a0-dfe5-40fa-b03f-5cbb84f3e32e
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                            threat: []
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T11:47:11.350Z'
+                            updated_by: elastic
+                            version: 2
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                            author: []
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-360s
+                            id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - Endpoint.policy.applied.artifacts.global.channel
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              from: 3m
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Rule 2
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 33
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                            threat: []
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T11:47:11.357Z'
+                            updated_by: elastic
+                            version: 24
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 2
+                        total: 2
+                    rules_count: 2
+                    success: true
+                example05:
+                  description: This example presents the idempotent behavior of the edit action with set_tags request. Both rules already had exactly the same tags that were being added, so no changes were made in any of them.
+                  summary: Idempotent behavior of set_tags
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            name: Rule 1
+                            skip_reason: RULE_NOT_MODIFIED
+                          - id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            name: Rule 2
+                            skip_reason: RULE_NOT_MODIFIED
+                        updated: []
+                      summary:
+                        failed: 0
+                        skipped: 2
+                        succeeded: 0
+                        total: 2
+                    rules_count: 2
+                    success: true
+                example06:
+                  description: This example presents the idempotent behavior of the edit action with add_tags request. One rule was updated and one was skipped. The rule that was skipped already had all the tags that were being added.
+                  summary: Idempotent behavior of add_tags
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped:
+                          - id: 738112cd-6cfa-414a-8457-2a658845d6ba
+                            name: Test Rule 2
+                            skip_reason: RULE_NOT_MODIFIED
+                        updated:
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                uuid: 580e2e16-5e91-411c-999b-7b75a11ed441
+                            author: []
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-360s
+                            id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - Endpoint.policy.applied.artifacts.global.channel
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              from: 3m
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Test rule
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 34
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                              - tag-4
+                            threat: []
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T11:55:12.752Z'
+                            updated_by: elastic
+                            version: 25
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 1
+                        total: 2
+                    rules_count: 2
+                    success: true
+                example07:
+                  description: This example shows a non-idempotent nature of the set_rule_actions requests. Regardless if the actions are the same as the existing actions for a rule, the actions are always set in the rule and receive a new unique ID.
+                  summary: Non-idempotent behavior for set_rule_actions
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated:
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 20fbf986-a270-460e-80f3-7b83c08b430f
+                                params:
+                                  body: Hello
+                                uuid: e48428e5-efac-4856-b8ad-b271c14eaa91
+                            author: []
+                            created_at: '2025-03-25T09:49:08.343Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-360s
+                            id: eacdfc95-e007-41c9-986e-4b2cbdfdc71b
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 3m
+                            investigation_fields:
+                              field_names:
+                                - alert.status
+                                - Endpoint.policy.applied.artifacts.global.channel
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              from: 3m
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Test rule
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 39
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 43250a55-53a3-4ddd-96cb-82a1bd720180
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags:
+                              - tag-1
+                              - tag-2
+                              - tag-4
+                            threat: []
+                            timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
+                            timeline_title: Alerts Involving a Single User Timeline
+                            to: now
+                            type: query
+                            updated_at: '2025-03-25T12:17:40.528Z'
+                            updated_by: elastic
+                            version: 30
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 1
+                        total: 1
+                    rules_count: 1
+                    success: true
+                example08:
+                  description: This example shows a non-idempotent nature of the add_rule_actions requests. Regardless if the added action is the same as another existing action for a rule, the new action is added to the rule and receives a new unique ID.
+                  summary: Non-idempotent behavior for add_rule_actions
+                  value:
+                    attributes:
+                      results:
+                        created: []
+                        deleted: []
+                        skipped: []
+                        updated:
+                          - actions:
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                params:
+                                  body: Message body
+                                uuid: 0309347e-3954-429c-9168-5da2663389af
+                              - action_type_id: .webhook
+                                frequency:
+                                  notifyWhen: onActiveAlert
+                                  summary: true
+                                  throttle: null
+                                group: default
+                                id: 76af173d-38d8-4a9a-b2cc-a3c695b845b4
+                                params:
+                                  body: Message body
+                                uuid: 49ddaa94-d63d-410e-90dc-8c1bad9552bd
+                            author: []
+                            created_at: '2025-04-02T12:42:03.400Z'
+                            created_by: elastic
+                            description: test
+                            enabled: false
+                            exceptions_list: []
+                            false_positives: []
+                            filters: []
+                            from: now-6m
+                            id: 0d3eb0cd-88c4-4651-ac87-6d9f0cb87217
+                            immutable: false
+                            index:
+                              - apm-*-transaction*
+                              - auditbeat-*
+                              - endgame-*
+                              - filebeat-*
+                              - logs-*
+                              - packetbeat-*
+                              - traces-apm*
+                              - winlogbeat-*
+                              - '-*elastic-cloud-logs-*'
+                            interval: 5m
+                            language: kuery
+                            license: ''
+                            max_signals: 100
+                            meta:
+                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                            name: Jacek test rule
+                            output_index: ''
+                            query: '*'
+                            references: []
+                            related_integrations: []
+                            required_fields: []
+                            revision: 2
+                            risk_score: 21
+                            risk_score_mapping: []
+                            rule_id: 2684c020-1370-4719-ac27-eafe6428fe10
+                            rule_source:
+                              type: internal
+                            setup: ''
+                            severity: low
+                            severity_mapping: []
+                            tags: []
+                            threat: []
+                            to: now
+                            type: query
+                            updated_at: '2025-04-02T12:51:40.215Z'
+                            updated_by: elastic
+                            version: 2
+                      summary:
+                        failed: 0
+                        skipped: 0
+                        succeeded: 1
+                        total: 1
+                    rules_count: 1
+                    success: true
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/Security_Detections_API_BulkEditActionResponse'
@@ -14697,6 +15486,35 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_analytics/monitoring/engine/init:
+    post:
+      operationId: InitMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      operationId: PrivMonHealth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+          description: Successful response
+      summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -18185,6 +19003,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -18857,6 +19685,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -19068,6 +19906,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -19759,6 +20607,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -20429,6 +21287,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -21099,6 +21967,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -21312,6 +22190,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -22002,6 +22890,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -22724,15 +23622,15 @@ paths:
                                 type: object
                                 properties:
                                   secrets:
-                                    additionalProperties: false
+                                    additionalProperties: true
                                     type: object
                                     properties:
                                       ssl:
-                                        additionalProperties: false
+                                        additionalProperties: true
                                         type: object
                                         properties:
                                           key:
-                                            additionalProperties: false
+                                            additionalProperties: true
                                             type: object
                                             properties:
                                               id:
@@ -22847,15 +23745,15 @@ paths:
                                   proxy_url:
                                     type: string
                                   secrets:
-                                    additionalProperties: false
+                                    additionalProperties: true
                                     type: object
                                     properties:
                                       ssl:
-                                        additionalProperties: false
+                                        additionalProperties: true
                                         type: object
                                         properties:
                                           key:
-                                            additionalProperties: false
+                                            additionalProperties: true
                                             type: object
                                             properties:
                                               id:
@@ -23775,9 +24673,6 @@ paths:
                                 type: array
                               type:
                                 type: string
-                            required:
-                              - api_key_id
-                              - type
                           type: object
                         packages:
                           items:
@@ -24237,9 +25132,6 @@ paths:
                               type: array
                             type:
                               type: string
-                          required:
-                            - api_key_id
-                            - type
                         type: object
                       packages:
                         items:
@@ -24581,9 +25473,6 @@ paths:
                               type: array
                             type:
                               type: string
-                          required:
-                            - api_key_id
-                            - type
                         type: object
                       packages:
                         items:
@@ -26315,6 +27204,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -26347,6 +27238,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -26450,6 +27343,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
@@ -26576,6 +27471,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
@@ -26917,6 +27814,63 @@ paths:
                   - message
                   - attributes
       summary: Create a custom integration
+      tags:
+        - Elastic Package Manager (EPM)
+  /api/fleet/epm/custom_integrations/{pkgName}:
+    put:
+      description: '[Required authorization] Route required privileges: fleet-settings-all AND integrations-all.'
+      operationId: put-fleet-epm-custom-integrations-pkgname
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                categories:
+                  items:
+                    type: string
+                  type: array
+                readMeData:
+                  type: string
+              required:
+                - readMeData
+      responses:
+        '200': {}
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Update a custom integration
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/data_streams:
@@ -30851,16 +31805,6 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
-                                kibana_api_key:
-                                  anyOf:
-                                    - additionalProperties: true
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                      required:
-                                        - id
-                                    - type: string
                                 service_token:
                                   anyOf:
                                     - additionalProperties: true
@@ -30955,6 +31899,8 @@ paths:
                                     - strict
                                   type: string
                             sync_integrations:
+                              type: boolean
+                            sync_uninstalled_integrations:
                               type: boolean
                             type:
                               enum:
@@ -31631,16 +32577,6 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
-                        kibana_api_key:
-                          anyOf:
-                            - additionalProperties: false
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                              required:
-                                - id
-                            - type: string
                         service_token:
                           anyOf:
                             - additionalProperties: false
@@ -31735,6 +32671,8 @@ paths:
                             - strict
                           type: string
                     sync_integrations:
+                      type: boolean
+                    sync_uninstalled_integrations:
                       type: boolean
                     type:
                       enum:
@@ -32370,16 +33308,6 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
-                              kibana_api_key:
-                                anyOf:
-                                  - additionalProperties: true
-                                    type: object
-                                    properties:
-                                      id:
-                                        type: string
-                                    required:
-                                      - id
-                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -32474,6 +33402,8 @@ paths:
                                   - strict
                                 type: string
                           sync_integrations:
+                            type: boolean
+                          sync_uninstalled_integrations:
                             type: boolean
                           type:
                             enum:
@@ -33215,16 +34145,6 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
-                              kibana_api_key:
-                                anyOf:
-                                  - additionalProperties: true
-                                    type: object
-                                    properties:
-                                      id:
-                                        type: string
-                                    required:
-                                      - id
-                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -33319,6 +34239,8 @@ paths:
                                   - strict
                                 type: string
                           sync_integrations:
+                            type: boolean
+                          sync_uninstalled_integrations:
                             type: boolean
                           type:
                             enum:
@@ -33982,16 +34904,6 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
-                        kibana_api_key:
-                          anyOf:
-                            - additionalProperties: false
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                              required:
-                                - id
-                            - type: string
                         service_token:
                           anyOf:
                             - additionalProperties: false
@@ -34086,6 +34998,8 @@ paths:
                             - strict
                           type: string
                     sync_integrations:
+                      type: boolean
+                    sync_uninstalled_integrations:
                       type: boolean
                     type:
                       enum:
@@ -34708,16 +35622,6 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
-                              kibana_api_key:
-                                anyOf:
-                                  - additionalProperties: true
-                                    type: object
-                                    properties:
-                                      id:
-                                        type: string
-                                    required:
-                                      - id
-                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -34812,6 +35716,8 @@ paths:
                                   - strict
                                 type: string
                           sync_integrations:
+                            type: boolean
+                          sync_uninstalled_integrations:
                             type: boolean
                           type:
                             enum:
@@ -39948,6 +40854,105 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
+  /api/fleet/remote_synced_integrations/{outputId}/remote_status:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
+      operationId: get-fleet-remote-synced-integrations-outputid-remote-status
+      parameters:
+        - in: path
+          name: outputId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  custom_assets:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        is_deleted:
+                          type: boolean
+                        name:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        type:
+                          type: string
+                      required:
+                        - type
+                        - name
+                        - package_name
+                        - package_version
+                        - sync_status
+                    type: object
+                  error:
+                    type: string
+                  integrations:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        id:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        updated_at:
+                          type: string
+                      required:
+                        - sync_status
+                    type: array
+                required:
+                  - integrations
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get CCR Remote synced integrations status by outputId
+      tags:
+        - CCR Remote synced integrations
   /api/fleet/remote_synced_integrations/status:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
@@ -39966,6 +40971,10 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        error:
+                          type: string
+                        is_deleted:
+                          type: boolean
                         name:
                           type: string
                         package_name:
@@ -46604,7 +47613,7 @@ paths:
         - system
   /api/streams:
     get:
-      description: Fetches list of all streams
+      description: 'Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams
       parameters: []
       requestBody:
@@ -46626,7 +47635,7 @@ paths:
       x-state: Technical Preview
   /api/streams/_disable:
     post:
-      description: Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.
+      description: 'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46655,7 +47664,7 @@ paths:
       x-state: Technical Preview
   /api/streams/_enable:
     post:
-      description: Enables wired streams
+      description: 'Enables wired streams<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46684,7 +47693,7 @@ paths:
       x-state: Technical Preview
   /api/streams/_resync:
     post:
-      description: Resyncs all streams, making sure that Elasticsearch assets are up to date
+      description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-resync
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46713,7 +47722,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}:
     delete:
-      description: Deletes a stream definition and the underlying data stream
+      description: 'Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46746,7 +47755,7 @@ paths:
         - streams
       x-state: Technical Preview
     get:
-      description: Fetches a stream definition and associated dashboards
+      description: 'Fetches a stream definition and associated dashboards<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name
       parameters:
         - in: path
@@ -46772,7 +47781,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Creates or updates a stream definition. Classic streams can not be created through this API, only updated
+      description: 'Creates or updates a stream definition. Classic streams can not be created through this API, only updated<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48893,7 +49902,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/_fork:
     post:
-      description: Forks a wired stream and creates a child stream
+      description: 'Forks a wired stream and creates a child stream<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-fork
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49011,7 +50020,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/_group:
     get:
-      description: Fetches the group settings of a group stream definition
+      description: 'Fetches the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-group
       parameters:
         - in: path
@@ -49037,7 +50046,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Upserts the group settings of a group stream definition
+      description: 'Upserts the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-group
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49081,7 +50090,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/_ingest:
     get:
-      description: Fetches the ingest settings of an ingest stream definition
+      description: 'Fetches the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-ingest
       parameters:
         - in: path
@@ -49107,7 +50116,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Upserts the ingest settings of an ingest stream definition
+      description: 'Upserts the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-ingest
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51077,7 +52086,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/content/export:
     post:
-      description: Exports the content associated to a stream.
+      description: 'Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-content-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51096,21 +52105,58 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - enum:
-                    - 'null'
-                  nullable: true
-                - not: {}
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                include:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        objects:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                      required:
+                        - objects
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        all:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - all
+                name:
+                  type: string
+                replaced_patterns:
+                  items:
+                    type: string
+                  type: array
+                version:
+                  type: string
+              required:
+                - name
+                - description
+                - version
+                - replaced_patterns
+                - include
       responses: {}
       summary: Export stream content
       tags:
         - streams
   /api/streams/{name}/content/import:
     post:
-      description: Links content objects to a stream.
+      description: 'Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-content-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51133,7 +52179,10 @@ paths:
               type: object
               properties:
                 content: {}
+                include:
+                  type: string
               required:
+                - include
                 - content
       responses: {}
       summary: Import content into a stream
@@ -51141,7 +52190,7 @@ paths:
         - streams
   /api/streams/{name}/dashboards:
     get:
-      description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
+      description: 'Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-dashboards
       parameters:
         - in: path
@@ -51168,7 +52217,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/dashboards/_bulk:
     post:
-      description: Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.
+      description: 'Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-dashboards-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51229,7 +52278,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/dashboards/{dashboardId}:
     delete:
-      description: Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.
+      description: 'Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name-dashboards-dashboardid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51267,7 +52316,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.
+      description: 'Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-dashboards-dashboardid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51306,7 +52355,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/queries:
     get:
-      description: Fetches all queries linked to a stream that are visible to the current user in the current space.
+      description: 'Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-queries
       parameters:
         - in: path
@@ -51333,7 +52382,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/queries/_bulk:
     post:
-      description: Bulk update queries of a stream. Can add new queries and delete existing ones.
+      description: 'Bulk update queries of a stream. Can add new queries and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: post-streams-name-queries-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51412,7 +52461,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/queries/{queryId}:
     delete:
-      description: Remove a query from a stream. Noop if the query is not found on the stream.
+      description: 'Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: delete-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51450,7 +52499,7 @@ paths:
         - streams
       x-state: Technical Preview
     put:
-      description: Adds a query to a stream. Noop if the query is already present on the stream.
+      description: 'Adds a query to a stream. Noop if the query is already present on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
       operationId: put-streams-name-queries-queryid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51499,7 +52548,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/significant_events:
     get:
-      description: Read the significant events
+      description: 'Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.'
       operationId: get-streams-name-significant-events
       parameters:
         - in: path
@@ -51541,6 +52590,982 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
+  /api/synthetics/monitors:
+    get:
+      description: |
+        Get a list of monitors.
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-synthetic-monitors
+      parameters:
+        - description: Additional filtering criteria.
+          in: query
+          name: filter
+          schema:
+            type: string
+        - description: The locations to filter by.
+          in: query
+          name: locations
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: The monitor types to filter.
+          in: query
+          name: monitorTypes
+          schema:
+            oneOf:
+              - enum:
+                  - browser
+                  - http
+                  - icmp
+                  - tcp
+                type: string
+              - type: array
+        - description: The page number for paginated results.
+          in: query
+          name: page
+          schema:
+            type: integer
+        - description: The number of items to return per page.
+          in: query
+          name: per_page
+          schema:
+            type: integer
+        - description: The projects to filter by.
+          in: query
+          name: projects
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: A free-text query string.
+          in: query
+          name: query
+          schema:
+            type: string
+        - description: The schedules to filter by.
+          in: query
+          name: schedules
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - description: The field to sort the results by.
+          in: query
+          name: sortField
+          schema:
+            enum:
+              - name
+              - createdAt
+              - updatedAt
+              - status
+            type: string
+        - description: The sort order.
+          in: query
+          name: sortOrder
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: The status to filter by.
+          in: query
+          name: status
+          schema:
+            oneOf:
+              - type: array
+              - type: string
+        - description: Tags to filter monitors.
+          in: query
+          name: tags
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - description: |
+            Specifies whether to apply logical AND filtering for specific fields. Accepts either a string with values "tags" or "locations" or an array containing both.
+          in: query
+          name: useLogicalAndFor
+          schema:
+            oneOf:
+              - enum:
+                  - tags
+                  - locations
+                type: string
+              - items:
+                  enum:
+                    - tags
+                    - locations
+                  type: string
+                type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSyntheticMonitorsResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`.
+                  value: |-
+                    {
+                        "page": 1,
+                        "total": 24,
+                        "monitors": [
+                            {
+                                "type": "icmp",
+                                "enabled": false,
+                                "alert": {
+                                    "status": {
+                                        "enabled": true
+                                    },
+                                    "tls": {
+                                        "enabled": true
+                                    }
+                                },
+                                "schedule": {
+                                    "number": "3",
+                                    "unit": "m"
+                                },
+                                "config_id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "timeout": "16",
+                                "name": "8.8.8.8:80",
+                                "locations": [
+                                    {
+                                        "id": "us_central",
+                                        "label": "North America - US Central",
+                                        "geo": {
+                                            "lat": 41.25,
+                                            "lon": -95.86
+                                        },
+                                        "isServiceManaged": true
+                                    }
+                                ],
+                                "namespace": "default",
+                                "origin": "ui",
+                                "id": "e59142e5-1fe3-4aae-b0b0-19d6345e65a1",
+                                "max_attempts": 2,
+                                "wait": "7",
+                                "revision": 3,
+                                "mode": "all",
+                                "ipv4": true,
+                                "ipv6": true,
+                                "created_at": "2023-11-07T09:57:04.152Z",
+                                "updated_at": "2023-12-04T19:19:34.039Z",
+                                "host": "8.8.8.8:80"
+                            }
+                        ],
+                        "absoluteTotal": 24,
+                        "perPage": 10,
+                    }
+              schema:
+                type: object
+          description: A successful response.
+      summary: Get monitors
+      tags:
+        - synthetics
+    post:
+      description: |
+        Create a new monitor with the specified attributes. A monitor can be one of the following types: HTTP, TCP, ICMP, or Browser. The required and default fields may vary based on the monitor type.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: post-synthetic-monitors
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postSyntheticMonitorsRequestExample1:
+                description: Create an HTTP monitor to check a website's availability.
+                summary: HTTP monitor
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample2:
+                description: Create a TCP monitor to monitor a server's availability.
+                summary: TCP monitor
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              postSyntheticMonitorsRequestExample3:
+                description: Create an ICMP monitor to perform ping checks.
+                summary: ICMP monitor
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              postSyntheticMonitorsRequestExample4:
+                description: Create a browser monitor to check a website.
+                summary: Browser monitor
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+            schema:
+              description: |
+                The request body should contain the attributes of the monitor you want to create. The required and default fields differ depending on the monitor type.
+              discriminator:
+                propertyName: type
+              oneOf:
+                - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+        required: true
+      responses:
+        '200':
+          description: A successful response.
+      summary: Create a monitor
+      tags:
+        - synthetics
+  /api/synthetics/monitors/_bulk_delete:
+    post:
+      description: |
+        Delete multiple monitors by sending a list of config IDs.
+      operationId: delete-synthetic-monitors
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkDeleteRequestExample1:
+                description: Run `POST /api/synthetics/monitors/_bulk_delete` to delete a list of monitors.
+                value: |-
+                  {
+                    "ids": [
+                      "monitor1-id",
+                      "monitor2-id"
+                    ]
+                  }
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: An array of monitor IDs to delete.
+                  items:
+                    type: string
+                  type: array
+              required:
+                - ids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteMonitorsResponseExample1:
+                  description: A response from successfully deleting multiple monitors.
+                  value: |-
+                    [
+                      {
+                        "id": "monitor1-id",
+                        "deleted": true
+                      },
+                      {
+                        "id": "monitor2-id",
+                        "deleted": true
+                      }
+                    ]
+              schema:
+                items:
+                  description: The API response includes information about the deleted monitors.
+                  type: object
+                  properties:
+                    deleted:
+                      description: |
+                        If it is `true`, the monitor was successfully deleted If it is `false`, the monitor was not deleted.
+                      type: boolean
+                    ids:
+                      description: The unique identifier of the deleted monitor.
+                      type: string
+                type: array
+      summary: Delete monitors
+      tags:
+        - synthetics
+  /api/synthetics/monitors/{id}:
+    delete:
+      description: |
+        Delete a monitor from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: delete-synthetic-monitor
+      parameters:
+        - description: The identifier for the monitor that you want to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      summary: Delete a monitor
+      tags:
+        - synthetics
+    get:
+      operationId: get-synthetic-monitor
+      parameters:
+        - description: The ID of the monitor.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSyntheticMonitorResponseExample1:
+                  description: A successful response from `GET /api/synthetics/monitors/<id>`.
+                  value: |-
+                    {
+                        "type": "http",
+                        "enabled": true,
+                        "alert": {
+                            "status": {
+                                "enabled": true
+                            },
+                            "tls": {
+                                "enabled": true
+                            }
+                        },
+                        "schedule": {
+                            "number": "3",
+                            "unit": "m"
+                        },
+                        "config_id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "timeout": "16",
+                        "name": "am i something",
+                        "locations": [
+                            {
+                                "id": "us_central",
+                                "label": "North America - US Central",
+                                "geo": {
+                                    "lat": 41.25,
+                                    "lon": -95.86
+                                },
+                                "isServiceManaged": true
+                            }
+                        ],
+                        "namespace": "default",
+                        "origin": "ui",
+                        "id": "a8188705-d01e-4bb6-87a1-64fa5e4b07ec",
+                        "max_attempts": 2,
+                        "__ui": {
+                            "is_tls_enabled": false
+                        },
+                        "max_redirects": "0",
+                        "response.include_body": "on_error",
+                        "response.include_headers": true,
+                        "check.request.method": "GET",
+                        "mode": "any",
+                        "response.include_body_max_bytes": "1024",
+                        "ipv4": true,
+                        "ipv6": true,
+                        "ssl.verification_mode": "full",
+                        "ssl.supported_protocols": [
+                            "TLSv1.1",
+                            "TLSv1.2",
+                            "TLSv1.3"
+                        ],
+                        "revision": 13,
+                        "created_at": "2023-11-08T08:45:29.334Z",
+                        "updated_at": "2023-12-18T20:31:44.770Z",
+                        "url": "https://fast.com"
+                    }
+              schema:
+                type: object
+        '404':
+          description: If the monitor is not found, the API returns a 404 error.
+      summary: Get a monitor
+      tags:
+        - synthetics
+    put:
+      description: |
+        Update a monitor with the specified attributes. The required and default fields may vary based on the monitor type.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+        You can also partially update a monitor. This will only update the fields that are specified in the request body. All other fields are left unchanged. The specified fields should conform to the monitor type. For example, you can't update the `inline_scipt` field of a HTTP monitor.
+      operationId: put-synthetic-monitor
+      parameters:
+        - description: The identifier for the monitor that you want to update.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putSyntheticMonitorsRequestExample1:
+                description: Update an HTTP monitor that checks a website's availability.
+                summary: HTTP monitor
+                value: |-
+                  {
+                    "type": "http",
+                    "name": "Website Availability",
+                    "url": "https://example.com",
+                    "tags": ["website", "availability"],
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample2:
+                description: Update a TCP monitor that monitors a server's availability.
+                summary: TCP monitor
+                value: |-
+                  {
+                    "type": "tcp",
+                    "name": "Server Availability",
+                    "host": "example.com",
+                    "private_locations": ["my_private_location"]
+                  }
+              putSyntheticMonitorsRequestExample3:
+                description: Update an ICMP monitor that performs ping checks.
+                summary: ICMP monitor
+                value: |-
+                  {
+                    "type": "icmp",
+                    "name": "Ping Test",
+                    "host": "example.com",
+                    "locations": ["united_kingdom"]
+                  }
+              putSyntheticMonitorsRequestExample4:
+                description: Update a browser monitor that checks a website.
+                summary: Browser monitor
+                value: |-
+                  {
+                    "type": "browser",
+                    "name": "Example journey",
+                    "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+                    "locations": ["united_kingdom"]
+                  }
+            schema:
+              description: |
+                The request body should contain the attributes of the monitor you want to update. The required and default fields differ depending on the monitor type.
+              discriminator:
+                propertyName: type
+              oneOf:
+                - $ref: '#/components/schemas/Synthetics_browserMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_httpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_icmpMonitorFields'
+                - $ref: '#/components/schemas/Synthetics_tcpMonitorFields'
+              type: object
+        required: true
+      summary: Update a monitor
+      tags:
+        - synthetics
+  /api/synthetics/params:
+    get:
+      description: |
+        Get a list of all parameters. You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-parameters
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getParametersResponseExample1:
+                  description: A successful response for a user with read-only permissions to get a list of parameters.
+                  summary: Read access
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"]
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"]
+                      }
+                    ]
+                getParametersResponseExample2:
+                  description: A successful response for a user with write permissions to get a list of parameters.
+                  summary: Write access
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "description": "Description for param1",
+                        "tags": ["tag1", "tag2"],
+                        "namespaces": ["namespace1"],
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "description": "Description for param2",
+                        "tags": ["tag3"],
+                        "namespaces": ["namespace2"],
+                        "value": "value2"
+                      }
+                    ]
+              schema:
+                items:
+                  - $ref: '#/components/schemas/Synthetics_getParameterResponse'
+                type: array
+          description: A successful response.
+      summary: Get parameters
+      tags:
+        - synthetics
+    post:
+      description: |
+        Add one or more parameters to the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: post-parameters
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postParametersRequestExample1:
+                description: Add a single parameter.
+                summary: Single parameter
+                value: |-
+                  {
+                    "key": "your-key-name",
+                    "value": "your-parameter-value",
+                    "description": "Param to use in browser monitor",
+                    "tags": ["authentication", "security"],
+                    "share_across_spaces": true
+                  }
+              postParametersRequestExample2:
+                description: Add multiple parameters.
+                summary: Multiple parameters
+                value: |-
+                  [
+                    {
+                      "key": "param1",
+                      "value": "value1"
+                    },
+                    {
+                      "key": "param2",
+                      "value": "value2"
+                    }
+                  ]
+            schema:
+              oneOf:
+                - items:
+                    $ref: '#/components/schemas/Synthetics_parameterRequest'
+                  type: array
+                - $ref: '#/components/schemas/Synthetics_parameterRequest'
+        description: The request body can contain either a single parameter object or an array of parameter objects.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postParametersResponseExample1:
+                  description: A successful response for a single added parameter.
+                  summary: Single parameter
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-key-name",
+                      "value": "your-param-value",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "share_across_spaces": true
+                    }
+                postParametersResponseExample2:
+                  description: A successful response for multiple added parameters.
+                  summary: Multiple parameters
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "key": "param1",
+                        "value": "value1"
+                      },
+                      {
+                        "id": "param2-id",
+                        "key": "param2",
+                        "value": "value2"
+                      }
+                    ]
+              schema:
+                oneOf:
+                  - items:
+                      $ref: '#/components/schemas/Synthetics_postParameterResponse'
+                    type: array
+                  - $ref: '#/components/schemas/Synthetics_postParameterResponse'
+          description: A successful response.
+      summary: Add parameters
+      tags:
+        - synthetics
+  /api/synthetics/params/_bulk_delete:
+    delete:
+      description: |
+        Delete parameters from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: delete-parameters
+      requestBody:
+        content:
+          application/json:
+            examples:
+              deleteParametersRequestExample1:
+                description: Run `POST /api/synthetics/params/_bulk_delete` to delete multiple parameters.
+                value: |-
+                  {
+                    "ids": ["param1-id", "param2-id"]
+                  }
+            schema:
+              property:
+                ids:
+                  description: An array of parameter IDs to delete.
+                  items:
+                    type: string
+                  type: array
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteParametersResponseExample1:
+                  value: |-
+                    [
+                      {
+                        "id": "param1-id",
+                        "deleted": true
+                      }
+                    ]
+              schema:
+                items:
+                  type: object
+                  properties:
+                    deleted:
+                      description: |
+                        Indicates whether the parameter was successfully deleted. It is `true` if it was deleted. It is `false` if it was not deleted.
+                      type: boolean
+                    id:
+                      description: The unique identifier for the deleted parameter.
+                      type: string
+                type: array
+          description: A successful response.
+      summary: Delete parameters
+      tags:
+        - synthetics
+  /api/synthetics/params/{id}:
+    delete:
+      description: |
+        Delete a parameter from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: delete-parameter
+      parameters:
+        - description: The ID for the parameter to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      summary: Delete a parameter
+      tags:
+        - synthetics
+    get:
+      description: |
+        Get a parameter from the Synthetics app.
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: get-parameter
+      parameters:
+        - description: The unique identifier for the parameter.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getParameterResponseExample1:
+                  description: A successful response for a user with read-only permissions to get a single parameter.
+                  summary: Read access
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-api-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"]
+                    }
+                getParameterResponseExample2:
+                  description: A successful response for a user with write permissions to get a single parameter.
+                  summary: Write access
+                  value: |-
+                    {
+                      "id": "unique-parameter-id",
+                      "key": "your-param-key",
+                      "description": "Param to use in browser monitor",
+                      "tags": ["authentication", "security"],
+                      "namespaces": ["namespace1", "namespace2"],
+                      "value": "your-param-value"
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getParameterResponse'
+          description: A successful response.
+      summary: Get a parameter
+      tags:
+        - synthetics
+    put:
+      description: |
+        Update a parameter in the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      operationId: put-parameter
+      parameters:
+        - description: The unique identifier for the parameter.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putParameterRequestExample1:
+                value: |-
+                  {
+                    "key": "updated_param_key",
+                    "value": "updated-param-value",
+                    "description": "Updated Param to be used in browser monitor",
+                    "tags": ["authentication", "security", "updated"]
+                  }
+            schema:
+              type: object
+              properties:
+                description:
+                  description: The updated description of the parameter.
+                  type: string
+                key:
+                  description: The key of the parameter.
+                  type: string
+                tags:
+                  description: An array of updated tags to categorize the parameter.
+                  items:
+                    type: string
+                  type: array
+                value:
+                  description: The updated value associated with the parameter.
+                  type: string
+        description: The request body cannot be empty; at least one attribute is required.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putParameterResponseExample1:
+                  value: |-
+                    {
+                      "id": "param_id1",
+                      "key": "updated_param_key",
+                      "value": "updated-param-value",
+                      "description": "Updated Param to be used in browser monitor",
+                      "tags": ["authentication", "security", "updated"]
+                    }
+              schema:
+                type: object
+          description: A successful response.
+      summary: Update a parameter
+      tags:
+        - synthetics
+  /api/synthetics/private_locations:
+    get:
+      description: |
+        Get a list of private locations.
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: get-private-locations
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPrivateLocationsResponseExample1:
+                  value: |-
+                    [
+                        {
+                            "label": "Test private location",
+                            "id": "fleet-server-policy",
+                            "agentPolicyId": "fleet-server-policy",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "default"
+                        },
+                        {
+                            "label": "Test private location 2",
+                            "id": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "agentPolicyId": "691225b0-6ced-11ee-8f5a-376306ee85ae",
+                            "isInvalid": false,
+                            "geo": {
+                                "lat": 0,
+                                "lon": 0
+                            },
+                            "namespace": "test"
+                        }
+                    ]
+              schema:
+                items:
+                  $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+                type: array
+          description: A successful response.
+      summary: Get private locations
+      tags:
+        - synthetics
+    post:
+      description: You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: post-private-location
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postPrivateLocationRequestExample1:
+                description: Run `POST /api/private_locations` to create a private location.
+                value: |-
+                  {
+                    "label": "Private Location 1",
+                    "agentPolicyId": "abcd1234",
+                    "tags": ["private", "testing"],
+                    "geo": {
+                      "lat": 40.7128,
+                      "lon": -74.0060
+                    }
+                    "spaces": ["default"]
+                  }
+            schema:
+              type: object
+              properties:
+                agentPolicyId:
+                  description: The ID of the agent policy associated with the private location.
+                  type: string
+                geo:
+                  description: Geographic coordinates (WGS84) for the location.
+                  type: object
+                  properties:
+                    lat:
+                      description: The latitude of the location.
+                      type: number
+                    lon:
+                      description: The longitude of the location.
+                      type: number
+                  required:
+                    - lat
+                    - lon
+                label:
+                  description: A label for the private location.
+                  type: string
+                spaces:
+                  description: |
+                    An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.
+                  items:
+                    type: string
+                  type: array
+                tags:
+                  description: An array of tags to categorize the private location.
+                  items:
+                    type: string
+                  type: array
+              required:
+                - agentPolicyId
+                - label
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "id": "abcd1234",
+                      "label": "Private Location 1",
+                      "agentPolicyId": "abcd1234",
+                      "tags": ["private", "testing"],
+                      "geo": {
+                        "lat": 40.7128,
+                        "lon": -74.0060
+                      }
+                    }
+              schema:
+                type: object
+          description: A successful response.
+        '400':
+          description: If the `agentPolicyId` is already used by an existing private location or if the `label` already exists, the API will return a 400 Bad Request response with a corresponding error message.
+      summary: Create a private location
+      tags:
+        - synthetics
+  /api/synthetics/private_locations/{id}:
+    delete:
+      description: |
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+        The API does not return a response body for deletion, but it will return an appropriate status code upon successful deletion.
+        A location cannot be deleted if it has associated monitors in use. You must delete all monitors associated with the location before deleting the location.
+      operationId: delete-private-location
+      parameters:
+        - description: The unique identifier of the private location to be deleted.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+      summary: Delete a private location
+      tags:
+        - synthetics
+    get:
+      description: |
+        You must have `read` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+      operationId: get-private-location
+      parameters:
+        - description: A private location identifier or label.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                        "label": "Test private location",
+                        "id": "test-private-location-id",
+                        "agentPolicyId": "test-private-location-id",
+                        "isServiceManaged": false,
+                        "isInvalid": false,
+                        "geo": {
+                            "lat": 0,
+                            "lon": 0
+                        },
+                        "namespace": "default"
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+          description: A successful response.
+      summary: Get a private location
+      tags:
+        - synthetics
   /api/task_manager/_health:
     get:
       description: |
@@ -52522,6 +54547,133 @@ paths:
       summary: Create an SLO
       tags:
         - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete:
+    post:
+      description: |
+        Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the `GET /api/slo/_bulk_delete/{taskId}` endpoint.
+      operationId: bulkDeleteOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_delete_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Bulk delete SLO definitions and their associated summary and rollup data.
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}:
+    get:
+      description: |
+        Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
+      operationId: bulkDeleteStatusOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+        - description: The task id of the bulk delete operation
+          in: path
+          name: taskId
+          required: true
+          schema:
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_delete_status_response'
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Retrieve the status of the bulk deletion
+      tags:
+        - slo
+  /s/{spaceId}/api/observability/slos/_bulk_purge_rollup:
+    post:
+      description: |
+        The deletion occurs for the specified list of `sloId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: deleteRollupDataOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_bulk_purge_rollup_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_bulk_purge_rollup_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+      summary: Batch delete rollup and summary data
+      tags:
+        - slo
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       description: |
@@ -52830,7 +54982,7 @@ paths:
           name: includeOutdatedOnly
           schema:
             type: boolean
-        - description: Specify which SLO tags to query by (comma-separated list)
+        - description: Filters the SLOs by tag
           in: query
           name: tags
           schema:
@@ -53049,7 +55201,7 @@ components:
           does_set_recovery_context: true
           enabled_in_license: true
           has_alerts_mappings: true
-          has_fields_for_a_a_d: false
+          has_fields_for_a_a_d: true
           id: xpack.ml.anomaly_detection_alert
           is_exportable: true
           minimum_license_required: platinum
@@ -53121,6 +55273,154 @@ components:
             id: recovered
             name: Recovered
           rule_task_timeout: 5m
+    APM_UI_agent_configuration_intake_object_delete_request1:
+      description: Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.
+      value: |
+        {
+            "service" : {
+                "name": "frontend",
+                "environment": "production"
+            }
+        }
+    APM_UI_agent_configuration_intake_object_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration`.
+      value: |
+        [
+          {
+              "agent_name": "go",
+              "service": {
+              "name": "opbeans-go",
+              "environment": "production"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "200"
+              },
+              "@timestamp": 1581934104843,
+              "applied_by_agent": false,
+              "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+          },
+          {
+              "agent_name": "go",
+              "service": {
+              "name": "opbeans-go"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "300"
+              },
+              "@timestamp": 1581934111727,
+              "applied_by_agent": false,
+              "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+          },
+          {
+              "agent_name": "nodejs",
+              "service": {
+              "name": "frontend"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              },
+              "@timestamp": 1582031336265,
+              "applied_by_agent": false,
+              "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        ]
+    APM_UI_agent_configuration_intake_object_put_request1:
+      description: Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.
+      value: |
+        {
+            "service": {
+                "name": "frontend",
+                "environment": "production"
+            },
+            "settings": {
+                "transaction_sample_rate": "0.4",
+                "capture_body": "off",
+                "transaction_max_spans": "500"
+            },
+            "agent_name": "nodejs"
+        }
+    APM_UI_agent_configuration_intake_object_search_200_response1:
+      description: An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.
+      value: |
+        {
+          "_index": ".apm-agent-configuration",
+          "_id": "CIaqXXABmQCdPphWj8EJ",
+          "_score": 2,
+          "_source": {
+            "agent_name": "nodejs",
+            "service": {
+              "name": "frontend"
+            },
+            "settings": {
+              "transaction_sample_rate": "1",
+            },
+            "@timestamp": 1582031336265,
+            "applied_by_agent": false,
+            "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        }
+    APM_UI_agent_configuration_intake_object_search_request1:
+      description: Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.
+      value: |
+        {
+            "etag": "1e58c178efeebae15c25c539da740d21dee422fc",
+            "service" : {
+                "name": "frontend",
+                "environment": "production"
+            }
+        }
+    APM_UI_agent_keys_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.
+      value: |
+        {
+          "agentKey": {
+            "id": "3DCLmn0B3ZMhLUa7WBG9",
+            "name": "apm-key",
+            "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+            "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+          }
+        }
+    APM_UI_agent_keys_object_post_request1:
+      description: Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.
+      value: |
+        {
+            "name": "apm-key",
+            "privileges": ["event:write", "config_agent:read"]
+        }
+    APM_UI_annotation_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.
+      value: |
+        {
+          "_index": "observability-annotations",
+          "_id": "Lc9I93EBh6DbmkeV7nFX",
+          "_version": 1,
+          "_seq_no": 12,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "message": "Deployment 1.2",
+            "@timestamp": "2020-05-08T10:31:30.452Z",
+            "service": {
+              "version": "1.2",
+              "name": "opbeans-java"
+            },
+            "tags": [
+              "apm",
+              "elastic.co",
+              "customer"
+            ],
+            "annotation": {
+              "type": "deployment"
+            },
+            "event": {
+              "created": "2020-05-09T02:34:43.937Z"
+            }
+          }
+        }
     APM_UI_source_maps_get_200_response1:
       description: A successful response from `GET /api/apm/sourcemaps`.
       value: |
@@ -58200,7 +60500,7 @@ components:
       type: object
       properties:
         agent_name:
-          description: Agent name
+          description: The agent name is used by the UI to determine which settings to display.
           type: string
         service:
           $ref: '#/components/schemas/APM_UI_service_object'
@@ -58225,7 +60525,8 @@ components:
           example: true
           type: boolean
         etag:
-          description: Etag
+          description: |
+            `etag` is sent by the APM agent to indicate the `etag` of the last successfully applied configuration. If the `etag` matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
           example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
           type: string
         service:
@@ -58249,10 +60550,12 @@ components:
       type: object
       properties:
         name:
-          description: Agent name
+          description: The name of the APM agent key.
           type: string
         privileges:
-          description: Privileges configuration
+          description: |
+            The APM agent key privileges. It can take one or more of the following values:
+            * `event:write`, which is required for ingesting APM agent events. * `config_agent:read`, which is required for APM agents to read agent configuration remotely.
           items:
             enum:
               - event:write
@@ -58347,23 +60650,26 @@ components:
       type: object
       properties:
         '@timestamp':
-          description: Timestamp
+          description: The date and time of the annotation. It must be in ISO 8601 format.
           type: string
         message:
-          description: Message
+          description: The message displayed in the annotation. It defaults to `service.version`.
           type: string
         service:
-          description: Service
+          description: The service that identifies the configuration to create or update.
           type: object
           properties:
             environment:
+              description: The environment of the service.
               type: string
             version:
+              description: The version of the service.
               type: string
           required:
             - version
         tags:
-          description: Tags
+          description: |
+            Tags are used by the Applications UI to distinguish APM annotations from other annotations. Tags may have additional functionality in future releases. It defaults to `[apm]`. While you can add additional tags, you cannot remove the `apm` tag.
           items:
             type: string
           type: array
@@ -58478,11 +60784,11 @@ components:
       type: object
       properties:
         environment:
-          description: Environment
+          description: The environment of the service.
           example: prod
           type: string
         name:
-          description: Name
+          description: The name of the service.
           example: node
           type: string
     APM_UI_settings_object:
@@ -62438,9 +64744,16 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSchedule'
     Security_Detections_API_BulkActionEditPayloadIndexPatterns:
+      description: |
+        Edits index patterns of rulesClient.
+
+        - `add_index_patterns` adds index patterns to rules. If an index pattern already exists for a rule, no changes are made.
+        - `delete_index_patterns` removes index patterns from rules. If an index pattern does not exist for a rule, no changes are made.
+        - `set_index_patterns` sets index patterns for rules, overwriting any existing index patterns. If the set of index patterns is the same as the existing index patterns, no changes are made.
       type: object
       properties:
         overwrite_data_views:
+          description: Resets the data view for the rule.
           type: boolean
         type:
           enum:
@@ -62454,6 +64767,12 @@ components:
         - type
         - value
     Security_Detections_API_BulkActionEditPayloadInvestigationFields:
+      description: |
+        Edits investigation fields of rules.
+
+        - `add_investigation_fields` adds investigation fields to rules. If an investigation field already exists for a rule, no changes are made.
+        - `delete_investigation_fields` removes investigation fields from rules. If an investigation field does not exist for a rule, no changes are made.
+        - `set_investigation_fields` sets investigation fields for rules. If the set of investigation fields is the same as the existing investigation fields, no changes are made.
       type: object
       properties:
         type:
@@ -62468,6 +64787,11 @@ components:
         - type
         - value
     Security_Detections_API_BulkActionEditPayloadRuleActions:
+      description: |
+        Edits rule actions of rules.
+
+        - `add_rule_actions` adds rule actions to rules. This action is non-idempotent, meaning that even if the same rule action already exists for a rule, it will be added again with a new unique ID.
+        - `set_rule_actions` sets rule actions for rules. This action is non-idempotent, meaning that even if the same set of rule actions already exists for a rule, it will be set again and the actions will receive new unique IDs.
       type: object
       properties:
         type:
@@ -62490,6 +64814,12 @@ components:
         - type
         - value
     Security_Detections_API_BulkActionEditPayloadSchedule:
+      description: |
+        Overwrites schedule of rules. 
+
+        - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
+
+        Both `interval` and `lookback` have a format of "{integer}{time_unit}", where accepted time units are `s` for seconds, `m` for minutes, and `h` for hours. The integer must be positive and larger than 0. Examples: "45s", "30m", "6h"
       type: object
       properties:
         type:
@@ -62505,7 +64835,10 @@ components:
               pattern: ^[1-9]\d*[smh]$
               type: string
             lookback:
-              description: Lookback time for the rule
+              description: |
+                Lookback time for the rules.
+
+                Additional look-back time that the rule analyzes. For example, "10m" means the rule analyzes the last 10 minutes of data in addition to the frequency interval.
               example: 1h
               pattern: ^[1-9]\d*[smh]$
               type: string
@@ -62516,6 +64849,12 @@ components:
         - type
         - value
     Security_Detections_API_BulkActionEditPayloadTags:
+      description: |
+        Edits tags of rules.
+
+        - `add_tags` adds tags to rules. If a tag already exists for a rule, no changes are made.
+        - `delete_tags` removes tags from rules. If a tag does not exist for a rule, no changes are made.
+        - `set_tags` sets tags for rules, overwriting any existing tags. If the set of tags is the same as the existing tags, no changes are made.
       type: object
       properties:
         type:
@@ -62530,6 +64869,10 @@ components:
         - type
         - value
     Security_Detections_API_BulkActionEditPayloadTimeline:
+      description: |
+        Edits timeline of rules.
+
+        - `set_timeline` sets a timeline for rules. If the same timeline already exists for a rule, no changes are made.
       type: object
       properties:
         type:
@@ -62801,6 +65144,7 @@ components:
               type: string
           required:
             - start_date
+            - end_date
       required:
         - action
         - run
@@ -70047,6 +72391,13 @@ components:
         - indexPattern
         - status
         - fieldHistoryLength
+    Security_Entity_Analytics_API_EngineMetadata:
+      type: object
+      properties:
+        Type:
+          type: string
+      required:
+        - Type
     Security_Entity_Analytics_API_EngineStatus:
       enum:
         - installing
@@ -70060,6 +72411,7 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -70142,7 +72494,42 @@ components:
         - user
         - host
         - service
+        - generic
       type: string
+    Security_Entity_Analytics_API_GenericEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            category:
+              type: string
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - id
+            - name
+            - type
+      required:
+        - entity
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
@@ -70159,13 +72546,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -70217,6 +72609,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - entity.id
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -70241,6 +72634,14 @@ components:
       type: string
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
+    Security_Entity_Analytics_API_MonitoringEngineDescriptor:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+      required:
+        - type
+        - status
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -70310,13 +72711,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -70424,13 +72830,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -72969,6 +75380,114 @@ components:
       example: occurrences
       title: Budgeting method
       type: string
+    SLOs_bulk_delete_request:
+      description: |
+        The bulk delete SLO request takes a list of SLOs Definition id to delete.
+      properties:
+        list:
+          description: An array of SLO Definition id
+          items:
+            description: The SLO Definition id
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+          type: array
+      required:
+        - list
+      title: Bulk delete SLO request
+      type: object
+    SLOs_bulk_delete_response:
+      description: |
+        The bulk delete SLO response returns a taskId that can be used to poll for its status
+      properties:
+        taskId:
+          description: The taskId of the bulk delete operation
+          example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+          type: string
+      title: Bulk delete SLO response
+      type: object
+    SLOs_bulk_delete_status_response:
+      description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
+      properties:
+        error:
+          description: The error message if the bulk deletion operation failed
+          example: Task not found
+          type: string
+        isDone:
+          description: Indicates if the bulk deletion operation is completed
+          example: true
+          type: boolean
+        results:
+          description: The results of the bulk deletion operation, including the success status and any errors for each SLO
+          items:
+            type: object
+            properties:
+              error:
+                description: The error message if the deletion operation failed for this SLO
+                example: SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found
+                type: string
+              id:
+                description: The ID of the SLO that was deleted
+                example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+                type: string
+              success:
+                description: The result of the deletion operation for this SLO
+                example: true
+                type: boolean
+          type: array
+      title: The status of the bulk deletion
+      type: object
+    SLOs_bulk_purge_rollup_request:
+      description: |
+        The bulk purge rollup data request takes a list of SLO ids and a purge policy, then deletes the rollup data according to the purge policy. This API can be used to remove the staled data of an instance SLO that no longer get updated.
+      properties:
+        list:
+          description: An array of slo ids
+          items:
+            description: The SLO Definition id
+            example: 8853df00-ae2e-11ed-90af-09bb6422b258
+            type: string
+          type: array
+        purgePolicy:
+          description: Policy that dictates which SLI documents to purge based on age
+          oneOf:
+            - type: object
+              properties:
+                age:
+                  description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
+                  example: 7d
+                  type: string
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-age
+                  type: string
+            - type: object
+              properties:
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-time
+                  type: string
+                timestamp:
+                  description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+                  example: '2024-12-31T00:00:00.000Z'
+                  type: string
+          type: object
+      required:
+        - list
+        - purgePolicy
+      title: Bulk Purge Rollup data request
+      type: object
+    SLOs_bulk_purge_rollup_response:
+      description: |
+        The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+      properties:
+        taskId:
+          description: The task id of the purge operation
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
+          type: string
+      title: Bulk Purge Rollup data response
+      type: object
     SLOs_create_slo_request:
       description: |
         The create SLO API request body varies depending on the type of indicator, time window and budgeting method.
@@ -74113,6 +76632,376 @@ components:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
       type: object
+    Synthetics_browserMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            ignore_https_errors:
+              default: false
+              description: Ignore HTTPS errors.
+              type: boolean
+            inline_script:
+              description: The inline script.
+              type: string
+            playwright_options:
+              description: Playwright options.
+              type: object
+            screenshots:
+              default: 'on'
+              description: The screenshot option.
+              enum:
+                - 'on'
+                - 'off'
+                - only-on-failure
+              type: string
+            synthetics_args:
+              description: Synthetics agent CLI arguments.
+              type: array
+            type:
+              description: The monitor type.
+              enum:
+                - browser
+              type: string
+          required:
+            - inline_script
+            - type
+      title: Browser monitor fields
+    Synthetics_commonMonitorFields:
+      title: Common monitor fields
+      type: object
+      properties:
+        alert:
+          description: |
+            The alert configuration. The default is `{ status: { enabled: true }, tls: { enabled: true } }`.
+          type: object
+        enabled:
+          default: true
+          description: Specify whether the monitor is enabled.
+          type: boolean
+        locations:
+          description: |
+            The location to deploy the monitor.
+            Monitors can be deployed in multiple locations so that you can detect differences in availability and response times across those locations.
+            To list available locations you can:
+
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Management* and click *Create monitor*. Locations will be listed in *Locations*.
+          externalDocs:
+            url: https://github.com/elastic/synthetics/blob/main/src/locations/public-locations.ts
+          items:
+            type: string
+          type: array
+        name:
+          description: The monitor name.
+          type: string
+        namespace:
+          default: default
+          description: |
+            The namespace field should be lowercase and not contain spaces. The namespace must not include any of the following characters: `*`, `\`, `/`, `?`, `"`, `<`, `>`, `|`, whitespace, `,`, `#`, `:`, or `-`.
+          type: string
+        params:
+          description: The monitor parameters.
+          type: string
+        private_locations:
+          description: |
+            The private locations to which the monitors will be deployed.
+            These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
+            You can specify a private location using the location's name.
+            To list available private locations you can:
+
+            - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
+            - Go to *Synthetics > Settings* and click *Private locationsr*. Private locations will be listed in the table.
+
+            > info
+            > You can provide `locations` or `private_locations` or both. At least one is required.
+          items:
+            type: string
+          type: array
+        retest_on_failure:
+          default: true
+          description: |
+            Turn retesting for when a monitor fails on or off. By default, monitors are automatically retested if the monitor goes from "up" to "down". If the result of the retest is also "down", an error will be created and if configured, an alert sent. The monitor will then resume running according to the defined schedule. Using `retest_on_failure` can reduce noise related to transient problems.
+          type: boolean
+        schedule:
+          description: |
+            The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors. The default value is `10` minutes for Browser monitors.
+          type: number
+        service.name:
+          description: The APM service name.
+          type: string
+        tags:
+          description: An array of tags.
+          items:
+            type: string
+          type: array
+        timeout:
+          default: 16
+          description: |
+            The monitor timeout in seconds. The monitor will fail if it doesn't complete within this time.
+          type: number
+      required:
+        - name
+    Synthetics_getParameterResponse:
+      title: Get parameter response
+      type: object
+      properties:
+        description:
+          description: |
+            The description of the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          type: string
+        id:
+          description: The unique identifier of the parameter.
+          type: string
+        key:
+          description: The key of the parameter.
+          type: string
+        namespaces:
+          description: |
+            The namespaces associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          items:
+            type: string
+          type: array
+        tags:
+          description: |
+            An array of tags associated with the parameter. It is included in the response if the user has read-only permissions to the Synthetics app.
+          items:
+            type: string
+          type: array
+        value:
+          description: |
+            The value associated with the parameter. It will be included in the response if the user has write permissions.  
+          type: string
+      required: null
+    Synthetics_getPrivateLocation:
+      additionalProperties: true
+      properties:
+        agentPolicyId:
+          description: The ID of the agent policy associated with the private location.
+          type: string
+        geo:
+          description: Geographic coordinates (WGS84) for the location.
+          type: object
+          properties:
+            lat:
+              description: The latitude of the location.
+              type: number
+            lon:
+              description: The longitude of the location.
+              type: number
+          required:
+            - lat
+            - lon
+        id:
+          description: The unique identifier of the private location.
+          type: string
+        isInvalid:
+          description: |
+            Indicates whether the location is invalid. If `true`, the location is invalid, which means the agent policy associated with the location is deleted.
+          type: boolean
+        label:
+          description: A label for the private location.
+          type: string
+        namespace:
+          description: The namespace of the location, which is the same as the namespace of the agent policy associated with the location.
+          type: string
+      title: Post a private location
+      type: object
+    Synthetics_httpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalproperties: true
+          type: object
+          properties:
+            check:
+              description: The check request settings.
+              type: objects
+              properties:
+                request:
+                  description: An optional request to send to the remote host.
+                  type: object
+                  properties:
+                    body:
+                      description: Optional request body content.
+                      type: string
+                    headers:
+                      description: |
+                        A dictionary of additional HTTP headers to send. By default, Synthetics will set the User-Agent header to identify itself.
+                      type: object
+                    method:
+                      description: The HTTP method to use.
+                      enum:
+                        - HEAD
+                        - GET
+                        - POST
+                        - OPTIONS
+                      type: string
+                response:
+                  additionalProperties: true
+                  description: The expected response.
+                  type: object
+                  properties:
+                    body:
+                      type: object
+                    headers:
+                      description: A dictionary of expected HTTP headers. If the header is not found, the check fails.
+                      type: object
+            ipv4:
+              default: true
+              description: If `true`, ping using the ipv4 protocol.
+              type: boolean
+            ipv6:
+              default: true
+              description: If `true`, ping using the ipv6 protocol.
+              type: boolean
+            max_redirects:
+              default: 0
+              description: The maximum number of redirects to follow.
+              type: number
+            mode:
+              default: any
+              description: |
+                The mode of the monitor. If it is `all`, the monitor pings all resolvable IPs for a hostname. If it is `any`, the monitor pings only one IP address for a hostname. If you're using a DNS-load balancer and want to ping every IP address for the specified hostname, you should use `all`.
+              enum:
+                - all
+                - any
+              type: string
+            password:
+              description: |
+                The password for authenticating with the server. The credentials are passed with the request.
+              type: string
+            proxy_headers:
+              description: Additional headers to send to proxies during CONNECT requests.
+              type: object
+            proxy_url:
+              description: The URL of the proxy to use for this monitor.
+              type: string
+            response:
+              description: Controls the indexing of the HTTP response body contents to the `http.response.body.contents field`.
+              type: object
+            ssl:
+              description: |
+                The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.
+              type: object
+            type:
+              description: The monitor type.
+              enum:
+                - http
+              type: string
+            url:
+              description: The URL to monitor.
+              type: string
+            username:
+              description: |
+                The username for authenticating with the server. The credentials are passed with the request.
+              type: string
+          required:
+            - type
+            - url
+      title: HTTP monitor fields
+    Synthetics_icmpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            host:
+              description: The host to ping.
+              type: string
+            type:
+              description: The monitor type.
+              enum:
+                - icmp
+              type: string
+            wait:
+              default: 1
+              description: The wait time in seconds.
+              type: number
+          required:
+            - host
+            - type
+      title: ICMP monitor fields
+    Synthetics_parameterRequest:
+      title: Parameter request
+      type: object
+      properties:
+        description:
+          description: A description of the parameter.
+          type: string
+        key:
+          description: The key of the parameter.
+          type: string
+        share_across_spaces:
+          description: Specify whether the parameter should be shared across spaces.
+          type: boolean
+        tags:
+          description: An array of tags to categorize the parameter.
+          items:
+            type: string
+          type: array
+        value:
+          description: The value associated with the parameter.
+          type: string
+      required:
+        - key
+        - value
+    Synthetics_postParameterResponse:
+      title: Post parameter response
+      type: object
+      properties:
+        description:
+          description: A description of the parameter.
+          type: string
+        id:
+          description: The unique identifier for the parameter.
+          type: string
+        key:
+          description: The parameter key.
+          type: string
+        share_across_spaces:
+          description: Indicates whether the parameter is shared across spaces.
+          type: boolean
+        tags:
+          description: An array of tags associated with the parameter.
+          items:
+            type: string
+          type: array
+        value:
+          description: The value associated with the parameter.
+          type: string
+    Synthetics_tcpMonitorFields:
+      allOf:
+        - $ref: '#/components/schemas/Synthetics_commonMonitorFields'
+        - additionalProperties: true
+          type: object
+          properties:
+            host:
+              description: |
+                The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon, for example "example.com:9200".
+              type: string
+            proxy_url:
+              description: |
+                The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of `socks5://`. If the SOCKS5 proxy server requires client authentication, then a username and password can be embedded in the URL. When using a proxy, hostnames are resolved on the proxy server instead of on the client. You can change this behavior by setting the `proxy_use_local_resolver` option.
+              type: string
+            proxy_use_local_resolver:
+              default: false
+              description: |
+                Specify that hostnames are resolved locally instead of being resolved on the proxy server. If `false`, name resolution occurs on the proxy server.
+              type: boolean
+            ssl:
+              description: |
+                The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.
+              type: object
+            type:
+              description: The monitor type.
+              enum:
+                - tcp
+              type: string
+          required:
+            - host
+            - type
+      title: TCP monitor fields
     Task_manager_health_APIs_configuration:
       description: |
         This object summarizes the current configuration of Task Manager. This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.

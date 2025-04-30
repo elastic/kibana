@@ -6,6 +6,7 @@
  */
 
 import url from 'url';
+import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 import { synthtrace } from '../../../synthtrace';
 import { adserviceEdot } from '../../fixtures/synthtrace/adservice_edot';
 import { checkA11y } from '../../support/commands';
@@ -33,7 +34,7 @@ describe('Service Overview', () => {
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
       }),
-      'otelToApm'
+      ApmSynthtracePipelineSchema.Otel
     );
   });
 
@@ -124,12 +125,27 @@ describe('Service Overview', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
       cy.visitKibana(baseUrl);
+      cy.contains('adservice-edot-synth');
+      cy.contains('a', 'View errors').click();
     });
 
     it('navigates to the errors page', () => {
-      cy.contains('adservice-edot-synth');
-      cy.contains('a', 'View errors').click();
       cy.url().should('include', '/adservice-edot-synth/errors');
+    });
+
+    it('navigates to error detail page and shows error summary', () => {
+      cy.contains('a', '[ResponseError] index_not_found_exception').click();
+      cy.contains('div', '[ResponseError] index_not_found_exception');
+
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').contains(
+        'https://otel-demo-blue-adservice-edot-synth:8080/some/path'
+      );
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
     });
   });
 });

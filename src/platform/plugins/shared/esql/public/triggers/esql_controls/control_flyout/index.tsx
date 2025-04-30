@@ -59,10 +59,10 @@ export function ESQLControlsFlyout({
   );
   const valuesField = useMemo(() => {
     if (initialVariableType === ESQLVariableType.VALUES) {
-      return getValuesFromQueryField(queryString);
+      return getValuesFromQueryField(queryString, cursorPosition);
     }
     return undefined;
-  }, [initialVariableType, queryString]);
+  }, [cursorPosition, initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
   const styling = useMemo(() => getFlyoutStyling(), []);
@@ -129,7 +129,8 @@ export function ESQLControlsFlyout({
 
   useEffect(() => {
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
-    const variableExists = checkVariableExistence(esqlVariables, variableName);
+    const variableExists =
+      checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
     setFormIsInvalid(
       !variableNameWithoutQuestionmark ||
         variableExists ||
@@ -137,6 +138,7 @@ export function ESQLControlsFlyout({
         !controlState?.availableOptions.length
     );
   }, [
+    isControlInEditMode,
     areValuesValid,
     controlState?.availableOptions.length,
     esqlVariables,

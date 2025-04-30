@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useWatch } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { createQuery } from '../../utils/create_query';
 import { SearchQuery } from './search_query';
@@ -35,28 +35,28 @@ export const QuerySidePanel = ({
 }: QuerySidePanelProps) => {
   const usageTracker = useUsageTracker();
   const { fields } = useSourceIndicesFields();
-  const sourceFields = useWatch<ChatForm, ChatFormFields.sourceFields>({
-    name: ChatFormFields.sourceFields,
+  const sourceFields = useWatch<PlaygroundForm, PlaygroundFormFields.sourceFields>({
+    name: PlaygroundFormFields.sourceFields,
   });
   const {
     field: { onChange: queryFieldsOnChange, value: queryFields },
-  } = useController<ChatForm, ChatFormFields.queryFields>({
-    name: ChatFormFields.queryFields,
+  } = useController<PlaygroundForm, PlaygroundFormFields.queryFields>({
+    name: PlaygroundFormFields.queryFields,
   });
   const {
     field: { onChange: elasticsearchQueryChange },
-  } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
-    name: ChatFormFields.elasticsearchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.elasticsearchQuery>({
+    name: PlaygroundFormFields.elasticsearchQuery,
   });
   const {
     field: { onChange: userElasticsearchQueryChange },
-  } = useController<ChatForm, ChatFormFields.userElasticsearchQuery>({
-    name: ChatFormFields.userElasticsearchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
+    name: PlaygroundFormFields.userElasticsearchQuery,
   });
   const {
     field: { value: userElasticsearchQueryValidations },
-  } = useController<ChatForm, ChatFormFields.userElasticsearchQueryValidations>({
-    name: ChatFormFields.userElasticsearchQueryValidations,
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
+    name: PlaygroundFormFields.userElasticsearchQueryValidations,
   });
 
   const handleSearch = useCallback(

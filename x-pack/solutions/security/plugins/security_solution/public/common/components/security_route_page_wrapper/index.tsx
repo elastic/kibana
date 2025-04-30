@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName } from '../../../../common';
@@ -14,15 +13,24 @@ import { useLinkInfo } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { useNavLinkExists } from '../../links/links_hooks';
 
-interface SecurityRoutePageWrapperProps {
-  pageName: SecurityPageName;
+interface SecurityRoutePageWrapperOptionProps {
+  /**
+   * Property to redirect to the Security home page instead of rendering the generic "NoPrivileges" page when the `pageName` is missing in the links registry.
+   * @default false
+   */
   redirectOnMissing?: boolean;
   /**
-   * Used primarily in the AI for SOC tier, to allow redirecting to the home page instead of showing the NoPrivileges page.
+   * Used to disable the SpyRoute for the page, if e.g. the page's need to render their own specific SpyRoute.
+   * @default false
    */
-  redirectIfUnauthorized?: boolean;
+  omitSpyRoute?: boolean;
 }
+
+type SecurityRoutePageWrapperProps = {
+  pageName: SecurityPageName;
+} & SecurityRoutePageWrapperOptionProps;
 
 /**
  * This component is created to wrap all the pages in the security solution app.
@@ -41,60 +49,51 @@ interface SecurityRoutePageWrapperProps {
  * </PluginTemplateWrapper>
  * ```
  */
-export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWrapperProps>> = ({
-  children,
-  pageName,
-  redirectIfUnauthorized,
-  redirectOnMissing,
-}) => {
-  const link = useLinkInfo(pageName);
+export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRoutePageWrapperProps>> =
+  React.memo(({ children, pageName, omitSpyRoute = false, redirectOnMissing = false }) => {
+    const link = useLinkInfo(pageName);
+    const navLinkExists = useNavLinkExists(pageName);
+    const UpsellingPage = useUpsellingPage(pageName);
 
-  // The upselling page is only returned when the license/product requirements are not met.
-  // When it is defined it must be rendered, no need to check anything else.
-  const UpsellingPage = useUpsellingPage(pageName);
-  if (UpsellingPage) {
+    // The upselling page is only returned when the license/product requirements are not met.
+    // When it is defined it must be rendered, no need to check anything else.
+    if (UpsellingPage) {
+      return (
+        <>
+          <SpyRoute pageName={pageName} />
+          <UpsellingPage />
+        </>
+      );
+    }
+
+    // Redirect to the home page if the link is not found in the application links or in the registered navigation links.
+    // If the `link == null` the `navLinkExists` will always be false, but adding the condition to avoid confusion.
+    if (redirectOnMissing && (link == null || !navLinkExists)) {
+      return <Redirect to="" />;
+    }
+
+    // Show the no privileges page if the link is not found or unauthorized.
+    if (link == null || link.unauthorized) {
+      return (
+        <>
+          <SpyRoute pageName={pageName} />
+          <NoPrivilegesPage
+            pageName={pageName}
+            docLinkSelector={(docLinks) => docLinks.siem.privileges}
+          />
+        </>
+      );
+    }
+
+    // Show the actual application page.
     return (
-      <>
-        <SpyRoute pageName={pageName} />
-        <UpsellingPage />
-      </>
+      <TrackApplicationView viewId={pageName}>
+        {children}
+        {!omitSpyRoute && <SpyRoute pageName={pageName} />}
+      </TrackApplicationView>
     );
-  }
-
-  // Allows a redirect to the home page.
-  if (redirectOnMissing && link == null) {
-    return <Redirect to="" />;
-  }
-
-  const isAuthorized = link != null && !link.unauthorized;
-
-  // Allows a redirect to the home page if the link is undefined or unauthorized.
-  // This is used in the AI for SOC tier (for the Alert Summary page for example), as it does not make sense to show the NoPrivilegesPage.
-  if (redirectIfUnauthorized && !isAuthorized) {
-    return <Redirect to="" />;
-  }
-
-  // Show the no privileges page if the link is undefined or unauthorized.
-  if (!isAuthorized) {
-    return (
-      <>
-        <SpyRoute pageName={pageName} />
-        <NoPrivilegesPage
-          pageName={pageName}
-          docLinkSelector={(docLinks) => docLinks.siem.privileges}
-        />
-      </>
-    );
-  }
-
-  // Show the actual application page.
-  return (
-    <TrackApplicationView viewId={pageName}>
-      {children}
-      <SpyRoute pageName={pageName} />
-    </TrackApplicationView>
-  );
-};
+  });
+SecurityRoutePageWrapper.displayName = 'SecurityRoutePageWrapper';
 
 /**
  * HOC to wrap a component with the `SecurityRoutePageWrapper`.
@@ -102,20 +101,13 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
 export const withSecurityRoutePageWrapper = <T extends {}>(
   Component: React.ComponentType<T>,
   pageName: SecurityPageName,
-  {
-    redirectOnMissing,
-    redirectIfUnauthorized,
-  }: { redirectOnMissing?: boolean; redirectIfUnauthorized?: boolean } = {}
+  options: SecurityRoutePageWrapperOptionProps = {}
 ) => {
-  return function WithSecurityRoutePageWrapper(props: T) {
+  return React.memo(function WithSecurityRoutePageWrapper(props: T) {
     return (
-      <SecurityRoutePageWrapper
-        pageName={pageName}
-        redirectOnMissing={redirectOnMissing}
-        redirectIfUnauthorized={redirectIfUnauthorized}
-      >
+      <SecurityRoutePageWrapper pageName={pageName} {...options}>
         <Component {...props} />
       </SecurityRoutePageWrapper>
     );
-  };
+  });
 };

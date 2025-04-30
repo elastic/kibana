@@ -13,6 +13,8 @@ import {
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
 import {
   checkAccess,
@@ -20,7 +22,6 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 
 export const sampleStreamRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/_sample',
@@ -29,9 +30,7 @@ export const sampleStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -49,7 +48,7 @@ export const sampleStreamRoute = createServerRoute({
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
 
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
     const { if: condition, start, end, size } = params.body;
@@ -111,9 +110,7 @@ export const unmanagedAssetDetailsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -125,7 +122,7 @@ export const unmanagedAssetDetailsRoute = createServerRoute({
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
 
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
     const stream = await streamsClient.getStream(params.path.name);

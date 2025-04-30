@@ -10,7 +10,11 @@ import { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import {
+  Instruction,
+  KnowledgeBaseEntry,
+  KnowledgeBaseState,
+} from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
@@ -18,29 +22,29 @@ import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setAdvancedSettings } from './advanced_settings';
 
-export const TINY_ELSER = {
-  ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
-  id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
-};
+export const TINY_MODELS = {
+  ELSER: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
+  TEXT_EMBEDDING: SUPPORTED_TRAINED_MODELS.TINY_TEXT_EMBEDDING.name,
+} as const;
 
-export async function importTinyElserModel(ml: ReturnType<typeof MachineLearningProvider>) {
-  const config = {
-    ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
-    input: {
-      field_names: ['text_field'],
-    },
-  };
+type TinyModelID = (typeof TINY_MODELS)[keyof typeof TINY_MODELS];
+
+async function importModel(ml: ReturnType<typeof MachineLearningProvider>, modelId: TinyModelID) {
   // necessary for MKI, check indices before importing model.  compatible with stateful
   await ml.api.assureMlStatsIndexExists();
-  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+
+  const config = ml.api.getTrainedModelConfig(modelId);
+  await ml.api.importTrainedModel(modelId, modelId, config);
 }
 
 export async function setupKnowledgeBase(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   {
     deployModel: deployModel = true,
+    modelId = TINY_MODELS.ELSER,
   }: {
     deployModel?: boolean;
+    modelId?: TinyModelID;
   } = {}
 ) {
   const log = getService('log');
@@ -49,14 +53,15 @@ export async function setupKnowledgeBase(
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   if (deployModel) {
-    await importTinyElserModel(ml);
+    await importModel(ml, modelId);
+    await ml.api.startTrainedModelDeploymentES(modelId);
   }
 
   const { status, body } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
     params: {
       query: {
-        model_id: TINY_ELSER.id,
+        model_id: modelId,
       },
     },
   });
@@ -83,7 +88,7 @@ export async function waitForKnowledgeBaseReady({
       endpoint: 'GET /internal/observability_ai_assistant/kb/status',
     });
     expect(res.status).to.be(200);
-    expect(res.body.ready).to.be(true);
+    expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
   });
 }
 
@@ -91,8 +96,10 @@ export async function deleteKnowledgeBaseModel(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   {
     shouldDeleteInferenceEndpoint = true,
+    modelId = TINY_MODELS.ELSER,
   }: {
     shouldDeleteInferenceEndpoint?: boolean;
+    modelId?: TinyModelID;
   } = {}
 ) {
   const log = getService('log');
@@ -100,8 +107,8 @@ export async function deleteKnowledgeBaseModel(
   const es = getService('es');
 
   try {
-    await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-    await ml.api.deleteTrainedModelES(TINY_ELSER.id);
+    await ml.api.stopTrainedModelDeploymentES(modelId, true);
+    await ml.api.deleteTrainedModelES(modelId);
     await ml.testResources.cleanMLSavedObjects();
 
     if (shouldDeleteInferenceEndpoint) {
@@ -229,4 +236,35 @@ export async function hasIndexWriteBlock(es: Client, index: string) {
   const response = await es.indices.getSettings({ index });
   const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
   return writeBlockSetting === 'true' || writeBlockSetting === true;
+}
+
+interface SemanticTextField {
+  semantic_text: string;
+  _inference_fields?: {
+    semantic_text?: {
+      inference: {
+        inference_id: string;
+        chunks: {
+          semantic_text: Array<{
+            embeddings:
+              | Record<string, number> // sparse embedding
+              | number[]; // dense embedding;
+          }>;
+        };
+      };
+    };
+  };
+}
+
+export async function getKnowledgeBaseEntries(es: Client) {
+  const res = await es.search<KnowledgeBaseEntry & SemanticTextField>({
+    index: resourceNames.aliases.kb,
+    // Add fields parameter to include inference metadata
+    fields: ['_inference_fields'],
+    query: {
+      match_all: {},
+    },
+  });
+
+  return res.hits.hits;
 }

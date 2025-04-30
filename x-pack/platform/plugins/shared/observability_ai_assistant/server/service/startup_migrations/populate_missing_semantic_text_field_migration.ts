@@ -10,14 +10,13 @@ import pLimit from 'p-limit';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { uniq } from 'lodash';
 import pRetry from 'p-retry';
+import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
 import { waitForKbModel } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
-import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
 
@@ -44,7 +43,7 @@ export async function populateMissingSemanticTextFieldMigration({
       });
 
       if (!hasKbIndex) {
-        logger.debug('Knowledge base index does not exist. Aborting updating index assets');
+        logger.warn('Knowledge base index does not exist. Aborting updating index assets');
         return;
       }
 

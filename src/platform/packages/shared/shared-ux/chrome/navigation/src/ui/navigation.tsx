@@ -17,13 +17,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import {
-  RecentlyAccessed,
-  NavigationPanel,
-  PanelProvider,
-  type PanelContentProvider,
-  FeedbackBtn,
-} from './components';
+import { RecentlyAccessed, NavigationPanel, PanelProvider, FeedbackBtn } from './components';
 import { useNavigation as useNavigationService } from '../services';
 import { NavigationSectionUI } from './components/navigation_section_ui';
 
@@ -44,10 +38,9 @@ const NavigationContext = createContext<Context>({
 export interface Props {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
   dataTestSubj?: string;
-  panelContentProvider?: PanelContentProvider;
 }
 
-const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
+const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
   const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
     useNavigationService();
 
@@ -85,7 +78,6 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
   return (
     <PanelProvider
       activeNodes={activeNodes}
-      contentProvider={panelContentProvider}
       selectedNode={selectedPanelNode}
       setSelectedNode={setSelectedPanelNode}
     >
@@ -102,6 +94,11 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
               <EuiSpacer size="s" />
               <FeedbackBtn solutionId={solutionId} />
             </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {navigationTree.callout && (
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>{renderNodes(navigationTree.callout)}</EuiFlexItem>
           </EuiFlexGroup>
         )}
         {/* Footer */}

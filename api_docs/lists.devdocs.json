@@ -1378,7 +1378,7 @@
               "\nExport an exception list parent container and it's items"
             ],
             "signature": [
-              "({ listId, id, namespaceType, includeExpiredExceptions, }: ",
+              "(options: ",
               "ExportExceptionListAndItemsOptions",
               ") => Promise<",
               {
@@ -1399,7 +1399,7 @@
                 "id": "def-server.ExceptionListClient.exportExceptionListAndItems.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    listId,\n    id,\n    namespaceType,\n    includeExpiredExceptions,\n  }",
+                "label": "options",
                 "description": [],
                 "signature": [
                   "ExportExceptionListAndItemsOptions"
@@ -3900,9 +3900,9 @@
         "signature": [
           "ServerExtensionPointDefinition<\"exceptionsListPreExport\", ",
           "ExportExceptionListAndItemsOptions",
-          ", ",
+          " & { filter?: string | undefined; }, ",
           "ExportExceptionListAndItemsOptions",
-          ">"
+          " & { filter?: string | undefined; }>"
         ],
         "path": "x-pack/solutions/security/plugins/lists/server/services/extension_points/types.ts",
         "deprecated": false,

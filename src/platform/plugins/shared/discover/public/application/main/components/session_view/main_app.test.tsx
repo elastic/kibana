@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -48,17 +49,19 @@ describe('DiscoverMainApp', () => {
 
     await act(async () => {
       const component = mountWithIntl(
-        <Router history={history}>
-          <KibanaContextProvider services={discoverServiceMock}>
-            <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
-              <DiscoverMainProvider value={stateContainer}>
-                <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-                  <DiscoverMainApp {...props} />
-                </RuntimeStateProvider>
-              </DiscoverMainProvider>
-            </CurrentTabProvider>
-          </KibanaContextProvider>
-        </Router>
+        <EuiProvider>
+          <Router history={history}>
+            <KibanaContextProvider services={discoverServiceMock}>
+              <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+                <DiscoverMainProvider value={stateContainer}>
+                  <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+                    <DiscoverMainApp {...props} />
+                  </RuntimeStateProvider>
+                </DiscoverMainProvider>
+              </CurrentTabProvider>
+            </KibanaContextProvider>
+          </Router>
+        </EuiProvider>
       );
 
       // wait for lazy modules

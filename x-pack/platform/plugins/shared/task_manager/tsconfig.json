@@ -34,6 +34,7 @@
     "@kbn/spaces-plugin",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-http-server-utils",
   ],
   "exclude": ["target/**/*"]
 }

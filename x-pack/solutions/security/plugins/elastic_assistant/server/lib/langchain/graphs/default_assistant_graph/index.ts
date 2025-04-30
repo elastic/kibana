@@ -26,10 +26,11 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { agentRunableFactory } from './agentRunnable';
+import { agentRunnableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
+  assistantContext,
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
@@ -58,6 +59,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   telemetryParams,
   traceOptions,
   responseLanguage = 'English',
+  timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai' && !isOssModel;
@@ -89,6 +91,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
       convertSystemMessageToHumanContent: false,
+      timeout,
       telemetryMetadata: {
         pluginId: 'security_ai_assistant',
       },
@@ -113,6 +116,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
     alertsIndexPattern,
+    assistantContext,
     anonymizationFields,
     connectorId,
     contentReferencesStore,
@@ -127,6 +131,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     request,
     size,
     telemetry,
+    createLlmInstance,
+    isOssModel,
   };
 
   const tools: StructuredTool[] = (
@@ -181,11 +187,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const chatPromptTemplate = formatPrompt({
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
-    llmType,
-    isOpenAI,
   });
 
-  const agentRunnable = await agentRunableFactory({
+  const agentRunnable = await agentRunnableFactory({
     llm: createLlmInstance(),
     isOpenAI,
     llmType,

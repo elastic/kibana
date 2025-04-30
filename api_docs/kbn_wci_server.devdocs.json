@@ -509,7 +509,9 @@
         "type": "Interface",
         "tags": [],
         "label": "McpServerTool",
-        "description": [],
+        "description": [
+          "\nInternal representation of an MCP tool.\nMostly used to abstract the underlying MCP implementation we're using for \"internal\" servers"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/wci-server",

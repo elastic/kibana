@@ -192,7 +192,7 @@ export const mapVariableToColumn = (
   return columns;
 };
 
-const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
+export const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
   const lines = queryString.split('\n');
   const lineNumber = cursorPosition?.lineNumber ?? lines.length;
   const column = cursorPosition?.column ?? lines[lineNumber - 1].length;
@@ -210,8 +210,23 @@ const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Positio
   return previousLines + '\n' + currentLine;
 };
 
+const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
+  if (typeof queryString !== 'string' || queryString.length === 0) {
+    return false;
+  }
+
+  const lastChar = queryString.slice(-1);
+  const secondLastChar = queryString.slice(-2, -1);
+
+  return lastChar === '?' || secondLastChar === '?';
+};
+
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
+
+  if (hasQuestionMarkAtEndOrSecondLastPosition(queryInCursorPosition)) {
+    return undefined;
+  }
 
   const validQuery = `${queryInCursorPosition} ""`;
   const { root } = parse(validQuery);

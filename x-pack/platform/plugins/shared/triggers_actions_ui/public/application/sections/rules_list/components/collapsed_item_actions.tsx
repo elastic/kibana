@@ -129,25 +129,6 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     ? !ruleTypeRegistry.get(item.ruleTypeId).requiresAppContext
     : false;
 
-  const button = (
-    <EuiButtonIcon
-      disabled={!item.isEditable}
-      data-test-subj="selectActionButton"
-      data-testid="selectActionButton"
-      iconType="boxesHorizontal"
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      aria-label={i18n.translate(
-        'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',
-        {
-          defaultMessage: 'Actions for "{name}" column',
-          values: {
-            name: item.name,
-          },
-        }
-      )}
-    />
-  );
-
   const isSnoozed = useMemo(() => {
     return isRuleSnoozed(item);
   }, [item]);
@@ -351,28 +332,46 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   ];
 
   return (
-    <>
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        ownFocus
-        panelPaddingSize="none"
-        data-test-subj="collapsedItemActions"
-      >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={panels}
-          className="actCollapsedItemActions"
-          data-test-subj="collapsedActionPanel"
-          data-testid="collapsedActionPanel"
-          css={collapsedItemActionsCss}
-        />
-      </EuiPopover>
-      {isUntrackAlertsModalOpen && (
-        <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
-      )}
-    </>
+    item.isEditable && (
+      <>
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              data-test-subj="selectActionButton"
+              data-testid="selectActionButton"
+              iconType="boxesHorizontal"
+              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',
+                {
+                  defaultMessage: 'Actions for "{name}" column',
+                  values: {
+                    name: item.name,
+                  },
+                }
+              )}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+          ownFocus
+          panelPaddingSize="none"
+          data-test-subj="collapsedItemActions"
+        >
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={panels}
+            className="actCollapsedItemActions"
+            data-test-subj="collapsedActionPanel"
+            data-testid="collapsedActionPanel"
+            css={collapsedItemActionsCss}
+          />
+        </EuiPopover>
+        {isUntrackAlertsModalOpen && (
+          <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
+        )}
+      </>
+    )
   );
 };
 

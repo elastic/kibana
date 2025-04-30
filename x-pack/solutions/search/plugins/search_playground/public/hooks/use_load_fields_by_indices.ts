@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form/dist/types';
 import { useUsageTracker } from './use_usage_tracker';
-import { ChatForm, ChatFormFields } from '../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../types';
 import { useIndicesFields } from './use_indices_fields';
 import {
   createQuery,
@@ -32,17 +32,17 @@ export const useLoadFieldsByIndices = ({
   watch,
   setValue,
   getValues,
-}: Pick<UseFormReturn<ChatForm>, 'watch' | 'getValues' | 'setValue'>) => {
+}: Pick<UseFormReturn<PlaygroundForm>, 'watch' | 'getValues' | 'setValue'>) => {
   const usageTracker = useUsageTracker();
-  const selectedIndices = watch(ChatFormFields.indices);
+  const selectedIndices = watch(PlaygroundFormFields.indices);
   const { fields, isFetched } = useIndicesFields(selectedIndices);
 
   useEffect(() => {
     // Don't merge fields if we haven't fetched them from indices yet, otherwise we'll overwrite save values with a race condition
     if (!isFetched) return;
     const {
-      [ChatFormFields.queryFields]: queryFields,
-      [ChatFormFields.sourceFields]: sourceFields,
+      [PlaygroundFormFields.queryFields]: queryFields,
+      [PlaygroundFormFields.sourceFields]: sourceFields,
     } = getValues();
 
     const defaultFields = getDefaultQueryFields(fields);
@@ -51,11 +51,11 @@ export const useLoadFieldsByIndices = ({
     const mergedSourceFields = mergeDefaultAndCurrentValues(defaultSourceFields, sourceFields);
 
     setValue(
-      ChatFormFields.elasticsearchQuery,
+      PlaygroundFormFields.elasticsearchQuery,
       createQuery(mergedQueryFields, mergedSourceFields, fields)
     );
-    setValue(ChatFormFields.queryFields, mergedQueryFields);
-    setValue(ChatFormFields.sourceFields, mergedSourceFields);
+    setValue(PlaygroundFormFields.queryFields, mergedQueryFields);
+    setValue(PlaygroundFormFields.sourceFields, mergedSourceFields);
 
     usageTracker?.count(AnalyticsEvents.sourceFieldsLoaded, Object.values(fields)?.flat()?.length);
   }, [fields, getValues, setValue, usageTracker, isFetched]);

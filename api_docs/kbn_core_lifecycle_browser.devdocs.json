@@ -690,6 +690,22 @@
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreStart.rendering",
+            "type": "Object",
+            "tags": [],
+            "label": "rendering",
+            "description": [
+              "{@link RenderingService}"
+            ],
+            "signature": [
+              "RenderingService"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
