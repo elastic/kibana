@@ -14,8 +14,44 @@ export const privilegeMonitoringTypeName = 'monitoring-entity-source-status'; //
 export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
-    status: {
+    type: {
       type: 'keyword',
+    },
+    name: {
+      type: 'keyword',
+    },
+    managed: {
+      type: 'boolean',
+    },
+    indexPattern: {
+      type: 'keyword',
+    },
+    detectRemovals: {
+      type: 'boolean',
+    },
+    enabled: {
+      type: 'boolean',
+    },
+    error: {
+      type: 'keyword',
+    },
+    integrationName: {
+      type: 'keyword',
+    },
+    matchers: {
+      type: 'nested', // TODO: check doccos for this
+      properties: {
+        field: {
+          type: 'keyword',
+        },
+        value: {
+          type: 'keyword',
+        },
+      },
+    },
+    filter: {
+      dynamic: false,
+      type: 'object',
     },
   },
 };
