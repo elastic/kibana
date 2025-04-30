@@ -1,6 +1,6 @@
 # Security Essentials tier config
 
-## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   dashboard:
     privileges:

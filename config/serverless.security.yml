@@ -9,7 +9,7 @@ xpack.securitySolutionEss.enabled: false
 ## Disable plugins
 xpack.observabilityAIAssistant.enabled: false
 
-## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+## Fine-tune the security solution feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:

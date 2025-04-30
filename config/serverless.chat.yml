@@ -1,6 +1,6 @@
 # Chat Project Config
 
-## Fine-tune the chat solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+## Fine-tune the chat solution feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   dashboard:
     privileges:
