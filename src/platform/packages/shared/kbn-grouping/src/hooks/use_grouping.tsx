@@ -10,7 +10,7 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { groupsReducerWithStorage, initialState as reducerinitialGroupings } from './state/reducer';
+import { groupsReducerWithStorage, initialState as reducerInitialGroupings } from './state/reducer';
 import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
@@ -115,7 +115,7 @@ export const useGrouping = <T,>({
 }: GroupingArgs<T>): UseGrouping<T> => {
   const [groupingState, dispatch] = useReducer(
     groupsReducerWithStorage,
-    initialGroupings ?? reducerinitialGroupings
+    initialGroupings ?? reducerInitialGroupings
   );
   const { activeGroups: selectedGroups } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
