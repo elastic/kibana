@@ -15,13 +15,13 @@ describe('getHashedEntity', () => {
   });
 
   it('returns different hashes for differently cased emails when normalize=false', () => {
-    const lower = getHashedEntity('KATY@GMAIL.COM', 'EMAIL', false);
-    const upper = getHashedEntity('katy@gmail.com', 'EMAIL', false);
+    const lower = getHashedEntity('KATY@GMAIL.COM', 'EMAIL');
+    const upper = getHashedEntity('katy@gmail.com', 'EMAIL');
     expect(lower).not.toEqual(upper);
   });
 
   it('defaults normalize=false when not passed', () => {
-    const withExplicitFalse = getHashedEntity('Test', 'CUSTOM', false);
+    const withExplicitFalse = getHashedEntity('Test', 'CUSTOM');
     const withDefault = getHashedEntity('Test', 'CUSTOM');
     expect(withExplicitFalse).toEqual(withDefault);
   });
