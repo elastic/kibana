@@ -21,4 +21,4 @@ export type UpdateAgentPayload = Omit<AgentCreateRequest, 'id'>;
 
 export type UpdateAgentResponse = { success: false } | { success: true; agent: Agent };
 
-export type DeleteAgentResponse = { success: false } | { success: true; agent: Agent };
+export type DeleteAgentResponse = { success: false } | { success: true };

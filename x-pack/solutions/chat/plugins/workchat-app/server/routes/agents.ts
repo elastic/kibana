@@ -161,12 +161,11 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
       const { agentService } = getServices();
       const client = await agentService.getScopedClient({ request });
 
-      const agent = await client.delete(agentId);
+      const didDelete = await client.delete(agentId);
 
       return res.ok<DeleteAgentResponse>({
         body: {
-          success: true,
-          agent,
+          success: didDelete
         },
       });
     })

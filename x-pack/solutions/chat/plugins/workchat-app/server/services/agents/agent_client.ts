@@ -51,7 +51,7 @@ export interface AgentClient {
   /**
    * Deletes an agent and returns it.
    */
-  delete(agentId: string): Promise<Agent>;
+  delete(agentId: string): Promise<boolean>;
 
 }
 
@@ -118,12 +118,20 @@ export class AgentClientImpl implements AgentClient {
     });
   }
 
-  async delete(agentId: string): Promise<Agent> {
-    const conversationSo = await this._rawGet({ agentId });
+  async delete(agentId: string): Promise<boolean> {
+    let conversationSo: SavedObject<AgentAttributes>
+    try {
+      conversationSo = await this._rawGet({agentId});
+    } catch (e) {
+      if (e instanceof WorkchatError && e.statusCode === 404) {
+        return false
+      } else {
+        throw e
+      }
+
+    }
     await this.client.delete(agentTypeName, conversationSo.id)
-    return savedObjectToModel({
-      ...conversationSo
-    })
+    return true
   }
 
   private async _rawGet({ agentId }: { agentId: string }): Promise<SavedObject<AgentAttributes>> {
