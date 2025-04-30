@@ -89,7 +89,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
 
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: resetSlo } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
   const { mutate: deleteSloInstance } = useDeleteSloInstance();
@@ -561,7 +561,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           slo={sloToReset}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
         />
       ) : null}
 

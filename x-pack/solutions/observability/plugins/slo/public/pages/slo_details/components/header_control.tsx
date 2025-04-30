@@ -75,7 +75,7 @@ export function HeaderControl({ slo }: Props) {
   const [isEnableConfirmationModalOpen, setEnableConfirmationModalOpen] = useState(false);
   const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
 
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: resetSlo } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
   const { mutate: deleteSloInstance } = useDeleteSloInstance();
@@ -438,7 +438,6 @@ export function HeaderControl({ slo }: Props) {
           slo={slo}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
         />
       ) : null}
 

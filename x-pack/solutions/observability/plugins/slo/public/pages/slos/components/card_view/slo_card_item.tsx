@@ -94,7 +94,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
     setIsAddRuleFlyoutOpen,
   });
 
-  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: resetSlo } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
   const { mutate: deleteSloInstance } = useDeleteSloInstance();
@@ -230,7 +230,6 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
           slo={slo}
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
         />
       ) : null}
 
