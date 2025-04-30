@@ -11,13 +11,17 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
 import type { Subscription } from 'rxjs';
+import {
+  getInternalSavedObjectsClient,
+  getInternalSavedObjectsClientForSpaceId,
+} from './utils/get_internal_saved_object_client';
 import { upgradeIntegration } from './utils/upgrade_integration';
 import type { PackSavedObject } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
@@ -107,7 +111,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('osquery: Started');
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
-
     this.osqueryAppContextService.start({
       ...plugins.fleet,
       ruleRegistryService: plugins.ruleRegistry,
@@ -128,7 +131,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
           OSQUERY_INTEGRATION_NAME
         );
-        const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+        const client = await getInternalSavedObjectsClient(core);
 
         const esClient = core.elasticsearch.client.asInternalUser;
         const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
@@ -151,10 +154,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         if (registerIngestCallback) {
           registerIngestCallback(
             'packagePolicyCreate',
-            async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
+            async (
+              newPackagePolicy: NewPackagePolicy,
+              soClient: SavedObjectsClientContract
+            ): Promise<UpdatePackagePolicy> => {
               if (newPackagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
                 await this.initialize(core, dataViewsService);
-
                 const allPacks = await client
                   .find<PackSavedObject>({
                     type: packSavedObjectType,
@@ -168,9 +173,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                   }));
 
                 if (allPacks.saved_objects) {
+                  const spaceScopedClient = getInternalSavedObjectsClientForSpaceId(
+                    core,
+                    soClient.getCurrentNamespace()
+                  );
+
                   return updateGlobalPacksCreateCallback(
                     newPackagePolicy,
-                    client,
+                    spaceScopedClient,
                     allPacks.saved_objects,
                     this.osqueryAppContextService
                   );
