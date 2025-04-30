@@ -32,7 +32,7 @@ export function ChartContainer({
     return <LoadingChartPlaceholder height={height} />;
   }
 
-  if (hasError) {
+  if (hasError && !loading) {
     return <FailedChartPlaceholder height={height} />;
   }
 
