@@ -12,7 +12,6 @@ import type {
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
   FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
