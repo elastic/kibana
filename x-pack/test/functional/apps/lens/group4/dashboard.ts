@@ -330,7 +330,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    it.only('should add a drilldown to a Lens by-value chart', async () => {
+    it('should add a drilldown to a Lens by-value chart', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
