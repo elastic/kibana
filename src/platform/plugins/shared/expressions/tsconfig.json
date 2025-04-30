@@ -18,6 +18,7 @@
     "@kbn/tinymath",
     "@kbn/panel-loader",
     "@kbn/es-query",
+    "@kbn/visualizations-plugin",
   ],
   "exclude": [
     "target/**/*",
