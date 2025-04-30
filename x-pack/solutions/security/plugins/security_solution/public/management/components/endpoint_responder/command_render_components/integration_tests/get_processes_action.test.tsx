@@ -15,7 +15,7 @@ import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type {
