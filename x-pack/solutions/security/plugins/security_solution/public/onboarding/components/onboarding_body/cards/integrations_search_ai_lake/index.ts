@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { OnboardingCardConfig } from '../../../../../types';
+import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
-import { OnboardingCardId } from '../../../../../constants';
+import { OnboardingCardId } from '../../../../constants';
 import integrationsIcon from '../../common/integrations/images/integrations_icon.png';
 import integrationsDarkIcon from '../../common/integrations/images/integrations_icon_dark.png';
-import { SECURITY_FEATURE_ID } from '../../../../../../../common/constants';
-import type { IntegrationCardMetadata } from '../../../../../../common/lib/integrations/types';
+import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
+import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
 
 export const integrationsSearchAILakeCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
   id: OnboardingCardId.integrationsSearchAILake,

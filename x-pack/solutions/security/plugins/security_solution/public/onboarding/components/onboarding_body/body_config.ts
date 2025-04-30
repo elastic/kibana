@@ -14,9 +14,8 @@ import { alertsCardConfig } from './cards/alerts';
 import { assistantCardConfig } from './cards/assistant';
 import { aiConnectorCardConfig } from './cards/siem_migrations/ai_connector';
 import { startMigrationCardConfig } from './cards/siem_migrations/start_migration';
-import { integrationsSearchAILakeCardConfig } from './cards/search_ai_lake/integrations_search_ai_lake';
-import { knowledgeSourceCardConfig } from './cards/search_ai_lake/knowledge_source';
-import { llmConnectorCardConfig } from './cards/search_ai_lake/llm';
+import { integrationsSearchAILakeCardConfig } from './cards/integrations_search_ai_lake';
+import { knowledgeSourceCardConfig } from './cards/knowledge_source';
 
 export const defaultBodyConfig: OnboardingGroupConfig[] = [
   {
@@ -47,7 +46,7 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
     title: i18n.translate('xpack.securitySolution.onboarding.customizeLLM.title', {
       defaultMessage: 'Customize your LLM',
     }),
-    cards: [llmConnectorCardConfig],
+    cards: [assistantCardConfig],
   },
 ];
 

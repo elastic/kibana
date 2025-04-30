@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../../../common/mock';
-import { OnboardingContextProvider } from '../../../../onboarding_context';
+import { TestProviders } from '../../../../../common/mock';
+import { OnboardingContextProvider } from '../../../onboarding_context';
 import KnowledgeSourceCard from './knowledge_source_card';
-import { ExperimentalFeaturesService } from '../../../../../../common/experimental_features_service';
+import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
 jest.mock('../../../../../../common/experimental_features_service', () => ({
   ExperimentalFeaturesService: { get: jest.fn() },

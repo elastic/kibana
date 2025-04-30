@@ -6,22 +6,22 @@
  */
 import React from 'react';
 
-import type { OnboardingCardComponent } from '../../../../../types';
-import { OnboardingCardContentPanel } from '../../common/card_content_panel';
-import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
+import type { OnboardingCardComponent } from '../../../../types';
+import { OnboardingCardContentPanel } from '../common/card_content_panel';
+import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
 import { INTEGRATION_TABS } from './integration_tabs_configs';
-import { ManageIntegrationsCallout } from '../../common/integrations/callouts/manage_integrations_callout';
-import { useOnboardingContext } from '../../../../onboarding_context';
-import { useEnhancedIntegrationCards } from '../../../../../../common/lib/search_ai_lake/hooks';
+import { ManageIntegrationsCallout } from '../common/integrations/callouts/manage_integrations_callout';
+import { useOnboardingContext } from '../../../onboarding_context';
+import { useEnhancedIntegrationCards } from '../../../../../common/lib/search_ai_lake/hooks';
 import type {
   RenderChildrenType,
   IntegrationCardMetadata,
-} from '../../../../../../common/lib/integrations/types';
-import { WithFilteredIntegrations } from '../../../../../../common/lib/integrations/components/with_filtered_integrations';
-import { IntegrationsCardGridTabsComponent } from '../../../../../../common/lib/integrations/components/integration_card_grid_tabs_component';
-import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../../common/lib/integrations/components/integration_card_grid_tabs';
-import { IntegrationContextProvider } from '../../../../../../common/lib/integrations/hooks/integration_context';
-import { ONBOARDING_PATH } from '../../../../../../../common/constants';
+} from '../../../../../common/lib/integrations/types';
+import { WithFilteredIntegrations } from '../../../../../common/lib/integrations/components/with_filtered_integrations';
+import { IntegrationsCardGridTabsComponent } from '../../../../../common/lib/integrations/components/integration_card_grid_tabs_component';
+import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../common/lib/integrations/components/integration_card_grid_tabs';
+import { IntegrationContextProvider } from '../../../../../common/lib/integrations/hooks/integration_context';
+import { ONBOARDING_PATH } from '../../../../../../common/constants';
 
 const IntegrationsCardGridTabs: RenderChildrenType = ({
   allowedIntegrations,
