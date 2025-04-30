@@ -585,6 +585,10 @@ export const GeneralLayoutStructure = (args: NavigationServices) => {
       { id: '', path: 'example_project.root-section1.item03.child-section4' },
       { id: '', path: 'example_project.root-section1.item03.child-section4.sub3' },
     ],
+    [
+      { id: '', path: 'example_project_footer' },
+      { id: '', path: 'example_project_footer.item10' },
+    ],
   ]);
 
   return (
