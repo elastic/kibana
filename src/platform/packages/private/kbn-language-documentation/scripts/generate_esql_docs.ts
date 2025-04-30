@@ -86,7 +86,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
           preview: functionDefinition.preview,
         });
       }
-      if (functionDefinition.name === 'bucket') {
+      if (['bucket', 'categorize'].includes(functionDefinition.name)) {
         groupingFunctions.set(functionName, {
           description: content,
           preview: functionDefinition.preview,

@@ -320,12 +320,11 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     locationsAvailable = [Location.WHERE];
   }
   const ret = {
-    type:
-      ESFunctionDefinition.name === 'bucket'
-        ? 'grouping'
-        : ESFunctionDefinition.type === 'eval'
-        ? 'scalar'
-        : ESFunctionDefinition.type,
+    type: ['bucket', 'categorize'].includes(ESFunctionDefinition.name)
+      ? 'grouping'
+      : ESFunctionDefinition.type === 'eval'
+      ? 'scalar'
+      : ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     operator: ESFunctionDefinition.operator,
     locationsAvailable,
