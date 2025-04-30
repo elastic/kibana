@@ -65,7 +65,7 @@ describe('Performance Tracker', () => {
 
       tracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
-      expect(mockMark).toHaveBeenCalledWith('Lens:testInstance:preRender', {
+      expect(mockMark).toHaveBeenCalledWith('Panel:testInstance:preRender', {
         detail: { id: 'test-uuid' },
       });
     });
@@ -74,8 +74,8 @@ describe('Performance Tracker', () => {
   describe('getPerformanceTrackersByType', () => {
     it('filters marks by type prefix', () => {
       const mockMarks = [
-        { name: 'Lens:test1:preRender', startTime: 100, detail: { id: 'id1' } },
-        { name: 'Lens:test2:renderStart', startTime: 200, detail: { id: 'id2' } },
+        { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
+        { name: 'Panel:test2:renderStart', startTime: 200, detail: { id: 'id2' } },
         { name: 'Other:test:preRender', startTime: 300, detail: { id: 'id3' } },
       ];
 
@@ -85,8 +85,8 @@ describe('Performance Tracker', () => {
 
       expect(mockGetEntriesByType).toHaveBeenCalledWith('mark');
       expect(result).toHaveLength(2);
-      expect(result[0].name).toBe('Lens:test1:preRender');
-      expect(result[1].name).toBe('Lens:test2:renderStart');
+      expect(result[0].name).toBe('Panel:test1:preRender');
+      expect(result[1].name).toBe('Panel:test2:renderStart');
     });
 
     it('returns an empty array when no marks match', () => {
@@ -103,9 +103,9 @@ describe('Performance Tracker', () => {
   describe('getPerformanceTrackersGroupedById', () => {
     it('groups performance marks by id', () => {
       const mockMarks = [
-        { name: 'Lens:test1:preRender', startTime: 100, detail: { id: 'id1' } },
-        { name: 'Lens:test1:renderStart', startTime: 200, detail: { id: 'id1' } },
-        { name: 'Lens:test2:preRender', startTime: 300, detail: { id: 'id2' } },
+        { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
+        { name: 'Panel:test1:renderStart', startTime: 200, detail: { id: 'id1' } },
+        { name: 'Panel:test2:preRender', startTime: 300, detail: { id: 'id2' } },
       ];
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
@@ -120,9 +120,9 @@ describe('Performance Tracker', () => {
       expect(result.id2.length).toBe(1);
 
       // Verify the correct marks are in each group
-      expect(result.id1[0].name).toBe('Lens:test1:preRender');
-      expect(result.id1[1].name).toBe('Lens:test1:renderStart');
-      expect(result.id2[0].name).toBe('Lens:test2:preRender');
+      expect(result.id1[0].name).toBe('Panel:test1:preRender');
+      expect(result.id1[1].name).toBe('Panel:test1:renderStart');
+      expect(result.id2[0].name).toBe('Panel:test2:preRender');
     });
 
     it('returns empty object when no marks match', () => {
@@ -135,8 +135,8 @@ describe('Performance Tracker', () => {
   describe('clearPerformanceTrackersByType', () => {
     it('clears all marks of a given type', () => {
       const mockMarks = [
-        { name: 'Lens:test1:preRender', startTime: 100, detail: { id: 'id1' } },
-        { name: 'Lens:test2:renderStart', startTime: 200, detail: { id: 'id2' } },
+        { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
+        { name: 'Panel:test2:renderStart', startTime: 200, detail: { id: 'id2' } },
       ];
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
@@ -144,8 +144,8 @@ describe('Performance Tracker', () => {
       clearPerformanceTrackersByType('Panel');
 
       expect(mockClearMarks).toHaveBeenCalledTimes(2);
-      expect(mockClearMarks).toHaveBeenCalledWith('Lens:test1:preRender');
-      expect(mockClearMarks).toHaveBeenCalledWith('Lens:test2:renderStart');
+      expect(mockClearMarks).toHaveBeenCalledWith('Panel:test1:preRender');
+      expect(mockClearMarks).toHaveBeenCalledWith('Panel:test2:renderStart');
     });
 
     it('does nothing when no marks match', () => {
