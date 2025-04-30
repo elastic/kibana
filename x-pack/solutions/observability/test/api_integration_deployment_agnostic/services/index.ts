@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { commonDeploymentAgnosticServices } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
+import { services as commonDeploymentAgnosticServices } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
 import { ApmApiProvider } from './apm_api';
 
 export type {

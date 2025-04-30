@@ -15,7 +15,7 @@ import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   SupertestReturnType,
   ApmApiError,
-} from '@kbn/test-suites-xpack-observability/api_integration/apm/common/apm_api_supertest';
+} from '@kbn/test-suites-xpack-observability/apm_api_integration/common/apm_api_supertest';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 

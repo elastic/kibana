@@ -14,7 +14,7 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { ApmAlertFields } from '@kbn/test-suites-xpack-observability/api_integration/apm/tests/alerts/helpers/alerting_api_helper';
+import { ApmAlertFields } from '@kbn/test-suites-xpack-observability/apm_api_integration/tests/alerts/helpers/alerting_api_helper';
 import {
   LlmProxy,
   RelevantField,

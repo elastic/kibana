@@ -33,7 +33,7 @@ interface RunCondition {
 export function RegistryProvider({ getService }: FtrProviderContext) {
   const apmFtrConfig = getService('apmFtrConfig');
   const esArchivesPath =
-    'x-pack/solutions/observability/test/api_integration/apm/common/fixtures/es_archiver';
+    'x-pack/solutions/observability/test/apm_api_integration/common/fixtures/es_archiver';
 
   const callbacks: Array<
     RunCondition & {
