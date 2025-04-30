@@ -153,8 +153,8 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
       validate: {
         params: schema.object({
           agentId: schema.string(),
-        })
-      }
+        }),
+      },
     },
     wrapHandler(async (ctx, request, res) => {
       const { agentId } = request.params;
@@ -165,7 +165,7 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
 
       return res.ok<DeleteAgentResponse>({
         body: {
-          success: didDelete
+          success: didDelete,
         },
       });
     })
