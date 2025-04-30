@@ -22,20 +22,25 @@ import {
 import { createRule, deleteRules } from '../../utils/alerts';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSyntheticApmData } from '../../synthtrace_scenarios/create_synthetic_apm_data';
-import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
+import { APM_ALERTS_INDEX as APM_ALERTS_INDEX_PATTERN } from '../../../apm/alerts/helpers/alerting_helper';
+
+const RECENT_ALERT_RULE_NAME = 'Recent Alert';
+const OLD_ALERT_DOC_RULE_NAME = 'Manually Indexed Old Alert';
+const APM_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
 
 const alertRuleData = {
   ruleTypeId: ApmRuleType.TransactionErrorRate,
-  indexName: APM_ALERTS_INDEX,
+  indexName: APM_ALERTS_INDEX_PATTERN,
   consumer: 'apm',
   environment: 'production',
   threshold: 1,
   windowSize: 1,
   windowUnit: 'h',
-  ruleName: 'APM transaction error rate',
+  ruleName: RECENT_ALERT_RULE_NAME,
 };
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const es = getService('es');
   const log = getService('log');
   const samlAuth = getService('samlAuth');
   const alertingApi = getService('alertingApi');
@@ -67,11 +72,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         port: proxy.getPort(),
       });
 
+      // Create alerting rule
       createdRuleId = await createRule({
         getService,
         roleAuthc,
         internalReqHeader,
         data: alertRuleData,
+      });
+
+      // Manually index old alert
+      const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+      await es.index({
+        index: APM_ALERTS_INDEX,
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': new Date().toISOString(),
+          'kibana.alert.start': eightDaysAgo,
+          'kibana.alert.status': 'active',
+          'kibana.alert.rule.name': OLD_ALERT_DOC_RULE_NAME,
+          'kibana.alert.rule.consumer': 'apm',
+          'kibana.alert.rule.rule_type_id': 'apm.transaction_error_rate',
+          'kibana.alert.evaluation.threshold': 1,
+          'service.environment': 'production',
+          'kibana.space_ids': ['default'],
+          'event.kind': 'signal',
+          'event.action': 'open',
+          'kibana.alert.workflow_status': 'open',
+        },
       });
 
       void proxy.interceptConversation('Hello from LLM Proxy');
@@ -103,7 +130,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await alertingApi.cleanUpAlerts({
         roleAuthc,
         ruleId: createdRuleId,
-        alertIndexName: APM_ALERTS_INDEX,
+        alertIndexName: APM_ALERTS_INDEX_PATTERN,
         consumer: 'apm',
       });
       await deleteRules({ getService, roleAuthc, internalReqHeader });
@@ -134,6 +161,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(alert['kibana.alert.evaluation.threshold']).to.eql(alertRuleData.threshold);
       expect(alert['kibana.alert.rule.rule_type_id']).to.eql(alertRuleData.ruleTypeId);
       expect(alert['kibana.alert.rule.name']).to.eql(alertRuleData.ruleName);
+    });
+
+    it('should only return alerts that started within the requested range', async () => {
+      const returnedAlert = parsedAlertsResponse.alerts[0];
+      expect(returnedAlert['kibana.alert.rule.name']).to.be(RECENT_ALERT_RULE_NAME);
+
+      const alertStartTime = new Date(returnedAlert['kibana.alert.start'] as unknown as string);
+      const from = new Date(Date.now() - 100 * 60 * 60 * 1000); // now-100h
+      const to = new Date();
+
+      expect(alertStartTime >= from && alertStartTime <= to).to.be(true);
     });
   });
 }
