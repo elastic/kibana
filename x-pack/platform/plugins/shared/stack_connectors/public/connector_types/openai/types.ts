@@ -27,6 +27,10 @@ export interface Config {
   headers?: Record<string, string>;
 }
 
+export interface InternalConfig {
+  hasPKI: boolean;
+}
+
 export interface Secrets {
   apiKey: string;
 }
