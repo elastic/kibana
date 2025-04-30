@@ -188,3 +188,7 @@ export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string)
     values: { apiProvider, connectorName },
     defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
   });
+
+export const PKI_MODE_LABEL = i18n.translate('xpack.stackConnectors.genAi.pkiModeLabel', {
+  defaultMessage: 'Enable PKI Authentication',
+});
