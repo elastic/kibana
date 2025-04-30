@@ -7,7 +7,8 @@
 
 export const MAX_ASSETS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
-export const ASSET_INVENTORY_INDEX_PATTERN = 'logs-cloud_asset_inventory.asset_inventory-*';
+export const ASSET_INVENTORY_INDEX_PATTERN = 'entities-generic-latest';
+export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
 
 export const QUERY_KEY_GRID_DATA = 'asset_inventory_grid_data';
 export const QUERY_KEY_CHART_DATA = 'asset_inventory_chart_data';

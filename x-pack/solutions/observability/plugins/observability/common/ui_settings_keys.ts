@@ -41,7 +41,5 @@ export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDisco
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
-export const profilingFetchTopNFunctionsFromStacktraces =
-  'observability:profilingFetchTopNFunctionsFromStacktraces';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
 export const apmEnableServiceMapApiV2 = 'observability:apmEnableServiceMapApiV2';
