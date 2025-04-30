@@ -8,7 +8,7 @@
 import { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import Fs from 'fs/promises';
-import { FtrProviderContext } from '@kbn/test';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export const SPACE_1 = {
   id: 'space_1',
