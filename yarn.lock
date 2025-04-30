@@ -8702,10 +8702,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.5.0.tgz#5fda73aa125dfb5729f5dd7362df00b6dca23a24"
-  integrity sha512-dRBJjnYhEa6XoF9BNf9sW4sHuXmigfBbbatA5djbRXRBDExrXsMydMpEWQqKYhd7XwdwFatuh2q+UkVbXriUKA==
+"@openfeature/core@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.8.0.tgz#2cec01af993f1c298afb4bbd4492b71ed04ef893"
+  integrity sha512-FX/B6yMD2s4BlMKtB0PqSMl94eLaTwh0VK9URcMvjww0hqMOeGZnGv4uv9O5E58krAan7yCOCm4NBCoh2IATqw==
 
 "@openfeature/launchdarkly-client-provider@^0.3.2":
   version "0.3.2"
@@ -8714,15 +8714,15 @@
   dependencies:
     lodash.isempty "^4.4.0"
 
-"@openfeature/server-sdk@^1.16.1":
-  version "1.16.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.16.1.tgz#2f32aeca5ff8d5e97deb2ee8a72daae38cc40461"
-  integrity sha512-5xcsuQTyomKFSs+VbW1fGZATGFE1mLewHZ220IRzLtlSeNNRoRIpYMtkxn7N9dG9k+rqikv+SrVD0/LoPDJiqg==
+"@openfeature/server-sdk@^1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.18.0.tgz#5fed5f1d0900b2535878db18a78295bbaebb997b"
+  integrity sha512-uP8nqEGBS58s3iWXx6d8vnJ6ZVt3DACJL4PWADOAuwIS4xXpID91783e9f6zQ0i1ijQpj3yx+3ZuCB2LfQMUMA==
 
-"@openfeature/web-sdk@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.3.1.tgz#001bfdcb5cb38b760670a319d66cf3d0febf2b6d"
-  integrity sha512-KpsekYseZ0zQcDa/WzylqBA5SOxS4xv2goEZl2SB4nd6lEJMTEW2qOkXPhJiV3qXAt8bcrv+Yr0sbCwJ+u+U/Q==
+"@openfeature/web-sdk@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.5.0.tgz#23ed7acc67ff8f67c3d46f686193f19889b8a482"
+  integrity sha512-AK9A4X6vRKQf/OvCue1LKM6thSDqbx/Sf3dHBTZ6p7DfpIKsD8mzCTgMhb5jukVlqwdKMlewU/rlYTYqqfnnTw==
 
 "@opentelemetry/api-logs@0.53.0":
   version "0.53.0"
@@ -21978,18 +21978,18 @@ launchdarkly-eventsource@2.0.3:
   resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.0.3.tgz#8a7b8da5538153f438f7d452b1c87643d900f984"
   integrity sha512-VhFjppK7jXlcEKaS7bxdoibB5j01NKyeDR7a8XfssdDGNWCTsbF0/5IExSmPi44eDncPhkoPNxlSZhEZvrbD5w==
 
-launchdarkly-js-client-sdk@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.5.0.tgz#cb0e3d6fc21e56750aa86fcaf75733d7f510946f"
-  integrity sha512-3dgxC9S8K2ix6qjdArjZGOJPtAytgfQTuE+vWgjWJK7725rpYbuqbHghIFr5B0+WyWyVBYANldjWd1JdtYLwsw==
+launchdarkly-js-client-sdk@^3.6.0:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.6.1.tgz#f397c33e1a3782909e5b1282934aad69b9b6d576"
+  integrity sha512-eq8v1cc3LG6tzlmOw03XrGlEjZsCLx9Pfs/eOQ0o72O8aqNj/ltmgVBFH1Z4HjNufX2680tHcOA/f68bvWyDzQ==
   dependencies:
     escape-string-regexp "^4.0.0"
-    launchdarkly-js-sdk-common "5.4.0"
+    launchdarkly-js-sdk-common "5.5.1"
 
-launchdarkly-js-sdk-common@5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.4.0.tgz#c9787daebe0b583b01d2334218524ea142c85001"
-  integrity sha512-Kb3SDcB6S0HUpFNBZgtEt0YUV/fVkyg+gODfaOCJQ0Y0ApxLKNmmJBZOrPE2qIdzw536u4BqEjtaJdqJWCEElg==
+launchdarkly-js-sdk-common@5.5.1:
+  version "5.5.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-5.5.1.tgz#1e3a56dbe190920942f7c9f51ba849dce4834142"
+  integrity sha512-z2+B/phJZFU8WnvYR+UX0+bn+sH+slzdV6eloIn3TF/J9tEXj8Lww9z3MErkpjuuShr4LBifSdI72tNbEASlIw==
   dependencies:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"

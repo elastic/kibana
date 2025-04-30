@@ -176,7 +176,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId1, start, end }])
+        .send([{ rule_id: ruleId1, ranges: [{ start, end }] }])
         .expect(200);
 
       const result = response.body;

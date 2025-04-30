@@ -14,12 +14,7 @@ import {
   CategorizationRequestBody,
   CategorizationResponse,
 } from '../../common';
-import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
-  ROUTE_HANDLER_TIMEOUT,
-} from '../constants';
+import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE, ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { getLLMClass, getLLMType } from '../util/llm';
@@ -47,11 +42,7 @@ export function registerCategorizationRoutes(
         version: '1',
         security: {
           authz: {
-            requiredPrivileges: [
-              FLEET_ALL_ROLE,
-              INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
-            ],
+            requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
           },
         },
         validate: {

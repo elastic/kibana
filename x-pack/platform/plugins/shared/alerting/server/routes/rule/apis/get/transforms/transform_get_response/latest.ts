@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const ActionGroupId = 'query matched';
-export const ConditionMetAlertInstanceId = 'query matched';
+export * from './v1';

@@ -2448,6 +2448,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         const startDate = moment().add(1, 'd');
+        const endDate = moment().add(2, 'd');
 
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
@@ -2455,7 +2456,10 @@ export default ({ getService }: FtrProviderContext): void => {
             body: {
               ids: [createdRule1.id, createdRule2.id],
               action: BulkActionTypeEnum.run,
-              [BulkActionTypeEnum.run]: { start_date: startDate.toISOString() },
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
             },
           })
           .expect(400);
