@@ -109,9 +109,11 @@ For the Elastic Security 8.18.1 release information, refer to {security-guide}/r
 [[fixes-v8.18.1]]
 === Fixes
 Dashboards and Visualizations::
-* Syncs the dashboard ES|QL query and filters with the ones in the corresponding *Lens* visualization ({kibana-pull}218997[#218997]).
+* Syncs the dashboard ES|QL query and filters with the corresponding visualization query in *Lens* ({kibana-pull}218997[#218997]).
 * Correctly formats keywords in metric visualizations ({kibana-pull}218233[#218233]).
+* When exploring a dashboard, the request inspector now shows the correct request and response in any successful scenario ({kibana-pull}216519[#216519]).
 Discover::
+* Fixes incorrect behavior for requests on fields where the Allow hidden and system indices (`allow_hidden`) option of the data view could be ignored
 * Fixes the result of the *Generate CSV report* action for ES|QL panels ({kibana-pull}216325[#216325]).
 Elastic Observability Solution::
 * Prevents unnecessary suggestion requests when interacting with inputs on the APM *Custom Links* page ({kibana-pull}218927[#218927]).
@@ -127,10 +129,6 @@ Kibana security::
 Machine Learning::
 * Fixes error when switching Service providers in the *Inference Endpoint* flyout ({kibana-pull}219020[#219020]).
 * Corrects quotes in ES|QL queries for function arguments ({kibana-pull}217680[#217680]).
-Management::
-* Fixes missing `allow_hidden` usage for data views in the request for fields ({kibana-pull}217628[#217628]).
-Platform::
-* Shows the correct request and response for any successful scenario in Inspector ({kibana-pull}216519[#216519]).
 
 [[release-notes-8.18.0]]
 == {kib} 8.18.0
