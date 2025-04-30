@@ -177,15 +177,22 @@ describe('kibana_client_open_api', () => {
       operation: mockPostOperation,
     });
 
+
+
     await toolForOperation.invoke({
-      path: {
-        id: '123',
-      },
-      query: {
-        'test-query-param': 'test',
-      },
-      body: {
-        test: 'test',
+      type: "tool_call",
+      id: '123',
+      name: 'get_actions_connector_id',
+      args: {
+        path: {
+          id: '123',
+        },
+        query: {
+          'test-query-param': 'test',
+        },
+        body: {
+          test: 'test',
+        }
       },
     });
 
