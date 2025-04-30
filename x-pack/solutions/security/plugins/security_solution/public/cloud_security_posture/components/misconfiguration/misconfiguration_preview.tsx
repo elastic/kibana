@@ -41,7 +41,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
         {
-          defaultMessage: 'Passed findings',
+          defaultMessage: passedFindingsStats > 1 ? 'Passed findings' : 'Passed finding',
         }
       ),
       count: passedFindingsStats,
@@ -53,7 +53,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
       key: i18n.translate(
         'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
         {
-          defaultMessage: 'Failed findings',
+          defaultMessage: failedFindingsStats > 1 ? 'Failed findings' : 'Failed finding',
         }
       ),
       count: failedFindingsStats,
