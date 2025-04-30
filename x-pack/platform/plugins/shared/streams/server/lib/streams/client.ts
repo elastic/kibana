@@ -250,6 +250,10 @@ export class StreamsClient {
     if: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = asWiredStreamDefinition(await this.getStream(parent));
+    const childExistsAlready = await this.existsStream(name);
+    if (childExistsAlready) {
+      throw new StatusError(`Child stream ${name} already exists`, 409);
+    }
 
     const result = await State.attemptChanges(
       [
