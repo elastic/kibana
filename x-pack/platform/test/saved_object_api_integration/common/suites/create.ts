@@ -135,12 +135,12 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTestAgen
       describeFn(description, () => {
         before(() =>
           esArchiver.load(
-            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );
         after(() =>
           esArchiver.unload(
-            'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
           )
         );
 

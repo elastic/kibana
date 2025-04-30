@@ -101,17 +101,17 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
             {
               spaceName: null,
               dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
             },
             {
               spaceName: SPACE_1.id,
               dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
             },
             {
               spaceName: SPACE_2.id,
               dataUrl:
-                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
             },
           ]);
         });

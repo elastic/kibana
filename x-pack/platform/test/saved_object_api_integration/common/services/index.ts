@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { services as commonServices } from '../../../common/services';
 import { services as apiIntegrationServices } from '../../../api_integration/services';
 
 export const services = {
-  ...commonServices,
-  esSupertestWithoutAuth: apiIntegrationServices.esSupertestWithoutAuth,
+  ...apiIntegrationServices,
 };

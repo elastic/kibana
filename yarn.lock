@@ -6819,7 +6819,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-object-test-plugin@link:x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin":
+"@kbn/saved-object-test-plugin@link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin":
   version "0.0.0"
   uid ""
 

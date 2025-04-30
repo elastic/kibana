@@ -151,7 +151,6 @@ enabled:
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/lists/config.ts
-  - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/test/api_integration/apis/ml/config.ts
   - x-pack/test/api_integration/apis/search_playground/config.ts
@@ -272,7 +271,6 @@ enabled:
   - x-pack/test/functional_search/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
-  - x-pack/platform/test/monitoring_api_integration/config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
@@ -283,10 +281,6 @@ enabled:
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/test/rule_registry/spaces_only/config_trial.ts
-  - x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/saved_object_api_integration/spaces_only/config.ts
-  - x-pack/test/saved_object_api_integration/user_profiles/config.ts
   - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
@@ -374,6 +368,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/logstash/config.ts
+  - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/maps/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
@@ -391,3 +386,8 @@ enabled:
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/api_integration_basic/apis/transform/config.ts
+  - x-pack/platform/test/monitoring_api_integration/config.ts
+  - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
