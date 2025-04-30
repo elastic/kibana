@@ -2167,26 +2167,26 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.2.0.tgz#0f32724e394f3bfa35d18ef8fa2e79da47191779"
   integrity sha512-EDp5FP8nbzGXwAMWM2xo6SL2LdsUwEVrt6idE8AoW45KybuJZ9Dr8IB8z6+wCr7Jxrg+nwdst039LpaslDur+g==
 
-"@elastic/eui-theme-borealis@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.2.0.tgz#abfe2776778be05d65a60ba02e936c2203bb1549"
-  integrity sha512-3gD60+QR4cWeCqC8OG6hXyO3xeagQ0chMBe+zZJE7qBcYXuPqGhaFb78rEI1BNniEm+pyUiGN88FQtLaoHInNw==
+"@elastic/eui-theme-borealis@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-1.0.0.tgz#f85679d2d72dfc43a620241cbf4161d4e4e81841"
+  integrity sha512-Zf3ZX5siUhF+TNOdP0FZ3PNEpVmfe3DDXFm5biAKFlGp4e5yrR1FKPYOzkOdJtPWlOoNaedawnALXNVjp1UH8w==
 
-"@elastic/eui-theme-common@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.2.0.tgz#570a988f58c24076c6f867475e70930769f3cff5"
-  integrity sha512-g2n38Uk4G9UqQU/wim+ZKWusWtO1bdudvDy/7+sdCYaxtgbINT5hhMHoU9M49D+7FJSsPuHn7gVfdYKMN9bTdQ==
+"@elastic/eui-theme-common@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.0.0.tgz#c5e7b7597c4ebe71fc533b18458415a14a93794d"
+  integrity sha512-9+P21npVm05OmFr0OPkA5DSdts9teOo/OEotbJFAVkqBLkNf+Eevv6q89B8eQ6r383RnVwTl7vBzb6M9PnULJg==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@101.4.0":
-  version "101.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.4.0.tgz#2db2d7163e2a317b514b6308197173655ff2ac4b"
-  integrity sha512-oKmlsjBMp4DSdu34YUqQD821Fov46mJ4nPHkWAUIHCv3+5PfAeK7NpVBEnyVZW5LTo+sAANqLN5mJFsovR8NZg==
+"@elastic/eui@102.0.0":
+  version "102.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.0.0.tgz#dda965d92eb46bf061aac8d0219218779aea28bb"
+  integrity sha512-o4BuXdyGLTAJOBMIUVovDaDmmW+RJgKG6XdIDds7aJyQFlcqIOHgM59yCorzEHhpPAuaYparShJE/vug2dJAIQ==
   dependencies:
-    "@elastic/eui-theme-common" "0.2.0"
+    "@elastic/eui-theme-common" "1.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -11856,10 +11856,10 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/rbush@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/rbush/-/rbush-3.0.0.tgz#b6887d99b159e87ae23cd14eceff34f139842aa6"
-  integrity sha512-W3ue/GYWXBOpkRm0VSoifrP3HV0Ni47aVJWvXyWMcbtpBy/l/K/smBRiJ+fI8f7shXRjZBiux+iJzYbh7VmcZg==
+"@types/rbush@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@types/rbush/-/rbush-4.0.0.tgz#b327bf54952e9c924ea6702c36904c2ce1d47f35"
+  integrity sha512-+N+2H39P8X+Hy1I5mC6awlTX54k3FhiUmvt7HWzGJZvF+syUAAxP/stwppS8JE84YHqFgRMv6fCy31202CMFxQ==
 
 "@types/react-dom@~18.2.0":
   version "18.2.25"
@@ -18552,11 +18552,6 @@ fetch-mock@^10.1.0:
     globrex "^0.1.2"
     is-subset "^0.1.1"
     regexparam "^3.0.0"
-
-fflate@^0.6.9:
-  version "0.6.9"
-  resolved "https://registry.yarnpkg.com/fflate/-/fflate-0.6.9.tgz#fb369b30792a03ff7274e174f3b36e51292d3f99"
-  integrity sha512-hmAdxNHub7fw36hX7BHiuAO0uekp6ufY2sjxBXWxIf0sw5p7tnS9GVrdM4D12SDYQUHVpiC50fPBYPTjOzRU2Q==
 
 figures@^3.0.0, figures@^3.2.0:
   version "3.2.0"
@@ -26467,12 +26462,19 @@ raw-body@^3.0.0:
     iconv-lite "0.6.3"
     unpipe "1.0.0"
 
-rbush@^3.0.0, rbush@^3.0.1:
+rbush@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/rbush/-/rbush-3.0.1.tgz#5fafa8a79b3b9afdfe5008403a720cc1de882ecf"
   integrity sha512-XRaVO0YecOpEuIvbhbpTrZgoiI6xBlz6hnlr6EHhd+0x9ase6EmeN+hdwwUaJvLcsFFQ8iWVF1GAK1yB0BWi0w==
   dependencies:
     quickselect "^2.0.0"
+
+rbush@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/rbush/-/rbush-4.0.1.tgz#1f55afa64a978f71bf9e9a99bc14ff84f3cb0d6d"
+  integrity sha512-IP0UpfeWQujYC8Jg162rMNc01Rf0gWMMAb2Uxus/Q0qOFw4lCcq6ZnQEZwUoJqWyUGJ9th7JjwI4yIWo+uvoAQ==
+  dependencies:
+    quickselect "^3.0.0"
 
 rc-pagination@^1.20.1:
   version "1.21.1"
