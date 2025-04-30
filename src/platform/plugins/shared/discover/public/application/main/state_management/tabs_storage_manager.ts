@@ -104,6 +104,12 @@ export const createTabsStorageManager = ({
   const startUrlSync: TabsStorageManager['startUrlSync'] = ({
     onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
   }) => {
+    if (!enabled) {
+      return () => {
+        // do nothing
+      };
+    }
+
     const { start, stop } = syncState({
       stateStorage: urlStateStorage,
       stateContainer: {
@@ -118,12 +124,11 @@ export const createTabsStorageManager = ({
       storageKey: TABS_STATE_URL_KEY,
     });
 
-    const listener =
-      onChanged && enabled
-        ? urlStateContainer.state$.subscribe((state) => {
-            onChanged(state);
-          })
-        : null;
+    const listener = onChanged
+      ? urlStateContainer.state$.subscribe((state) => {
+          onChanged(state);
+        })
+      : null;
 
     start();
 
@@ -169,6 +174,24 @@ export const createTabsStorageManager = ({
       closedAt: tabState.closedAt,
     };
   };
+
+  const toTabState = (
+    tabStateInStorage: TabStateInLocalStorage,
+    defaultTabState: Omit<TabState, keyof TabItem>
+  ): TabState => ({
+    ...defaultTabState,
+    ...pick(tabStateInStorage, 'id', 'label'),
+    lastPersistedGlobalState:
+      tabStateInStorage.globalState || defaultTabState.lastPersistedGlobalState,
+  });
+
+  const toRecentlyClosedTabState = (
+    tabStateInStorage: RecentlyClosedTabStateInLocalStorage,
+    defaultTabState: Omit<TabState, keyof TabItem>
+  ): RecentlyClosedTabState => ({
+    ...toTabState(tabStateInStorage, defaultTabState),
+    closedAt: tabStateInStorage.closedAt,
+  });
 
   const readFromLocalStorage = (): TabsStateInLocalStorage => {
     const storedTabsState = storage.get(TABS_LOCAL_STORAGE_KEY);
@@ -234,6 +257,7 @@ export const createTabsStorageManager = ({
     if (!enabled) {
       return;
     }
+
     await pushSelectedTabIdToUrl(selectedTabId);
 
     const keptTabIds: Record<string, boolean> = {};
@@ -241,11 +265,13 @@ export const createTabsStorageManager = ({
     const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) => {
       const tabStateInStorage = toTabStateInStorage(tab, getAppState);
       keptTabIds[tab.id] = true;
+      tabsInStorageCache.set(tab.id, tabStateInStorage);
       return tabStateInStorage;
     });
     const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map((tab) => {
       const tabStateInStorage = toRecentlyClosedTabStateInStorage(tab, getAppState);
       keptTabIds[tab.id] = true;
+      tabsInStorageCache.set(tab.id, tabStateInStorage);
       return tabStateInStorage;
     });
 
@@ -333,20 +359,7 @@ export const createTabsStorageManager = ({
     defaultTabState,
     defaultGroupId,
   }) => {
-    const toTabState = (tabStateInStorage: TabStateInLocalStorage): TabState => ({
-      ...defaultTabState,
-      ...pick(tabStateInStorage, 'id', 'label'),
-      lastPersistedGlobalState:
-        tabStateInStorage.globalState || defaultTabState.lastPersistedGlobalState,
-    });
-    const toRecentlyClosedTabState = (
-      tabStateInStorage: RecentlyClosedTabStateInLocalStorage
-    ): RecentlyClosedTabState => ({
-      ...toTabState(tabStateInStorage),
-      closedAt: tabStateInStorage.closedAt,
-    });
-
-    const selectedTabId = getSelectedTabIdFromURL();
+    const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
       : defaultTabsStateInLocalStorage;
@@ -370,8 +383,10 @@ export const createTabsStorageManager = ({
       tabsInStorageCache.set(tab.id, tab);
     });
 
-    const openTabs = storedTabsState.openTabs.map(toTabState);
-    const closedTabs = storedTabsState.closedTabs.map(toRecentlyClosedTabState);
+    const openTabs = storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState));
+    const closedTabs = storedTabsState.closedTabs.map((tab) =>
+      toRecentlyClosedTabState(tab, defaultTabState)
+    );
 
     if (enabled) {
       if (selectedTabId) {
@@ -393,7 +408,7 @@ export const createTabsStorageManager = ({
             groupId: defaultGroupId,
             allTabs: storedTabsState.closedTabs
               .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
-              .map(toTabState),
+              .map((tab) => toTabState(tab, defaultTabState)),
             selectedTabId,
             recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
           };

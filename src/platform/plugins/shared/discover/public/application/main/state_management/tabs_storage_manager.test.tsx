@@ -149,6 +149,19 @@ describe('TabsStorageManager', () => {
         closedTabs: [toStoredTab(mockRecentlyClosedTab)],
       })
     );
+
+    expect(tabsStorageManager.loadTabAppStateFromLocalCache(mockTab1.id)).toEqual(
+      mockGetAppState(mockTab1.id)
+    );
+    expect(tabsStorageManager.loadTabGlobalStateFromLocalCache(mockTab1.id)).toEqual(
+      mockTab1.lastPersistedGlobalState
+    );
+    expect(tabsStorageManager.loadTabAppStateFromLocalCache(mockRecentlyClosedTab.id)).toEqual(
+      mockGetAppState(mockRecentlyClosedTab.id)
+    );
+    expect(tabsStorageManager.loadTabGlobalStateFromLocalCache(mockRecentlyClosedTab.id)).toEqual(
+      mockRecentlyClosedTab.lastPersistedGlobalState
+    );
   });
 
   it('should load tabs state from local storage and select one of open tabs', () => {
@@ -258,6 +271,60 @@ describe('TabsStorageManager', () => {
     expect(storage.set).not.toHaveBeenCalled();
   });
 
+  it('should initialize with a default state if user id changes', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+    jest.spyOn(urlStateStorage, 'get');
+    jest.spyOn(storage, 'get');
+
+    const props: TabsInternalStatePayload = {
+      groupId: 'group2',
+      allTabs: [mockTab1, mockTab2],
+      selectedTabId: 'tab2',
+      recentlyClosedTabs: [mockRecentlyClosedTab],
+    };
+
+    storage.set(
+      TABS_LOCAL_STORAGE_KEY,
+      JSON.stringify({
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+        openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+        closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+      })
+    );
+
+    urlStateStorage.set(TABS_STATE_URL_KEY, {
+      tabId: props.selectedTabId,
+    });
+
+    jest.spyOn(urlStateStorage, 'set');
+    jest.spyOn(storage, 'set');
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: 'different',
+      spaceId: mockSpaceId,
+      defaultGroupId: props.groupId,
+      defaultTabState,
+    });
+
+    expect(loadedProps.recentlyClosedTabs).toHaveLength(0);
+    expect(loadedProps.allTabs).toHaveLength(1);
+    expect(loadedProps.allTabs[0]).toEqual(
+      expect.objectContaining({
+        label: 'Untitled session',
+      })
+    );
+    expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
+    expect(urlStateStorage.get).toHaveBeenCalledWith(TABS_STATE_URL_KEY);
+    expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
+    expect(urlStateStorage.set).not.toHaveBeenCalled();
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
   it('should initialize with a default single tab', () => {
     const {
       tabsStorageManager,
@@ -279,6 +346,8 @@ describe('TabsStorageManager', () => {
         closedTabs: [toStoredTab(mockRecentlyClosedTab)],
       })
     );
+
+    urlStateStorage.set(TABS_STATE_URL_KEY, null);
 
     jest.spyOn(urlStateStorage, 'set');
     jest.spyOn(storage, 'set');
@@ -338,7 +407,7 @@ describe('TabsStorageManager', () => {
       },
     };
 
-    tabsStorageManager.updateTabStateLocally('tab1', updatedTabState);
+    tabsStorageManager.updateTabStateLocally(mockTab1.id, updatedTabState);
 
     expect(storage.set).toHaveBeenCalledWith(
       TABS_LOCAL_STORAGE_KEY,
@@ -354,6 +423,13 @@ describe('TabsStorageManager', () => {
         ],
         closedTabs: [toStoredTab(mockRecentlyClosedTab)],
       })
+    );
+
+    expect(tabsStorageManager.loadTabAppStateFromLocalCache(mockTab1.id)).toEqual(
+      updatedTabState.appState
+    );
+    expect(tabsStorageManager.loadTabGlobalStateFromLocalCache(mockTab1.id)).toEqual(
+      updatedTabState.globalState
     );
   });
 
@@ -414,6 +490,4 @@ describe('TabsStorageManager', () => {
       ...newClosedTabs.map((tab) => ({ ...tab, closedAt: newClosedAt })),
     ]);
   });
-
-  // TODO: add a test for changed userId and spaceId
 });
