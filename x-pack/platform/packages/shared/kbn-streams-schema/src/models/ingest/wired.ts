@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 import { IngestBase, IngestBaseStream } from './base';
-import { RoutingDefinition, routingDefinitionSchema } from './routing';
+import { RoutingDefinition, routingDefinitionListSchema } from './routing';
 import {
   WiredIngestStreamEffectiveLifecycle,
   wiredIngestStreamEffectiveLifecycleSchema,
@@ -33,7 +33,7 @@ interface IngestWired {
 const IngestWired: z.Schema<IngestWired> = z.object({
   wired: z.object({
     fields: fieldDefinitionSchema,
-    routing: z.array(routingDefinitionSchema),
+    routing: routingDefinitionListSchema,
   }),
 });
 

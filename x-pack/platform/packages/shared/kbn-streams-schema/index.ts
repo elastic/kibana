@@ -42,7 +42,7 @@ export {
   processorDefinitionSchema,
 } from './src/models/ingest/processors';
 
-export { type RoutingDefinition } from './src/models/ingest/routing';
+export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
 
 export { type ContentPack, contentPackSchema } from './src/content';
 
