@@ -161,11 +161,17 @@ export const getSearchEmbeddableFactory = ({
             visContext: 'skip',
           };
         },
-        onReset: (lastSaved) => {
+        onReset: async (lastSaved) => {
           dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
           timeRangeManager.reinitializeState(lastSaved?.rawState);
           titleManager.reinitializeState(lastSaved?.rawState);
-          searchEmbeddable.reinitializeState(lastSaved?.rawState);
+          if (lastSaved) {
+            const lastSavedRuntimeState = await deserializeState({
+              serializedState: lastSaved,
+              discoverServices,
+            });
+            searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+          }
         },
       });
 
