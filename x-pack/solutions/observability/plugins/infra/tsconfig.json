@@ -90,7 +90,6 @@
     "@kbn/serverless",
     "@kbn/elastic-agent-utils",
     "@kbn/dashboard-plugin",
-    "@kbn/shared-svg",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/search-types",
     "@kbn/alerting-comparators",
@@ -119,7 +118,6 @@
     "@kbn/response-ops-rule-form",
     "@kbn/traced-es-client",
     "@kbn/fields-metadata-plugin",
-    "@kbn/deeplinks-analytics",
     "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
