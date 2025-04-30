@@ -27,6 +27,7 @@ import {
   isMachineLearningParams,
   isEsqlParams,
   getDisabledActionsWarningText,
+  checkForFrozenIndices,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -104,6 +105,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     ruleExecutionLoggerFactory,
     version,
     isPreview,
+    isServerless,
     experimentalFeatures,
     alerting,
     analytics,
@@ -220,6 +222,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
 
+          let frozenIndicesQueriedCount = 0;
           const wrapperWarnings = [];
           const wrapperErrors = [];
 
@@ -295,8 +298,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
           let skipExecution: boolean = false;
-          try {
-            if (!isMachineLearningParams(params)) {
+
+          if (!isMachineLearningParams(params)) {
+            try {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
               const readIndexWarningMessage = await hasReadIndexPrivileges({
@@ -309,7 +313,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (readIndexWarningMessage != null) {
                 wrapperWarnings.push(readIndexWarningMessage);
               }
+            } catch (exc) {
+              wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
+            }
 
+            try {
               const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
                 services.scopedClusterClient.asCurrentUser.fieldCaps(
                   {
@@ -336,13 +344,29 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 wrapperWarnings.push(warningMissingTimestampFieldsMessage);
               }
               skipExecution = foundNoIndices;
+            } catch (exc) {
+              wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
             }
-          } catch (exc) {
-            await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatusEnum['partial failure'],
-              message: `Check privileges failed to execute ${exc}`,
-            });
-            wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
+
+            if (!isServerless) {
+              try {
+                const frozenIndices = await checkForFrozenIndices({
+                  inputIndices: inputIndex,
+                  internalEsClient: services.scopedClusterClient.asInternalUser,
+                  currentUserEsClient: services.scopedClusterClient.asCurrentUser,
+                  to: params.to,
+                  from: params.from,
+                  primaryTimestamp,
+                  secondaryTimestamp,
+                });
+
+                if (frozenIndices.length > 0) {
+                  frozenIndicesQueriedCount = frozenIndices.length;
+                }
+              } catch (exc) {
+                wrapperWarnings.push(`Frozen indices check failed to execute ${exc}`);
+              }
+            }
           }
 
           const {
@@ -522,6 +546,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
+                  frozenIndicesQueriedCount,
                 },
               });
             }
@@ -535,6 +560,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
                   gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
+                  frozenIndicesQueriedCount,
                 },
                 userError: result.userError,
               });
@@ -556,6 +582,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
+                  frozenIndicesQueriedCount,
                 },
               });
             }
@@ -569,6 +596,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
                 enrichmentDurations: result.enrichmentTimes,
+                frozenIndicesQueriedCount,
               },
             });
           }
