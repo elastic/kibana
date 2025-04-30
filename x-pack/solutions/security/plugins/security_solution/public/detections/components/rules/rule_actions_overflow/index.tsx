@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../detection_engine/rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -33,7 +32,7 @@ import {
   useExecuteBulkAction,
 } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_download_exported_rules';
-import * as i18nActions from '../../../pages/detection_engine/rules/translations';
+import * as i18nActions from '../../../../detection_engine/common/translations';
 import * as i18n from './translations';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
@@ -42,6 +41,7 @@ const MyEuiButtonIcon = styled(EuiButtonIcon)`
     svg {
       transform: rotate(90deg);
     }
+
     border: 1px solid ${({ theme }) => theme.euiColorPrimary};
     width: 40px;
     height: 40px;
@@ -73,7 +73,6 @@ const RuleActionsOverflowComponent = ({
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -139,10 +138,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"
-              disabled={
-                !userHasPermissions ||
-                (isPrebuiltRulesCustomizationEnabled === false && rule.immutable)
-              }
+              disabled={!userHasPermissions}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
@@ -211,7 +207,6 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
-      isPrebuiltRulesCustomizationEnabled,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,

@@ -5,32 +5,33 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   CoreStart,
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import {
+import type {
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { InvalidateAPIKeyResult } from '../rules_client';
-import { AlertingConfig } from '../config';
+} from '@elastic/elasticsearch/lib/api/types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
+import type { InvalidateAPIKeyResult } from '../rules_client';
+import type { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
-import { AlertingPluginsStart } from '../plugin';
-import { InvalidatePendingApiKey } from '../types';
+import type { AlertingPluginsStart } from '../plugin';
+import type { InvalidatePendingApiKey } from '../types';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import type { AdHocRunSO } from '../data/ad_hoc_run/types';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 const PAGE_SIZE = 100;
@@ -116,6 +117,7 @@ export function taskRunner(
           const savedObjectsClient = savedObjects.createInternalRepository([
             API_KEY_PENDING_INVALIDATION_TYPE,
             AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
           ]);
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
@@ -248,29 +250,14 @@ export async function getApiKeyIdsToInvalidate({
   );
 
   // Query saved objects index to see if any API keys are in use
-  const filter = `${apiKeyIds
-    .map(({ apiKeyId }) => `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.apiKeyId: "${apiKeyId}"`)
-    .join(' OR ')}`;
-  const { aggregations } = await savedObjectsClient.find<
-    AdHocRunSO,
-    { apiKeyId: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys> }
-  >({
-    type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-    filter,
-    perPage: 0,
-    namespaces: ['*'],
-    aggs: {
-      apiKeyId: {
-        terms: {
-          field: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.apiKeyId`,
-          size: PAGE_SIZE,
-        },
-      },
-    },
-  });
+  const apiKeyIdStrings = apiKeyIds.map(({ apiKeyId }) => apiKeyId);
+  let apiKeyIdsInUseBuckets: AggregationsStringTermsBucketKeys[] = [];
 
-  const apiKeyIdsInUseBuckets: AggregationsStringTermsBucketKeys[] =
-    (aggregations?.apiKeyId?.buckets as AggregationsStringTermsBucketKeys[]) ?? [];
+  for (const soType of [AD_HOC_RUN_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE]) {
+    apiKeyIdsInUseBuckets = apiKeyIdsInUseBuckets.concat(
+      await queryForApiKeysInUse(apiKeyIdStrings, soType, savedObjectsClient)
+    );
+  }
 
   const apiKeyIdsToInvalidate: ApiKeyIdAndSOId[] = [];
   const apiKeyIdsToExclude: ApiKeyIdAndSOId[] = [];
@@ -334,4 +321,34 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
   }
   logger.debug(`Total invalidated API keys "${totalInvalidated}"`);
   return totalInvalidated;
+}
+
+async function queryForApiKeysInUse(
+  apiKeyIds: string[],
+  savedObjectType: string,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<AggregationsStringTermsBucketKeys[]> {
+  const filter = `${apiKeyIds
+    .map((apiKeyId) => `${savedObjectType}.attributes.apiKeyId: "${apiKeyId}"`)
+    .join(' OR ')}`;
+
+  const { aggregations } = await savedObjectsClient.find<
+    AdHocRunSO,
+    { apiKeyId: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys> }
+  >({
+    type: savedObjectType,
+    filter,
+    perPage: 0,
+    namespaces: ['*'],
+    aggs: {
+      apiKeyId: {
+        terms: {
+          field: `${savedObjectType}.attributes.apiKeyId`,
+          size: PAGE_SIZE,
+        },
+      },
+    },
+  });
+
+  return (aggregations?.apiKeyId?.buckets as AggregationsStringTermsBucketKeys[]) ?? [];
 }

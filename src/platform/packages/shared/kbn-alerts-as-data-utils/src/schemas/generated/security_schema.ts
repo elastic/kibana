@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
@@ -154,6 +154,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.original_event.start': schemaDate,
   'kibana.alert.original_event.timezone': schemaString,
   'kibana.alert.original_event.url': schemaString,
+  'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.risk_score': schemaNumber,
@@ -212,6 +213,9 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
+  'service.asset.criticality': schemaString,
+  'service.risk.calculated_level': schemaString,
+  'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
   'user.asset.criticality': schemaString,
 });

@@ -12,7 +12,10 @@ import {
   LICENCE_FOR_OUTPUT_PER_INTEGRATION,
   LICENCE_FOR_MULTIPLE_AGENT_POLICIES,
 } from '../../../common/constants';
-import { getAllowedOutputTypesForIntegration } from '../../../common/services/output_helpers';
+import {
+  getAllowedOutputTypesForPackagePolicy,
+  getAllowedOutputTypesForIntegration,
+} from '../../../common/services/output_helpers';
 import type {
   PackagePolicy,
   NewPackagePolicy,
@@ -26,7 +29,6 @@ import {
 } from '../../errors';
 import { licenseService } from '../license';
 import { outputService } from '../output';
-import { appContextService } from '../app_context';
 
 export const mapPackagePolicySavedObjectToPackagePolicy = (
   { id, version, attributes }: SavedObject<PackagePolicySOAttributes>,
@@ -62,11 +64,7 @@ export async function preflightCheckPackagePolicy(
   // If package policy has an output_id, check if it can be used
   if (packagePolicy.output_id && packagePolicy.package) {
     const { canUseOutputForIntegrationResult, errorMessage: outputForIntegrationErrorMessage } =
-      await canUseOutputForIntegration(
-        soClient,
-        packagePolicy.package.name,
-        packagePolicy.output_id
-      );
+      await canUseOutputForIntegration(soClient, packagePolicy);
     if (!canUseOutputForIntegrationResult && outputForIntegrationErrorMessage) {
       throw new PackagePolicyOutputError(outputForIntegrationErrorMessage);
     }
@@ -75,10 +73,9 @@ export async function preflightCheckPackagePolicy(
 
 export function canUseMultipleAgentPolicies() {
   const hasEnterpriseLicence = licenseService.hasAtLeast(LICENCE_FOR_MULTIPLE_AGENT_POLICIES);
-  const { enableReusableIntegrationPolicies } = appContextService.getExperimentalFeatures();
 
   return {
-    canUseReusablePolicies: hasEnterpriseLicence && enableReusableIntegrationPolicies,
+    canUseReusablePolicies: hasEnterpriseLicence,
     errorMessage: !hasEnterpriseLicence
       ? 'Reusable integration policies are only available with an Enterprise license'
       : 'Reusable integration policies are not supported',
@@ -87,25 +84,34 @@ export function canUseMultipleAgentPolicies() {
 
 export async function canUseOutputForIntegration(
   soClient: SavedObjectsClientContract,
-  packageName: string,
-  outputId: string
+  packagePolicy: Pick<PackagePolicy, 'output_id' | 'package' | 'supports_agentless'>
 ) {
-  const hasAllowedLicense = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
-  if (!hasAllowedLicense) {
-    return {
-      canUseOutputForIntegrationResult: false,
-      errorMessage: `Output per integration is only available with an ${LICENCE_FOR_OUTPUT_PER_INTEGRATION} license`,
-    };
-  }
+  const outputId = packagePolicy.output_id;
+  const packageName = packagePolicy.package?.name;
 
-  const allowedOutputTypes = getAllowedOutputTypesForIntegration(packageName);
-  const output = await outputService.get(soClient, outputId);
+  if (outputId) {
+    const hasAllowedLicense = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
+    if (!hasAllowedLicense) {
+      return {
+        canUseOutputForIntegrationResult: false,
+        errorMessage: `Output per integration is only available with an ${LICENCE_FOR_OUTPUT_PER_INTEGRATION} license`,
+      };
+    }
 
-  if (!allowedOutputTypes.includes(output.type)) {
-    return {
-      canUseOutputForIntegrationResult: false,
-      errorMessage: `Output type "${output.type}" is not usable with package "${packageName}"`,
-    };
+    const allowedOutputTypesForIntegration = getAllowedOutputTypesForIntegration(packageName);
+    const allowedOutputTypesForPackagePolicy = getAllowedOutputTypesForPackagePolicy(packagePolicy);
+    const allowedOutputTypes = allowedOutputTypesForIntegration.filter((type) =>
+      allowedOutputTypesForPackagePolicy.includes(type)
+    );
+
+    const output = await outputService.get(soClient, outputId);
+
+    if (!allowedOutputTypes.includes(output.type)) {
+      return {
+        canUseOutputForIntegrationResult: false,
+        errorMessage: `Output type "${output.type}" is not usable with package "${packageName}"`,
+      };
+    }
   }
 
   return {

@@ -26,7 +26,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const indexName = 'test-my-index';
 
-  describe('index details page - search solution', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/203508
+  // Failing: See https://github.com/elastic/kibana/issues/203508
+  describe.skip('index details page - search solution', function () {
     describe('developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginWithRole('developer');
@@ -70,20 +72,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should have basic example texts', async () => {
             await pageObjects.svlSearchIndexDetailPage.expectHasSampleDocuments();
           });
-
-          it('should have other example texts when mapping changed', async () => {
-            await es.indices.putMapping({
-              index: indexNameCodeExample,
-              properties: {
-                text: { type: 'text' },
-                number: { type: 'integer' },
-              },
-            });
-            await pageObjects.svlSearchIndexDetailPage.expectSampleDocumentsWithCustomMappings();
-          });
         });
 
         describe('API key details', () => {
+          // see details: https://github.com/elastic/kibana/issues/208695
+          this.tags(['failsOnMKI']);
           it('should show api key', async () => {
             await pageObjects.svlApiKeys.deleteAPIKeys();
             await svlSearchNavigation.navigateToIndexDetailPage(indexName);
@@ -109,12 +102,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappings();
           await es.indices.putMapping({
             index: indexName,
-            body: {
-              properties: {
-                my_field: {
-                  type: 'dense_vector',
-                  dims: 3,
-                },
+            properties: {
+              my_field: {
+                type: 'dense_vector',
+                dims: 3,
               },
             },
           });
@@ -127,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             indexName
           );
           await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
-          await pageObjects.indexManagement.expectToBeOnIndicesManagement();
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
 

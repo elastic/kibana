@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FunctionComponent } from 'react';
+import React, { useEffect, type FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiPanel,
@@ -22,6 +22,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -32,26 +33,33 @@ import { GetStartedPanel } from '../shared/get_started_panel';
 import { isSupportedLogo, LogoIcon } from '../../shared/logo_icon';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
-import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
 import { SupportedIntegrationsList } from './supported_integrations_list';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 export const AutoDetectPanel: FunctionComponent = () => {
+  useFlowBreadcrumb({
+    text: i18n.translate(
+      'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel',
+      { defaultMessage: 'Elastic Agent: Logs & Metrics' }
+    ),
+  });
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const command = data ? getAutoDetectCommand(data) : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
+  const { onPageReady } = usePerformanceContext();
   const {
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
 
-  useAutoDetectTelemetry(
-    status,
-    installedIntegrations.map(({ title, pkgName, pkgVersion, installSource }) => ({
-      title,
-      pkgName,
-      pkgVersion,
-      installSource,
-    }))
-  );
+  useEffect(() => {
+    if (data) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Request to create the onboarding flow succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [data, onPageReady]);
 
   if (error) {
     return <EmptyPrompt onboardingFlowType="auto-detect" error={error} onRetryClick={refetch} />;

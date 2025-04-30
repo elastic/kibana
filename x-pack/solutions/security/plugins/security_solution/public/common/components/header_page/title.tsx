@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { BadgeOptions, TitleProp } from './types';
 import { TruncatableText } from '../truncatable_text';
@@ -47,13 +47,18 @@ const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
         <>
           {badgeOptions.beta ? (
             <EuiBetaBadge
+              data-test-subj="header-page-title-beta-badge"
               label={badgeOptions.text}
               tooltipContent={badgeOptions.tooltip}
               tooltipPosition="bottom"
               size={badgeOptions.size}
             />
           ) : (
-            <EuiBadge color={badgeOptions.color || 'hollow'} title="">
+            <EuiBadge
+              data-test-subj="header-page-title-badge"
+              color={badgeOptions.color || 'hollow'}
+              title=""
+            >
               {badgeOptions.text}
             </EuiBadge>
           )}

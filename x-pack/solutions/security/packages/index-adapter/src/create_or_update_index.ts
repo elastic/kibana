@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { IndexName } from '@elastic/elasticsearch/lib/api/types';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndexName,
+  IndicesSimulateIndexTemplateResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
@@ -16,6 +18,7 @@ interface UpdateIndexMappingsOpts {
   esClient: ElasticsearchClient;
   indexNames: string[];
   totalFieldsLimit: number;
+  writeIndexOnly?: boolean;
 }
 
 interface UpdateIndexOpts {
@@ -23,6 +26,7 @@ interface UpdateIndexOpts {
   esClient: ElasticsearchClient;
   indexName: string;
   totalFieldsLimit: number;
+  writeIndexOnly?: boolean;
 }
 
 const updateTotalFieldLimitSetting = async ({
@@ -34,10 +38,11 @@ const updateTotalFieldLimitSetting = async ({
   logger.debug(`Updating total field limit setting for ${indexName} data stream.`);
 
   try {
-    const body = { 'index.mapping.total_fields.limit': totalFieldsLimit };
-    await retryTransientEsErrors(() => esClient.indices.putSettings({ index: indexName, body }), {
-      logger,
-    });
+    const settings = { 'index.mapping.total_fields.limit': totalFieldsLimit };
+    await retryTransientEsErrors(
+      () => esClient.indices.putSettings({ index: indexName, settings }),
+      { logger }
+    );
   } catch (err) {
     logger.error(
       `Failed to PUT index.mapping.total_fields.limit settings for ${indexName}: ${err.message}`
@@ -50,7 +55,7 @@ const updateTotalFieldLimitSetting = async ({
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const updateMapping = async ({ logger, esClient, indexName }: UpdateIndexOpts) => {
+const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: UpdateIndexOpts) => {
   logger.debug(`Updating mappings for ${indexName} data stream.`);
 
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
@@ -75,7 +80,12 @@ const updateMapping = async ({ logger, esClient, indexName }: UpdateIndexOpts) =
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index: indexName, body: simulatedMapping }),
+      () =>
+        esClient.indices.putMapping({
+          index: indexName,
+          ...simulatedMapping,
+          write_index_only: writeIndexOnly,
+        }),
       { logger }
     );
   } catch (err) {
@@ -91,6 +101,7 @@ const updateIndexMappings = async ({
   esClient,
   totalFieldsLimit,
   indexNames,
+  writeIndexOnly,
 }: UpdateIndexMappingsOpts) => {
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
@@ -101,7 +112,9 @@ const updateIndexMappings = async ({
   );
   // Update mappings of the found indices.
   await Promise.all(
-    indexNames.map((indexName) => updateMapping({ logger, esClient, totalFieldsLimit, indexName }))
+    indexNames.map((indexName) =>
+      updateMapping({ logger, esClient, totalFieldsLimit, indexName, writeIndexOnly })
+    )
   );
 };
 
@@ -200,6 +213,7 @@ export interface CreateOrUpdateSpacesIndexParams {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  writeIndexOnly?: boolean;
 }
 
 export async function updateIndices({
@@ -207,6 +221,7 @@ export async function updateIndices({
   esClient,
   name,
   totalFieldsLimit,
+  writeIndexOnly,
 }: CreateOrUpdateSpacesIndexParams): Promise<void> {
   logger.info(`Updating indices - ${name}`);
 
@@ -230,6 +245,7 @@ export async function updateIndices({
       esClient,
       totalFieldsLimit,
       indexNames: indices,
+      writeIndexOnly,
     });
   }
 }

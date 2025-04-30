@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiSkeletonText,
@@ -26,28 +26,49 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { type ObservabilityOnboardingAppServices } from '../../..';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
-import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.3.3';
-const OTEL_KUBE_STACK_VALUES_FILE_URL =
-  'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/8.16/resources/kubernetes/operator/helm/values.yaml';
+const OTEL_KUBE_STACK_VERSION = '0.3.9';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8sOtel', {
+      defaultMessage: 'Kubernetes: OpenTelemetry',
+    }),
+  });
   const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
-    services: { share },
-  } = useKibana<ObservabilityOnboardingContextValue>();
+    services: {
+      share,
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
   const theme = useEuiTheme();
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    if (data) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Request to create the onboarding flow succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [data, onPageReady]);
+
+  const ingestEndpointUrl = isServerless ? data?.managedOtlpServiceUrl : data?.elasticsearchUrl;
 
   if (error) {
     return (
@@ -55,17 +76,26 @@ export const OtelKubernetesPanel: React.FC = () => {
     );
   }
 
+  const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
+  const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
+  const dockerImageOverride = isServerless
+    ? '--set defaultCRConfig.image.repository="docker.elastic.co/elastic-agent/elastic-agent"'
+    : '';
+
+  const otelKubeStackValuesFileUrl = data
+    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/values.yaml`
+    : '';
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const installStackCommand = data
     ? `kubectl create namespace ${namespace}
 kubectl create secret generic elastic-secret-otel \\
   --namespace ${namespace} \\
-  --from-literal=elastic_endpoint='${data.elasticsearchUrl}' \\
+  --from-literal=${elasticEndpointVarName}='${ingestEndpointUrl}' \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
-helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
+helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
-  --values '${OTEL_KUBE_STACK_VALUES_FILE_URL}' \\
+  --values '${otelKubeStackValuesFileUrl}' ${dockerImageOverride} \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
     : undefined;
 
@@ -160,7 +190,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       iconType="download"
-                      href={OTEL_KUBE_STACK_VALUES_FILE_URL}
+                      href={otelKubeStackValuesFileUrl}
                       flush="left"
                       target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
                       data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
@@ -276,7 +306,12 @@ spec:
                     { defaultMessage: 'Annotate all resources in a namespace' }
                   )}
                 >
-                  <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                  <EuiCodeBlock
+                    paddingSize="m"
+                    language="bash"
+                    isCopyable={true}
+                    data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
+                  >
                     {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"`}
                   </EuiCodeBlock>
                 </EuiAccordion>
@@ -295,7 +330,12 @@ spec:
                   )}
                 </p>
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                <EuiCodeBlock
+                  paddingSize="m"
+                  language="bash"
+                  isCopyable={true}
+                  data-test-subj="observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet"
+                >
                   {`kubectl rollout restart deployment myapp -n my-namespace
 
 kubectl describe pod <myapp-pod-name> -n my-namespace`}

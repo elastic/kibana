@@ -11,7 +11,7 @@ import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_ma
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -66,7 +66,7 @@ jest.mock(
 
 jest.mock('../../common/links', () => ({
   useLinkInfo: jest.fn().mockReturnValue({
-    capabilities: ['siem.show'],
+    capabilities: ['siemV2.show'],
     globalNavPosition: 4,
     globalSearchKeywords: ['Attack discovery'],
     id: 'attack_discovery',
@@ -117,7 +117,7 @@ jest.mock('../../common/lib/kibana', () => {
       services: {
         application: {
           capabilities: {
-            siem: { crud_alerts: true, read_alerts: true },
+            siemV2: { crud_alerts: true, read_alerts: true },
           },
           navigateToUrl: jest.fn(),
         },
@@ -149,10 +149,13 @@ jest.mock('../../common/lib/kibana', () => {
         dataViews: mockDataViewsService,
         docLinks: {
           links: {
-            siem: {
+            siemV2: {
               privileges: 'link',
             },
           },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false), // legacy view enabled
         },
         notifications: jest.fn().mockReturnValue({
           addError: jest.fn(),
@@ -161,7 +164,7 @@ jest.mock('../../common/lib/kibana', () => {
           remove: jest.fn(),
         }),
         sessionView: {
-          getSessionView: jest.fn().mockReturnValue(<div />),
+          getSessionView: jest.fn(() => <div />),
         },
         storage: {
           get: jest.fn(),
@@ -500,6 +503,30 @@ describe('AttackDiscovery', () => {
 
     it('does NOT render the upgrade call to action', () => {
       expect(screen.queryByTestId('upgrade')).toBeNull();
+    });
+  });
+
+  describe('Alerts filtering feature', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('invokes fetchAttackDiscoveries with the end, filter, size, and start parameters when the generate button is clicked,', () => {
+      const generate = screen.getAllByTestId('generate');
+
+      fireEvent.click(generate[0]);
+
+      expect(
+        (useAttackDiscovery as jest.Mock)().fetchAttackDiscoveries as jest.Mock
+      ).toHaveBeenCalledWith({ end: 'test-id', filter: undefined, size: 20, start: 'test-id' });
     });
   });
 

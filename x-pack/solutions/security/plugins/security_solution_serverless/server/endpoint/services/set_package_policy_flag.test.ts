@@ -86,12 +86,8 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
   });
 
   it('does NOT update serverless flag for endpoint policies with the flag already set', async () => {
-    const packagePolicy1 = generatePackagePolicy(
-      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
-    );
-    const packagePolicy2 = generatePackagePolicy(
-      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
-    );
+    const packagePolicy1 = generatePackagePolicy(policyFactory({ serverless: true }));
+    const packagePolicy2 = generatePackagePolicy(policyFactory({ serverless: true }));
     packagePolicyServiceMock.list.mockResolvedValue({
       items: [packagePolicy1, packagePolicy2],
       page: 1,
@@ -116,23 +112,15 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
 
   it('correctly updates billable flag for endpoint policies', async () => {
     // billable: false - serverless false
-    const packagePolicy1 = generatePackagePolicy(
-      policyFactory(undefined, undefined, undefined, undefined, undefined, false)
-    );
+    const packagePolicy1 = generatePackagePolicy(policyFactory({ serverless: false }));
     // billable: true - serverless + protections
-    const packagePolicy2 = generatePackagePolicy(
-      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
-    );
+    const packagePolicy2 = generatePackagePolicy(policyFactory({ serverless: true }));
     // billable: false - serverless true but event collection only
     const packagePolicy3 = generatePackagePolicy(
-      ensureOnlyEventCollectionIsAllowed(
-        policyFactory(undefined, undefined, undefined, undefined, undefined, true)
-      )
+      ensureOnlyEventCollectionIsAllowed(policyFactory({ serverless: true }))
     );
     // ignored since flag already set
-    const packagePolicy4 = generatePackagePolicy(
-      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
-    );
+    const packagePolicy4 = generatePackagePolicy(policyFactory({ serverless: true }));
     packagePolicyServiceMock.list.mockResolvedValue({
       items: [packagePolicy1, packagePolicy2, packagePolicy3, packagePolicy4],
       page: 1,

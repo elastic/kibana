@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './dimension_container.scss';
-
 import React from 'react';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 

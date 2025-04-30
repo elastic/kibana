@@ -35,7 +35,6 @@
     "@kbn/unified-histogram-plugin",
     "@kbn/data-views-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/embeddable-plugin",
     "@kbn/es-query",
     "@kbn/core-saved-objects-api-server",
     "@kbn/deeplinks-management",
@@ -56,7 +55,10 @@
     "@kbn/rison",
     "@kbn/task-manager-plugin",
     "@kbn/field-utils",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/ui-theme",
+    "@kbn/react-hooks",
+    "@kbn/charts-theme"
   ],
   "exclude": [
     "target/**/*"

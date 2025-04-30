@@ -6,14 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KueryNode } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KueryNode } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import Boom from '@hapi/boom';
 import { flatMap, get, isEmpty } from 'lodash';
-import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseDuration } from '.';
-import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
+import type { IExecutionLog, IExecutionLogResult } from '../../common';
+import { EMPTY_EXECUTION_KPI_RESULT, EMPTY_EXECUTION_SUMMARY_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 10000; // do not retrieve more than this number of executions. UI limits 1000 to display, but we need to fetch all 10000 to accurately reflect the KPIs
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
@@ -90,6 +92,30 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
   };
   actionExecution: {
     actionOutcomes: IActionExecution;
+  };
+}
+
+interface ILatestExecutionOutcomeAggBucket extends estypes.AggregationsStringTermsBucketKeys {
+  latest_execution: {
+    hits: estypes.SearchHitsMetadata<{
+      event: {
+        outcome: string;
+      };
+    }>;
+  };
+}
+
+interface IExecutionsCount {
+  doc_count: number;
+}
+
+interface ISuccessfulExecutionsCount {
+  doc_count: number;
+}
+
+interface LatestExecutionOutcomeAggResult extends estypes.AggregationsAggregateBase {
+  by_rule_id: {
+    buckets: ILatestExecutionOutcomeAggBucket[];
   };
 }
 
@@ -461,6 +487,55 @@ export function getExecutionLogAggregation({
   };
 }
 
+export const getExecutionSummaryAggregation = () => ({
+  executionsCount: {
+    filter: {
+      exists: {
+        field: OUTCOME_FIELD,
+      },
+    },
+  },
+  successfulExecutionsCount: {
+    filter: {
+      term: {
+        [OUTCOME_FIELD]: 'success',
+      },
+    },
+  },
+  latestExecutionOutcome: {
+    filter: {
+      exists: {
+        field: OUTCOME_FIELD,
+      },
+    },
+    aggs: {
+      by_rule_id: {
+        terms: {
+          field: RULE_ID_FIELD,
+          size: DEFAULT_MAX_BUCKETS_LIMIT,
+        },
+        aggs: {
+          latest_execution: {
+            top_hits: {
+              sort: [
+                {
+                  [TIMESTAMP]: {
+                    order: 'desc' as estypes.SortOrder,
+                  },
+                },
+              ],
+              _source: {
+                includes: [OUTCOME_FIELD],
+              },
+              size: 1,
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
 function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
   try {
     const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
@@ -529,7 +604,7 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     ? outcomeMessageAndMaintenanceWindow.rule?.name ?? ''
     : '';
   return {
-    id: bucket?.key ?? '',
+    id: bucket?.key ? `${bucket.key}` : '', // `key` can be a number, this way we stringify it.
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
     status,
@@ -551,6 +626,24 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     rule_name: ruleName,
     maintenance_window_ids: maintenanceWindowIds,
   };
+}
+
+function formatLatestExecutionSummary(buckets: ILatestExecutionOutcomeAggBucket[]) {
+  const summary = {
+    success: 0,
+    failure: 0,
+    warning: 0,
+  };
+  buckets.forEach((bucket) => {
+    const latestExecution = bucket.latest_execution.hits.hits[0]._source;
+    const outcome = latestExecution?.event?.outcome ?? '';
+
+    if (Object.keys(summary).includes(outcome)) {
+      const outcomeLabel = outcome as keyof typeof summary;
+      summary[outcomeLabel]++;
+    }
+  });
+  return summary;
 }
 
 function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
@@ -638,6 +731,29 @@ export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectRe
   const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartKpiAggResult;
   const buckets = aggs.executionUuid.buckets;
   return formatExecutionKPIAggBuckets(buckets);
+}
+
+export function formatExecutionSummaryResult(results: AggregateEventsBySavedObjectResult) {
+  const { aggregations } = results;
+
+  if (!aggregations) {
+    return EMPTY_EXECUTION_SUMMARY_RESULT;
+  }
+  const executionsCountAgg = aggregations.executionsCount as IExecutionsCount;
+  const successfulExecutionsCountAgg =
+    aggregations.successfulExecutionsCount as ISuccessfulExecutionsCount;
+  const latestExecutionSummaryResults =
+    aggregations.latestExecutionOutcome as LatestExecutionOutcomeAggResult;
+
+  return {
+    executions: {
+      total: executionsCountAgg.doc_count,
+      success: successfulExecutionsCountAgg.doc_count,
+    },
+    latestExecutionSummary: formatLatestExecutionSummary(
+      latestExecutionSummaryResults.by_rule_id.buckets
+    ),
+  };
 }
 
 export function formatExecutionLogResult(

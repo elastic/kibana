@@ -9,11 +9,13 @@ import { URL } from 'url';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import type { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { IncomingWebhookResult } from '@slack/webhook';
+import { IncomingWebhook } from '@slack/webhook';
+import { pipe } from 'fp-ts/pipeable';
+import { map, getOrElse } from 'fp-ts/Option';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -25,7 +27,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';

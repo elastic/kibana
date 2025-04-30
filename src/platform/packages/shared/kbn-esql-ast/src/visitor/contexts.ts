@@ -14,12 +14,12 @@
 import { type GlobalVisitorContext, SharedData } from './global_visitor_context';
 import { children, firstItem, singleItems } from './utils';
 import type {
+  ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstExpression,
   ESQLAstItem,
   ESQLAstJoinCommand,
-  ESQLAstNodeWithArgs,
-  ESQLAstNodeWithChildren,
+  ESQLAstQueryExpression,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLCommandOption,
@@ -30,8 +30,12 @@ import type {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
   ESQLOrderExpression,
+  ESQLProperNode,
   ESQLSource,
+  ESQLStringLiteral,
   ESQLTimeInterval,
 } from '../types';
 import type {
@@ -46,14 +50,19 @@ import type {
   VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
+import { isProperNode } from '../ast/helpers';
 
-const isNodeWithArgs = (x: unknown): x is ESQLAstNodeWithArgs =>
-  !!x && typeof x === 'object' && Array.isArray((x as any).args);
-
-const isNodeWithChildren = (x: unknown): x is ESQLAstNodeWithChildren =>
-  !!x &&
-  typeof x === 'object' &&
-  (Array.isArray((x as any).args) || Array.isArray((x as any).values));
+const isRenameExpression = (
+  parent: ESQLProperNode,
+  node: ESQLAstExpression
+): node is ESQLAstRenameExpression => {
+  return (
+    parent.type === 'command' &&
+    parent.name === 'rename' &&
+    node.type === 'option' &&
+    node.name === 'as'
+  );
+};
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -85,14 +94,9 @@ export class VisitorContext<
   ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
     this.ctx.assertMethodExists('visitExpression');
 
-    const node = this.node;
-
-    if (!isNodeWithArgs(node)) {
-      return;
-    }
-
-    for (const arg of singleItems(node.args)) {
-      if (arg.type === 'option' && arg.name !== 'as') {
+    for (const arg of this.arguments()) {
+      if (!arg) continue;
+      if (arg.type === 'option' && !isRenameExpression(this.node as ESQLProperNode, arg)) {
         continue;
       }
       yield this.visitExpression(
@@ -107,7 +111,7 @@ export class VisitorContext<
   public arguments(): ESQLAstExpressionNode[] {
     const node = this.node;
 
-    if (!isNodeWithChildren(node)) {
+    if (!isProperNode(node)) {
       return [];
     }
 
@@ -128,12 +132,12 @@ export class VisitorContext<
 
     const node = this.node;
 
-    if (!isNodeWithArgs(node)) {
+    if (!isProperNode(node)) {
       throw new Error('Node does not have arguments');
     }
 
     let i = 0;
-    for (const arg of singleItems(node.args)) {
+    for (const arg of this.arguments()) {
       if (i === index) {
         return this.visitExpression(arg, input as any);
       }
@@ -191,14 +195,19 @@ export class CommandVisitorContext<
     return this.node.name.toUpperCase();
   }
 
+  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
+    this.ctx.assertMethodExists('visitQuery');
+    return this.ctx.visitQuery(this, queryNode, undefined as any);
+  }
+
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
-      if (Array.isArray(arg)) {
+      if (!arg || Array.isArray(arg)) {
         continue;
       }
+      // We treat "AS" options as rename expressions, not as command options.
+      if (isRenameExpression(this.node, arg)) continue;
       if (arg.type === 'option') {
-        // We treat "AS" options as rename expressions, not as command options.
-        if (arg.name === 'as') continue;
         yield arg;
       }
     }
@@ -222,13 +231,16 @@ export class CommandVisitorContext<
 
     if (!option) {
       for (const arg of this.node.args) {
+        if (!arg) {
+          continue;
+        }
         if (Array.isArray(arg)) {
           yield arg;
           continue;
         }
         if (arg.type !== 'option') {
           yield arg;
-        } else if (arg.name === 'as') {
+        } else if (isRenameExpression(this.node, arg)) {
           // We treat "AS" options as rename expressions, not as command options.
           yield arg;
         }
@@ -236,7 +248,7 @@ export class CommandVisitorContext<
     }
 
     const optionNode = this.node.args.find(
-      (arg) => !Array.isArray(arg) && arg.type === 'option' && arg.name === option
+      (arg) => !Array.isArray(arg) && arg && arg.type === 'option' && arg.name === option
     );
 
     if (optionNode) {
@@ -373,8 +385,8 @@ export class RowCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// METRICS
-export class MetricsCommandVisitorContext<
+// TS
+export class TimeseriesCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
@@ -474,6 +486,18 @@ export class JoinCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
+
+// CHANGE_POINT <value> [ ON <key> ] [ AS <targetType>, <targetPvalue> ]
+export class ChangePointCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstChangePointCommand> {}
+
+// FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]
+export class ForkCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // Expressions -----------------------------------------------------------------
 
@@ -580,3 +604,57 @@ export class IdentifierExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLIdentifier> {}
+
+export class MapExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLMap> {
+  public *visitEntries(
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
+  ): Iterable<ExpressionVisitorOutput<Methods>> {
+    this.ctx.assertMethodExists(['visitExpression', 'visitMapEntryExpression']);
+
+    for (const value of this.node.entries) {
+      yield this.visitExpression(value, typeof input === 'function' ? (input as any)() : input);
+    }
+  }
+
+  public *visitArguments(
+    input:
+      | VisitorInput<Methods, 'visitExpression'>
+      | (() => VisitorInput<Methods, 'visitExpression'>)
+  ): Iterable<VisitorOutput<Methods, 'visitExpression'>> {
+    return yield* this.visitEntries(input);
+  }
+}
+
+export class MapEntryExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLMapEntry> {
+  public key(): ESQLStringLiteral {
+    return this.node.key;
+  }
+
+  public value(): ESQLAstExpression {
+    return this.node.value;
+  }
+
+  public visitKey(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.key(), input as any);
+  }
+
+  public visitValue(
+    input: VisitorInput<Methods, 'visitExpression'>
+  ): VisitorOutput<Methods, 'visitExpression'> {
+    this.ctx.assertMethodExists('visitExpression');
+
+    return this.visitExpression(this.value(), input as any);
+  }
+}

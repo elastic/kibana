@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { EuiCode, EuiFlexGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
-import { Panel, PanelIndicator } from './panel';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
+  overviewPanelDatasetQualityIndicatorFailedDocs,
   overviewPanelDocumentsIndicatorSize,
   overviewPanelDocumentsIndicatorTotalCount,
   overviewPanelResourcesIndicatorServices,
@@ -20,10 +21,34 @@ import {
 } from '../../../../../common/translations';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { DatasetQualityIndicator } from '../../../quality_indicator';
+import { Panel, PanelIndicator } from './panel';
+import { useDatasetQualityDetailsContext } from '../../context';
+
+const degradedDocsTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.details.degradedDocsTooltip"
+    defaultMessage="The number of degraded documents —documents with the {ignoredProperty} property— in your data set."
+    values={{
+      ignoredProperty: (
+        <EuiCode language="json" transparentBackground>
+          _ignored
+        </EuiCode>
+      ),
+    }}
+  />
+);
+
+const failedDocsColumnTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.failedDocsSummaryTooltip"
+    defaultMessage="The number of documents sent to failure store due to an issue during ingestion."
+  />
+);
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Summary() {
+  const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
   const {
     isSummaryPanelLoading,
     totalDocsCount,
@@ -32,6 +57,7 @@ export default function Summary() {
     totalServicesCount,
     totalHostsCount,
     totalDegradedDocsCount,
+    totalFailedDocsCount,
     quality,
   } = useOverviewSummaryPanel();
   return (
@@ -75,7 +101,16 @@ export default function Summary() {
           label={overviewPanelDatasetQualityIndicatorDegradedDocs}
           value={totalDegradedDocsCount}
           isLoading={isSummaryPanelLoading}
+          tooltip={degradedDocsTooltip}
         />
+        {isFailureStoreEnabled && (
+          <PanelIndicator
+            label={overviewPanelDatasetQualityIndicatorFailedDocs}
+            value={totalFailedDocsCount}
+            isLoading={isSummaryPanelLoading}
+            tooltip={failedDocsColumnTooltip}
+          />
+        )}
       </Panel>
     </EuiFlexGroup>
   );

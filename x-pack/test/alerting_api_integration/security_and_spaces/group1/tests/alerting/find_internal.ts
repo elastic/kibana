@@ -13,7 +13,7 @@ import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { Space } from '../../../../common/types';
+import type { Space } from '../../../../common/types';
 import {
   Space1AllAtSpace1,
   StackAlertsOnly,
@@ -21,7 +21,7 @@ import {
   UserAtSpaceScenarios,
 } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createFindTests({ getService }: FtrProviderContext) {
@@ -78,7 +78,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
               const activeSnoozes = match.active_snoozes;
               const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
-              expect(match).to.eql({
+              const expected = {
                 id: createdAlert.id,
                 name: 'abc',
                 tags: ['foo'],
@@ -87,6 +87,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
+                artifacts: {
+                  dashboards: [],
+                },
                 actions: [],
                 params: {},
                 created_by: 'elastic',
@@ -108,7 +111,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 snooze_schedule: match.snooze_schedule,
                 ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
                 is_snoozed_until: null,
-              });
+              };
+
+              expect(match).to.eql(expected);
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
               break;
@@ -279,6 +284,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 params: {},
                 created_by: 'elastic',
                 api_key_created_by_user: null,
+                artifacts: {
+                  dashboards: [],
+                },
                 revision: 0,
                 throttle: '1m',
                 updated_by: 'elastic',
@@ -370,6 +378,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 snooze_schedule: [],
                 is_snoozed_until: null,
@@ -377,6 +386,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 snooze_schedule: [],
                 is_snoozed_until: null,
@@ -453,6 +463,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 execution_status: matchFirst.execution_status,
                 snooze_schedule: [],
@@ -461,6 +472,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 execution_status: matchSecond.execution_status,
                 snooze_schedule: [],

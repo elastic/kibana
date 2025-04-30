@@ -17,7 +17,7 @@ import {
   Capabilities as UICapabilities,
 } from '@kbn/core/server';
 import { ConfigType } from './config';
-import { FeatureRegistry } from './feature_registry';
+import { FeatureRegistry, GetKibanaFeaturesParams } from './feature_registry';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
@@ -84,7 +84,11 @@ export interface FeaturesPluginSetup {
 export interface FeaturesPluginStart {
   getElasticsearchFeatures(): ElasticsearchFeature[];
 
-  getKibanaFeatures(): KibanaFeature[];
+  /**
+   * Returns all registered Kibana features.
+   * @param params Optional parameters to filter features.
+   */
+  getKibanaFeatures(params?: GetKibanaFeaturesParams): KibanaFeature[];
 }
 
 /**
@@ -147,7 +151,10 @@ export class FeaturesPlugin
       getElasticsearchFeatures: this.featureRegistry.getAllElasticsearchFeatures.bind(
         this.featureRegistry
       ),
-      getKibanaFeatures: this.featureRegistry.getAllKibanaFeatures.bind(this.featureRegistry),
+      getKibanaFeatures: (params) =>
+        this.featureRegistry.getAllKibanaFeatures(
+          params && { omitDeprecated: params.omitDeprecated }
+        ),
     });
   }
 

@@ -22,7 +22,17 @@ export const initMigrateLogViewSettingsRoute = ({
   getStartServices,
 }: LogsSharedBackendLibs) => {
   framework.router.put(
-    { path: MIGRATE_LOG_VIEW_SETTINGS_URL, validate: false },
+    {
+      path: MIGRATE_LOG_VIEW_SETTINGS_URL,
+      validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This API delegates security to the currently logged in user and their permissions.',
+        },
+      },
+    },
     async (context, request, response) => {
       try {
         const { elasticsearch, savedObjects } = await context.core;

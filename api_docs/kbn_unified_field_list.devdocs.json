@@ -4811,7 +4811,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4819,7 +4819,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly getAction: (id: string) => ",
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4827,7 +4843,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4835,7 +4851,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4843,7 +4859,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -4851,7 +4867,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -6078,6 +6094,69 @@
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-field-list",
+        "id": "def-public.GenericFieldItemButtonType",
+        "type": "Type",
+        "tags": [],
+        "label": "GenericFieldItemButtonType",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/field-utils",
+            "scope": "common",
+            "docId": "kibKbnFieldUtilsPluginApi",
+            "section": "def-common.FieldBase",
+            "text": "FieldBase"
+          },
+          " = ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ">({ field, fieldSearchHighlight, isSelected, isActive, isEmpty, infoIcon, className, getCustomFieldType, dataTestSubj, size, withDragIcon, onClick, shouldAlwaysShowAction, buttonAddFieldToWorkspaceProps, buttonRemoveFieldFromWorkspaceProps, onAddFieldToWorkspace, onRemoveFieldFromWorkspace, ...otherProps }: ",
+          {
+            "pluginId": "@kbn/unified-field-list",
+            "scope": "public",
+            "docId": "kibKbnUnifiedFieldListPluginApi",
+            "section": "def-public.FieldItemButtonProps",
+            "text": "FieldItemButtonProps"
+          },
+          "<T>) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.GenericFieldItemButtonType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "public",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-public.FieldItemButtonProps",
+                "text": "FieldItemButtonProps"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

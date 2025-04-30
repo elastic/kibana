@@ -7,32 +7,34 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { useEuiTheme, type EuiBasicTableColumn } from '@elastic/eui';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type { ManagedUsersTableColumns, ManagedUserTable } from '../types';
 import * as i18n from '../translations';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
-const fieldColumn: EuiBasicTableColumn<ManagedUserTable> = {
-  name: i18n.FIELD_COLUMN_TITLE,
-  field: 'label',
-  render: (label: string, { field }) => (
+const FieldColumn: React.FC<{ label: string; field: string }> = ({ label, field }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
     <span
       css={css`
-        font-weight: ${euiThemeVars.euiFontWeightMedium};
-        color: ${euiThemeVars.euiTitleColor};
+        font-weight: ${euiTheme.font.weight.medium};
+        color: ${euiTheme.colors.textHeading};
       `}
     >
       {label ?? field}
     </span>
-  ),
+  );
 };
 
-export const getManagedUserTableColumns = (
-  contextID: string,
-  isDraggable: boolean
-): ManagedUsersTableColumns => [
+const fieldColumn: EuiBasicTableColumn<ManagedUserTable> = {
+  name: i18n.FIELD_COLUMN_TITLE,
+  field: 'label',
+  render: (label: string, { field }) => <FieldColumn label={label} field={field ?? ''} />,
+};
+
+export const getManagedUserTableColumns = (contextID: string): ManagedUsersTableColumns => [
   fieldColumn,
   {
     name: i18n.VALUES_COLUMN_TITLE,
@@ -43,7 +45,6 @@ export const getManagedUserTableColumns = (
           rowItems={value.map(() => value.toString())}
           attrName={field}
           idPrefix={contextID ? `managedUser-${contextID}` : 'managedUser'}
-          isDraggable={isDraggable}
         />
       ) : (
         defaultToEmptyTag(value)

@@ -19,8 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
+import { DashboardPanelMap } from '../../../../common';
 import {
   getDashboardBackupService,
   PANELS_CONTROL_GROUP_KEY,
@@ -29,6 +30,7 @@ import { coreServices, dataService, shareService } from '../../../services/kiban
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
+import { DashboardLocatorParams } from '../../../../common';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -41,9 +43,9 @@ export interface ShowShareModalProps {
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.dashboard) return false;
+  if (!anonymousUserCapabilities.dashboard_v2) return false;
 
-  const dashboard = anonymousUserCapabilities.dashboard;
+  const dashboard = anonymousUserCapabilities.dashboard_v2;
 
   return !!dashboard.show;
 };
@@ -200,7 +202,6 @@ export function ShowShareModal({
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
-    allowEmbed: true,
     allowShortUrl,
     shareableUrl,
     objectId: savedObjectId,
@@ -223,7 +224,9 @@ export function ShowShareModal({
               }
             >
               {Boolean(unsavedDashboardState?.panels)
-                ? shareModalStrings.getDraftSharePanelChangesWarning()
+                ? allowShortUrl
+                  ? shareModalStrings.getDraftSharePanelChangesWarning()
+                  : shareModalStrings.getSnapshotShareWarning()
                 : shareModalStrings.getDraftShareWarning('link')}
             </EuiCallOut>
           ),
@@ -245,6 +248,13 @@ export function ShowShareModal({
                 : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
+          computeAnonymousCapabilities: showPublicUrlSwitch,
         },
       },
     },
@@ -260,16 +270,12 @@ export function ShowShareModal({
         params: locatorParams,
       },
     },
-    embedUrlParamExtensions: [
-      {
-        paramName: 'embed',
-        component: EmbedUrlParamExtension,
-      },
-    ],
-    showPublicUrlSwitch,
-    snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
-      ? shareModalStrings.getSnapshotShareWarning()
-      : undefined,
     toasts: coreServices.notifications.toasts,
+    shareableUrlLocatorParams: {
+      locator: shareService.url.locators.get(
+        DASHBOARD_APP_LOCATOR
+      ) as LocatorPublic<DashboardLocatorParams>,
+      params: locatorParams,
+    },
   });
 }

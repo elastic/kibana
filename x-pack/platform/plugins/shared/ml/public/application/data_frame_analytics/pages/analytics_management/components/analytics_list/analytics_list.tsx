@@ -24,9 +24,6 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useRefreshAnalyticsList } from '../../../../common';
-import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';
@@ -35,12 +32,13 @@ import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 import { StatsBar } from '../../../../../components/stats_bar';
-import { CreateAnalyticsButton } from '../create_analytics_button';
 import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
+import { SpaceManagementContextWrapper } from '../../../../../components/space_management_context_wrapper';
+import { DatePicker } from '../../../../../components/ml_page/date_picker';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -96,8 +94,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   pageState,
   updatePageState,
 }) => {
-  const navigateToPath = useNavigateToPath();
-
   const searchQueryText = pageState.queryText ?? '';
   const setSearchQueryText = useCallback(
     (value: string) => {
@@ -119,13 +115,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
 
   const refreshObs = useRefresh();
-
-  const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics] = usePermissionCheck([
-    'canCreateDataFrameAnalytics',
-    'canStartStopDataFrameAnalytics',
-  ]);
-
-  const disabled = !canCreateDataFrameAnalytics || !canStartStopDataFrameAnalytics;
 
   const getAnalytics = useGetAnalytics(
     setAnalytics,
@@ -197,11 +186,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     updatePageState
   );
 
-  const navigateToSourceSelection = useCallback(async () => {
-    await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
     if (search.error !== null) {
       setSearchError(search.error.message);
@@ -236,7 +220,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     return (
       <div data-test-subj="mlAnalyticsJobList">
         <EuiSpacer size="m" />
-        <AnalyticsEmptyPrompt />
+        <AnalyticsEmptyPrompt showDocsLink />
       </div>
     );
   }
@@ -259,43 +243,43 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   return (
-    <div data-test-subj="mlAnalyticsJobList">
-      {modals}
-      <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        {stats}
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <CreateAnalyticsButton
-                isDisabled={disabled}
-                navigateToSourceSelection={navigateToSourceSelection}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <SpaceManagementContextWrapper>
       <EuiSpacer size="m" />
-      <div data-test-subj="mlAnalyticsTableContainer">
-        <EuiInMemoryTable<DataFrameAnalyticsListRow>
-          rowHeader={DataFrameAnalyticsListColumn.id}
-          allowNeutralSort={false}
-          columns={columns}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          items={analytics}
-          itemId={DataFrameAnalyticsListColumn.id}
-          loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
-          search={search}
-          data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
-          rowProps={(item) => ({
-            'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
-          })}
-          error={searchError}
-        />
+      <div data-test-subj="mlAnalyticsJobList">
+        {modals}
+        <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          {stats}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <DatePicker />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <div data-test-subj="mlAnalyticsTableContainer">
+          <EuiInMemoryTable<DataFrameAnalyticsListRow>
+            rowHeader={DataFrameAnalyticsListColumn.id}
+            allowNeutralSort={false}
+            columns={columns}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            items={analytics}
+            itemId={DataFrameAnalyticsListColumn.id}
+            loading={isLoading}
+            onTableChange={onTableChange}
+            pagination={pagination}
+            sorting={sorting}
+            search={search}
+            data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
+            rowProps={(item) => ({
+              'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
+            })}
+            error={searchError}
+          />
+        </div>
       </div>
-    </div>
+    </SpaceManagementContextWrapper>
   );
 };

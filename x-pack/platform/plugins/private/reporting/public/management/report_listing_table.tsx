@@ -16,8 +16,10 @@ import {
   EuiIconTip,
   EuiLink,
   EuiSpacer,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
@@ -26,7 +28,7 @@ import { ListingPropsInternal } from '.';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from './components';
-import { guessAppIconTypeFromObjectType } from './utils';
+import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from './utils';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -230,12 +232,12 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
         }),
         render: (_type: string, job) => {
           return (
-            <div className="kbnReporting__reportListing__typeIcon">
+            <div css={({ euiTheme }: UseEuiTheme) => css({ paddingLeft: euiTheme.size.s })}>
               <EuiIconTip
                 type={guessAppIconTypeFromObjectType(job.objectType)}
                 size="s"
                 data-test-subj="reportJobType"
-                content={job.objectType}
+                content={getDisplayNameFromObjectType(job.objectType)}
               />
             </div>
           );

@@ -1,0 +1,98 @@
+{
+  "id": "searchQueryRules",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "searchQueryRules",
+      "id": "def-server.SearchQueryRulesPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchQueryRulesPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/search/plugins/search_query_rules/common/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "searchQueryRules",
+      "id": "def-server.SearchQueryRulesPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchQueryRulesPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/search/plugins/search_query_rules/common/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "searchQueryRules",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"searchQueryRules\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_query_rules/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchQueryRules",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Query Rules\""
+        ],
+        "path": "x-pack/solutions/search/plugins/search_query_rules/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchQueryRules",
+        "id": "def-common.PLUGIN_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_TITLE",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_query_rules/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

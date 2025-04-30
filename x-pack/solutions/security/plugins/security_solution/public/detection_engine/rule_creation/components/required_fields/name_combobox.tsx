@@ -6,9 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { EuiComboBox, EuiIcon } from '@elastic/eui';
+import { EuiComboBox, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { FieldHook } from '../../../../shared_imports';
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { pickTypeForName } from './utils';
@@ -32,6 +31,7 @@ export function NameComboBox({
   nameError,
 }: NameComboBoxProps) {
   const { value, setValue } = field;
+  const { euiTheme } = useEuiTheme();
 
   const selectableNameOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
@@ -46,7 +46,7 @@ export function NameComboBox({
   /*
     Using a state for `selectedNameOptions` instead of using the field value directly
     to fix the issue where pressing the backspace key in combobox input would clear the field value
-    and trigger a validation error. By using a separate state, we can clear the selected option 
+    and trigger a validation error. By using a separate state, we can clear the selected option
     without clearing the field value.
   */
   const [selectedNameOption, setSelectedNameOption] = useState<
@@ -115,7 +115,7 @@ export function NameComboBox({
           <EuiIcon
             size="s"
             type="warning"
-            color={euiThemeVars.euiColorWarningText}
+            color={euiTheme.colors.textWarning}
             data-test-subj="warningIcon"
             aria-labelledby={`warningText-${itemId}`}
           />

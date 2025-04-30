@@ -8,6 +8,7 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -15,7 +16,6 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
@@ -53,10 +53,6 @@ export function ObservabilityOnboardingAppRoot({
     context,
   };
 
-  core.analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-    uses_legacy_onboarding_page: false,
-  });
-
   return (
     <KibanaRenderContextProvider {...core}>
       <div className={APP_WRAPPER_CLASS}>
@@ -76,13 +72,15 @@ export function ObservabilityOnboardingAppRoot({
               }}
             >
               <Router history={history}>
-                <EuiErrorBoundary>
-                  <ObservabilityOnboardingHeaderActionMenu
-                    setHeaderActionMenu={setHeaderActionMenu}
-                    theme$={theme$}
-                  />
-                  <ObservabilityOnboardingFlow />
-                </EuiErrorBoundary>
+                <PerformanceContextProvider>
+                  <EuiErrorBoundary>
+                    <ObservabilityOnboardingHeaderActionMenu
+                      setHeaderActionMenu={setHeaderActionMenu}
+                      theme$={theme$}
+                    />
+                    <ObservabilityOnboardingFlow />
+                  </EuiErrorBoundary>
+                </PerformanceContextProvider>
               </Router>
             </KibanaThemeProvider>
           </KibanaContextProvider>

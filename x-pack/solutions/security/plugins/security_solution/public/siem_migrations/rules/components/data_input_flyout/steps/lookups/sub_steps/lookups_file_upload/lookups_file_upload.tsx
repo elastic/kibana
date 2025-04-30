@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
@@ -21,6 +14,7 @@ import type {
 import type { RuleMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { FILE_UPLOAD_ERROR } from '../../../../translations';
 import * as i18n from './translations';
+import { UploadFileButton } from '../../../common/upload_file_button';
 
 export interface LookupsFileUploadProps {
   createResources: (resources: RuleMigrationResourceData[]) => void;
@@ -112,8 +106,11 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
       return fileErrors;
     }, [apiError, fileErrors]);
 
+    const showLoader = isParsing || isLoading;
+    const isButtonDisabled = showLoader || lookupResources.length === 0;
+
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow
             helpText={errors.map((error) => (
@@ -129,19 +126,17 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth
               initialPromptText={
-                <>
-                  <EuiText size="s" textAlign="center">
-                    {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT}
-                  </EuiText>
-                </>
+                <EuiText size="s" textAlign="center">
+                  {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT}
+                </EuiText>
               }
               accept="application/text"
               onChange={parseFile}
               multiple
               display="large"
               aria-label="Upload lookups files"
-              isLoading={isParsing || isLoading}
-              disabled={isParsing || isLoading}
+              isLoading={showLoader}
+              disabled={showLoader}
               data-test-subj="lookupsFilePicker"
               data-loading={isParsing}
             />
@@ -150,9 +145,11 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={createLookups} isLoading={isLoading} color="success">
-                {i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_BUTTON}
-              </EuiButton>
+              <UploadFileButton
+                onClick={createLookups}
+                isLoading={showLoader}
+                disabled={isButtonDisabled}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

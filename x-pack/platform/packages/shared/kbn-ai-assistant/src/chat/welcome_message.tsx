@@ -12,6 +12,7 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isSupportedConnectorType } from '@kbn/inference-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
@@ -61,7 +62,10 @@ export function WelcomeMessage({
       connectors.reloadConnectors();
     }
 
-    if (!knowledgeBase.status.value || knowledgeBase.status.value?.ready === false) {
+    if (
+      !knowledgeBase.status.value ||
+      knowledgeBase.status.value?.kbState === KnowledgeBaseState.NOT_INSTALLED
+    ) {
       knowledgeBase.install();
     }
   };
@@ -88,8 +92,8 @@ export function WelcomeMessage({
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
           />
-          {knowledgeBase.status.value?.enabled ? (
-            <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
+          {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
+            <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

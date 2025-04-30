@@ -22,13 +22,14 @@ import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasParentApi,
-  initializeTitles,
+  getUnchangingComparator,
+  initializeTitleManager,
   SerializedTitles,
+  SerializedPanelState,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { serializeBookAttributes, stateManagerFromAttributes } from './book_state';
 import { SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
@@ -80,13 +81,30 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
       };
     },
     buildEmbeddable: async (state, buildApi) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
       const bookAttributesManager = stateManagerFromAttributes(state);
-      const savedBookId$ = new BehaviorSubject(state.savedBookId);
+      const isByReference = Boolean(state.savedBookId);
+
+      const serializeBook = (byReference: boolean, newId?: string) => {
+        if (byReference) {
+          // if this book is currently by reference, we serialize the reference only.
+          const bookByReferenceState: BookByReferenceSerializedState = {
+            savedBookId: newId ?? state.savedBookId!,
+            ...titleManager.serialize(),
+          };
+          return { rawState: bookByReferenceState };
+        }
+        // if this book is currently by value, we serialize the entire state.
+        const bookByValueState: BookByValueSerializedState = {
+          attributes: serializeBookAttributes(bookAttributesManager),
+          ...titleManager.serialize(),
+        };
+        return { rawState: bookByValueState };
+      };
 
       const api = buildApi(
         {
-          ...titlesApi,
+          ...titleManager.api,
           onEdit: async () => {
             openSavedBookEditor({
               attributesManager: bookAttributesManager,
@@ -95,7 +113,18 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               core,
               api,
             }).then((result) => {
-              savedBookId$.next(result.savedBookId);
+              const nextIsByReference = Boolean(result.savedBookId);
+
+              // if the by reference state has changed during this edit, reinitialize the panel.
+              if (
+                nextIsByReference !== isByReference &&
+                apiIsPresentationContainer(api.parentApi)
+              ) {
+                api.parentApi.replacePanel<BookSerializedState>(api.uuid, {
+                  serializedState: serializeBook(nextIsByReference, result.savedBookId),
+                  panelType: api.type,
+                });
+              }
             });
           },
           isEditingEnabled: () => true,
@@ -103,49 +132,30 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
               defaultMessage: 'book',
             }),
-          serializeState: () => {
-            if (!Boolean(savedBookId$.value)) {
-              // if this book is currently by value, we serialize the entire state.
-              const bookByValueState: BookByValueSerializedState = {
-                attributes: serializeBookAttributes(bookAttributesManager),
-                ...serializeTitles(),
-              };
-              return { rawState: bookByValueState };
-            }
+          serializeState: () => serializeBook(isByReference),
 
-            // if this book is currently by reference, we serialize the reference only.
-            const bookByReferenceState: BookByReferenceSerializedState = {
-              savedBookId: savedBookId$.value!,
-              ...serializeTitles(),
-            };
-            return { rawState: bookByReferenceState };
-          },
-
-          // in place library transforms
-          libraryId$: savedBookId$,
+          // library transforms
+          getSavedBookId: () => state.savedBookId,
           saveToLibrary: async (newTitle: string) => {
             bookAttributesManager.bookTitle.next(newTitle);
             const newId = await saveBookAttributes(
               undefined,
               serializeBookAttributes(bookAttributesManager)
             );
-            savedBookId$.next(newId);
             return newId;
           },
           checkForDuplicateTitle: async (title) => {},
-          unlinkFromLibrary: () => {
-            savedBookId$.next(undefined);
-          },
-          getByValueRuntimeSnapshot: () => {
-            const snapshot = api.snapshotRuntimeState();
-            delete snapshot.savedBookId;
-            return snapshot;
-          },
+          getSerializedStateByValue: () =>
+            serializeBook(false) as SerializedPanelState<BookByValueSerializedState>,
+          getSerializedStateByReference: (newId) =>
+            serializeBook(true, newId) as SerializedPanelState<BookByReferenceSerializedState>,
+          canLinkToLibrary: async () => !isByReference,
+          canUnlinkFromLibrary: async () => isByReference,
         },
         {
-          savedBookId: [savedBookId$, (val) => savedBookId$.next(val)],
+          savedBookId: getUnchangingComparator(), // saved book id will not change over the lifetime of the embeddable.
           ...bookAttributesManager.comparators,
-          ...titleComparators,
+          ...titleManager.comparators,
         }
       );
 
@@ -156,14 +166,12 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
       return {
         api,
         Component: () => {
-          const [authorName, numberOfPages, savedBookId, bookTitle, synopsis] =
-            useBatchedPublishingSubjects(
-              bookAttributesManager.authorName,
-              bookAttributesManager.numberOfPages,
-              savedBookId$,
-              bookAttributesManager.bookTitle,
-              bookAttributesManager.bookSynopsis
-            );
+          const [authorName, numberOfPages, bookTitle, synopsis] = useBatchedPublishingSubjects(
+            bookAttributesManager.authorName,
+            bookAttributesManager.numberOfPages,
+            bookAttributesManager.bookTitle,
+            bookAttributesManager.bookSynopsis
+          );
           const { euiTheme } = useEuiTheme();
 
           return (
@@ -177,7 +185,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                   size="s"
                   color={'warning'}
                   title={
-                    savedBookId
+                    isByReference
                       ? i18n.translate('embeddableExamples.savedBook.libraryCallout', {
                           defaultMessage: 'Saved in library',
                         })
@@ -185,7 +193,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                           defaultMessage: 'Not saved in library',
                         })
                   }
-                  iconType={savedBookId ? 'folderCheck' : 'folderClosed'}
+                  iconType={isByReference ? 'folderCheck' : 'folderClosed'}
                 />
               )}
               <div

@@ -5,48 +5,46 @@
  * 2.0.
  */
 
-import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createOrUpdateIndexTemplate } from '@kbn/observability-plugin/server';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
+import { APM_SOURCE_MAP_INDEX } from '@kbn/apm-sources-access-plugin/server';
 
 const indexTemplate: IndicesPutIndexTemplateRequest = {
   name: 'apm-source-map',
-  body: {
-    version: 1,
-    index_patterns: [APM_SOURCE_MAP_INDEX],
-    template: {
-      settings: {
-        index: {
-          number_of_shards: 1,
-          auto_expand_replicas: '0-1',
-          hidden: true,
-        },
+  version: 1,
+  index_patterns: [APM_SOURCE_MAP_INDEX],
+  template: {
+    settings: {
+      index: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+        hidden: true,
       },
-      mappings: {
-        dynamic: 'strict',
-        properties: {
-          fleet_id: {
-            type: 'keyword',
-          },
-          created: {
-            type: 'date',
-          },
-          content: {
-            type: 'binary',
-          },
-          content_sha256: {
-            type: 'keyword',
-          },
-          'file.path': {
-            type: 'keyword',
-          },
-          'service.name': {
-            type: 'keyword',
-          },
-          'service.version': {
-            type: 'keyword',
-          },
+    },
+    mappings: {
+      dynamic: 'strict',
+      properties: {
+        fleet_id: {
+          type: 'keyword',
+        },
+        created: {
+          type: 'date',
+        },
+        content: {
+          type: 'binary',
+        },
+        content_sha256: {
+          type: 'keyword',
+        },
+        'file.path': {
+          type: 'keyword',
+        },
+        'service.name': {
+          type: 'keyword',
+        },
+        'service.version': {
+          type: 'keyword',
         },
       },
     },

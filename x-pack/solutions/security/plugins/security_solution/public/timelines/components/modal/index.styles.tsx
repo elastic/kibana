@@ -27,6 +27,7 @@ export const usePaneStyles = () => {
     left: 0;
     right: 0;
     bottom: 0;
+    // TODO EUI: add color with transparency
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
     z-index: ${(euiTheme.levels.flyout as number) +
     1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
@@ -56,10 +57,6 @@ export const usePaneStyles = () => {
     &:not(.timeline-portal-overlay-mask--full-screen) .timeline-container {
       margin: ${euiTheme.size.m};
       border-radius: ${euiTheme.border.radius.medium};
-
-      .timeline-template-badge {
-        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0; // top corners only
-      }
     }
   `;
 };

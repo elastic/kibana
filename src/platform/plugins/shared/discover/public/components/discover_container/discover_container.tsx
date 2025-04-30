@@ -13,10 +13,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverMainRoute } from '../../application/main';
+import useAsync from 'react-use/lib/useAsync';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { LoadingIndicator } from '../common/loading_indicator';
+import { DiscoverMainRoute } from '../../application/main';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -26,7 +27,7 @@ export interface DiscoverContainerInternalProps {
    *  already consumes.
    */
   overrideServices: Partial<DiscoverServices>;
-  getDiscoverServices: () => DiscoverServices;
+  getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
@@ -44,13 +45,7 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
-const customizationContext: DiscoverCustomizationContext = {
-  displayMode: 'embedded',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
-};
+const customizationContext: DiscoverCustomizationContext = { displayMode: 'embedded' };
 
 export const DiscoverContainerInternal = ({
   overrideServices,
@@ -60,15 +55,20 @@ export const DiscoverContainerInternal = ({
   stateStorageContainer,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
-  const services = useMemo<DiscoverServices>(() => {
+  const { value: discoverServices } = useAsync(getDiscoverServices, [getDiscoverServices]);
+  const services = useMemo(() => {
+    if (!discoverServices) {
+      return undefined;
+    }
+
     return {
-      ...getDiscoverServices(),
+      ...discoverServices,
       ...overrideServices,
       getScopedHistory: <T,>() => scopedHistory as ScopedHistory<T | undefined>,
     };
-  }, [getDiscoverServices, overrideServices, scopedHistory]);
+  }, [discoverServices, overrideServices, scopedHistory]);
 
-  if (isLoading) {
+  if (isLoading || !services) {
     return (
       <EuiFlexGroup css={discoverContainerWrapperCss}>
         <LoadingIndicator type="spinner" />

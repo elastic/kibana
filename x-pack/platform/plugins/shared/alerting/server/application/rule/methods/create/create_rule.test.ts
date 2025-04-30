@@ -6,8 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CreateRuleParams } from './create_rule';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client';
+import type { CreateRuleParams } from './create_rule';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -19,8 +20,8 @@ import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -29,9 +30,9 @@ import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter } from '../../../../connector_adapters/types';
-import { RuleDomain } from '../../types';
-import { RuleSystemAction } from '../../../../types';
+import type { ConnectorAdapter } from '../../../../connector_adapters/types';
+import type { RuleDomain } from '../../types';
+import type { RuleSystemAction } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
@@ -431,6 +432,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
@@ -481,6 +485,9 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -711,6 +718,9 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -932,6 +942,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -1136,6 +1149,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -1190,6 +1206,9 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+        },
         apiKeyCreatedByUser: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1388,6 +1407,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -1448,6 +1470,9 @@ describe('create()', () => {
         apiKey: null,
         apiKeyCreatedByUser: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+        },
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1470,6 +1495,8 @@ describe('create()', () => {
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
+                // TODO: uncomment after intermidiate release
+                // gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
@@ -1559,6 +1586,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "executionStatus": Object {
@@ -1617,6 +1647,7 @@ describe('create()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -1697,6 +1728,9 @@ describe('create()', () => {
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
+        artifacts: {
+          dashboards: [],
+        },
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
@@ -1752,6 +1786,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -1810,6 +1847,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -1889,6 +1927,9 @@ describe('create()', () => {
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
+        artifacts: {
+          dashboards: [],
+        },
         legacyId: null,
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
@@ -1944,6 +1985,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -2072,6 +2116,9 @@ describe('create()', () => {
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
+        artifacts: {
+          dashboards: [],
+        },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -2120,6 +2167,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
@@ -2216,6 +2266,9 @@ describe('create()', () => {
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
+        artifacts: {
+          dashboards: [],
+        },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -2264,6 +2317,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
@@ -2360,6 +2416,9 @@ describe('create()', () => {
         apiKey: null,
         apiKeyOwner: null,
         apiKeyCreatedByUser: null,
+        artifacts: {
+          dashboards: [],
+        },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -2408,6 +2467,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
@@ -2526,6 +2588,9 @@ describe('create()', () => {
         apiKeyOwner: null,
         apiKey: null,
         apiKeyCreatedByUser: null,
+        artifacts: {
+          dashboards: [],
+        },
         legacyId: null,
         createdBy: 'elastic',
         updatedBy: 'elastic',
@@ -2549,6 +2614,8 @@ describe('create()', () => {
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
+                // TODO: uncomment after intermidiate release
+                // gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
@@ -2593,6 +2660,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
@@ -2654,6 +2724,7 @@ describe('create()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      solution: 'stack',
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -2919,6 +2990,9 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        artifacts: {
+          dashboards: [],
+        },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -3020,6 +3094,9 @@ describe('create()', () => {
         ],
         legacyId: null,
         alertTypeId: '123',
+        artifacts: {
+          dashboards: [],
+        },
         consumer: 'bar',
         name: 'abc',
         params: { bar: true },
@@ -3128,6 +3205,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3278,6 +3356,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3318,6 +3397,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3412,6 +3492,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3463,6 +3544,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3527,6 +3609,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3609,6 +3692,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3770,6 +3854,9 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -3813,6 +3900,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3872,6 +3960,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3986,6 +4075,9 @@ describe('create()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         apiKeyCreatedByUser: true,
+        artifacts: {
+          dashboards: [],
+        },
         createdBy: 'elastic',
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
@@ -4164,6 +4256,9 @@ describe('create()', () => {
             },
           ],
           "alertTypeId": "123",
+          "artifacts": Object {
+            "dashboards": Array [],
+          },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "executionStatus": Object {
             "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -4217,6 +4312,9 @@ describe('create()', () => {
           apiKey: null,
           apiKeyOwner: null,
           apiKeyCreatedByUser: null,
+          artifacts: {
+            dashboards: [],
+          },
           consumer: 'bar',
           createdAt: '2019-02-12T21:01:22.479Z',
           createdBy: 'elastic',
@@ -4464,6 +4562,103 @@ describe('create()', () => {
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to execute actions]`
       );
+    });
+  });
+
+  describe('artifacts', () => {
+    test('should create a rule with linked dashboards', async () => {
+      const dashboards = [
+        {
+          id: '1',
+        },
+        {
+          id: '2',
+        },
+      ];
+
+      const data = getMockData({
+        name: 'my rule name',
+        actions: [],
+        artifacts: {
+          dashboards,
+        },
+      });
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: false,
+          name: 'my rule name',
+          alertTypeId: '123',
+          schedule: { interval: 10000 },
+          params: {
+            bar: true,
+          },
+          executionStatus: getRuleExecutionStatusPending(now),
+          running: false,
+          createdAt: now,
+          updatedAt: now,
+          actions: [],
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+              {
+                refId: 'dashboard_1',
+              },
+            ],
+          },
+        },
+        references: [
+          {
+            id: '1',
+            name: 'dashboard_0',
+            type: 'dashboard',
+          },
+          {
+            id: '2',
+            name: 'dashboard_1',
+            type: 'dashboard',
+          },
+        ],
+      });
+
+      const result = await rulesClient.create({ data });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+              {
+                refId: 'dashboard_1',
+              },
+            ],
+          },
+        }),
+        {
+          id: 'mock-saved-object-id',
+          references: [
+            {
+              id: '1',
+              name: 'dashboard_0',
+              type: 'dashboard',
+            },
+            {
+              id: '2',
+              name: 'dashboard_1',
+              type: 'dashboard',
+            },
+          ],
+        }
+      );
+
+      expect(result.artifacts?.dashboards).toEqual(dashboards);
     });
   });
 });

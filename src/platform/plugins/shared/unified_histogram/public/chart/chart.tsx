@@ -18,11 +18,19 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  DefaultInspectorAdapters,
+} from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
+import { IKibanaSearchResponse } from '@kbn/search-types';
+import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
-import type {
+import {
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -33,6 +41,7 @@ import type {
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramBucketInterval,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
@@ -41,11 +50,14 @@ import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
 import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
-import { useRefetch } from './hooks/use_refetch';
+import { useFetch } from './hooks/use_fetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 import { LensVisService } from '../services/lens_vis_service';
 import type { UseRequestParamsResult } from '../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
+import { useLensProps } from './hooks/use_lens_props';
+import { useStableCallback } from '../hooks/use_stable_callback';
+import { buildBucketInterval } from './utils/build_bucket_interval';
 
 export interface ChartProps {
   abortController?: AbortController;
@@ -64,12 +76,11 @@ export interface ChartProps {
   breakdown?: UnifiedHistogramBreakdownContext;
   renderCustomChartToggleActions?: () => ReactElement | undefined;
   appendHistogram?: ReactElement;
-  disableAutoFetching?: boolean;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  dataLoading$?: LensEmbeddableOutput['dataLoading'];
+  dataLoading$?: LensEmbeddableOutput['dataLoading$'];
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -99,7 +110,6 @@ export function Chart({
   isPlainRecord,
   renderCustomChartToggleActions,
   appendHistogram,
-  disableAutoFetching,
   disableTriggers,
   disabledActions,
   input$: originalInput$,
@@ -140,20 +150,9 @@ export function Chart({
 
   const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = requestParams;
 
-  const refetch$ = useRefetch({
-    dataView,
-    request,
-    hits,
-    chart,
-    chartVisible,
-    breakdown,
-    filters,
-    query,
-    relativeTimeRange,
-    currentSuggestion,
-    disableAutoFetching,
+  const fetch$ = useFetch({
     input$,
-    beforeRefetch: updateTimeRange,
+    beforeFetch: updateTimeRange,
   });
 
   useTotalHits({
@@ -165,9 +164,65 @@ export function Chart({
     filters,
     query,
     getTimeRange,
-    refetch$,
+    fetch$,
     onTotalHitsChange,
     isPlainRecord,
+  });
+
+  const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
+  const onLoad = useStableCallback(
+    (
+      isLoading: boolean,
+      adapters: Partial<DefaultInspectorAdapters> | undefined,
+      dataLoadingSubject$?: PublishingSubject<boolean | undefined>
+    ) => {
+      const lensRequest = adapters?.requests?.getRequests()[0];
+      const requestFailed = lensRequest?.status === RequestStatus.ERROR;
+      const json = lensRequest?.response?.json as
+        | IKibanaSearchResponse<estypes.SearchResponse>
+        | undefined;
+      const response = json?.rawResponse;
+
+      if (requestFailed) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
+        onChartLoad?.({ adapters: adapters ?? {} });
+        return;
+      }
+
+      const adapterTables = adapters?.tables?.tables;
+      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
+
+      if (response?._shards?.failed || response?.timed_out) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
+      } else {
+        onTotalHitsChange?.(
+          isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
+          totalHits ?? hits?.total
+        );
+      }
+
+      if (response) {
+        const newBucketInterval = buildBucketInterval({
+          data: services.data,
+          dataView,
+          timeInterval: chart?.timeInterval,
+          timeRange: getTimeRange(),
+          response,
+        });
+
+        setBucketInterval(newBucketInterval);
+      }
+
+      onChartLoad?.({ adapters: adapters ?? {}, dataLoading$: dataLoadingSubject$ });
+    }
+  );
+
+  const lensPropsContext = useLensProps({
+    request,
+    getTimeRange,
+    fetch$,
+    visContext,
+    onLoad,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
@@ -221,7 +276,7 @@ export function Chart({
 
   const canEditVisualizationOnTheFly = canCustomizeVisualization && chartVisible;
   const canSaveVisualization =
-    canEditVisualizationOnTheFly && services.capabilities.dashboard?.showWriteControls;
+    canEditVisualizationOnTheFly && services.capabilities.dashboard_v2?.showWriteControls;
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
@@ -356,26 +411,24 @@ export function Chart({
                 <EuiProgress size="xs" color="accent" position="absolute" />
               </EuiDelayRender>
             )}
-            <HistogramMemoized
-              abortController={abortController}
-              services={services}
-              dataView={dataView}
-              request={request}
-              hits={hits}
-              chart={chart}
-              getTimeRange={getTimeRange}
-              refetch$={refetch$}
-              visContext={visContext}
-              isPlainRecord={isPlainRecord}
-              disableTriggers={disableTriggers}
-              disabledActions={disabledActions}
-              onTotalHitsChange={onTotalHitsChange}
-              hasLensSuggestions={hasLensSuggestions}
-              onChartLoad={onChartLoad}
-              onFilter={onFilter}
-              onBrushEnd={onBrushEnd}
-              withDefaultActions={withDefaultActions}
-            />
+            {lensPropsContext && (
+              <HistogramMemoized
+                abortController={abortController}
+                services={services}
+                dataView={dataView}
+                chart={chart}
+                bucketInterval={bucketInterval}
+                getTimeRange={getTimeRange}
+                visContext={visContext}
+                isPlainRecord={isPlainRecord}
+                disableTriggers={disableTriggers}
+                disabledActions={disabledActions}
+                onFilter={onFilter}
+                onBrushEnd={onBrushEnd}
+                withDefaultActions={withDefaultActions}
+                {...lensPropsContext}
+              />
+            )}
           </section>
           {appendHistogram}
         </EuiFlexItem>
@@ -405,3 +458,30 @@ export function Chart({
     </EuiFlexGroup>
   );
 }
+
+const computeTotalHits = (
+  hasLensSuggestions: boolean,
+  adapterTables:
+    | {
+        [key: string]: Datatable;
+      }
+    | undefined,
+  isPlainRecord?: boolean
+) => {
+  if (isPlainRecord && hasLensSuggestions) {
+    return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
+  } else if (isPlainRecord && !hasLensSuggestions) {
+    // ES|QL histogram case
+    const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
+    if (!rows) {
+      return undefined;
+    }
+    let rowsCount = 0;
+    rows.forEach((r) => {
+      rowsCount += r.results;
+    });
+    return rowsCount;
+  } else {
+    return adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
+  }
+};

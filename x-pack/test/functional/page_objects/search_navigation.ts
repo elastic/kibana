@@ -4,31 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
+  const { common, indexManagement, header, solutionNavigation } = getPageObjects([
+    'common',
+    'indexManagement',
+    'header',
+    'solutionNavigation',
+  ]);
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToLandingPage() {
+    async navigateToElasticsearchOverviewPage(basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('landingPage');
-        // Wait for the side nav, since the landing page will sometimes redirect to index management now
-        await testSubjects.existOrFail('svlSearchSideNav', { timeout: 2000 });
+        await common.navigateToApp('enterpriseSearch', {
+          shouldLoginIfPrompted: false,
+          basePath,
+        });
       });
     },
-    async navigateToGettingStartedPage() {
+    async navigateToElasticsearchStartPage(expectRedirect: boolean = false, basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('serverlessElasticsearch');
-        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
-      });
-    },
-    async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('elasticsearchStart', {
+        await common.navigateToApp('elasticsearchStart', {
+          basePath,
           shouldLoginIfPrompted: false,
         });
         if (!expectRedirect) {
@@ -37,16 +37,31 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
       });
     },
     async navigateToIndexDetailPage(indexName: string) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp(`elasticsearch/indices/index_details/${indexName}`, {
-          shouldLoginIfPrompted: false,
-        });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'elasticsearchIndexManagement',
       });
+      const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink');
+      for (const indexNameLink of indexNamesList) {
+        if ((await indexNameLink.getVisibleText()).includes(indexName)) {
+          await indexNameLink.click();
+          return;
+        }
+      }
       await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
-      await PageObjects.common.navigateToApp('searchInferenceEndpoints', {
+      await common.navigateToApp('searchInferenceEndpoints', {
         shouldLoginIfPrompted: false,
+      });
+    },
+
+    async navigateToIndexManagementPage() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await common.navigateToApp(`indexManagement`);
+        await indexManagement.changeTabs('indicesTab');
+        await header.waitUntilLoadingHasFinished();
+        await indexManagement.expectToBeOnIndexManagement();
       });
     },
   };

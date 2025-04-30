@@ -11,11 +11,16 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, searchClassicNavigation } = getPageObjects(['common', 'searchClassicNavigation']);
+  const { common, searchClassicNavigation, indexManagement } = getPageObjects([
+    'common',
+    'searchClassicNavigation',
+    'indexManagement',
+  ]);
   const spaces = getService('spaces');
   const browser = getService('browser');
 
-  describe('Search Classic Navigation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/203607
+  describe.skip('Search Classic Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -43,13 +48,12 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
         { id: 'Content', label: 'Content' },
-        { id: 'Indices', label: 'Indices' },
+        { id: 'Indices', label: 'Index Management' },
         { id: 'Connectors', label: 'Connectors' },
         { id: 'Crawlers', label: 'Web Crawlers' },
         { id: 'Build', label: 'Build' },
         { id: 'Playground', label: 'Playground' },
         { id: 'SearchApplications', label: 'Search Applications' },
-        { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
         { id: 'GettingStarted', label: 'Getting started' },
@@ -64,12 +68,11 @@ export default function searchSolutionNavigation({
 
       await searchClassicNavigation.expectNavItemExists('Home');
 
-      // Check Content
-      // > Indices
+      // > Index Management
       await searchClassicNavigation.clickNavItem('Indices');
       await searchClassicNavigation.expectNavItemActive('Indices');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Content');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Elasticsearch indices');
+      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Index Management');
       // > Connectors
       await searchClassicNavigation.clickNavItem('Connectors');
       await searchClassicNavigation.expectNavItemActive('Connectors');
@@ -92,11 +95,6 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.expectNavItemActive('SearchApplications');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Search Applications');
-      // > BehavioralAnalytics
-      await searchClassicNavigation.clickNavItem('BehavioralAnalytics');
-      await searchClassicNavigation.expectNavItemActive('BehavioralAnalytics');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Build');
-      await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('Behavioral Analytics');
 
       // Check Relevance
       // > InferenceEndpoints
@@ -129,6 +127,12 @@ export default function searchSolutionNavigation({
       await searchClassicNavigation.breadcrumbs.expectBreadcrumbExists('AI Search');
 
       await expectNoPageReload();
+    });
+
+    it("should redirect to index management when clicking on 'Indices'", async () => {
+      await searchClassicNavigation.clickNavItem('Indices');
+      await indexManagement.expectToBeOnSearchIndexManagement();
+      await indexManagement.expectToBeOnIndexManagement();
     });
   });
 }

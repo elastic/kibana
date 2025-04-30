@@ -24,6 +24,8 @@ import type {
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -51,6 +53,8 @@ export interface WalkerOptions {
   visitInlineCast?: (node: ESQLInlineCast) => void;
   visitUnknown?: (node: ESQLUnknownItem) => void;
   visitIdentifier?: (node: ESQLIdentifier) => void;
+  visitMap?: (node: ESQLMap) => void;
+  visitMapEntry?: (node: ESQLMapEntry) => void;
 
   /**
    * Called for any node type that does not have a specific visitor.
@@ -65,20 +69,6 @@ export type WalkerAstNode = ESQLAstNode | ESQLAstNode[];
 /**
  * Iterates over all nodes in the AST and calls the appropriate visitor
  * functions.
- *
- * AST nodes supported:
- *
- * - [x] command
- * - [x] option
- * - [x] mode
- * - [x] function
- * - [x] source
- * - [x] column
- * - [x] literal
- * - [x] list literal
- * - [x] timeInterval
- * - [x] inlineCast
- * - [x] unknown
  */
 export class Walker {
   /**
@@ -325,7 +315,7 @@ export class Walker {
     }
   }
 
-  public walkAstItem(node: ESQLAstItem): void {
+  public walkAstItem(node: ESQLAstItem | ESQLAstExpression): void {
     if (node instanceof Array) {
       const list = node as ESQLAstItem[];
       for (const item of list) this.walkAstItem(item);
@@ -373,12 +363,35 @@ export class Walker {
     const args = node.args;
     const length = args.length;
 
-    if (node.operator) this.walkAstItem(node.operator);
+    if (node.operator) this.walkSingleAstItem(node.operator);
 
     for (let i = 0; i < length; i++) {
       const arg = args[i];
       this.walkAstItem(arg);
     }
+  }
+
+  public walkMap(node: ESQLMap): void {
+    const { options } = this;
+
+    (options.visitMap ?? options.visitAny)?.(node);
+
+    const entries = node.entries;
+    const length = entries.length;
+
+    for (let i = 0; i < length; i++) {
+      const arg = entries[i];
+      this.walkSingleAstItem(arg);
+    }
+  }
+
+  public walkMapEntry(node: ESQLMapEntry): void {
+    const { options } = this;
+
+    (options.visitMapEntry ?? options.visitAny)?.(node);
+
+    this.walkSingleAstItem(node.key);
+    this.walkSingleAstItem(node.value);
   }
 
   public walkQuery(node: ESQLAstQueryExpression): void {
@@ -393,6 +406,7 @@ export class Walker {
   }
 
   public walkSingleAstItem(node: ESQLAstExpression): void {
+    if (!node) return;
     const { options } = this;
     options.visitSingleAstItem?.(node);
     switch (node.type) {
@@ -402,6 +416,14 @@ export class Walker {
       }
       case 'function': {
         this.walkFunction(node as ESQLFunction);
+        break;
+      }
+      case 'map': {
+        this.walkMap(node as ESQLMap);
+        break;
+      }
+      case 'map-entry': {
+        this.walkMapEntry(node as ESQLMapEntry);
         break;
       }
       case 'option': {

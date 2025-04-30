@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -128,6 +130,8 @@ export interface RouteDeprecationInfo {
   documentationUrl: string;
   /**
    * The description message to be displayed for the deprecation.
+   * This will also appear in the '299 Kibana-{version} {message}' header warning when someone calls the route.
+   * Keep the message concise to avoid long header values. It is recommended to keep the message under 255 characters.
    * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
    */
   message?: string;
@@ -198,6 +202,9 @@ interface DeprecateApiDeprecationType {
   type: 'deprecate';
 }
 
+export type AllRequiredCondition = Array<Privilege | { anyOf: Privilege[] }>;
+export type AnyRequiredCondition = Array<Privilege | { allOf: Privilege[] }>;
+
 /**
  * A set of privileges that can be used to define complex authorization requirements.
  *
@@ -205,14 +212,14 @@ interface DeprecateApiDeprecationType {
  * - `allRequired`: An array of privileges where all listed privileges must be satisfied to meet the authorization requirement.
  */
 export interface PrivilegeSet {
-  anyRequired?: Privilege[];
-  allRequired?: Privilege[];
+  anyRequired?: AnyRequiredCondition;
+  allRequired?: AllRequiredCondition;
 }
 
 /**
  * An array representing a combination of simple privileges or complex privilege sets.
  */
-type Privileges = Array<Privilege | PrivilegeSet>;
+export type Privileges = Array<Privilege | PrivilegeSet>;
 
 /**
  * Describes the authorization requirements when authorization is enabled.
@@ -386,12 +393,50 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   deprecated?: RouteDeprecationInfo;
 
   /**
+   * Filepath to a YAML file or a partial {@link OpenAPIV3.OperationObject} to
+   * be merged with the code generated for this endpoint.
+   *
+   * @note Always instantiate the objects lazily to avoid unnecessarily loading
+   *       objects into memory.
+   *
+   * @example
+   * As a path to a OAS file
+   * () => path.join(__dirname, 'my_examples.yaml')
+   *
+   * @example
+   * As an object
+   * () => ({
+   *      requestBody: {
+   *        content: {
+   *          200: {
+   *            examples: {
+   *              fooExample: {
+   *                value: { coolType: true } as { coolType: true },
+   *              },
+   *            },
+   *          },
+   *        },
+   *      },
+   *  })
+   */
+  oasOperationObject?: () =>
+    | string
+    | DeepPartial<Pick<OpenAPIV3.OperationObject, 'requestBody' | 'responses'>>;
+
+  /**
    * Whether this route should be treated as "invisible" and excluded from router
    * OAS introspection.
    *
    * @default false
    */
   excludeFromOAS?: boolean;
+
+  /**
+   * Whether the rate limiter should never throttle this route.
+   *
+   * @default false
+   */
+  excludeFromRateLimiter?: boolean;
 
   /**
    * Release version or date that this route will be removed
@@ -515,7 +560,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Defines the security requirements for a route, including authorization and authentication.
    */
-  security?: RouteSecurity;
+  security: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

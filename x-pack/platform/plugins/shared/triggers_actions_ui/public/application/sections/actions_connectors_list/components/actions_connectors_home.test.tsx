@@ -21,7 +21,10 @@ jest.mock('../../../lib/action_connector_api', () => ({
 }));
 const { loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../lib/capabilities');
+jest.mock('../../../lib/capabilities', () => ({
+  hasSaveActionsCapability: jest.fn(),
+}));
+const { hasSaveActionsCapability } = jest.requireMock('../../../lib/capabilities');
 jest.mock('../../../../common/get_experimental_features');
 jest.mock('../../../components/health_check', () => ({
   HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -48,6 +51,11 @@ jest.mock('./actions_connectors_event_log_list_table', () => {
 const queryClient = new QueryClient();
 
 describe('ActionsConnectorsHome', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    hasSaveActionsCapability.mockReturnValue(true);
+  });
+
   it('renders Actions connectors list component', async () => {
     const props: RouteComponentProps<MatchParams> = {
       history: createMemoryHistory({
@@ -239,5 +247,38 @@ describe('ActionsConnectorsHome', () => {
       name: 'Select a connector',
     });
     expect(selectConnectorFlyout).toBeInTheDocument();
+  });
+
+  it('hide "Create connector" button when the user only has read access', async () => {
+    hasSaveActionsCapability.mockReturnValue(false);
+    const props: RouteComponentProps<MatchParams> = {
+      history: createMemoryHistory({
+        initialEntries: ['/connectors'],
+      }),
+      location: createLocation('/connectors'),
+      match: {
+        isExact: true,
+        path: '/connectors',
+        url: '',
+        params: {
+          section: 'connectors',
+        },
+      },
+    };
+
+    render(
+      <IntlProvider locale="en">
+        <Router history={props.history}>
+          <QueryClientProvider client={queryClient}>
+            <ActionsConnectorsHome {...props} />
+          </QueryClientProvider>
+        </Router>
+      </IntlProvider>
+    );
+
+    expect(screen.queryByRole('button', { name: 'Create connector' })).not.toBeInTheDocument();
+
+    const documentationButton = await screen.findByRole('link', { name: 'Documentation' });
+    expect(documentationButton).toBeEnabled();
   });
 });

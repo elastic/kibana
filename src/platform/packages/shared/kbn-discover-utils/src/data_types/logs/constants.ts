@@ -47,7 +47,6 @@ export const DEFAULT_ROWS_PER_PAGE = 100;
 
 // List of prefixes which needs to be filtered out for Display in Content Column
 export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
-  '_', // Filter fields like '_id', '_score'
   '@timestamp',
   'agent.',
   'elastic_agent.',
@@ -61,6 +60,18 @@ export const FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT = [
   'log.',
   'service.',
 ];
+export const FILTER_OUT_EXACT_FIELDS_FOR_CONTENT = [
+  '_id',
+  '_index',
+  '_source',
+  '_size',
+  '_doc_count',
+  '_field_names',
+  '_ignored',
+  '_routing',
+  '_meta',
+  '_tier',
+];
 
 export const DEFAULT_ALLOWED_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
 export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat', 'winlogbeat'];
@@ -68,3 +79,27 @@ export const DEFAULT_ALLOWED_LOGS_DATA_VIEWS = ['logs', 'auditbeat', 'filebeat',
 export const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
 export const SERVICE_NAME_FIELDS = ['service.name', 'service_name'];
 export const AGENT_NAME_FIELD = 'agent.name';
+
+export const RESOURCE_FIELDS = [
+  fieldConstants.SERVICE_NAME_FIELD,
+  fieldConstants.CONTAINER_NAME_FIELD,
+  fieldConstants.HOST_NAME_FIELD,
+  fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD,
+  fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD,
+  fieldConstants.ORCHESTRATOR_CLUSTER_ID_FIELD,
+  fieldConstants.CONTAINER_ID_FIELD,
+  fieldConstants.AGENT_NAME_FIELD,
+] as const;
+export const TRACE_FIELDS = [
+  fieldConstants.SERVICE_NAME_FIELD,
+  fieldConstants.EVENT_OUTCOME_FIELD,
+  fieldConstants.TRANSACTION_NAME_FIELD,
+  fieldConstants.TRANSACTION_DURATION_FIELD,
+  fieldConstants.SPAN_NAME_FIELD,
+  fieldConstants.SPAN_DURATION_FIELD,
+  fieldConstants.AGENT_NAME_FIELD,
+] as const;
+export const DURATION_FIELDS: readonly string[] = [
+  fieldConstants.SPAN_DURATION_FIELD,
+  fieldConstants.TRANSACTION_DURATION_FIELD,
+];

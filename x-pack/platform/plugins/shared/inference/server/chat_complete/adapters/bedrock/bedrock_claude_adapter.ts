@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import { filter, from, map, switchMap, tap } from 'rxjs';
-import { Readable } from 'stream';
+import { filter, map, tap, defer } from 'rxjs';
 import {
   Message,
   MessageRole,
   createInferenceInternalError,
   ToolChoiceType,
-  ToolSchemaType,
-  type ToolOptions,
 } from '@kbn/inference-common';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
-import type { BedRockImagePart, BedRockMessage, BedRockTextPart, BedrockToolChoice } from './types';
+import { handleConnectorResponse } from '../../utils';
+import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
 import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
 import { processCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
+import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
-  chatComplete: ({ executor, system, messages, toolChoice, tools, abortSignal }) => {
+  chatComplete: ({
+    executor,
+    system,
+    messages,
+    toolChoice,
+    tools,
+    temperature = 0,
+    modelName,
+    abortSignal,
+    metadata,
+  }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
     const subActionParams = {
@@ -34,21 +43,20 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       messages: messagesToBedrock(messages),
       tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
       toolChoice: toolChoiceToBedrock(toolChoice),
-      temperature: 0,
+      temperature,
+      model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
+      ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
     };
 
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'invokeStream',
         subActionParams,
-      })
-    ).pipe(
-      switchMap((response) => {
-        const readable = response.data as Readable;
-        return serdeEventstreamIntoObservable(readable);
-      }),
+      });
+    }).pipe(
+      handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {
         if ('modelStreamErrorException' in eventData) {
           throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
@@ -63,88 +71,6 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       processCompletionChunks()
     );
   },
-};
-
-const toolChoiceToBedrock = (
-  toolChoice: ToolOptions['toolChoice']
-): BedrockToolChoice | undefined => {
-  if (toolChoice === ToolChoiceType.required) {
-    return {
-      type: 'any',
-    };
-  } else if (toolChoice === ToolChoiceType.auto) {
-    return {
-      type: 'auto',
-    };
-  } else if (typeof toolChoice === 'object') {
-    return {
-      type: 'tool',
-      name: toolChoice.function,
-    };
-  }
-  // ToolChoiceType.none is not supported by claude
-  // we are adding a directive to the system instructions instead in that case.
-  return undefined;
-};
-
-const toolsToBedrock = (tools: ToolOptions['tools'], messages: Message[]) => {
-  function walkSchema<T extends ToolSchemaType>(schemaPart: T): T {
-    if (schemaPart.type === 'object' && schemaPart.properties) {
-      return {
-        ...schemaPart,
-        properties: Object.fromEntries(
-          Object.entries(schemaPart.properties).map(([key, childSchemaPart]) => {
-            return [key, walkSchema(childSchemaPart)];
-          })
-        ),
-      };
-    }
-
-    if (schemaPart.type === 'array') {
-      return {
-        ...schemaPart,
-        // Claude is prone to ignoring the "array" part of an array type
-        description: schemaPart.description + '. Must be provided as a JSON array',
-        items: walkSchema(schemaPart.items),
-      };
-    }
-
-    return schemaPart;
-  }
-
-  if (tools) {
-    return Object.entries(tools).map(([toolName, toolDef]) => {
-      return {
-        name: toolName,
-        description: toolDef.description,
-        input_schema: walkSchema(
-          toolDef.schema ?? {
-            type: 'object' as const,
-            properties: {},
-          }
-        ),
-      };
-    });
-  }
-
-  const hasToolUse = messages.filter(
-    (message) =>
-      message.role === MessageRole.Tool ||
-      (message.role === MessageRole.Assistant && message.toolCalls?.length)
-  );
-
-  if (hasToolUse) {
-    return [
-      {
-        name: 'do_not_call_this_tool',
-        description: 'Do not call this tool, it is strictly forbidden',
-        input_schema: {
-          type: 'object',
-          properties: {},
-        },
-      },
-    ];
-  }
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {

@@ -6,38 +6,86 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { i18n } from '@kbn/i18n';
-import type {
-  ESQLColumn,
-  ESQLCommand,
-  ESQLAstItem,
-  ESQLMessage,
-  ESQLFunction,
-} from '@kbn/esql-ast';
 import {
-  getFunctionDefinition,
+  ESQLCommandMode,
+  ESQLCommandOption,
+  isFunctionExpression,
+  isWhereExpression,
+  type ESQLColumn,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLMessage,
+  type ESQLAstRenameExpression,
+  Walker,
+} from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
+import {
+  hasWildcard,
   isAssignment,
   isColumnItem,
   isFunctionItem,
-  isFunctionOperatorParam,
+  isInlineCastItem,
   isLiteralItem,
+  isOptionItem,
+  isSingleItem,
+  isSourceItem,
+  noCaseCompare,
 } from '../shared/helpers';
-import { ENRICH_MODES } from './settings';
+
 import {
-  appendSeparatorOption,
-  asOption,
-  byOption,
-  metadataOption,
-  onOption,
-  withOption,
-} from './options';
-import type { CommandDefinition } from './types';
+  ENRICH_MODES,
+  checkAggExistence,
+  checkFunctionContent,
+  validateColumnForGrokDissect,
+} from './commands_helpers';
+import { type CommandDefinition } from './types';
+
+import {
+  suggest as suggestForDissect,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterDissect,
+} from '../autocomplete/commands/dissect';
+import {
+  suggest as suggestForDrop,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterDrop,
+} from '../autocomplete/commands/drop';
+import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
+import { suggest as suggestForEval } from '../autocomplete/commands/eval';
+import {
+  suggest as suggestForFork,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
+} from '../autocomplete/commands/fork';
+import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import {
+  suggest as suggestForGrok,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
+} from '../autocomplete/commands/grok';
+import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import {
+  suggest as suggestForKeep,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterKeep,
+} from '../autocomplete/commands/keep';
+import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
+import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
+import {
+  suggest as suggestForRename,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterRename,
+} from '../autocomplete/commands/rename';
+import { suggest as suggestForRow } from '../autocomplete/commands/row';
+import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
-import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
-import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
-import { suggest as suggestForStats } from '../autocomplete/commands/stats';
+import {
+  suggest as suggestForStats,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterStats,
+} from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
+import {
+  suggest as suggestForChangePoint,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterChangePoint,
+} from '../autocomplete/commands/change_point';
+
+import { METADATA_FIELDS } from '../shared/constants';
+import { getMessageFromId } from '../validation/errors';
+import { isNumericType } from '../shared/esql_types';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -60,28 +108,16 @@ const statsValidator = (command: ESQLCommand) => {
   // until an agg function is detected
   // in the long run this might be integrated into the validation function
   const statsArg = command.args
-    .flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg))
+    .flatMap((arg) => {
+      if (isWhereExpression(arg) && isFunctionExpression(arg.args[0])) {
+        arg = arg.args[0] as ESQLFunction;
+      }
+
+      return isAssignment(arg) ? arg.args[1] : arg;
+    })
     .filter(isFunctionItem);
 
   if (statsArg.length) {
-    function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
-    }
-    function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
-    }
-
-    function checkAggExistence(arg: ESQLFunction): boolean {
-      // TODO the grouping function check may not
-      // hold true for all future cases
-      if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
-        return true;
-      }
-      if (isOtherFunction(arg)) {
-        return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
-      }
-      return false;
-    }
     // first check: is there an agg function somewhere?
     const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
 
@@ -105,25 +141,6 @@ const statsValidator = (command: ESQLCommand) => {
         }))
       );
     } else {
-      function isConstantOrAggFn(arg: ESQLAstItem): boolean {
-        return isLiteralItem(arg) || isAggFunction(arg);
-      }
-      // now check that:
-      // * the agg function is at root level
-      // * or if it's a builtin function, then all operands are agg functions or literals
-      // * or if it's a eval function then all arguments are agg functions or literals
-      function checkFunctionContent(arg: ESQLFunction) {
-        // TODO the grouping function check may not
-        // hold true for all future cases
-        if (isAggFunction(arg)) {
-          return true;
-        }
-        return (arg as ESQLFunction).args.every(
-          (subArg): boolean =>
-            isConstantOrAggFn(subArg) ||
-            (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
-        );
-      }
       // @TODO: improve here the check to get the last instance of the invalidExpression
       // to provide a better location for the error message
       // i.e. STATS round(round(round( a + sum(b) )))
@@ -152,6 +169,7 @@ const statsValidator = (command: ESQLCommand) => {
       }
     }
   }
+
   return messages;
 };
 export const commandDefinitions: Array<CommandDefinition<any>> = [
@@ -161,14 +179,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
-    examples: ['row a=1', 'row a=1, b=2'],
-    signature: {
-      multipleParams: true,
-      // syntax check already validates part of this
-      params: [{ name: 'assignment', type: 'any' }],
-    },
-    options: [],
-    modes: [],
+    declaration: 'ROW column1 = value1[, ..., columnN = valueN]',
+    examples: ['ROW a=1', 'ROW a=1, b=2'],
+    suggest: suggestForRow,
   },
   {
     name: 'from',
@@ -176,13 +189,36 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),
-    examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
-    options: [metadataOption],
-    modes: [],
-    hasRecommendedQueries: true,
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'index', type: 'source', wildcards: true }],
+    declaration: 'FROM index_pattern [METADATA fields]',
+    examples: ['FROM logs', 'FROM logs-*', 'FROM logs_*, events-*'],
+    suggest: suggestForFrom,
+    validate: (command: ESQLCommand) => {
+      const metadataStatement = command.args.find(
+        (arg) => isOptionItem(arg) && arg.name === 'metadata'
+      ) as ESQLCommandOption | undefined;
+
+      if (!metadataStatement) {
+        return [];
+      }
+
+      const messages: ESQLMessage[] = [];
+
+      const fields = metadataStatement.args.filter(isColumnItem);
+      for (const field of fields) {
+        if (!METADATA_FIELDS.includes(field.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownMetadataField',
+              values: {
+                value: field.name,
+                availableFields: Array.from(METADATA_FIELDS).join(', '),
+              },
+              locations: field.location,
+            })
+          );
+        }
+      }
+      return messages;
     },
   },
   {
@@ -190,16 +226,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    examples: ['show info'],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'functions', type: 'function' }],
-    },
+    declaration: 'SHOW item',
+    examples: ['SHOW INFO'],
+    suggest: suggestForShow,
   },
   {
-    name: 'metrics',
+    name: 'ts',
     hidden: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
       defaultMessage:
@@ -210,24 +242,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         'The command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. ' +
         'When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
-    examples: [
-      'metrics index',
-      'metrics index, index2',
-      'metrics index avg = avg(a)',
-      'metrics index sum(b) by b',
-      'metrics index, index2 sum(b) by b % 2',
-      'metrics <sources> [ <aggregates> [ by <grouping> ]]',
-      'metrics src1, src2 agg1, agg2 by field1, field2',
-    ],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: true,
-      params: [
-        { name: 'index', type: 'source', wildcards: true },
-        { name: 'expression', type: 'function', optional: true },
-      ],
-    },
+    declaration: '',
+    examples: ['TS index', 'TS index, index2'],
+    suggest: () => [],
   },
   {
     name: 'stats',
@@ -235,15 +252,14 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Calculates aggregate statistics, such as average, count, and sum, over the incoming search results set. Similar to SQL aggregation, if the stats command is used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. The stats command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
+    declaration: `STATS [column1 =] expression1 [WHERE boolean_expression1][,
+      ...,
+      [columnN =] expressionN [WHERE boolean_expressionN]]
+      [BY grouping_expression1[, ..., grouping_expressionN]]`,
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'function', optional: true }],
-    },
-    options: [byOption],
-    modes: [],
     validate: statsValidator,
     suggest: suggestForStats,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterStats,
   },
   {
     name: 'inlinestats',
@@ -255,15 +271,11 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
           'Calculates an aggregate result and merges that result back into the stream of input data. Without the optional `BY` clause this will produce a single result which is appended to each row. With a `BY` clause this will produce one result per grouping and merge the result into the stream based on matching group keys.',
       }
     ),
+    declaration: '',
     examples: ['… | EVAL bar = a * b | INLINESTATS m = MAX(bar) BY b'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'function', optional: true }],
-    },
-    options: [byOption],
-    modes: [],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
+    suggest: () => [],
   },
 
   {
@@ -272,31 +284,53 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Calculates an expression and puts the resulting value into a search results field.',
     }),
+    declaration: 'EVAL [column1 =] value1[, ..., [columnN =] valueN]',
     examples: [
-      '… | eval b * c',
-      '… | eval a = b * c',
-      '… | eval then = now() + 1 year + 2 weeks',
-      '… | eval a = b * c, d = e * f',
+      '… | EVAL b * c',
+      '… | EVAL a = b * c',
+      '… | EVAL then = NOW() + 1 year + 2 weeks',
+      '… | EVAL a = b * c, d = e * f',
     ],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'any' }],
-    },
-    options: [],
-    modes: [],
+    suggest: suggestForEval,
   },
   {
     name: 'rename',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.renameDoc', {
       defaultMessage: 'Renames an old column to a new one',
     }),
-    examples: ['… | rename old as new', '… | rename old as new, a as b'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'renameClause', type: 'column' }],
+    declaration: 'RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]',
+    examples: ['… | RENAME old AS new', '… | RENAME old AS new, a AS b'],
+    suggest: suggestForRename,
+    validate: (command: ESQLCommand<'rename'>) => {
+      const messages: ESQLMessage[] = [];
+
+      const renameExpressions = Walker.findAll(command, (node) => {
+        return node.type === 'option' && node.name === 'as';
+      }) as ESQLAstRenameExpression[];
+
+      for (const expression of renameExpressions) {
+        const [column] = expression.args;
+        if (!isColumnItem(column)) {
+          continue;
+        }
+
+        if (hasWildcard(column.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wildcardNotSupportedForCommand',
+              values: {
+                command: 'RENAME',
+                value: column.name,
+              },
+              locations: column.location,
+            })
+          );
+        }
+      }
+
+      return messages;
     },
-    options: [asOption],
-    modes: [],
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterRename,
   },
   {
     name: 'limit',
@@ -304,13 +338,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Returns the first search results, in search order, based on the "limit" specified.',
     }),
-    examples: ['… | limit 100', '… | limit 0'],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'size', type: 'integer', constantOnly: true }],
-    },
-    options: [],
-    modes: [],
+    declaration: 'LIMIT max_number_of_rows',
+    examples: ['… | LIMIT 100', '… | LIMIT 1'],
+    suggest: suggestForLimit,
   },
   {
     name: 'keep',
@@ -318,27 +348,18 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Rearranges fields in the Results table by applying the keep clauses in fields',
     }),
-    examples: ['… | keep a', '… | keep a,b'],
+    declaration: 'KEEP column1[, ..., columnN]',
+    examples: ['… | KEEP a', '… | KEEP a, b'],
     suggest: suggestForKeep,
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'column', type: 'column', wildcards: true }],
-    },
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterKeep,
   },
   {
     name: 'drop',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.dropDoc', {
       defaultMessage: 'Drops columns',
     }),
-    examples: ['… | drop a', '… | drop a,b'],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'column', type: 'column', wildcards: true }],
-    },
+    declaration: 'DROP column1[, ..., columnN]',
+    examples: ['… | DROP a', '… | DROP a, b'],
     suggest: suggestForDrop,
     validate: (command: ESQLCommand) => {
       const messages: ESQLMessage[] = [];
@@ -377,6 +398,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       }
       return messages;
     },
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterDrop,
   },
   {
     name: 'sort',
@@ -384,34 +406,24 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Sorts all results by the specified fields. By default, null values are treated as being larger than any other value. With an ascending sort order, null values are sorted last, and with a descending sort order, null values are sorted first. You can change that by providing NULLS FIRST or NULLS LAST',
     }),
+    declaration:
+      'SORT column1 [ASC/DESC][NULLS FIRST/NULLS LAST][, ..., columnN [ASC/DESC][NULLS FIRST/NULLS LAST]]',
     examples: [
-      '… | sort a desc, b nulls last, c asc nulls first',
-      '… | sort b nulls last',
-      '… | sort c asc nulls first',
-      '… | sort a - abs(b)',
+      '… | SORT a DESC, b NULLS LAST, c ASC NULLS FIRST',
+      '… | SORT b NULLS LAST',
+      '… | SORT c ASC NULLS FIRST',
+      '… | SORT a - abs(b)',
     ],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'any' }],
-    },
     suggest: suggestForSort,
   },
-
   {
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.whereDoc', {
       defaultMessage:
         'Uses "predicate-expressions" to filter search results. A predicate expression, when evaluated, returns TRUE or FALSE. The where command only returns the results that evaluate to TRUE. For example, to filter results for a specific field value',
     }),
-    examples: ['… | where status_code == 200'],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'expression', type: 'boolean' }],
-    },
-    options: [],
-    modes: [],
+    declaration: 'WHERE expression',
+    examples: ['… | WHERE status_code == 200'],
     suggest: suggestForWhere,
   },
   {
@@ -420,16 +432,49 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | dissect a "%{b} %{c}"'],
-    options: [appendSeparatorOption],
-    modes: [],
-    signature: {
-      multipleParams: false,
-      params: [
-        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
-        { name: 'pattern', type: 'string', constantOnly: true },
-      ],
+    declaration: 'DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]',
+    examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
+    suggest: suggestForDissect,
+    validate: (command: ESQLCommand, references) => {
+      const messages: ESQLMessage[] = validateColumnForGrokDissect(command, references);
+
+      const appendSeparatorClause = command.args.find((arg) => isOptionItem(arg)) as
+        | ESQLCommandOption
+        | undefined;
+
+      if (!appendSeparatorClause) {
+        return messages;
+      }
+
+      if (appendSeparatorClause.name !== 'append_separator') {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownDissectKeyword',
+            values: { keyword: appendSeparatorClause.name },
+            locations: appendSeparatorClause.location,
+          })
+        );
+        return messages;
+      }
+
+      const [firstArg] = appendSeparatorClause.args;
+      if (
+        !Array.isArray(firstArg) &&
+        (!isLiteralItem(firstArg) || firstArg.literalType !== 'keyword')
+      ) {
+        const value =
+          'value' in firstArg && !isInlineCastItem(firstArg) ? firstArg.value : firstArg.name;
+        messages.push(
+          getMessageFromId({
+            messageId: 'wrongDissectOptionArgumentType',
+            values: { value: (value as string | number) ?? '' },
+            locations: firstArg.location,
+          })
+        );
+      }
+      return messages;
     },
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterDissect,
   },
   {
     name: 'grok',
@@ -437,29 +482,21 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: false,
-      params: [
-        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
-        { name: 'pattern', type: 'string', constantOnly: true },
-      ],
-    },
+    declaration: 'GROK input "pattern"',
+    examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
+    suggest: suggestForGrok,
+    validate: validateColumnForGrokDissect,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterGrok,
   },
   {
     name: 'mv_expand',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvExpandDoc', {
       defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
     }),
-    examples: ['row a=[1,2,3] | mv_expand a'],
-    options: [],
-    modes: [],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
-    },
+    declaration: 'MV_EXPAND column',
+    examples: ['ROW a=[1,2,3] | MV_EXPAND a'],
+    preview: true,
+    suggest: suggestForMvExpand,
   },
   {
     name: 'enrich',
@@ -467,28 +504,236 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Enrich table with another table. Before you can use enrich, you need to create and execute an enrich policy.',
     }),
+    declaration:
+      'ENRICH policy [ON match_field] [WITH [new_name1 = ]field1, [new_name2 = ]field2, ...]',
     examples: [
-      '… | enrich my-policy',
-      '… | enrich my-policy on pivotField',
-      '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
+      '… | ENRICH my-policy',
+      '… | ENRICH my-policy ON pivotField',
+      '… | ENRICH my-policy ON pivotField WITH a = enrichFieldA, b = enrichFieldB',
     ],
-    options: [onOption, withOption],
-    modes: [ENRICH_MODES],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
+    suggest: suggestForEnrich,
+    validate: (command: ESQLCommand, { policies }) => {
+      const messages: ESQLMessage[] = [];
+
+      const sources = command.args.filter(isSourceItem);
+      sources.forEach((source) => {
+        if (hasWildcard(source.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wildcardNotSupportedForCommand',
+              values: { command: 'ENRICH', value: source.name },
+              locations: source.location,
+            })
+          );
+        } else if (!policies.has(source.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownPolicy',
+              values: { name: source.name },
+              locations: source.location,
+            })
+          );
+        }
+      });
+
+      const modeArg = command.args.find((arg) => isSingleItem(arg) && arg.type === 'mode') as
+        | ESQLCommandMode
+        | undefined;
+
+      if (!modeArg) {
+        return messages;
+      }
+
+      const acceptedValues = ENRICH_MODES.map(({ name }) => '_' + name);
+      if (!acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unsupportedMode',
+            values: {
+              command: 'ENRICH',
+              value: modeArg.text,
+              expected: acceptedValues.join(', '),
+            },
+            locations: modeArg.location,
+          })
+        );
+      }
+
+      return messages;
     },
   },
   {
     name: 'hidden_command',
     description: 'A test fixture to test hidden-ness',
+    declaration: '',
     hidden: true,
     examples: [],
-    modes: [],
-    options: [],
-    signature: {
-      params: [],
-      multipleParams: false,
+    suggest: () => [],
+  },
+  {
+    name: 'join',
+    types: [
+      // TODO: uncomment, when in the future LEFT JOIN and RIGHT JOIN are supported.
+      // {
+      //   name: 'left',
+      //   description: i18n.translate(
+      //     'kbn-esql-validation-autocomplete.esql.definitions.joinLeftDoc',
+      //     {
+      //       defaultMessage:
+      //         'Join index with another index, keep only matching documents from the right index',
+      //     }
+      //   ),
+      // },
+      // {
+      //   name: 'right',
+      //   description: i18n.translate(
+      //     'kbn-esql-validation-autocomplete.esql.definitions.joinRightDoc',
+      //     {
+      //       defaultMessage:
+      //         'Join index with another index, keep only matching documents from the left index',
+      //     }
+      //   ),
+      // },
+      {
+        name: 'lookup',
+        description: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.definitions.joinLookupDoc',
+          {
+            defaultMessage: 'Join with a "lookup" mode index',
+          }
+        ),
+      },
+    ],
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.joinDoc', {
+      defaultMessage: 'Join table with another table.',
+    }),
+    declaration: `LOOKUP JOIN <lookup_index> ON <field_name>`,
+    preview: true,
+    examples: [
+      '… | LOOKUP JOIN lookup_index ON join_field',
+      // TODO: Uncomment when other join types are implemented
+      // '… | <LEFT | RIGHT | LOOKUP> JOIN index ON index.field = index2.field',
+      // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
+      // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
+    ],
+    suggest: suggestForJoin,
+  },
+  {
+    name: 'change_point',
+    preview: true,
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.changePointDoc',
+      {
+        defaultMessage: 'Detect change point in the query results',
+      }
+    ),
+    declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue>`,
+    examples: [
+      '… | CHANGE_POINT value',
+      '… | CHANGE_POINT value ON timestamp',
+      '… | CHANGE_POINT value ON timestamp AS type, pvalue',
+    ],
+    validate: (command: ESQLCommand, references) => {
+      const messages: ESQLMessage[] = [];
+
+      // validate change point value column
+      const valueArg = command.args[0];
+      if (isColumnItem(valueArg)) {
+        const columnName = valueArg.name;
+        // look up for columns in userDefinedColumns and existing fields
+        let valueColumnType: string | undefined;
+        const userDefinedColumnRef = references.userDefinedColumns.get(columnName);
+        if (userDefinedColumnRef) {
+          valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
+        } else {
+          const fieldRef = references.fields.get(columnName);
+          valueColumnType = fieldRef?.type;
+        }
+
+        if (valueColumnType && !isNumericType(valueColumnType)) {
+          messages.push({
+            location: command.location,
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.validation.changePointUnsupportedFieldType',
+              {
+                defaultMessage:
+                  'CHANGE_POINT only supports numeric types values, found [{columnName}] of type [{valueColumnType}]',
+                values: { columnName, valueColumnType },
+              }
+            ),
+            type: 'error',
+            code: 'changePointUnsupportedFieldType',
+          });
+        }
+      }
+
+      // validate ON column
+      const defaultOnColumnName = '@timestamp';
+      const onColumn = command.args.find((arg) => isOptionItem(arg) && arg.name === 'on');
+      const hasDefaultOnColumn = references.fields.has(defaultOnColumnName);
+      if (!onColumn && !hasDefaultOnColumn) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.changePointOnFieldMissing',
+            {
+              defaultMessage: '[CHANGE_POINT] Default {defaultOnColumnName} column is missing',
+              values: { defaultOnColumnName },
+            }
+          ),
+          type: 'error',
+          code: 'changePointOnFieldMissing',
+        });
+      }
+
+      // validate AS
+      const asArg = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
+      if (asArg && isOptionItem(asArg)) {
+        // populate userDefinedColumns references to prevent the common check from failing with unknown column
+        asArg.args.forEach((arg, index) => {
+          if (isColumnItem(arg)) {
+            references.userDefinedColumns.set(arg.name, [
+              { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
+            ]);
+          }
+        });
+      }
+
+      return messages;
     },
+    suggest: suggestForChangePoint,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterChangePoint,
+  },
+  {
+    hidden: true,
+    name: 'fork',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
+      defaultMessage: 'Forks the stream.',
+    }),
+    declaration: `TODO`,
+    examples: [],
+    suggest: suggestForFork,
+    validate: (command) => {
+      const messages: ESQLMessage[] = [];
+
+      if (command.args.length < 2) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.forkTooFewBranches',
+            {
+              defaultMessage: '[FORK] Must include at least two branches.',
+            }
+          ),
+          type: 'error',
+          code: 'forkTooFewBranches',
+        });
+      }
+
+      return messages;
+    },
+
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
   },
 ];

@@ -77,6 +77,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ? [
                 {
                   link: 'streams' as const,
+                  withBadge: true,
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }),
+                  },
                 },
               ]
             : []),
@@ -153,7 +161,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure inventory',
+                      defaultMessage: 'Infrastructure Inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
@@ -211,16 +219,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     link: 'ml:overview',
                   },
                   {
-                    link: 'ml:notifications',
-                  },
-                  {
-                    link: 'ml:memoryUsage',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.machineLearning.memoryUsage',
-                      {
-                        defaultMessage: 'Memory usage',
-                      }
-                    ),
+                    link: 'ml:dataVisualizer',
                   },
                 ],
               },
@@ -232,22 +231,10 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
-                    link: 'ml:anomalyDetection',
-                    title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection.jobs', {
-                      defaultMessage: 'Jobs',
-                    }),
-                  },
-                  {
                     link: 'ml:anomalyExplorer',
                   },
                   {
                     link: 'ml:singleMetricViewer',
-                  },
-                  {
-                    link: 'ml:settings',
-                  },
-                  {
-                    link: 'ml:suppliedConfigurations',
                   },
                 ],
               },
@@ -259,82 +246,10 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
-                    link: 'ml:dataFrameAnalytics',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_frame_analytics.jobs',
-                      {
-                        defaultMessage: 'Jobs',
-                      }
-                    ),
-                  },
-                  {
                     link: 'ml:resultExplorer',
                   },
                   {
                     link: 'ml:analyticsMap',
-                  },
-                ],
-              },
-              {
-                id: 'category-model_management',
-                title: i18n.translate('xpack.observability.obltNav.ml.model_management', {
-                  defaultMessage: 'Model management',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:nodesOverview',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.model_management.trainedModels',
-                      {
-                        defaultMessage: 'Trained models',
-                      }
-                    ),
-                  },
-                ],
-              },
-              {
-                id: 'category-data_visualizer',
-                title: i18n.translate('xpack.observability.obltNav.ml.data_visualizer', {
-                  defaultMessage: 'Data visualizer',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:fileUpload',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.file_data_visualizer',
-                      {
-                        defaultMessage: 'File data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:indexDataVisualizer',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.data_view_data_visualizer',
-                      {
-                        defaultMessage: 'Data view data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:esqlDataVisualizer',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.esql_data_visualizer',
-                      {
-                        defaultMessage: 'ES|QL data visualizer',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:dataDrift',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.data_visualizer.data_drift',
-                      {
-                        defaultMessage: 'Data drift',
-                      }
-                    ),
                   },
                 ],
               },
@@ -439,7 +354,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-            link: 'management',
             title: i18n.translate('xpack.observability.obltNav.stackManagement', {
               defaultMessage: 'Stack Management',
             }),
@@ -480,6 +394,16 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
               {
+                title: 'Machine Learning',
+                children: [
+                  { link: 'management:overview' },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
+                  { link: 'management:trained_models' },
+                  { link: 'management:supplied_configurations' },
+                ],
+              },
+              {
                 title: 'Security',
                 children: [
                   { link: 'management:users' },
@@ -509,6 +433,10 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
             ],
+          },
+          {
+            id: 'monitoring',
+            link: 'monitoring',
           },
           {
             link: 'integrations',

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -32,6 +33,7 @@ const preconfiguredActionSchema = schema.object({
   actionTypeId: schema.string({ minLength: 1 }),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  exposeConfig: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 const customHostSettingsSchema = schema.object({

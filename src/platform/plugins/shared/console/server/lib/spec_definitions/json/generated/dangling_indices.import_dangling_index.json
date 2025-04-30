@@ -21,7 +21,7 @@
     "patterns": [
       "_dangling/{index_uuid}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-gateway-dangling-indices.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/dangling-index-import.html",
     "availability": {
       "stack": true,
       "serverless": false

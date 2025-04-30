@@ -46,6 +46,7 @@ import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 jest.mock('./spaces/helpers');
 
@@ -121,6 +122,7 @@ jest.mock('./app_context');
 jest.mock('./audit_logging');
 jest.mock('./agent_policies/full_agent_policy');
 jest.mock('./agent_policies/outputs_helpers');
+jest.mock('./agent_policies/deploy_agent_policies_task');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
@@ -217,7 +219,9 @@ describe('Agent policy', () => {
       soClient.create.mockResolvedValueOnce({
         id: 'test-agent-policy',
         type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {},
+        attributes: {
+          name: 'test',
+        },
         references: [],
       });
 
@@ -235,6 +239,7 @@ describe('Agent policy', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
+        name: 'test',
         id: 'test-agent-policy',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -278,6 +283,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-agent-policy',
+        name: 'test',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -489,7 +495,9 @@ describe('Agent policy', () => {
 
       soClient.get.mockResolvedValueOnce({
         id: 'test-agent-policy',
-        attributes: {},
+        attributes: {
+          name: 'Test',
+        },
         references: [],
         type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -499,6 +507,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-agent-policy',
+        name: 'Test',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -512,13 +521,17 @@ describe('Agent policy', () => {
         saved_objects: [
           {
             id: 'test-agent-policy-1',
-            attributes: {},
+            attributes: {
+              name: 'Test 1',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-agent-policy-2',
-            attributes: {},
+            attributes: {
+              name: 'Test 2',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
@@ -530,12 +543,14 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
         id: 'test-agent-policy-1',
+        name: 'Test 1',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
         id: 'test-agent-policy-2',
+        name: 'Test 2',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -550,14 +565,18 @@ describe('Agent policy', () => {
         saved_objects: [
           {
             id: 'test-agent-policy-1',
-            attributes: {},
+            attributes: {
+              name: 'Test 1',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
           {
             id: 'test-agent-policy-2',
-            attributes: {},
+            attributes: {
+              name: 'Test 2',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
@@ -576,12 +595,14 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
         id: 'test-agent-policy-1',
+        name: 'Test 1',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
         id: 'test-agent-policy-2',
+        name: 'Test 2',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -591,241 +612,131 @@ describe('Agent policy', () => {
     let soClient: ReturnType<typeof savedObjectsClientMock.create>;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
 
-    describe('with enableReusableIntegrationPolicies disabled', () => {
-      beforeEach(() => {
-        soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
-        mockedPackagePolicyService.create.mockReset();
-        esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    beforeEach(() => {
+      soClient = getSavedObjectMock({ revision: 1, name: 'Test', package_policies: ['package-1'] });
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+        },
+      ] as any);
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        (getAgentsByKuery as jest.Mock).mockResolvedValue({
-          agents: [],
-          total: 0,
-          page: 1,
-          perPage: 10,
-        });
-
-        mockedPackagePolicyService.delete.mockResolvedValue([
-          {
-            id: 'package-1',
-          } as any,
-        ]);
-        jest
-          .spyOn(appContextService, 'getExperimentalFeatures')
-          .mockReturnValue({ enableReusableIntegrationPolicies: false } as any);
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
       });
+      mockedPackagePolicyService.create.mockReset();
+    });
 
-      it('should throw error for agent policy which has managed package policy', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-            is_managed: true,
-          },
-        ] as any);
-        try {
-          await agentPolicyService.delete(soClient, esClient, 'mocked');
-        } catch (e) {
-          expect(e.message).toEqual(
-            new PackagePolicyRestrictionRelatedError(
-              `Cannot delete agent policy mocked that contains managed package policies`
-            ).message
-          );
-        }
-      });
-
-      it('should allow delete with force for agent policy which has managed package policy', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-            is_managed: true,
-          },
-        ] as any);
-        const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
-          force: true,
-        });
-        expect(response.id).toEqual('mocked');
-      });
-
-      it('should call audit logger', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-          },
-        ] as any);
+    it('should throw error for agent policy which has managed package policy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      try {
         await agentPolicyService.delete(soClient, esClient, 'mocked');
-
-        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
-          action: 'delete',
-          id: 'mocked',
-          savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-        });
-      });
-
-      it('should throw error if active agents are assigned to the policy', async () => {
-        (getAgentsByKuery as jest.Mock).mockResolvedValue({
-          agents: [],
-          total: 2,
-          page: 1,
-          perPage: 10,
-        });
-        await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
-          'Cannot delete an agent policy that is assigned to any active or inactive agents'
+      } catch (e) {
+        expect(e.message).toEqual(
+          new PackagePolicyRestrictionRelatedError(
+            `Cannot delete agent policy mocked that contains managed package policies`
+          ).message
         );
+      }
+    });
+
+    it('should allow delete with force for agent policy which has managed package policy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
+        force: true,
       });
+      expect(response.id).toEqual('mocked');
+    });
 
-      it('should delete .fleet-policies entries on agent policy delete', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-          },
-        ] as any);
-        esClient.deleteByQuery.mockResolvedValueOnce({
-          deleted: 2,
-        });
+    it('should call audit logger', async () => {
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
 
-        await agentPolicyService.delete(soClient, esClient, 'mocked');
-
-        expect(esClient.deleteByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            index: AGENT_POLICY_INDEX,
-            query: {
-              term: {
-                policy_id: 'mocked',
-              },
-            },
-          })
-        );
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
+        action: 'delete',
+        id: 'mocked',
+        name: 'Test',
+        savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
 
-    describe('with enableReusableIntegrationPolicies enabled', () => {
-      beforeEach(() => {
-        soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-          },
-        ] as any);
-        esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    it('should throw error if active agents are assigned to the policy', async () => {
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 2,
+        page: 1,
+        perPage: 10,
+      });
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
+        'Cannot delete an agent policy that is assigned to any active or inactive agents'
+      );
+    });
 
-        (getAgentsByKuery as jest.Mock).mockResolvedValue({
-          agents: [],
-          total: 0,
-          page: 1,
-          perPage: 10,
-        });
-        mockedPackagePolicyService.create.mockReset();
-        jest
-          .spyOn(appContextService, 'getExperimentalFeatures')
-          .mockReturnValue({ enableReusableIntegrationPolicies: true } as any);
+    it('should delete .fleet-policies entries on agent policy delete', async () => {
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 2,
       });
 
-      it('should throw error for agent policy which has managed package policy', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-            is_managed: true,
-          },
-        ] as any);
-        try {
-          await agentPolicyService.delete(soClient, esClient, 'mocked');
-        } catch (e) {
-          expect(e.message).toEqual(
-            new PackagePolicyRestrictionRelatedError(
-              `Cannot delete agent policy mocked that contains managed package policies`
-            ).message
-          );
-        }
-      });
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
 
-      it('should allow delete with force for agent policy which has managed package policy', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-            is_managed: true,
-          },
-        ] as any);
-        const response = await agentPolicyService.delete(soClient, esClient, 'mocked', {
-          force: true,
-        });
-        expect(response.id).toEqual('mocked');
-      });
-
-      it('should call audit logger', async () => {
-        await agentPolicyService.delete(soClient, esClient, 'mocked');
-
-        expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
-          action: 'delete',
-          id: 'mocked',
-          savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-        });
-      });
-
-      it('should throw error if active agents are assigned to the policy', async () => {
-        (getAgentsByKuery as jest.Mock).mockResolvedValue({
-          agents: [],
-          total: 2,
-          page: 1,
-          perPage: 10,
-        });
-        await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
-          'Cannot delete an agent policy that is assigned to any active or inactive agents'
-        );
-      });
-
-      it('should delete .fleet-policies entries on agent policy delete', async () => {
-        esClient.deleteByQuery.mockResolvedValueOnce({
-          deleted: 2,
-        });
-
-        await agentPolicyService.delete(soClient, esClient, 'mocked');
-
-        expect(esClient.deleteByQuery).toHaveBeenCalledWith(
-          expect.objectContaining({
-            index: AGENT_POLICY_INDEX,
-            query: {
-              term: {
-                policy_id: 'mocked',
-              },
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          query: {
+            term: {
+              policy_id: 'mocked',
             },
-          })
-        );
-      });
+          },
+        })
+      );
+    });
 
-      it('should only delete package polices that are not shared with other agent policies', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+    it('should only delete package polices that are not shared with other agent policies', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          policy_id: ['policy_1'],
+          policy_ids: ['policy_1', 'int_policy_2'],
+        },
+        {
+          id: 'package-2',
+          policy_id: ['policy_1'],
+          policy_ids: ['policy_1'],
+        },
+        {
+          id: 'package-3',
+        },
+      ] as any);
+      await agentPolicyService.delete(soClient, esClient, 'policy_1');
+      expect(mockedPackagePolicyService.delete).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        ['package-2', 'package-3'],
+        expect.anything()
+      );
+      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
           {
             id: 'package-1',
-            policy_id: ['policy_1'],
-            policy_ids: ['policy_1', 'int_policy_2'],
+            policy_id: 'int_policy_2',
+            policy_ids: ['int_policy_2'],
           },
-          {
-            id: 'package-2',
-            policy_id: ['policy_1'],
-            policy_ids: ['policy_1'],
-          },
-          {
-            id: 'package-3',
-          },
-        ] as any);
-        await agentPolicyService.delete(soClient, esClient, 'policy_1');
-        expect(mockedPackagePolicyService.delete).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          ['package-2', 'package-3'],
-          expect.anything()
-        );
-        expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          [
-            {
-              id: 'package-1',
-              policy_id: 'int_policy_2',
-              policy_ids: ['int_policy_2'],
-            },
-          ]
-        );
-      });
+        ]
+      );
     });
   });
 
@@ -844,7 +755,7 @@ describe('Agent policy', () => {
   });
 
   describe('bumpAllAgentPolicies', () => {
-    it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
+    it('should call scheduleDeployAgentPoliciesTask with updated event once', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
         monitoring_enabled: ['metrics'],
@@ -872,12 +783,12 @@ describe('Agent policy', () => {
         })
       );
 
-      expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('bumpAllAgentPoliciesForOutput', () => {
-    it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
+    it('should call scheduleDeployAgentPoliciesTask with updated event once', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
         monitoring_enabled: ['metrics'],
@@ -888,7 +799,7 @@ describe('Agent policy', () => {
       );
       await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
 
-      expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1030,7 +941,7 @@ describe('Agent policy', () => {
   });
 
   describe('bumpAllAgentPoliciesForDownloadSource', () => {
-    it('should call agentPolicyUpdateEventHandler with updated event once', async () => {
+    it('should call scheduleDeployAgentPoliciesTask with updated event once', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
         monitoring_enabled: ['metrics'],
@@ -1041,7 +952,7 @@ describe('Agent policy', () => {
       );
       await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, 'test-id-1');
 
-      expect(agentPolicyUpdateEventHandler).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1103,7 +1014,9 @@ describe('Agent policy', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.get.mockResolvedValue({
-        attributes: {},
+        attributes: {
+          name: 'Test',
+        },
         references: [],
         id: 'test-agent-policy',
         type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -1117,6 +1030,7 @@ describe('Agent policy', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
+        name: 'Test',
         id: 'test-agent-policy',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -1336,6 +1250,98 @@ describe('Agent policy', () => {
           ).message
         );
       }
+    });
+
+    it('should link shared package policies', async () => {
+      agentPolicyService.requireUniqueName = async () => {};
+      soClient = savedObjectsClientMock.create();
+      const mockPolicy = {
+        type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { revision: 1, package_policies: ['package-1'] } as any,
+      };
+      soClient.get.mockImplementation(async (type: string, id: string) => {
+        return {
+          id,
+          ...mockPolicy,
+        };
+      });
+      soClient.find
+        .mockImplementationOnce(async () => ({
+          saved_objects: [
+            {
+              id: 'agent-policy-id',
+              score: 1,
+              ...{ ...mockPolicy, name: 'mocked-policy' },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        }))
+        .mockImplementationOnce(async () => ({
+          saved_objects: [
+            {
+              id: 'agent-policy-id-copy',
+              score: 1,
+              ...{ ...mockPolicy, name: 'mocked-policy' },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 1,
+        }));
+      soClient.create.mockImplementation(async (type, attributes) => {
+        return {
+          attributes: attributes as unknown as NewAgentPolicy,
+          id: 'mocked',
+          type: 'mocked',
+          references: [],
+        };
+      });
+      const packagePolicies = [
+        {
+          id: 'package-1',
+          name: 'package-1',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1', 'policy_2'],
+        },
+        {
+          id: 'package-2',
+          name: 'package-2',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1'],
+        },
+      ] as any;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue(packagePolicies);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: packagePolicies } as any);
+      await agentPolicyService.copy(soClient, esClient, 'mocked', {
+        name: 'copy mocked',
+      });
+      expect(mockedPackagePolicyService.bulkCreate).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            name: 'package-2 (copy)',
+            policy_id: 'policy_1',
+            policy_ids: ['mocked'],
+          },
+        ],
+        expect.anything()
+      );
+      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        [
+          {
+            id: 'package-1',
+            name: 'package-1',
+            policy_id: 'policy_1',
+            policy_ids: ['policy_1', 'policy_2', 'mocked'],
+          },
+        ]
+      );
     });
   });
 
@@ -1665,7 +1671,7 @@ describe('Agent policy', () => {
             perPage: 1000,
             sortField: 'created_at',
             sortOrder: 'asc',
-            fields: ['id'],
+            fields: ['id', 'name'],
             filter: undefined,
           })
         );
@@ -1685,7 +1691,7 @@ describe('Agent policy', () => {
             perPage: 13,
             sortField: 'created_at',
             sortOrder: 'asc',
-            fields: ['id'],
+            fields: ['id', 'name'],
             filter: 'one=two',
           })
         );

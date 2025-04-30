@@ -10,12 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import {
   type Message,
-  MessageRole,
   type TelemetryEventTypeWithPayload,
   ObservabilityAIAssistantTelemetryEventType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useLastUsedPrompts } from '../hooks/use_last_used_prompts';
-import { FunctionListPopover } from '../chat/function_list_popover';
 import { PromptEditorFunction } from './prompt_editor_function';
 import { PromptEditorNaturalLanguage } from './prompt_editor_natural_language';
 import { useScopes } from '../hooks/use_scopes';
@@ -83,25 +81,6 @@ export function PromptEditor({
     setInnerMessage(newInnerMessage);
   };
 
-  const handleSelectFunction = (func: string | undefined) => {
-    if (func) {
-      setMode('function');
-      setInnerMessage({
-        function_call: { name: func, trigger: MessageRole.Assistant },
-        role: MessageRole.User,
-      });
-      onChangeHeight(200);
-      return;
-    }
-
-    setMode('prompt');
-    setInnerMessage(undefined);
-
-    if (containerRef.current) {
-      onChangeHeight(containerRef.current.clientHeight);
-    }
-  };
-
   const handleSubmit = useCallback(() => {
     if (loading || !innerMessage) {
       return;
@@ -125,7 +104,7 @@ export function PromptEditor({
       setMode('prompt');
       onSendTelemetry({
         type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat,
-        payload: { ...message, scopes },
+        payload: { scopes },
       });
     } catch (_) {
       setInnerMessage(oldMessage);
@@ -161,14 +140,6 @@ export function PromptEditor({
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" ref={containerRef}>
-      <EuiFlexItem grow={false}>
-        <FunctionListPopover
-          mode={mode}
-          selectedFunctionName={innerMessage?.function_call?.name}
-          onSelectFunction={handleSelectFunction}
-          disabled={loading || disabled}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         {mode === 'function' && innerMessage?.function_call?.name ? (
           <PromptEditorFunction

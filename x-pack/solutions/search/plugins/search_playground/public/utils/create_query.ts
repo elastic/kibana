@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
+import { RetrieverContainer, SearchHighlight } from '@elastic/elasticsearch/lib/api/types';
 import { IndicesQuerySourceFields, QuerySourceFields } from '../types';
 
 export type IndexFields = Record<string, string[]>;
@@ -28,13 +28,7 @@ export const SUGGESTED_BM25_FIELDS = [
 
 export const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = [
-  'body_content',
-  'content',
-  'text',
-  'page_content_text',
-  'text_field',
-];
+const SEMANTIC_FIELD_TYPE = 'semantic';
 
 interface Matches {
   queryMatches: any[];
@@ -52,7 +46,7 @@ export function createQuery(
   rerankOptions: ReRankOptions = {
     rrf: true,
   }
-): { retriever: RetrieverContainer } {
+): { retriever: RetrieverContainer; highlight?: SearchHighlight } {
   const indices = Object.keys(fieldDescriptors);
   const boolMatches = Object.keys(fields).reduce<Matches>(
     (acc, index) => {
@@ -64,60 +58,8 @@ export function createQuery(
 
       const semanticMatches = indexFields.map((field) => {
         const semanticField = indexFieldDescriptors.semantic_fields.find((x) => x.field === field);
-        const isSourceField = sourceFields[index].includes(field);
 
-        // this is needed to get the inner_hits for the source field
-        // we cant rely on only the semantic field
-        // in future inner_hits option will be added to semantic
-        if (semanticField && isSourceField) {
-          if (semanticField.embeddingType === 'dense_vector') {
-            const filter =
-              semanticField.indices.length < indices.length
-                ? { filter: { terms: { _index: semanticField.indices } } }
-                : {};
-
-            return {
-              nested: {
-                path: `${semanticField.field}.inference.chunks`,
-                query: {
-                  knn: {
-                    field: `${semanticField.field}.inference.chunks.embeddings`,
-                    ...filter,
-                    query_vector_builder: {
-                      text_embedding: {
-                        model_id: semanticField.inferenceId,
-                        model_text: '{query}',
-                      },
-                    },
-                  },
-                },
-                inner_hits: {
-                  size: 2,
-                  name: `${index}.${semanticField.field}`,
-                  _source: [`${semanticField.field}.inference.chunks.text`],
-                },
-              },
-            };
-          } else if (semanticField.embeddingType === 'sparse_vector') {
-            return {
-              nested: {
-                path: `${semanticField.field}.inference.chunks`,
-                query: {
-                  sparse_vector: {
-                    inference_id: semanticField.inferenceId,
-                    field: `${semanticField.field}.inference.chunks.embeddings`,
-                    query: '{query}',
-                  },
-                },
-                inner_hits: {
-                  size: 2,
-                  name: `${index}.${semanticField.field}`,
-                  _source: [`${semanticField.field}.inference.chunks.text`],
-                },
-              },
-            };
-          }
-        } else if (semanticField) {
+        if (semanticField) {
           return {
             semantic: {
               field: semanticField.field,
@@ -241,12 +183,34 @@ export function createQuery(
 
   // for single Elser support to make it easy to read - skips bool query
   if (boolMatches.queryMatches.length === 1 && boolMatches.knnMatches.length === 0) {
+    const semanticField = boolMatches.queryMatches[0].semantic?.field ?? null;
+
+    let isSourceField = false;
+    indices.forEach((index) => {
+      if (sourceFields[index].includes(semanticField)) {
+        isSourceField = true;
+      }
+    });
+
     return {
       retriever: {
         standard: {
           query: boolMatches.queryMatches[0],
         },
       },
+      ...(isSourceField
+        ? {
+            highlight: {
+              fields: {
+                [semanticField]: {
+                  type: SEMANTIC_FIELD_TYPE,
+                  number_of_fragments: 2,
+                  order: 'score',
+                },
+              },
+            },
+          }
+        : {}),
     };
   }
 
@@ -285,12 +249,39 @@ export function createQuery(
       };
     });
 
+    const semanticFields = matches
+      .filter((match) => match.semantic)
+      .map((match) => match.semantic.field)
+      .filter((field) => {
+        let isSourceField = false;
+        indices.forEach((index) => {
+          if (sourceFields[index].includes(field)) {
+            isSourceField = true;
+          }
+        });
+        return isSourceField;
+      });
+
     return {
       retriever: {
         rrf: {
           retrievers,
         },
       },
+      ...(semanticFields.length > 0
+        ? {
+            highlight: {
+              fields: semanticFields.reduce((acc, field) => {
+                acc[field] = {
+                  type: SEMANTIC_FIELD_TYPE,
+                  number_of_fragments: 2,
+                  order: 'score',
+                };
+                return acc;
+              }, {}),
+            },
+          }
+        : {}),
     };
   }
 
@@ -314,14 +305,6 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
-      // semantic_text fields are prioritized
-      if (indexFieldDescriptors.semantic_fields.length > 0) {
-        return {
-          ...acc,
-          [index]: indexFieldDescriptors.semantic_fields.map((x) => x.field),
-        };
-      }
-
       // if there are no source fields, we don't need to suggest anything
       if (indexFieldDescriptors.source_fields.length === 0) {
         return {
@@ -330,15 +313,9 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
         };
       }
 
-      const suggested = indexFieldDescriptors.source_fields.filter((x) =>
-        SUGGESTED_SOURCE_FIELDS.includes(x)
-      );
-
-      const fields = suggested.length === 0 ? [indexFieldDescriptors.source_fields[0]] : suggested;
-
       return {
         ...acc,
-        [index]: fields,
+        [index]: indexFieldDescriptors.source_fields,
       };
     },
     {}

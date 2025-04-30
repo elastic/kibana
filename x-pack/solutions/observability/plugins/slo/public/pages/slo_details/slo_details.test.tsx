@@ -92,6 +92,14 @@ const mockKibana = () => {
           get: () => 'http://localhost:5601',
         },
       },
+      docLinks: {
+        links: {
+          query: {},
+          observability: {
+            slo: 'dummy_link',
+          },
+        },
+      },
       dataViews: {
         create: jest.fn().mockResolvedValue({
           getIndexPattern: jest.fn().mockReturnValue('some-index'),
@@ -113,9 +121,8 @@ const mockKibana = () => {
         },
       },
       triggersActionsUi: {
-        getAddRuleFlyout: jest.fn(() => (
-          <div data-test-subj="add-rule-flyout">mocked component</div>
-        )),
+        ruleTypeRegistry: {},
+        actionTypeRegistry: {},
       },
       uiSettings: {
         get: (settings: string) => {
@@ -222,7 +229,6 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
-    expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(2);
@@ -237,7 +243,6 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
-    expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorRateChart')).toBeTruthy();

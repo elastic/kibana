@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -40,15 +40,10 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       const params: estypes.IndicesSimulateTemplateRequest = templateName
         ? {
             name: templateName,
-            body: {
-              index_patterns,
-            },
           }
         : {
-            body: {
-              ...template,
-              index_patterns,
-            },
+            ...template,
+            index_patterns,
           };
 
       try {

@@ -9,21 +9,28 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { internalElserInferenceId } from '../../../../common/consts';
+import { isLegacySemanticTextVersion } from '../utils';
 
 export const createIndex = async ({
   esClient,
   indexName,
+  manifestVersion,
   mappings,
   log,
+  elserInferenceId = internalElserInferenceId,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
+  manifestVersion: string;
   mappings: MappingTypeMapping;
   log: Logger;
+  elserInferenceId?: string;
 }) => {
   log.debug(`Creating index ${indexName}`);
 
-  overrideInferenceId(mappings, internalElserInferenceId);
+  const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
+
+  overrideInferenceId(mappings, elserInferenceId);
 
   await esClient.indices.create({
     index: indexName,
@@ -31,6 +38,7 @@ export const createIndex = async ({
     settings: {
       number_of_shards: 1,
       auto_expand_replicas: '0-1',
+      'index.mapping.semantic_text.use_legacy_format': legacySemanticText,
     },
   });
 };

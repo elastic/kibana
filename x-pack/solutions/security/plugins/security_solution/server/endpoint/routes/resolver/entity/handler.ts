@@ -34,21 +34,19 @@ export function handleEntities(
     const queryResponse = await esClient.asCurrentUser.search({
       ignore_unavailable: true,
       index: indices,
-      body: {
-        // only return 1 match at most
-        size: 1,
-        query: {
-          bool: {
-            filter: [
-              ...createSharedFilters({ excludeColdAndFrozenTiers }),
-              {
-                // only return documents with the matching _id
-                ids: {
-                  values: _id,
-                },
+      // only return 1 match at most
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            ...createSharedFilters({ excludeColdAndFrozenTiers }),
+            {
+              // only return documents with the matching _id
+              ids: {
+                values: _id,
               },
-            ],
-          },
+            },
+          ],
         },
       },
     });

@@ -21,11 +21,13 @@ import {
   ESQLInlineCast,
   ESQLUnknownItem,
   ESQLIdentifier,
+  ESQLMap,
+  ESQLMapEntry,
 } from '../types';
 import { walk, Walker } from './walker';
 
 test('can walk all functions', () => {
-  const { root } = parse('METRICS index a(b(c(foo)))');
+  const { root } = parse('TS index | EVAL a(b(c(foo)))');
   const functions: string[] = [];
 
   walk(root, {
@@ -36,7 +38,7 @@ test('can walk all functions', () => {
 });
 
 test('can find assignment expression', () => {
-  const query = 'METRICS source var0 = bucket(bytes, 1 hour)';
+  const query = 'TS source | STATS var0 = bucket(bytes, 1 hour)';
   const { root } = parse(query);
   const functions: ESQLFunction[] = [];
 
@@ -84,19 +86,22 @@ describe('structurally can walk all nodes', () => {
     });
 
     test('can traverse JOIN command', () => {
-      const { ast } = parse('FROM index | LEFT JOIN a AS b ON c, d');
+      const { ast } = parse('FROM index | LEFT JOIN a ON c, d');
       const commands: ESQLCommand[] = [];
+      const sources: ESQLSource[] = [];
       const identifiers: ESQLIdentifier[] = [];
       const columns: ESQLColumn[] = [];
 
       walk(ast, {
         visitCommand: (cmd) => commands.push(cmd),
+        visitSource: (id) => sources.push(id),
         visitIdentifier: (id) => identifiers.push(id),
         visitColumn: (col) => columns.push(col),
       });
 
       expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'join']);
-      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['a', 'as', 'b', 'c', 'd']);
+      expect(sources.map(({ name }) => name).sort()).toStrictEqual(['a', 'index']);
+      expect(identifiers.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
       expect(columns.map(({ name }) => name).sort()).toStrictEqual(['c', 'd']);
     });
 
@@ -203,7 +208,7 @@ describe('structurally can walk all nodes', () => {
         });
 
         test('iterates through all sources', () => {
-          const { ast } = parse('METRICS index, index2, index3, index4');
+          const { ast } = parse('TS index, index2, index3, index4');
           const sources: ESQLSource[] = [];
 
           walk(ast, {
@@ -217,6 +222,37 @@ describe('structurally can walk all nodes', () => {
             'index3',
             'index4',
           ]);
+        });
+
+        test('can walk through "WHERE" binary expression', () => {
+          const query = 'FROM index | STATS a = 123 WHERE c == d';
+          const { root } = parse(query);
+          const expressions: ESQLFunction[] = [];
+
+          walk(root, {
+            visitFunction: (node) => {
+              if (node.name === 'where') {
+                expressions.push(node);
+              }
+            },
+          });
+
+          expect(expressions.length).toBe(1);
+          expect(expressions[0]).toMatchObject({
+            type: 'function',
+            subtype: 'binary-expression',
+            name: 'where',
+            args: [
+              {
+                type: 'function',
+                name: '=',
+              },
+              {
+                type: 'function',
+                name: '==',
+              },
+            ],
+          });
         });
       });
 
@@ -773,6 +809,48 @@ describe('structurally can walk all nodes', () => {
     });
   });
 
+  describe('expressions', () => {
+    test('can visit a "map" expression', () => {
+      const src = 'ROW f(0, {"a": 0})';
+      const { ast } = parse(src);
+      const nodes: ESQLMap[] = [];
+
+      walk(ast, {
+        visitMap: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'map',
+        },
+      ]);
+      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('{"a": 0}');
+    });
+
+    test('can visit a "map-entry" expression', () => {
+      const src = 'ROW f(0, {"a":0, "foo" : /* 1 */ "bar"})';
+      const { ast } = parse(src);
+      const nodes: ESQLMapEntry[] = [];
+
+      walk(ast, {
+        visitMapEntry: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'map-entry',
+        },
+        {
+          type: 'map-entry',
+        },
+      ]);
+      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('"a":0');
+      expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe(
+        '"foo" : /* 1 */ "bar"'
+      );
+    });
+  });
+
   describe('unknown nodes', () => {
     test('can iterate through "unknown" nodes', () => {
       const { ast } = parse('FROM index');
@@ -1078,8 +1156,8 @@ describe('Walker.match()', () => {
       name: 'join',
       commandType: 'left',
     })!;
-    const identifier1 = Walker.match(join1, {
-      type: 'identifier',
+    const source1 = Walker.match(join1, {
+      type: 'source',
       name: 'a',
     })!;
     const join2 = Walker.match(root, {
@@ -1087,15 +1165,15 @@ describe('Walker.match()', () => {
       name: 'join',
       commandType: 'right',
     })!;
-    const identifier2 = Walker.match(join2, {
-      type: 'identifier',
+    const source2 = Walker.match(join2, {
+      type: 'source',
       name: 'b',
     })!;
 
-    expect(identifier1).toMatchObject({
+    expect(source1).toMatchObject({
       name: 'a',
     });
-    expect(identifier2).toMatchObject({
+    expect(source2).toMatchObject({
       name: 'b',
     });
   });
@@ -1189,11 +1267,11 @@ describe('Walker.matchAll()', () => {
 });
 
 describe('Walker.hasFunction()', () => {
-  test('can find assignment expression', () => {
+  test('can find binary expression expression', () => {
     const query1 = 'FROM a | STATS bucket(bytes, 1 hour)';
-    const query2 = 'FROM b | STATS var0 = bucket(bytes, 1 hour)';
-    const has1 = Walker.hasFunction(parse(query1).ast!, '=');
-    const has2 = Walker.hasFunction(parse(query2).ast!, '=');
+    const query2 = 'FROM b | STATS var0 == bucket(bytes, 1 hour)';
+    const has1 = Walker.hasFunction(parse(query1).ast!, '==');
+    const has2 = Walker.hasFunction(parse(query2).ast!, '==');
 
     expect(has1).toBe(false);
     expect(has2).toBe(true);

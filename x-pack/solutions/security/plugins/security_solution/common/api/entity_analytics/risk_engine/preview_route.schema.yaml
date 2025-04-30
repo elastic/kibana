@@ -106,3 +106,8 @@ components:
               items:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
               description: A list of service risk scores
+            generic:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of generic entities risk scores

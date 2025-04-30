@@ -2,8 +2,9 @@
   "type": "shared-common",
   "id": "@kbn/reporting-mocks-server",
   "owner": [
-    "@elastic/appex-sharedux"
+    "@elastic/response-ops"
   ],
   "group": "platform",
-  "visibility": "private"
+  "visibility": "private",
+  "devOnly": true
 }

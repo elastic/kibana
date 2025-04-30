@@ -18,7 +18,7 @@ jest.mock('../../../common/components/user_privileges');
 describe('SaveTimelineCallout', () => {
   it('should render the callout and save components', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true },
+      timelinePrivileges: { crud: true },
     });
 
     const mockStore = createMockStore({

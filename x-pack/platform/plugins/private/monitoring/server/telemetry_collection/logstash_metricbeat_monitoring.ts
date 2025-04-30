@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -32,6 +32,8 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
     state: INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE,
     stats: INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS,
   };
+
+  private monitoringType: string = 'metricbeat';
 
   /*
    * Call the function for fetching and summarizing Logstash metrics for Metricbeat monitoring
@@ -67,6 +69,7 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
    * @param monitoringType - the monitoring type where metricbeat monitoring is intended.
    */
   setIndexPattern(monitoringType: string) {
+    this.monitoringType = monitoringType;
     if (monitoringType === 'stack') {
       this.indexPattern.state = INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE;
       this.indexPattern.stats = INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS;
@@ -79,6 +82,11 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
   getIndexPattern(): { [key: string]: string } {
     return this.indexPattern;
   }
+
+  getMonitoringType(): string {
+    return this.monitoringType;
+  }
+
   /*
    * Update a clusters object with processed Logstash stats for metricbeat monitoring
    * @param {Array} results - array of LogstashStats docs from ES
@@ -117,7 +125,8 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
         incrementByKey(a, thisVersion);
         clusters[clusterUuid].versions = mapToList(a, 'version');
 
-        const thisCollectionType = hit._source?.agent?.type || 'metricbeat';
+        // for stack_monitoring, agent internally uses metricbeat or filebeat
+        const thisCollectionType = this.getMonitoringType() === 'stack' ? 'agent' : 'metricbeat';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }
@@ -271,28 +280,26 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
       index: this.indexPattern.stats,
       ignore_unavailable: true,
       filter_path: filterPath,
-      body: {
-        query: createQuery({
-          start,
-          end,
-          filters: [
-            {
-              bool: {
-                should: [
-                  { term: { 'metricset.name': 'node_stats' } },
-                  { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node_stats' } },
-                ],
-              },
+      query: createQuery({
+        start,
+        end,
+        filters: [
+          {
+            bool: {
+              should: [
+                { term: { 'metricset.name': 'node_stats' } },
+                { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node_stats' } },
+              ],
             },
-          ],
-        }) as estypes.QueryDslQueryContainer,
-        collapse: {
-          field: 'logstash.node.stats.logstash.uuid',
-        },
-        sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
-        from: page * HITS_SIZE,
-        size: HITS_SIZE,
+          },
+        ],
+      }) as estypes.QueryDslQueryContainer,
+      collapse: {
+        field: 'logstash.node.stats.logstash.uuid',
       },
+      sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
+      from: page * HITS_SIZE,
+      size: HITS_SIZE,
     };
 
     const results = await callCluster.search<LogstashStats>(params, {
@@ -335,28 +342,26 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
       index: this.indexPattern.state,
       ignore_unavailable: true,
       filter_path: filterPath,
-      body: {
-        query: createQuery({
-          // metricbeat occasionally sends state metrics
-          // so, not using start and end periods as we need node state info to fill plugin usages
-          filters: [
-            { terms: { 'logstash.node.state.pipeline.ephemeral_id': ephemeralIds } },
-            {
-              bool: {
-                should: [
-                  { term: { 'metricset.name': 'node' } },
-                  { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node' } },
-                ],
-              },
+      query: createQuery({
+        // metricbeat occasionally sends state metrics
+        // so, not using start and end periods as we need node state info to fill plugin usages
+        filters: [
+          { terms: { 'logstash.node.state.pipeline.ephemeral_id': ephemeralIds } },
+          {
+            bool: {
+              should: [
+                { term: { 'metricset.name': 'node' } },
+                { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node' } },
+              ],
             },
-          ],
-        }) as estypes.QueryDslQueryContainer,
-        collapse: {
-          field: 'logstash.node.state.pipeline.ephemeral_id',
-        },
-        sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
-        size: ephemeralIds.length,
+          },
+        ],
+      }) as estypes.QueryDslQueryContainer,
+      collapse: {
+        field: 'logstash.node.state.pipeline.ephemeral_id',
       },
+      sort: [{ ['timestamp']: { order: 'desc', unmapped_type: 'long' } }],
+      size: ephemeralIds.length,
     };
 
     const results = await callCluster.search<LogstashState>(params, {

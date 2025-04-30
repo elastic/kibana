@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -96,6 +96,7 @@ const AlertOptional = rt.partial({
   'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,
   'kibana.alert.reason': schemaString,
   'kibana.alert.rule.execution.timestamp': schemaDate,

@@ -9,5 +9,9 @@
 
 import { getFieldRowStory, getStory } from './common';
 
-export default getStory('Number Row', 'A setting with a numeric value.');
+const Story = getStory('Number Row', 'A setting with a numeric value.');
 export const NumberRow = getFieldRowStory('number' as const);
+
+export default {
+  ...Story,
+};

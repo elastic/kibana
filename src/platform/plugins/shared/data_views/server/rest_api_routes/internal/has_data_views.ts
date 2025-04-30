@@ -41,16 +41,16 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
     .get({
       path: '/internal/data_views/has_data_views',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by saved objects client',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'Authorization provided by saved objects client',
-          },
-        },
         validate: {
           response: {
             200: {

@@ -19,7 +19,7 @@ import { analyticsEventsExist } from '../../lib/analytics/analytics_events_exist
 import { createApiKey } from '../../lib/analytics/create_api_key';
 import { deleteAnalyticsCollectionById } from '../../lib/analytics/delete_analytics_collection';
 import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
@@ -51,6 +51,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/elasticsearch/analytics/collections',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: schema.object({
           query: schema.maybe(schema.string()),
@@ -76,6 +82,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/elasticsearch/analytics/collections/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -102,6 +114,12 @@ export function registerAnalyticsRoutes({
   router.post(
     {
       path: '/internal/elasticsearch/analytics/collections/{name}/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           keyName: schema.string(),
@@ -128,6 +146,12 @@ export function registerAnalyticsRoutes({
   router.post(
     {
       path: '/internal/elasticsearch/analytics/collections',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -173,6 +197,12 @@ export function registerAnalyticsRoutes({
   router.delete(
     {
       path: '/internal/elasticsearch/analytics/collections/{name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -196,6 +226,12 @@ export function registerAnalyticsRoutes({
   router.get(
     {
       path: '/internal/elasticsearch/analytics/collection/{name}/events/exist',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           name: schema.string(),

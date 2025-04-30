@@ -123,6 +123,8 @@ export interface TelemetryPluginConfig {
   labels: Record<string, unknown>;
   /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
   appendServerlessChannelsSuffix: boolean;
+  /** Should use the local EBT shipper to persist events in the local ES */
+  localShipper: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -155,9 +157,10 @@ export class TelemetryPlugin
   }
 
   public setup(
-    { analytics, http, notifications, getStartServices }: CoreSetup,
+    coreSetup: CoreSetup,
     { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
+    const { analytics, http, notifications, getStartServices } = coreSetup;
     const config = this.config;
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
@@ -201,6 +204,13 @@ export class TelemetryPlugin
       buildShipperHeaders,
       buildShipperUrl: createBuildShipperUrl(sendTo),
     });
+
+    if (config.localShipper) {
+      // Make it async to exclude the shipper from the initial page load since this config will likely be false most of the time.
+      import('./local_shipper')
+        .then(({ initializeLocalShipper }) => initializeLocalShipper(coreSetup))
+        .catch(() => {});
+    }
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig(http);

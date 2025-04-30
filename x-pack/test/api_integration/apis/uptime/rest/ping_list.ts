@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { PingsResponseType } from '@kbn/uptime-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';

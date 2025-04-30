@@ -25,7 +25,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 
-export const EmptyPrompt: React.FC = () => {
+interface EmptyPromptProps {
+  getStartedAction: () => void;
+}
+export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
@@ -53,7 +56,7 @@ export const EmptyPrompt: React.FC = () => {
                     <p>
                       <FormattedMessage
                         id="xpack.searchSynonyms.emptyPrompt.subtitle"
-                        defaultMessage="Improve search relevance by matching terms that express the same concept."
+                        defaultMessage="Create and manage Elasticsearch synonym sets and rules, which expand search results by matching different terms that express the same concept."
                       />
                     </p>
                   </EuiText>
@@ -64,6 +67,7 @@ export const EmptyPrompt: React.FC = () => {
                       data-test-subj="searchSynonymsEmptyPromptGetStartedButton"
                       color="primary"
                       fill
+                      onClick={getStartedAction}
                     >
                       <FormattedMessage
                         id="xpack.searchSynonyms.emptyPrompt.getStartedButton"
@@ -86,8 +90,8 @@ export const EmptyPrompt: React.FC = () => {
                               <EuiTitle size="xxs">
                                 <h5>
                                   <FormattedMessage
-                                    id="xpack.searchSynonyms.emptyPrompt.improveSearchRelevance.title"
-                                    defaultMessage="Expand search coverage"
+                                    id="xpack.searchSynonyms.emptyPrompt.instantlyAvailable.title"
+                                    defaultMessage="Instantly available changes"
                                   />
                                 </h5>
                               </EuiTitle>
@@ -98,8 +102,40 @@ export const EmptyPrompt: React.FC = () => {
                           <EuiText size="s" color="subdued">
                             <p>
                               <FormattedMessage
-                                id="xpack.searchSynonyms.emptyPrompt.improveSearchRelevance.description"
-                                defaultMessage="Include related terms your users actually use."
+                                id="xpack.searchSynonyms.emptyPrompt.instantlyAvailable.description"
+                                defaultMessage="Updates automatically reload the associated analyzers."
+                              />
+                            </p>
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
+                        <EuiFlexItem grow={false}>
+                          <EuiFlexGroup responsive={false} gutterSize="s">
+                            <EuiFlexItem grow={false}>
+                              <EuiIcon type="check" />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiTitle size="xxs">
+                                <h5>
+                                  <FormattedMessage
+                                    id="xpack.searchSynonyms.emptyPrompt.increaseSearchScope.title"
+                                    defaultMessage="Increase search scope"
+                                  />
+                                </h5>
+                              </EuiTitle>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s" color="subdued">
+                            <p>
+                              <FormattedMessage
+                                id="xpack.searchSynonyms.emptyPrompt.increaseSearchScope.description"
+                                defaultMessage="Include related terms your users commonly use."
                               />
                             </p>
                           </EuiText>
@@ -119,7 +155,7 @@ export const EmptyPrompt: React.FC = () => {
                                 <h5>
                                   <FormattedMessage
                                     id="xpack.searchSynonyms.emptyPrompt.domainSpecific.title"
-                                    defaultMessage="Match domain-specific terms"
+                                    defaultMessage="Domain-specific terms"
                                   />
                                 </h5>
                               </EuiTitle>
@@ -131,39 +167,7 @@ export const EmptyPrompt: React.FC = () => {
                             <p>
                               <FormattedMessage
                                 id="xpack.searchSynonyms.emptyPrompt.domainSpecific.description"
-                                defaultMessage="Connect industry terms with common search phrases."
-                              />
-                            </p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup responsive={false} gutterSize="s">
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type="check" />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiTitle size="xxs">
-                                <h5>
-                                  <FormattedMessage
-                                    id="xpack.searchSynonyms.emptyPrompt.improvePerformance.title"
-                                    defaultMessage="Optimize performance"
-                                  />
-                                </h5>
-                              </EuiTitle>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s" color="subdued">
-                            <p>
-                              <FormattedMessage
-                                id="xpack.searchSynonyms.emptyPrompt.improvedPerformance.description"
-                                defaultMessage="Uses the built-in synonyms API for improved performance and flexibility."
+                                defaultMessage="Adds specialized vocabulary for successful searches."
                               />
                             </p>
                           </EuiText>

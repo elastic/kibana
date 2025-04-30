@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
-import {
+import type {
   MicrosoftDefenderEndpointSecretsSchema,
   MicrosoftDefenderEndpointConfigSchema,
   MicrosoftDefenderEndpointActionParamsSchema,
@@ -17,6 +17,7 @@ import {
   TestConnectorParamsSchema,
   AgentDetailsParamsSchema,
   GetActionsParamsSchema,
+  AgentListParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -34,6 +35,18 @@ export interface MicrosoftDefenderEndpointTestConnector {
 }
 
 export type MicrosoftDefenderEndpointAgentDetailsParams = TypeOf<typeof AgentDetailsParamsSchema>;
+
+export type MicrosoftDefenderEndpointAgentListParams = TypeOf<typeof AgentListParamsSchema>;
+
+export interface MicrosoftDefenderEndpointAgentListResponse {
+  '@odata.context': string;
+  '@odata.count'?: number;
+  /** If value is `-1`, then API did not provide a total count */
+  total: number;
+  page: number;
+  pageSize: number;
+  value: MicrosoftDefenderEndpointMachine[];
+}
 
 export type MicrosoftDefenderEndpointGetActionsParams = TypeOf<typeof GetActionsParamsSchema>;
 

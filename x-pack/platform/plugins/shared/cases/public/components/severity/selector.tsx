@@ -6,10 +6,11 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import type { CaseSeverity } from '../../../common/types/domain';
-import { severities } from './config';
+import { severities, SeverityHealth } from './config';
+import * as i18n from './translations';
 
 interface Props {
   selectedSeverity: CaseSeverity;
@@ -26,7 +27,6 @@ export const SeveritySelector: React.FC<Props> = ({
 }) => {
   const caseSeverities = Object.keys(severities) as CaseSeverity[];
   const options: Array<EuiSuperSelectOption<CaseSeverity>> = caseSeverities.map((severity) => {
-    const severityData = severities[severity];
     return {
       value: severity,
       inputDisplay: (
@@ -37,7 +37,7 @@ export const SeveritySelector: React.FC<Props> = ({
           data-test-subj={`case-severity-selection-${severity}`}
         >
           <EuiFlexItem grow={false}>
-            <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
+            <SeverityHealth severity={severity} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -53,6 +53,7 @@ export const SeveritySelector: React.FC<Props> = ({
       valueOfSelected={selectedSeverity}
       onChange={onSeverityChange}
       data-test-subj="case-severity-selection"
+      aria-label={i18n.SEVERITY_TITLE}
     />
   );
 };

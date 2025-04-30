@@ -28,10 +28,10 @@ export class DatatableVisualization {
     { expressions, formatFactory, editorFrame, charts }: DatatableVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getDatatableRenderer, getDatatableVisualization } = await import(
-        '../../async_services'
-      );
-      const palettes = await charts.palettes.getPalettes();
+      const [{ getDatatableRenderer, getDatatableVisualization }, palettes] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
 
       expressions.registerRenderer(() =>
         getDatatableRenderer({

@@ -7,9 +7,11 @@
 
 import {
   HasEditCapabilities,
+  HasReadOnlyCapabilities,
   HasSupportedTriggers,
   PublishesDisabledActionIds,
   PublishesViewMode,
+  PublishingSubject,
   ViewMode,
   apiHasAppContext,
   apiPublishesDisabledActionIds,
@@ -19,6 +21,7 @@ import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
+import { BehaviorSubject } from 'rxjs';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -52,6 +55,18 @@ function getSupportedTriggers(
   };
 }
 
+function isReadOnly(viewMode$: PublishingSubject<ViewMode>) {
+  return viewMode$.getValue() === 'view';
+}
+
+function isEditMode(viewMode$: PublishingSubject<ViewMode>) {
+  return viewMode$.getValue() === 'edit';
+}
+
+function hasManagedApi(api: unknown): api is { isManaged: boolean } {
+  return Boolean(api && typeof (api as { isManaged?: boolean }).isManaged === 'boolean');
+}
+
 /**
  * Initialize the edit API for the embeddable
  **/
@@ -70,12 +85,16 @@ export function initializeEditApi(
   api: HasSupportedTriggers &
     PublishesDisabledActionIds &
     HasEditCapabilities &
+    HasReadOnlyCapabilities &
     PublishesViewMode & { uuid: string };
   comparators: {};
   serialize: () => {};
   cleanup: () => void;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
+  const isManaged = (currentState: LensRuntimeState) => {
+    return currentState.managed || (hasManagedApi(parentApi) ? parentApi.isManaged : false);
+  };
 
   const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
@@ -83,16 +102,16 @@ export function initializeEditApi(
     extractInheritedViewModeObservable(parentApi)
   );
 
-  const { disabledActionIds, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
+  const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
-    : { disabledActionIds: undefined, setDisabledActionIds: noop };
-  const [disabledActionIds$, disabledActionIdsComparator] = buildObservableVariable<
-    string[] | undefined
-  >(disabledActionIds);
+    : {
+        disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
+        setDisabledActionIds: noop,
+      };
 
   if (isTextBasedLanguage(initialState)) {
     // do not expose the drilldown action for ES|QL
-    disabledActionIds$.next(disabledActionIds$.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
+    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
   }
 
   /**
@@ -121,6 +140,8 @@ export function initializeEditApi(
   const panelManagementApi = setupPanelManagement(uuid, parentApi, {
     isNewlyCreated$: internalApi.isNewlyCreated$,
     setAsCreated: internalApi.setAsCreated,
+    isReadOnly: () => isReadOnly(viewMode$),
+    canEdit: () => isEditMode(viewMode$),
   });
 
   const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => {
@@ -153,6 +174,7 @@ export function initializeEditApi(
     };
   };
 
+  // This will handle both edit and read only mode based on the view mode
   const openInlineEditor = prepareInlineEditPanel(
     initialState,
     getStateWithInjectedFilters,
@@ -162,7 +184,8 @@ export function initializeEditApi(
     inspectorApi,
     startDependencies,
     navigateToLensEditor,
-    uuid
+    uuid,
+    parentApi
   );
 
   /**
@@ -171,19 +194,27 @@ export function initializeEditApi(
   const { uiSettings, capabilities, data } = startDependencies;
 
   const canEdit = () => {
-    if (viewMode$.getValue() !== 'edit') {
+    if (!isEditMode(viewMode$)) {
       return false;
     }
+    const currentState = getState();
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(getState()) && !isESQLModeEnabled()) {
+    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled()) {
+      return false;
+    }
+    if (isManaged(currentState)) {
       return false;
     }
     return (
-      Boolean(capabilities.visualize.save) ||
+      Boolean(capabilities.visualize_v2.save) ||
       (!getState().savedObjectId &&
-        Boolean(capabilities.dashboard?.showWriteControls) &&
-        Boolean(capabilities.visualize.show))
+        Boolean(capabilities.dashboard_v2?.showWriteControls) &&
+        Boolean(capabilities.visualize_v2.show))
     );
+  };
+
+  const canShowConfig = () => {
+    return isReadOnly(viewMode$) && Boolean(capabilities.visualize_v2.show);
   };
 
   // this will force the embeddable to toggle the inline editing feature
@@ -191,19 +222,43 @@ export function initializeEditApi(
     ? parentApi.canEditInline
     : true;
 
+  const openConfigurationPanel = async (
+    { showOnly }: { showOnly: boolean } = { showOnly: false }
+  ) => {
+    // save the initial state in case it needs to revert later on
+    const firstState = getState();
+
+    const rootEmbeddable = parentApi;
+    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+    const ConfigPanel = await openInlineEditor({
+      // restore the first state found when the panel opened
+      onCancel: () => updateState({ ...firstState }),
+      // the getState() here contains the wrong filters references
+      // but the input attributes are correct as openInlineEditor() handler is using
+      // the getStateWithInjectedFilters() function
+      onApply: showOnly
+        ? noop
+        : (attributes: LensRuntimeState['attributes']) =>
+            updateState({ ...getState(), attributes }),
+    });
+    if (ConfigPanel) {
+      mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
+    }
+  };
+
   return {
-    comparators: { disabledActionIds: disabledActionIdsComparator },
+    comparators: { disabledActionIds$: [disabledActionIds$, setDisabledActionIds] },
     serialize: emptySerializer,
     cleanup: noop,
     api: {
       uuid,
-      viewMode: viewMode$,
+      viewMode$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.lens.embeddableDisplayName', {
-          defaultMessage: 'Lens',
+          defaultMessage: 'visualization',
         }),
       supportedTriggers,
-      disabledActionIds: disabledActionIds$,
+      disabledActionIds$,
       setDisabledActionIds,
 
       /**
@@ -226,23 +281,7 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        // save the initial state in case it needs to revert later on
-        const firstState = getState();
-
-        const rootEmbeddable = parentApi;
-        const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-        const ConfigPanel = await openInlineEditor({
-          // the getState() here contains the wrong filters references
-          // but the input attributes are correct as openInlineEditor() handler is using
-          // the getStateWithInjectedFilters() function
-          onApply: (attributes: LensRuntimeState['attributes']) =>
-            updateState({ ...getState(), attributes }),
-          // restore the first state found when the panel opened
-          onCancel: () => updateState({ ...firstState }),
-        });
-        if (ConfigPanel) {
-          mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
-        }
+        openConfigurationPanel({ showOnly: false });
       },
       /**
        * Check everything here: user/app permissions and the current inline editing state
@@ -254,6 +293,18 @@ export function initializeEditApi(
             canEdit() &&
             panelManagementApi.isEditingEnabled()
         );
+      },
+      isReadOnlyEnabled: () => {
+        return {
+          read: Boolean(parentApi && apiHasAppContext(parentApi) && canShowConfig()),
+          write: Boolean(capabilities.dashboard_v2?.showWriteControls && !isManaged(getState())),
+        };
+      },
+      onShowConfig: async () => {
+        if (!parentApi || !apiHasAppContext(parentApi)) {
+          return;
+        }
+        openConfigurationPanel({ showOnly: true });
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {

@@ -9,6 +9,9 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
+import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -16,6 +19,7 @@ import {
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
@@ -50,11 +54,11 @@ import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -156,7 +160,17 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+    const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } =
+      useSourcererDataView(SourcererScopeName.timeline);
+    const { newDataViewPickerEnabled } = useEnableExperimental();
+
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+
+    const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id || '' : oldDataViewId;
+    const selectedPatterns = newDataViewPickerEnabled
+      ? experimentalSelectedPatterns
+      : oldSelectedPatterns;
 
     const {
       customTemplateTimelineCount,
@@ -246,7 +260,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultUdtHeaders,
-              dataViewId,
+              dataViewId: dataViewId ?? '',
               indexNames: selectedPatterns,
               show: false,
               excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
@@ -368,13 +382,20 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
+    const {
+      timelinePrivileges: { crud: canWriteTimelines },
+    } = useUserPrivileges();
     useEffect(() => {
       const fetchData = async () => {
-        await installPrepackagedTimelines();
-        refetch();
+        if (canWriteTimelines) {
+          await installPrepackagedTimelines();
+          refetch();
+        } else {
+          refetch();
+        }
       };
       fetchData();
-    }, [refetch, installPrepackagedTimelines]);
+    }, [refetch, installPrepackagedTimelines, canWriteTimelines]);
 
     return !isModal ? (
       <OpenTimeline

@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiBasicTable,
   EuiButton,
@@ -21,29 +21,25 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
-  EuiBetaBadge,
-  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import {
   CriticalityLevels,
   CriticalityModifiers,
 } from '../../../../common/entity_analytics/asset_criticality';
-import { EntityAnalyticsLearnMoreLink } from '../risk_score_onboarding/entity_analytics_doc_link';
-import { BETA } from '../risk_score_onboarding/translations';
 import { AssetCriticalityBadge } from '../asset_criticality';
+import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
 
 const SpacedOrderedList = styled.ol`
   li {
-    margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
+    margin-bottom: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   }
 `;
 
@@ -105,7 +101,7 @@ const getCriticalityLevelTableColumns = (): Array<
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
 
-export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
+export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: EntityType }) => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   return (
@@ -119,7 +115,6 @@ export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskSco
 };
 
 export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {
-  const { euiTheme } = useEuiTheme();
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RiskInformation',
   });
@@ -138,16 +133,6 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <EuiTitle size="m">
               <h2 id={simpleFlyoutTitleId}>{i18n.TITLE}</h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={BETA}
-              size="s"
-              css={css`
-                color: ${euiTheme.colors.text};
-                margin-top: ${euiTheme.size.xxs};
-              `}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

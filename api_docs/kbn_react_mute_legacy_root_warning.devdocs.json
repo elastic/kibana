@@ -31,7 +31,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-react-mute-legacy-root-warning/index.ts",
+        "path": "src/platform/packages/private/kbn-react-mute-legacy-root-warning/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

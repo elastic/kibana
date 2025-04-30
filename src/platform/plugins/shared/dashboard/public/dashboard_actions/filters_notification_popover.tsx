@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiButton,
@@ -23,13 +23,17 @@ import {
 
 import { css } from '@emotion/react';
 import { AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
-import { getEditPanelAction } from '@kbn/presentation-panel-plugin/public';
+import { ACTION_EDIT_PANEL } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import {
+  EmbeddableApiContext,
   apiCanLockHoverActions,
   getViewModeSubject,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { uiActionsService } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationActionApi } from './filters_notification_action';
 
@@ -37,11 +41,22 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [disableEditbutton, setDisableEditButton] = useState(false);
 
-  const editPanelAction = getEditPanelAction();
-
   const filters = useMemo(() => api.filters$?.value, [api]);
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
   const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
+
+  const executeEditAction = useCallback(async () => {
+    try {
+      const action = await uiActionsService.getAction(ACTION_EDIT_PANEL);
+      action.execute({
+        embeddable: api,
+        trigger: { id: CONTEXT_MENU_TRIGGER },
+      } as EmbeddableApiContext & ActionExecutionMeta);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Unable to execute edit action, Error: ', error.message);
+    }
+  }, [api]);
 
   const { queryString, queryLanguage } = useMemo(() => {
     const query = api.query$?.value;
@@ -63,7 +78,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
   }, [api, setDisableEditButton]);
 
   const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
-    api.parentApi?.dataViews,
+    api.parentApi?.dataViews$,
     getViewModeSubject(api ?? undefined)
   );
 
@@ -141,7 +156,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
                 data-test-subj={'filtersNotificationModal__editButton'}
                 size="s"
                 fill
-                onClick={() => editPanelAction.execute({ embeddable: api })}
+                onClick={executeEditAction}
               >
                 {dashboardFilterNotificationActionStrings.getEditButtonTitle()}
               </EuiButton>

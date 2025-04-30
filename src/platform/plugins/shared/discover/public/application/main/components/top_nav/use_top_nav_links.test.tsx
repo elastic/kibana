@@ -12,15 +12,17 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { useTopNavLinks } from './use_top_nav_links';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../build_services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { RuntimeStateProvider } from '../../state_management/redux';
 
 describe('useTopNavLinks', () => {
   const services = {
     ...createDiscoverServicesMock(),
     capabilities: {
-      discover: {
+      discover_v2: {
         save: true,
       },
     },
@@ -33,7 +35,15 @@ describe('useTopNavLinks', () => {
   state.actions.setDataView(dataViewMock);
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+    return (
+      <KibanaContextProvider services={services}>
+        <DiscoverMainProvider value={state}>
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            {children}
+          </RuntimeStateProvider>
+        </DiscoverMainProvider>
+      </KibanaContextProvider>
+    );
   };
 
   test('useTopNavLinks result', () => {

@@ -14,8 +14,8 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../shared/components/left_panel/left_panel_header';
 import { UserDetailsPanelKey } from '../../user_details_left';
-import { UserPanelKey } from '..';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { UserPanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -53,10 +53,10 @@ const mockOpenLeftPanel = jest.fn();
 const mockOpenFlyout = jest.fn();
 
 describe('useNavigateToUserDetails', () => {
-  describe('when preview navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openLeftPanel: mockOpenLeftPanel,
         openFlyout: mockOpenFlyout,
@@ -124,10 +124,10 @@ describe('useNavigateToUserDetails', () => {
     });
   });
 
-  describe('when preview navigation is disabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is true', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
       (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
         openLeftPanel: mockOpenLeftPanel,
         openFlyout: mockOpenFlyout,

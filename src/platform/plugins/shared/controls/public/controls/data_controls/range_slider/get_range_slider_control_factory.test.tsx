@@ -10,9 +10,9 @@
 import React from 'react';
 import { of } from 'rxjs';
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
@@ -147,7 +147,7 @@ describe('RangesliderControlApi', () => {
         controlGroupApi
       );
       expect(api.filters$.value).toBeUndefined();
-      expect(api.blockingError.value?.message).toEqual(
+      expect(api.blockingError$.value?.message).toEqual(
         'no data view found for id notGonnaFindMeDataView'
       );
     });

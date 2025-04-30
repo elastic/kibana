@@ -33,6 +33,7 @@ describe('When using calculateRouteAuthz()', () => {
       addFleetServers: false,
     },
     integrations: {
+      all: false,
       readPackageInfo: false,
       readInstalledPackages: false,
       installPackages: false,
@@ -583,9 +584,6 @@ describe('getAuthzFromRequest', () => {
     jest.mocked(appContextService.getSecurity).mockReturnValue(mockSecurity);
     jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => true,
-    } as any);
-    jest.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
-      subfeaturePrivileges: true,
     } as any);
   });
   it('should not authorize access if RBAC is not enabled', async () => {

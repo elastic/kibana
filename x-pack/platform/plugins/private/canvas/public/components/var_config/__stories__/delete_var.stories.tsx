@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 
 import { CanvasVariable } from '../../../../types';
@@ -19,6 +18,14 @@ const variable: CanvasVariable = {
   type: 'string',
 };
 
-storiesOf('components/Variables/DeleteVar', module).add('default', () => (
-  <DeleteVar selectedVar={variable} onDelete={action('onDelete')} onCancel={action('onCancel')} />
-));
+export default {
+  title: 'components/Variables/DeleteVar',
+};
+
+export const Default = {
+  render: () => (
+    <DeleteVar selectedVar={variable} onDelete={action('onDelete')} onCancel={action('onCancel')} />
+  ),
+
+  name: 'default',
+};

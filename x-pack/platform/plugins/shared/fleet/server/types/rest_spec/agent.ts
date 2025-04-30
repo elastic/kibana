@@ -21,7 +21,7 @@ import { ListResponseSchema } from '../../routes/schema/utils';
 export const GetAgentsRequestSchema = {
   query: schema.object(
     {
-      page: schema.number({ defaultValue: 1 }),
+      page: schema.maybe(schema.number()),
       perPage: schema.number({ defaultValue: 20 }),
       kuery: schema.maybe(
         schema.string({
@@ -39,11 +39,48 @@ export const GetAgentsRequestSchema = {
       getStatusSummary: schema.boolean({ defaultValue: false }),
       sortField: schema.maybe(schema.string()),
       sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      searchAfter: schema.maybe(schema.string()),
+      openPit: schema.maybe(schema.boolean()),
+      pitId: schema.maybe(schema.string()),
+      pitKeepAlive: schema.maybe(schema.string()),
     },
     {
       validate: (request) => {
-        if (request.page * request.perPage > SO_SEARCH_LIMIT) {
+        const usingSearchAfter = !!request.searchAfter;
+        const usingPIT = !!(request.openPit || request.pitId || request.pitKeepAlive);
+
+        // If using PIT search, ensure that all required PIT parameters are provided
+        if (usingPIT) {
+          if (request.openPit && request.pitId) {
+            return 'You cannot request to open a new point-in-time with an existing pitId';
+          }
+          if (!request.pitKeepAlive) {
+            return 'You must provide pitKeepAlive when using point-in-time parameters';
+          }
+        }
+
+        // Ensure that pagination parameters are not over the search limit
+        if ((request.page || 1) * request.perPage > SO_SEARCH_LIMIT) {
           return `You cannot use page and perPage page over ${SO_SEARCH_LIMIT} agents`;
+        }
+
+        // If using searchAfter:
+        //   1. ensure that incompatible pagination parameters are not used
+        //   2. ensure that searchAfter is an array
+        if (usingSearchAfter) {
+          if (request.page) {
+            return 'You cannot use page parameter when using searchAfter';
+          }
+          // ensure that searchAfter is an array after parsing json
+          try {
+            const searchAfterArray = JSON.parse(request.searchAfter);
+
+            if (!Array.isArray(searchAfterArray) || searchAfterArray.length === 0) {
+              return 'searchAfter must be a non-empty array';
+            }
+          } catch (e) {
+            return 'searchAfter must be a non-empty array';
+          }
         }
       },
     }
@@ -80,6 +117,8 @@ export const AgentStatusSchema = schema.oneOf([
   schema.literal('unenrolled'),
   schema.literal('updating'),
   schema.literal('degraded'),
+  schema.literal('uninstalled'),
+  schema.literal('orphaned'),
 ]);
 
 export const AgentResponseSchema = schema.object({
@@ -102,8 +141,8 @@ export const AgentResponseSchema = schema.object({
     schema.recordOf(
       schema.string(),
       schema.object({
-        api_key_id: schema.string(),
-        type: schema.string(),
+        api_key_id: schema.maybe(schema.string()),
+        type: schema.maybe(schema.string()),
         to_retire_api_key_ids: schema.maybe(
           schema.arrayOf(
             schema.object({
@@ -117,9 +156,7 @@ export const AgentResponseSchema = schema.object({
   ),
   status: schema.maybe(AgentStatusSchema),
   packages: schema.arrayOf(schema.string()),
-  sort: schema.maybe(
-    schema.arrayOf(schema.oneOf([schema.number(), schema.string(), schema.literal(null)]))
-  ),
+  sort: schema.maybe(schema.arrayOf(schema.any())), // ES can return many different types for `sort` array values, including unsafe numbers
   metrics: schema.maybe(
     schema.object({
       cpu_avg: schema.maybe(schema.number()),
@@ -158,6 +195,9 @@ export const AgentResponseSchema = schema.object({
         ),
       }),
     ])
+  ),
+  upgrade_attempts: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.arrayOf(schema.string())])
   ),
   access_api_key_id: schema.maybe(schema.string()),
   default_api_key: schema.maybe(schema.string()),
@@ -221,6 +261,8 @@ export const AgentResponseSchema = schema.object({
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
+  pit: schema.maybe(schema.string()),
+  nextSearchAfter: schema.maybe(schema.string()),
   statusSummary: schema.maybe(schema.recordOf(AgentStatusSchema, schema.number())),
 });
 
@@ -519,6 +561,8 @@ export const GetAgentStatusResponseSchema = schema.object({
     online: schema.number(),
     error: schema.number(),
     offline: schema.number(),
+    uninstalled: schema.maybe(schema.number()),
+    orphaned: schema.maybe(schema.number()),
     other: schema.number(),
     updating: schema.number(),
     inactive: schema.number(),
@@ -571,6 +615,8 @@ export const GetActionStatusResponseSchema = schema.object({
   items: schema.arrayOf(
     schema.object({
       actionId: schema.string(),
+      is_automatic: schema.maybe(schema.boolean()),
+
       nbAgentsActionCreated: schema.number({
         meta: {
           description: 'number of agents included in action from kibana',

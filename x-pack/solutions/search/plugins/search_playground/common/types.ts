@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Document } from '@langchain/core/documents';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
 export enum MessageRole {
@@ -45,13 +46,22 @@ export interface QuerySourceFields {
   skipped_fields: number;
 }
 
+const BASE_API_PATH = '/internal/search_playground';
+
 export enum APIRoutes {
-  POST_API_KEY = '/internal/search_playground/api_key',
-  POST_CHAT_MESSAGE = '/internal/search_playground/chat',
-  POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
-  GET_INDICES = '/internal/search_playground/indices',
-  POST_SEARCH_QUERY = '/internal/search_playground/search',
-  GET_INDEX_MAPPINGS = '/internal/search_playground/mappings',
+  BASE_API = BASE_API_PATH,
+  POST_API_KEY = `${BASE_API_PATH}/api_key`,
+  POST_CHAT_MESSAGE = `${BASE_API_PATH}/chat`,
+  POST_QUERY_SOURCE_FIELDS = `${BASE_API_PATH}/query_source_fields`,
+  GET_INDICES = `${BASE_API_PATH}/indices`,
+  POST_SEARCH_QUERY = `${BASE_API_PATH}/search`,
+  GET_INDEX_MAPPINGS = `${BASE_API_PATH}/mappings`,
+  POST_QUERY_TEST = `${BASE_API_PATH}/query_test`,
+  PUT_PLAYGROUND_CREATE = `${BASE_API_PATH}/playgrounds`,
+  PUT_PLAYGROUND_UPDATE = `${BASE_API_PATH}/playgrounds/{id}`,
+  GET_PLAYGROUND = `${BASE_API_PATH}/playgrounds/{id}`,
+  GET_PLAYGROUNDS = `${BASE_API_PATH}/playgrounds`,
+  DELETE_PLAYGROUND = `${BASE_API_PATH}/playgrounds/{id}`,
 }
 
 export enum LLMs {
@@ -60,6 +70,7 @@ export enum LLMs {
   openai_other = 'openai_other',
   bedrock = 'bedrock',
   gemini = 'gemini',
+  inference = 'inference',
 }
 
 export interface ChatRequestData {
@@ -90,4 +101,55 @@ export interface Pagination {
   from: number;
   size: number;
   total: number;
+}
+
+export interface QueryTestResponse {
+  documents?: Document[];
+  searchResponse: SearchResponse;
+}
+export interface PlaygroundMetadata {
+  id: string;
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+export interface PlaygroundSavedObject {
+  name: string;
+  indices: string[];
+  queryFields: Record<string, string[] | undefined>;
+  elasticsearchQueryJSON: string;
+  userElasticsearchQueryJSON?: string;
+  prompt?: string;
+  citations?: boolean;
+  context?: {
+    sourceFields: Record<string, string[] | undefined>;
+    docSize: number;
+  };
+  summarizationModel?: {
+    connectorId: string;
+    modelId?: string;
+  };
+}
+
+export interface PlaygroundResponse {
+  _meta: PlaygroundMetadata;
+  data: PlaygroundSavedObject;
+}
+
+export interface PlaygroundListObject {
+  id: string;
+  name: string;
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+export interface PlaygroundListResponse {
+  _meta: {
+    page: number;
+    size: number;
+    total: number;
+  };
+  items: PlaygroundListObject[];
 }

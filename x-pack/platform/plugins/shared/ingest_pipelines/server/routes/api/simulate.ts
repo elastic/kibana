@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
@@ -42,10 +42,8 @@ export const registerSimulateRoute = ({
       try {
         const response = await clusterClient.asCurrentUser.ingest.simulate({
           verbose,
-          body: {
-            pipeline,
-            docs: documents as estypes.IngestSimulateDocument[],
-          },
+          pipeline,
+          docs: documents as estypes.IngestDocument[],
         });
 
         return res.ok({ body: response });

@@ -12,8 +12,9 @@ import {
   RULES_ADD_PATH,
   RULES_CREATE_PATH,
   RULES_LANDING_PATH,
+  RULES_MANAGEMENT_PATH,
   RULES_PATH,
-  SERVER_APP_ID,
+  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import {
   ADD_RULES,
@@ -38,7 +39,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: `${SECURITY_FEATURE_ID}.show`,
   links: [
     {
       id: SecurityPageName.rules,
@@ -53,13 +54,24 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
+      capabilities: `${SECURITY_FEATURE_ID}.show`,
       links: [
+        {
+          id: SecurityPageName.rulesManagement,
+          title: SIEM_RULES,
+          path: RULES_MANAGEMENT_PATH,
+          globalSearchDisabled: true,
+          skipUrlState: true,
+          hideTimeline: true,
+          capabilities: `${SECURITY_FEATURE_ID}.detections`,
+        },
         {
           id: SecurityPageName.rulesAdd,
           title: ADD_RULES,
           path: RULES_ADD_PATH,
           skipUrlState: true,
           hideTimeline: true,
+          capabilities: `${SECURITY_FEATURE_ID}.detections`,
         },
         {
           id: SecurityPageName.rulesCreate,
@@ -67,6 +79,7 @@ export const links: LinkItem = {
           path: RULES_CREATE_PATH,
           skipUrlState: true,
           hideTimeline: false,
+          capabilities: `${SECURITY_FEATURE_ID}.detections`,
         },
       ],
     },
@@ -79,7 +92,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [`${SERVER_APP_ID}.showEndpointExceptions`],
+      capabilities: [`${SECURITY_FEATURE_ID}.showEndpointExceptions`],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
@@ -100,7 +113,7 @@ export const links: LinkItem = {
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
-      capabilities: [`${SERVER_APP_ID}.show`],
+      capabilities: `${SECURITY_FEATURE_ID}.detections`,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
           defaultMessage: 'MITRE ATT&CK Coverage',

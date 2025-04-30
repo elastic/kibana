@@ -8,18 +8,28 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
+import type {
+  FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
+  FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+} from '@kbn/cloud-security-posture';
+import type { AIForSOCDetailsProps } from './ai_for_soc/types';
+import { AIForSOCDetailsProvider } from './ai_for_soc/context';
+import { AIForSOCPanel } from './ai_for_soc';
+import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
+import { UniversalEntityPanel } from './entity_details/universal_right';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
 import type { NetworkExpandableFlyoutProps } from './network_details';
+import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
-  DocumentDetailsIsolateHostPanelKey,
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-  DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
+  DocumentDetailsIsolateHostPanelKey,
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsPreviewPanelKey,
+  DocumentDetailsRightPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
@@ -36,16 +46,31 @@ import { AlertReasonPanelProvider } from './document_details/alert_reason/contex
 import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
-import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
+import { UserPanel, UserPreviewPanelKey } from './entity_details/user_right';
 import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
-import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
+import { HostPanel, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
-import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
+import {
+  HostPanelKey,
+  ServicePanelKey,
+  UniversalEntityPanelKey,
+  UserPanelKey,
+} from './entity_details/shared/constants';
+import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
+import { ServicePanel } from './entity_details/service_right';
+import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
+import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
+import {
+  MisconfigurationFindingsPanelKey,
+  MisconfigurationFindingsPreviewPanelKey,
+} from './csp_details/findings_flyout/constants';
+import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
+import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -156,6 +181,47 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: NetworkPreviewPanelKey,
     component: (props) => (
       <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
+    ),
+  },
+
+  {
+    key: ServicePanelKey,
+    component: (props) => <ServicePanel {...(props as ServicePanelExpandableFlyoutProps).params} />,
+  },
+  {
+    key: ServiceDetailsPanelKey,
+    component: (props) => (
+      <ServiceDetailsPanel {...(props as ServiceDetailsExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: UniversalEntityPanelKey,
+    component: (props) => (
+      <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: MisconfigurationFindingsPanelKey,
+    component: (props) => (
+      <FindingsMisconfigurationPanel
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
+      />
+    ),
+  },
+  {
+    key: IOCPanelKey,
+    component: (props) => (
+      <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
+        <AIForSOCPanel />
+      </AIForSOCDetailsProvider>
+    ),
+  },
+  {
+    key: MisconfigurationFindingsPreviewPanelKey,
+    component: (props) => (
+      <FindingsMisconfigurationPanel
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
+      />
     ),
   },
 ];

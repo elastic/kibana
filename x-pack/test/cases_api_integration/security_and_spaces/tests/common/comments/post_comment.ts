@@ -9,16 +9,18 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import {
-  AttachmentType,
+import type {
   UserCommentAttachmentAttributes,
   AlertAttachmentAttributes,
-  CaseStatuses,
   ExternalReferenceSOAttachmentPayload,
   AlertAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
+import {
+  AttachmentType,
+  CaseStatuses,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
@@ -40,7 +42,7 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   superUserSpace1Auth,
   updateCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   getAllComments,
   bulkCreateAttachments,
@@ -69,7 +71,7 @@ import {
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -148,7 +150,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
         expect(commentUserAction).to.eql({
@@ -162,7 +164,6 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           },
-          case_id: postedCase.id,
           comment_id: patchedCase.comments![0].id,
           owner: 'securitySolutionFixture',
         });

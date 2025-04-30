@@ -13,10 +13,9 @@ import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
-import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
+import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
@@ -44,11 +43,11 @@ export const useDashboardMenuItems = ({
 
   const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
     useBatchedPublishingSubjects(
-      dashboardApi.panelTitle,
+      dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
-      dashboardApi.savedObjectId,
-      dashboardApi.viewMode
+      dashboardApi.savedObjectId$,
+      dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
 
@@ -73,9 +72,7 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboardApi
-      .runQuickSave()
-      .then(() => setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE));
+    dashboardApi.runQuickSave().then(() => setTimeout(() => setIsSaveInProgress(false), 100));
   }, [dashboardApi]);
 
   /**

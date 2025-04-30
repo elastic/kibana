@@ -149,8 +149,8 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
         `}
         title={
           slo.summary.summaryUpdatedAt
-            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
-                defaultMessage: '{status}, Last updated: {value}',
+            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastSummaryUpdatedLabel', {
+                defaultMessage: '{status}, Last summary updated: {value}',
                 values: {
                   status: slo.summary.status,
                   value: moment(slo.summary.summaryUpdatedAt).fromNow(),
@@ -272,11 +272,12 @@ export function SloCardChart({
   const { cardColor } = useSloCardColor(slo.summary.status);
   const subTitle = getSubTitle(slo);
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   return (
     <Chart>
       <Settings
-        baseTheme={charts.theme.useChartsBaseTheme()}
+        baseTheme={chartBaseTheme}
         theme={{
           metric: {
             iconAlign: 'right',

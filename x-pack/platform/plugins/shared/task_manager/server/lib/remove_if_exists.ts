@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { TaskStore } from '../task_store';
+import type { TaskStore } from '../task_store';
 
 /**
  * Removes a task from the store, ignoring a not found error

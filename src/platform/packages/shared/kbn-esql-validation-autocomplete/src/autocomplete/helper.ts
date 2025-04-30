@@ -7,21 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLFunction,
-  ESQLLiteral,
-  ESQLSource,
-} from '@kbn/esql-ast';
-import { uniqBy } from 'lodash';
 import {
+  ESQLSingleAstItem,
+  Walker,
+  isIdentifier,
+  type ESQLAstItem,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLLiteral,
+  type ESQLSource,
+} from '@kbn/esql-ast';
+import { ESQLVariableType } from '@kbn/esql-types';
+import { uniqBy } from 'lodash';
+import { logicalOperators } from '../definitions/all_operators';
+import {
+  CommandSuggestParams,
+  FunctionDefinitionTypes,
+  Location,
   isParameterType,
+  isReturnType,
   type FunctionDefinition,
   type FunctionReturnType,
   type SupportedDataType,
-  isReturnType,
 } from '../definitions/types';
+import {
+  EDITOR_MARKER,
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../shared/constants';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   findFinalWord,
   getColumnForASTNode,
@@ -30,24 +44,22 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
-  isIdentifier,
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
-import { compareTypesWithLiterals } from '../shared/esql_types';
+import { ESQLRealField, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
+import { listCompleteItem } from './complete_items';
 import {
   TIME_SYSTEM_PARAMS,
-  buildVariablesDefinitions,
-  getFunctionSuggestions,
+  buildUserDefinedColumnsDefinitions,
   getCompatibleLiterals,
   getDateLiterals,
+  getFunctionSuggestions,
+  getOperatorSuggestion,
   getOperatorSuggestions,
+  getSuggestionsAfterNot,
 } from './factories';
-import { EDITOR_MARKER } from '../shared/constants';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
-import { listCompleteItem } from './complete_items';
-import { removeMarkerArgFromArgsList } from '../shared/context';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -55,7 +67,10 @@ function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
 
 function checkContent(fn: ESQLFunction): boolean {
   const fnDef = getFunctionDefinition(fn.name);
-  return (!!fnDef && fnDef.type === 'agg') || extractFunctionArgs(fn.args).some(checkContent);
+  return (
+    (!!fnDef && fnDef.type === FunctionDefinitionTypes.AGG) ||
+    extractFunctionArgs(fn.args).some(checkContent)
+  );
 }
 
 export function isAggFunctionUsedAlready(command: ESQLCommand, argIndex: number) {
@@ -101,7 +116,10 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
   const fromCommand = commands.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
-  return args.filter((arg) => arg.sourceType === sourceType);
+  // the marker gets added in queries like "FROM "
+  return args.filter(
+    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
+  );
 }
 
 export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
@@ -200,7 +218,7 @@ export function getCompatibleTypesToSuggestNext(
 export function getOverlapRange(
   query: string,
   suggestionText: string
-): { start: number; end: number } {
+): { start: number; end: number } | undefined {
   let overlapLength = 0;
 
   // Convert both strings to lowercase for case-insensitive comparison
@@ -214,10 +232,13 @@ export function getOverlapRange(
     }
   }
 
-  // add one since Monaco columns are 1-based
+  if (overlapLength === 0) {
+    return;
+  }
+
   return {
-    start: query.length - overlapLength + 1,
-    end: query.length + 1,
+    start: query.length - overlapLength,
+    end: query.length,
   };
 }
 
@@ -245,7 +266,10 @@ export function isLiteralDateItem(nodeArg: ESQLAstItem): boolean {
 
 export function getValidSignaturesAndTypesToSuggestNext(
   node: ESQLFunction,
-  references: { fields: Map<string, ESQLRealField>; variables: Map<string, ESQLVariable[]> },
+  references: {
+    fields: Map<string, ESQLRealField>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  },
   fnDefinition: FunctionDefinition,
   fullText: string,
   offset: number
@@ -287,7 +311,9 @@ export function getValidSignaturesAndTypesToSuggestNext(
   // E.g. if true, "fieldName" -> "fieldName, "
   const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
   const shouldAddComma =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
+    hasMoreMandatoryArgs &&
+    fnDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
+    !alreadyHasComma;
   const currentArg = enrichedArgs[argIndex];
   return {
     shouldAddComma,
@@ -345,8 +371,8 @@ export function handleFragment(
     return getSuggestionsForIncomplete('');
   } else {
     const rangeToReplace = {
-      start: innerText.length - fragment.length + 1,
-      end: innerText.length + 1,
+      start: innerText.length - fragment.length,
+      end: innerText.length,
     };
     if (isFragmentComplete(fragment)) {
       return getSuggestionsForComplete(fragment, rangeToReplace);
@@ -360,19 +386,20 @@ export function handleFragment(
  */
 export async function getFieldsOrFunctionsSuggestions(
   types: string[],
-  commandName: string,
-  optionName: string | undefined,
+  location: Location,
   getFieldsByType: GetColumnsByTypeFn,
   {
     functions,
     fields,
-    variables,
+    userDefinedColumns,
+    values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
-    variables?: Map<string, ESQLVariable[]>;
+    userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>;
     literals?: boolean;
+    values?: boolean;
   },
   {
     ignoreFn = [],
@@ -385,32 +412,33 @@ export async function getFieldsOrFunctionsSuggestions(
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
       ? getFieldsByType(types, ignoreColumns, {
-          advanceCursor: commandName === 'sort',
-          openSuggestions: commandName === 'sort',
+          advanceCursor: location === Location.SORT,
+          openSuggestions: location === Location.SORT,
+          variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
         })
       : [])) as SuggestionRawDefinition[],
     functions
   );
 
-  const filteredVariablesByType: string[] = [];
-  if (variables) {
-    for (const variable of variables.values()) {
+  const filteredColumnByType: string[] = [];
+  if (userDefinedColumns) {
+    for (const userDefinedColumn of userDefinedColumns.values()) {
       if (
-        (types.includes('any') || types.includes(variable[0].type)) &&
-        !ignoreColumns.includes(variable[0].name)
+        (types.includes('any') || types.includes(userDefinedColumn[0].type)) &&
+        !ignoreColumns.includes(userDefinedColumn[0].name)
       ) {
-        filteredVariablesByType.push(variable[0].name);
+        filteredColumnByType.push(userDefinedColumn[0].name);
       }
     }
-    // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+    // due to a bug on the ES|QL table side, filter out fields list with underscored userDefinedColumns names (??)
     // avg( numberField ) => avg_numberField_
     const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
     if (
-      filteredVariablesByType.length &&
-      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
+      filteredColumnByType.length &&
+      filteredColumnByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
-      for (const variable of filteredVariablesByType) {
-        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
+      for (const userDefinedColumn of filteredColumnByType) {
+        const underscoredName = userDefinedColumn.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
@@ -421,22 +449,22 @@ export async function getFieldsOrFunctionsSuggestions(
     }
   }
   // could also be in stats (bucket) but our autocomplete is not great yet
-  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+  const displayDateSuggestions =
+    types.includes('date') && [Location.WHERE, Location.EVAL].includes(location);
 
   const suggestions = filteredFieldsByType.concat(
     displayDateSuggestions ? getDateLiterals() : [],
     functions
       ? getFunctionSuggestions({
-          command: commandName,
-          option: optionName,
+          location,
           returnTypes: types,
           ignored: ignoreFn,
         })
       : [],
-    variables
-      ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
+    userDefinedColumns
+      ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
       : [],
-    literals ? getCompatibleLiterals(commandName, types) : []
+    literals ? getCompatibleLiterals(types) : []
   );
 
   return suggestions;
@@ -455,7 +483,7 @@ export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], should
 /** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
 export function extractTypeFromASTArg(
   arg: ESQLAstItem,
-  references: Pick<ReferenceMaps, 'fields' | 'variables'>
+  references: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
 ):
   | ESQLLiteral['literalType']
   | SupportedDataType
@@ -488,6 +516,29 @@ export function extractTypeFromASTArg(
   }
 }
 
+/**
+ * In several cases we don't want to count the last arg if it is
+ * of type unknown.
+ *
+ * this solves for the case where the user has typed a
+ * prefix (e.g. "keywordField != tex/")
+ *
+ * "tex" is not a recognizable identifier so it is of
+ * type "unknown" which leads us to continue suggesting
+ * fields/functions.
+ *
+ * Monaco will then filter our suggestions list
+ * based on the "tex" prefix which gives the correct UX
+ */
+function removeFinalUnknownIdentiferArg(
+  args: ESQLAstItem[],
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+) {
+  return getExpressionType(args[args.length - 1]) === 'unknown'
+    ? args.slice(0, args.length - 1)
+    : args;
+}
+
 // @TODO: refactor this to be shared with validation
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
@@ -500,7 +551,9 @@ export function checkFunctionInvocationComplete(
   if (!fnDefinition) {
     return { complete: false };
   }
-  const cleanedArgs = removeMarkerArgFromArgsList(func)!.args;
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
+
   const argLengthCheck = fnDefinition.signatures.some((def) => {
     if (def.minParams && cleanedArgs.length >= def.minParams) {
       return true;
@@ -519,7 +572,8 @@ export function checkFunctionInvocationComplete(
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
     return func.args.every((a, index) => {
       return (
-        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
+        fnDefinition.name.endsWith('null') ||
+        def.params[index].type === 'any' ||
         def.params[index].type === getExpressionType(a)
       );
     });
@@ -540,16 +594,14 @@ export function checkFunctionInvocationComplete(
  */
 export async function getSuggestionsToRightOfOperatorExpression({
   queryText,
-  commandName,
-  optionName,
+  location,
   rootOperator: operator,
   preferredExpressionType,
   getExpressionType,
   getColumnsByType,
 }: {
   queryText: string;
-  commandName: string;
-  optionName?: string;
+  location: Location;
   rootOperator: ESQLFunction;
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
@@ -563,15 +615,14 @@ export async function getSuggestionsToRightOfOperatorExpression({
     const operatorReturnType = getExpressionType(operator);
     suggestions.push(
       ...getOperatorSuggestions({
-        command: commandName,
-        option: optionName,
+        location,
         // here we use the operator return type because we're suggesting operators that could
         // accept the result of the existing operator as a left operand
         leftParamType:
           operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
             ? 'any'
             : operatorReturnType,
-        ignored: ['='],
+        ignored: ['=', ':'],
       })
     );
   } else {
@@ -583,7 +634,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
     // and suggest the next argument based on types
 
     // pick the last arg and check its type to verify whether is incomplete for the given function
-    const cleanedArgs = removeMarkerArgFromArgsList(operator)!.args;
+    const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
     const leftArgType = getExpressionType(operator.args[cleanedArgs.length - 1]);
 
     if (isFnComplete.reason === 'tooFewArgs') {
@@ -595,7 +646,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
       ) {
         suggestions.push(listCompleteItem);
       } else {
-        const finalType = leftArgType || leftArgType || 'any';
+        const finalType = leftArgType || 'any';
         const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
 
         // this is a special case with AND/OR
@@ -603,22 +654,18 @@ export async function getSuggestionsToRightOfOperatorExpression({
         // technically another boolean value should be suggested, but it is a better experience
         // to actually suggest a wider set of fields/functions
         const typeToUse =
-          finalType === 'boolean' && getFunctionDefinition(operator.name)?.type === 'builtin'
+          finalType === 'boolean' &&
+          getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR
             ? ['any']
             : (supportedTypes as string[]);
 
         // TODO replace with fields callback + function suggestions
         suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            typeToUse,
-            commandName,
-            optionName,
-            getColumnsByType,
-            {
-              functions: true,
-              fields: true,
-            }
-          ))
+          ...(await getFieldsOrFunctionsSuggestions(typeToUse, location, getColumnsByType, {
+            functions: true,
+            fields: true,
+            values: Boolean(operator.subtype === 'binary-expression'),
+          }))
         );
       }
     }
@@ -645,7 +692,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
         ) {
           suggestions.push(
             ...getOperatorSuggestions({
-              command: commandName,
+              location,
               leftParamType: leftArgType,
               returnTypes: [preferredExpressionType],
             })
@@ -656,13 +703,300 @@ export async function getSuggestionsToRightOfOperatorExpression({
   }
   return suggestions.map<SuggestionRawDefinition>((s) => {
     const overlap = getOverlapRange(queryText, s.text);
-    const offset = overlap.start === overlap.end ? 1 : 0;
     return {
       ...s,
-      rangeToReplace: {
-        start: overlap.start + offset,
-        end: overlap.end + offset,
-      },
+      rangeToReplace: overlap,
     };
   });
+}
+
+/**
+ * The position of the cursor within an expression.
+ */
+type ExpressionPosition =
+  | 'after_column'
+  | 'after_function'
+  | 'after_not'
+  | 'after_operator'
+  | 'after_literal'
+  | 'empty_expression';
+
+/**
+ * Determines the position of the cursor within an expression.
+ * @param innerText
+ * @param expressionRoot
+ * @returns
+ */
+export const getExpressionPosition = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined
+): ExpressionPosition => {
+  const endsWithNot = / not$/i.test(innerText.trimEnd());
+  if (
+    endsWithNot &&
+    !(
+      expressionRoot &&
+      isFunctionItem(expressionRoot) &&
+      // See https://github.com/elastic/kibana/issues/199401
+      // for more information on this check...
+      ['is null', 'is not null'].includes(expressionRoot.name)
+    )
+  ) {
+    return 'after_not';
+  }
+
+  if (expressionRoot) {
+    if (
+      isColumnItem(expressionRoot) &&
+      // and not directly after the column name or prefix e.g. "colu/"
+      !new RegExp(`${expressionRoot.parts.join('\\.')}$`).test(innerText)
+    ) {
+      return 'after_column';
+    }
+
+    if (isFunctionItem(expressionRoot) && expressionRoot.subtype === 'variadic-call') {
+      return 'after_function';
+    }
+
+    if (isFunctionItem(expressionRoot) && expressionRoot.subtype !== 'variadic-call') {
+      return 'after_operator';
+    }
+
+    if (isLiteralItem(expressionRoot) || isTimeIntervalItem(expressionRoot)) {
+      return 'after_literal';
+    }
+  }
+
+  return 'empty_expression';
+};
+
+/**
+ * Creates suggestion within an expression.
+ *
+ * TODO — should this function know about the command context
+ * or would we prefer a set of generic configuration options?
+ *
+ * @param param0
+ * @returns
+ */
+export async function suggestForExpression({
+  expressionRoot,
+  innerText,
+  getExpressionType,
+  getColumnsByType,
+  previousCommands,
+  location,
+  preferredExpressionType,
+}: {
+  expressionRoot: ESQLSingleAstItem | undefined;
+  location: Location;
+  preferredExpressionType?: SupportedDataType;
+} & Pick<
+  CommandSuggestParams<string>,
+  'innerText' | 'getExpressionType' | 'getColumnsByType' | 'previousCommands'
+>): Promise<SuggestionRawDefinition[]> {
+  const suggestions: SuggestionRawDefinition[] = [];
+
+  const position = getExpressionPosition(innerText, expressionRoot);
+  switch (position) {
+    /**
+     * After a literal, column, or complete (non-operator) function call
+     */
+    case 'after_literal':
+    case 'after_column':
+    case 'after_function':
+      const expressionType = getExpressionType(expressionRoot);
+
+      if (!isParameterType(expressionType)) {
+        break;
+      }
+
+      suggestions.push(
+        ...getOperatorSuggestions({
+          location,
+          leftParamType: expressionType,
+          ignored: ['='],
+        })
+      );
+
+      break;
+
+    /**
+     * After a NOT keyword
+     *
+     * the NOT function is a special operator that can be used in different ways,
+     * and not all these are mapped within the AST data structure: in particular
+     * <COMMAND> <field> NOT <here>
+     * is an incomplete statement and it results in a missing AST node, so we need to detect
+     * from the query string itself
+     *
+     * (this comment was copied but seems to still apply)
+     */
+    case 'after_not':
+      if (expressionRoot && isFunctionItem(expressionRoot) && expressionRoot.name === 'not') {
+        suggestions.push(
+          ...getFunctionSuggestions({ location, returnTypes: ['boolean'] }),
+          ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
+        );
+      } else {
+        suggestions.push(...getSuggestionsAfterNot());
+      }
+
+      break;
+
+    /**
+     * After an operator (e.g. AND, OR, IS NULL, +, etc.)
+     */
+    case 'after_operator':
+      if (!expressionRoot) {
+        break;
+      }
+
+      if (!isFunctionItem(expressionRoot) || expressionRoot.subtype === 'variadic-call') {
+        // this is already guaranteed in the getPosition function, but TypeScript doesn't know
+        break;
+      }
+
+      let rightmostOperator = expressionRoot;
+      // get rightmost function
+      const walker = new Walker({
+        visitFunction: (fn: ESQLFunction) => {
+          if (fn.location.min > rightmostOperator.location.min && fn.subtype !== 'variadic-call')
+            rightmostOperator = fn;
+        },
+      });
+      walker.walkFunction(expressionRoot);
+
+      // See https://github.com/elastic/kibana/issues/199401 for an explanation of
+      // why this check has to be so convoluted
+      if (rightmostOperator.text.toLowerCase().trim().endsWith('null')) {
+        suggestions.push(...logicalOperators.map(getOperatorSuggestion));
+        break;
+      }
+
+      suggestions.push(
+        ...(await getSuggestionsToRightOfOperatorExpression({
+          queryText: innerText,
+          location,
+          rootOperator: rightmostOperator,
+          preferredExpressionType,
+          getExpressionType,
+          getColumnsByType,
+        }))
+      );
+
+      break;
+
+    case 'empty_expression':
+      // Don't suggest MATCH, QSTR or KQL after unsupported commands
+      const priorCommands = previousCommands?.map((a) => a.name) ?? [];
+      const ignored = [];
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
+        ignored.push('match');
+      }
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
+        ignored.push('kql', 'qstr');
+      }
+      const last = previousCommands?.[previousCommands.length - 1];
+      let columnSuggestions: SuggestionRawDefinition[] = [];
+      if (!last?.text?.endsWith(`:${EDITOR_MARKER}`)) {
+        columnSuggestions = await getColumnsByType('any', [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        });
+      }
+      suggestions.push(
+        ...pushItUpInTheList(columnSuggestions, true),
+        ...getFunctionSuggestions({ location, ignored })
+      );
+
+      break;
+  }
+
+  /**
+   * Attach replacement ranges if there's a prefix.
+   *
+   * Can't rely on Monaco because
+   * - it counts "." as a word separator
+   * - it doesn't handle multi-word completions (like "is null")
+   *
+   * TODO - think about how to generalize this — issue: https://github.com/elastic/kibana/issues/209905
+   */
+  const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
+  suggestions.forEach((s) => {
+    if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
+      // this suggestion has spaces in it (e.g. "IS NOT NULL")
+      // so we need to see if there's an overlap
+      s.rangeToReplace = getOverlapRange(innerText, s.text);
+      return;
+    } else if (hasNonWhitespacePrefix) {
+      // get index of first char of final word
+      const lastNonWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
+      s.rangeToReplace = {
+        start: lastNonWhitespaceIndex,
+        end: innerText.length,
+      };
+    }
+  });
+
+  return suggestions;
+}
+
+/**
+ * Builds a regex that matches partial strings starting
+ * from the beginning of the string.
+ *
+ * Example:
+ * "is null" -> /^i(?:s(?:\s+(?:n(?:u(?:l(?:l)?)?)?)?)?)?$/i
+ */
+export function buildPartialMatcher(str: string) {
+  // Split the string into characters
+  const chars = str.split('');
+
+  // Initialize the regex pattern
+  let pattern = '';
+
+  // Iterate through the characters and build the pattern
+  chars.forEach((char, index) => {
+    if (char === ' ') {
+      pattern += '\\s+';
+    } else {
+      pattern += char;
+    }
+    if (index < chars.length - 1) {
+      pattern += '(?:';
+    }
+  });
+
+  // Close the non-capturing groups
+  for (let i = 0; i < chars.length - 1; i++) {
+    pattern += ')?';
+  }
+
+  // Return the final regex pattern
+  return new RegExp(pattern + '$', 'i');
+}
+
+const isNullMatcher = buildPartialMatcher('is nul');
+const isNotNullMatcher = buildPartialMatcher('is not nul');
+
+/**
+ * Checks whether an expression is truly complete.
+ *
+ * (Encapsulates handling of the "is null" and "is not null"
+ * checks)
+ *
+ * @todo use the simpler "getExpressionType(root) !== 'unknown'"
+ * as soon as https://github.com/elastic/kibana/issues/199401 is resolved
+ */
+export function isExpressionComplete(
+  expressionType: SupportedDataType | 'unknown',
+  innerText: string
+) {
+  return (
+    expressionType !== 'unknown' &&
+    // see https://github.com/elastic/kibana/issues/199401
+    // for the reason we need this string check.
+    !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
+  );
 }

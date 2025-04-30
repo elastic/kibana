@@ -20,14 +20,15 @@ import {
   generateAlert,
   generateRecoveredAlert,
 } from '../test_fixtures';
-import { RuleAction } from '@kbn/alerting-types';
+import type { RuleAction } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
-import { CombinedSummarizedAlerts } from '../../../types';
+import type { CombinedSummarizedAlerts } from '../../../types';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -97,7 +98,13 @@ const getSchedulerContext = (params = {}) => {
   return { ...defaultSchedulerContext, rule, ...params, ruleRunMetricsStore };
 };
 
-const getResult = (actionId: string, actionUuid: string, summary: CombinedSummarizedAlerts) => ({
+const getResult = (
+  actionId: string,
+  actionUuid: string,
+  summary: CombinedSummarizedAlerts,
+  priority?: number,
+  apiKeyId?: string
+) => ({
   actionToEnqueue: {
     actionTypeId: 'test',
     apiKey: 'MTIzOmFiYw==',
@@ -108,6 +115,8 @@ const getResult = (actionId: string, actionUuid: string, summary: CombinedSummar
     relatedSavedObjects: [{ id: 'rule-id-1', namespace: 'test1', type: 'alert', typeId: 'test' }],
     source: { source: { id: 'rule-id-1', type: 'alert' }, type: 'SAVED_OBJECT' },
     spaceId: 'test1',
+    ...(priority && { priority }),
+    ...(apiKeyId && { apiKeyId }),
   },
   actionToLog: {
     alertSummary: {
@@ -225,7 +234,7 @@ describe('Summary Action Scheduler', () => {
       const throttledSummaryActions = {};
       const scheduler = new SummaryActionScheduler(getSchedulerContext());
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions,
       });
 
@@ -261,6 +270,108 @@ describe('Summary Action Scheduler', () => {
       ]);
     });
 
+    test('should create action to schedule with priority if specified for summary action when summary action is per rule run', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const throttledSummaryActions = {};
+      const scheduler = new SummaryActionScheduler({
+        ...getSchedulerContext(),
+        priority: TaskPriority.Low,
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+        throttledSummaryActions,
+      });
+
+      expect(throttledSummaryActions).toEqual({});
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(2, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+      expect(logger.debug).not.toHaveBeenCalled();
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
+
+      expect(results).toHaveLength(2);
+
+      const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
+      expect(results).toEqual([
+        getResult('action-2', '222-222', finalSummary, 1),
+        getResult('action-3', '333-333', finalSummary, 1),
+      ]);
+    });
+
+    test('should create action to schedule with apiKeyId if specified for summary action when summary action is per rule run', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue(alerts);
+      const summarizedAlerts = {
+        new: { count: 2, data: [mockAAD, mockAAD] },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      };
+      alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
+
+      const throttledSummaryActions = {};
+      const scheduler = new SummaryActionScheduler({
+        ...getSchedulerContext(),
+        apiKeyId: '24534wy3wydfbs',
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeAlerts: alerts,
+        throttledSummaryActions,
+      });
+
+      expect(throttledSummaryActions).toEqual({});
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(2);
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(1, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+      expect(alertsClient.getSummarizedAlerts).toHaveBeenNthCalledWith(2, {
+        excludedAlertInstanceIds: [],
+        executionUuid: defaultSchedulerContext.executionId,
+        ruleId: 'rule-id-1',
+        spaceId: 'test1',
+      });
+      expect(logger.debug).not.toHaveBeenCalled();
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
+
+      expect(results).toHaveLength(2);
+
+      const finalSummary = { ...summarizedAlerts, all: { count: 2, data: [mockAAD, mockAAD] } };
+      expect(results).toEqual([
+        getResult('action-2', '222-222', finalSummary, undefined, '24534wy3wydfbs'),
+        getResult('action-3', '333-333', finalSummary, undefined, '24534wy3wydfbs'),
+      ]);
+    });
+
     test('should create actions to schedule for summary action when summary action has alertsFilter', async () => {
       alertsClient.getProcessedAlerts.mockReturnValue(alerts);
       const summarizedAlerts = {
@@ -277,7 +388,7 @@ describe('Summary Action Scheduler', () => {
 
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions,
       });
 
@@ -321,7 +432,7 @@ describe('Summary Action Scheduler', () => {
 
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions,
       });
 
@@ -357,7 +468,7 @@ describe('Summary Action Scheduler', () => {
 
       const throttledSummaryActions = { '444-444': { date: '1969-12-31T13:00:00.000Z' } };
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions,
       });
 
@@ -394,7 +505,7 @@ describe('Summary Action Scheduler', () => {
 
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions,
       });
 
@@ -459,8 +570,8 @@ describe('Summary Action Scheduler', () => {
 
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
-        recoveredCurrentAlerts: recoveredAlert,
+        activeAlerts: alerts,
+        recoveredAlerts: recoveredAlert,
         throttledSummaryActions,
       });
 
@@ -507,7 +618,7 @@ describe('Summary Action Scheduler', () => {
 
       const throttledSummaryActions = {};
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions,
       });
 
@@ -537,7 +648,7 @@ describe('Summary Action Scheduler', () => {
 
       try {
         await scheduler.getActionsToSchedule({
-          activeCurrentAlerts: alerts,
+          activeAlerts: alerts,
           throttledSummaryActions: {},
         });
       } catch (err) {
@@ -566,7 +677,7 @@ describe('Summary Action Scheduler', () => {
         },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions: {},
       });
 
@@ -623,7 +734,7 @@ describe('Summary Action Scheduler', () => {
         },
       });
       const results = await scheduler.getActionsToSchedule({
-        activeCurrentAlerts: alerts,
+        activeAlerts: alerts,
         throttledSummaryActions: {},
       });
 

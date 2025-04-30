@@ -2,7 +2,7 @@
 
 exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
 <div
-  className="ml-explorer-chart-info-tooltip"
+  css="unknown styles"
 >
   <TooltipDefinitionList
     toolTipData={

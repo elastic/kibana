@@ -9,16 +9,24 @@ import React, { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import {
+  defaultGroupingOptions,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
+} from '../../../detections/components/alerts_table/grouping_settings';
 import { HeaderSection } from '../../../common/components/header_section';
-
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
-import { AlertsTableComponent } from '../../../detections/components/alerts_table';
+import type { EntityRiskScore } from '../../../../common/search_strategy';
+import {
+  EntityType,
+  type HostRiskScore,
+  type UserRiskScore,
+} from '../../../../common/search_strategy';
+import { DetectionEngineAlertsTable } from '../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -27,26 +35,35 @@ import { useUserData } from '../../../detections/components/user_info';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { RiskInformationButtonEmpty } from '../risk_information';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
-export interface TopRiskScoreContributorsAlertsProps {
+export interface TopRiskScoreContributorsAlertsProps<T extends EntityType> {
   toggleStatus: boolean;
   toggleQuery?: (status: boolean) => void;
-  riskScore: HostRiskScore | UserRiskScore;
-  riskEntity: RiskScoreEntity;
+  riskScore: EntityRiskScore<T>;
+  riskEntity: T;
   loading: boolean;
 }
 
-export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAlertsProps> = ({
+export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   toggleStatus,
   toggleQuery,
   riskScore,
   riskEntity,
   loading,
-}) => {
+}: TopRiskScoreContributorsAlertsProps<T>) => {
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
     useUserData();
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -57,8 +74,9 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const inputFilters = useMemo(() => {
+    // TODO Add support for services on a follow-up PR
     const riskScoreEntity =
-      riskEntity === RiskScoreEntity.host
+      riskEntity === EntityType.host
         ? (riskScore as HostRiskScore).host
         : (riskScore as UserRiskScore).user;
 
@@ -82,14 +100,23 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <AlertsTableComponent
-          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RISK_INPUTS}
+        <DetectionEngineAlertsTable
+          tableType={TableId.alertsRiskInputs}
           inputFilters={[...inputFilters, ...filters, ...groupingFilters]}
-          tableId={TableId.alertsRiskInputs}
         />
       );
     },
     [inputFilters, filters]
+  );
+
+  const defaultFilters = useMemo(() => [...inputFilters, ...filters], [filters, inputFilters]);
+
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
   );
 
   return (
@@ -114,7 +141,10 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
         >
           <EuiFlexItem grow={1}>
             <GroupedAlertsTable
-              defaultFilters={[...inputFilters, ...filters]}
+              accordionButtonContent={defaultGroupTitleRenderers}
+              accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+              defaultFilters={defaultFilters}
+              defaultGroupingOptions={defaultGroupingOptions}
               from={from}
               globalFilters={filters}
               globalQuery={query}

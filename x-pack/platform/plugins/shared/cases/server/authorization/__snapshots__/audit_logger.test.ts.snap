@@ -1,5 +1,89 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "cases_assign",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "change",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases",
+    },
+  },
+  "message": "Failed attempt to update cases [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "cases_assign",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "change",
+    ],
+  },
+  "message": "Failed attempt to update a case as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "cases_assign",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "change",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases",
+    },
+  },
+  "message": "User is updating cases [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "assignCase" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "cases_assign",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "change",
+    ],
+  },
+  "message": "User is updating a case as any owners",
+}
+`;
+
 exports[`audit_logger log function event structure creates the correct audit event for operation: "bulkCreateAttachments" with an error and entity 1`] = `
 Object {
   "error": Object {

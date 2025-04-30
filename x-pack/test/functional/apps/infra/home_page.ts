@@ -94,7 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
           const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
-          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=infra`;
+          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding`;
           expect(currentUrl).to.equal(expectedUrlPattern);
         });
       });
@@ -144,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain(
-          'Infrastructure inventory - Infrastructure - Observability - Elastic'
+          'Infrastructure Inventory - Infrastructure - Observability - Elastic'
         );
       });
 
@@ -370,11 +370,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'host-3', value: 90, color: '#6092c0' },
-            { name: 'host-2', value: 70, color: '#82a7cd' },
-            { name: 'host-1', value: 50, color: '#a2bcd9' },
-            { name: 'host-4', value: 30, color: '#d1ddec' },
-            { name: 'host-5', value: 10, color: '#f0f4f9' },
+            { name: 'host-3', value: 90, color: '#61a2ff' },
+            { name: 'host-2', value: 70, color: '#80b2ff' },
+            { name: 'host-1', value: 50, color: '#9bc2ff' },
+            { name: 'host-4', value: 30, color: '#c2d9ff' },
+            { name: 'host-5', value: 10, color: '#dbe9ff' },
           ]);
         });
       });
@@ -387,11 +387,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'host-5', value: 10, color: '#f0f4f9' },
-            { name: 'host-4', value: 30, color: '#d1ddec' },
-            { name: 'host-1', value: 50, color: '#a2bcd9' },
-            { name: 'host-2', value: 70, color: '#82a7cd' },
-            { name: 'host-3', value: 90, color: '#6092c0' },
+            { name: 'host-5', value: 10, color: '#dbe9ff' },
+            { name: 'host-4', value: 30, color: '#c2d9ff' },
+            { name: 'host-1', value: 50, color: '#9bc2ff' },
+            { name: 'host-2', value: 70, color: '#80b2ff' },
+            { name: 'host-3', value: 90, color: '#61a2ff' },
           ]);
         });
       });
@@ -411,7 +411,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.enterSearchTerm('host.name: "host-1"');
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
-          expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#6092c0' }]);
+          expect(nodesWithValue).to.eql([{ name: 'host-1', value: 50, color: '#61a2ff' }]);
         });
         await pageObjects.infraHome.clearSearchTerm();
       });
@@ -424,11 +424,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.tryForTime(5000, async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'host-5', value: 10, color: '#6092c0' },
-            { name: 'host-4', value: 30, color: '#9ab6d5' },
-            { name: 'host-1', value: 50, color: '#f6e0b9' },
-            { name: 'host-2', value: 70, color: '#eda77a' },
-            { name: 'host-3', value: 90, color: '#e7664c' },
+            { name: 'host-5', value: 10, color: '#61a2ff' },
+            { name: 'host-4', value: 30, color: '#b5d2ff' },
+            { name: 'host-1', value: 50, color: '#fbefee' },
+            { name: 'host-2', value: 70, color: '#ffbab3' },
+            { name: 'host-3', value: 90, color: '#f6726a' },
           ]);
         });
       });
@@ -459,7 +459,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.tryForTime(5000, async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'host-5 - Infrastructure inventory - Infrastructure - Observability - Elastic'
+              'host-5 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -476,7 +476,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -494,7 +494,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'container-id-4 - Infrastructure inventory - Infrastructure - Observability - Elastic'
+                'container-id-4 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
               );
             });
 

@@ -77,7 +77,7 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
           @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
       <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
         {sortedRuleExecutionStatusValues.map((item: RuleExecutionStatuses) => {
-          const healthColor = getExecutionStatusHealthColor(item);
+          const healthColor = getExecutionStatusHealthColor(item, euiTheme);
           return (
             <EuiFilterSelectItem
               key={item}

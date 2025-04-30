@@ -21,8 +21,9 @@ import {
   type Edge as xyEdge,
 } from '@xyflow/react';
 import { isEmpty, isEqual, pick, size, xorWith } from 'lodash';
-import { Story } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { DefaultEdge } from '.';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { LabelNode } from '../node';
 import type { EdgeViewModel } from '../types';
 import { SvgDefsMarker } from './markers';
@@ -43,6 +44,7 @@ export default {
       control: { type: 'radio' },
     },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const nodeTypes = {
@@ -75,7 +77,7 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
-const Template: Story<EdgeViewModel> = (args: EdgeViewModel) => {
+const Template: StoryFn<EdgeViewModel> = (args: EdgeViewModel) => {
   const nodes = useMemo(
     () => [
       {
@@ -178,14 +180,16 @@ const Template: Story<EdgeViewModel> = (args: EdgeViewModel) => {
   );
 };
 
-export const Edge = Template.bind({});
+export const Edge: StoryObj<EdgeViewModel> = {
+  render: Template,
 
-Edge.args = {
-  id: 'siem-windows',
-  label: 'User login to OKTA',
-  color: 'primary',
-  interactive: true,
-  type: 'solid',
+  args: {
+    id: 'siem-windows',
+    label: 'User login to OKTA',
+    color: 'primary',
+    interactive: true,
+    type: 'solid',
+  },
 };
 
 const isArrayOfObjectsEqual = (x: object[], y: object[]) =>

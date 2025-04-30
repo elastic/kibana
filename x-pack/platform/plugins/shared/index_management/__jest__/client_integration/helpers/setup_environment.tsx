@@ -21,6 +21,7 @@ import {
   applicationServiceMock,
   fatalErrorsServiceMock,
   httpServiceMock,
+  chromeServiceMock,
 } from '@kbn/core/public/mocks';
 
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
@@ -65,11 +66,13 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
 const appDependencies = {
   services,
   history,
+  url: sharePluginMock.createStartContract().url,
   core: {
     getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     executionContext: executionContextServiceMock.createStartContract(),
     http: httpServiceMock.createSetupContract(),
     application: applicationServiceMock.createStartContract(),
+    chrome: chromeServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
   },
   plugins: {
@@ -105,6 +108,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   settings: settingsServiceMock.createStartContract(),
   theme: themeServiceMock.createStartContract(),
+  chrome: chromeServiceMock.createStartContract(),
   kibanaVersion: {
     get: () => kibanaVersion,
   },

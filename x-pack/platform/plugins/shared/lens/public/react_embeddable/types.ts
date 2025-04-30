@@ -13,11 +13,10 @@ import type {
   TimeRange,
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
-  HasParentApi,
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
@@ -27,8 +26,8 @@ import type {
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesRendered,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
+  PublishesWritableDescription,
+  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
   ViewMode,
@@ -64,7 +63,6 @@ import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common'
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
@@ -91,7 +89,7 @@ import type { LensPluginStartDependencies } from '../plugin';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { PieVisualizationState } from '../../common/types';
 import type { FormBasedPersistedState } from '..';
-import type { TextBasedPersistedState } from '../datasources/text_based/types';
+import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
 
@@ -392,18 +390,15 @@ export type LensApi = Simplify<
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
-    PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
+    PublishesWritableTitle &
+    PublishesWritableDescription &
     // This embeddable can narrow down specific triggers usage
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasInPlaceLibraryTransforms &
-    HasLibraryTransforms<LensRuntimeState> &
+    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
     // Let the container know the view mode
     PublishesViewMode &
-    // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface
-    Partial<HasParentApi<PresentationContainer>> &
     // Let the container know the saved object id
     PublishesSavedObjectId &
     // Lens specific API methods:
@@ -419,6 +414,7 @@ export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
     PublishesDataViews &
     VisualizationContextHelper & {
+      esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
@@ -525,3 +521,24 @@ export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
+
+export interface ControlGroupApi {
+  addNewPanel: (panelState: Record<string, unknown>) => void;
+}
+
+interface ESQLVariablesCompatibleDashboardApi {
+  esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  children$: PublishingSubject<{ [key: string]: unknown }>;
+}
+
+export const isApiESQLVariablesCompatible = (
+  api: unknown | null
+): api is ESQLVariablesCompatibleDashboardApi => {
+  return Boolean(
+    api &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
+  );
+};

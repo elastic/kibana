@@ -18,12 +18,18 @@ import { ProductDocBasePlugin } from './plugin';
 export { config } from './config';
 
 export type { ProductDocBaseSetupContract, ProductDocBaseStartContract };
-export type { SearchApi as ProductDocSearchAPI } from './services/search/types';
+export type {
+  SearchApi as ProductDocSearchAPI,
+  DocSearchOptions,
+  DocSearchResult,
+  DocSearchResponse,
+} from './services/search/types';
 
 export const plugin: PluginInitializer<
   ProductDocBaseSetupContract,
   ProductDocBaseStartContract,
   ProductDocBaseSetupDependencies,
   ProductDocBaseStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<ProductDocBaseConfig>) =>
-  new ProductDocBasePlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<ProductDocBaseConfig>) => {
+  return new ProductDocBasePlugin(pluginInitializerContext);
+};

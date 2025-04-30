@@ -412,6 +412,26 @@
           },
           {
             "parentPluginId": "management",
+            "id": "def-public.DefinedSections.machineLearning",
+            "type": "Object",
+            "tags": [],
+            "label": "machineLearning",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ],
+            "path": "src/platform/plugins/shared/management/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.security",
             "type": "Object",
             "tags": [],
@@ -518,13 +538,7 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[]) => void"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
@@ -539,13 +553,7 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBreadcrumb",
-                    "text": "ChromeBreadcrumb"
-                  },
+                  "ChromeBreadcrumb",
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/management/public/types.ts",

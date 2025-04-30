@@ -8,8 +8,9 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLRealField } from '../validation/types';
+import { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
+import { ESQLCallbacks } from '../shared/types';
 
 export const fields: ESQLRealField[] = [
   ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
@@ -52,17 +53,39 @@ export const policies = [
   },
 ];
 
-export function getCallbackMocks() {
+export const joinIndices: JoinIndexAutocompleteItem[] = [
+  {
+    name: 'join_index',
+    mode: 'lookup',
+    aliases: [],
+  },
+  {
+    name: 'join_index_with_alias',
+    mode: 'lookup',
+    aliases: ['join_index_alias_1', 'join_index_alias_2'],
+  },
+  {
+    name: 'lookup_index',
+    mode: 'lookup',
+    aliases: [],
+  },
+];
+
+export function getCallbackMocks(): ESQLCallbacks {
   return {
-    getColumnsFor: jest.fn(async ({ query }) => {
+    getColumnsFor: jest.fn(async ({ query } = {}) => {
       if (/enrich/.test(query)) {
         return enrichFields;
       }
       if (/unsupported_index/.test(query)) {
         return unsupported_field;
       }
-      if (/dissect|grok/.test(query)) {
-        const field: ESQLRealField = { name: 'firstWord', type: 'text' };
+      if (/join_index/.test(query)) {
+        const field: ESQLRealField = {
+          name: 'keywordField',
+          type: 'unsupported',
+          hasConflict: true,
+        };
         return [field];
       }
       return fields;
@@ -75,5 +98,6 @@ export function getCallbackMocks() {
       }))
     ),
     getPolicies: jest.fn(async () => policies),
+    getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
   };
 }

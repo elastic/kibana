@@ -8,24 +8,22 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiProvider } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import {
-  DiscoverSidebarResponsive,
-  DiscoverSidebarResponsiveProps,
-} from './discover_sidebar_responsive';
-import { DiscoverServices } from '../../../../build_services';
-import { FetchStatus, SidebarToggleState } from '../../../types';
-import { DataDocuments$ } from '../../state_management/discover_data_state_container';
+import type { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
+import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
+import type { DiscoverServices } from '../../../../build_services';
+import type { SidebarToggleState } from '../../../types';
+import { FetchStatus } from '../../../types';
+import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppStateProvider } from '../../state_management/discover_app_state_container';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -33,7 +31,9 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
+import { RuntimeStateProvider } from '../../state_management/redux';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -177,13 +177,13 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
   };
 }
 
-function getAppStateContainer({ query }: { query?: Query | AggregateQuery }) {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-  appStateContainer.set({
+function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.appState.set({
     query: query ?? { query: '', language: 'lucene' },
     filters: [],
   });
-  return appStateContainer;
+  return stateContainer;
 }
 
 async function mountComponent(
@@ -192,7 +192,7 @@ async function mountComponent(
   services?: DiscoverServices
 ): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
-  const appState = getAppStateContainer(appStateParams);
+  const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
@@ -202,15 +202,21 @@ async function mountComponent(
   mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
     return [props.selectedDataView].find((d) => d!.id === id);
   });
-  mockedServices.data.query.getState = jest.fn().mockImplementation(() => appState.getState());
+  mockedServices.data.query.getState = jest
+    .fn()
+    .mockImplementation(() => stateContainer.appState.getState());
 
   await act(async () => {
     comp = mountWithIntl(
-      <KibanaContextProvider services={mockedServices}>
-        <DiscoverAppStateProvider value={appState}>
-          <DiscoverSidebarResponsive {...props} />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
+      <EuiProvider>
+        <KibanaContextProvider services={mockedServices}>
+          <DiscoverMainProvider value={stateContainer}>
+            <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
+              <DiscoverSidebarResponsive {...props} />{' '}
+            </RuntimeStateProvider>
+          </DiscoverMainProvider>
+        </KibanaContextProvider>
+      </EuiProvider>
     );
     // wait for lazy modules
     await new Promise((resolve) => setTimeout(resolve, 0));

@@ -13,12 +13,24 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
   const browser = getService('browser');
   const retry = getService('retry');
 
+  const expectIndexDetailPageHeader = async function () {
+    await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
+  };
+  const expectSearchIndexDetailsTabsExists = async function () {
+    await testSubjects.existOrFail('dataTab');
+    await testSubjects.existOrFail('mappingsTab');
+    await testSubjects.existOrFail('settingsTab');
+  };
+
   return {
-    async expectIndexDetailPageHeader() {
-      await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
-    },
+    expectIndexDetailPageHeader,
+    expectSearchIndexDetailsTabsExists,
     async expectAPIReferenceDocLinkExists() {
       await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
+    },
+    async expectIndexDetailsPageIsLoaded() {
+      await expectIndexDetailPageHeader();
+      await expectSearchIndexDetailsTabsExists();
     },
     async expectActionItemReplacedWhenHasDocs() {
       await testSubjects.missingOrFail('ApiReferenceDoc', { timeout: 2000 });
@@ -38,12 +50,26 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
         'QuickStatsDocumentCount'
       );
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Document count\n0');
-      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size\n0b');
+      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Total\n0');
       await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n227b');
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Total\n0\nDeleted\n0');
+    },
+
+    async expectQuickStatsToHaveIndexStatus() {
+      await testSubjects.existOrFail('QuickStatsIndexStatus');
+    },
+
+    async expectQuickStatsToHaveIndexStorage(size?: string) {
+      await testSubjects.existOrFail('QuickStatsStorage');
+      if (!size) return;
+
+      const quickStatsElem = await testSubjects.find('quickStats');
+      const quickStatsStorageElem = await quickStatsElem.findByTestSubject('QuickStatsStorage');
+      expect(await quickStatsStorageElem.getVisibleText()).to.contain(`Storage\n${size}`);
     },
 
     async expectQuickStatsToHaveDocumentCount(count: number) {
+      await testSubjects.existOrFail('QuickStatsDocumentCount');
       const quickStatsElem = await testSubjects.find('quickStats');
       const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
         'QuickStatsDocumentCount'
@@ -53,6 +79,7 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
 
     async expectQuickStatsAIMappings() {
       await testSubjects.existOrFail('quickStats', { timeout: 2000 });
+      await testSubjects.existOrFail('QuickStatsAIMappings');
       const quickStatsElem = await testSubjects.find('quickStats');
       const quickStatsAIMappingsElem = await quickStatsElem.findByTestSubject(
         'QuickStatsAIMappings'
@@ -221,20 +248,6 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       );
     },
 
-    async expectSampleDocumentsWithCustomMappings() {
-      await browser.refresh();
-      await testSubjects.existOrFail('ingestDataCodeExample-code-block');
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Example text 1'
-      );
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Example text 2'
-      );
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Example text 3'
-      );
-    },
-
     async clickFirstDocumentDeleteAction() {
       await testSubjects.existOrFail('documentMetadataButton');
       await testSubjects.click('documentMetadataButton');
@@ -270,21 +283,26 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
         return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
       });
     },
-    async expectSearchIndexDetailsTabsExists() {
-      await testSubjects.existOrFail('dataTab');
-      await testSubjects.existOrFail('mappingsTab');
-      await testSubjects.existOrFail('settingsTab');
-    },
 
-    async expectBreadcrumbNavigationWithIndexName(indexName: string) {
+    async expectIndexNametoBeInBreadcrumbs(indexName: string) {
       await testSubjects.existOrFail('euiBreadcrumb');
       expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(indexName);
     },
+    async expectBreadcrumbsToBeAvailable(breadcrumbsName: string) {
+      const breadcrumbs = await testSubjects.findAll('breadcrumb');
+      let isBreadcrumbShown: boolean = false;
+      for (const breadcrumb of breadcrumbs) {
+        if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
+          isBreadcrumbShown = true;
+        }
+      }
+      expect(isBreadcrumbShown).to.be(true);
+    },
 
-    async clickOnIndexManagementBreadcrumb() {
+    async clickOnBreadcrumb(breadcrumbsName: string) {
       const breadcrumbs = await testSubjects.findAll('breadcrumb');
       for (const breadcrumb of breadcrumbs) {
-        if ((await breadcrumb.getVisibleText()) === 'Index Management') {
+        if ((await breadcrumb.getVisibleText()) === breadcrumbsName) {
           await breadcrumb.click();
           return;
         }

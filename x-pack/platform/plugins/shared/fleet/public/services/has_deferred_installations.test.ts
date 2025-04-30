@@ -12,10 +12,6 @@ import { ElasticsearchAssetType } from '../../common/types';
 
 import { hasDeferredInstallations } from './has_deferred_installations';
 
-import { ExperimentalFeaturesService } from '.';
-
-const mockGet = jest.spyOn(ExperimentalFeaturesService, 'get');
-
 const createPackage = ({
   installedEs = [],
 }: {
@@ -46,47 +42,38 @@ const createPackage = ({
 });
 
 describe('isPackageUnverified', () => {
-  describe('When experimental feature is disabled', () => {
-    beforeEach(() => {
-      // @ts-ignore don't want to define all experimental features here
-      mockGet.mockReturnValue({
-        packageVerification: false,
-      } as ReturnType<(typeof ExperimentalFeaturesService)['get']>);
+  it('Should return false for a package with no installationInfo', () => {
+    const noSoPkg = createPackage();
+    // @ts-ignore we know pkg has installationInfo but ts doesn't
+    delete noSoPkg.installationInfo;
+    expect(hasDeferredInstallations(noSoPkg)).toEqual(false);
+  });
+
+  it('Should return true for a package with at least one asset deferred', () => {
+    const pkgWithDeferredInstallations = createPackage({
+      installedEs: [
+        { id: '', type: ElasticsearchAssetType.ingestPipeline },
+        { id: '', type: ElasticsearchAssetType.transform, deferred: true },
+      ],
     });
 
-    it('Should return false for a package with no installationInfo', () => {
-      const noSoPkg = createPackage();
-      // @ts-ignore we know pkg has installationInfo but ts doesn't
-      delete noSoPkg.installationInfo;
-      expect(hasDeferredInstallations(noSoPkg)).toEqual(false);
-    });
+    expect(hasDeferredInstallations(pkgWithDeferredInstallations)).toEqual(true);
+  });
 
-    it('Should return true for a package with at least one asset deferred', () => {
-      const pkgWithDeferredInstallations = createPackage({
-        installedEs: [
-          { id: '', type: ElasticsearchAssetType.ingestPipeline },
-          { id: '', type: ElasticsearchAssetType.transform, deferred: true },
-        ],
-      });
-
-      expect(hasDeferredInstallations(pkgWithDeferredInstallations)).toEqual(true);
+  it('Should return false for a package that has no asset deferred', () => {
+    const pkgWithoutDeferredInstallations = createPackage({
+      installedEs: [
+        { id: '', type: ElasticsearchAssetType.ingestPipeline },
+        { id: '', type: ElasticsearchAssetType.transform, deferred: false },
+      ],
     });
+    expect(hasDeferredInstallations(pkgWithoutDeferredInstallations)).toEqual(false);
+  });
 
-    it('Should return false for a package that has no asset deferred', () => {
-      const pkgWithoutDeferredInstallations = createPackage({
-        installedEs: [
-          { id: '', type: ElasticsearchAssetType.ingestPipeline },
-          { id: '', type: ElasticsearchAssetType.transform, deferred: false },
-        ],
-      });
-      expect(hasDeferredInstallations(pkgWithoutDeferredInstallations)).toEqual(false);
+  it('Should return false for a package that has no asset', () => {
+    const pkgWithoutDeferredInstallations = createPackage({
+      installedEs: [],
     });
-
-    it('Should return false for a package that has no asset', () => {
-      const pkgWithoutDeferredInstallations = createPackage({
-        installedEs: [],
-      });
-      expect(hasDeferredInstallations(pkgWithoutDeferredInstallations)).toEqual(false);
-    });
+    expect(hasDeferredInstallations(pkgWithoutDeferredInstallations)).toEqual(false);
   });
 });

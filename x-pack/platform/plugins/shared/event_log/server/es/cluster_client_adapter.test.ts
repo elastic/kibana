@@ -6,20 +6,24 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  ClusterClientAdapter,
+import type {
   IClusterClientAdapter,
-  EVENT_BUFFER_LENGTH,
-  getQueryBody,
   FindEventsOptionsBySavedObjectFilter,
   AggregateEventsOptionsBySavedObjectFilter,
   AggregateEventsWithAuthFilter,
+  Doc,
+} from './cluster_client_adapter';
+import {
+  ClusterClientAdapter,
+  EVENT_BUFFER_LENGTH,
+  getQueryBody,
   getQueryBodyWithAuthFilter,
 } from './cluster_client_adapter';
-import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
+import type { AggregateOptionsType } from '../event_log_client';
+import { queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getEsNames } from './names';
 
@@ -375,13 +379,11 @@ describe('setLegacyIndexTemplateToHidden', () => {
     await clusterClientAdapter.setLegacyIndexTemplateToHidden('foo-bar-template', currentTemplate);
     expect(clusterClient.indices.putTemplate).toHaveBeenCalledWith({
       name: 'foo-bar-template',
-      body: {
-        order: 0,
-        index_patterns: ['foo-bar-*'],
-        settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
-        mappings: { dynamic: false, properties: {} },
-        aliases: {},
-      },
+      order: 0,
+      index_patterns: ['foo-bar-*'],
+      settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
+      mappings: { dynamic: false, properties: {} },
+      aliases: {},
     });
   });
 
@@ -442,7 +444,7 @@ describe('setIndexToHidden', () => {
     await clusterClientAdapter.setIndexToHidden('foo-bar-000001');
     expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
       index: 'foo-bar-000001',
-      body: {
+      settings: {
         index: {
           hidden: true,
         },
@@ -501,18 +503,16 @@ describe('setIndexAliasToHidden', () => {
       { alias: 'foo-bar', indexName: 'foo-bar-000001', is_write_index: true },
     ]);
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
-      body: {
-        actions: [
-          {
-            add: {
-              index: 'foo-bar-000001',
-              alias: 'foo-bar',
-              is_hidden: true,
-              is_write_index: true,
-            },
+      actions: [
+        {
+          add: {
+            index: 'foo-bar-000001',
+            alias: 'foo-bar',
+            is_hidden: true,
+            is_write_index: true,
           },
-        ],
-      },
+        },
+      ],
     });
   });
 
@@ -522,27 +522,25 @@ describe('setIndexAliasToHidden', () => {
       { alias: 'foo-bar', indexName: 'foo-bar-000002', index_routing: 'index', routing: 'route' },
     ]);
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
-      body: {
-        actions: [
-          {
-            add: {
-              index: 'foo-bar-000001',
-              alias: 'foo-bar',
-              is_hidden: true,
-              is_write_index: true,
-            },
+      actions: [
+        {
+          add: {
+            index: 'foo-bar-000001',
+            alias: 'foo-bar',
+            is_hidden: true,
+            is_write_index: true,
           },
-          {
-            add: {
-              index: 'foo-bar-000002',
-              alias: 'foo-bar',
-              is_hidden: true,
-              index_routing: 'index',
-              routing: 'route',
-            },
+        },
+        {
+          add: {
+            index: 'foo-bar-000002',
+            alias: 'foo-bar',
+            is_hidden: true,
+            index_routing: 'index',
+            routing: 'route',
           },
-        ],
-      },
+        },
+      ],
     });
   });
 
@@ -627,6 +625,7 @@ describe('createDataStream', () => {
   test(`shouldn't throw when an error of type resource_already_exists_exception is thrown`, async () => {
     // ElasticsearchError can be a bit random in shape, we need an any here
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const err = new Error('Already exists') as any;
     err.body = {
       error: {
@@ -658,7 +657,8 @@ describe('updateConcreteIndices', () => {
     });
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
   });
 
@@ -719,7 +719,8 @@ describe('updateConcreteIndices', () => {
 
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
     expect(logger.error).toHaveBeenCalledWith(
       `Error updating index mappings for foo: failed to put mappings`
@@ -733,7 +734,15 @@ describe('queryEventsBySavedObject', () => {
   test('should call cluster with correct options', async () => {
     clusterClient.search.mockResponse({
       hits: {
-        hits: [{ _index: 'index-name-00001', _id: '1', _source: { foo: 'bar' } }],
+        hits: [
+          {
+            _index: 'index-name-00001',
+            _id: '1',
+            _source: { foo: 'bar' },
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        ],
         total: { relation: 'eq', value: 1 },
       },
       took: 0,
@@ -766,18 +775,17 @@ describe('queryEventsBySavedObject', () => {
     expect(query).toEqual({
       index: 'index-name',
       track_total_hits: true,
-      body: {
-        size: 6,
-        from: 12,
-        query: getQueryBody(logger, options, pick(options.findOptions, ['start', 'end', 'filter'])),
-        sort: [{ '@timestamp': { order: 'asc' } }, { 'event.end': { order: 'desc' } }],
-      },
+      seq_no_primary_term: true,
+      size: 6,
+      from: 12,
+      query: getQueryBody(logger, options, pick(options.findOptions, ['start', 'end', 'filter'])),
+      sort: [{ '@timestamp': { order: 'asc' } }, { 'event.end': { order: 'desc' } }],
     });
     expect(result).toEqual({
       page: 3,
       per_page: 6,
       total: 1,
-      data: [{ foo: 'bar' }],
+      data: [{ foo: 'bar', _id: '1', _index: 'index-name-00001', _seq_no: 1, _primary_term: 1 }],
     });
   });
 });
@@ -840,19 +848,17 @@ describe('aggregateEventsBySavedObject', () => {
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toEqual({
       index: 'index-name',
-      body: {
-        size: 0,
-        query: getQueryBody(
-          logger,
-          options,
-          pick(options.aggregateOptions, ['start', 'end', 'filter'])
-        ),
-        aggs: {
-          genericAgg: {
-            term: {
-              field: 'event.action',
-              size: 10,
-            },
+      size: 0,
+      query: getQueryBody(
+        logger,
+        options,
+        pick(options.aggregateOptions, ['start', 'end', 'filter'])
+      ),
+      aggs: {
+        genericAgg: {
+          term: {
+            field: 'event.action',
+            size: 10,
           },
         },
       },
@@ -945,19 +951,17 @@ describe('aggregateEventsWithAuthFilter', () => {
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toEqual({
       index: 'index-name',
-      body: {
-        size: 0,
-        query: getQueryBodyWithAuthFilter(
-          logger,
-          options,
-          pick(options.aggregateOptions, ['start', 'end', 'filter'])
-        ),
-        aggs: {
-          genericAgg: {
-            term: {
-              field: 'event.action',
-              size: 10,
-            },
+      size: 0,
+      query: getQueryBodyWithAuthFilter(
+        logger,
+        options,
+        pick(options.aggregateOptions, ['start', 'end', 'filter'])
+      ),
+      aggs: {
+        genericAgg: {
+          term: {
+            field: 'event.action',
+            size: 10,
           },
         },
       },
@@ -1037,82 +1041,80 @@ describe('aggregateEventsWithAuthFilter', () => {
     const [query] = clusterClient.search.mock.calls[0];
     expect(query).toEqual({
       index: 'index-name',
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    match: {
-                      test: 'test',
-                    },
+      size: 0,
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  match: {
+                    test: 'test',
                   },
-                ],
-              },
+                },
+              ],
             },
-            must: [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.rel': {
-                              value: 'primary',
-                            },
+          },
+          must: [
+            {
+              nested: {
+                path: 'kibana.saved_objects',
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'kibana.saved_objects.rel': {
+                            value: 'primary',
                           },
                         },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: 'saved-object-type',
-                            },
+                      },
+                      {
+                        term: {
+                          'kibana.saved_objects.type': {
+                            value: 'saved-object-type',
                           },
                         },
-                        {
-                          bool: {
-                            should: [
-                              {
-                                bool: {
-                                  should: [
-                                    {
-                                      term: {
-                                        'kibana.saved_objects.namespace': {
-                                          value: 'namespace',
-                                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              bool: {
+                                should: [
+                                  {
+                                    term: {
+                                      'kibana.saved_objects.namespace': {
+                                        value: 'namespace',
                                       },
                                     },
-                                  ],
-                                },
+                                  },
+                                ],
                               },
-                              {
-                                match: {
-                                  'kibana.saved_objects.space_agnostic': true,
-                                },
+                            },
+                            {
+                              match: {
+                                'kibana.saved_objects.space_agnostic': true,
                               },
-                            ],
-                          },
+                            },
+                          ],
                         },
-                      ],
-                    },
+                      },
+                    ],
                   },
                 },
               },
-            ],
-          },
-        },
-
-        aggs: {
-          genericAgg: {
-            term: {
-              field: 'event.action',
-              size: 10,
             },
+          ],
+        },
+      },
+
+      aggs: {
+        genericAgg: {
+          term: {
+            field: 'event.action',
+            size: 10,
           },
         },
       },
@@ -2291,6 +2293,477 @@ describe('getQueryBodyWithAuthFilter', () => {
   });
 });
 
+describe('updateDocuments', () => {
+  test('should successfully update document with meta information', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    clusterClient.bulk.mockResponse({
+      took: 15,
+      items: [
+        {
+          update: {
+            _index: 'test-index',
+            _id: 'test-id',
+            _version: 2,
+            result: 'updated',
+            status: 200,
+            _shards: {
+              total: 2,
+              successful: 1,
+              failed: 0,
+            },
+            _seq_no: 2,
+            _primary_term: 1,
+          },
+        },
+      ],
+      errors: false,
+    });
+
+    await clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>]);
+
+    expect(clusterClient.bulk).toHaveBeenCalledWith({
+      body: [
+        {
+          update: {
+            _id: doc.internalFields._id,
+            _index: doc.internalFields._index,
+            if_primary_term: doc.internalFields._primary_term,
+            if_seq_no: doc.internalFields._seq_no,
+          },
+        },
+        { doc: doc.body },
+      ],
+    });
+  });
+
+  test('should throw error if internal fields information is missing', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+    };
+
+    await expect(
+      clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
+    ).rejects.toThrowErrorMatchingInlineSnapshot('"Internal fields are required"');
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `error updating events in bulk: "Internal fields are required"; docs: ${JSON.stringify([
+        doc,
+      ])}`
+    );
+  });
+
+  test('should throw error when update fails', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    const error = new Error('Update failed');
+    clusterClient.bulk.mockRejectedValue(error);
+
+    await expect(
+      clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Update failed"`);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `error updating events in bulk: "Update failed"; docs: ${JSON.stringify([doc])}`
+    );
+  });
+
+  test('should log error when bulk response contains errors', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    const errorItem = {
+      update: {
+        _index: 'test-index',
+        _id: 'test-id',
+        status: 400,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: 'version conflict',
+        },
+      },
+    };
+
+    const bulkResponse = {
+      took: 15,
+      items: [errorItem],
+      errors: true,
+    };
+
+    clusterClient.bulk.mockResponse(bulkResponse);
+
+    const response = await clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>]);
+
+    expect(response).toEqual(bulkResponse);
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Error updating some bulk events',
+      })
+    );
+  });
+});
+
+describe('queryEventsByDocumentIds', () => {
+  test('should successfully retrieve documents by ids', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          _seq_no: 1,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 1' },
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(clusterClient.mget).toHaveBeenCalledWith({
+      docs,
+    });
+
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 1',
+          _id: 'test-id-1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+        },
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should handle not found documents', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          found: false,
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(logger.error).toHaveBeenCalledWith('Event not found: test-id-1');
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should handle documents with errors', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          error: {
+            type: 'document_missing_exception',
+            reason: 'Document missing',
+          },
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Event not found: test-id-1, with error: Document missing'
+    );
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should throw error when mget fails', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockRejectedValue(new Error('Failed to get documents'));
+
+    await expect(
+      clusterClientAdapter.queryEventsByDocumentIds(docs)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error querying events by document ids: Failed to get documents"`
+    );
+  });
+});
+
+describe('queryEventsBySavedObjectsSearchAfter', () => {
+  const defaultQuery = {
+    index: 'test-index',
+    namespace: undefined,
+    type: 'test-type',
+    ids: ['test-id'],
+    findOptions: {
+      per_page: 10,
+      sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+    },
+  };
+
+  beforeEach(() => {
+    clusterClient.openPointInTime.mockResponse({
+      id: 'test-pit-id',
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+    });
+    clusterClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _id: 'hit1',
+            _index: 'test-index',
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: { field: 'value1' },
+            sort: ['2021-01-01T00:00:00.000Z'],
+          },
+          {
+            _id: 'hit2',
+            _index: 'test-index',
+            _seq_no: 2,
+            _primary_term: 1,
+            _source: { field: 'value2' },
+            sort: ['2021-01-01T00:00:01.000Z'],
+          },
+        ],
+        total: { value: 100, relation: 'eq' },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
+  });
+
+  test('should use seq_no_primary_term in query', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+
+    expect(clusterClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        seq_no_primary_term: true,
+      })
+    );
+  });
+
+  test('should create new PIT when not provided', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+
+    expect(clusterClient.openPointInTime).toHaveBeenCalledWith({
+      index: 'test-index',
+      keep_alive: '1m',
+    });
+  });
+
+  test('should not create new PIT when one is provided', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter({
+      ...defaultQuery,
+      findOptions: {
+        ...defaultQuery.findOptions,
+        pit_id: 'existing-pit-id',
+      },
+    });
+
+    expect(clusterClient.openPointInTime).not.toHaveBeenCalled();
+  });
+
+  test('should use provided search_after in query', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter({
+      ...defaultQuery,
+      findOptions: {
+        ...defaultQuery.findOptions,
+        search_after: ['2021-01-01T00:00:00.000Z'],
+      },
+    });
+
+    expect(clusterClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search_after: ['2021-01-01T00:00:00.000Z'],
+      })
+    );
+  });
+
+  test('should return properly formatted response', async () => {
+    const response = await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+
+    expect(response).toEqual({
+      data: [
+        {
+          field: 'value1',
+          _id: 'hit1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+        },
+        {
+          field: 'value2',
+          _id: 'hit2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+      total: 100,
+      search_after: ['2021-01-01T00:00:01.000Z'],
+      pit_id: 'test-pit-id',
+    });
+  });
+
+  test('should clean up PIT on error', async () => {
+    clusterClient.search.mockRejectedValue(new Error('Search failed'));
+
+    await expect(
+      clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery)
+    ).rejects.toThrow('Search failed');
+
+    expect(clusterClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+  });
+});
+
+describe('closePointInTime', () => {
+  test('should not call cluster when pitId is empty', async () => {
+    await clusterClientAdapter.closePointInTime('');
+    expect(clusterClient.closePointInTime).not.toHaveBeenCalled();
+  });
+
+  test('should call cluster with given pitId', async () => {
+    await clusterClientAdapter.closePointInTime('test-pit-id');
+    expect(clusterClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+  });
+
+  test('should throw and log error when cluster call fails', async () => {
+    const error = new Error('Failed to close PIT');
+    clusterClient.closePointInTime.mockRejectedValue(error);
+
+    await expect(clusterClientAdapter.closePointInTime('test-pit-id')).rejects.toThrow(error);
+    expect(logger.error).toHaveBeenCalledWith('Failed to close point in time: Failed to close PIT');
+  });
+});
+
+describe('refreshIndex', () => {
+  test('should successfully refresh index', async () => {
+    clusterClient.indices.refresh.mockResolvedValue({});
+
+    await clusterClientAdapter.refreshIndex();
+
+    expect(clusterClient.indices.refresh).toHaveBeenCalledWith({
+      index: 'kibana-event-log-ds',
+    });
+  });
+
+  test('should throw error when refresh fails', async () => {
+    clusterClient.indices.refresh.mockRejectedValue(new Error('Failed to refresh index'));
+
+    await expect(clusterClientAdapter.refreshIndex()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to refresh index"`
+    );
+  });
+});
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './index.scss';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { IndexMgmtUIPlugin } from './plugin';
 

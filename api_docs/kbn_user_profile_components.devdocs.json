@@ -923,35 +923,22 @@
                 "signature": [
                   "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
-                "path": "packages/react/kibana_mount/to_mount_point.tsx",
+                "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/user-profile-components",
                 "id": "def-common.UserProfilesKibanaDependencies.toMountPoint.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ i18n: ",
-                  "I18nStart",
-                  "; analytics?: Pick<",
-                  "AnalyticsServiceStart",
-                  ", \"reportEvent\"> | undefined; theme: ",
-                  {
-                    "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "common",
-                    "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
-                  },
-                  "; userProfile?: Pick<",
-                  "UserProfileService",
-                  ", \"getUserProfile$\"> | undefined; }"
+                  "RenderingService",
+                  " | ToMountPointParamsDeprecated"
                 ],
-                "path": "packages/react/kibana_mount/to_mount_point.tsx",
+                "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1495,6 +1482,27 @@
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.contrastMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "contrastMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.ContrastModeValue",
+                "text": "ContrastModeValue"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserSettingsData.solutionNavOptOut",
             "type": "CompoundType",
             "tags": [],
@@ -1586,6 +1594,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.ContrastModeValue",
+        "type": "Type",
+        "tags": [],
+        "label": "ContrastModeValue",
+        "description": [],
+        "signature": [
+          "\"standard\" | \"system\" | \"high\""
+        ],
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.DarkModeValue",

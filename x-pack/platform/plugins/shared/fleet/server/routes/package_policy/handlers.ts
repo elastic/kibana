@@ -56,7 +56,12 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import type {
+  SimplifiedInputs,
+  SimplifiedPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
+import { runWithCache } from '../../services/epm/packages/cache';
+import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
   isSimplifiedCreatePackagePolicyRequest,
@@ -339,6 +344,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   }
 
   try {
+    // simplified request
     const { force, package: pkg, ...body } = request.body;
     let newData: NewPackagePolicy;
 
@@ -354,12 +360,18 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         pkgName: pkg.name,
         pkgVersion: pkg.version,
       });
+
       newData = simplifiedPackagePolicytoNewPackagePolicy(
         body as unknown as SimplifiedPackagePolicy,
         pkgInfo,
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
+      validateAgentlessInputs(
+        body?.inputs as SimplifiedInputs,
+        body?.supports_agentless || newData.supports_agentless
+      );
     } else {
+      // complete request
       const { overrides, ...restOfBody } = body as TypeOf<
         typeof UpdatePackagePolicyRequestBodySchema
       >;
@@ -380,12 +392,17 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
+        supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
       } as NewPackagePolicy;
 
       if (overrides) {
         newData.overrides = overrides;
       }
     }
+    validateAgentlessInputs(
+      newData.inputs,
+      newData.supports_agentless || packagePolicy.supports_agentless
+    );
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (
@@ -498,7 +515,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+  const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
     request.body.packagePolicyIds,
@@ -527,11 +544,12 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
 
   const body: UpgradePackagePolicyDryRunResponse = [];
   const { packagePolicyIds } = request.body;
-
-  for (const id of packagePolicyIds) {
-    const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
-    body.push(result);
-  }
+  await runWithCache(async () => {
+    for (const id of packagePolicyIds) {
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+      body.push(result);
+    }
+  });
 
   const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
 

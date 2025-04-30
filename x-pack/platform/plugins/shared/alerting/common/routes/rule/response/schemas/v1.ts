@@ -407,6 +407,18 @@ export const monitoringSchema = schema.object(
                 })
               )
             ),
+            gap_range: schema.maybe(
+              schema.nullable(
+                schema.object({
+                  lte: schema.string({
+                    meta: { description: 'Start of the gap range.' },
+                  }),
+                  gte: schema.string({
+                    meta: { description: 'End of the gap range.' },
+                  }),
+                })
+              )
+            ),
           }),
         }),
       },
@@ -462,6 +474,12 @@ export const alertDelaySchema = schema.object(
     },
   }
 );
+
+export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
+});
 
 export const ruleResponseSchema = schema.object({
   id: schema.string({
@@ -627,6 +645,7 @@ export const ruleResponseSchema = schema.object({
   ),
   alert_delay: schema.maybe(alertDelaySchema),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  artifacts: schema.maybe(artifactsSchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

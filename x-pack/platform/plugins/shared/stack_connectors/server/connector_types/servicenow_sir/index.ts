@@ -6,7 +6,7 @@
  */
 
 import { curry } from 'lodash';
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type {
   ActionType as ConnectorType,
@@ -17,7 +17,7 @@ import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+} from '@kbn/actions-plugin/common';
 import { validate } from '../lib/servicenow/validators';
 import {
   ExecutorParamsSchemaSIR,
@@ -25,7 +25,7 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from '../lib/servicenow/schema';
 import * as i18n from '../lib/servicenow/translations';
-import {
+import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
   ServiceFactory,

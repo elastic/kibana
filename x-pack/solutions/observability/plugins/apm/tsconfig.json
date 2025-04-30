@@ -131,7 +131,14 @@
     "@kbn/saved-search-plugin",
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
-    "@kbn/entityManager-plugin"
+    "@kbn/entityManager-plugin",
+    "@kbn/core-http-server-utils",
+    "@kbn/key-value-metadata-table",
+    "@kbn/event-stacktrace",
+    "@kbn/response-ops-rule-form",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/apm-sources-access-plugin",
   ],
   "exclude": ["target/**/*"]
 }

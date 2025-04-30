@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
+import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { PublishesESQLVariables } from '@kbn/esql-types';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
   HasRuntimeChildState,
@@ -14,11 +21,11 @@ import {
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
-  SerializedPanelState,
   TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
+  SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -26,36 +33,30 @@ import {
   HasUniqueId,
   PublishesDataLoading,
   PublishesDataViews,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
-  ViewMode,
 } from '@kbn/presentation-publishing';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { Observable, Subject } from 'rxjs';
-import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
+import { Observable, Subject } from 'rxjs';
+import {
+  DashboardLocatorParams,
+  DashboardPanelMap,
+  DashboardPanelState,
+  DashboardSettings,
+  DashboardState,
+} from '../../common';
+import type { DashboardAttributes } from '../../server/content_management';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { DashboardLocatorParams } from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -86,32 +87,8 @@ export interface DashboardCreationOptions {
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
-export type DashboardSettings = DashboardOptions & {
-  description?: DashboardAttributes['description'];
-  tags: string[];
-  timeRestore: DashboardAttributes['timeRestore'];
-  title: DashboardAttributes['description'];
-};
-
-export interface DashboardState extends DashboardSettings {
-  query: Query;
-  filters: Filter[];
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  viewMode: ViewMode;
-  panels: DashboardPanelMap;
-
-  /**
-   * Serialized control group state.
-   * Contains state loaded from dashboard saved object
-   */
-  controlGroupInput?: ControlGroupSerializedState | undefined;
-  /**
-   * Runtime control group state.
-   * Contains state passed from dashboard locator
-   * Use runtime state when building input for portable dashboards
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState>;
+export interface UnsavedPanelState {
+  [key: string]: object | undefined;
 }
 
 export type DashboardApi = CanExpandPanels &
@@ -125,10 +102,11 @@ export type DashboardApi = CanExpandPanels &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
-  PublishesPanelDescription &
-  Pick<PublishesPanelTitle, 'panelTitle'> &
+  PublishesDescription &
+  Pick<PublishesTitle, 'title$'> &
   PublishesReload &
   PublishesSavedObjectId &
+  PublishesESQLVariables &
   PublishesSearchSession &
   PublishesSettings &
   PublishesUnifiedSearch &
@@ -140,11 +118,12 @@ export type DashboardApi = CanExpandPanels &
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
+    setFocusedPanelId: (id: string | undefined) => void;
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardAttributes;
-      references: SavedObjectReference[];
+      references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;
@@ -174,7 +153,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  animatePanelTransforms$: PublishingSubject<boolean>;
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   getRuntimeStateForControlGroup: () => object | undefined;

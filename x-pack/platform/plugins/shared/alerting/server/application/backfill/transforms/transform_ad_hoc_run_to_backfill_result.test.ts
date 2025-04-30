@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
-import { SavedObject } from '@kbn/core/server';
+import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core/server';
 import { adHocRunStatus } from '../../../../common/constants';
-import { transformAdHocRunToBackfillResult } from './transform_ad_hoc_run_to_backfill_result';
+import {
+  transformAdHocRunToAdHocRunData,
+  transformAdHocRunToBackfillResult,
+} from './transform_ad_hoc_run_to_backfill_result';
+import type { RawRule } from '../../../types';
+
+const isSystemAction = jest.fn().mockReturnValue(false);
 
 function getMockAdHocRunAttributes({
   ruleId,
-  overwrites,
   omitApiKey = false,
+  actions,
 }: {
   ruleId?: string;
-  overwrites?: Record<string, unknown>;
   omitApiKey?: boolean;
+  actions?: RawRule['actions'];
 } = {}): AdHocRunSO {
+  // @ts-expect-error
   return {
     ...(omitApiKey ? {} : { apiKeyId: '123', apiKeyToUse: 'MTIzOmFiYw==' }),
     createdAt: '2024-01-30T00:00:00.000Z',
@@ -29,7 +36,7 @@ function getMockAdHocRunAttributes({
       name: 'my rule name',
       tags: ['foo'],
       alertTypeId: 'myType',
-      // @ts-expect-error
+      actions: actions ? actions : [],
       params: {},
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
@@ -59,14 +66,14 @@ function getMockAdHocRunAttributes({
         runAt: '2023-10-20T15:07:40.011Z',
       },
     ],
-    ...overwrites,
   };
 }
 
 function getBulkCreateResponse(
   id: string,
   ruleId: string,
-  attributes: AdHocRunSO
+  attributes: AdHocRunSO,
+  additionalReferences?: Array<{ id: string; name: string; type: string }>
 ): SavedObject<AdHocRunSO> {
   return {
     type: 'ad_hoc_rule_run_params',
@@ -79,6 +86,7 @@ function getBulkCreateResponse(
         name: 'rule',
         type: 'alert',
       },
+      ...(additionalReferences ?? []),
     ],
     managed: false,
     coreMigrationVersion: '8.8.0',
@@ -91,9 +99,10 @@ function getBulkCreateResponse(
 describe('transformAdHocRunToBackfillResult', () => {
   test('should transform bulk create response', () => {
     expect(
-      transformAdHocRunToBackfillResult(
-        getBulkCreateResponse('abc', '1', getMockAdHocRunAttributes())
-      )
+      transformAdHocRunToBackfillResult({
+        adHocRunSO: getBulkCreateResponse('abc', '1', getMockAdHocRunAttributes()),
+        isSystemAction,
+      })
     ).toEqual({
       id: 'abc',
       createdAt: '2024-01-30T00:00:00.000Z',
@@ -103,6 +112,71 @@ describe('transformAdHocRunToBackfillResult', () => {
         id: '1',
         name: 'my rule name',
         tags: ['foo'],
+        actions: [],
+        alertTypeId: 'myType',
+        params: {},
+        apiKeyOwner: 'user',
+        apiKeyCreatedByUser: false,
+        consumer: 'myApp',
+        enabled: true,
+        schedule: {
+          interval: '12h',
+        },
+        createdBy: 'user',
+        updatedBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        revision: 0,
+      },
+      spaceId: 'default',
+      start: '2023-10-19T15:07:40.011Z',
+      status: adHocRunStatus.PENDING,
+      schedule: [
+        {
+          interval: '12h',
+          status: adHocRunStatus.PENDING,
+          runAt: '2023-10-20T03:07:40.011Z',
+        },
+        {
+          interval: '12h',
+          status: adHocRunStatus.PENDING,
+          runAt: '2023-10-20T15:07:40.011Z',
+        },
+      ],
+    });
+  });
+
+  test('should transform bulk create response with actions', () => {
+    expect(
+      transformAdHocRunToBackfillResult({
+        adHocRunSO: getBulkCreateResponse(
+          'abc',
+          '1',
+          getMockAdHocRunAttributes({
+            actions: [
+              {
+                uuid: '123abc',
+                group: 'default',
+                actionRef: 'action_0',
+                actionTypeId: 'test',
+                params: {},
+              },
+            ],
+          }),
+          [{ id: '4', name: 'action_0', type: 'action' }]
+        ),
+        isSystemAction,
+      })
+    ).toEqual({
+      id: 'abc',
+      createdAt: '2024-01-30T00:00:00.000Z',
+      duration: '12h',
+      enabled: true,
+      rule: {
+        id: '1',
+        name: 'my rule name',
+        tags: ['foo'],
+        actions: [{ actionTypeId: 'test', group: 'default', id: '4', params: {}, uuid: '123abc' }],
         alertTypeId: 'myType',
         params: {},
         apiKeyOwner: 'user',
@@ -138,10 +212,10 @@ describe('transformAdHocRunToBackfillResult', () => {
 
   test('should return error for malformed responses when original create request is not provided', () => {
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // missing id
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           namespaces: ['default'],
           attributes: getMockAdHocRunAttributes(),
@@ -151,8 +225,9 @@ describe('transformAdHocRunToBackfillResult', () => {
           updated_at: '2024-02-07T16:05:39.296Z',
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "id".',
@@ -160,10 +235,10 @@ describe('transformAdHocRunToBackfillResult', () => {
       },
     });
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // missing attributes
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: 'abc',
           namespaces: ['default'],
@@ -173,8 +248,9 @@ describe('transformAdHocRunToBackfillResult', () => {
           updated_at: '2024-02-07T16:05:39.296Z',
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "attributes".',
@@ -182,10 +258,10 @@ describe('transformAdHocRunToBackfillResult', () => {
       },
     });
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // missing references
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: 'def',
           namespaces: ['default'],
@@ -195,8 +271,9 @@ describe('transformAdHocRunToBackfillResult', () => {
           updated_at: '2024-02-07T16:05:39.296Z',
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "references".',
@@ -204,9 +281,9 @@ describe('transformAdHocRunToBackfillResult', () => {
       },
     });
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // empty references
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: 'ghi',
           namespaces: ['default'],
@@ -217,8 +294,9 @@ describe('transformAdHocRunToBackfillResult', () => {
           updated_at: '2024-02-07T16:05:39.296Z',
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "references".',
@@ -230,10 +308,10 @@ describe('transformAdHocRunToBackfillResult', () => {
   test('should return error for malformed responses when original create request is provided', () => {
     const attributes = getMockAdHocRunAttributes();
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // missing id
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           namespaces: ['default'],
           attributes,
@@ -244,12 +322,13 @@ describe('transformAdHocRunToBackfillResult', () => {
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
         },
-        {
+        originalSO: {
           type: 'ad_hoc_rule_run_params',
           attributes,
           references: [{ id: '1', name: 'rule', type: 'alert' }],
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "id".',
@@ -257,10 +336,10 @@ describe('transformAdHocRunToBackfillResult', () => {
       },
     });
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // missing attributes
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: 'abc',
           namespaces: ['default'],
@@ -271,12 +350,13 @@ describe('transformAdHocRunToBackfillResult', () => {
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
         },
-        {
+        originalSO: {
           type: 'ad_hoc_rule_run_params',
           attributes,
           references: [{ id: '1', name: 'rule', type: 'alert' }],
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "attributes".',
@@ -284,10 +364,10 @@ describe('transformAdHocRunToBackfillResult', () => {
       },
     });
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // missing references
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: 'def',
           namespaces: ['default'],
@@ -298,12 +378,13 @@ describe('transformAdHocRunToBackfillResult', () => {
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
         },
-        {
+        originalSO: {
           type: 'ad_hoc_rule_run_params',
           attributes,
           references: [{ id: '1', name: 'rule', type: 'alert' }],
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "references".',
@@ -311,9 +392,9 @@ describe('transformAdHocRunToBackfillResult', () => {
       },
     });
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // empty references
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: 'ghi',
           namespaces: ['default'],
@@ -325,12 +406,13 @@ describe('transformAdHocRunToBackfillResult', () => {
           created_at: '2024-02-07T16:05:39.296Z',
           version: 'WzcsMV0=',
         },
-        {
+        originalSO: {
           type: 'ad_hoc_rule_run_params',
           attributes,
           references: [{ id: '1', name: 'rule', type: 'alert' }],
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Malformed saved object in bulkCreate response - Missing "references".',
@@ -341,9 +423,9 @@ describe('transformAdHocRunToBackfillResult', () => {
 
   test('should pass through error if saved object error when original create request is not provided', () => {
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: '788a2784-c021-484f-a53e-0c1c63c7567c',
           error: {
@@ -351,8 +433,9 @@ describe('transformAdHocRunToBackfillResult', () => {
             message: 'Unable to create',
             statusCode: 404,
           },
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Unable to create',
@@ -363,9 +446,9 @@ describe('transformAdHocRunToBackfillResult', () => {
 
   test('should pass through error if saved object error when original create request is provided', () => {
     expect(
-      transformAdHocRunToBackfillResult(
+      transformAdHocRunToBackfillResult({
         // @ts-expect-error
-        {
+        adHocRunSO: {
           type: 'ad_hoc_rule_run_params',
           id: '788a2784-c021-484f-a53e-0c1c63c7567c',
           error: {
@@ -374,17 +457,137 @@ describe('transformAdHocRunToBackfillResult', () => {
             statusCode: 404,
           },
         },
-        {
+        originalSO: {
           type: 'ad_hoc_rule_run_params',
           attributes: getMockAdHocRunAttributes(),
           references: [{ id: '1', name: 'rule', type: 'alert' }],
-        }
-      )
+        },
+        isSystemAction,
+      })
     ).toEqual({
       error: {
         message: 'Unable to create',
         rule: { id: '1', name: 'my rule name' },
       },
+    });
+  });
+});
+
+describe('transformAdHocRunToAdHocRunData', () => {
+  test('should transform bulk create response and include api key', () => {
+    expect(
+      transformAdHocRunToAdHocRunData({
+        adHocRunSO: getBulkCreateResponse('abc', '1', getMockAdHocRunAttributes()),
+        isSystemAction,
+      })
+    ).toEqual({
+      id: 'abc',
+      apiKeyId: '123',
+      apiKeyToUse: 'MTIzOmFiYw==',
+      createdAt: '2024-01-30T00:00:00.000Z',
+      duration: '12h',
+      enabled: true,
+      rule: {
+        id: '1',
+        name: 'my rule name',
+        tags: ['foo'],
+        actions: [],
+        alertTypeId: 'myType',
+        params: {},
+        apiKeyOwner: 'user',
+        apiKeyCreatedByUser: false,
+        consumer: 'myApp',
+        enabled: true,
+        schedule: {
+          interval: '12h',
+        },
+        createdBy: 'user',
+        updatedBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        revision: 0,
+      },
+      spaceId: 'default',
+      start: '2023-10-19T15:07:40.011Z',
+      status: adHocRunStatus.PENDING,
+      schedule: [
+        {
+          interval: '12h',
+          status: adHocRunStatus.PENDING,
+          runAt: '2023-10-20T03:07:40.011Z',
+        },
+        {
+          interval: '12h',
+          status: adHocRunStatus.PENDING,
+          runAt: '2023-10-20T15:07:40.011Z',
+        },
+      ],
+    });
+  });
+
+  test('should transform bulk create response with actions and include api key', () => {
+    expect(
+      transformAdHocRunToAdHocRunData({
+        adHocRunSO: getBulkCreateResponse(
+          'abc',
+          '1',
+          getMockAdHocRunAttributes({
+            actions: [
+              {
+                uuid: '123abc',
+                group: 'default',
+                actionRef: 'action_0',
+                actionTypeId: 'test',
+                params: {},
+              },
+            ],
+          }),
+          [{ id: '4', name: 'action_0', type: 'action' }]
+        ),
+        isSystemAction,
+      })
+    ).toEqual({
+      id: 'abc',
+      apiKeyId: '123',
+      apiKeyToUse: 'MTIzOmFiYw==',
+      createdAt: '2024-01-30T00:00:00.000Z',
+      duration: '12h',
+      enabled: true,
+      rule: {
+        id: '1',
+        name: 'my rule name',
+        tags: ['foo'],
+        actions: [{ actionTypeId: 'test', group: 'default', id: '4', params: {}, uuid: '123abc' }],
+        alertTypeId: 'myType',
+        params: {},
+        apiKeyOwner: 'user',
+        apiKeyCreatedByUser: false,
+        consumer: 'myApp',
+        enabled: true,
+        schedule: {
+          interval: '12h',
+        },
+        createdBy: 'user',
+        updatedBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        revision: 0,
+      },
+      spaceId: 'default',
+      start: '2023-10-19T15:07:40.011Z',
+      status: adHocRunStatus.PENDING,
+      schedule: [
+        {
+          interval: '12h',
+          status: adHocRunStatus.PENDING,
+          runAt: '2023-10-20T03:07:40.011Z',
+        },
+        {
+          interval: '12h',
+          status: adHocRunStatus.PENDING,
+          runAt: '2023-10-20T15:07:40.011Z',
+        },
+      ],
     });
   });
 });

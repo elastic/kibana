@@ -13,6 +13,9 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { catchAndWrapError } from '../../../../utils';
 import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
@@ -119,6 +122,7 @@ export const HOST_NOT_ENROLLED = i18n.translate(
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
+  spaceId: string;
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
@@ -207,6 +211,98 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     this.log = options.endpointService.createLogger(
       this.constructor.name ?? 'ResponseActionsClient'
     );
+  }
+
+  /**
+   * Fetches information about the policies for each agent id that the response action is being sent to.
+   * Must be implemented by each subclass, since "agentId" for 3rd party EDRs agent IDs will need to
+   * to be mapped to elastic agent ids.
+   *
+   * @param agentIds
+   * @protected
+   */
+  protected abstract fetchAgentPolicyInfo(
+    /**
+     * The agent IDs that the response action is being sent to.  For 3rd party EDRs, these will be
+     * the IDs of the agent in the 3rd party system and NOT the Elastic Agent ID.
+     * The `fetchFleetInfoForAgents()` method can be used in conjunction with this method retrieve info.
+     * from Fleet once the Fleet Agent Ids have been calculated.
+     */
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']>;
+
+  /**
+   * Fetches Fleet agent information for each of the Fleet agent ids provided on input.
+   * @param agentIds
+   * @param integrations
+   * @protected
+   */
+  protected async fetchFleetInfoForAgents(
+    /** Fleet Agent IDs */
+    agentIds: string[],
+    /** A list of integration names (value found in `package.name` in an integration policy) */
+    integrations: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    if (integrations.length === 0) {
+      throw new ResponseActionsClientError(`'integrations' argument can not be empty`);
+    }
+
+    const spaceId = this.options.spaceId;
+    const fleetServices = this.options.endpointService.getInternalFleetServices(spaceId);
+    const soClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
+    const agentPolicyIds = new Set<string>();
+    const policyInfo: LogsEndpointAction['agent']['policy'] = [];
+
+    // Get a list of Agent records so we can identify the Agent Policy ID
+    const agents = await fleetServices.agent.getByIds(agentIds).catch(catchAndWrapError);
+
+    this.log.debug(
+      () => `Fleet agent records for agent IDs [${agentIds.join(' | ')}]:\n${stringify(agents)}`
+    );
+
+    for (const agent of agents) {
+      if (agent.policy_id) {
+        agentPolicyIds.add(agent.policy_id);
+      }
+    }
+
+    // Get a list of integration policies that are associated with the agent policies identified
+    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (${integrations.join(
+      ' OR '
+    )}) AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids: (${Array.from(agentPolicyIds.values())
+      .map((id) => `"${id}"`)
+      .join(' OR ')})`;
+
+    this.log.debug(
+      () => `Looking for integration policies in fleet using filter (kuery):\n${kuery}`
+    );
+
+    const integrationPolicies = await fleetServices.packagePolicy
+      .list(soClient, { perPage: 10_000, kuery })
+      .catch(catchAndWrapError);
+
+    this.log.debug(() => `Integration policies found:\n${stringify(integrationPolicies)}`);
+
+    const agentPolicyToIntegrationPolicyMap: Record<string, PackagePolicy> = {};
+
+    for (const integrationPolicy of integrationPolicies.items) {
+      for (const agentPolicyId of integrationPolicy.policy_ids) {
+        agentPolicyToIntegrationPolicyMap[agentPolicyId] = integrationPolicy;
+      }
+    }
+
+    for (const agent of agents) {
+      if (agent.policy_id) {
+        policyInfo.push({
+          agentId: agent.id,
+          elasticAgentId: agent.id,
+          agentPolicyId: agent.policy_id,
+          integrationPolicyId: agentPolicyToIntegrationPolicyMap[agent.policy_id].id,
+        });
+      }
+    }
+
+    return policyInfo;
   }
 
   /**
@@ -477,8 +573,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
+      // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
+      // It will be removed once we enable the feature and delete the feature flag checks.
+      // @ts-expect-error
       agent: {
         id: actionRequest.endpoint_ids,
+        // add the `policy` info if space awareness is enabled
+        ...(this.options.endpointService.experimentalFeatures
+          .endpointManagementSpaceAwarenessEnabled
+          ? {
+              policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
+            }
+          : {}),
       },
       EndpointActions: {
         action_id: actionRequest.actionId || uuidv4(),
@@ -503,6 +609,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         : {}),
     };
 
+    this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
+
     try {
       const logsEndpointActionsResult = await this.options.esClient.index<LogsEndpointAction>(
         {
@@ -526,6 +634,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return doc;
     } catch (err) {
       this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+      this.log.debug(
+        () => `attempt to index document into ${ENDPOINT_ACTIONS_INDEX} failed:\n${stringify(err)}`
+      );
 
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(

@@ -108,9 +108,10 @@ const MaybeWrapper = ({
       onClose={() => {
         closeFlyout?.();
       }}
-      aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+      aria-label={i18n.translate('xpack.lens.config.editLabel', {
         defaultMessage: 'Edit configuration',
       })}
+      role="dialog"
       size="s"
       hideCloseButton
       css={css`
@@ -155,6 +156,8 @@ export async function getEditLensConfiguration(
     onApply,
     onCancel,
     hideTimeFilterInfo,
+    isReadOnly,
+    parentApi,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -225,6 +228,9 @@ export async function getEditLensConfiguration(
       onApply,
       onCancel,
       hideTimeFilterInfo,
+      isReadOnly,
+      parentApi,
+      panelId,
     };
 
     return (

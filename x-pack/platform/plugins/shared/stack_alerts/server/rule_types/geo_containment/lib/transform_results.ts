@@ -10,6 +10,7 @@ import type { GeoContainmentAlertInstanceState } from '../types';
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   results: any,
   dateField: string,
   geoField: string

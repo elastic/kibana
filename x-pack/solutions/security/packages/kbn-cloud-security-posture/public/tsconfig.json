@@ -36,5 +36,6 @@
     "@kbn/i18n-react",
     "@kbn/rison",
     "@kbn/core-lifecycle-browser",
+    "@kbn/expandable-flyout",
   ]
 }

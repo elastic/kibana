@@ -16,21 +16,17 @@ import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
 import { Explore } from './explore';
-import { Kubernetes } from './kubernetes';
 import { Onboarding } from './onboarding';
 import { Overview } from './overview';
 import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { CloudDefend } from './cloud_defend';
 import { CloudSecurityPosture } from './cloud_security_posture';
 import { ThreatIntelligence } from './threat_intelligence';
 import { Dashboards } from './dashboards';
 import { EntityAnalytics } from './entity_analytics';
-import { Assets } from './assets';
-import { Investigations } from './investigations';
-import { MachineLearning } from './machine_learning';
 import { SiemMigrations } from './siem_migrations';
+import { Configurations } from './configurations';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -42,20 +38,16 @@ const subPluginClasses = {
   Cases,
   Exceptions,
   Explore,
-  Kubernetes,
   Onboarding,
   Overview,
   Rules,
   Timelines,
   Management,
   Dashboards,
-  CloudDefend,
   CloudSecurityPosture,
   ThreatIntelligence,
   EntityAnalytics,
-  Assets,
-  Investigations,
-  MachineLearning,
+  Configurations,
   SiemMigrations,
 };
 export { subPluginClasses };

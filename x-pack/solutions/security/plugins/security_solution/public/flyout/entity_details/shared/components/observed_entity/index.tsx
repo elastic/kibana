@@ -21,14 +21,12 @@ export const ObservedEntity = <T,>({
   observedData,
   contextID,
   scopeId,
-  isDraggable,
   observedFields,
   queryId,
 }: {
   observedData: ObservedEntityData<T>;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   observedFields: EntityTableRows<ObservedEntityData<T>>;
   queryId: string;
 }) => {
@@ -109,7 +107,6 @@ export const ObservedEntity = <T,>({
           <EntityTable
             contextID={contextID}
             scopeId={scopeId}
-            isDraggable={isDraggable}
             data={observedData}
             entityFields={observedFields}
           />

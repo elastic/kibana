@@ -21,6 +21,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SloClient } from './client';
 
@@ -39,11 +40,12 @@ export interface SLOPluginSetupDependencies {
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   dataViews: DataViewsServerPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface SLOPluginStartDependencies {

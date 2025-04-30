@@ -16,6 +16,10 @@ import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../
 import { getKpiUniquePrivateIpsAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
 import { getKpiUniquePrivateIpsBarLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
 import { KpiBaseComponent } from '../../../../components/kpi';
+import {
+  getDestinationIpColor,
+  getSourceIpColor,
+} from '../../../../../common/components/visualization_actions/lens_attributes/common/utils/unique_ips_palette';
 
 export const ID = 'networkKpiUniquePrivateIpsQuery';
 
@@ -30,7 +34,7 @@ export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () =
             key: 'uniqueSourcePrivateIps',
             name: i18n.SOURCE_CHART_LABEL,
             description: i18n.SOURCE_UNIT_LABEL,
-            color: euiTheme.colors.vis.euiColorVis4,
+            color: getSourceIpColor(euiTheme),
             icon: 'visMapCoordinate',
             lensAttributes: kpiUniquePrivateIpsSourceMetricLensAttributes,
           },
@@ -38,7 +42,7 @@ export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () =
             key: 'uniqueDestinationPrivateIps',
             name: i18n.DESTINATION_CHART_LABEL,
             description: i18n.DESTINATION_UNIT_LABEL,
-            color: euiTheme.colors.vis.euiColorVis2,
+            color: getDestinationIpColor(euiTheme),
             icon: 'visMapCoordinate',
             lensAttributes: kpiUniquePrivateIpsDestinationMetricLensAttributes,
           },
@@ -50,7 +54,7 @@ export const useGetUniquePrivateIpsStatItems: () => Readonly<StatItems[]> = () =
         getBarChartLensAttributes: getKpiUniquePrivateIpsBarLensAttributes,
       },
     ],
-    [euiTheme.colors.vis.euiColorVis2, euiTheme.colors.vis.euiColorVis4]
+    [euiTheme]
   );
 };
 

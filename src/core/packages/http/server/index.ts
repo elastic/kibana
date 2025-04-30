@@ -119,11 +119,14 @@ export type {
   AuthcEnabled,
   Privilege,
   PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
   RouteSecurity,
   RouteSecurityGetter,
   InternalRouteSecurity,
   RouteDeprecationInfo,
   PostValidationMetadata,
+  AnyKibanaRequest,
 } from './src/router';
 export {
   validBodyOutput,

@@ -14,9 +14,11 @@ import {
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -31,6 +33,7 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -42,11 +45,14 @@ interface SetupDeps {
 interface StartDeps {
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
+  share?: SharePluginStart;
 }
 
 export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
+  private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -64,15 +70,19 @@ export class DashboardPlugin
       })
     );
 
-    plugins.contentManagement.register({
-      id: CONTENT_ID,
-      storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
+    void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
+      const { contentClient } = plugins.contentManagement.register({
+        id: CONTENT_ID,
+        storage: new DashboardStorage({
+          throwOnResultValidationError: this.initializerContext.env.mode.dev,
+          logger: this.logger.get('storage'),
+          savedObjectsTagging,
+        }),
+        version: {
+          latest: LATEST_VERSION,
+        },
+      });
+      this.contentClient = contentClient;
     });
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
@@ -103,7 +113,7 @@ export class DashboardPlugin
         {
           domainId: 'dashboard',
           // makes sure that only users with read/all access to dashboard app can access the routes
-          routeTags: ['access:dashboardUsageStats'],
+          routePrivileges: ['dashboardUsageStats'],
         }
       );
     }
@@ -126,6 +136,19 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
 
+    if (plugins.share) {
+      plugins.share.url.locators.create(
+        new DashboardAppLocatorDefinition({
+          useHashedUrl: false,
+          getDashboardFilterFields: async (dashboardId: string) => {
+            throw new Error(
+              'Locator .getLocation() is not supported on the server with the `preserveSavedFilters` parameter.'
+            );
+          },
+        })
+      );
+    }
+
     if (plugins.taskManager) {
       scheduleDashboardTelemetry(this.logger, plugins.taskManager)
         .then(async () => {
@@ -136,7 +159,9 @@ export class DashboardPlugin
         });
     }
 
-    return {};
+    return {
+      getContentClient: () => this.contentClient,
+    };
   }
 
   public stop() {}

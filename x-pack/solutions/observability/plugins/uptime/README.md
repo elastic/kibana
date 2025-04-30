@@ -92,6 +92,6 @@ The commands for running these tests are very similar to the other functional te
 
 From the `~/x-pack` directory:
 
-Start the server: `node scripts/functional_tests_server --config test/accessibility/config.ts`
+Start the server: `node scripts/functional_tests_server --config src/platform/test/accessibility/config.ts`
 
-Run the uptime `a11y` tests: `node scripts/functional_test_runner.js --config test/accessibility/config.ts --grep=uptime`
+Run the uptime `a11y` tests: `node scripts/functional_test_runner.js --config src/platform/test/accessibility/config.ts --grep=uptime`

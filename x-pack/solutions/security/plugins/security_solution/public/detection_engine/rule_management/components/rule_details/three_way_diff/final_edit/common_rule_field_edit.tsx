@@ -65,12 +65,6 @@ import {
   ruleNameOverrideSerializer,
   ruleNameOverrideSchema,
 } from './fields/rule_name_override';
-import {
-  RuleScheduleEdit,
-  ruleScheduleSchema,
-  ruleScheduleDeserializer,
-  ruleScheduleSerializer,
-} from './fields/rule_schedule';
 import { SetupEdit, setupSchema } from './fields/setup';
 import { SeverityEdit } from './fields/severity';
 import {
@@ -92,6 +86,7 @@ import {
   timestampOverrideSerializer,
   timestampOverrideSchema,
 } from './fields/timestamp_override';
+import { RuleScheduleForm } from './fields/rule_schedule';
 
 interface CommonRuleFieldEditProps {
   fieldName: UpgradeableCommonFields;
@@ -200,14 +195,7 @@ export function CommonRuleFieldEdit({ fieldName }: CommonRuleFieldEditProps) {
         />
       );
     case 'rule_schedule':
-      return (
-        <RuleFieldEditFormWrapper
-          component={RuleScheduleEdit}
-          ruleFieldFormSchema={ruleScheduleSchema}
-          serializer={ruleScheduleSerializer}
-          deserializer={ruleScheduleDeserializer}
-        />
-      );
+      return <RuleScheduleForm />;
     case 'setup':
       return <RuleFieldEditFormWrapper component={SetupEdit} ruleFieldFormSchema={setupSchema} />;
     case 'severity':

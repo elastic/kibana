@@ -58,20 +58,9 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
   await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
   if (outdatedAgentPolicyIds.length) {
-    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
-      return scheduleDeployAgentPoliciesTask(
-        appContextService.getTaskManagerStart()!,
-        outdatedAgentPolicyIds
-      );
-    } else {
-      return agentPolicyService
-        .deployPolicies(
-          soClient,
-          outdatedAgentPolicyIds.map(({ id }) => id)
-        )
-        .catch((error) => {
-          logger.warn(`Error deploying policies: ${error.message}`, { error });
-        });
-    }
+    return scheduleDeployAgentPoliciesTask(
+      appContextService.getTaskManagerStart()!,
+      outdatedAgentPolicyIds
+    );
   }
 }

@@ -30,13 +30,7 @@
         "label": "DevToolsNodeDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<",
           {
             "pluginId": "@kbn/deeplinks-devtools",
@@ -62,13 +56,7 @@
             "text": "NavigationID"
           },
           "> & { children: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<",
           {
             "pluginId": "@kbn/deeplinks-devtools",

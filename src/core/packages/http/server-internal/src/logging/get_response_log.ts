@@ -59,22 +59,35 @@ export function getEcsResponseLog(request: Request, log: Logger) {
   const query = querystring.stringify(request.query);
   const pathWithQuery = query.length > 0 ? `${path}?${query}` : path;
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const status_code = isBoom(response) ? response.output.statusCode : response.statusCode;
-
   const requestHeaders = cloneAndFilterHeaders(request.headers);
-  const responseHeaders = cloneAndFilterHeaders(
-    isBoom(response) ? (response.output.headers as HapiHeaders) : response.headers
-  );
 
   // borrowed from the hapi/good implementation
   const responseTime = (request.info.completed || request.info.responded) - request.info.received;
-  const responseTimeMsg = !isNaN(responseTime) ? ` ${responseTime}ms` : '';
+  const responseTimeMsg = responseTime >= 0 ? ` ${responseTime}ms` : '';
 
-  const bytes = getResponsePayloadBytes(response, log);
+  const bytes = response ? getResponsePayloadBytes(response, log) : undefined;
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
   const traceId = (request.app as KibanaRequestState).traceId;
+
+  const responseLogObj = response
+    ? {
+        response: {
+          body: {
+            bytes,
+          },
+          status_code: isBoom(response) ? response.output.statusCode : response.statusCode,
+          headers: cloneAndFilterHeaders(
+            isBoom(response) ? (response.output.headers as HapiHeaders) : response.headers
+          ),
+          responseTime: !isNaN(responseTime) ? responseTime : undefined,
+        },
+      }
+    : {};
+
+  const message = response
+    ? `${method} ${pathWithQuery} ${responseLogObj.response?.status_code}${responseTimeMsg}${bytesMsg}`
+    : `${method} ${pathWithQuery}`;
 
   const meta: LogMeta = {
     client: {
@@ -88,16 +101,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
         // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: requestHeaders,
       },
-      response: {
-        body: {
-          bytes,
-        },
-        status_code,
-        // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
-        headers: responseHeaders,
-        // responseTime is a custom non-ECS field
-        responseTime: !isNaN(responseTime) ? responseTime : undefined,
-      },
+      ...responseLogObj,
     },
     url: {
       path,
@@ -110,7 +114,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
   };
 
   return {
-    message: `${method} ${pathWithQuery} ${status_code}${responseTimeMsg}${bytesMsg}`,
+    message,
     meta,
   };
 }

@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const inspector = getService('inspector');
+  const find = getService('find');
 
   const inspectorTrendlineData = [
     ['2015-09-19 06:00', '-'],
@@ -273,12 +274,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const expectedDynamicColors = [
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(204, 86, 66, 1)',
-      'rgba(32, 146, 128, 1)',
+      'rgba(246, 114, 106, 1)',
+      'rgba(246, 114, 106, 1)',
+      'rgba(246, 114, 106, 1)',
+      'rgba(246, 114, 106, 1)',
+      'rgba(246, 114, 106, 1)',
+      'rgba(36, 194, 146, 1)',
     ];
 
     it('applies dynamic color', async () => {
@@ -350,7 +351,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
 
       await lens.switchToVisualization('lnsLegacyMetric');
-      // await lens.clickLegacyMetric();
+
       await lens.configureDimension({
         dimension: 'lns-empty-dimension',
         operation: 'average',
@@ -368,6 +369,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Extract the numeric decimals from the value without any compact suffix like k or m
       const decimals = (value?.split(`.`)[1] || '').match(/(\d)+/)?.[0];
       expect(decimals).have.length(3);
+    });
+
+    it('should disable collapse by when the primary metric is not numeric', async () => {
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+
+      const N_TILES = 39;
+
+      await lens.switchToVisualization('lnsMetric', 'Metric');
+      await lens.configureDimension({
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await lens.configureDimension({
+        dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+        keepOpen: true,
+      });
+
+      // test that there are 39 tiles now
+      expect(await lens.getMetricTiles()).to.have.length(N_TILES);
+
+      await find.clickByCssSelector(
+        'select[data-test-subj="indexPattern-collapse-by"] > option[value="sum"]'
+      );
+      // change the collapse by fn
+      await lens.closeDimensionEditor();
+
+      // check that the collapse by is applied to the chart
+      expect(await lens.getMetricTiles()).to.have.length(1);
+
+      // now change the metric to Last value of a string field
+      await lens.configureDimension({
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger',
+        operation: 'last_value',
+        field: 'ip',
+      });
+
+      // test that there are 39 tiles now
+      expect(await lens.getMetricTiles()).to.have.length(N_TILES);
     });
   });
 }

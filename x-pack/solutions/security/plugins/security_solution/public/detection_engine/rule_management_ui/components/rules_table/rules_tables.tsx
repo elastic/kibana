@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiConfirmModal,
+  EuiEmptyPrompt,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../rule_management/logic';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
+import * as i18n from '../../../common/translations';
+import type { EuiBasicTableOnChange } from '../../../common/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
@@ -38,6 +44,8 @@ import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/u
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
+import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -211,6 +219,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
+  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
+
   const isTableEmpty =
     ruleManagementFilters?.rules_summary.custom_count === 0 &&
     ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
@@ -265,7 +275,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               : i18n.BULK_DELETE_CONFIRMATION_TITLE
           }
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={() => handleDeletionConfirm()}
           confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"
@@ -313,6 +323,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {shouldShowRulesTable && (
         <>
+          {selectedTab === AllRulesTabs.monitoring && storeGapsInEventLogEnabled && (
+            <>
+              <EuiSpacer />
+              <RulesWithGapsOverviewPanel />
+              <EuiSpacer />
+            </>
+          )}
           <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}

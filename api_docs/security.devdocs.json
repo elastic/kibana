@@ -1759,13 +1759,7 @@
             "description": [],
             "signature": [
               "{ (operation: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
-                "text": "ApiOperation"
-              },
+              "ApiOperation",
               ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
@@ -1780,13 +1774,7 @@
                 "label": "operation",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.ApiOperation",
-                    "text": "ApiOperation"
-                  }
+                  "ApiOperation"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
                 "deprecated": false,
@@ -1822,13 +1810,7 @@
             "description": [],
             "signature": [
               "{ (operation: ",
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
-                "text": "ApiOperation"
-              },
+              "ApiOperation",
               ", subject: string): string; (subject: string): string; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
@@ -1893,6 +1875,10 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/epm/kibana_assets_handler.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
               },
               {
@@ -1942,6 +1928,14 @@
               {
                 "plugin": "@kbn/security-authorization-core",
                 "path": "x-pack/platform/packages/private/security/authorization_core/src/actions/api.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "@kbn/security-authorization-core",
+                "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/privileges.test.ts"
               },
               {
                 "plugin": "@kbn/security-authorization-core",
@@ -3134,6 +3128,19 @@
             "label": "enabled",
             "description": [
               "\nIndicates whether audit logging is enabled or not.\n\nUseful for skipping resource-intense operations that don't need to be performed when audit\nlogging is disabled."
+            ],
+            "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditLogger.includeSavedObjectNames",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeSavedObjectNames",
+            "description": [
+              "\nIndicates whether to include saved objects names in audit log"
             ],
             "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
             "deprecated": false,
@@ -5096,9 +5103,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(featureId: keyof ",
-              "Capabilities",
-              ", ...uiCapabilityParts: string[]) => string"
+              "(featureId: string | number, ...uiCapabilityParts: string[]) => string"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
             "deprecated": false,
@@ -5112,8 +5117,7 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  "keyof ",
-                  "Capabilities"
+                  "string | number"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
                 "deprecated": false,
@@ -5433,7 +5437,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
+          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\" | \"assignCase\""
         ],
         "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
@@ -5896,12 +5900,12 @@
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
-            },
-            {
               "plugin": "savedObjectsTagging",
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/request_handler_context.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
             },
             {
               "plugin": "ml",
@@ -5914,18 +5918,6 @@
             {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             }
           ]
         }
@@ -5988,23 +5980,7 @@
             },
             {
               "plugin": "observabilityAIAssistant",
-              "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
-            },
-            {
-              "plugin": "transform",
-              "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
-            },
-            {
-              "plugin": "upgradeAssistant",
-              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-            },
-            {
-              "plugin": "upgradeAssistant",
-              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
-            },
-            {
-              "plugin": "upgradeAssistant",
-              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
             },
             {
               "plugin": "fleet",
@@ -6021,6 +5997,22 @@
             {
               "plugin": "fleet",
               "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
+            },
+            {
+              "plugin": "transform",
+              "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/credential_store.ts"
             },
             {
               "plugin": "entityManager",
@@ -6045,6 +6037,10 @@
             {
               "plugin": "entityManager",
               "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
             },
             {
               "plugin": "fleet",
@@ -7527,12 +7523,12 @@
           {
             "parentPluginId": "security",
             "id": "def-common.RoleRemoteClusterPrivilege.clusters",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "clusters",
             "description": [],
             "signature": [
-              "string[]"
+              "string | string[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -7546,7 +7542,14 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "string[]"
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RemoteClusterPrivilege",
+                "text": "RemoteClusterPrivilege"
+              },
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,

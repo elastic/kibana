@@ -37,11 +37,6 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  is_default: {
-    type: 'boolean',
-    array: false,
-    required: false,
-  },
   updated_at: {
     type: 'date',
     array: false,
@@ -94,6 +89,16 @@ export const conversationsFieldMap: FieldMap = {
   },
   'messages.trace_data.trace_id': {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'messages.metadata': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  'messages.metadata.content_references': {
+    type: 'flattened',
     array: false,
     required: false,
   },

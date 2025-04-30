@@ -22,17 +22,17 @@ export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
     .get({
       path: API_ROUTE_FUNCTIONS,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it only provides non-sensitive information about functions available to Canvas.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because it only provides non-sensitive information about functions available to Canvas.',
-          },
-        },
         validate: false,
       },
       async (context, request, response) => {
@@ -51,17 +51,17 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
     .post({
       path: API_ROUTE_FUNCTIONS,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because data source expressions that perform search operations use the Kibana search client which handles permission checking.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because data source expressions that perform search operations use the Kibana search client which handles permission checking.',
-          },
-        },
         validate: {
           request: {
             body: schema.object({

@@ -20,8 +20,6 @@ import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
 
-import './file_card.scss';
-
 interface Props {
   file: FileJSON;
 }

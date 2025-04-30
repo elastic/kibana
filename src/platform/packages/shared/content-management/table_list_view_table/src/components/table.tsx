@@ -42,7 +42,7 @@ import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel, TagFilterContextProvider } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
-import type { SortColumnField } from './table_sort_select';
+import type { CustomSortingOptions, SortColumnField } from './table_sort_select';
 import {
   UserFilterPanel,
   UserFilterContextProvider,
@@ -71,6 +71,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
+  customSortingOptions?: CustomSortingOptions;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
@@ -95,6 +96,7 @@ export function Table<T extends UserContentCommonSchema>({
   tableFilter,
   hasUpdatedAtMetadata,
   hasRecentlyAccessedMetadata,
+  customSortingOptions,
   entityName,
   entityNamePlural,
   tagsToTableItemMap,
@@ -168,7 +170,6 @@ export function Table<T extends UserContentCommonSchema>({
 
   const {
     isPopoverOpen,
-    isInUse,
     closePopover,
     onFilterButtonClick,
     onSelectChange,
@@ -191,12 +192,19 @@ export function Table<T extends UserContentCommonSchema>({
             tableSort={tableSort}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
             hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
+            customSortingOptions={customSortingOptions}
             onChange={onSortChange}
           />
         );
       },
     };
-  }, [hasUpdatedAtMetadata, onSortChange, tableSort, hasRecentlyAccessedMetadata]);
+  }, [
+    hasUpdatedAtMetadata,
+    onSortChange,
+    tableSort,
+    hasRecentlyAccessedMetadata,
+    customSortingOptions,
+  ]);
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     if (!isTaggingEnabled()) return null;
@@ -345,7 +353,6 @@ export function Table<T extends UserContentCommonSchema>({
     >
       <TagFilterContextProvider
         isPopoverOpen={isPopoverOpen}
-        isInUse={isInUse}
         closePopover={closePopover}
         onFilterButtonClick={onFilterButtonClick}
         onSelectChange={onSelectChange}

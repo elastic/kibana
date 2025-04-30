@@ -6,13 +6,16 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback, memo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
@@ -25,8 +28,10 @@ import { useTimelineEvents } from '../../../../containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import {
+  useEnableExperimental,
+  useIsExperimentalFeatureEnabled,
+} from '../../../../../common/hooks/use_experimental_features';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
@@ -37,7 +42,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
-import { NotesEventTypes, DocumentEventTypes } from '../../../../../common/lib/telemetry';
+import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
@@ -78,9 +83,23 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const [pageIndex, setPageIndex] = useState(0);
 
   const { telemetry } = useKibana().services;
-  const { dataViewId, sourcererDataView, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+
+  const {
+    dataViewId: oldDataViewId,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -144,7 +163,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       endDate: '',
       id: `pinned-${timelineId}`,
       indexNames: selectedPatterns,
-      dataViewId,
+      dataViewId: dataViewId ?? '',
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,
@@ -164,8 +183,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       itemsPerPage * pageIndex,
       itemsPerPage * (pageIndex + 1)
     );
-
-    loadNotesOnEventsLoad(eventsOnCurrentPage);
+    if (eventsOnCurrentPage.length > 0) {
+      loadNotesOnEventsLoad(eventsOnCurrentPage);
+    }
   }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
 
   /**
@@ -246,10 +266,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
 
   const leadingControlColumns = useTimelineControlColumn({
-    columns,
-    sort,
     timelineId,
-    activeTab: TimelineTabs.pinned,
     refetch,
     events,
     pinnedEventIds,

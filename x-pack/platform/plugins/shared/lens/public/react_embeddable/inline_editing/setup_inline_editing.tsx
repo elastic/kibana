@@ -31,6 +31,8 @@ export function prepareInlineEditPanel(
   inspectorApi: LensInspectorAdapters,
   {
     coreStart,
+    visualizationMap,
+    datasourceMap,
     ...startDependencies
   }: Omit<
     LensEmbeddableStartServices,
@@ -40,8 +42,6 @@ export function prepareInlineEditPanel(
     | 'expressionRenderer'
     | 'documentToExpression'
     | 'injectFilterReferences'
-    | 'visualizationMap'
-    | 'datasourceMap'
     | 'theme'
     | 'uiSettings'
     | 'attributeService'
@@ -50,18 +50,15 @@ export function prepareInlineEditPanel(
     stateTransfer: EmbeddableStateTransfer,
     skipAppLeave?: boolean
   ) => () => Promise<void>,
-  uuid?: string
+  uuid?: string,
+  parentApi?: unknown
 ) {
   return async function openConfigPanel({
     onApply,
     onCancel,
     hideTimeFilterInfo,
   }: Partial<Pick<EditConfigPanelProps, 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>> = {}) {
-    const { getEditLensConfiguration, getVisualizationMap, getDatasourceMap } = await import(
-      '../../async_services'
-    );
-    const visualizationMap = getVisualizationMap();
-    const datasourceMap = getDatasourceMap();
+    const { getEditLensConfiguration } = await import('../../async_services');
 
     const currentState = getState();
     const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
@@ -95,6 +92,11 @@ export function prepareInlineEditPanel(
     if (attributes?.visualizationType == null) {
       return null;
     }
+
+    const canNavigateToFullEditor =
+      !isTextBasedLanguage(currentState) &&
+      panelManagementApi.isEditingEnabled() &&
+      navigateToLensEditor;
     return (
       <Component
         attributes={attributes}
@@ -107,7 +109,7 @@ export function prepareInlineEditPanel(
         panelId={uuid}
         savedObjectId={currentState.savedObjectId}
         navigateToLensEditor={
-          !isTextBasedLanguage(currentState) && navigateToLensEditor
+          canNavigateToFullEditor
             ? navigateToLensEditor(
                 new EmbeddableStateTransfer(
                   coreStart.application.navigateToApp,
@@ -137,6 +139,8 @@ export function prepareInlineEditPanel(
           }
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
+        isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
+        parentApi={parentApi}
       />
     );
   };

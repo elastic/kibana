@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEventLogClient } from './types';
+import type { IEventLogClient } from './types';
 
 const createEventLogClientMock = () => {
   const mock: jest.Mocked<IEventLogClient> = {
@@ -13,6 +13,10 @@ const createEventLogClientMock = () => {
     findEventsWithAuthFilter: jest.fn(),
     aggregateEventsBySavedObjectIds: jest.fn(),
     aggregateEventsWithAuthFilter: jest.fn(),
+    findEventsByDocumentIds: jest.fn(),
+    findEventsBySavedObjectIdsSearchAfter: jest.fn(),
+    closePointInTime: jest.fn(),
+    refreshIndex: jest.fn(),
   };
   return mock;
 };

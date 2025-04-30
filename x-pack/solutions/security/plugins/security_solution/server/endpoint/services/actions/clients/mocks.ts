@@ -17,12 +17,15 @@ import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { merge } from 'lodash';
-import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
+import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { ResponseActionsClient } from '../..';
 import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
@@ -84,6 +87,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
   const endpointService = new EndpointAppContextService();
+  const endpointServiceStartContract = createMockEndpointAppContextServiceStartContract();
 
   esClient.index.mockImplementation((async (payload) => {
     switch (payload.index) {
@@ -112,9 +116,46 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     (async () => {}) as unknown as jest.Mocked<AttachmentsSubClient>['bulkCreate']
   );
 
+  // Mock some Fleet apis in order to support the `fetchFleetInfoForAgents()` method
+  const fleetStartServices = endpointServiceStartContract.fleetStartServices;
+  const packagePolicy = new FleetPackagePolicyGenerator('seed').generate();
+
+  fleetStartServices.agentService.asInternalUser.getByIds.mockImplementation(async (agentIds) => {
+    return agentIds?.map((id) =>
+      new FleetAgentGenerator('seed').generate({ id, policy_id: packagePolicy.policy_ids[0] })
+    );
+  });
+  fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
+    const kueryInfo = await getPackagePolicyInfoFromFleetKuery(options.kuery ?? '');
+
+    const packagePolicyOverrides: Parameters<FleetPackagePolicyGenerator['generate']>[0] = {
+      id: packagePolicy.id,
+    };
+
+    if (kueryInfo.packageNames.length > 0) {
+      packagePolicyOverrides.package = {
+        name: kueryInfo.packageNames[0],
+        version: '1.0.0',
+        title: kueryInfo.packageNames[0],
+      };
+    }
+
+    if (kueryInfo.agentPolicyIds) {
+      packagePolicyOverrides.policy_ids = [kueryInfo.agentPolicyIds[0]];
+    }
+
+    return {
+      items: [new FleetPackagePolicyGenerator('seed').generate(packagePolicyOverrides)],
+      size: 1,
+      page: 1,
+      perPage: 20,
+      total: 1,
+    };
+  });
+
   endpointService.setup(createMockEndpointAppContextServiceSetupContract());
   endpointService.start({
-    ...createMockEndpointAppContextServiceStartContract(),
+    ...endpointServiceStartContract,
     esClient,
   });
 
@@ -122,15 +163,16 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     esClient,
     casesClient,
     endpointService,
+    spaceId: DEFAULT_SPACE_ID,
     username: 'foo',
     isAutomated: false,
   };
 };
 
 const createEsIndexTransportResponseMock = (
-  overrides: DeepPartial<TransportResult<esTypes.IndexResponse, unknown>> = {}
-): TransportResult<esTypes.IndexResponse, unknown> => {
-  const responseDoc: TransportResult<esTypes.IndexResponse, unknown> = {
+  overrides: DeepPartial<TransportResult<estypes.IndexResponse, unknown>> = {}
+): TransportResult<estypes.IndexResponse, unknown> => {
+  const responseDoc: TransportResult<estypes.IndexResponse, unknown> = {
     body: {
       _id: 'indexed-1-2-3',
       _index: 'some-index',
@@ -301,9 +343,11 @@ const createConnectorActionsClientMock = ({
 } = {}): ActionsClientMock => {
   const client = actionsClientMock.create();
 
-  (client.getAll as jest.Mock).mockImplementation(async () => {
+  client.getAll.mockImplementation(async () => {
     return getAllResponse ?? [];
   });
+
+  client.execute.mockImplementation(async () => createConnectorActionExecuteResponseMock());
 
   return client;
 };
@@ -325,14 +369,20 @@ const createNormalizedExternalConnectorClientMock = (
 const setConnectorActionsClientExecuteResponseMock = (
   connectorActionsClient: ActionsClientMock | NormalizedExternalConnectorClientMock,
   subAction: string,
+  /**
+   * The response to be returned. If this value is a function, it will be called with the
+   * arguments passed to `.execute()` and should then return the response
+   */
   response: any
 ): void => {
   const executeMockFn = (connectorActionsClient.execute as jest.Mock).getMockImplementation();
 
   (connectorActionsClient.execute as jest.Mock).mockImplementation(async (options) => {
     if (options.params.subAction === subAction) {
+      const responseData = typeof response === 'function' ? response(options) : response;
+
       return responseActionsClientMock.createConnectorActionExecuteResponse({
-        data: response,
+        data: responseData,
       });
     }
 

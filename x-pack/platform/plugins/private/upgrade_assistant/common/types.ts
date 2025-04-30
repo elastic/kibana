@@ -6,8 +6,11 @@
  */
 
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SavedObject } from '@kbn/core/types';
+import type { DataStreamsAction } from './data_stream_types';
+
+export * from './data_stream_types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
@@ -51,8 +54,11 @@ export interface ReindexStatusResponse {
     reindexName: string;
     // Array of aliases pointing to the index being reindexed
     aliases: string[];
+    isReadonly: boolean;
+    isFrozen: boolean;
+    isInDataStream: boolean;
   };
-  warnings?: ReindexWarning[];
+  warnings?: IndexWarning[];
   reindexOp?: ReindexOperation;
   hasRequiredPrivileges?: boolean;
 }
@@ -109,6 +115,7 @@ export interface ReindexOperation {
   errorMessage: string | null;
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
+  rollupJob?: string;
 
   /**
    * The original index settings to set after reindex is completed.
@@ -133,10 +140,11 @@ export interface ReindexOperation {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // 8.0 -> 9.0 warnings
-export type ReindexWarningTypes = 'indexSetting' | 'replaceIndexWithAlias';
+export type IndexWarningType = 'indexSetting' | 'replaceIndexWithAlias' | 'makeIndexReadonly';
 
-export interface ReindexWarning {
-  warningType: ReindexWarningTypes;
+export interface IndexWarning {
+  warningType: IndexWarningType;
+  flow: 'reindex' | 'readonly' | 'all';
   /**
    * Optional metadata for deprecations
    *
@@ -144,7 +152,7 @@ export interface ReindexWarning {
    * For "indexSetting" we want to surface the deprecated settings.
    */
   meta?: {
-    [key: string]: string | string[];
+    [key: string]: string | string[] | boolean;
   };
 }
 
@@ -187,16 +195,36 @@ export interface DeprecationInfo {
 export interface IndexSettingsDeprecationInfo {
   [indexName: string]: DeprecationInfo[];
 }
-export interface ReindexAction {
-  type: 'reindex';
+
+export interface IndexMetadata {
+  isFrozenIndex: boolean;
+  isInDataStream: boolean;
+  isClosedIndex: boolean;
+}
+
+export interface IndexAction {
   /**
-   * Indicate what blockers have been detected for calling reindex
-   * against this index.
-   *
-   * @remark
-   * In future this could be an array of blockers.
+   * Includes relevant information about the index related to this action
    */
-  blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
+  metadata: IndexMetadata;
+}
+
+export interface ReindexAction extends IndexAction {
+  type: 'reindex';
+
+  /**
+   * The transform IDs that are currently targeting this index
+   */
+  transformIds?: string[];
+
+  /**
+   * The actions that should be excluded from the reindex corrective action.
+   */
+  excludedActions?: string[];
+}
+
+export interface UnfreezeAction extends IndexAction {
+  type: 'unfreeze';
 }
 
 export interface MlAction {
@@ -222,18 +250,30 @@ export interface HealthIndicatorAction {
   impacts: HealthReportImpact[];
 }
 
+export type CorrectiveAction =
+  | ReindexAction
+  | UnfreezeAction
+  | MlAction
+  | IndexSettingAction
+  | ClusterSettingAction
+  | DataStreamsAction
+  | HealthIndicatorAction;
+
 export interface EnrichedDeprecationInfo
-  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
-  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator' | 'data_streams';
+  extends Omit<
+    estypes.MigrationDeprecationsDeprecation,
+    'level' | 'resolve_during_rolling_upgrade'
+  > {
+  type:
+    | keyof estypes.MigrationDeprecationsResponse
+    | 'data_streams'
+    | 'health_indicator'
+    | 'ilm_policies'
+    | 'templates';
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
-  correctiveAction?:
-    | ReindexAction
-    | MlAction
-    | IndexSettingAction
-    | ClusterSettingAction
-    | HealthIndicatorAction;
+  correctiveAction?: CorrectiveAction;
   resolveDuringUpgrade: boolean;
 }
 
@@ -244,7 +284,9 @@ export interface CloudBackupStatus {
 
 export interface ESUpgradeStatus {
   totalCriticalDeprecations: number;
-  deprecations: EnrichedDeprecationInfo[];
+  migrationsDeprecations: EnrichedDeprecationInfo[];
+  totalCriticalHealthIssues: number;
+  enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
 export interface ResolveIndexResponseFromES {
@@ -307,3 +349,5 @@ export interface FeatureSet {
   reindexCorrectiveActions: boolean;
   migrateDataStreams: boolean;
 }
+
+export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;

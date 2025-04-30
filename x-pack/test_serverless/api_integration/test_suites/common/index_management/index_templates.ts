@@ -45,9 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         templateName = `template-${getRandomString()}`;
         const indexTemplate = {
           name: templateName,
-          body: {
-            index_patterns: ['test*'],
-          },
+          index_patterns: ['test*'],
         };
         // Create a new index template to test against
         try {
@@ -126,6 +124,50 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.name).to.eql(templateName);
           expect(Object.keys(body).sort()).to.eql(expectedKeys);
         });
+
+        describe('with logs-*-* index pattern', () => {
+          const logsdbTemplateName = 'test-logsdb-template';
+          before(async () => {
+            const template = svlTemplatesHelpers.getTemplatePayload(
+              logsdbTemplateName,
+              ['logs-*-*'],
+              false,
+              false
+            );
+            await svlTemplatesApi.createTemplate(template, roleAuthc).expect(200);
+          });
+
+          after(async () => {
+            await svlTemplatesApi.deleteTemplates([{ name: logsdbTemplateName }], roleAuthc);
+          });
+
+          const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+            { enabled: true, indexMode: 'logsdb' },
+            { enabled: false, indexMode: 'standard' },
+            { enabled: null, indexMode: 'logsdb' }, // In serverless Kibana, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+          ];
+
+          logsdbSettings.forEach(({ enabled, indexMode }) => {
+            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+              await es.cluster.putSettings({
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
+                    },
+                  },
+                },
+              });
+
+              const { body, status } = await supertestWithoutAuth
+                .get(`${API_BASE_PATH}/index_templates/${logsdbTemplateName}`)
+                .set(internalReqHeader)
+                .set(roleAuthc.apiKeyHeader);
+              expect(status).to.eql(200);
+              expect(body.indexMode).to.equal(indexMode);
+            });
+          });
+        });
       });
     });
 
@@ -135,7 +177,8 @@ export default function ({ getService }: FtrProviderContext) {
           `template-${getRandomString()}`,
           [getRandomString()],
           undefined,
-          false
+          false,
+          'logsdb'
         );
 
         const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);

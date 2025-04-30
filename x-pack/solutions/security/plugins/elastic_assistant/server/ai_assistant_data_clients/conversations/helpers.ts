@@ -65,6 +65,12 @@ export const getUpdateScript = ({
         if (message.trace_data != null) {
           newMessage.trace_data = message.trace_data;
         }
+        if (message.metadata != null) {
+          newMessage.metadata = [:];
+          if (message.metadata.content_references != null) {
+            newMessage.metadata.content_references = message.metadata.content_references;
+          }
+        }
         messages.add(newMessage);
       }
       ctx._source.messages = messages;

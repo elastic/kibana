@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 import type { NormalizedExternalConnectorClientExecuteOptions } from './normalized_external_connector_client';
 import { NormalizedExternalConnectorClient } from './normalized_external_connector_client';
-import { ResponseActionsConnectorNotConfiguredError } from '../errors';
+import { ResponseActionsClientError, ResponseActionsConnectorNotConfiguredError } from '../errors';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 
@@ -139,6 +139,22 @@ describe('`NormalizedExternalConnectorClient` class', () => {
         params: executeInputOptions.params,
       });
     });
+
+    it('should throw a ResponseActionClientError', async () => {
+      actionPluginConnectorClient.execute.mockImplementation(async () => {
+        throw new Error('oh oh');
+      });
+
+      const testInstance = new NormalizedExternalConnectorClient(
+        actionPluginConnectorClient,
+        logger
+      );
+      testInstance.setup('foo');
+
+      await expect(testInstance.execute(executeInputOptions)).rejects.toThrow(
+        ResponseActionsClientError
+      );
+    });
   });
 
   describe('with IUnsecuredActionsClient', () => {
@@ -150,6 +166,9 @@ describe('`NormalizedExternalConnectorClient` class', () => {
       (actionPluginConnectorClient.getAll as jest.Mock).mockResolvedValue([
         responseActionsClientMock.createConnector({ actionTypeId: 'foo' }),
       ]);
+      (actionPluginConnectorClient.execute as jest.Mock).mockResolvedValue(
+        responseActionsClientMock.createConnectorActionExecuteResponse()
+      );
     });
 
     it('should call Action Plugin client `.execute()` with expected arguments', async () => {
@@ -180,6 +199,22 @@ describe('`NormalizedExternalConnectorClient` class', () => {
           },
         ],
       });
+    });
+
+    it('should throw a ResponseActionClientError', async () => {
+      (actionPluginConnectorClient.execute as jest.Mock).mockImplementation(async () => {
+        throw new Error('oh oh');
+      });
+
+      const testInstance = new NormalizedExternalConnectorClient(
+        actionPluginConnectorClient,
+        logger
+      );
+      testInstance.setup('foo');
+
+      await expect(testInstance.execute(executeInputOptions)).rejects.toThrow(
+        ResponseActionsClientError
+      );
     });
   });
 });

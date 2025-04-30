@@ -131,7 +131,7 @@ export const SummarySection = ({
             data-test-subj="dashboard-view-all-resources"
             onClick={() => {
               navToFindings(getPolicyTemplateQuery(dashboardType), [
-                FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME,
+                FINDINGS_GROUPING_OPTIONS.RESOURCE_ID,
               ]);
             }}
           >

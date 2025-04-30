@@ -17,6 +17,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-codeql.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-coverage-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-cloud.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-project.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing-9-dot-0.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing.yml
@@ -43,6 +44,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-release.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-vm-images.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/scalability_testing-daily.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-ess/gen-ai-evals.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-ess/security-solution-ess.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-defend-workflows.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-quality-gate/kibana-serverless-security-solution-quality-gate-detection-engine.yml

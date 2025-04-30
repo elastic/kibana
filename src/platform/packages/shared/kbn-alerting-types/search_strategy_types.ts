@@ -13,8 +13,8 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Alert } from './alert_type';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { Alert } from './alerts_types';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   ruleTypeIds: string[];
@@ -24,6 +24,8 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
   runtimeMappings?: MappingRuntimeFields;
+  minScore?: number;
+  trackScores?: boolean;
 };
 
 export interface RuleRegistrySearchRequestPagination {

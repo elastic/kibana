@@ -21,9 +21,9 @@ import { validateKibanaFeature, validateElasticsearchFeature } from './feature_s
 import type { ConfigOverridesType } from './config';
 
 /**
- * Describes parameters used to retrieve all Kibana features.
+ * Describes parameters used to retrieve all Kibana features (for internal consumers).
  */
-export interface GetKibanaFeaturesParams {
+export interface GetKibanaFeaturesParamsInternal {
   /**
    * If provided, the license will be used to filter out features that require a license higher than the specified one.
    * */
@@ -39,6 +39,17 @@ export interface GetKibanaFeaturesParams {
    * in the result by default.
    */
   omitDeprecated?: boolean;
+}
+
+/**
+ * Describes parameters used to retrieve all Kibana features (for public consumers).
+ */
+export interface GetKibanaFeaturesParams {
+  /**
+   * If true, deprecated features will be omitted. For backward compatibility reasons, deprecated features are included
+   * in the result by default.
+   */
+  omitDeprecated: boolean;
 }
 
 export class FeatureRegistry {
@@ -110,6 +121,10 @@ export class FeatureRegistry {
       // becomes necessary.
       if (featureOverride.name) {
         feature.name = featureOverride.name;
+      }
+
+      if (typeof featureOverride.description !== 'undefined') {
+        feature.description = featureOverride.description;
       }
 
       if (featureOverride.category) {
@@ -207,6 +222,7 @@ export class FeatureRegistry {
 
       // Iterate over all top-level and sub-feature privileges.
       const isFeatureDeprecated = !!feature.deprecated;
+      const replacementFeatureIds = new Set();
       for (const [privilegeId, privilege] of [
         ...Object.entries(feature.privileges),
         ...collectSubFeaturesPrivileges(feature),
@@ -257,12 +273,39 @@ export class FeatureRegistry {
               );
             }
 
-            if (referencedPrivilege.disabled) {
+            // Enabled privileges cannot be replaced with disabled ones.
+            if (referencedPrivilege.disabled && !privilege.disabled) {
               throw new Error(
                 `Cannot replace privilege "${privilegeId}" of deprecated feature "${feature.id}" with disabled privilege "${privilegeReference}" of feature "${featureReference.feature}".`
               );
             }
           }
+
+          replacementFeatureIds.add(featureReference.feature);
+        }
+      }
+
+      const featureReplacedBy = feature.deprecated?.replacedBy;
+      if (featureReplacedBy) {
+        if (featureReplacedBy.length === 0) {
+          throw new Error(
+            `Feature “${feature.id}” is deprecated and must have at least one feature ID added to the “replacedBy” property, or the property must be left out completely.`
+          );
+        }
+
+        // The feature can be marked as replaced by another feature only if that feature is actually used to replace any
+        // of the deprecated feature’s privileges.
+        const invalidFeatureIds = featureReplacedBy.filter(
+          (featureId) => !replacementFeatureIds.has(featureId)
+        );
+        if (invalidFeatureIds.length > 0) {
+          throw new Error(
+            `Cannot replace deprecated feature “${
+              feature.id
+            }” with the following features, as they aren’t used to replace feature privileges: ${invalidFeatureIds.join(
+              ', '
+            )}.`
+          );
         }
       }
     }
@@ -272,7 +315,7 @@ export class FeatureRegistry {
     license,
     ignoreLicense = false,
     omitDeprecated = false,
-  }: GetKibanaFeaturesParams = {}): KibanaFeature[] {
+  }: GetKibanaFeaturesParamsInternal = {}): KibanaFeature[] {
     if (!this.locked) {
       throw new Error('Cannot retrieve Kibana features while registration is still open');
     }
@@ -341,6 +384,7 @@ function applyAutomaticAllPrivilegeGrants(
         'config-global',
         'url',
         'tag',
+        'cloud',
       ]);
     }
   });
@@ -358,6 +402,7 @@ function applyAutomaticReadPrivilegeGrants(
         'telemetry',
         'url',
         'tag',
+        'cloud',
       ]);
     }
   });

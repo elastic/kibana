@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Fragment } from 'react';
 import {
   EuiAccordion,
   EuiPanel,
@@ -22,11 +22,10 @@ import {
 } from '@elastic/eui';
 import type { BoolQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityType } from '../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../common/entity_analytics/types';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
-import {
-  RiskScoreEntity,
-  RISK_SCORE_INDEX_PATTERN,
-} from '../../../common/entity_analytics/risk_engine';
+import { RISK_SCORE_INDEX_PATTERN } from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
@@ -34,12 +33,16 @@ import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../common';
+import { EntityIconByType } from './entity_store/helpers';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 interface IRiskScorePreviewPanel {
-  showMessage: string;
-  hideMessage: string;
+  showMessage: React.ReactNode;
+  hideMessage: React.ReactNode;
   isLoading: boolean;
   items: EntityRiskScoreRecord[];
-  type: RiskScoreEntity;
+  type: EntityType;
 }
 
 const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
@@ -125,7 +128,7 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
-        extraAction={<EuiIcon type={type === RiskScoreEntity.host ? 'storage' : 'user'} />}
+        extraAction={<EuiIcon type={EntityIconByType[type]} />}
       >
         <>
           <EuiSpacer size={'m'} />
@@ -141,11 +144,20 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   from,
   to,
 }) => {
+  const entityTypes = useEntityAnalyticsTypes();
+
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
     data_view_id: sourcererDataView.title,
@@ -156,9 +168,6 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
     },
     exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
   });
-
-  const hosts = getRiskiestScores(data?.scores.host, 'host.name');
-  const users = getRiskiestScores(data?.scores.user, 'user.name');
 
   if (isError) {
     return (
@@ -187,23 +196,37 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
       <EuiSpacer />
       <EuiSpacer />
 
-      <RiskScorePreviewPanel
-        items={hosts}
-        showMessage={i18n.SHOW_HOSTS_RISK_SCORE}
-        hideMessage={i18n.HIDE_HOSTS_RISK_SCORE}
-        isLoading={isLoading}
-        type={RiskScoreEntity.host}
-      />
-
-      <EuiSpacer />
-
-      <RiskScorePreviewPanel
-        items={users}
-        showMessage={i18n.SHOW_USERS_RISK_SCORE}
-        hideMessage={i18n.HIDE_USERS_RISK_SCORE}
-        isLoading={isLoading}
-        type={RiskScoreEntity.user}
-      />
+      {entityTypes.map((entityType) => (
+        <Fragment key={entityType}>
+          <RiskScorePreviewPanel
+            items={getRiskiestScores(
+              data?.scores[entityType],
+              EntityTypeToIdentifierField[entityType]
+            )}
+            showMessage={
+              <FormattedMessage
+                id="xpack.securitySolution.riskScore.riskScorePreview.show"
+                defaultMessage="Show {entityType}s"
+                values={{
+                  entityType,
+                }}
+              />
+            }
+            hideMessage={
+              <FormattedMessage
+                id="xpack.securitySolution.riskScore.riskScorePreview.hide"
+                defaultMessage="Hide {entityType}s"
+                values={{
+                  entityType,
+                }}
+              />
+            }
+            isLoading={isLoading}
+            type={entityType}
+          />
+          <EuiSpacer />
+        </Fragment>
+      ))}
     </>
   );
 };

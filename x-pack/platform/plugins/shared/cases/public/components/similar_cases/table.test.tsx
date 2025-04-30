@@ -6,33 +6,38 @@
  */
 
 import React from 'react';
-import { type AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import { screen } from '@testing-library/react';
+import { renderWithTestingProviders } from '../../common/mock';
 import { SimilarCasesTable, type SimilarCasesTableProps } from './table';
-import { mockCase, mockObservables } from '../../containers/mock';
+import { mockCase, mockSimilarObservables } from '../../containers/mock';
 
 describe('SimilarCasesTable', () => {
-  let appMock: AppMockRenderer;
   const props: SimilarCasesTableProps = {
-    cases: [{ ...mockCase, similarities: { observables: mockObservables } }],
+    cases: [{ ...mockCase, similarities: { observables: mockSimilarObservables } }],
     isLoading: false,
     onChange: jest.fn(),
     pagination: { pageIndex: 0, totalItemCount: 1 },
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<SimilarCasesTable {...props} />);
+    renderWithTestingProviders(<SimilarCasesTable {...props} />);
 
-    expect(result.getByTestId('similar-cases-table')).toBeInTheDocument();
+    expect(screen.getByTestId('similar-cases-table')).toBeInTheDocument();
+  });
+
+  it('renders similarities correctly', async () => {
+    renderWithTestingProviders(<SimilarCasesTable {...props} />);
+
+    expect(await screen.findByTestId('similar-cases-table-column-similarities')).toBeTruthy();
   });
 
   it('renders loading indicator when loading', async () => {
-    const result = appMock.render(<SimilarCasesTable {...props} isLoading={true} />);
-    expect(result.queryByTestId('similar-cases-table')).not.toBeInTheDocument();
-    expect(result.getByTestId('similar-cases-table-loading')).toBeInTheDocument();
+    renderWithTestingProviders(<SimilarCasesTable {...props} isLoading={true} />);
+    expect(screen.queryByTestId('similar-cases-table')).not.toBeInTheDocument();
+    expect(screen.getByTestId('similar-cases-table-loading')).toBeInTheDocument();
   });
 });

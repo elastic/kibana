@@ -21,29 +21,32 @@ type BuilderArgs = Pick<
   UserActionBuilderArgs,
   'userAction' | 'actionsNavigation' | 'userProfiles'
 > & {
-  comment: SnakeToCamelCase<ActionsAttachment>;
+  attachment: SnakeToCamelCase<ActionsAttachment>;
 };
 
 export const createActionAttachmentUserActionBuilder = ({
   userAction,
   userProfiles,
-  comment,
+  attachment,
   actionsNavigation,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   build: () => {
-    const actionIconName = comment.actions.type === 'isolate' ? 'lock' : 'lockOpen';
+    const actionIconName = attachment.actions.type === 'isolate' ? 'lock' : 'lockOpen';
     return [
       {
         username: (
-          <HoverableUserWithAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
+          <HoverableUserWithAvatarResolver
+            user={attachment.createdBy}
+            userProfiles={userProfiles}
+          />
         ),
         className: classNames('comment-action', {
-          'empty-comment': comment.comment.trim().length === 0,
+          'empty-comment': attachment.comment.trim().length === 0,
         }),
         event: (
           <HostIsolationCommentEvent
-            type={comment.actions.type}
-            endpoints={comment.actions.targets}
+            type={attachment.actions.type}
+            endpoints={attachment.actions.targets}
             href={actionsNavigation?.href}
             onClick={actionsNavigation?.onClick}
           />
@@ -52,9 +55,9 @@ export const createActionAttachmentUserActionBuilder = ({
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: actionIconName,
         timelineAvatarAriaLabel: actionIconName,
-        actions: <UserActionCopyLink id={comment.id} />,
-        children: comment.comment.trim().length > 0 && (
-          <ScrollableMarkdown content={comment.comment} />
+        actions: <UserActionCopyLink id={attachment.id} />,
+        children: attachment.comment.trim().length > 0 && (
+          <ScrollableMarkdown content={attachment.comment} />
         ),
       },
     ];

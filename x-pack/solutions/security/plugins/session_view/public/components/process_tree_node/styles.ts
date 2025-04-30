@@ -25,7 +25,7 @@ export const useStyles = ({
   isSelected,
   isSessionLeader,
 }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, size, font } = euiTheme;
@@ -50,7 +50,7 @@ export const useStyles = ({
     };
 
     const icon: CSSObject = {
-      color: euiVars.euiColorDarkShade,
+      color: euiTheme.colors.darkShade,
     };
 
     /**
@@ -58,9 +58,9 @@ export const useStyles = ({
      */
     const getHighlightColors = () => {
       let bgColor = 'none';
-      let hoverColor = transparentize(colors.primary, 0.04);
+      let hoverColor = transparentize(colors.primary, 0.04); // TODO: Borealis migration - replace transparentize with color token
       let borderColor = 'transparent';
-      let searchResColor = transparentize(colors.warning, 0.32);
+      let searchResColor = transparentize(colors.warning, 0.32); // TODO: Borealis migration - replace transparentize with color token
 
       if (hasAlerts) {
         borderColor = colors.danger;
@@ -68,15 +68,15 @@ export const useStyles = ({
 
       if (isSelected) {
         searchResColor = colors.warning;
-        bgColor = transparentize(colors.primary, 0.08);
-        hoverColor = transparentize(colors.primary, 0.12);
+        bgColor = transparentize(colors.primary, 0.08); // TODO: Borealis migration - replace transparentize with color token
+        hoverColor = transparentize(colors.primary, 0.12); // TODO: Borealis migration - replace transparentize with color token
       }
 
       if (hasInvestigatedAlert) {
-        bgColor = transparentize(colors.danger, 0.04);
-        hoverColor = transparentize(colors.danger, 0.12);
+        bgColor = transparentize(colors.danger, 0.04); // TODO: Borealis migration - replace transparentize with color token
+        hoverColor = transparentize(colors.danger, 0.12); // TODO: Borealis migration - replace transparentize with color token
         if (isSelected) {
-          bgColor = transparentize(colors.danger, 0.08);
+          bgColor = transparentize(colors.danger, 0.08); // TODO: Borealis migration - replace transparentize with color token
         }
       }
 
@@ -142,7 +142,7 @@ export const useStyles = ({
       processNode.top = '-' + size.base;
       processNode.zIndex = 1;
       processNode.borderTop = `${size.base} solid transparent`;
-      processNode.backgroundColor = euiVars.euiColorLightestShade;
+      processNode.backgroundColor = euiTheme.colors.lightestShade;
       processNode.borderBottom = border.editable;
     }
 
@@ -156,7 +156,7 @@ export const useStyles = ({
       paddingLeft: size.s,
       position: 'relative',
       verticalAlign: 'middle',
-      color: euiVars.euiTextSubduedColor,
+      color: euiTheme.colors.textSubdued,
       wordBreak: 'break-all',
       padding: `${size.xs} 0px`,
       button: {
@@ -166,7 +166,7 @@ export const useStyles = ({
     };
 
     const workingDir: CSSObject = {
-      color: colors.successText,
+      color: colors.textSuccess,
       fontFamily: font.familyCode,
       fontWeight: font.weight.regular,
     };
@@ -203,7 +203,7 @@ export const useStyles = ({
       sessionLeader,
       jumpToTop,
     };
-  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars, isSessionLeader]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, isSessionLeader]);
 
   return cached;
 };

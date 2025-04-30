@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import { RuleTypeParams } from '../../types';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { RuleTypeParams, Artifacts } from '../../types';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
 import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
-import { RulesClientContext } from '../types';
+import type { RulesClientContext, DenormalizedArtifacts } from '../types';
 import { denormalizeActions } from './denormalize_actions';
+import { denormalizeArtifacts } from './denormalize_artifacts';
 
 export async function extractReferences<
   Params extends RuleTypeParams,
@@ -20,13 +21,21 @@ export async function extractReferences<
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,
   ruleActions: NormalizedAlertActionWithGeneratedValues[],
-  ruleParams: Params
+  ruleParams: Params,
+  ruleArtifacts: Artifacts
 ): Promise<{
   actions: DenormalizedAction[];
+  artifacts: Required<DenormalizedArtifacts>;
   params: ExtractedParams;
   references: SavedObjectReference[];
 }> {
-  const { references: actionReferences, actions } = await denormalizeActions(context, ruleActions);
+  const actionsClient = await context.getActionsClient();
+  const { references: actionReferences, actions } = await denormalizeActions(
+    actionsClient,
+    ruleActions
+  );
+
+  const { artifacts, references: artifactReferences } = denormalizeArtifacts(ruleArtifacts);
 
   // Extracts any references using configured reference extractor if available
   const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences
@@ -41,10 +50,11 @@ export async function extractReferences<
     name: `${extractedSavedObjectParamReferenceNamePrefix}${reference.name}`,
   }));
 
-  const references = [...actionReferences, ...paramReferences];
+  const references = [...actionReferences, ...paramReferences, ...artifactReferences];
 
   return {
     actions,
+    artifacts,
     params,
     references,
   };

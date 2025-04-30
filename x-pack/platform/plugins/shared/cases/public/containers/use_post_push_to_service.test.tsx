@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../common/lib/kibana';
 import { usePostPushToService } from './use_post_push_to_service';
@@ -12,9 +13,8 @@ import { pushedCase } from './mock';
 import * as api from './api';
 import type { CaseConnector } from '../../common/types/domain';
 import { ConnectorTypes } from '../../common/types/domain';
-import { createAppMockRenderer } from '../common/mock';
-import type { AppMockRenderer } from '../common/mock';
 import { casesQueriesKeys } from './constants';
+import { TestProviders, createTestQueryClient } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -32,18 +32,16 @@ describe('usePostPushToService', () => {
   const addError = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('refresh the case after pushing', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => usePostPushToService(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {
@@ -52,14 +50,15 @@ describe('usePostPushToService', () => {
 
     await waitFor(() => {
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
     });
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'pushCase');
     const { result } = renderHook(() => usePostPushToService(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -71,7 +70,7 @@ describe('usePostPushToService', () => {
 
   it('shows a success toaster', async () => {
     const { result } = renderHook(() => usePostPushToService(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -90,7 +89,7 @@ describe('usePostPushToService', () => {
     jest.spyOn(api, 'pushCase').mockRejectedValue(new Error('usePostPushToService: Test error'));
 
     const { result } = renderHook(() => usePostPushToService(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

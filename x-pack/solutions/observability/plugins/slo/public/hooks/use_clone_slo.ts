@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCallback } from 'react';
 import { paths } from '../../common/locators/paths';
 import { useKibana } from './use_kibana';
@@ -21,8 +21,8 @@ export function useCloneSlo() {
   const spaceId = useSpace();
 
   return useCallback(
-    (slo: SLOWithSummaryResponse) => {
-      if (slo.remote) {
+    (slo: SLOWithSummaryResponse | SLODefinitionResponse) => {
+      if ('remote' in slo && slo.remote) {
         window.open(createRemoteSloCloneUrl(slo, spaceId), '_blank');
       } else {
         const clonePath = paths.sloCreateWithEncodedForm(

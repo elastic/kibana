@@ -10,8 +10,8 @@ import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { initializeTitleManager, PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
@@ -41,15 +41,15 @@ function getDefaultLensApiMock() {
     type: DOC_TYPE,
     uuid: faker.string.uuid(),
     // Shared Embeddable Observables
-    panelTitle: new BehaviorSubject<string | undefined>(faker.lorem.words()),
-    hidePanelTitle: new BehaviorSubject<boolean | undefined>(false),
+    title$: new BehaviorSubject<string | undefined>(faker.lorem.words()),
+    hideTitle$: new BehaviorSubject<boolean | undefined>(false),
     filters$: new BehaviorSubject<Filter[] | undefined>([]),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
       query: 'test',
       language: 'kuery',
     }),
     timeRange$: new BehaviorSubject<TimeRange | undefined>({ from: 'now-15m', to: 'now' }),
-    dataLoading: new BehaviorSubject<boolean | undefined>(false),
+    dataLoading$: new BehaviorSubject<boolean | undefined>(false),
     // Methods
     getSavedVis: jest.fn(),
     getFullAttributes: jest.fn(),
@@ -70,40 +70,37 @@ function getDefaultLensApiMock() {
     supportedTriggers: jest.fn(() => []),
     canLinkToLibrary: jest.fn(async () => false),
     canUnlinkFromLibrary: jest.fn(async () => false),
-    unlinkFromLibrary: jest.fn(),
     checkForDuplicateTitle: jest.fn(),
     /** New embeddable api inherited methods */
     resetUnsavedChanges: jest.fn(),
     serializeState: jest.fn(),
     snapshotRuntimeState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
-    getByValueRuntimeSnapshot: jest.fn(),
     onEdit: jest.fn(),
     isEditingEnabled: jest.fn(() => true),
     getTypeDisplayName: jest.fn(() => 'Lens'),
-    setPanelTitle: jest.fn(),
-    setHidePanelTitle: jest.fn(),
+    setTitle: jest.fn(),
+    setHideTitle: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',
       timeToEvent: 1000,
     }),
-    unsavedChanges: new BehaviorSubject<object | undefined>(undefined),
-    dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
-    libraryId$: new BehaviorSubject<string | undefined>(undefined),
-    savedObjectId: new BehaviorSubject<string | undefined>(undefined),
+    unsavedChanges$: new BehaviorSubject<object | undefined>(undefined),
+    dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
+    savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
     updateAttributes: jest.fn(),
     updateSavedObjectId: jest.fn(),
     updateOverrides: jest.fn(),
-    getByReferenceState: jest.fn(),
-    getByValueState: jest.fn(),
+    getSerializedStateByReference: jest.fn(),
+    getSerializedStateByValue: jest.fn(),
     getTriggerCompatibleActions: jest.fn(),
-    blockingError: new BehaviorSubject<Error | undefined>(undefined),
-    panelDescription: new BehaviorSubject<string | undefined>(undefined),
-    setPanelDescription: jest.fn(),
-    viewMode: new BehaviorSubject<ViewMode>('view'),
-    disabledActionIds: new BehaviorSubject<string[] | undefined>(undefined),
+    blockingError$: new BehaviorSubject<Error | undefined>(undefined),
+    description$: new BehaviorSubject<string | undefined>(undefined),
+    setDescription: jest.fn(),
+    viewMode$: new BehaviorSubject<ViewMode>('view'),
+    disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
     setDisabledActionIds: jest.fn(),
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
@@ -280,7 +277,13 @@ export function getValidExpressionParams(
 }
 
 function getInternalApiWithFunctionWrappers() {
-  const newApi = initializeInternalApi(getLensRuntimeStateMock(), {}, makeEmbeddableServices());
+  const mockRuntimeState = getLensRuntimeStateMock();
+  const newApi = initializeInternalApi(
+    mockRuntimeState,
+    {},
+    initializeTitleManager(mockRuntimeState),
+    makeEmbeddableServices()
+  );
   const fns: Array<keyof LensInternalApi> = (
     Object.keys(newApi) as Array<keyof LensInternalApi>
   ).filter((key) => typeof newApi[key] === 'function');

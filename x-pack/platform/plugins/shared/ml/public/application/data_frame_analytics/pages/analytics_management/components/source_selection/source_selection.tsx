@@ -13,8 +13,9 @@ import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import {
   getDataViewAndSavedSearchCallback,
   isCcsIndexPattern,
@@ -33,7 +34,7 @@ export const SourceSelection: FC = () => {
       uiSettings,
     },
   } = useMlKibana();
-  const navigateToPath = useNavigateToPath();
+  const mlManagementLocator = useMlManagementLocator();
 
   const [isCcsCallOut, setIsCcsCallOut] = useState(false);
   const [ccsCallOutBodyText, setCcsCallOutBodyText] = useState<string>();
@@ -96,11 +97,12 @@ export const SourceSelection: FC = () => {
       return;
     }
 
-    await navigateToPath(
-      `/data_frame_analytics/new_job?${
+    await mlManagementLocator?.navigate({
+      sectionId: 'ml',
+      appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB}?${
         type === 'index-pattern' ? 'index' : 'savedSearchId'
-      }=${encodeURIComponent(id)}`
-    );
+      }=${encodeURIComponent(id)}`,
+    });
   };
 
   return (

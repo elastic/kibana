@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiCollapsibleNavGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -16,27 +17,35 @@ import {
   euiScrollBarStyles,
   EuiSpacer,
   EuiText,
+  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent } from 'react';
-import { useConfirmModal } from '../hooks/use_confirm_modal';
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
-import { EMPTY_CONVERSATION_TITLE } from '../i18n';
+import { useConfirmModal, useConversationsByDate, useConversationContextMenu } from '../hooks';
+import { DATE_CATEGORY_LABELS } from '../i18n';
 import { NewChatButton } from '../buttons/new_chat_button';
+import { ConversationListItemLabel } from './conversation_list_item_label';
+import { isConversationOwnedByUser } from '../utils/is_conversation_owned_by_current_user';
 
-const titleClassName = css`
-  text-transform: uppercase;
-`;
+enum ListSections {
+  CONVERSATIONS = 'conversations',
+  ARCHIVED = 'archived',
+}
 
 const panelClassName = css`
-  max-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   padding-top: 56px;
 `;
 
-const overflowScrollClassName = (scrollBarStyles: string) => css`
+const scrollSectionClass = (scrollBarStyles: string) => css`
   overflow-y: auto;
+  max-height: ${Math.floor(window.innerHeight * 0.7)}px;
   ${scrollBarStyles}
 `;
 
@@ -44,169 +53,277 @@ const newChatButtonWrapperClassName = css`
   padding-bottom: 5px;
 `;
 
+const titleClassName = css`
+  text-transform: uppercase;
+  font-weight: bold;
+`;
+
+const containerClassName = (theme: UseEuiTheme) => css`
+  height: 100%;
+  border-top: solid 1px ${theme.euiTheme.border.color};
+`;
+
 export function ConversationList({
   conversations,
   isLoading,
   selectedConversationId,
+  currentUser,
   onConversationSelect,
-  onConversationDeleteClick,
   newConversationHref,
   getConversationHref,
+  setIsUpdatingConversationList,
+  refreshConversations,
+  updateDisplayedConversation,
 }: {
   conversations: UseConversationListResult['conversations'];
   isLoading: boolean;
   selectedConversationId?: string;
+  currentUser: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
   onConversationSelect?: (conversationId?: string) => void;
-  onConversationDeleteClick: (conversationId: string) => void;
   newConversationHref?: string;
   getConversationHref?: (conversationId: string) => string;
+  setIsUpdatingConversationList: (isUpdating: boolean) => void;
+  refreshConversations: () => void;
+  updateDisplayedConversation: (id?: string) => void;
 }) {
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
-  const containerClassName = css`
-    height: 100%;
-    border-top: solid 1px ${euiTheme.euiTheme.border.color};
-    padding: ${euiTheme.euiTheme.size.s};
-  `;
+  const [allConversations, activeConversations, archivedConversations] = useMemo(() => {
+    const conversationList = conversations.value?.conversations ?? [];
+
+    return [
+      conversationList,
+      conversationList.filter((c) => !c.archived),
+      conversationList.filter((c) => c.archived),
+    ];
+  }, [conversations.value?.conversations]);
+
+  const selectedConversation = useMemo(
+    () => allConversations.find((c) => c.conversation.id === selectedConversationId),
+    [allConversations, selectedConversationId]
+  );
+
+  const categorizedActiveConversations = useConversationsByDate(
+    activeConversations,
+    getConversationHref
+  );
+
+  const categorizedArchivedConversations = useConversationsByDate(
+    archivedConversations,
+    getConversationHref
+  );
+
+  const [openSection, setOpenSection] = useState<ListSections>(ListSections.CONVERSATIONS);
 
   const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
     title: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationTitle', {
-      defaultMessage: 'Delete this conversation?',
+      defaultMessage: 'Delete conversation',
     }),
     children: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationContent', {
-      defaultMessage: 'This action cannot be undone.',
+      defaultMessage: 'This action is permanent and cannot be undone.',
     }),
     confirmButtonText: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteButtonText', {
-      defaultMessage: 'Delete conversation',
+      defaultMessage: 'Delete',
     }),
   });
 
-  const displayedConversations = [
-    ...(!selectedConversationId
-      ? [
-          {
-            id: '',
-            label: EMPTY_CONVERSATION_TITLE,
-            lastUpdated: '',
-            href: newConversationHref,
-          },
-        ]
-      : []),
-    ...(conversations.value?.conversations ?? []).map(({ conversation }) => ({
-      id: conversation.id,
-      label: conversation.title,
-      lastUpdated: conversation.last_updated,
-      href: getConversationHref ? getConversationHref(conversation.id) : undefined,
-    })),
-  ];
+  const onClickConversation = (
+    e: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLAnchorElement>,
+    conversationId?: string
+  ) => {
+    if (onConversationSelect) {
+      e.preventDefault();
+      onConversationSelect(conversationId);
+    }
+  };
+
+  const { deleteConversation } = useConversationContextMenu({
+    setIsUpdatingConversationList,
+    refreshConversations,
+  });
+
+  const renderCategorizedList = (
+    categorizedConversations: ReturnType<typeof useConversationsByDate>
+  ) => {
+    return Object.entries(categorizedConversations).map(([category, list]) =>
+      list.length ? (
+        <EuiFlexItem grow={false} key={category}>
+          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+            <EuiText className={titleClassName} size="s">
+              {DATE_CATEGORY_LABELS[category]}
+            </EuiText>
+          </EuiPanel>
+          <EuiListGroup flush={false} gutterSize="none">
+            {list.map((conversation) => (
+              <EuiListGroupItem
+                data-test-subj="observabilityAiAssistantConversationsLink"
+                key={conversation.id}
+                label={
+                  <ConversationListItemLabel
+                    labelText={conversation.label}
+                    isPublic={conversation.public}
+                  />
+                }
+                size="s"
+                isActive={conversation.id === selectedConversationId}
+                isDisabled={isLoading}
+                showToolTip
+                toolTipText={conversation.label}
+                href={conversation.href}
+                onClick={(event) => onClickConversation(event, conversation.id)}
+                extraAction={{
+                  iconType: 'trash',
+                  color: 'danger',
+                  'aria-label': i18n.translate(
+                    'xpack.aiAssistant.conversationList.deleteConversationIconLabel',
+                    { defaultMessage: 'Delete' }
+                  ),
+                  disabled: !isConversationOwnedByUser({
+                    conversationId: conversation.id,
+                    conversationUser: conversation.conversation.user,
+                    currentUser,
+                  }),
+                  onClick: () => {
+                    confirmDeleteCallback().then((confirmed) => {
+                      if (!confirmed) return;
+                      deleteConversation(conversation.id).then(() => {
+                        if (conversation.id === selectedConversationId) {
+                          updateDisplayedConversation();
+                        }
+                      });
+                    });
+                  },
+                }}
+              />
+            ))}
+          </EuiListGroup>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      ) : null
+    );
+  };
+
+  useEffect(() => {
+    if (selectedConversation?.archived) {
+      setOpenSection(ListSections.ARCHIVED);
+    } else {
+      setOpenSection(ListSections.CONVERSATIONS);
+    }
+  }, [selectedConversation]);
+
+  const loader = (
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+      <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="s" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
 
   return (
     <>
       <EuiPanel paddingSize="none" hasShadow={false} className={panelClassName}>
-        <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-          <EuiFlexItem grow className={overflowScrollClassName(scrollBarStyles)}>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-                  <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiSpacer size="s" />
-                      <EuiText className={titleClassName} size="s">
-                        <strong>
-                          {i18n.translate('xpack.aiAssistant.conversationList.title', {
-                            defaultMessage: 'Previously',
-                          })}
-                        </strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                    {isLoading ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner size="s" />
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName(euiTheme)}>
+          {isLoading && !allConversations.length ? (
+            <EuiFlexItem grow={true}>
+              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+                <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="s" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
 
-              {conversations.error ? (
-                <EuiFlexItem grow={false}>
-                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-                    <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="warning" color="danger" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s" color="danger">
-                          {i18n.translate('xpack.aiAssistant.conversationList.errorMessage', {
-                            defaultMessage: 'Failed to load',
-                          })}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                </EuiFlexItem>
-              ) : null}
+          {conversations.error ? (
+            <EuiFlexItem grow={false}>
+              <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="warning" color="danger" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="danger">
+                      {i18n.translate('xpack.aiAssistant.conversationList.errorMessage', {
+                        defaultMessage: 'Failed to load',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
 
-              {displayedConversations?.length ? (
-                <EuiFlexItem grow>
-                  <EuiListGroup flush={false} gutterSize="none">
-                    {displayedConversations?.map((conversation) => (
-                      <EuiListGroupItem
-                        data-test-subj="observabilityAiAssistantConversationsLink"
-                        key={conversation.id}
-                        label={conversation.label}
-                        size="s"
-                        isActive={conversation.id === selectedConversationId}
-                        isDisabled={isLoading}
-                        wrapText
-                        showToolTip
-                        href={conversation.href}
-                        onClick={(event) => {
-                          if (onConversationSelect) {
-                            event.preventDefault();
-                            onConversationSelect(conversation.id);
-                          }
-                        }}
-                        extraAction={
-                          conversation.id
-                            ? {
-                                iconType: 'trash',
-                                'aria-label': i18n.translate(
-                                  'xpack.aiAssistant.conversationList.deleteConversationIconLabel',
-                                  {
-                                    defaultMessage: 'Delete',
-                                  }
-                                ),
-                                onClick: () => {
-                                  confirmDeleteCallback().then((confirmed) => {
-                                    if (!confirmed) {
-                                      return;
-                                    }
+          {!isLoading && !conversations.error && !allConversations?.length ? (
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+              <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
+                  defaultMessage: 'No conversations',
+                })}
+              </EuiText>
+            </EuiPanel>
+          ) : null}
 
-                                    onConversationDeleteClick(conversation.id);
-                                  });
-                                },
-                              }
-                            : undefined
+          {!conversations.error && allConversations?.length ? (
+            <>
+              <EuiFlexItem grow>
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={openSection === ListSections.CONVERSATIONS}>
+                    <EuiCollapsibleNavGroup
+                      isCollapsible
+                      title={i18n.translate(
+                        'xpack.aiAssistant.conversationList.conversationsTitle',
+                        {
+                          defaultMessage: 'Conversations',
                         }
-                      />
-                    ))}
-                  </EuiListGroup>
-                </EuiFlexItem>
-              ) : null}
+                      )}
+                      titleSize="xs"
+                      iconType="list"
+                      iconSize="m"
+                      onToggle={(isOpen) =>
+                        setOpenSection(isOpen ? ListSections.CONVERSATIONS : ListSections.ARCHIVED)
+                      }
+                      forceState={openSection === ListSections.CONVERSATIONS ? 'open' : 'closed'}
+                    >
+                      <div className={scrollSectionClass(scrollBarStyles)}>
+                        {isLoading ? loader : null}
+                        <EuiFlexGroup direction="column" gutterSize="xs">
+                          {renderCategorizedList(categorizedActiveConversations)}
+                        </EuiFlexGroup>
+                      </div>
+                    </EuiCollapsibleNavGroup>
+                  </EuiFlexItem>
 
-              {!isLoading && !conversations.error && !displayedConversations?.length ? (
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-                  <EuiText color="subdued" size="s">
-                    {i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
-                      defaultMessage: 'No conversations',
-                    })}
-                  </EuiText>
-                </EuiPanel>
-              ) : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                  <EuiFlexItem grow={openSection === ListSections.ARCHIVED}>
+                    <EuiCollapsibleNavGroup
+                      isCollapsible
+                      title={i18n.translate('xpack.aiAssistant.conversationList.archivedTitle', {
+                        defaultMessage: 'Archived',
+                      })}
+                      titleSize="xs"
+                      iconType="folderOpen"
+                      iconSize="m"
+                      onToggle={(isOpen) =>
+                        setOpenSection(isOpen ? ListSections.ARCHIVED : ListSections.CONVERSATIONS)
+                      }
+                      forceState={openSection === ListSections.ARCHIVED ? 'open' : 'closed'}
+                      borders="horizontal"
+                    >
+                      <div className={scrollSectionClass(scrollBarStyles)}>
+                        {isLoading ? loader : null}
+                        <EuiFlexGroup direction="column" gutterSize="xs">
+                          {renderCategorizedList(categorizedArchivedConversations)}
+                        </EuiFlexGroup>
+                      </div>
+                    </EuiCollapsibleNavGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </>
+          ) : null}
 
           <EuiFlexItem grow={false}>
             <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
@@ -214,14 +331,7 @@ export function ConversationList({
                 <EuiFlexItem grow className={newChatButtonWrapperClassName}>
                   <NewChatButton
                     href={newConversationHref}
-                    onClick={(
-                      event: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLAnchorElement>
-                    ) => {
-                      if (onConversationSelect) {
-                        event.preventDefault();
-                        onConversationSelect(undefined);
-                      }
-                    }}
+                    onClick={(event) => onClickConversation(event)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

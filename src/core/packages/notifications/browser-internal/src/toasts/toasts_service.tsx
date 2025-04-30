@@ -9,53 +9,66 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import { NotificationCoordinator } from '@kbn/core-notifications-browser';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
-import { EventReporter } from './telemetry';
+import { ToastsTelemetry } from './telemetry';
 
 interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
   uiSettings: IUiSettingsClient;
 }
 
 interface StartDeps {
-  analytics: AnalyticsServiceStart;
-  i18n: I18nStart;
   overlays: OverlayStart;
-  theme: ThemeServiceStart;
-  userProfile: UserProfileService;
-  eventReporter: EventReporter;
+  rendering: RenderingService;
+  analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
+  notificationCoordinator: NotificationCoordinator;
 }
 
 export class ToastsService {
   private api?: ToastsApi;
   private targetDomElement?: HTMLElement;
+  private readonly telemetry = new ToastsTelemetry();
 
-  public setup({ uiSettings }: SetupDeps) {
+  public setup({ uiSettings, analytics }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
+    this.telemetry.setup({ analytics });
     return this.api!;
   }
 
-  public start({ eventReporter, overlays, targetDomElement, ...startDeps }: StartDeps) {
-    this.api!.start({ overlays, ...startDeps });
+  public start({
+    overlays,
+    targetDomElement,
+    rendering,
+    analytics,
+    notificationCoordinator,
+  }: StartDeps) {
+    this.api!.start({ overlays, rendering });
     this.targetDomElement = targetDomElement;
 
+    const reportEvent = this.telemetry.start({ analytics });
+
+    const coordinator = notificationCoordinator(ToastsService.name);
+
+    const toasts$ = coordinator.optInToCoordination(this.api!.get$(), ({ locked, controller }) => {
+      // new toasts will only be emitted when there are no locks, or when the current lock is owned by the toast service
+      return !locked || controller === ToastsService.name;
+    });
+
     render(
-      <KibanaRenderContextProvider {...startDeps}>
+      rendering.addContext(
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
-          toasts$={this.api!.get$()}
-          reportEvent={eventReporter}
+          toasts$={toasts$}
+          reportEvent={reportEvent}
         />
-      </KibanaRenderContextProvider>,
+      ),
       targetDomElement
     );
 
