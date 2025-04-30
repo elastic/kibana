@@ -650,7 +650,6 @@ export function getTextBasedDatasource({
           keptLayerIds: [id],
         };
       });
-      return [];
     },
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForVisualizeField,
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
@@ -660,7 +659,18 @@ export function getTextBasedDatasource({
       references1: SavedObjectReference[],
       persistableState2: TextBasedPersistedState,
       references2: SavedObjectReference[]
-    ) => isEqual(persistableState1, persistableState2),
+    ) =>
+      // undefined is not equal to missing
+      isEqual(
+        {
+          initialContext: undefined,
+          ...persistableState1,
+        },
+        {
+          initialContext: undefined,
+          ...persistableState2,
+        }
+      ),
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const indexPatterns: DataView[] = [];
       for (const { index } of Object.values(state.layers)) {
