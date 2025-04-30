@@ -106,11 +106,6 @@ export const getRuleExecutor = (basePath: IBasePath) =>
           ).activeRules
         : [];
 
-    const resultGroupSet = new Set<string>();
-    for (const result of results) {
-      resultGroupSet.add(result.instanceId);
-    }
-
     if (results.length > 0) {
       const alertLimit = alertsClient.getAlertLimitValue();
       let hasReachedLimit = false;
