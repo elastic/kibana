@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  InferenceCallToolRequest,
+  InferenceCallToolResponseResolved,
+  InferenceListToolsResponse,
+} from '../..';
 import { BoundChatCompleteAPI, ChatCompleteAPI } from '../chat_complete';
 import { InferenceConnector } from '../connectors';
 import { BoundOutputAPI, OutputAPI } from '../output';
@@ -36,6 +41,17 @@ export interface InferenceClient {
    * Non-inference connectors will throw an error.
    */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  /**
+   * `listMCPTools` returns the available tools from MCP connectors.
+   */
+  listMCPTools: () => Promise<InferenceListToolsResponse>;
+  /**
+   * `callMCPTool` executes a MCP tool by sending a request to the
+   * specified MCP Server.
+   * @param request
+   * @returns
+   */
+  callMCPTool: (request: InferenceCallToolRequest) => Promise<InferenceCallToolResponseResolved>;
 }
 
 /**
