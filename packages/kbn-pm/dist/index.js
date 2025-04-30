@@ -9273,6 +9273,7 @@ class CiStatsReporter {
           method: 'POST',
           url: path,
           baseURL: BASE_URL,
+          allowAbsoluteUrls: false,
           headers,
           data: body,
           params: query,
@@ -12667,26 +12668,6 @@ const toFiniteNumber = (value, defaultValue) => {
   return value != null && Number.isFinite(value = +value) ? value : defaultValue;
 }
 
-const ALPHA = 'abcdefghijklmnopqrstuvwxyz'
-
-const DIGIT = '0123456789';
-
-const ALPHABET = {
-  DIGIT,
-  ALPHA,
-  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
-}
-
-const generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
-  let str = '';
-  const {length} = alphabet;
-  while (size--) {
-    str += alphabet[Math.random() * length|0]
-  }
-
-  return str;
-}
-
 /**
  * If the thing is a FormData object, return true, otherwise return false.
  *
@@ -12814,8 +12795,6 @@ const asap = typeof queueMicrotask !== 'undefined' ?
   findKey,
   global: _global,
   isContextDefined,
-  ALPHABET,
-  generateString,
   isSpecCompliantForm,
   toJSONObject,
   isAsyncFn,
@@ -12954,6 +12933,15 @@ class Axios {
       }
     }
 
+    // Set config.allowAbsoluteUrls
+    if (config.allowAbsoluteUrls !== undefined) {
+      // do nothing
+    } else if (this.defaults.allowAbsoluteUrls !== undefined) {
+      config.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
+    } else {
+      config.allowAbsoluteUrls = true;
+    }
+
     _helpers_validator_js__WEBPACK_IMPORTED_MODULE_6__["default"].assertOptions(config, {
       baseUrl: validators.spelling('baseURL'),
       withXsrfToken: validators.spelling('withXSRFToken')
@@ -13049,7 +13037,7 @@ class Axios {
 
   getUri(config) {
     config = Object(_mergeConfig_js__WEBPACK_IMPORTED_MODULE_4__["default"])(this.defaults, config);
-    const fullPath = Object(_buildFullPath_js__WEBPACK_IMPORTED_MODULE_5__["default"])(config.baseURL, config.url);
+    const fullPath = Object(_buildFullPath_js__WEBPACK_IMPORTED_MODULE_5__["default"])(config.baseURL, config.url, config.allowAbsoluteUrls);
     return Object(_helpers_buildURL_js__WEBPACK_IMPORTED_MODULE_1__["default"])(fullPath, config.params, config.paramsSerializer);
   }
 }
@@ -15570,18 +15558,46 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _classes_URLSearchParams_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(215);
-/* harmony import */ var _classes_FormData_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(186);
+/* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(136);
+/* harmony import */ var crypto__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(crypto__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _classes_URLSearchParams_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(215);
+/* harmony import */ var _classes_FormData_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(186);
 
+
+
+
+const ALPHA = 'abcdefghijklmnopqrstuvwxyz'
+
+const DIGIT = '0123456789';
+
+const ALPHABET = {
+  DIGIT,
+  ALPHA,
+  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
+}
+
+const generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
+  let str = '';
+  const {length} = alphabet;
+  const randomValues = new Uint32Array(size);
+  crypto__WEBPACK_IMPORTED_MODULE_0___default.a.randomFillSync(randomValues);
+  for (let i = 0; i < size; i++) {
+    str += alphabet[randomValues[i] % length];
+  }
+
+  return str;
+}
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   isNode: true,
   classes: {
-    URLSearchParams: _classes_URLSearchParams_js__WEBPACK_IMPORTED_MODULE_0__["default"],
-    FormData: _classes_FormData_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+    URLSearchParams: _classes_URLSearchParams_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+    FormData: _classes_FormData_js__WEBPACK_IMPORTED_MODULE_2__["default"],
     Blob: typeof Blob !== 'undefined' && Blob || null
   },
+  ALPHABET,
+  generateString,
   protocols: [ 'http', 'https', 'file', 'data' ]
 });
 
@@ -16549,7 +16565,7 @@ const buildAddressEntry = (address, family) => resolveFamily(_utils_js__WEBPACK_
     }
 
     // Parse url
-    const fullPath = Object(_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_2__["default"])(config.baseURL, config.url);
+    const fullPath = Object(_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_2__["default"])(config.baseURL, config.url, config.allowAbsoluteUrls);
     const parsed = new URL(fullPath, _platform_index_js__WEBPACK_IMPORTED_MODULE_14__["default"].hasBrowserEnv ? _platform_index_js__WEBPACK_IMPORTED_MODULE_14__["default"].origin : undefined);
     const protocol = parsed.protocol || supportedProtocols[0];
 
@@ -17077,8 +17093,9 @@ __webpack_require__.r(__webpack_exports__);
  *
  * @returns {string} The combined full path
  */
-function buildFullPath(baseURL, requestedURL) {
-  if (baseURL && !Object(_helpers_isAbsoluteURL_js__WEBPACK_IMPORTED_MODULE_0__["default"])(requestedURL)) {
+function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
+  let isRelativeUrl = !Object(_helpers_isAbsoluteURL_js__WEBPACK_IMPORTED_MODULE_0__["default"])(requestedURL);
+  if (baseURL && isRelativeUrl || allowAbsoluteUrls == false) {
     return Object(_helpers_combineURLs_js__WEBPACK_IMPORTED_MODULE_1__["default"])(baseURL, requestedURL);
   }
   return requestedURL;
@@ -18793,7 +18810,7 @@ module.exports = require("zlib");
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VERSION", function() { return VERSION; });
-const VERSION = "1.7.9";
+const VERSION = "1.8.3";
 
 /***/ }),
 /* 239 */
@@ -19041,12 +19058,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var stream__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(stream__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(179);
 /* harmony import */ var _readBlob_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(243);
+/* harmony import */ var _platform_index_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(213);
 
 
 
 
 
-const BOUNDARY_ALPHABET = _utils_js__WEBPACK_IMPORTED_MODULE_2__["default"].ALPHABET.ALPHA_DIGIT + '-_';
+
+const BOUNDARY_ALPHABET = _platform_index_js__WEBPACK_IMPORTED_MODULE_4__["default"].ALPHABET.ALPHA_DIGIT + '-_';
 
 const textEncoder = typeof TextEncoder === 'function' ? new TextEncoder() : new util__WEBPACK_IMPORTED_MODULE_0___default.a.TextEncoder();
 
@@ -19106,7 +19125,7 @@ const formDataToStream = (form, headersHandler, options) => {
   const {
     tag = 'form-data-boundary',
     size = 25,
-    boundary = tag + '-' + _utils_js__WEBPACK_IMPORTED_MODULE_2__["default"].generateString(size, BOUNDARY_ALPHABET)
+    boundary = tag + '-' + _platform_index_js__WEBPACK_IMPORTED_MODULE_4__["default"].generateString(size, BOUNDARY_ALPHABET)
   } = options || {};
 
   if(!_utils_js__WEBPACK_IMPORTED_MODULE_2__["default"].isFormData(form)) {
@@ -19658,7 +19677,7 @@ __webpack_require__.r(__webpack_exports__);
 
   newConfig.headers = headers = _core_AxiosHeaders_js__WEBPACK_IMPORTED_MODULE_6__["default"].from(headers);
 
-  newConfig.url = Object(_buildURL_js__WEBPACK_IMPORTED_MODULE_7__["default"])(Object(_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_4__["default"])(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+  newConfig.url = Object(_buildURL_js__WEBPACK_IMPORTED_MODULE_7__["default"])(Object(_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_4__["default"])(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
 
   // HTTP basic authentication
   if (auth) {

@@ -65,9 +65,7 @@ export default function (ftrContext: FtrProviderContext) {
       await testSubjects.missingOrFail('licenseExpiredBanner');
     });
 
-    // FIXME: enterprise license is not available for tests
-    // https://github.com/elastic/kibana/issues/53575
-    it.skip('properly recognize an enterprise license', async () => {
+    it('properly recognize an enterprise license', async () => {
       await scenario.startEnterprise();
       await scenario.waitForPluginToDetectLicenseUpdate();
 

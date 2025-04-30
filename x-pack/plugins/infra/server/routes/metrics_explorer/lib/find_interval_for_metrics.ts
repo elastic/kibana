@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import LRU from 'lru-cache';
+import { LRUCache as LRU } from 'lru-cache';
 import { MetricsExplorerRequestBody } from '../../../../common/http_api';
 import { getDatasetForField } from './get_dataset_for_field';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
@@ -14,7 +14,7 @@ import { ESSearchClient } from '../../../lib/metrics/types';
 
 const cache = new LRU({
   max: 100,
-  maxAge: 15 * 60 * 1000,
+  ttl: 15 * 60 * 1000,
 });
 
 export const findIntervalForMetrics = async (

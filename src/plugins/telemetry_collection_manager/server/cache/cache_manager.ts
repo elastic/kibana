@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
 export interface CacheManagerConfig {
   // cache duration of objects in ms
@@ -14,12 +14,12 @@ export interface CacheManagerConfig {
 }
 
 export class CacheManager {
-  private readonly cache: LRUCache<string, unknown>;
+  private readonly cache: LRUCache<string, {}>;
 
   constructor({ cacheDurationMs }: CacheManagerConfig) {
     this.cache = new LRUCache({
       max: 1,
-      maxAge: cacheDurationMs,
+      ttl: cacheDurationMs,
     });
   }
 
@@ -27,7 +27,7 @@ export class CacheManager {
    * Cache an object by key
    */
   public setCache = (cacheKey: string, data: unknown): void => {
-    this.cache.set(cacheKey, data);
+    this.cache.set(cacheKey, data as {});
   };
 
   /**
@@ -41,6 +41,6 @@ export class CacheManager {
    * Removes all cached objects
    */
   public resetCache(): void {
-    this.cache.reset();
+    this.cache.clear();
   }
 }

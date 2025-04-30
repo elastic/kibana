@@ -22,6 +22,14 @@ if (!global.URL.hasOwnProperty('createObjectURL')) {
   Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
 }
 
+// https://github.com/jsdom/jsdom/issues/2524
+if (!Object.hasOwn(global, 'TextEncoder')) {
+  // eslint-disable-next-line import/no-unresolved
+  const customTextEncoding = require('@kayahr/text-encoding');
+  global.TextEncoder = customTextEncoding.TextEncoder;
+  global.TextDecoder = customTextEncoding.TextDecoder;
+}
+
 // Will be replaced with a better solution in EUI
 // https://github.com/elastic/eui/issues/3713
 global._isJest = true;
