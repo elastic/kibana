@@ -28,19 +28,20 @@ export const zodStringWithDurationValidation = z
 
 export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
   {
-    name: 'agent.limits.go_max_procs',
+    name: 'agent.limits.cpu',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsTitle', {
       defaultMessage: 'Limit CPU usage',
     }),
     description: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
-      defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
+      defaultMessage:
+        'Limits the max percentage of CPU that can be used by each agent in the policy.',
     }),
     learnMoreLink:
       'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-limit-cpu',
     api_field: {
-      name: 'agent_limits_go_max_procs',
+      name: 'agent_limits_cpu',
     },
-    schema: z.number().int().min(0),
+    schema: z.number().int().min(0) && z.number().int().max(100),
   },
   {
     name: 'agent.download.timeout',

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
-import type { AgentMetrics, AgentPolicy } from '../../../../../../common/types';
+import type { AgentMetrics, AgentPolicy, Agent } from '../../../../../../common/types';
 
 import { MetricNonAvailable } from '../components';
 
@@ -21,7 +21,16 @@ export function formatAgentCPU(metrics?: AgentMetrics, agentPolicy?: AgentPolicy
     <MetricNonAvailable agentPolicy={agentPolicy} />
   );
 }
-
+export function formatAgentCPULimit(agent: Agent, agentPolicy?: AgentPolicy) {
+  if (
+    agentPolicy?.revision !== agent.policy_revision ||
+    !agentPolicy?.advanced_settings?.agent_limits_cpu
+  ) {
+    return <MetricNonAvailable agentPolicy={agentPolicy} />;
+  } else {
+    return `${agentPolicy?.advanced_settings?.agent_limits_cpu + ' %'}`;
+  }
+}
 export function formatAgentMemory(metrics?: AgentMetrics, agentPolicy?: AgentPolicy) {
   return metrics?.memory_size_byte_avg ? (
     formatBytes(metrics.memory_size_byte_avg)

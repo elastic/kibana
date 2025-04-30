@@ -28,7 +28,11 @@ import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
 import { Tags } from '../../../components/tags';
-import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
+import {
+  formatAgentCPU,
+  formatAgentMemory,
+  formatAgentCPULimit,
+} from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
 import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 import { AgentPolicyOutputsSummary } from '../../../agent_list_page/components/agent_policy_outputs_summary';
@@ -44,7 +48,6 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
 }> = memo(({ agent, agentPolicy }) => {
   const latestAgentVersion = useAgentVersion();
-
   const outputRes = useGetInfoOutputsForPolicy(agentPolicy?.id);
   const outputs = outputRes?.data?.item;
 
@@ -73,7 +76,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         <span>
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.cpuTitle"
-                            defaultMessage="CPU"
+                            defaultMessage="CPU usage"
                           />
                           &nbsp;
                           <EuiIcon type="iInCircle" />
@@ -81,6 +84,28 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                       </EuiToolTip>
                     ),
                     description: formatAgentCPU(agent.metrics, agentPolicy),
+                  },
+                  {
+                    title: (
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            id="xpack.fleet.agentDetails.cpuTooltip"
+                            defaultMessage="The CPU limit set in the agent policy"
+                          />
+                        }
+                      >
+                        <span>
+                          <FormattedMessage
+                            id="xpack.fleet.agentDetails.cpuTitle"
+                            defaultMessage="CPU limit"
+                          />
+                          &nbsp;
+                          <EuiIcon type="iInCircle" />
+                        </span>
+                      </EuiToolTip>
+                    ),
+                    description: formatAgentCPULimit(agent, agentPolicy),
                   },
                   {
                     title: (
