@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { isTracingSuppressed } from '@opentelemetry/core';
 import { Span, context, propagation, trace } from '@opentelemetry/api';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
 import { InferenceSpanAttributes } from './with_inference_span';
@@ -13,7 +14,7 @@ import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
 export function createActiveInferenceSpan<T>(
   options: string | (InferenceSpanAttributes & { name: string }),
-  cb: (span: Span) => T
+  cb: (span?: Span) => T
 ) {
   const tracer = trace.getTracer('inference');
 
@@ -28,6 +29,10 @@ export function createActiveInferenceSpan<T>(
     apm.currentSpan?.ids['span.id'] ?? currentTransaction?.ids['transaction.id'];
 
   let parentContext = context.active();
+
+  if (isTracingSuppressed(parentContext)) {
+    return cb();
+  }
 
   let baggage = propagation.getBaggage(parentContext);
 

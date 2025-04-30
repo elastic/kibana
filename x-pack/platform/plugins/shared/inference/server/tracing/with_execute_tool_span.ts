@@ -33,6 +33,10 @@ export function withExecuteToolSpan<T>(
       'input.value': input,
     },
     (span) => {
+      if (!span) {
+        return cb();
+      }
+
       const res = cb(span);
 
       if (isPromise(res)) {

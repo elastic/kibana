@@ -87,9 +87,11 @@ export async function ensureLangfuse({ log, signal }: { log: ToolingLog; signal:
       );
 
       const lines = [
-        `xpack.inference.tracing.langfuse.base_url: "${env.LANGFUSE_BASE_URL}"`,
-        `xpack.inference.tracing.langfuse.public_key: "${env.LANGFUSE_INIT_PROJECT_PUBLIC_KEY}"`,
-        `xpack.inference.tracing.langfuse.secret_key: "${env.LANGFUSE_INIT_PROJECT_SECRET_KEY}"`,
+        `telemetry.enabled: true`,
+        `telemetry.tracing.enabled: true`,
+        `xpack.inference.tracing.exporter.langfuse.base_url: "${env.LANGFUSE_BASE_URL}"`,
+        `xpack.inference.tracing.exporter.langfuse.public_key: "${env.LANGFUSE_INIT_PROJECT_PUBLIC_KEY}"`,
+        `xpack.inference.tracing.exporter.langfuse.secret_key: "${env.LANGFUSE_INIT_PROJECT_SECRET_KEY}"`,
       ];
 
       log.write('');

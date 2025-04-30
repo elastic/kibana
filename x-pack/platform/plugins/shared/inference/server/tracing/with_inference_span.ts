@@ -22,10 +22,14 @@ export type InferenceSpanAttributes = GenAISemConvAttributes;
  */
 export function withInferenceSpan<T>(
   options: string | ({ name: string } & InferenceSpanAttributes),
-  cb: (span: Span) => T
+  cb: (span?: Span) => T
 ): T {
   const parentContext = context.active();
   return createActiveInferenceSpan(options, (span) => {
+    if (!span) {
+      return cb();
+    }
+
     try {
       const res = cb(span);
       if (isObservable(res)) {

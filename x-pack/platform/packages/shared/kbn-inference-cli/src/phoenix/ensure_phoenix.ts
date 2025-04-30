@@ -96,10 +96,12 @@ export async function ensurePhoenix({ log, signal }: { log: ToolingLog; signal: 
       );
 
       const lines = [
-        `xpack.inference.tracing.phoenix.base_url: "http://${env.PHOENIX_HOST}:${env.PHOENIX_GRPC_PORT}"`,
-        `xpack.inference.tracing.phoenix.public_url: "http://${env.PHOENIX_HOST}:${env.PHOENIX_PORT}"`,
+        `telemetry.enabled: true`,
+        `telemetry.tracing.enabled: true`,
+        `xpack.inference.tracing.exporter.phoenix.base_url: "http://${env.PHOENIX_HOST}:${env.PHOENIX_GRPC_PORT}"`,
+        `xpack.inference.tracing.exporter.phoenix.public_url: "http://${env.PHOENIX_HOST}:${env.PHOENIX_PORT}"`,
         ...(env.PHOENIX_SECRET
-          ? [`xpack.inference.tracing.phoenix.secret: "${env.PHOENIX_SECRET}"`]
+          ? [`xpack.inference.tracing.exporter.phoenix.secret: "${env.PHOENIX_SECRET}"`]
           : []),
       ];
 
