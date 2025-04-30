@@ -6,7 +6,38 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-public.STREAMS_API_PRIVILEGES",
+        "type": "Object",
+        "tags": [],
+        "label": "STREAMS_API_PRIVILEGES",
+        "description": [],
+        "signature": [
+          "{ readonly read: \"read_stream\"; readonly manage: \"manage_stream\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-public.STREAMS_UI_PRIVILEGES",
+        "type": "Object",
+        "tags": [],
+        "label": "STREAMS_UI_PRIVILEGES",
+        "description": [],
+        "signature": [
+          "{ readonly manage: \"manage\"; readonly show: \"show\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "streams",
       "id": "def-public.StreamsPluginSetup",
@@ -17,25 +48,7 @@
       "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "streams",
-          "id": "def-public.StreamsPluginSetup.status$",
-          "type": "Object",
-          "tags": [],
-          "label": "status$",
-          "description": [],
-          "signature": [
-            "Observable",
-            "<",
-            "StreamsStatus",
-            ">"
-          ],
-          "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
+      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
