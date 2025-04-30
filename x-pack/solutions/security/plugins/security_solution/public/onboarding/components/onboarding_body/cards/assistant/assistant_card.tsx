@@ -28,8 +28,9 @@ import { OnboardingCardContentPanel } from '../common/card_content_panel';
 import { ConnectorCards } from '../common/connectors/connector_cards';
 import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
-import type { AIConnector, AssistantCardMetadata } from '../common/connectors/types';
+import type { AIConnector } from '../common/connectors/types';
 import * as i18n from './translations';
+import type { AssistantCardMetadata } from './types';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,

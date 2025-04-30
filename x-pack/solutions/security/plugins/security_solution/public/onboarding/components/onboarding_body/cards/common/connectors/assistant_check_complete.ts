@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { loadAiConnectors } from './ai_connectors';
 import { getConnectorsAuthz } from './authz';
-import type { AssistantCardMetadata } from './types';
+import type { AssistantCardMetadata } from '../../assistant/types';
 
 const completeBadgeText = (count: number) =>
   i18n.translate('xpack.securitySolution.onboarding.assistantCard.badge.completeText', {

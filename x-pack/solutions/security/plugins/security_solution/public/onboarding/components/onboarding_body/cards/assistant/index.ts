@@ -11,7 +11,7 @@ import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { ASSISTANT_CARD_TITLE } from './translations';
 import { checkAssistantCardComplete } from '../common/connectors/assistant_check_complete';
-import type { AssistantCardMetadata } from '../common/connectors/types';
+import type { AssistantCardMetadata } from './types';
 
 export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = {
   id: OnboardingCardId.assistant,
