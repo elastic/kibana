@@ -58,13 +58,6 @@ export const createLensEmbeddableFactory = (
      */
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
-      const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState.rawState
-      );
-      // if it is provided, start the dynamic actions manager
-      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
       const initialRuntimeState = await deserializeState(
         services,
@@ -138,8 +131,6 @@ export const createLensEmbeddableFactory = (
        */
       function getLatestState(): LensRuntimeState {
         return {
-          ...titleManager.getLatestState(),
-          ...(dynamicActionsManager?.getLatestState() ?? {}),
           ...actionsConfig.getLatestState(),
           ...dashboardConfig.getLatestState(),
           ...searchContextConfig.getLatestState(),
@@ -153,26 +144,23 @@ export const createLensEmbeddableFactory = (
         serializeState: integrationsConfig.api.serializeState,
         anyStateChange$: merge(
           actionsConfig.anyStateChange$,
-          dynamicActionsManager?.anyStateChange$ ?? [],
           dashboardConfig.anyStateChange$,
           stateConfig.anyStateChange$,
           searchContextConfig.anyStateChange$
         ),
         getComparators: () => {
           return {
-            ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+            ...stateConfig.getComparators(),
             ...actionsConfig.getComparators(),
             ...dashboardServicesComparators,
             ...searchContextComparators,
-            ...stateConfig.getComparators(),
             isNewPanel: 'skip',
             references: 'skip',
           };
         },
         onReset: async (lastSaved) => {
-          actionsConfig.reinitializeState(lastSaved);
+          actionsConfig.reinitializeState(lastSaved?.rawState);
           dashboardConfig.reinitializeState(lastSaved?.rawState);
-          dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
           searchContextConfig.reinitializeState(lastSaved?.rawState);
           if (!lastSaved) return;
           const lastSavedRuntimeState = await deserializeState(
@@ -194,7 +182,6 @@ export const createLensEmbeddableFactory = (
         // stateConfig one who owns the inline editing
         {
           ...unsavedChangesApi,
-          ...(dynamicActionsManager?.api ?? {}),
           ...editConfig.api,
           ...inspectorConfig.api,
           ...searchContextConfig.api,
@@ -221,8 +208,6 @@ export const createLensEmbeddableFactory = (
         expressionConfig.cleanup();
         actionsConfig.cleanup();
         searchContextConfig.cleanup();
-        // if it was started, stop the dynamic actions manager on unmount
-        maybeStopDynamicActions?.stopDynamicActions();
       };
 
       return {

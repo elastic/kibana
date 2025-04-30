@@ -254,16 +254,16 @@ export function initializeActionApi(
   cleanup: () => void;
   reinitializeState: (lastSaved?: LensSerializedState) => void;
 } {
-  const dynamicActionsManger = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+  const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
     uuid,
     () => title$.getValue(),
     initialState
   );
-  const maybeStopDynamicActions = dynamicActionsManger?.startDynamicActions();
+  const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
   return {
     api: {
-      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsManger?.api ?? {}),
+      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsManager?.api ?? {}),
       ...createViewUnderlyingDataApis(
         getLatestState,
         internalApi,
@@ -272,18 +272,18 @@ export function initializeActionApi(
         services
       ),
     },
-    anyStateChange$: dynamicActionsManger?.anyStateChange$ ?? new BehaviorSubject(undefined),
+    anyStateChange$: dynamicActionsManager?.anyStateChange$ ?? new BehaviorSubject(undefined),
     getComparators: () => ({
-      ...(dynamicActionsManger?.comparators ?? {
+      ...(dynamicActionsManager?.comparators ?? {
         enhancements: 'skip',
       }),
     }),
-    getLatestState: () => dynamicActionsManger?.getLatestState ?? {},
+    getLatestState: () => dynamicActionsManager?.getLatestState() ?? {},
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
     },
     reinitializeState: (lastSaved?: LensSerializedState) => {
-      dynamicActionsManger?.reinitializeState(lastSaved ?? {});
+      dynamicActionsManager?.reinitializeState(lastSaved ?? {});
     },
   };
 }
