@@ -14,11 +14,7 @@ import { AgentExecutorParams, AssistantDataClients } from '../../executors/types
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { createOpenAIToolsAgent, createToolCallingAgent } from 'langchain/agents';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
@@ -237,7 +233,6 @@ describe('callAssistantGraph', () => {
       await callAssistantGraph(params);
 
       expect(createOpenAIToolsAgent).toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
       expect(createToolCallingAgent).not.toHaveBeenCalled();
     });
 
@@ -252,7 +247,6 @@ describe('callAssistantGraph', () => {
       await callAssistantGraph(params);
 
       expect(createOpenAIToolsAgent).toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
       expect(createToolCallingAgent).not.toHaveBeenCalled();
     });
 
@@ -262,7 +256,6 @@ describe('callAssistantGraph', () => {
 
       expect(createToolCallingAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
     });
 
     it('creates ToolCallingAgent for gemini llmType', async () => {
@@ -277,16 +270,14 @@ describe('callAssistantGraph', () => {
 
       expect(createToolCallingAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
     });
 
-    it('creates StructuredChatAgent for oss model', async () => {
+    it('creates ToolCallingAgent for oss model', async () => {
       const params = { ...defaultParams, llmType: 'openai', isOssModel: true };
       await callAssistantGraph(params);
 
-      expect(createStructuredChatAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
-      expect(createToolCallingAgent).not.toHaveBeenCalled();
+      expect(createToolCallingAgent).toHaveBeenCalled();
     });
     it('does not calls resolveProviderAndModel when llmType === openai', async () => {
       const params = { ...defaultParams, llmType: 'openai' };

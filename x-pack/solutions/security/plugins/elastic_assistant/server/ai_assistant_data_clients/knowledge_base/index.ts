@@ -25,11 +25,13 @@ import {
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { StructuredTool } from '@langchain/core/tools';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AnalyticsServiceSetup,
   AuditLogger,
   ElasticsearchClient,
   IScopedClusterClient,
+  Logger,
 } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
@@ -72,6 +74,7 @@ import {
 } from './field_maps_configuration';
 import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
+import { findDocuments } from '../find';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -162,179 +165,23 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
-  public getInferenceEndpointId = async () => {
-    // Don't use default enpdpoint for pt_tiny_elser
-    if (this.options.modelIdOverride) {
-      return ASSISTANT_ELSER_INFERENCE_ID;
-    }
+  public isInferenceEndpointExists = async (): Promise<boolean> =>
+    isInferenceEndpointExists({
+      esClient: await this.options.elasticsearchClientPromise,
+      logger: this.options.logger,
+      getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+    });
+
+  public createInferenceEndpoint = async (): Promise<void> => {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    try {
-      const elasticsearchInference = await esClient.inference.get({
-        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-        task_type: 'sparse_embedding',
-      });
-
-      if (elasticsearchInference) {
-        return ASSISTANT_ELSER_INFERENCE_ID;
-      }
-    } catch (_) {
-      /* empty */
-    }
-
-    // Fallback to the default inference endpoint
-    return ELASTICSEARCH_ELSER_INFERENCE_ID;
-  };
-
-  /**
-   * Checks if the inference endpoint is deployed and allocated in Elasticsearch
-   *
-   * @returns Promise<boolean> indicating whether the model is deployed
-   */
-  public isInferenceEndpointExists = async (inferenceEndpointId?: string): Promise<boolean> => {
-    const elserId = await this.options.getElserId();
-    const inferenceId = inferenceEndpointId || (await this.getInferenceEndpointId());
-
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
-
-      const inferenceExists = !!(await esClient.inference.get({
-        inference_id: inferenceId,
-        task_type: 'sparse_embedding',
-      }));
-
-      if (!inferenceExists) {
-        return false;
-      }
-
-      let getResponse;
-      try {
-        getResponse = await this.options.getTrainedModelsProvider().getTrainedModelsStats({
-          model_id: elserId,
-        });
-      } catch (e) {
-        return false;
-      }
-
-      // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
-      const isReadyESS = (stats: MlTrainedModelStats) =>
-        stats.deployment_stats?.state === 'started' &&
-        stats.deployment_stats?.allocation_status.state === 'fully_allocated';
-
-      const isReadyServerless = (stats: MlTrainedModelStats) =>
-        (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
-          (node) => node.routing_state.routing_state === 'started'
-        );
-
-      return !!getResponse.trained_model_stats
-        .filter((stats) => stats.deployment_stats?.deployment_id === inferenceId)
-        ?.some((stats) => isReadyESS(stats) || isReadyServerless(stats));
-    } catch (error) {
-      this.options.logger.debug(
-        `Error checking if Inference endpoint ${inferenceId} exists: ${error}`
-      );
-      return false;
-    }
-  };
-
-  private dryRunTrainedModelDeployment = async () => {
-    const elserId = await this.options.getElserId();
-    const esClient = await this.options.elasticsearchClientPromise;
-
-    try {
-      // As there is no better way to check if the model is deployed, we try to start the model
-      // deployment and throw an error if it fails
-      const dryRunId = await esClient.ml.startTrainedModelDeployment({
-        model_id: elserId,
-        wait_for: 'fully_allocated',
-      });
-      this.options.logger.debug(`Dry run for ELSER model '${elserId}' successfully deployed!`);
-
-      await this.options.getTrainedModelsProvider().stopTrainedModelDeployment({
-        model_id: elserId,
-        deployment_id: dryRunId.assignment.task_parameters.deployment_id,
-      });
-      this.options.logger.debug(`Dry run for ELSER model '${elserId}' successfully stopped!`);
-    } catch (e) {
-      this.options.logger.error(`Dry run error starting trained model deployment: ${e.message}`);
-      throw new Error(`${e.message}`);
-    }
-  };
-
-  private deleteInferenceEndpoint = async () => {
-    const elserId = await this.options.getElserId();
-    const esClient = await this.options.elasticsearchClientPromise;
-
-    try {
-      await esClient.inference.delete({
-        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-        // it's being used in the mapping so we need to force delete
-        force: true,
-      });
-      this.options.logger.debug(
-        `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
-      );
-    } catch (error) {
-      this.options.logger.error(
-        `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
-      );
-    }
-  };
-
-  public createInferenceEndpoint = async () => {
-    const elserId = await this.options.getElserId();
-    this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
-    const esClient = await this.options.elasticsearchClientPromise;
-    const inferenceId = await this.getInferenceEndpointId();
-
-    if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
-      await this.deleteInferenceEndpoint();
-
-      await pRetry(async () => this.dryRunTrainedModelDeployment(), {
-        minTimeout: 10000,
-        maxTimeout: 10000,
-        retries: 1,
-      });
-
-      try {
-        await esClient.inference.put({
-          task_type: 'sparse_embedding',
-          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-          inference_config: {
-            service: 'elasticsearch',
-            service_settings: {
-              adaptive_allocations: {
-                enabled: true,
-                min_number_of_allocations: 0,
-                max_number_of_allocations: 8,
-              },
-              num_threads: 1,
-              model_id: elserId,
-            },
-            task_settings: {},
-          },
-        });
-
-        // await for the model to be deployed
-        const inferenceEndpointExists = await this.isInferenceEndpointExists(
-          ASSISTANT_ELSER_INFERENCE_ID
-        );
-        if (!inferenceEndpointExists) {
-          throw new Error(
-            `Inference endpoint for ELSER model '${elserId}' was not deployed successfully`
-          );
-        }
-      } catch (error) {
-        this.options.logger.error(
-          `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
-        );
-        throw new Error(
-          `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
-        );
-      }
-    } else {
-      await this.dryRunTrainedModelDeployment();
-    }
+    await createInferenceEndpoint({
+      elserId: await this.options.getElserId(),
+      esClient,
+      logger: this.options.logger,
+      inferenceId: await getInferenceEndpointId({ esClient }),
+      getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+    });
   };
 
   /**
@@ -354,6 +201,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }: {
     ignoreSecurityLabs?: boolean;
   }): Promise<void> => {
+    const elserId = await this.options.getElserId();
     const esClient = await this.options.elasticsearchClientPromise;
 
     if (this.options.getIsKBSetupInProgress(this.spaceId)) {
@@ -373,7 +221,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       this.options.logger.debug('Starting Knowledge Base setup...');
       this.options.setIsKBSetupInProgress(this.spaceId, true);
-      const elserId = await this.options.getElserId();
 
       // Delete legacy ESQL knowledge base docs if they exist, and silence the error if they do not
       try {
@@ -416,9 +263,25 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
       }
 
-      const inferenceExists = await this.isInferenceEndpointExists();
+      const inferenceId = await getInferenceEndpointId({
+        esClient,
+      });
+
+      const inferenceExists = await isInferenceEndpointExists({
+        esClient,
+        inferenceEndpointId: inferenceId,
+        getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+        logger: this.options.logger,
+      });
+
       if (!inferenceExists) {
-        await this.createInferenceEndpoint();
+        await createInferenceEndpoint({
+          elserId,
+          esClient,
+          logger: this.options.logger,
+          inferenceId,
+          getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+        });
 
         this.options.logger.debug(
           `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
@@ -459,21 +322,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           });
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
-        }
-      }
-
-      const inferenceId = await this.getInferenceEndpointId();
-
-      if (
-        inferenceId !== ASSISTANT_ELSER_INFERENCE_ID &&
-        (await this.isInferenceEndpointExists(ASSISTANT_ELSER_INFERENCE_ID))
-      ) {
-        try {
-          await this.deleteInferenceEndpoint();
-        } catch (error) {
-          this.options.logger.debug(
-            `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID}`
-          );
         }
       }
 
@@ -982,3 +830,335 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     return [];
   };
 }
+
+export const getInferenceEndpointId = async ({ esClient }: { esClient: ElasticsearchClient }) => {
+  try {
+    const elasticsearchInference = await esClient.inference.get({
+      inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+      task_type: 'sparse_embedding',
+    });
+
+    if (elasticsearchInference) {
+      return ASSISTANT_ELSER_INFERENCE_ID;
+    }
+  } catch (_) {
+    /* empty */
+  }
+
+  // Fallback to the default inference endpoint
+  return ELASTICSEARCH_ELSER_INFERENCE_ID;
+};
+
+/**
+ * Checks if the inference endpoint is deployed and allocated in Elasticsearch
+ *
+ * @returns Promise<boolean> indicating whether the model is deployed
+ */
+export const isInferenceEndpointExists = async ({
+  esClient,
+  inferenceEndpointId,
+  getTrainedModelsProvider,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+  inferenceEndpointId?: string;
+  logger: Logger;
+}): Promise<boolean> => {
+  const inferenceId = inferenceEndpointId || (await getInferenceEndpointId({ esClient }));
+
+  try {
+    const response = await esClient.inference.get({
+      inference_id: inferenceId,
+      task_type: 'sparse_embedding',
+    });
+
+    if (!response.endpoints?.[0]?.service_settings?.model_id) {
+      return false;
+    }
+
+    let getResponse;
+    try {
+      getResponse = await getTrainedModelsProvider().getTrainedModelsStats({
+        model_id: response.endpoints?.[0]?.service_settings?.model_id,
+      });
+    } catch (e) {
+      return false;
+    }
+
+    // For standardized way of checking deployment status see: https://github.com/elastic/elasticsearch/issues/106986
+    const isReadyESS = (stats: MlTrainedModelStats) =>
+      stats.deployment_stats?.state === 'started' &&
+      stats.deployment_stats?.allocation_status?.state === 'fully_allocated';
+
+    const isReadyServerless = (stats: MlTrainedModelStats) =>
+      (stats.deployment_stats?.nodes as unknown as MlTrainedModelDeploymentNodesStats[])?.some(
+        (node) => node.routing_state.routing_state === 'started'
+      );
+
+    return !!getResponse.trained_model_stats
+      .filter((stats) => stats.deployment_stats?.deployment_id === inferenceId)
+      ?.some((stats) => isReadyESS(stats) || isReadyServerless(stats));
+  } catch (error) {
+    logger.debug(`Error checking if Inference endpoint ${inferenceId} exists: ${error}`);
+    return false;
+  }
+};
+
+export const hasDedicatedInferenceEndpointIndexEntries = async ({
+  esClient,
+  index,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  logger: Logger;
+}): Promise<boolean> => {
+  try {
+    // Track if we've already created an inference endpoint to ensure we only create it once
+    let inferenceEndpointUsed = false;
+
+    // Pull knowledge base entries of type "index"
+    const results = await findDocuments<EsIndexEntry>({
+      perPage: 100,
+      page: 1,
+      filter: 'type:index',
+      esClient,
+      logger,
+      index,
+    });
+
+    if (!results || !results.data.hits.hits.length) {
+      logger.debug('No index type knowledge base entries found');
+      return false;
+    }
+
+    const indexEntries = transformESSearchToKnowledgeBaseEntry(results.data) as IndexEntry[];
+
+    for (const entry of indexEntries) {
+      // Skip if we've already created the inference endpoint
+      if (inferenceEndpointUsed) {
+        break;
+      }
+
+      try {
+        // Get the specific field mapping directly from Elasticsearch
+        const fieldMappingResponse = await esClient.indices.getFieldMapping({
+          index: entry.index,
+          fields: entry.field,
+          include_defaults: true,
+        });
+
+        // Check each index for the field with inference_id
+        for (const indexName of Object.keys(fieldMappingResponse)) {
+          // Skip if we've already created the inference endpoint
+          if (inferenceEndpointUsed) {
+            break;
+          }
+
+          const mappings = fieldMappingResponse[indexName].mappings || {};
+
+          // Check if the field exists and has mapping information
+          if (mappings[entry.field] && mappings[entry.field].mapping) {
+            // The field mapping structure is nested under the field name and then 'mapping'
+            const fieldMapping = mappings[entry.field].mapping[entry.field];
+
+            // Check if it's a semantic_text field with the specific inference_id
+            if (
+              fieldMapping &&
+              fieldMapping.type === 'semantic_text' &&
+              fieldMapping.inference_id === ASSISTANT_ELSER_INFERENCE_ID
+            ) {
+              inferenceEndpointUsed = true;
+
+              // No need to check other fields or indices
+              break;
+            }
+          }
+        }
+      } catch (error) {
+        logger.error(`Error checking field mappings for index ${entry.index}: ${error.message}`);
+      }
+    }
+
+    return inferenceEndpointUsed;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const dryRunTrainedModelDeployment = async ({
+  esClient,
+  elserId,
+  logger,
+  getTrainedModelsProvider,
+}: {
+  esClient: ElasticsearchClient;
+  elserId: string;
+  logger: Logger;
+  getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+}) => {
+  try {
+    const deploymentId = uuidv4();
+    // As there is no better way to check if the model is deployed, we try to start the model
+    // deployment and throw an error if it fails
+    const dryRunId = await esClient.ml.startTrainedModelDeployment({
+      model_id: elserId,
+      deployment_id: deploymentId,
+      wait_for: 'fully_allocated',
+    });
+    logger.debug(`Dry run for ELSER model '${elserId}' successfully deployed!`);
+
+    await getTrainedModelsProvider().stopTrainedModelDeployment({
+      model_id: elserId,
+      deployment_id: dryRunId.assignment.task_parameters.deployment_id,
+    });
+    logger.debug(`Dry run for ELSER model '${elserId}' successfully stopped!`);
+  } catch (e) {
+    logger.error(`Dry run error starting trained model deployment: ${e.message}`);
+    throw new Error(`${e.message}`);
+  }
+};
+
+export const deleteInferenceEndpoint = async ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}) => {
+  try {
+    await esClient.inference.delete({
+      inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+      // it's being used in the mapping so we need to force delete
+      force: true,
+    });
+    logger.debug(
+      `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model`
+    );
+  } catch (error) {
+    logger.debug(
+      `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model:\n${error}`
+    );
+  }
+};
+
+export const createInferenceEndpoint = async ({
+  elserId,
+  logger,
+  esClient,
+  inferenceId,
+  getTrainedModelsProvider,
+}: {
+  elserId: string;
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  inferenceId: string;
+  getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+}) => {
+  if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
+    await deleteInferenceEndpoint({ esClient, logger });
+
+    await pRetry(
+      async () =>
+        dryRunTrainedModelDeployment({ elserId, esClient, logger, getTrainedModelsProvider }),
+      {
+        minTimeout: 10000,
+        maxTimeout: 10000,
+        retries: 1,
+      }
+    );
+
+    try {
+      await esClient.inference.put({
+        task_type: 'sparse_embedding',
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        inference_config: {
+          service: 'elasticsearch',
+          service_settings: {
+            adaptive_allocations: {
+              enabled: true,
+              min_number_of_allocations: 0,
+              max_number_of_allocations: 8,
+            },
+            num_threads: 1,
+            model_id: elserId,
+          },
+          task_settings: {},
+        },
+      });
+
+      // await for the model to be deployed
+      const inferenceEndpointExists = await isInferenceEndpointExists({
+        esClient,
+        inferenceEndpointId: ASSISTANT_ELSER_INFERENCE_ID,
+        getTrainedModelsProvider,
+        logger,
+      });
+      if (!inferenceEndpointExists) {
+        throw new Error(
+          `Inference endpoint for ELSER model '${elserId}' was not deployed successfully`
+        );
+      }
+    } catch (error) {
+      logger.error(`Error creating inference endpoint for ELSER model '${elserId}':\n${error}`);
+      throw new Error(`Error creating inference endpoint for ELSER model '${elserId}':\n${error}`);
+    }
+  } else {
+    await dryRunTrainedModelDeployment({ elserId, esClient, logger, getTrainedModelsProvider });
+  }
+};
+
+export const ensureDedicatedInferenceEndpoint = async ({
+  elserId,
+  esClient,
+  logger,
+  index,
+  getTrainedModelsProvider,
+}: {
+  elserId: string;
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  index: string;
+  getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+}): Promise<void> => {
+  try {
+    const isEndpointUsed = await hasDedicatedInferenceEndpointIndexEntries({
+      esClient,
+      index,
+      logger,
+    });
+
+    const inferenceEndpointExists = await isInferenceEndpointExists({
+      esClient,
+      inferenceEndpointId: ASSISTANT_ELSER_INFERENCE_ID,
+      getTrainedModelsProvider,
+      logger,
+    });
+
+    if (!isEndpointUsed) {
+      if (inferenceEndpointExists) {
+        await deleteInferenceEndpoint({
+          esClient,
+          logger,
+        });
+      }
+      return;
+    }
+
+    if (inferenceEndpointExists) {
+      logger.debug(`Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} already exists.`);
+      return;
+    }
+
+    await createInferenceEndpoint({
+      elserId,
+      esClient,
+      logger,
+      inferenceId: ASSISTANT_ELSER_INFERENCE_ID,
+      getTrainedModelsProvider,
+    });
+  } catch (error) {
+    logger.error(`Error in ensureDedicatedInferenceEndpoint: ${error.message}`);
+  }
+};
