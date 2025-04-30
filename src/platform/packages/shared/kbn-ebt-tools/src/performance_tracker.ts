@@ -13,7 +13,7 @@ import { groupBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
 
 /**
- * PERFORMANCE_TRACKER_TYPES defines top-level categories to be use as
+ * PERFORMANCE_TRACKER_TYPES defines top-level categories to be used as
  * the mark name. They are used to group marks and measures by type.
  */
 export const PERFORMANCE_TRACKER_TYPES = {
@@ -58,7 +58,7 @@ export type PerformanceTrackerMeasures =
  */
 interface PerformanceTrackerOptions {
   /**
-   * High-level type of the performance tracker, for example "Lens".
+   * High-level type of the performance tracker, for example "Panel".
    */
   type: PerformanceTrackerTypes;
   /**
@@ -74,7 +74,7 @@ interface PerformanceTrackerOptions {
 
 /**
  * Creates a performance tracker to mark and measure performance events.
- * @param options.type - High-level type of the performance tracker, for example "Lens".
+ * @param options.type - High-level type of the performance tracker, for example "Panel".
  * @param options.instance - Instance of the performance tracker type, for example "xyVis".
  * @returns A performance tracker object with a mark method.
  */
@@ -100,7 +100,7 @@ export const createPerformanceTracker = ({ type, instance, logger }: Performance
 
 /**
  * Get all performance trackers by type.
- * @param type - High-level type of the performance tracker, for example "Lens".
+ * @param type - High-level type of the performance tracker, for example "Panel".
  */
 export const getPerformanceTrackersByType = (type: PerformanceTrackerTypes) => {
   try {
@@ -115,7 +115,7 @@ export const getPerformanceTrackersByType = (type: PerformanceTrackerTypes) => {
 
 /**
  * Get all performance trackers grouped by id.
- * @param type - High-level type of the performance tracker, for example "Lens".
+ * @param type - High-level type of the performance tracker, for example "Panel".
  * @returns A map of performance trackers grouped by id.
  */
 export const getPerformanceTrackersGroupedById = (type: PerformanceTrackerTypes) => {
@@ -129,7 +129,7 @@ export const getPerformanceTrackersGroupedById = (type: PerformanceTrackerTypes)
 
 /**
  * Clear all performance trackers by type.
- * @param type - High-level type of the performance tracker, for example "Lens".
+ * @param type - High-level type of the performance tracker, for example "Panel".
  */
 export const clearPerformanceTrackersByType = (type: PerformanceTrackerTypes) => {
   try {
