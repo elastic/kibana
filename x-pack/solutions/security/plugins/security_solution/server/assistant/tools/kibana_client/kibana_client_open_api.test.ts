@@ -110,7 +110,7 @@ describe('kibana_client_open_api', () => {
     jest.clearAllMocks();
   });
 
-  it.only('can initialize KibanaClientTool default', async () => {
+  it('can initialize KibanaClientTool default', async () => {
     const kibanaClientTool = await KibanaClientTool.create();
 
     await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();

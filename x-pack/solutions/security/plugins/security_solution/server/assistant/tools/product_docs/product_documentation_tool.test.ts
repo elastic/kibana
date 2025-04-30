@@ -45,6 +45,7 @@ describe('ProductDocumentationTool', () => {
     connectorId,
     isEnabledKnowledgeBase: true,
     contentReferencesStore,
+    llmType: undefined,
   };
   beforeEach(() => {
     jest.clearAllMocks();

@@ -51,6 +51,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
     chain,
     logger,
     contentReferencesStore,
+    llmType: undefined,
   };
 
   const anonymizationFields = [

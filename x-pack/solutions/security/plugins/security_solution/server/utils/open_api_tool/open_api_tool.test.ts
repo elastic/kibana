@@ -136,6 +136,7 @@ describe('OpenApiTool', () => {
       llmType: 'openai',
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rootTool = (await openApiTool.getTool({})) as any;
 
     expect(rootTool).toEqual({

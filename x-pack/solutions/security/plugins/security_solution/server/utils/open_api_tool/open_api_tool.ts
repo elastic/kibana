@@ -55,13 +55,13 @@ export abstract class OpenApiTool<T> {
     if (schema.type === 'array' && isEmpty(schema.items)) {
       return z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]); // OpenAi requires items in array to be defined
     }
-    if (this.llmType == 'gemini' && schema.oneOf !== undefined && Array.isArray(schema.oneOf)) {
+    if (this.llmType === 'gemini' && schema.oneOf !== undefined && Array.isArray(schema.oneOf)) {
       // Gemini does not support oneOf so we use any
       return z.any().describe(schema.description ?? ''); // Gemini does not support oneOf so we use any
     }
     let modified = false;
     if (
-      this.llmType == 'gemini' &&
+      this.llmType === 'gemini' &&
       schema.type === 'integer' &&
       schema.enum &&
       schema.enum.some((val) => typeof val === 'number')
@@ -70,16 +70,16 @@ export abstract class OpenApiTool<T> {
       schema.enum = schema.enum.map((x) => (x as number).toString());
       modified = true;
     }
-    if (this.llmType == 'gemini' && schema.exclusiveMinimum !== undefined) {
+    if (this.llmType === 'gemini' && schema.exclusiveMinimum !== undefined) {
       delete schema.exclusiveMinimum; // Gemini does not support exclusiveMinimum
       modified = true;
     }
-    if (this.llmType == 'gemini' && schema.exclusiveMaximum !== undefined) {
+    if (this.llmType === 'gemini' && schema.exclusiveMaximum !== undefined) {
       delete schema.exclusiveMaximum; // Gemini does not support exclusiveMaximum
       modified = true;
     }
     if (
-      this.llmType == 'gemini' &&
+      this.llmType === 'gemini' &&
       schema.anyOf &&
       Array.isArray(schema.anyOf) &&
       schema.anyOf.length > 1
@@ -88,7 +88,7 @@ export abstract class OpenApiTool<T> {
       schema.anyOf = [schema.anyOf[0]];
       modified = true;
     }
-    if (this.llmType == 'gemini' && Array.isArray(schema.type)) {
+    if (this.llmType === 'gemini' && Array.isArray(schema.type)) {
       schema.type = schema.type[0]; // Gemini does not support multiple types so we use the first one
       modified = true;
     }
@@ -101,7 +101,7 @@ export abstract class OpenApiTool<T> {
       modified = true;
     }
     if (
-      schema.type == 'array' &&
+      schema.type === 'array' &&
       schema.items &&
       typeof schema.items !== 'boolean' &&
       !Array.isArray(schema.items) &&
@@ -131,8 +131,8 @@ export abstract class OpenApiTool<T> {
     const jsonSchemaToZodWithParserOverride = (schema: JsonSchema): z.ZodTypeAny => {
       return jsonSchemaToZod(schema as JsonSchema, {
         // Overrides to ensure schema is compatible with LLM provider
-        parserOverride: (schema, refs) =>
-          this.getParserOverride(schema, refs, jsonSchemaToZodWithParserOverride),
+        parserOverride: (s, r) =>
+          this.getParserOverride(s, r, jsonSchemaToZodWithParserOverride),
       });
     };
 

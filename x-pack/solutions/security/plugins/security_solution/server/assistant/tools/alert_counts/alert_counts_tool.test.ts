@@ -38,6 +38,7 @@ describe('AlertCountsTool', () => {
     chain,
     logger,
     contentReferencesStore,
+    llmType: undefined,
   };
 
   beforeEach(() => {
