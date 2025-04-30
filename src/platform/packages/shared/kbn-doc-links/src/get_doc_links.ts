@@ -52,8 +52,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       : `${ELASTIC_DOCS}get-started`,
     apiReference: `${API_DOCS}`,
     upgrade: {
-      upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
-      upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
+      upgradingStackOnPrem: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
+      upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
     },
     apm: {
       kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
@@ -88,10 +88,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexManagement: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-configure-index-management.html`,
     },
     console: {
-      guide: isServerless
-        ? `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`
-        : `${KIBANA_DOCS}console-kibana.html`,
-      serverlessGuide: `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`,
+      guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
     },
     dashboard: {
       guide: `${ELASTIC_DOCS}explore-analyze/dashboards`,
@@ -273,49 +270,52 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       change_point: `${ELASTICSEARCH_DOCS}search-aggregations-change-point-aggregation.html`,
     },
     runtimeFields: {
-      overview: `${ELASTICSEARCH_DOCS}runtime.html`,
-      mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
+      overview: `${ELASTIC_DOCS}manage-data/data-store/mapping/runtime-fields`,
+      mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping/map-runtime-field`,
     },
     scriptedFields: {
-      scriptFields: `${ELASTICSEARCH_DOCS}search-fields.html#script-fields`,
-      scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html`,
-      painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
-      painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
-      painlessLangSpec: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
-      painlessSyntax: `${ELASTICSEARCH_DOCS}modules-scripting-painless-syntax.html`,
-      painlessWalkthrough: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-walkthrough.html`,
-      painlessLanguage: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
-      luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
+      scriptFields: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/retrieve-selected-fields#script-fields`,
+      scriptAggs: `${ELASTIC_DOCS}explore-analyze/query-filter/aggregations`,
+      painless: `${ELASTIC_DOCS}explore-analyze/scripting/modules-scripting-painless`,
+      painlessApi: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-scripts-painless-execute`
+        : `${ELASTICSEARCH_APIS}operation/operation-scripts-painless-execute`,
+      painlessLangSpec: `${ELASTIC_DOCS}reference/scripting-languages/painless/painless-language-specification`,
+      painlessSyntax: `${ELASTIC_DOCS}reference/scripting-languages/painless/painless-language-specification`,
+      painlessWalkthrough: `${ELASTIC_DOCS}reference/scripting-languages/painless/brief-painless-walkthrough`,
+      painlessLanguage: `${ELASTIC_DOCS}reference/scripting-languages/painless/painless-language-specification`,
+      luceneExpressions: `${ELASTIC_DOCS}explore-analyze/scripting/modules-scripting-expression`,
     },
     indexPatterns: {
-      introduction: isServerless
-        ? `${SERVERLESS_DOCS}data-views.html`
-        : `${KIBANA_DOCS}data-views.html`,
-      fieldFormattersNumber: `${KIBANA_DOCS}numeral.html`,
-      fieldFormattersString: `${KIBANA_DOCS}managing-data-views.html#string-field-formatters`,
-      runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
-      migrateOffScriptedFields: `${KIBANA_DOCS}managing-data-views.html#migrate-off-scripted-fields`,
+      introduction: `${ELASTIC_DOCS}explore-analyze/find-and-organize/data-views`,
+      fieldFormattersNumber: `${ELASTIC_DOCS}explore-analyze/numeral-formatting`,
+      fieldFormattersString: `${ELASTIC_DOCS}explore-analyze/find-and-organize/data-views#string-field-formatters`,
+      runtimeFields: `${ELASTIC_DOCS}explore-analyze/find-and-organize/data-views#runtime-fields`,
+      migrateOffScriptedFields: `${ELASTIC_DOCS}explore-analyze/find-and-organize/data-views#migrate-off-scripted-fields`,
     },
     addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
     kibana: {
       askElastic: `${ELASTIC_WEBSITE_URL}products/kibana/ask-elastic?blade=kibanaaskelastic`,
       createGithubIssue: `${ELASTIC_GITHUB}kibana/issues/new/choose`,
       feedback: `${ELASTIC_WEBSITE_URL}products/kibana/feedback?blade=kibanafeedback`,
-      guide: `${KIBANA_DOCS}index.html`,
-      autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
-      secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
-      xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
+      guide: `${ELASTIC_DOCS}get-started/the-stack`,
+      autocompleteSuggestions: `${ELASTIC_DOCS}explore-analyze/query-filter/filtering#autocomplete-suggestions`,
+      secureSavedObject: `${ELASTIC_DOCS}deploy-manage/security/secure-saved-objects`,
+      xpackSecurity: `${ELASTIC_DOCS}deploy-manage/security`,
       restApis: isServerless ? `${KIBANA_SERVERLESS_APIS}` : `${KIBANA_APIS}`,
-      dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
-      upgradeNotes: `${KIBANA_DOCS}breaking-changes-summary.html`,
+      upgradeNotes: `${ELASTIC_DOCS}release-notes/kibana/breaking-changes`,
     },
     upgradeAssistant: {
-      overview: `${KIBANA_DOCS}upgrade-assistant.html`,
-      batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
-      indexBlocks: `${ELASTICSEARCH_DOCS}index-modules-blocks.html#index-block-settings`,
-      remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+      overview: `${ELASTIC_DOCS}deploy-manage/upgrade/prepare-to-upgrade/upgrade-assistant`,
+      batchReindex: `${KIBANA_APIS}group/endpoint-upgrade`,
+      indexBlocks: `${ELASTIC_DOCS}reference/elasticsearch/index-settings/index-block#index-block-settings`,
+      remoteReindex: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-reindex`
+        : `${ELASTICSEARCH_APIS}operation/operation-reindex`,
       unfreezeApi: `https://www.elastic.co/guide/en/elastic-stack/9.0/release-notes-elasticsearch-9.0.0.html#remove_unfreeze_rest_endpoint`,
-      reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
+      reindexWithPipeline: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-reindex`
+        : `${ELASTICSEARCH_APIS}operation/operation-reindex`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
     elasticsearch: {
@@ -493,24 +493,25 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       sessionLimits: `${KIBANA_DOCS}search-sessions.html#_limitations`,
     },
     date: {
-      dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
-      dateMathIndexNames: `${ELASTICSEARCH_DOCS}date-math-index-names.html`,
+      dateMath: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/common-options#date-math`,
+      dateMathIndexNames: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#api-date-math-index-names`,
     },
     management: {
-      dashboardSettings: `${KIBANA_DOCS}advanced-options.html#kibana-dashboard-settings`,
+      dashboardSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-dashboard-settings`,
       indexManagement: isServerless
-        ? `${SERVERLESS_DOCS}index-management.html`
-        : `${ELASTICSEARCH_DOCS}index-mgmt.html`,
-      kibanaSearchSettings: `${KIBANA_DOCS}advanced-options.html#kibana-search-settings`,
-      discoverSettings: `${KIBANA_DOCS}advanced-options.html#kibana-discover-settings`,
-      rollupSettings: `${KIBANA_DOCS}advanced-options.html#kibana-rollups-settings`,
-      visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
-      timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
-      generalSettings: `${KIBANA_DOCS}advanced-options.html#kibana-general-settings`,
+        ? `${ELASTIC_DOCS}manage-data/data-store/index-basics`
+        : `${ELASTIC_DOCS}manage-data/lifecycle/index-lifecycle-management/index-management-in-kibana`,
+      kibanaSearchSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-search-settings`,
+      discoverSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-discover-settings`,
+      rollupSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-rollups-settings`,
+      visualizationSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-visualization-settings`,
+      timelionSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-timelion-settings`,
+      generalSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-general-settings`,
       savedObjectsApiList: isServerless
         ? `${KIBANA_SERVERLESS_APIS}group/endpoint-saved-objects`
         : `${KIBANA_APIS}group/endpoint-saved-objects`,
-      apiKeys: `${KIBANA_DOCS}api-keys.html`,
+      apiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
+
     },
     ml: {
       guide: `${ELASTIC_DOCS}explore-analyze/machine-learning`,
@@ -695,8 +696,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       enableElasticSearchSecurityFeatures: `${ELASTICSEARCH_DOCS}security-minimal-setup.html#_enable_elasticsearch_security_features`,
     },
     spaces: {
-      kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
-      kibanaDisableLegacyUrlAliasesApi: `${KIBANA_DOCS}spaces-api-disable-legacy-url-aliases.html`,
+      kibanaLegacyUrlAliases: `${ELASTIC_DOCS}extend/kibana/legacy-url-aliases`,
+      kibanaDisableLegacyUrlAliasesApi: `${KIBANA_APIS}operation/operation-post-spaces-disable-legacy-url-aliases`,
     },
     watcher: {
       jiraAction: `${ELASTICSEARCH_DOCS}actions-jira.html`,
@@ -961,10 +962,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       dataUse: `${ELASTIC_WEBSITE_URL}legal/privacy-statement#how-we-use-the-information`,
     },
     kibanaUpgradeSavedObjects: {
-      resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
-      repeatedTimeoutRequests: `${KIBANA_DOCS}resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail`,
-      routingAllocationDisabled: `${KIBANA_DOCS}resolve-migrations-failures.html#routing-allocation-disabled`,
-      clusterShardLimitExceeded: `${KIBANA_DOCS}resolve-migrations-failures.html#cluster-shard-limit-exceeded`,
+      resolveMigrationFailures: `${ELASTIC_DOCS}troubleshoot/kibana/migration-failures`,
+      repeatedTimeoutRequests: `${ELASTIC_DOCS}troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail`,
+      routingAllocationDisabled: `${ELASTIC_DOCS}troubleshoot/kibana/migration-failures#routing-allocation-disabled`,
+      clusterShardLimitExceeded: `${ELASTIC_DOCS}troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded`,
+
     },
     searchUI: {
       appSearch: `${SEARCH_UI_DOCS}tutorials/app-search`,
@@ -1007,14 +1009,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${OBSERVABILITY_DOCS}synthetics-feature-roles.html`,
     },
     telemetry: {
-      settings: `${KIBANA_DOCS}telemetry-settings-kbn.html`,
+      settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/telemetry-settings`,
     },
     playground: {
-      chatPlayground: `${KIBANA_DOCS}playground.html`,
-      retrievalOptimize: `${KIBANA_DOCS}playground-query.html#playground-query-relevance`,
-      retrieval: `${KIBANA_DOCS}playground-query.html`,
-      context: `${KIBANA_DOCS}playground-context.html`,
-      hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
+      chatPlayground: `${ELASTIC_DOCS}solutions/search/rag/playground`,
+      retrievalOptimize: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-query-relevance`,
+      retrieval: `${ELASTIC_DOCS}solutions/search/rag/playground-query`,
+      context: `${ELASTIC_DOCS}solutions/search/rag/playground-context`,
+      hiddenFields: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-hidden-fields`,
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless
