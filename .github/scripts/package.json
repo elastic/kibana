@@ -1,0 +1,7 @@
+{
+  "name": "github-script-dependencies",
+  "version": "1.0.0",
+  "description": "Dependencies needed by the GitHub Action script",
+  "private": true,
+  "dependencies": {}
+}

@@ -30,6 +30,7 @@ export class AuthzDisabled {
   static readonly serveStaticFiles = AuthzDisabled.fromReason(AuthzOptOutReason.ServeStaticFiles);
 }
 
+
 export const unwindNestedSecurityPrivileges = <
   T extends Array<string | { allOf?: string[]; anyOf?: string[] }>
 >(
