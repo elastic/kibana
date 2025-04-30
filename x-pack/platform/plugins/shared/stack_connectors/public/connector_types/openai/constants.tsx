@@ -12,6 +12,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 import { Config } from './types';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const DEFAULT_URL_AZURE =
