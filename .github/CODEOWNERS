@@ -2607,7 +2607,7 @@ x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics 
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
 
 ## Security Solution sub teams - Automatic Import
-x-pack/test/automatic_import_api_integration @elastic/security-scalability
+x-pack/platform/test/automatic_import_api_integration @elastic/security-scalability
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/test/osquery_cypress @elastic/security-defend-workflows

@@ -386,6 +386,8 @@ enabled:
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/api_integration_basic/apis/transform/config.ts
+  - x-pack/platform/test/automatic_import_api_integration/apis/config_basic.ts
+  - x-pack/platform/test/automatic_import_api_integration/apis/config_graphs.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
