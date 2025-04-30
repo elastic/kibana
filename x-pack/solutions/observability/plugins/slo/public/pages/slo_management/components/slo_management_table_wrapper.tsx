@@ -8,7 +8,7 @@
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { SloBulkDeleteConfirmationModal } from '../../../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
-import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
@@ -48,7 +48,7 @@ export function SloManagementTableWrapper() {
         return navigateToClone(action.item);
       case 'delete':
         return (
-          <SloDeleteModal
+          <SloDeleteConfirmationModal
             slo={action.item}
             onCancel={() => setAction(undefined)}
             onConfirm={() => {

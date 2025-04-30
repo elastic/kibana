@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from '../../../../common/locators/paths';
 import {
   DeleteConfirmation,
-  SloDeleteModal,
+  SloDeleteConfirmationModal,
 } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
@@ -426,7 +426,11 @@ export function HeaderControl({ slo }: Props) {
       ) : null}
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirm} />
+        <SloDeleteConfirmationModal
+          slo={slo}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
       ) : null}
 
       {isResetConfirmationModalOpen ? (

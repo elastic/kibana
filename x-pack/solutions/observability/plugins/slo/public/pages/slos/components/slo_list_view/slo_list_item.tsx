@@ -11,7 +11,7 @@ import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
 import {
   DeleteConfirmation,
-  SloDeleteModal,
+  SloDeleteConfirmationModal,
 } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
@@ -176,7 +176,11 @@ export function SloListItem({
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirm} />
+        <SloDeleteConfirmationModal
+          slo={slo}
+          onCancel={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+        />
       ) : null}
 
       {isResetConfirmationModalOpen ? (

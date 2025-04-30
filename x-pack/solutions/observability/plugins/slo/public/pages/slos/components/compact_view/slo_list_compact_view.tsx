@@ -26,7 +26,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
 import {
   DeleteConfirmation,
-  SloDeleteModal,
+  SloDeleteConfirmationModal,
 } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
@@ -549,7 +549,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       ) : null}
 
       {sloToDelete ? (
-        <SloDeleteModal
+        <SloDeleteConfirmationModal
           slo={sloToDelete}
           onCancel={handleDeleteCancel}
           onConfirm={handleDeleteConfirm}

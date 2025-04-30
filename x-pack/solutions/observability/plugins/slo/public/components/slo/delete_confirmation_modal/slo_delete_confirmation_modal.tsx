@@ -39,7 +39,7 @@ interface Props {
   onConfirm: (params: DeleteConfirmation) => void;
 }
 
-export function SloDeleteModal({ slo, onCancel, onConfirm }: Props) {
+export function SloDeleteConfirmationModal({ slo, onCancel, onConfirm }: Props) {
   const modalTitleId = useGeneratedHtmlId();
   const { name, groupBy } = slo;
   const instanceId =
