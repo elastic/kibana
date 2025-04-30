@@ -44,6 +44,7 @@ import {
   openAiSecrets,
   providerOptions,
   openAiConfig,
+  pkiConfig,
 } from './constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -53,10 +54,12 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const { euiTheme } = useEuiTheme();
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__, id, name }] = useFormData({
-    watch: ['config.apiProvider', '__internal__.hasHeaders'],
+    watch: ['config.apiProvider', '__internal__.hasHeaders', '__internal__.hasPKI'],
   });
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
+  const hasPKI = __internal__ != null ? __internal__.hasPKI : false;
+  const hasPKIDefaultValue = !!getFieldDefaultValue<boolean | undefined>('__internal__.hasPKI');
 
   const selectedProviderDefaultValue = useMemo(
     () =>
@@ -117,59 +120,95 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           <SimpleConnectorForm
             isEdit={isEdit}
             readOnly={readOnly}
-            configFormSchema={otherOpenAiConfig.filter(field => field.id !== 'verificationMode')}
+            configFormSchema={otherOpenAiConfig}
             secretsFormSchema={otherOpenAiSecrets}
-            configValidations={[
-              {
-                validator: ({ certificateFile, certificateData, privateKeyFile, privateKeyData }) => {
-                  if (
-                    (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
-                    !(certificateFile || certificateData)
-                  ) {
-                    return {
-                      message: i18n.MISSING_CERTIFICATE,
-                    };
-                  }
-                  if (
-                    (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
-                    !(privateKeyFile || privateKeyData)
-                  ) {
-                    return {
-                      message: i18n.MISSING_PRIVATE_KEY,
-                    };
-                  }
-                },
-              },
-            ]}
+            configValidations={
+              hasPKI
+                ? [
+                    {
+                      validator: ({
+                        certificateFile,
+                        certificateData,
+                        privateKeyFile,
+                        privateKeyData,
+                      }) => {
+                        if (
+                          (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                          !(certificateFile || certificateData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_CERTIFICATE,
+                          };
+                        }
+                        if (
+                          (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                          !(privateKeyFile || privateKeyData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_PRIVATE_KEY,
+                          };
+                        }
+                        return undefined;
+                      },
+                    },
+                  ]
+                : []
+            }
           />
           <EuiSpacer size="s" />
           <UseField
-            path="config.verificationMode"
-            component={SelectField}
+            path="__internal__.hasPKI"
+            component={ToggleField}
             config={{
-              label: i18n.VERIFICATION_MODE_LABEL,
-              defaultValue: 'full',
-              helpText: (
-                <FormattedMessage
-                  defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing)."
-                  id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
-                />
-              ),
+              defaultValue: hasPKIDefaultValue,
+              label: i18n.PKI_MODE_LABEL,
             }}
             componentProps={{
               euiFieldProps: {
-                options: verificationModeOptions,
-                'data-test-subj': 'verificationModeSelect',
-                fullWidth: true,
                 disabled: readOnly,
-                append: (
-                  <EuiText size="xs" color="subdued">
-                    {i18n.OPTIONAL_LABEL}
-                  </EuiText>
-                ),
+                'data-test-subj': 'openAIViewPKISwitch',
               },
             }}
           />
+          {hasPKI && (
+            <>
+              <EuiSpacer size="s" />
+              <SimpleConnectorForm
+                isEdit={isEdit}
+                readOnly={readOnly}
+                configFormSchema={pkiConfig}
+                secretsFormSchema={[]}
+              />
+              <EuiSpacer size="s" />
+              <UseField
+                path="config.verificationMode"
+                component={SelectField}
+                config={{
+                  label: i18n.VERIFICATION_MODE_LABEL,
+                  defaultValue: 'full',
+                  helpText: (
+                    <FormattedMessage
+                      defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing)."
+                      id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
+                    />
+                  ),
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    options: verificationModeOptions,
+                    'data-test-subj': 'verificationModeSelect',
+                    fullWidth: true,
+                    disabled: readOnly,
+                    append: (
+                      <EuiText size="xs" color="subdued">
+                        {i18n.OPTIONAL_LABEL}
+                      </EuiText>
+                    ),
+                  },
+                }}
+              />
+            </>
+          )}
         </>
       )}
       <UseField
