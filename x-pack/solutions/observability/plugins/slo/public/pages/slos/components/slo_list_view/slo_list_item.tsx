@@ -57,7 +57,7 @@ export function SloListItem({
   const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
 
   const { mutate: resetSlo } = useResetSlo();
-  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
+  const { mutate: enableSlo } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
   const { mutate: deleteSloInstance } = useDeleteSloInstance();
   const { mutate: deleteSlo } = useDeleteSlo();
@@ -196,7 +196,6 @@ export function SloListItem({
           slo={slo}
           onCancel={handleEnableCancel}
           onConfirm={handleEnableConfirm}
-          isLoading={isEnableLoading}
         />
       ) : null}
 

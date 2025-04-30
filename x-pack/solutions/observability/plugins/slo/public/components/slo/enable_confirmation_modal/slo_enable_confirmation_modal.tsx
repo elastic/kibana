@@ -14,10 +14,9 @@ export interface Props {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
   onConfirm: () => void;
-  isLoading?: boolean;
 }
 
-export function SloEnableConfirmationModal({ slo, onCancel, onConfirm, isLoading }: Props) {
+export function SloEnableConfirmationModal({ slo, onCancel, onConfirm }: Props) {
   const { name } = slo;
   return (
     <EuiConfirmModal
@@ -35,7 +34,6 @@ export function SloEnableConfirmationModal({ slo, onCancel, onConfirm, isLoading
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      isLoading={isLoading}
     >
       {i18n.translate('xpack.slo.enableConfirmationModal.descriptionText', {
         defaultMessage: 'Enabling this SLO will generate the missing data since it was disabled.',
