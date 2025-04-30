@@ -7,7 +7,6 @@
 
 import { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { OverlayRef } from '@kbn/core/public';
 import { unitsMap } from '@kbn/datemath';
 import { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -89,16 +88,12 @@ export function initializeAlertRules(
 
         const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
-        // eslint doesn't notice `handle` getting reassinged for some reason,
-        // and initializing it as `undefined` throws a different eslint error
-        // eslint-disable-next-line prefer-const
-        let handle: OverlayRef;
         const closeRuleForm = () => {
           overlayTracker?.clearOverlays();
           handle?.close();
         };
 
-        handle = coreStart.overlays.openFlyout(
+        const handle = coreStart.overlays.openFlyout(
           toMountPoint(
             <KibanaContextProvider services={ruleFormPlugins}>
               <RuleFormFlyout
