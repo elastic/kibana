@@ -90,7 +90,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
   },
 
   {
-    key: 'log_level',
+    key: 'logging_level',
     validation: loggingLevelRt,
     type: 'select',
     defaultValue: 'info',
