@@ -39,7 +39,7 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
     [formData.artifacts]
   );
   // const dashboardsFormData = formData.dashboards;
-  
+
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
 
   const [selectedDashboards, setSelectedDashboards] = useState<
@@ -48,7 +48,6 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
 
   useEffect(() => {
     if ((dashboardsFormData ?? []).length > 0 && dashboardService) {
-      console.log(dashboardsFormData.length, '!!length')
       const fetchDashboardTitles = async () => {
         const dashboardsWithTitles = await Promise.all(
           (dashboardsFormData ?? []).map(async (dashboard) => ({
@@ -99,26 +98,26 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   }, [dashboardService]);
 
   useEffect(() => {
-      loadDashboards();
+    loadDashboards();
   }, [loadDashboards]);
 
   return (
     <>
-        <EuiSplitPanel.Inner>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h6>{ALERT_LINK_DASHBOARDS_TITLE}</h6>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiComboBox
-              fullWidth
-              options={dashboardList}
-              selectedOptions={selectedDashboards}
-              onChange={onChange}
-              data-test-subj="ruleLinkedDashboards"
-            />
-          </EuiFlexItem>
-        </EuiSplitPanel.Inner>
+      <EuiSplitPanel.Inner>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h6>{ALERT_LINK_DASHBOARDS_TITLE}</h6>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiComboBox
+            fullWidth
+            options={dashboardList}
+            selectedOptions={selectedDashboards}
+            onChange={onChange}
+            data-test-subj="ruleLinkedDashboards"
+          />
+        </EuiFlexItem>
+      </EuiSplitPanel.Inner>
     </>
   );
 };
