@@ -69,7 +69,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
   );
   router.get(
     {
-      path: APIRoutes.QUERY_RULES_RULESET_FETCH,
+      path: APIRoutes.QUERY_RULES_RULESET_ID,
       options: {
         access: 'internal',
       },
@@ -116,7 +116,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
   );
   router.put(
     {
-      path: APIRoutes.QUERY_RULES_RULESET_SET_ID,
+      path: APIRoutes.QUERY_RULES_RULESET_ID,
       options: {
         access: 'internal',
       },
