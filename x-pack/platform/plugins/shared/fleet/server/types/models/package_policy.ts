@@ -439,6 +439,7 @@ export const DryRunPackagePolicySchema = PackagePolicySchema.extends(
   {
     id: schema.maybe(schema.string()),
     force: schema.maybe(schema.boolean()),
+    revision: schema.maybe(schema.number()),
     errors: schema.maybe(
       schema.arrayOf(
         schema.object({
