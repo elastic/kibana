@@ -316,14 +316,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   columnExists: (column: string) => boolean;
   /**
-   * Gets the name that should be used for the next variable.
+   * Gets the name that should be used for the next userDefinedColumn.
    *
    * @param extraFieldNames — names that should be recognized as columns
    * but that won't be found in the current table from Elasticsearch. This is currently only
    * used to recognize enrichment fields from a policy in the ENRICH command.
    * @returns
    */
-  getSuggestedVariableName: (extraFieldNames?: string[]) => string;
+  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[]) => string;
   /**
    * Examine the AST to determine the type of an expression.
    * @param expression
