@@ -400,7 +400,7 @@ export const postEvaluateRoute = (
                       llm: createLlmInstance(),
                       isOssModel,
                       description,
-                      llmType
+                      llmType,
                     });
                   })
                 )
