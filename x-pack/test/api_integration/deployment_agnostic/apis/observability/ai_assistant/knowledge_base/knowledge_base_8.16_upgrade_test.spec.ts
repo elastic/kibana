@@ -27,8 +27,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   // In 8.17 semantic text field is added to the knowledge base index and inference endpoint is introduced
   // Prior to this ML embeddings were used.
-  // We need to ensure that the semantic_text field is populated
-  describe('when upgrading to 8.17 and the knowledge base index was created in an earlier release', function () {
+  // We need to ensure that the semantic_text field is populated when upgrading from 8.16
+  describe('when upgrading from 8.16 to 8.17', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);

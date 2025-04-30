@@ -46,7 +46,7 @@ export async function runStartupMigrations({
       const doesKbIndexExist = await hasKbWriteIndex({ esClient });
 
       if (!doesKbIndexExist) {
-        logger.warn('Knowledge base index does not exist. Aborting updating index assets');
+        logger.info('Knowledge base index does not exist. Aborting updating index assets');
         return;
       }
 
