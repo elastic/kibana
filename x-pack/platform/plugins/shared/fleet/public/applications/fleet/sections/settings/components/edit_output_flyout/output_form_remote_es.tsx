@@ -21,6 +21,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { snakeCase } from 'lodash';
+
 import { MultiRowInput } from '../multi_row_input';
 
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -332,7 +334,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                             followerIndex: (
                               <EuiCode>
                                 fleet-synced-integrations-ccr-
-                                {inputs.nameInput.props.value || '<output name>'}
+                                {snakeCase(inputs.nameInput.props.value) || '<output name>'}
                               </EuiCode>
                             ),
                           }}

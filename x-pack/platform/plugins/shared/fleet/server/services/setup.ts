@@ -64,8 +64,12 @@ import {
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
-import { createOrUpdateFleetSyncedIntegrationsIndex } from './setup/fleet_synced_integrations';
+import {
+  createCCSIndexPatterns,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
+import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -325,6 +329,10 @@ async function createSetupSideEffects(
 
   logger.debug('Create or update fleet-synced-integrations index');
   await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
+
+  logger.debug('Create CCS index patterns for remote clusters');
+  const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
+  await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
