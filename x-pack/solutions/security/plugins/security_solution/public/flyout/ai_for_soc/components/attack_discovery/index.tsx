@@ -66,6 +66,7 @@ export const AttackDiscoveryWidget = memo(({ id }: Props) => {
           <AttackDiscoveryPanel attackDiscovery={attackDiscovery} start={from} end={to} />
           {additionalAttackDiscoveries.length ? (
             <EuiAccordion
+              data-test-subj="attackDiscoveryAccordion"
               id={attackDiscoveryAccordionId}
               arrowDisplay="right"
               buttonContent={i18n.ADDITIONAL_DISCOVERIES}
