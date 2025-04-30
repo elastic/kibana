@@ -45,5 +45,9 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/observability-plugin",
     "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/profiling-plugin",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
   ]
 }
