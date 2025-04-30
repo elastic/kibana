@@ -30,6 +30,7 @@ type LocationStatus = Array<{
   status: string;
   locationId: string;
   timestamp: string;
+  monitorUrl: string;
 }>;
 
 export const SUMMARIES_PAGE_SIZE = 5000;
@@ -182,9 +183,14 @@ export class OverviewStatusService {
                 aggs: {
                   status: {
                     top_metrics: {
-                      metrics: {
-                        field: 'monitor.status',
-                      },
+                      metrics: [
+                        {
+                          field: 'monitor.status',
+                        },
+                        {
+                          field: 'url.full.keyword',
+                        },
+                      ],
                       sort: {
                         '@timestamp': 'desc',
                       },
@@ -206,11 +212,12 @@ export class OverviewStatusService {
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
+          const monitorUrl = String(statusAgg.top?.[0].metrics?.['url.full.keyword']);
           const timestamp = String(statusAgg.top[0].sort[0]);
           if (!monitorByIds.has(String(monitorId))) {
             monitorByIds.set(monitorId, []);
           }
-          monitorByIds.get(monitorId)?.push({ status, locationId, timestamp });
+          monitorByIds.get(monitorId)?.push({ status, locationId, timestamp, monitorUrl });
         });
       } while (hasMoreData && afterKey);
       return monitorByIds;
@@ -262,12 +269,14 @@ export class OverviewStatusService {
           return;
         }
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
+        const metaInfo = this.getMonitorMeta(monitor);
         const meta = {
+          ...metaInfo,
           monitorQueryId: monitorId,
           locationId: monLocation.id,
           timestamp: locData?.timestamp,
           locationLabel: monLocation.label,
-          ...this.getMonitorMeta(monitor),
+          urls: monitor.attributes[ConfigKey.URLS] || locData?.monitorUrl,
         };
         const monLocId = `${meta.configId}-${monLocation.id}`;
         if (locData) {

@@ -38,3 +38,10 @@ export const ACTIONS = i18n.translate('xpack.synthetics.overview.compactView.mon
 export const DURATION = i18n.translate('xpack.synthetics.overview.compactView.monitorDuration', {
   defaultMessage: 'Median duration',
 });
+
+export const MONITOR_HISTORY = i18n.translate(
+  'xpack.synthetics.monitorList.monitorHistoryColumnLabel',
+  {
+    defaultMessage: 'Downtime history',
+  }
+);

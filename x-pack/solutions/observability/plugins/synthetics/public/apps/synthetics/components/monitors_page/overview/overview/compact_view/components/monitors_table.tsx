@@ -20,13 +20,14 @@ export const MonitorsTable = ({
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
-  const { loaded, status } = useOverviewStatus({
+  const { loaded, status, loading } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
-  const { columns } = useMonitorsTableColumns({ setFlyoutConfigCallback });
   const { pageOfItems, pagination, onTableChange } = useMonitorsTablePagination({
     totalItems: items,
   });
+
+  const { columns } = useMonitorsTableColumns({ setFlyoutConfigCallback, items: pageOfItems });
 
   const dispatch = useDispatch();
 
@@ -37,8 +38,9 @@ export const MonitorsTable = ({
         onClick: (e) => {
           // This is a workaround to prevent the flyout from opening when clicking on the action buttons
           if (
-            Array.from((e.target as HTMLElement).classList).some((className) =>
-              className.includes('euiTableCellContent')
+            Array.from((e.target as HTMLElement).classList).some(
+              (className) =>
+                className.includes('euiTableCellContent') || className.includes('clickCellContent')
             )
           ) {
             dispatch(
@@ -62,11 +64,12 @@ export const MonitorsTable = ({
       compressed
       items={pageOfItems}
       columns={columns}
-      loading={!status || !loaded}
+      loading={!status || !loaded || loading}
       pagination={pagination}
       onChange={onTableChange}
       rowProps={getRowProps}
       data-test-subj="syntheticsCompactViewTable"
+      tableLayout="auto"
     />
   );
 };

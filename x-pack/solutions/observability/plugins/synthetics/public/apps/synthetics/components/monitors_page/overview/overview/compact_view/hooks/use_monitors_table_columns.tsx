@@ -10,6 +10,8 @@ import { EuiBasicTableColumn, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useDispatch } from 'react-redux';
+import { MonitorBarSeries } from '../components/monitor_bar_series';
+import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import {
   MonitorTypeEnum,
   OverviewStatusMetaData,
@@ -19,15 +21,28 @@ import { getFilterForTypeMessage } from '../../../../management/monitor_list_tab
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
-import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, DURATION, URL, NO_URL } from '../labels';
+import {
+  STATUS,
+  ACTIONS,
+  LOCATIONS,
+  NAME,
+  TAGS,
+  DURATION,
+  URL,
+  NO_URL,
+  MONITOR_HISTORY,
+} from '../labels';
 import { MonitorsDuration } from '../components/monitors_duration';
 
 export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,
+  items,
 }: {
+  items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
   const history = useHistory();
+  const { histogramsById, minInterval } = useMonitorHistogram({ items });
 
   const onClickMonitorFilter = useCallback(
     (filterName: string, filterValue: string) => {
@@ -76,7 +91,12 @@ export const useMonitorsTableColumns = ({
         field: 'name',
         name: NAME,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
-          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+          <EuiFlexGroup
+            direction="column"
+            alignItems="flexStart"
+            gutterSize="s"
+            className="clickCellContent"
+          >
             <EuiFlexItem>
               <EuiText size="s" onClick={() => openFlyout(monitor)}>
                 {name}
@@ -134,14 +154,34 @@ export const useMonitorsTableColumns = ({
         render: (monitor: OverviewStatusMetaData) => (
           <MonitorsDuration monitor={monitor} onClickDuration={() => openFlyout(monitor)} />
         ),
+        width: '100px',
+      },
+      {
+        align: 'left' as const,
+        field: 'configId',
+        name: MONITOR_HISTORY,
+        mobileOptions: {
+          show: false,
+        },
+        width: '220px',
+        render: (configId: string, monitor: OverviewStatusMetaData) => {
+          const uniqId = `${configId}-${monitor.locationId}`;
+          return (
+            <MonitorBarSeries
+              histogramSeries={histogramsById?.[uniqId]?.points}
+              minInterval={minInterval!}
+            />
+          );
+        },
       },
       {
         name: ACTIONS,
         render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
         align: 'right',
+        width: '40px',
       },
     ],
-    [onClickMonitorFilter, openFlyout]
+    [histogramsById, minInterval, onClickMonitorFilter, openFlyout]
   );
 
   return {
