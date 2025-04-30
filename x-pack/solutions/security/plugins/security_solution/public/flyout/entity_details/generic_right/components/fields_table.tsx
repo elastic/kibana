@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { useQuery, useMutation } from 'react-query';
-import { usePinnedFields } from './hooks/usePinnedFields'; // Import the custom hook
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
 
 interface FlattenedItem {
@@ -28,8 +28,8 @@ const getSortedFlattenedItems = (
   }));
 
   return flattenedItems.sort((a, b) => {
-    const isAPinned = pinnedFields.includes(a.key);
-    const isBPinned = pinnedFields.includes(b.key);
+    const isAPinned = pinnedFields?.includes(a.key);
+    const isBPinned = pinnedFields?.includes(b.key);
 
     if (isAPinned && !isBPinned) return -1;
     if (!isAPinned && isBPinned) return 1;
@@ -37,7 +37,28 @@ const getSortedFlattenedItems = (
   });
 };
 
-export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorageKey }) => {
+// Define FieldsTableProps interface if needed, passed to FieldsTable component
+interface FieldsTableProps {
+  /**
+   * The document object containing the fields and values to be displayed in the table.
+   */
+  document: Record<string, unknown>;
+
+  /**
+   * Optional key to store pinned fields in localStorage.
+   * If provided, pinned fields will be saved under this key.
+   * If not provided, pinning functionality will be disabled.
+   */
+  tableStorageKey?: string;
+
+  euiInMemeoryTableProps: EuiInMemoryTableProps;
+}
+
+export const FieldsTable: React.FC<FieldsTableProps> = ({
+  document,
+  tableStorageKey,
+  euiInMemeoryTableProps,
+}) => {
   // Use the custom hook and pass the tableStorageKey
   const { pinnedFields, togglePin } = usePinnedFields(tableStorageKey);
 
@@ -49,22 +70,26 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorage
 
   const columns = useMemo(
     () => [
-      {
-        field: 'key',
-        name: '',
-        width: '40px',
-        render: (fieldKey: string) => {
-          const isPinned = pinnedFields.includes(fieldKey);
-          return (
-            <EuiButtonIcon
-              iconType={isPinned ? 'pinFilled' : 'pin'}
-              aria-label={isPinned ? 'Unpin field' : 'Pin field'}
-              color={isPinned ? 'primary' : 'text'}
-              onClick={() => togglePin(fieldKey)} // Use the togglePin function from the hook
-            />
-          );
-        },
-      },
+      ...(tableStorageKey
+        ? [
+            {
+              field: 'key',
+              name: '',
+              width: '40px',
+              render: (fieldKey: string) => {
+                const isPinned = pinnedFields?.includes(fieldKey);
+                return (
+                  <EuiButtonIcon
+                    iconType={isPinned ? 'pinFilled' : 'pin'}
+                    aria-label={isPinned ? 'Unpin field' : 'Pin field'}
+                    color={isPinned ? 'primary' : 'text'}
+                    onClick={() => togglePin(fieldKey)}
+                  />
+                );
+              },
+            },
+          ]
+        : []),
       {
         field: 'key',
         name: i18n.translate('xpack.securitySolution.fieldsTable.fieldColumnLabel', {
@@ -93,9 +118,10 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorage
     <EuiInMemoryTable
       items={sortedItems}
       columns={columns}
-      sorting={{ sort: { field: 'key', direction: 'asc' } }}
+      sorting={{ field: 'key', direction: 'asc' }}
       search={{ box: { incremental: true } }}
       pagination={{ initialPageSize: 100, showPerPageOptions: false }}
+      {...euiInMemeoryTableProps}
     />
   );
 };
@@ -111,32 +137,30 @@ const setPinnedFieldsInLocalStorage = (storageKey: string, fields: string[]) => 
   localStorage.setItem(storageKey, JSON.stringify(fields));
 };
 
-// Custom hook to manage pinned fields
 export const usePinnedFields = (storageKey: string) => {
-  // Use React Query to fetch the pinned fields from localStorage
-  const { data: pinnedFields, refetch } = useQuery<string[]>(
-    ['pinnedFields', storageKey],
-    () => getPinnedFieldsFromLocalStorage(storageKey),
-    { initialData: [] }
-  );
+  const queryClient = useQueryClient();
 
-  // Use React Query mutation to update the pinned fields
-  const mutation = useMutation(
-    (updatedPinnedFields: string[]) =>
+  const { data: pinnedFields = [] } = useQuery<string[]>({
+    queryKey: ['pinnedFields', storageKey],
+    queryFn: () => getPinnedFieldsFromLocalStorage(storageKey),
+    initialData: getPinnedFieldsFromLocalStorage(storageKey) || [],
+  });
+
+  const mutation = useMutation({
+    mutationFn: (updatedPinnedFields: string[]) =>
       setPinnedFieldsInLocalStorage(storageKey, updatedPinnedFields),
-    {
-      onSuccess: () => {
-        refetch();
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['pinnedFields', storageKey],
+      });
+    },
+  });
 
   const togglePin = (fieldKey: string) => {
     const updatedPinnedFields = pinnedFields.includes(fieldKey)
       ? pinnedFields.filter((key) => key !== fieldKey)
       : [...pinnedFields, fieldKey];
 
-    // Update pinned fields in localStorage via mutation
     mutation.mutate(updatedPinnedFields);
   };
 

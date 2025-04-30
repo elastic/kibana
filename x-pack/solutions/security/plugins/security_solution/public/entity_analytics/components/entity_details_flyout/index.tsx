@@ -59,10 +59,9 @@ export const getInsightsInputTab = ({
 export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProps) => {
   return {
     id: EntityDetailsLeftPanelTab.FIELDS_TABLE,
-    'data-test-subj': INSIGHTS_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.insightsDetails.insights.tabLabel"
+        id="xpack.securitySolution.flyout.entityDetails.fieldsTableTab.tabLabel"
         defaultMessage="Fields"
       />
     ),
