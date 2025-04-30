@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
+import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
@@ -20,10 +21,26 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 interface GenericEntityFlyoutContentProps {
   source: Record<string, unknown>;
+  entityDocId: string;
 }
 
-export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutContentProps) => {
+export const GenericEntityFlyoutContent = ({
+  source,
+  entityDocId,
+}: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
+    field: 'agent.type',
+    value: 'cloudbeat',
+    entityDocId,
+    scopeId: 'table',
+    panelTab: 'fields',
+  });
+
+  const openDetailsPanel = (path) => {
+    return openGenericEntityDetails(path);
+  };
 
   const fieldsSectionExpandedState = useExpandSection({
     title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
@@ -36,16 +53,12 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
   });
 
   const { pinnedFields } = usePinnedFields(GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS);
-  console.log('talbe', pinnedFields);
 
-  // Filter and flatten the document based on pinned fields
   const filteredDocument = useMemo(() => {
-    if (!source) return {}; // If no source is provided, return an empty object
+    if (!source) return {};
 
-    // First, flatten the document
     const flattenedDocument = getFlattenedObject(source);
 
-    // Now, filter the flattened document based on pinned fields
     const filtered = Object.entries(flattenedDocument).reduce((acc, [key, value]) => {
       if (pinnedFields?.includes(key)) {
         acc[key] = value;
@@ -83,7 +96,15 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
                 />
               </EuiTitle>
             ),
-            // link: hasMisconfigurationFindings ? link : undefined,
+            link: {
+              callback: openGenericEntityDetails,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.genericEntityFlyout.flyoutContent.expandablePanel.highlightedFieldsTooltip"
+                  defaultMessage="Show all fields"
+                />
+              ),
+            },
           }}
         >
           <FieldsTable
@@ -99,8 +120,8 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
         field={'agent.type'}
         value={'cloudbeat'}
         isPreviewMode={false}
-        isLinkEnabled={false}
-        openDetailsPanel={() => {}}
+        isLinkEnabled={true}
+        openDetailsPanel={openDetailsPanel}
       />
     </FlyoutBody>
   );

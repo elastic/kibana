@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { type FlyoutPanelProps } from '@kbn/expandable-flyout';
+import React, { useMemo } from 'react';
+import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-import type {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
+import {
+  LeftPanelHeader,
+  type CspInsightLeftPanelSubTab,
+  type EntityDetailsLeftPanelTab,
+  type LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
-import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
-import { useSelectedTab, useTabs } from './hooks';
+import { useGetGenericEntity } from '../generic_right/hooks/use_get_generic_entity';
+import {
+  getInsightsInputTab,
+  getFieldsTableTab,
+} from '../../../entity_analytics/components/entity_details_flyout';
+import { GENERIC_FLYOUT_STORAGE_KEYS } from '../generic_right/constants';
 
 export interface GenericEntityDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
@@ -37,8 +43,65 @@ export interface GenericEntityDetailsExpandableFlyoutProps extends FlyoutPanelPr
 export const GenericEntityDetailsPanelKey: GenericEntityDetailsExpandableFlyoutProps['key'] =
   'generic_entity_details';
 
+const useSelectedTab = (params: GenericEntityDetailsPanelProps, tabs: LeftPanelTabsType) => {
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const path = params.path;
+
+  const selectedTabId = useMemo(() => {
+    const defaultTab = tabs.length > 0 ? tabs[0].id : undefined;
+    if (!path) return defaultTab;
+    return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;
+  }, [path, tabs]);
+
+  const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
+    openLeftPanel({
+      id: GenericEntityDetailsPanelKey,
+      params: {
+        ...params,
+        path: {
+          tab: tabId,
+        },
+      },
+    });
+  };
+
+  return { setSelectedTabId, selectedTabId };
+};
+
 export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps) => {
-  const tabs = useTabs(params) || [];
+  const {
+    entityDocId,
+    field,
+    value,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+  } = params;
+
+  const { getGenericEntity } = useGetGenericEntity(entityDocId);
+  const source = getGenericEntity.data?._source;
+
+  const tabs: LeftPanelTabsType = useMemo(() => {
+    const insightsTab =
+      hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
+        ? [getInsightsInputTab({ name: value, fieldName: field })]
+        : [];
+
+    const fieldsTableTab = getFieldsTableTab({
+      document: source || {},
+      tableStorageKey: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS,
+    });
+
+    return [fieldsTableTab, ...insightsTab];
+  }, [
+    getGenericEntity.data,
+    field,
+    value,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+  ]);
+
   const { selectedTabId, setSelectedTabId } = useSelectedTab(params, tabs);
 
   if (!selectedTabId) {

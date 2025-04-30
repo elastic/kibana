@@ -15,6 +15,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import { GenericEntityDetailsPanelKey } from '../generic_details_left';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -66,35 +67,34 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
     }
   }, [getGenericEntity.data?._id]);
 
-  // const { telemetry } = useKibana().services;
   // const { eventId, indexName, scopeId, isPreview } = useDocumentDetailsContext();
+
+  const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
+    field: 'agent.type',
+    value: 'cloudbeat',
+    entityDocId,
+    scopeId: 'table',
+    panelTab: 'fields',
+  });
 
   const expandDetails = useCallback(() => {
     openLeftPanel({
       id: GenericEntityDetailsPanelKey,
-      path: {
-        tab: 'csp_insights',
-      },
       params: {
-        isRiskScoreExist: false,
+        entityDocId,
         name: 'name',
         field: 'agent.type',
         value: 'cloudbeat',
-        entityDocId,
         scopeId: 'table',
-        hasMisconfigurationFindings: false,
-        hasVulnerabilitiesFindings: false,
+        isRiskScoreExist: false,
+        hasMisconfigurationFindings: true,
+        hasVulnerabilitiesFindings: true,
         hasNonClosedAlerts: true,
-        // id: eventId,
-        // indexName,
-        // scopeId,
+        path: {
+          tab: 'csp_insights',
+        },
       },
     });
-    // telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-    //   location: scopeId,
-    //   panel: 'left',
-    // });
-    // }, [eventId, openLeftPanel, indexName, scopeId, telemetry]);
   }, [openLeftPanel]);
 
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
@@ -144,9 +144,9 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={openGenericEntityDetails} />
       <GenericEntityFlyoutHeader entity={entity} source={source} />
-      <GenericEntityFlyoutContent source={source} />
+      <GenericEntityFlyoutContent source={source} entityDocId={entityDocId} />
     </>
   );
 };
