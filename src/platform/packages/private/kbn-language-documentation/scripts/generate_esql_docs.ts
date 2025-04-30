@@ -22,17 +22,26 @@ interface DocsSectionContent {
   const pathToElasticsearch = process.argv[2];
   const { scalarFunctions, aggregationFunctions, groupingFunctions } =
     loadFunctionDocs(pathToElasticsearch);
+
+  const allFunctionNames = Array.from(scalarFunctions.keys()).concat(
+    Array.from(aggregationFunctions.keys()),
+    Array.from(groupingFunctions.keys())
+  );
+
   writeFunctionDocs(
     scalarFunctions,
-    path.join(__dirname, '../src/sections/generated/scalar_functions.tsx')
+    path.join(__dirname, '../src/sections/generated/scalar_functions.tsx'),
+    allFunctionNames
   );
   writeFunctionDocs(
     aggregationFunctions,
-    path.join(__dirname, '../src/sections/generated/aggregation_functions.tsx')
+    path.join(__dirname, '../src/sections/generated/aggregation_functions.tsx'),
+    allFunctionNames
   );
   writeFunctionDocs(
     groupingFunctions,
-    path.join(__dirname, '../src/sections/generated/grouping_functions.tsx')
+    path.join(__dirname, '../src/sections/generated/grouping_functions.tsx'),
+    allFunctionNames
   );
 })();
 
@@ -102,11 +111,15 @@ function replaceCodeBlocksForESQLFormatting(text: string) {
   return text.replace(/```(\n[\s\S]*?\n)```/g, '```esql$1```');
 }
 
-function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathToDocsFile: string) {
+function writeFunctionDocs(
+  functionDocs: Map<string, DocsSectionContent>,
+  pathToDocsFile: string,
+  allFunctionNames: string[]
+) {
   const codeStrings = Array.from(functionDocs.entries()).map(([name, doc]) => {
     const docWithoutLinks = removeAsciiDocInternalCrossReferences(
       doc.description,
-      Array.from(functionDocs.keys())
+      allFunctionNames
     );
     const defaultMessage = replaceCodeBlocksForESQLFormatting(docWithoutLinks).replaceAll(
       '`',
