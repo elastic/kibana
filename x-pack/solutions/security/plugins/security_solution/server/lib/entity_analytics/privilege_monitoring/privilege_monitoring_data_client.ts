@@ -148,6 +148,9 @@ export class PrivilegeMonitoringDataClient {
       options: {
         index: this.getIndex(),
         mappings: generateUserIndexMappings(),
+        settings: {
+          hidden: true,
+        },
       },
     });
   }
