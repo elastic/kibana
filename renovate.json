@@ -411,23 +411,6 @@
       "enabled": true
     },
     {
-      "matchDepNames": [
-        "fflate"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:SharedUX",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "lz-string dependencies",
       "matchDepNames": [
         "lz-string",
@@ -4570,9 +4553,9 @@
       "enabled": true
     },
     {
-      "groupName": "node-libs-browser",
+      "groupName": "node-stdlib-browser",
       "matchDepNames": [
-        "node-libs-browser"
+        "node-stdlib-browser"
       ],
       "reviewers": [
         "team:kibana-operations"
