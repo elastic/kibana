@@ -36,6 +36,7 @@ import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 import { createTabsStorageManager } from './state_management/tabs_storage_manager';
 import { TABS_ENABLED } from '../../constants';
+import type { DiscoverServices } from '../../build_services';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -119,10 +120,9 @@ export const DiscoverMainRoute = ({
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
 
-      const userId = 'todo'; // TODO: fix getting the user id. Does not work with: (await services.userProfile?.getCurrent())?.uid ?? '';
-      const spaceId = (await services.spaces?.getActiveSpace())?.id ?? '';
+      const userAndSpaceIds = await getUserIdAndSpaceId(services);
 
-      internalState.dispatch(internalStateActions.initiateTabs({ userId, spaceId }));
+      internalState.dispatch(internalStateActions.initiateTabs(userAndSpaceIds));
 
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData,
@@ -191,3 +191,22 @@ export const DiscoverMainRoute = ({
     </InternalStateProvider>
   );
 };
+
+async function getUserIdAndSpaceId(services: DiscoverServices) {
+  let userId = '';
+  let spaceId = '';
+
+  try {
+    userId = (await services.core.security?.authc.getCurrentUser()).profile_uid ?? '';
+  } catch {
+    // ignore as it's expected for deployments without security enabled
+  }
+
+  try {
+    spaceId = (await services.spaces?.getActiveSpace())?.id ?? '';
+  } catch {
+    // ignore
+  }
+
+  return { userId, spaceId };
+}
