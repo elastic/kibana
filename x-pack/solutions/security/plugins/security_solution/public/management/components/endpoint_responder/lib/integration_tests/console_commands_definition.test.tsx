@@ -19,6 +19,7 @@ import { ExperimentalFeaturesService } from '../../../../../common/experimental_
 import type { CommandDefinition } from '../../../console';
 import type { HostMetadataInterface } from '../../../../../../common/endpoint/types';
 import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { act } from '@testing-library/react';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -58,7 +59,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display expected help groups', () => {
       render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
 
       expect(helpPanelSelectors.getHelpGroupLabels()).toEqual([
         ...sortBy(Object.values(HELP_GROUPS), 'position').map((group) => group.label),
@@ -68,7 +71,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display response action commands in the help panel in expected order', () => {
       render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
       const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
         HELP_GROUPS.responseActions.label
       );
@@ -108,7 +113,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display expected help groups', () => {
       render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
 
       expect(helpPanelSelectors.getHelpGroupLabels()).toEqual([
         ...sortBy(Object.values(HELP_GROUPS), 'position').map((group) => group.label),
@@ -118,7 +125,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display response action commands in the help panel in expected order', () => {
       const { queryByTestId } = render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
       const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
         HELP_GROUPS.responseActions.label
       );
@@ -142,7 +151,9 @@ describe('When displaying Endpoint Response Actions', () => {
         platform: 'windows',
       });
       const { getByTestId } = render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
 
       expect(getByTestId('sentineloneProcessesWindowsWarningTooltip')).not.toBeNull();
     });
@@ -165,7 +176,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display expected help groups', () => {
       render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
 
       expect(helpPanelSelectors.getHelpGroupLabels()).toEqual([
         ...sortBy(Object.values(HELP_GROUPS), 'position').map((group) => group.label),
@@ -175,7 +188,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display response action commands in the help panel in expected order', () => {
       render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
       const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
         HELP_GROUPS.responseActions.label
       );
@@ -201,7 +216,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display expected help groups', () => {
       render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
 
       expect(helpPanelSelectors.getHelpGroupLabels()).toEqual([
         ...sortBy(Object.values(HELP_GROUPS), 'position').map((group) => group.label),
@@ -211,7 +228,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
     it('should display response action commands in the help panel in expected order', () => {
       render({ commands });
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
       const commandsInPanel = helpPanelSelectors.getHelpCommandNames(
         HELP_GROUPS.responseActions.label
       );

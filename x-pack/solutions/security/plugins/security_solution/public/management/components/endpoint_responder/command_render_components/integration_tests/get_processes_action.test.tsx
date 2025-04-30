@@ -304,7 +304,9 @@ describe('When using processes action from response actions console', () => {
 
     it('should display correct entry in help panel', async () => {
       await render();
-      consoleSelectors.openHelpPanel();
+      act(() => {
+        consoleSelectors.openHelpPanel();
+      });
 
       expect(
         renderResult.getByTestId('test-commandList-Responseactions-processes')
@@ -344,7 +346,9 @@ describe('When using processes action from response actions console', () => {
 
       it('should not display `processes` command in console help', async () => {
         await render();
-        consoleSelectors.openHelpPanel();
+        act(() => {
+          consoleSelectors.openHelpPanel();
+        });
 
         expect(renderResult.queryByTestId('test-commandList-Responseactions-processes')).toBeNull();
       });
