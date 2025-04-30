@@ -15,17 +15,47 @@ import {
   EuiFlyout,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiSelectable,
   EuiSpacer,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+
+import { PLAYGROUND_MAX_SELECTED_INDICES_COUNT } from '../../common';
 import { getIndicesWithNoSourceFields } from '../utils/create_query';
 import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 import { useQueryIndices } from '../hooks/use_query_indices';
 import { handleSelectOptions } from '../utils/select_indices';
+
+interface IndicesErrorCalloutProps {
+  isFieldsLoading: boolean;
+  emptyIndices: string[];
+}
+const IndicesErrorCallout = ({ emptyIndices, isFieldsLoading }: IndicesErrorCalloutProps) => {
+  if (isFieldsLoading) return null;
+
+  if (emptyIndices.length > 0) {
+    return (
+      <EuiCallOut
+        color="danger"
+        data-test-subj="NoIndicesFieldsMessage"
+        title={
+          <FormattedMessage
+            id="xpack.searchPlayground.addDataSource.flyout.errorCallout"
+            defaultMessage="One or more indices have errors"
+          />
+        }
+      />
+    );
+  }
+  return null;
+};
 
 interface SelectIndicesFlyout {
   onClose: () => void;
@@ -37,32 +67,63 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
   const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
   const [selectedTempIndices, setSelectedTempIndices] = useState<string[]>(selectedIndices);
   const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedTempIndices);
-  const { emptyIndicesList, disabledSave } = useMemo((): {
+  const { emptyIndices, disabledSave } = useMemo((): {
     disabledSave: boolean;
-    emptyIndicesList: string | null;
+    emptyIndices: string[];
   } => {
-    if (selectedTempIndices.length === 0) {
+    if (
+      isFieldsLoading ||
+      selectedTempIndices.length === 0 ||
+      selectedTempIndices.length > PLAYGROUND_MAX_SELECTED_INDICES_COUNT
+    ) {
       return {
         disabledSave: true,
-        emptyIndicesList: null,
+        emptyIndices: [],
       };
     }
-    const emptyIndices = getIndicesWithNoSourceFields(fields);
+    const emptyIndicesList = getIndicesWithNoSourceFields(fields);
     return {
-      disabledSave: (emptyIndices?.length ?? 0) > 0,
-      emptyIndicesList: emptyIndices && emptyIndices.length > 0 ? emptyIndices.join(', ') : null,
+      disabledSave: (emptyIndicesList?.length ?? 0) > 0,
+      emptyIndices: emptyIndicesList ?? [],
     };
-  }, [fields, selectedTempIndices]);
+  }, [fields, isFieldsLoading, selectedTempIndices]);
   const indexOptions = useMemo(
     () =>
-      indices.map(
-        (index, num): EuiSelectableOption => ({
+      indices.map((index, num): EuiSelectableOption => {
+        const option: EuiSelectableOption = {
           label: index,
           checked: selectedTempIndices.includes(index) ? 'on' : undefined,
           'data-test-subj': `sourceIndex-${num}`,
-        })
-      ),
-    [indices, selectedTempIndices]
+        };
+        if (emptyIndices.includes(index)) {
+          option.append = (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.searchPlayground.addDataSource.flyout.emptyIndexTooltip',
+                { defaultMessage: 'No fields found in index' }
+              )}
+            >
+              <EuiIcon type="warning" color="danger" />
+            </EuiToolTip>
+          );
+        } else if (
+          selectedTempIndices.includes(index) &&
+          fields[index] &&
+          fields[index].source_fields.length > 0
+        ) {
+          option.append = (
+            <FormattedMessage
+              id="xpack.searchPlayground.addDataSource.flyout.indexFieldCount"
+              defaultMessage="{fieldCount, plural, one {# Field} other {# Fields}}"
+              values={{ fieldCount: fields[index].source_fields.length }}
+            />
+          );
+        }
+
+        return option;
+      }),
+    [indices, selectedTempIndices, emptyIndices, fields]
   );
   const handleSaveQuery = () => {
     setSelectedIndices(selectedTempIndices);
@@ -76,6 +137,10 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         searchable
         height="full"
         searchProps={{
+          placeholder: i18n.translate(
+            'xpack.searchPlayground.addDataSource.flyout.search.placeholder',
+            { defaultMessage: 'Search' }
+          ),
           onChange: setQuery,
         }}
         options={indexOptions}
@@ -83,6 +148,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         listProps={{
           showIcons: true,
           bordered: false,
+          onFocusBadge: false,
         }}
         isLoading={isIndicesLoading}
       >
@@ -93,38 +159,54 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
                 <h2>
                   <FormattedMessage
                     id="xpack.searchPlayground.addDataSource.flyout.title"
-                    defaultMessage="Add data to query"
+                    defaultMessage="Add data"
                   />
                 </h2>
               </EuiTitle>
               <EuiSpacer />
               {search}
               <EuiSpacer size="s" />
-              <EuiTitle size="xxs">
-                <h5>
-                  <FormattedMessage
-                    id="xpack.searchPlayground.setupPage.addDataSource.flyout.groupOption"
-                    defaultMessage="Available indices"
-                  />
-                </h5>
-              </EuiTitle>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.searchPlayground.setupPage.addDataSource.flyout.selectedCount"
+                      defaultMessage="{selectedCount} selected"
+                      values={{
+                        selectedCount: selectedTempIndices.length,
+                      }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {selectedTempIndices.length === PLAYGROUND_MAX_SELECTED_INDICES_COUNT ? (
+                    <EuiText color="success" size="s">
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.addDataSource.flyout.maxAllowSelected.label"
+                        defaultMessage="Maximum selected"
+                      />
+                    </EuiText>
+                  ) : (
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.addDataSource.flyout.maxAllowIndices.label"
+                        defaultMessage="Maximum {maxIndices} allowed"
+                        values={{
+                          maxIndices: PLAYGROUND_MAX_SELECTED_INDICES_COUNT,
+                        }}
+                      />
+                    </EuiText>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlyoutHeader>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="xs" />
             {list}
           </>
         )}
       </EuiSelectable>
-      {!isFieldsLoading && emptyIndicesList !== null ? (
-        <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
-          <p>
-            <FormattedMessage
-              id="xpack.searchPlayground.addDataSource.flyout.warningCallout"
-              defaultMessage="No fields found for {errorMessage}. Try adding data to these indices."
-              values={{ errorMessage: emptyIndicesList }}
-            />
-          </p>
-        </EuiCallOut>
-      ) : null}
+      <EuiSpacer size="xs" />
+      <IndicesErrorCallout emptyIndices={emptyIndices} isFieldsLoading={isFieldsLoading} />
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -148,8 +230,8 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
               disabled={disabledSave}
             >
               <FormattedMessage
-                id="xpack.searchPlayground.setupPage.addDataSource.flyout.saveButton"
-                defaultMessage="Save and continue"
+                id="xpack.searchPlayground.setupPage.addDataSource.flyout.addDataButton"
+                defaultMessage="Add data"
               />
             </EuiButton>
           </EuiFlexItem>
