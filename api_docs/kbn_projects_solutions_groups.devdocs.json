@@ -253,7 +253,7 @@
           "\nModuleVisibility tells whether a module is accessible from any module (shared) or only from modules of the same group (private)"
         ],
         "signature": [
-          "\"private\" | \"shared\""
+          "\"shared\" | \"private\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/index.ts",
         "deprecated": false,
