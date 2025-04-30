@@ -34,10 +34,6 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         interval: {
           type: 'keyword',
         },
-        rrule: {
-          type: 'object',
-          dynamic: false,
-        },
       },
     },
     attempts: {

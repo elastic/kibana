@@ -1138,7 +1138,6 @@
     "runAt",
     "schedule",
     "schedule.interval",
-    "schedule.rrule",
     "scheduledAt",
     "scope",
     "status",

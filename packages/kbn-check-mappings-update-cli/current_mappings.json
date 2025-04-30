@@ -3766,10 +3766,6 @@
         "properties": {
           "interval": {
             "type": "keyword"
-          },
-          "rrule": {
-            "dynamic": false,
-            "type": "object"
           }
         }
       },

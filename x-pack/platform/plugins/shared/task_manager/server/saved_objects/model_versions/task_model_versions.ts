@@ -78,20 +78,7 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '5': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          schedule: {
-            properties: {
-              rrule: {
-                dynamic: false,
-              },
-            },
-          },
-        },
-      },
-    ],
+    changes: [],
     schemas: {
       forwardCompatibility: taskSchemaV5.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV5,
