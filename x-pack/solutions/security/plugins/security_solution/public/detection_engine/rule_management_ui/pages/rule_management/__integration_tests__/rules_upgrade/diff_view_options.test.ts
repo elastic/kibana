@@ -24,9 +24,7 @@ import { inputFieldValue } from './mock/set_field_value';
 describe('Rule upgrade preview Diff View options', () => {
   describe('non-customized field w/ an upgrade (AAB)', () => {
     it('shows default (incoming upgrade)', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Initial name',
@@ -34,17 +32,7 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Updated name',
         },
         diffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
-
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
 
@@ -55,9 +43,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows resolved value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Initial name',
@@ -65,17 +51,7 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Updated name',
         },
         diffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
-
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
       await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
@@ -90,9 +66,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows the same diff after saving unchanged field value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Initial name',
@@ -100,19 +74,10 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Updated name',
         },
         diffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
 
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Updated name' });
       await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
@@ -126,9 +91,7 @@ describe('Rule upgrade preview Diff View options', () => {
 
   describe('customized field w/o an upgrade (ABA)', () => {
     it('shows default (customization)', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -136,17 +99,7 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Customized name',
         },
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
-
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
 
@@ -157,9 +110,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows resolved value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -167,17 +118,7 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Customized name',
         },
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
-
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
       await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
@@ -192,9 +133,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows the same diff after saving unchanged field value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -202,19 +141,10 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Customized name',
         },
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
 
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Customized name' });
       await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
@@ -228,9 +158,7 @@ describe('Rule upgrade preview Diff View options', () => {
 
   describe('customized field w/ the matching upgrade (ABB)', () => {
     it('shows default (customization)', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Updated name',
@@ -238,17 +166,7 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Updated name',
         },
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
-
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
 
@@ -259,9 +177,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows incoming upgrade', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Updated name',
@@ -269,17 +185,7 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Updated name',
         },
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
-
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.UpdateFromElastic);
 
@@ -292,9 +198,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows resolved value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Updated name',
@@ -302,17 +206,7 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Updated name',
         },
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
-
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
       await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
@@ -327,9 +221,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows the same diff after saving unchanged field value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Updated name',
@@ -337,19 +229,10 @@ describe('Rule upgrade preview Diff View options', () => {
           merged: 'Updated name',
         },
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-        conflict: ThreeWayDiffConflict.NONE,
       });
 
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
-
-      toggleFieldAccordion(fieldUpgradeWrapper);
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Updated name' });
       await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
@@ -363,9 +246,7 @@ describe('Rule upgrade preview Diff View options', () => {
 
   describe('customized field w/ an upgrade resulting in a solvable conflict (ABC)', () => {
     it('shows default (merged value)', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -375,12 +256,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
 
@@ -391,9 +266,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows incoming upgrade', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -403,12 +276,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.UpdateFromElastic);
 
@@ -421,9 +288,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows original customization', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -433,12 +298,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.MyOriginalChanges);
 
@@ -451,9 +310,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows resolved value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -463,12 +320,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
       await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
@@ -483,9 +334,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows the same diff after saving unchanged field value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -496,15 +345,8 @@ describe('Rule upgrade preview Diff View options', () => {
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
 
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
-
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Merged name' });
       await saveAndAcceptFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
@@ -518,9 +360,7 @@ describe('Rule upgrade preview Diff View options', () => {
 
   describe('customized field w/ an upgrade resulting in a non-solvable conflict (ABC)', () => {
     it('shows default diff view (customization)', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -530,12 +370,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
 
@@ -546,9 +380,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows incoming upgrade', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -558,12 +390,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.UpdateFromElastic);
 
@@ -576,9 +402,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows resolved value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -588,12 +412,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
       await saveAndAcceptFieldValue(fieldUpgradeWrapper);
@@ -607,9 +425,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows the same diff after saving unchanged field value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           base: 'Initial name',
           current: 'Customized name',
@@ -620,13 +436,6 @@ describe('Rule upgrade preview Diff View options', () => {
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       });
 
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
-
-      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Customized name' });
       await saveAndAcceptFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
@@ -640,9 +449,7 @@ describe('Rule upgrade preview Diff View options', () => {
 
   describe('missing base - customized field w/ an upgrade resulting in a solvable conflict (-AB)', () => {
     it('shows default diff view (incoming update)', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           current: 'Customized name',
           target: 'Updated name',
@@ -651,12 +458,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
 
@@ -667,9 +468,7 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows the same diff after saving unchanged field value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           current: 'Customized name',
           target: 'Updated name',
@@ -678,12 +477,6 @@ describe('Rule upgrade preview Diff View options', () => {
         diffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
-
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       await acceptSuggestedFieldValue(fieldUpgradeWrapper);
 
@@ -696,23 +489,17 @@ describe('Rule upgrade preview Diff View options', () => {
     });
 
     it('shows resolved value', async () => {
-      mockRuleUpgradeReviewData({
-        ruleType: 'query',
-        fieldName: 'name',
+      const { fieldUpgradeWrapper, diffViewSection, diffViewSelector } = await setup({
         fieldVersions: {
           current: 'Customized name',
           target: 'Updated name',
           merged: 'Customized name',
         },
-        diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-        conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+        diffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
       });
 
-      const { getByTestId } = await renderRuleUpgradeFlyout();
-
-      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
-      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
-      const diffViewSelector = within(diffViewSection).getByRole('combobox');
+      switchToFieldEdit(fieldUpgradeWrapper);
 
       await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
       await saveAndAcceptFieldValue(fieldUpgradeWrapper);
@@ -726,6 +513,50 @@ describe('Rule upgrade preview Diff View options', () => {
     });
   });
 });
+
+interface SetupParams {
+  fieldVersions: {
+    base?: string;
+    current: string;
+    target: string;
+    merged: string;
+  };
+  diffOutcome: ThreeWayDiffOutcome;
+  conflict?: ThreeWayDiffConflict;
+}
+
+interface SetupResult {
+  fieldUpgradeWrapper: HTMLElement;
+  diffViewSection: HTMLElement;
+  diffViewSelector: HTMLElement;
+}
+
+async function setup({
+  fieldVersions,
+  diffOutcome,
+  conflict = ThreeWayDiffConflict.NONE,
+}: SetupParams): Promise<SetupResult> {
+  mockRuleUpgradeReviewData({
+    ruleType: 'query',
+    fieldName: 'name',
+    fieldVersions,
+    diffOutcome,
+    conflict,
+  });
+
+  const { getByTestId } = await renderRuleUpgradeFlyout();
+  const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
+
+  // Fields w/o conflicts are shown collapsed
+  if (conflict === ThreeWayDiffConflict.NONE) {
+    toggleFieldAccordion(fieldUpgradeWrapper);
+  }
+
+  const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
+  const diffViewSelector = within(diffViewSection).getByRole('combobox');
+
+  return { fieldUpgradeWrapper, diffViewSection, diffViewSelector };
+}
 
 function switchDiffViewTo(diffViewSelector: HTMLElement, option: VersionsPickerOptionEnum): void {
   act(() => {
