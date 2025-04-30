@@ -131,7 +131,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
         });
 
     const splitValueQueries = Object.entries(splitValues).map(([fieldName, values]) => {
-      const queries = `${values
+      const queries = values
         .map((v) => {
           try {
             // If the value is a string, first attempt to parse it as a JSON-formatted array
@@ -150,7 +150,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
             typeof v === 'number' ? v : formatStringForESQL(v ?? '')
           }`;
         })
-        .join(' OR ')}`;
+        .join(' OR ');
       return values.length === 1 ? queries : `(${queries})`;
     });
     const conditionsQuery = [...splitValueQueries, thresholdQuery].join(' AND ');
