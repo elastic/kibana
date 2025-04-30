@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RecentlyAccessed } from './recently_accessed';
-
-export { NavigationPanel, PanelProvider } from './panel';
-
-export type { Props as RecentlyAccessedProps } from './recently_accessed';
-
-export { FeedbackBtn } from './feedback_btn';
-
-export type { PanelContent, PanelComponentProps } from './panel';
-
-export { NavigationSectionUI } from './navigation_section';
+export { NavigationSectionUI } from './navigation_section_ui';
