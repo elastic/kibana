@@ -43,6 +43,10 @@ class MockOpenApiTool extends OpenApiTool<{}> {
     return this.getParametersAsZodSchema(...args);
   }
 
+  callGetOperations() {
+    return this.getOperations();
+  }
+
   static async createTestableOpenApiTool({
     llmType,
   }: {
@@ -125,6 +129,17 @@ const mockPostOperation = {
 } as unknown as Operation;
 
 describe('OpenApiTool', () => {
+  it("get operations", async () => {
+    const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
+      llmType: "openai"
+    });
+
+    const operations = openApiTool.callGetOperations()
+
+    expect(operations.length).toEqual(3);
+    expect(operations.map(operation => operation.getOperationId())).toEqual(['listPets', 'createPets', 'showPetById']);
+  })
+
   it("returns tool agents grouped by tags", async () => {
     const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
       llmType: "openai"
