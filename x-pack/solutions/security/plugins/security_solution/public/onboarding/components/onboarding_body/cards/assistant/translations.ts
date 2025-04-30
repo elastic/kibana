@@ -10,6 +10,6 @@ import { i18n } from '@kbn/i18n';
 export const ASSISTANT_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.title',
   {
-    defaultMessage: 'Configure AI Assistant',
+    defaultMessage: 'Configure AI Provider',
   }
 );
