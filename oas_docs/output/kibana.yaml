@@ -52682,6 +52682,22 @@ paths:
             oneOf:
               - type: string
               - type: array
+        - description: |
+            Specifies whether to apply logical AND filtering for specific fields. Accepts either a string with values "tags" or "locations" or an array containing both.
+          in: query
+          name: useLogicalAndFor
+          schema:
+            oneOf:
+              - enum:
+                  - tags
+                  - locations
+                type: string
+              - items:
+                  enum:
+                    - tags
+                    - locations
+                  type: string
+                type: array
       responses:
         '200':
           content:
@@ -65128,6 +65144,7 @@ components:
               type: string
           required:
             - start_date
+            - end_date
       required:
         - action
         - run
@@ -68360,6 +68377,10 @@ components:
       properties:
         execution_gap_duration_s:
           description: Duration in seconds of execution gap
+          minimum: 0
+          type: integer
+        frozen_indices_queried_count:
+          description: Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.
           minimum: 0
           type: integer
         gap_range:
