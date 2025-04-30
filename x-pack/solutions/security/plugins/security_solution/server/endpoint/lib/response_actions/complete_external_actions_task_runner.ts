@@ -9,6 +9,7 @@ import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-p
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
@@ -135,6 +136,7 @@ export class CompleteExternalActionsTaskRunner
               agentType,
               taskType: this.taskType,
               taskId: this.taskInstanceId,
+              spaceId: DEFAULT_SPACE_ID,
             });
 
           return agentTypeActionsClient

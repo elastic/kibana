@@ -6,6 +6,7 @@
  */
 
 import { each } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
@@ -36,6 +37,7 @@ export const endpointResponseAction = async (
   const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
     agentType: 'endpoint',
     username: 'unknown',
+    spaceId: DEFAULT_SPACE_ID, // TODO:PT Will be updated with team issue #12312
   });
 
   const automatedProcessActionsEnabled =
