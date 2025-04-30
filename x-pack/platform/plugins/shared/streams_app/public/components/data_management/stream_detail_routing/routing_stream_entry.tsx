@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -18,41 +19,43 @@ import {
 } from '@elastic/eui';
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { RoutingDefinition, isDescendantOf, isNeverCondition } from '@kbn/streams-schema';
-import React from 'react';
+import { isDescendantOf, isNeverCondition } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
-import { ControlBar } from './control_bar';
+import { EditRoutingRuleControls } from './control_bars';
+import { RoutingDefinitionWithUIAttributes } from './types';
 
 export function RoutingStreamEntry({
-  draggableProvided,
-  child,
-  onChildChange,
-  onEditStateChange,
-  edit,
   availableStreams,
-  disableEditButton,
+  draggableProvided,
+  isEditing,
+  isEditingEnabled,
+  onChange,
+  onEditIconClick,
+  routingRule,
 }: {
-  draggableProvided: DraggableProvided;
-  child: RoutingDefinition;
-  onChildChange: (child: RoutingDefinition) => void;
-  onEditStateChange: () => void;
-  edit?: boolean;
   availableStreams: string[];
-  disableEditButton?: boolean;
+  draggableProvided: DraggableProvided;
+  isEditing: boolean;
+  isEditingEnabled: boolean;
+  onChange: (child: Partial<RoutingDefinitionWithUIAttributes>) => void;
+  onEditIconClick: (id: string) => void;
+  routingRule: RoutingDefinitionWithUIAttributes;
 }) {
-  const children = availableStreams.filter((stream) =>
-    isDescendantOf(child.destination, stream)
-  ).length;
-  const router = useStreamsAppRouter();
   const theme = useEuiTheme();
+  const router = useStreamsAppRouter();
+
+  const childrenCount = availableStreams.filter((stream) =>
+    isDescendantOf(routingRule.destination, stream)
+  ).length;
+
   return (
     <EuiPanel
       hasShadow={false}
       hasBorder
-      color={isNeverCondition(child.if) ? 'transparent' : undefined}
+      color={isNeverCondition(routingRule.if) ? 'transparent' : undefined}
       paddingSize="s"
       className={css`
         overflow: hidden;
@@ -66,7 +69,7 @@ export function RoutingStreamEntry({
         }
       `}
     >
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiPanel
             className="streamsDragHandle"
@@ -81,74 +84,62 @@ export function RoutingStreamEntry({
             <EuiIcon type="grabOmnidirectional" />
           </EuiPanel>
         </EuiFlexItem>
-        {isNeverCondition(child.if) && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
-              {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
-                defaultMessage: 'Disabled',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            href={router.link('/{key}/management/{tab}', {
-              path: { key: child.destination, tab: 'route' },
+        {isNeverCondition(routingRule.if) && (
+          <EuiBadge color="hollow">
+            {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
+              defaultMessage: 'Disabled',
             })}
-            data-test-subj="streamsAppRoutingStreamEntryButton"
-          >
-            <EuiText size="s">{child.destination}</EuiText>
-          </EuiLink>
-        </EuiFlexItem>
+          </EuiBadge>
+        )}
+        <EuiLink
+          href={router.link('/{key}/management/{tab}', {
+            path: { key: routingRule.destination, tab: 'route' },
+          })}
+          data-test-subj="streamsAppRoutingStreamEntryButton"
+        >
+          <EuiText size="s">{routingRule.destination}</EuiText>
+        </EuiLink>
         <EuiFlexItem
           className={css`
             overflow: hidden;
           `}
         >
-          <EuiText
-            size="s"
-            color="subdued"
-            className={css`
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            `}
-          >
-            <ConditionMessage condition={child.if} />
+          <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
+            <ConditionMessage condition={routingRule.if} />
           </EuiText>
         </EuiFlexItem>
-        {children > 0 && (
+        {childrenCount > 0 && (
           <EuiBadge color="hollow">
             {i18n.translate('xpack.streams.streamDetailRouting.numberChildren', {
-              defaultMessage: '{children, plural, one {# child} other {# children}}',
-              values: { children },
+              defaultMessage: '{childrenCount, plural, one {# child} other {# children}}',
+              values: { childrenCount },
             })}
           </EuiBadge>
         )}
         <EuiButtonIcon
           data-test-subj="streamsAppRoutingStreamEntryButton"
           iconType="pencil"
-          disabled={disableEditButton}
-          onClick={() => {
-            onEditStateChange();
-          }}
+          disabled={!isEditingEnabled}
+          onClick={() => onEditIconClick(routingRule.id)}
           aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
             defaultMessage: 'Edit',
           })}
         />
       </EuiFlexGroup>
-      {edit && (
+      {isEditing && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <RoutingConditionEditor
-            condition={child.if}
-            onConditionChange={(condition) => {
-              onChildChange({
-                ...child,
-                if: condition,
-              });
-            }}
+            condition={routingRule.if}
+            onConditionChange={(condition) => onChange({ if: condition })}
           />
-          <ControlBar />
+          <EditRoutingRuleControls
+            relatedStreams={availableStreams.filter(
+              (streamName) =>
+                streamName === routingRule.destination ||
+                isDescendantOf(routingRule.destination, streamName)
+            )}
+            routingRule={routingRule}
+          />
         </EuiFlexGroup>
       )}
     </EuiPanel>

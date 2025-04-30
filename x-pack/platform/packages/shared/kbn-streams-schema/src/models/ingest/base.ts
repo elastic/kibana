@@ -10,7 +10,7 @@ import { NonEmptyString } from '@kbn/zod-helpers';
 import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
-import { RoutingDefinition, routingDefinitionSchema } from './routing';
+import { RoutingDefinition, routingDefinitionListSchema } from './routing';
 import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 
 interface IngestBase {
@@ -64,7 +64,7 @@ const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
   z.object({
     wired: z.object({
       fields: fieldDefinitionSchema,
-      routing: z.array(routingDefinitionSchema),
+      routing: routingDefinitionListSchema,
     }),
   })
 );
