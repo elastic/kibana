@@ -12,7 +12,6 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import * as i18n from './translations';
 import { Config } from './types';
-import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export const DEFAULT_URL = 'https://api.openai.com/v1/chat/completions' as const;
 export const DEFAULT_URL_AZURE =
@@ -266,33 +265,6 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
           {i18n.OPTIONAL_LABEL}
         </EuiText>
       ),
-    },
-  },
-{
-    id: 'verificationMode',
-    Component: SelectField,
-    config: {
-      label: i18n.VERIFICATION_MODE_LABEL,
-      defaultValue: 'full',
-      options: [
-        { value: 'full', text: i18n.VERIFICATION_MODE_FULL },
-        { value: 'certificate', text: i18n.VERIFICATION_MODE_CERTIFICATE },
-        { value: 'none', text: i18n.VERIFICATION_MODE_NONE },
-      ],
-      helpText: (
-        <FormattedMessage
-          defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate' verifies the certificate but not the hostname, 'None' skips all verification (use cautiously, e.g., for testing)."
-          id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
-        />
-      ),
-      euiFieldProps: {
-        append: (
-          <EuiText size="xs" color="subdued">
-            {i18n.OPTIONAL_LABEL}
-          </EuiText>
-        ),
-        'data-test-subj': 'verificationModeSelect',
-      },
     },
   },
 ];
