@@ -45,7 +45,6 @@ jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_permissions');
-jest.mock('../../hooks/use_capabilities');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('@kbn/ebt-tools');
 
