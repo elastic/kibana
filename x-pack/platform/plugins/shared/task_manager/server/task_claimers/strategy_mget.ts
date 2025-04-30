@@ -330,7 +330,7 @@ async function searchAvailableTasks({
       // Task must be enabled
       EnabledTask,
       // Specific task type
-      OneOfTaskTypes('task.taskType', types),
+      OneOfTaskTypes('task.taskType', types.split(',')),
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
@@ -356,7 +356,7 @@ async function searchAvailableTasks({
 
 interface ClaimPartitions {
   unlimitedTypes: string[];
-  limitedTypes: Map<string[], number>;
+  limitedTypes: Map<string, number>;
 }
 
 interface BuildClaimPartitionsOpts {
@@ -401,12 +401,12 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
         }
       }
       if (minCapacity) {
-        result.limitedTypes.set(isSharingConcurrency, minCapacity);
+        result.limitedTypes.set(isSharingConcurrency.join(','), minCapacity);
       }
     } else {
       const capacity = getCapacity(definition.type) / definition.cost;
       if (capacity !== 0) {
-        result.limitedTypes.set([definition.type], capacity);
+        result.limitedTypes.set(definition.type, capacity);
       }
     }
   }
