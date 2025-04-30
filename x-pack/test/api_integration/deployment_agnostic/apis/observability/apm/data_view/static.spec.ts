@@ -12,12 +12,12 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import request from 'superagent';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
-import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   SupertestReturnType,
   ApmApiError,
-} from '../../../../../../apm_api_integration/common/apm_api_supertest';
+} from '@kbn/test-suites-xpack-observability/api_integration/apm/common/apm_api_supertest';
+import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
