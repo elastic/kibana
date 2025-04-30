@@ -25,7 +25,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { formatRulesetName } from '../../utils/query_rules_utils';
-// import { usePutSynonymsSet } from '../../hooks/use_put_synonyms_set';
+import { usePutRuleset } from '../../hooks/use_put_query_rules_ruleset';
 // import { useUsageTracker } from '../../hooks/use_usage_tracker';
 // import { AnalyticsEvents } from '../../analytics/constants';
 
@@ -41,14 +41,14 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
   const [rawName, setRawName] = useState('');
   const [conflictError, setConflictError] = useState(false);
   const [forceWrite, setForceWrite] = useState(false);
-  // const { mutate: createSynonymsSet } = usePutSynonymsSet(
-  //   () => {
-  //     onClose();
-  //   },
-  //   () => {
-  //     setConflictError(true);
-  //   }
-  // );
+  const { mutate: createRuleset } = usePutRuleset(
+    () => {
+      onClose();
+    },
+    () => {
+      setConflictError(true);
+    }
+  );
   // const usageTracker = useUsageTracker();
   return (
     <EuiModal onClose={onClose}>
@@ -68,7 +68,7 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
           onSubmit={(e) => {
             e.preventDefault();
             // usageTracker?.click(AnalyticsEvents.new_set_created);
-            // createSynonymsSet({ synonymsSetId: name, forceWrite });
+            createRuleset({ rulesetId: name, forceWrite });
           }}
         >
           <EuiFormRow
