@@ -8,6 +8,7 @@
 import type {
   ElasticsearchClient,
   ISavedObjectsImporter,
+  SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
@@ -144,18 +145,20 @@ export async function createCCSIndexPatterns(
     return;
   }
 
-  const indexPatternSavedObjectsWithRemoteCluster = [];
+  const indexPatternSavedObjectsWithRemoteCluster: SavedObject[] = [];
 
   for (const clusterName of remoteClusterNames) {
     for (const indexPatternType of indexPatternTypes) {
       indexPatternSavedObjectsWithRemoteCluster.push({
         id: `${clusterName}:${indexPatternType}-*`,
         type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        typeMigrationVersion: '8.0.0',
         attributes: {
           title: `${clusterName}:${indexPatternType}-*`,
           timeFieldName: '@timestamp',
           allowNoIndex: true,
         },
+        references: [],
       });
     }
   }
