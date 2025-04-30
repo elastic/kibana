@@ -10,7 +10,7 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { getAddESQLControlButtonTitle } from '../../_dashboard_app_strings';
@@ -53,7 +53,7 @@ export const AddESQLControlButton = ({ closePopover, controlGroupApi, ...rest }:
           await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
             queryString: '',
             variableType: ESQLVariableType.VALUES,
-            controlType: 'VALUES_FROM_QUERY',
+            controlType: EsqlControlType.VALUES_FROM_QUERY,
             esqlVariables: variablesInParent,
             onSaveControl,
             onCancelControl: closePopover,
