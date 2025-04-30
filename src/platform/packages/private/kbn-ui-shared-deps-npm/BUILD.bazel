@@ -40,6 +40,7 @@ RUNTIME_DEPS = [
   "@npm//@elastic/apm-rum-core",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
+  "@npm//@elastic/eui-amsterdam",
   "@npm//@elastic/numeral",
   "@npm//@emotion/cache",
   "@npm//@emotion/react",
@@ -95,9 +96,11 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
+      "EUI_AMSTERDAM": "$(EUI_AMSTERDAM)",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
+      "EUI_AMSTERDAM": "$(EUI_AMSTERDAM)",
     },
   })
 )
