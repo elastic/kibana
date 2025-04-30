@@ -11,22 +11,31 @@ import {
   ASSETS_URL,
   ALERTS_URL,
   ASSET_INVENTORY_URL,
+  BLOCKLIST_URL,
   CREATE_RULE_URL,
   CSP_DASHBOARD_URL,
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
   CSP_VULNERABILITIES_URL,
   DASHBOARDS_URL,
+  ENDPOINTS_URL,
   ENTITY_ANALYTICS_MANAGEMENT_URL,
   ENTITY_ANALYTICS_ENTITY_STORE_URL,
+  EVENT_FILTERS_URL,
+  EXCEPTIONS_URL,
   EXPLORE_URL,
   GET_STARTED_URL,
+  HOST_ISOLATION_EXCEPTIONS_URL,
   INVESTIGATIONS_URL,
   HOSTS_URL,
   NETWORK_URL,
   NOTES_URL,
   OVERVIEW_URL,
+  POLICIES_URL,
+  RESPONSE_ACTIONS_HISTORY,
+  THREAT_INTELLIGENCE_URL,
   TIMELINES_URL,
+  TRUSTED_APPS_URL,
   USERS_URL,
 } from '../../../urls/navigation';
 import { AI_SOC_NAVIGATION } from '../../../screens/ai_soc';
@@ -64,6 +73,16 @@ const redirectedLinks = [
   OVERVIEW_URL,
   TIMELINES_URL,
   USERS_URL,
+];
+const upSellLinks = [EXCEPTIONS_URL, THREAT_INTELLIGENCE_URL];
+const privilegeRequiredLinks = [
+  ENDPOINTS_URL,
+  POLICIES_URL,
+  TRUSTED_APPS_URL,
+  EVENT_FILTERS_URL,
+  BLOCKLIST_URL,
+  HOST_ISOLATION_EXCEPTIONS_URL,
+  RESPONSE_ACTIONS_HISTORY,
 ];
 
 describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
@@ -131,6 +150,25 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
       redirectedLinks.forEach((link) => {
         cy.visit(link);
         cy.url().should('include', GET_STARTED_URL);
+      });
+    });
+  });
+
+  // TODO: Undecided if these pages should be redirected as well.
+  describe('Non-redirected pages ', () => {
+    it('shows up-sell callout for a set of pages', () => {
+      upSellLinks.forEach((link) => {
+        cy.visit(link);
+        cy.url().should('include', link);
+        cy.get('.euiTitle').contains('Do more with Security');
+      });
+    });
+
+    it('shows privilege required callout for endpoint related pages', () => {
+      privilegeRequiredLinks.forEach((link) => {
+        cy.visit(link);
+        cy.url().should('include', link);
+        cy.getByTestSubjContains('noPrivilegesPage');
       });
     });
   });

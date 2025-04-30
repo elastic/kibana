@@ -19,6 +19,9 @@ export const POLICIES_URL = '/app/security/administration/policy';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';
 export const BLOCKLIST_URL = '/app/security/administration/blocklist';
+export const HOST_ISOLATION_EXCEPTIONS_URL = `app/security/administration/host_isolation_exceptions`;
+export const RESPONSE_ACTIONS_HISTORY = `app/security/administration/response_actions_history`;
+
 export const CSP_BENCHMARKS_URL = '/app/security/cloud_security_posture/benchmarks';
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
 export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/configurations';
