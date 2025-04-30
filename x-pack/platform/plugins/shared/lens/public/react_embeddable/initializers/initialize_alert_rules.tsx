@@ -9,7 +9,7 @@ import { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { OverlayRef } from '@kbn/core/public';
 import { unitsMap } from '@kbn/datemath';
-import { TimeRange } from '@kbn/es-query';
+import { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
@@ -155,7 +155,7 @@ function timeRangeToNearestTimeWindow(timeRange: TimeRange) {
   return { timeWindowUnit, timeWindowSize };
 }
 
-function parseEsqlVariables(query: { esql: string } | undefined, variables: ESQLControlVariable[]) {
+function parseEsqlVariables(query: AggregateQuery | undefined, variables: ESQLControlVariable[]) {
   if (!query) return query;
   let parsedQuery = query.esql;
 
