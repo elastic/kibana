@@ -82,7 +82,7 @@ export const FeatureFeedbackButton = ({
       href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType, sanitizedPath)}
       target="_blank"
       color={defaultButton ? undefined : 'warning'}
-      iconType={defaultButton ? undefined : 'editorComment'}
+      iconType={defaultButton ? undefined : 'comment'}
       data-test-subj={dts}
       onClickCapture={onClickCapture}
     >

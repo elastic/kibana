@@ -40,7 +40,7 @@ export function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
               defaultMessage: 'Streams is currently in tech preview',
             })}
             color="hollow"
-            iconType="beaker"
+            iconType="flask"
           />
         </EuiFlexGroup>
         <EuiFlexGroup

@@ -73,7 +73,7 @@ export function ProfilingAppPageTemplate({
             href={PROFILING_FEEDBACK_LINK}
             target="_blank"
             color="warning"
-            iconType="editorComment"
+            iconType="comment"
           >
             {i18n.translate('xpack.profiling.header.giveFeedbackLink', {
               defaultMessage: 'Give feedback',

@@ -37,7 +37,7 @@ export function TipsAndResources() {
 
   const cards = [
     {
-      icon: 'beaker',
+      icon: 'flask',
       title: i18n.translate('xpack.apm.storageExplorer.resources.errorMessages.title', {
         defaultMessage: 'Reduce transactions',
       }),
@@ -112,7 +112,7 @@ export function TipsAndResources() {
       }),
       href: getStorageExplorerFeedbackHref(),
       target: '_blank',
-      iconType: 'editorComment',
+      iconType: 'comment',
     },
   ];
 

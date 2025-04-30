@@ -75,7 +75,7 @@ export function WaterfallContainer({
                   })}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge icon="beaker" />
+                  <TechnicalPreviewBadge icon="flask" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }

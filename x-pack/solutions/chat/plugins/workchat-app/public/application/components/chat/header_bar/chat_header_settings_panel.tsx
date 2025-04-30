@@ -47,7 +47,7 @@ export const ChatHeaderSettingsPanel: React.FC<ChatHeaderSettingsPanel> = ({
       color="text"
       display="base"
       size="m"
-      iconType="controlsHorizontal"
+      iconType="controls"
       iconSize="m"
       onClick={onButtonClick}
     />

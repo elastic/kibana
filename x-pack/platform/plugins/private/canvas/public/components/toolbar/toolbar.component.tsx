@@ -133,7 +133,7 @@ export const Toolbar: FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="text"
-                    iconType="editorCodeBlock"
+                    iconType="code"
                     onClick={() => toggleTray('expression')}
                     data-test-subj="canvasExpressionEditorButton"
                   >

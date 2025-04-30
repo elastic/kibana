@@ -49,7 +49,7 @@ export function FeedbackModal({
                 color: euiTheme.colors.emptyShade,
               }}
               data-test-subj="xpack.apm.eemFeedback.button.open"
-              iconType="discuss"
+              iconType="comment"
               target="_blank"
               size="s"
               href={getSurveyFeedbackURL({

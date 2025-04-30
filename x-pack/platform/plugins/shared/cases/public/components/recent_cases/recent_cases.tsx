@@ -99,7 +99,7 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                 </EuiFlexItem>
                 <IconWithCount
                   count={c.totalComment}
-                  icon={'editorComment'}
+                  icon={'comment'}
                   tooltip={i18n.COMMENTS}
                 />
               </EuiFlexGroup>

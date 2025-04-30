@@ -196,7 +196,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
+      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="flask" />,
       hidden: isMetricsTabHidden({
         agentName,
         serverlessType,
@@ -238,7 +238,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
+      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="flask" />,
       hidden: !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType),
     },
     {
@@ -290,7 +290,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
     },
   ];
 

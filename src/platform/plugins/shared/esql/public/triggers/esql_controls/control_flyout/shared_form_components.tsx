@@ -337,7 +337,7 @@ export function Header({ isInEditMode }: { isInEditMode: boolean }) {
           >
             <EuiBetaBadge
               label=""
-              iconType="beaker"
+              iconType="flask"
               size="s"
               css={css`
                 vertical-align: middle;

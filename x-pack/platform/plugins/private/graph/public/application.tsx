@@ -86,7 +86,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
       tooltip: i18n.translate('xpack.graph.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save Graph workspaces',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
 

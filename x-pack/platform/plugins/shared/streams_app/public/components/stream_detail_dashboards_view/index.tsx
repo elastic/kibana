@@ -113,7 +113,7 @@ export function StreamDetailDashboardsView({
           {renderContentPackItems && (
             <EuiButton
               data-test-subj="streamsAppStreamDetailExportContentPackButton"
-              iconType="exportAction"
+              iconType="export"
               isDisabled={linkedDashboards.length === 0}
               onClick={() => {
                 setIsExportFlyoutOpen(true);

@@ -16,5 +16,5 @@ export const readOnlyBadge = {
   tooltip: i18n.translate('management.settings.badge.readOnly.tooltip', {
     defaultMessage: 'Unable to save advanced settings',
   }),
-  iconType: 'glasses',
+  iconType: 'readOnly',
 };

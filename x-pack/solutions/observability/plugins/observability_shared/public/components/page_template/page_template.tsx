@@ -149,7 +149,7 @@ export function ObservabilityPageTemplate({
             ) : entry.isTechnicalPreview ? (
               <NavNameWithBetaBadge
                 label={entry.label}
-                iconType="beaker"
+                iconType="flask"
                 isTechnicalPreview={true}
               />
             ) : (

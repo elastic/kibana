@@ -140,7 +140,7 @@ export const CreateSearchApplication = ({ onClose }: CreateSearchApplicationFlyo
                 { defaultMessage: 'Beta feature' }
               )}
               color="warning"
-              iconType="beaker"
+              iconType="flask"
             >
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.createSearchApplication.featureCallOut.description"

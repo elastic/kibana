@@ -42,7 +42,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
           defaultMessage: 'Developer tools',
         }),
         link: 'dev_tools',
-        icon: 'editorCodeBlock',
+        icon: 'code',
       },
       {
         type: 'navGroup',

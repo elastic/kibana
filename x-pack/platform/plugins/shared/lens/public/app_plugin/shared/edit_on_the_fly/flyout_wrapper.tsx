@@ -76,7 +76,7 @@ export const FlyoutWrapper = ({
                       >
                         <EuiBetaBadge
                           label=""
-                          iconType="beaker"
+                          iconType="flask"
                           size="s"
                           css={css`
                             vertical-align: middle;

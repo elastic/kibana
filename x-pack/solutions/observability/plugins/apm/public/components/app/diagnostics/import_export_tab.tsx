@@ -87,7 +87,7 @@ function ImportCard() {
   });
   return (
     <EuiCard
-      icon={<EuiIcon size="xxl" type="exportAction" />}
+      icon={<EuiIcon size="xxl" type="export" />}
       title="Import diagnostics report"
       description={
         isImported

@@ -15,7 +15,7 @@ export const SubItemBadge = ({ icon, tooltip }: { icon?: string; tooltip?: strin
   <EuiBetaBadge
     size="s"
     label=""
-    iconType={icon ?? 'beaker'}
+    iconType={icon ?? 'flask'}
     alignment="middle"
     tooltipContent={tooltip}
   />

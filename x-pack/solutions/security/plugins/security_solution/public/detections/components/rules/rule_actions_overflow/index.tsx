@@ -137,7 +137,7 @@ const RuleActionsOverflowComponent = ({
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
-              icon="exportAction"
+              icon="export"
               disabled={!userHasPermissions}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {

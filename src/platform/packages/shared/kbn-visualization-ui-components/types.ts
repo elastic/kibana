@@ -21,7 +21,7 @@ export type SharedSetOfIcons =
   | 'bell'
   | 'bolt'
   | 'bug'
-  | 'editorComment'
+  | 'comment'
   | 'flag'
   | 'heart'
   | 'mapMarker'

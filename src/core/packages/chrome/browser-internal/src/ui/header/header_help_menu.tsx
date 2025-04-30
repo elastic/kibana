@@ -314,7 +314,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
           case 'discuss': {
             const { linkType, ...rest } = link;
             return createCustomLink(index, getFeedbackText(), addSpacer, {
-              iconType: 'editorComment',
+              iconType: 'comment',
               target: '_blank',
               rel: 'noopener',
               ...rest,

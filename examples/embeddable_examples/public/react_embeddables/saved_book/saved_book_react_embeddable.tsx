@@ -215,7 +215,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                   <EuiFlexItem>
                     <EuiFlexGroup wrap responsive={false} gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiBadge iconType="userAvatar" color="hollow">
+                        <EuiBadge iconType="user" color="hollow">
                           {authorName}
                         </EuiBadge>
                       </EuiFlexItem>

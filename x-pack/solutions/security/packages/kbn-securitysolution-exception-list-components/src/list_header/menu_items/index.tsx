@@ -107,7 +107,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
           actions={[
             {
               key: '1',
-              icon: 'exportAction',
+              icon: 'export',
               label: i18n.EXCEPTION_LIST_HEADER_EXPORT_ACTION,
               onClick: () => {
                 if (typeof onExportList === 'function') onExportList();

@@ -117,7 +117,7 @@ export const getActionsColumns = ({
 
   const exportTimelineAction = {
     name: i18n.EXPORT_SELECTED,
-    icon: 'exportAction' as (typeof ICON_TYPES)[number],
+    icon: 'export' as (typeof ICON_TYPES)[number],
     type: 'icon',
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (enableExportTimelineDownloader != null) enableExportTimelineDownloader(selectedTimeline);

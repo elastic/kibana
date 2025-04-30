@@ -52,7 +52,7 @@ export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
   },
 
   {
-    value: 'editorComment',
+    value: 'comment',
     label: i18n.translate('eventAnnotationComponents.xyChart.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),

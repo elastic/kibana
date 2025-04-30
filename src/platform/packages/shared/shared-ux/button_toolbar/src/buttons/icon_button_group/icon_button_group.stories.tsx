@@ -32,7 +32,7 @@ const iconButtons = [
   {
     label: 'Control',
     onClick: action('onControlClick'),
-    iconType: 'controlsHorizontal',
+    iconType: 'controls',
   },
   {
     label: 'Link',
@@ -47,7 +47,7 @@ const iconButtons = [
   {
     label: 'Markup',
     onClick: action('onMarkupClick'),
-    iconType: 'visVega',
+    iconType: 'code',
   },
 ];
 

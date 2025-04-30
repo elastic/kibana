@@ -208,7 +208,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
                         <EuiFlexItem>
                           <EuiPanel hasShadow={false} paddingSize="l" className="eui-fullHeight">
                             <EuiEmptyPrompt
-                              iconType="beaker"
+                              iconType="flask"
                               title={<h3>{PLUGIN_NAME}</h3>}
                               body={<p>Tab: {label}</p>}
                             />

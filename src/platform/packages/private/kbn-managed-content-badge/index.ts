@@ -23,7 +23,7 @@ export const getManagedContentBadge: (
     defaultMessage: 'Managed',
   }),
   color: 'primary',
-  iconType: 'glasses',
+  iconType: 'readOnly',
   toolTipProps: enableTooltipProps
     ? ({
         content: tooltipText,

@@ -63,7 +63,7 @@ export class ShowConfigPanelAction
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return 'glasses';
+    return 'readOnly';
   }
 
   /**

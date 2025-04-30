@@ -139,7 +139,7 @@ export const useKnowledgeBaseTable = () => {
   const getIconForEntry = (entry: KnowledgeBaseEntryResponse): string => {
     if (entry.type === DocumentEntryType.value) {
       if (entry.kbResource === 'user') {
-        return 'userAvatar';
+        return 'user';
       }
       if (['esql', 'security_labs'].includes(entry.kbResource)) {
         return 'logoElastic';

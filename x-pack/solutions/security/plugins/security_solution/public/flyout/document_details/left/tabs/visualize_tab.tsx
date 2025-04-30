@@ -57,7 +57,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
 
 const graphVisualizationButton: EuiButtonGroupOptionProps = {
   id: GRAPH_ID,
-  iconType: 'beaker',
+  iconType: 'flask',
   iconSide: 'right',
   toolTipProps: {
     title: (

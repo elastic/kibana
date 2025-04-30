@@ -121,7 +121,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
           <h2>
             {i18n.SETTINGS_TITLE}{' '}
-            <EuiBetaBadge iconType={'beaker'} label={i18n.SETTINGS_BADGE} size="s" color="hollow" />
+            <EuiBetaBadge iconType={'flask'} label={i18n.SETTINGS_BADGE} size="s" color="hollow" />
           </h2>
         </EuiTitle>
         <EuiSpacer size="xs" />

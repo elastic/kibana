@@ -275,7 +275,7 @@ const FleetTopNav = memo(
         }),
         disableButton: true,
         className: readOnlyBtnClass,
-        iconType: 'glasses',
+        iconType: 'readOnly',
         tooltip: i18n.translate('xpack.fleet.appNavigation.readOnlyTooltip', {
           defaultMessage:
             "You can view most Fleet settings, but your current privileges don't allow you to perform all actions.",

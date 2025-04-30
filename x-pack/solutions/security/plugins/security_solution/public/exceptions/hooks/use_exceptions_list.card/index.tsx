@@ -139,7 +139,7 @@ export const useExceptionsListCard = ({
     () => [
       {
         key: 'Export',
-        icon: 'exportAction',
+        icon: 'export',
         label: i18n.EXPORT_EXCEPTION_LIST,
         onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
           if (listType === ExceptionListTypeEnum.ENDPOINT) {

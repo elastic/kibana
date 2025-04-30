@@ -27,7 +27,7 @@ export function createInputControlVisTypeDefinition(
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Input controls',
     }),
-    icon: 'controlsHorizontal',
+    icon: 'controls',
     group: VisGroups.TOOLS,
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Input controls are deprecated and will be removed in a future version.',

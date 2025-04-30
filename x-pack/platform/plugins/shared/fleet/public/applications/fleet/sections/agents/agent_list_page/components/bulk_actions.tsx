@@ -241,7 +241,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         />
       ),
       disabled: !authz.fleet.readAgents,
-      icon: <EuiIcon type="exportAction" size="m" />,
+      icon: <EuiIcon type="export" size="m" />,
       onClick: () => {
         closeMenu();
         setIsExportCSVModalOpen(true);

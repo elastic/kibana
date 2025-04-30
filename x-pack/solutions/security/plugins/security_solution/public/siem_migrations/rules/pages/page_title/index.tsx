@@ -35,7 +35,7 @@ export const PageTitle: React.FC = React.memo(() => {
         grow={false}
       >
         <EuiBetaBadge
-          iconType={'beaker'}
+          iconType={'flask'}
           label={i18n.BETA_LABEL}
           tooltipContent={i18n.BETA_TOOLTIP}
           size="m"

@@ -37,7 +37,7 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 label=""
-                iconType="beaker"
+                iconType="flask"
                 size="m"
                 color="hollow"
                 tooltipContent={
@@ -113,7 +113,7 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
           />{' '}
           <EuiBetaBadge
             label=""
-            iconType="beaker"
+            iconType="flask"
             size="m"
             color="hollow"
             tooltipContent={

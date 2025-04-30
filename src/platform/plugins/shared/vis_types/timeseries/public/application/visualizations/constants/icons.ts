@@ -33,7 +33,7 @@ export const ICON_TYPES_MAP = {
   [ICON_NAMES.BOLT]: 'bolt',
   [ICON_NAMES.BOMB]: bombIcon,
   [ICON_NAMES.BUG]: 'bug',
-  [ICON_NAMES.COMMENT]: 'editorComment',
+  [ICON_NAMES.COMMENT]: 'comment',
   [ICON_NAMES.EXCLAMATION_TRIANGLE]: 'warning',
   [ICON_NAMES.FIRE]: fireIcon,
   [ICON_NAMES.FLAG]: 'flag',

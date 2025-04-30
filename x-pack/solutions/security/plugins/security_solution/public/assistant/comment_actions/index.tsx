@@ -119,7 +119,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
           <EuiButtonIcon
             aria-label={i18n.ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE}
             color="primary"
-            iconType="editorComment"
+            iconType="comment"
             onClick={onAddNoteToTimeline}
           />
         </EuiToolTip>

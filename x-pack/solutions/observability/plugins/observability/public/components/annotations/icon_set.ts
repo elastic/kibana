@@ -78,7 +78,7 @@ export const iconsSet: IconSet<AvailableMetricIcon> = [
   },
 
   {
-    value: 'editorComment',
+    value: 'comment',
     label: i18n.translate('xpack.observability.metric.iconSelect.commentIconLabel', {
       defaultMessage: 'Comment',
     }),

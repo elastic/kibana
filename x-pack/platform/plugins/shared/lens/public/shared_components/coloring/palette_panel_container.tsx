@@ -47,7 +47,7 @@ export function PalettePanelContainer(props: {
                 aria-label={i18n.translate('xpack.lens.colorMapping.editColors', {
                   defaultMessage: 'Edit colors',
                 })}
-                iconType="controlsHorizontal"
+                iconType="controls"
                 onClick={onClick}
                 size="xs"
                 color="text"

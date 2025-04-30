@@ -258,7 +258,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                       <EuiFlexGroup direction="row" gutterSize="s">
                         {i18n.ADD_OPEN_API_SPEC_LABEL}
                         <EuiBetaBadge
-                          iconType="beaker"
+                          iconType="flask"
                           label={i18n.TECH_PREVIEW}
                           tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
                           size="s"

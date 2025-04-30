@@ -468,7 +468,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                 />
               </EuiFormRow>
               <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                <EuiButton key="exportSO" iconType="export" onClick={this.onExportClick} fill>
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"

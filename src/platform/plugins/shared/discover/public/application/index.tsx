@@ -31,7 +31,7 @@ export const renderApp = ({ element, services, customizationContext }: RenderApp
       tooltip: i18n.translate('discover.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save Discover sessions',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
 

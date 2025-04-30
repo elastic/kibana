@@ -116,7 +116,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
             <span
               className="euiButtonContent__icon"
               color="inherit"
-              data-euiicon-type="editorCodeBlock"
+              data-euiicon-type="code"
               size="m"
             />
             <span

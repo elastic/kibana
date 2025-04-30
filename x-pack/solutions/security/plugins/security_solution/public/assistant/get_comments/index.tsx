@@ -113,7 +113,7 @@ export const getComments: GetAssistantMessages = ({
       );
     }
 
-    return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
+    return <EuiAvatar name="user" size="l" color="subdued" iconType="user" />;
   };
 
   return [

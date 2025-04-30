@@ -29,7 +29,7 @@ export function DetectorCell({ detectorDescription, numberOfRules }) {
         }
       >
         <EuiIcon
-          type="controlsHorizontal"
+          type="controls"
           css={{
             marginLeft: euiTheme.size.xs,
           }}

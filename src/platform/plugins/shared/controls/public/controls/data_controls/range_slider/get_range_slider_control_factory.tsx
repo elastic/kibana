@@ -31,7 +31,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
-    getIconType: () => 'controlsHorizontal',
+    getIconType: () => 'controls',
     getDisplayName: RangeSliderStrings.control.getDisplayName,
     isFieldCompatible: (field) => {
       return field.aggregatable && field.type === 'number';

@@ -59,7 +59,7 @@ export const useRulesTableActions = ({
       ) : (
         i18n.EDIT_RULE_SETTINGS
       ),
-      icon: 'controlsHorizontal',
+      icon: 'controls',
       onClick: (rule: Rule) => goToRuleEditPage(rule.id, navigateToApp),
       enabled: (rule: Rule) => canEditRuleWithActions(rule, hasActionsPrivileges),
     },
@@ -107,7 +107,7 @@ export const useRulesTableActions = ({
       type: 'icon',
       'data-test-subj': 'exportRuleAction',
       description: i18n.EXPORT_RULE,
-      icon: 'exportAction',
+      icon: 'export',
       name: i18n.EXPORT_RULE,
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });

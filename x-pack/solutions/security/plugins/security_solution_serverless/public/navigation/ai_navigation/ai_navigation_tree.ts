@@ -105,7 +105,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       type: 'navItem',
       link: 'dev_tools',
       title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
+      icon: 'code',
     },
     createStackManagementNavigationTree(),
   ],

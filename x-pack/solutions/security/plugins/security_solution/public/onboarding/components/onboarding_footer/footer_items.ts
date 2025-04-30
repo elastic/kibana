@@ -108,7 +108,7 @@ export const useFooterItems = () => {
           },
         },
         {
-          icon: 'beaker',
+          icon: 'flask',
           id: OnboardingFooterLinkItemId.labs,
           title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.title', {
             defaultMessage: 'Help improve Elastic Security',

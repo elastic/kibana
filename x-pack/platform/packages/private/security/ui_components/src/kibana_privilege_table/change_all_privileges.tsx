@@ -52,7 +52,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
         };
       case 'read':
         return {
-          icon: 'glasses',
+          icon: 'readOnly',
           label: i18n.translate(
             'xpack.security.management.editRole.changeAllPrivileges.readSelectionLabel',
             {
