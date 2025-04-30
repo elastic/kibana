@@ -10,7 +10,7 @@
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { convertValueToString } from './convert_value_to_string';
 import { formatFieldValue } from './format_value';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '../__mocks__';
 
 export const mockSourceField = {
