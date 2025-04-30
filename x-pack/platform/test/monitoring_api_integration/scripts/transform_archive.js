@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
+require('../../../../../src/setup_node_env');
 
 const { createReadStream, createWriteStream } = require('fs');
 const { mkdir, rm } = require('fs/promises');
@@ -16,7 +16,7 @@ const { createPromiseFromStreams } = require('@kbn/utils');
 
 const {
   createParseArchiveStreams,
-} = require('../../../../src/platform/packages/shared/kbn-es-archiver/src/lib/archives/parse'); // eslint-disable-line @kbn/imports/uniform_imports
+} = require('../../../../../src/platform/packages/shared/kbn-es-archiver/src/lib/archives/parse'); // eslint-disable-line @kbn/imports/uniform_imports
 
 /**
  * generates .monitoring-* (metricbeat) archive from a metrics-* (package) archive

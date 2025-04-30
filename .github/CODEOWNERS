@@ -1424,7 +1424,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/page_objects/alert_controls.ts @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
-/x-pack/test/monitoring_api_integration @elastic/stack-monitoring
+/x-pack/platform/test/monitoring_api_integration @elastic/stack-monitoring
 /x-pack/test/functional/page_objects/monitoring_page.ts @elastic/stack-monitoring
 /x-pack/test/functional/es_archives/monitoring @elastic/stack-monitoring
 /x-pack/test/functional/services/monitoring @elastic/stack-monitoring

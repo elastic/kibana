@@ -273,7 +273,7 @@ enabled:
   - x-pack/test/functional_search/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
-  - x-pack/test/monitoring_api_integration/config.ts
+  - x-pack/platform/test/monitoring_api_integration/config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts

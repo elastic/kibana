@@ -12,7 +12,7 @@ the new versions of the packages.
 
 _Note that while Stack Monitoring currently supports 3 collection modes, the tests
 in this directory only focus on metricbeat and elastic-agent data. Tests for legacy
-data are defined under `x-pack/test/api_integration/apis/monitoring`._
+data are defined under `x-pack/platform/test/api_integration/apis/monitoring`._
 
 Since an elastic-agent integration spawns the corresponding metricbeat module under
 the hood (ie when an agent policy defines elasticsearch metrics data streams,
