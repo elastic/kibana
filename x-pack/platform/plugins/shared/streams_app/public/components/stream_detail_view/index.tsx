@@ -278,6 +278,34 @@ const GroupStreamDetailView = () => {
                       </EuiText>
                     </EuiFlexItem>
                   ))}
+                  {streamsListFetch.value
+                    ?.filter((s) => {
+                      if (!isGroupStreamDefinition(s.stream)) {
+                        return false;
+                      }
+                      return s.stream.group.relationships.some((relationship) => {
+                        return relationship.name === stream.name;
+                      });
+                    })
+                    .map((s) => {
+                      const groupStream = s.stream;
+                      if (!isGroupStreamDefinition(groupStream)) {
+                        return null;
+                      }
+                      return (
+                        <EuiFlexItem key={s.stream.name}>
+                          <EuiText size="s">
+                            <EuiLink
+                              data-test-subj="streamsAppStreamNodeLink"
+                              href={router.link('/{key}', { path: { key: s.stream.name } })}
+                            >
+                              {s.stream.name}{' '}
+                              <EuiBadge color="hollow">{groupStream.group.category}</EuiBadge>
+                            </EuiLink>
+                          </EuiText>
+                        </EuiFlexItem>
+                      );
+                    })}
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>

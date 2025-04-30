@@ -218,7 +218,25 @@ function GroupStreamCreationFlyout({
           />
         </EuiFormRow>
         <EuiFormRow label="Category">
-          <EuiFieldText name="category" value={formData.category} onChange={handleInputChange} />
+          <EuiComboBox
+            placeholder="Select or create a category"
+            singleSelection={{ asPlainText: true }}
+            options={[
+              { label: 'products' },
+              { label: 'applications' },
+              { label: 'services' },
+              { label: 'infrastructure' },
+              { label: 'orgs' },
+              { label: 'GitHub' },
+            ]}
+            selectedOptions={formData.category ? [{ label: formData.category }] : []}
+            onChange={(selectedOptions) =>
+              setFormData({ ...formData, category: selectedOptions[0]?.label || '' })
+            }
+            onCreateOption={(searchValue) =>
+              setFormData({ ...formData, category: searchValue.trim() })
+            }
+          />
         </EuiFormRow>
         <EuiFormRow label="Owner">
           <EuiFieldText name="owner" value={formData.owner} onChange={handleInputChange} />
@@ -428,17 +446,27 @@ function GroupStreamsTable({
     acc[category].push(stream);
     return acc;
   }, {} as Record<string, GroupStreamDefinition[]>);
+
+  // order categories: products, applications, services, infrastructure, orgs, then alphabetical for remaining categories
+  const explicitOrder = ['products', 'applications', 'services', 'infrastructure', 'orgs'];
+  const allCategories = Object.keys(groupedStreams);
+  const orderedCategories = explicitOrder
+    .filter((c) => allCategories.includes(c))
+    .concat(
+      allCategories.filter((c) => !explicitOrder.includes(c)).sort((a, b) => a.localeCompare(b))
+    );
+
   // render each category
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {Object.entries(groupedStreams).map(([category, streams]) => (
+      {orderedCategories.map((category) => (
         <EuiFlexItem key={category} grow={false}>
           <EuiText size="m">
             <h2>{category}</h2>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="row" wrap>
-            {streams.map((stream) => (
+            {groupedStreams[category].map((stream) => (
               <EuiPanel
                 key={stream.name}
                 paddingSize="s"

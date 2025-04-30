@@ -243,7 +243,7 @@ const createGroupStreamNavigationComponent =
       // find the group streams of type application and render links to them
       const groupStreams = value.filter((stream) => {
         const def = stream.stream;
-        return isGroupStreamDefinition(def) && def.group.category === 'product';
+        return isGroupStreamDefinition(def) && def.group.category === 'products';
       });
 
       return (
