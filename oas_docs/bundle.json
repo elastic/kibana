@@ -10999,7 +10999,7 @@
                               "agent_download_timeout": {
                                 "nullable": true
                               },
-                              "agent_limits_go_max_procs": {
+                              "agent_limits_cpu": {
                                 "nullable": true
                               },
                               "agent_logging_files_interval": {
@@ -12019,7 +12019,7 @@
                       "agent_download_timeout": {
                         "nullable": true
                       },
-                      "agent_limits_go_max_procs": {
+                      "agent_limits_cpu": {
                         "nullable": true
                       },
                       "agent_logging_files_interval": {
@@ -12336,7 +12336,7 @@
                             "agent_download_timeout": {
                               "nullable": true
                             },
-                            "agent_limits_go_max_procs": {
+                            "agent_limits_cpu": {
                               "nullable": true
                             },
                             "agent_logging_files_interval": {
@@ -13382,7 +13382,7 @@
                               "agent_download_timeout": {
                                 "nullable": true
                               },
-                              "agent_limits_go_max_procs": {
+                              "agent_limits_cpu": {
                                 "nullable": true
                               },
                               "agent_logging_files_interval": {
@@ -14674,7 +14674,7 @@
                             "agent_download_timeout": {
                               "nullable": true
                             },
-                            "agent_limits_go_max_procs": {
+                            "agent_limits_cpu": {
                               "nullable": true
                             },
                             "agent_logging_files_interval": {
@@ -15692,7 +15692,7 @@
                       "agent_download_timeout": {
                         "nullable": true
                       },
-                      "agent_limits_go_max_procs": {
+                      "agent_limits_cpu": {
                         "nullable": true
                       },
                       "agent_logging_files_interval": {
@@ -16012,7 +16012,7 @@
                             "agent_download_timeout": {
                               "nullable": true
                             },
-                            "agent_limits_go_max_procs": {
+                            "agent_limits_cpu": {
                               "nullable": true
                             },
                             "agent_logging_files_interval": {
@@ -17058,7 +17058,7 @@
                             "agent_download_timeout": {
                               "nullable": true
                             },
-                            "agent_limits_go_max_procs": {
+                            "agent_limits_cpu": {
                               "nullable": true
                             },
                             "agent_logging_files_interval": {
