@@ -626,5 +626,37 @@ describe('case transforms', () => {
         transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.observables
       ).toMatchInlineSnapshot(`Array []`);
     });
+
+    it('returns incremental_id when it is defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          incremental_id: {
+            space_id: 'default',
+            numerical_id: 100,
+          },
+        },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.incremental_id
+      ).toMatchInlineSnapshot(`
+        Object {
+          "numerical_id": 100,
+          "space_id": "default",
+        }
+      `);
+    });
+
+    it('returns undefined for `inceremental_id` when it is not defined', () => {
+      const CaseSOResponseWithObservables = createCaseSavedObjectResponse({
+        overrides: {
+          incremental_id: undefined,
+        },
+      });
+
+      expect(
+        transformSavedObjectToExternalModel(CaseSOResponseWithObservables).attributes.incremental_id
+      ).toMatchInlineSnapshot(`undefined`);
+    });
   });
 });

@@ -6,8 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { casesSchemaV1, casesSchemaV2 } from './schemas';
-
+import { casesSchemaV1 } from '../schemas';
 /**
  * Adds custom fields to the cases SO.
  */
@@ -57,32 +56,5 @@ export const modelVersion1: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: casesSchemaV1.extends({}, { unknowns: 'ignore' }),
-  },
-};
-
-/**
- * Adds case observables to the cases SO.
- */
-export const modelVersion2: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        observables: {
-          type: 'nested',
-          properties: {
-            typeKey: {
-              type: 'keyword',
-            },
-            value: {
-              type: 'keyword',
-            },
-          },
-        },
-      },
-    },
-  ],
-  schemas: {
-    forwardCompatibility: casesSchemaV2.extends({}, { unknowns: 'ignore' }),
   },
 };
