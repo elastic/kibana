@@ -11,20 +11,20 @@ import {
   PERFORM_RULE_UPGRADE_URL,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
-} from '../../../../../../../../common/api/detection_engine';
+} from '../../../../../../../../../common/api/detection_engine';
 import {
   acceptSuggestedFieldValue,
   saveFieldValue,
   saveAndAcceptFieldValue,
   switchToFieldEdit,
   toggleFieldAccordion,
-} from './rule_upgrade_helpers';
-import { inputFieldValue } from './set_field_value';
+} from '../../test_utils/rule_upgrade_helpers';
+import { inputFieldValue } from '../../test_utils/set_field_value';
 import {
   extractSingleKibanaFetchBodyBy,
   mockRuleUpgradeReviewData,
   renderRuleUpgradeFlyout,
-} from './rule_upgrade_flyout';
+} from '../../test_utils/rule_upgrade_flyout';
 
 interface AssertRuleUpgradeAfterReviewParams {
   ruleType: string;

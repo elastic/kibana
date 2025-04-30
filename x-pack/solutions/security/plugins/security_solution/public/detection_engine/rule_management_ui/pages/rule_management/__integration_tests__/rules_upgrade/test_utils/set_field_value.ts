@@ -283,9 +283,7 @@ async function inputRiskScoreOverride(
   fieldFinalSide: HTMLElement,
   value: RiskScoreMapping
 ): Promise<void> {
-  if (value.length !== 1) {
-    throw new Error('setRiskScoreOverride() expects a single entry risk score mapping');
-  }
+  invariant(value.length === 1, 'setRiskScoreOverride() expects a single entry risk score mapping');
 
   const sourceFieldComboboxInput = within(fieldFinalSide).getByRole('combobox');
 

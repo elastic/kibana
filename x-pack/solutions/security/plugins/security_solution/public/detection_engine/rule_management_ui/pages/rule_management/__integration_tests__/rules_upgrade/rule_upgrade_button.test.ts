@@ -10,15 +10,18 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
 } from '../../../../../../../common/api/detection_engine';
-import { mockRuleUpgradeReviewData, renderRuleUpgradeFlyout } from './mock/rule_upgrade_flyout';
+import {
+  mockRuleUpgradeReviewData,
+  renderRuleUpgradeFlyout,
+} from './test_utils/rule_upgrade_flyout';
 import {
   switchToFieldEdit,
   toggleFieldAccordion,
   cancelFieldEdit,
   saveFieldValue,
   saveAndAcceptFieldValue,
-} from './mock/rule_upgrade_helpers';
-import { inputFieldValue } from './mock/set_field_value';
+} from './test_utils/rule_upgrade_helpers';
+import { inputFieldValue } from './test_utils/set_field_value';
 
 describe('Rule Upgrade button', () => {
   describe('when there are no fields with conflicts', () => {

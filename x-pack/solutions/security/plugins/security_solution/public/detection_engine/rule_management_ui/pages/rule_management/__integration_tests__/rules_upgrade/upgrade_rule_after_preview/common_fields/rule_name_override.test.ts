@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
+import { mockAvailableDataViews } from '../../test_utils/rule_upgrade_flyout';
+import { assertRuleUpgradePreview } from '../test_utils/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../test_utils/assert_rule_upgrade_after_review';
 
 describe('Upgrade diffable rule "rule_name_override" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
