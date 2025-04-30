@@ -12,7 +12,7 @@ import { isMarkerNode } from '../../../shared/context';
 import { isAssignment, isColumnItem } from '../../../..';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
-import { getNewVariableSuggestion } from '../../factories';
+import { getNewUserDefinedColumnSuggestion } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { getExpressionPosition, isExpressionComplete, suggestForExpression } from '../../helper';
 
@@ -42,7 +42,7 @@ export async function suggest(
 
   const positionInExpression = getExpressionPosition(params.innerText, expressionRoot);
   if (positionInExpression === 'empty_expression' && !insideAssignment) {
-    suggestions.push(getNewVariableSuggestion(params.getSuggestedVariableName()));
+    suggestions.push(getNewUserDefinedColumnSuggestion(params.getSuggestedUserDefinedColumnName()));
   }
 
   if (

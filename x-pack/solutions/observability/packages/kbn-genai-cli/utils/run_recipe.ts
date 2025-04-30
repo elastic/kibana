@@ -18,7 +18,7 @@ type RunRecipeCallback = (options: {
 
 export function runRecipe(callback: RunRecipeCallback) {
   run(
-    async ({ log, addCleanupTask }) => {
+    async ({ log, addCleanupTask, flags }) => {
       const controller = new AbortController();
       const signal = controller.signal;
 
@@ -32,7 +32,9 @@ export function runRecipe(callback: RunRecipeCallback) {
         log,
         signal,
         kibanaClient,
+        connectorId: flags.connectorId as string | undefined,
       });
+
       return await callback({
         inferenceClient,
         kibanaClient,
@@ -41,7 +43,12 @@ export function runRecipe(callback: RunRecipeCallback) {
       });
     },
     {
-      flags: {},
+      flags: {
+        boolean: ['connectorId'],
+        help: `
+          --connectorId  Use a specific connector id
+        `,
+      },
     }
   );
 }

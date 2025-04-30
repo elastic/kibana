@@ -71,7 +71,6 @@ export interface DocLinks {
     readonly configuration: string;
     readonly elasticsearchOutput: string;
     readonly elasticsearchModule: string;
-    readonly kafkaOutput: string;
     readonly startup: string;
     readonly exportedFields: string;
     readonly suricataModule: string;
@@ -326,8 +325,6 @@ export interface DocLinks {
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
-    readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyRuleManagementBulkApiDeprecations: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
   };
@@ -464,7 +461,6 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
-    deprecatedV1Endpoints: string;
     enableElasticSearchSecurityFeatures: string;
   }>;
   readonly spaces: Readonly<{
@@ -493,6 +489,7 @@ export interface DocLinks {
     settings: string;
     logstashSettings: string;
     kafkaSettings: string;
+    kafkaOutputTopicsSettings: string;
     settingsFleetServerHostSettings: string;
     settingsFleetServerProxySettings: string;
     troubleshooting: string;
@@ -514,6 +511,7 @@ export interface DocLinks {
     onPremRegistry: string;
     secureLogstash: string;
     agentPolicy: string;
+    agentlessIntegrations: string;
     api: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
