@@ -8,8 +8,7 @@
  */
 
 import { sortBy } from 'lodash';
-// @ts-expect-error
-import Histogram from 'native-hdr-histogram';
+import Histogram from 'hdr-histogram-js';
 
 const ONE_HOUR_IN_MICRO_SECONDS = 1000 * 1000 * 60 * 60;
 
@@ -41,17 +40,44 @@ class LosslessHistogram {
       return this.backingHistogram;
     }
 
-    const histogram = new Histogram(this.min, this.max);
+    const histogram = Histogram.build({
+      lowestDiscernibleValue: this.min,
+      highestTrackableValue: this.max,
+      useWebAssembly: false,
+    });
 
     this.backingHistogram = histogram;
 
     if (this.trackedValues.size > 0) {
       this.trackedValues.forEach((count, value) => {
-        histogram.record(value, count);
+        histogram.recordValueWithCount(value, count);
       });
     }
 
     return histogram;
+  }
+
+  private linearCounts(valueUnitsPerBucket: number) {
+    if (!this.backingHistogram) {
+      return [];
+    }
+
+    const result = [];
+    let value = valueUnitsPerBucket;
+
+    while (value <= this.backingHistogram.maxValue) {
+      let count = 0;
+
+      // Sum counts within this bucket range
+      for (let i = value - valueUnitsPerBucket + 1; i <= value; i++) {
+        count += this.backingHistogram.getCountAtValue(i);
+      }
+
+      result.push({ count, value });
+      value += valueUnitsPerBucket;
+    }
+
+    return result;
   }
 
   record(value: number) {
@@ -70,11 +96,12 @@ class LosslessHistogram {
 
   serialize(): SerializedHistogram {
     if (this.backingHistogram) {
-      const minRecordedValue = this.backingHistogram.min();
-      const maxRecordedValue = this.backingHistogram.max();
+      const minRecordedValue = this.backingHistogram.minNonZeroValue;
+      const maxRecordedValue = this.backingHistogram.maxValue;
 
-      const distribution: Array<{ value: number; count: number }> =
-        this.backingHistogram.linearcounts(Math.max(1, (maxRecordedValue - minRecordedValue) / 50));
+      const distribution: Array<{ value: number; count: number }> = this.linearCounts(
+        Math.max(1, (maxRecordedValue - minRecordedValue) / 50)
+      );
 
       const values: number[] = [];
       const counts: number[] = [];
