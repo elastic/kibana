@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { prepareLogTable, DimensionType } from './prepare_log_table';
+export { prepareLogTable } from './prepare_log_table';
 export type { Dimension, LayerDimension } from './prepare_log_table';
 export {
   findAccessor,

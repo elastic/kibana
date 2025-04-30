@@ -10,6 +10,7 @@ import type {
   AlertRuleFromVisUIActionData,
   RuleTypeRegistryContract,
 } from '@kbn/alerts-ui-shared';
+import { DimensionType } from '@kbn/visualization-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
@@ -18,7 +19,6 @@ import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { DimensionType } from '@kbn/visualizations-plugin/common/utils';
 import { pick, snakeCase } from 'lodash';
 
 interface Context {

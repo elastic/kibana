@@ -70,3 +70,13 @@ export enum LensVisualizationType {
   Datatable = 'lnsDatatable',
   LegacyMetric = 'lnsLegacyMetric',
 }
+
+export enum DimensionType {
+  Y_AXIS = 'y',
+  X_AXIS = 'x',
+  REFERENCE_LINE = 'reference',
+  BREAKDOWN = 'breakdown',
+  MARK_SIZE = 'markSize',
+  SPLIT_COLUMN = 'splitCol',
+  SPLIT_ROW = 'splitRow',
+}

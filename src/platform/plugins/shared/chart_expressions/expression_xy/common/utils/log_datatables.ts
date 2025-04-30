@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DimensionType } from '@kbn/visualization-utils';
 import { QueryPointEventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import {
   Datatable,
@@ -17,7 +18,6 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import {
   Dimension,
   LayerDimension,
-  DimensionType,
   prepareLogTable,
 } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';

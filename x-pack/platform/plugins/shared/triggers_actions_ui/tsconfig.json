@@ -82,8 +82,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/ui-actions-browser",
     "@kbn/embeddable-plugin",
-    "@kbn/presentation-publishing",
-    "@kbn/visualizations-plugin",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }

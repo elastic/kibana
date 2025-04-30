@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DimensionType } from '@kbn/visualization-utils';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ExpressionValueVisDimension } from '../expression_functions/vis_dimension';
 import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
 
 type DimensionColumn = ExpressionValueVisDimension | ExpressionValueXYDimension | string;
 
-export enum DimensionType {
-  Y_AXIS = 'y',
-  X_AXIS = 'x',
-  REFERENCE_LINE = 'reference',
-  BREAKDOWN = 'breakdown',
-  MARK_SIZE = 'markSize',
-  SPLIT_COLUMN = 'splitCol',
-  SPLIT_ROW = 'splitRow',
-}
 export type Dimension = [DimensionColumn[] | undefined, string];
 export type LayerDimension = [DimensionColumn[] | undefined, string, DimensionType];
 const isLayerDimensions = (
