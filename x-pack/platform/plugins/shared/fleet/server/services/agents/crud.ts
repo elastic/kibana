@@ -491,20 +491,28 @@ export const getByIds = async (
   const agentsHits = await getAgentsById(esClient, soClient, agentIds);
   const currentNamespace = getCurrentNamespace(soClient);
   const response: Agent[] = [];
+  const throwNotFoundError = (agentId: string): never => {
+    throw new AgentNotFoundError(`Agent ${agentId} not found`, { agentId });
+  };
 
   for (const agentHit of agentsHits) {
-    const wasFound = !(`notFound` in agentHit);
-    const isAccessibleInCurrentSpace = wasFound
-      ? await isAgentInNamespace(agentHit as Agent, currentNamespace)
-      : true;
-
-    if (!options?.ignoreMissing && (!wasFound || !isAccessibleInCurrentSpace)) {
-      throw new AgentNotFoundError(`Agent ${agentHit.id} not found`, { agentId: agentHit.id });
+    const wasFound = !('notFound' in agentHit);
+    if (!wasFound) {
+      if (!options?.ignoreMissing) {
+        throwNotFoundError(agentHit.id);
+      }
+      continue;
     }
 
-    if (wasFound && isAccessibleInCurrentSpace) {
-      response.push(agentHit);
+    const isAccessible = await isAgentInNamespace(agentHit as Agent, currentNamespace);
+    if (!isAccessible) {
+      if (!options?.ignoreMissing) {
+        throwNotFoundError(agentHit.id);
+      }
+      continue;
     }
+
+    response.push(agentHit);
   }
 
   return response;
