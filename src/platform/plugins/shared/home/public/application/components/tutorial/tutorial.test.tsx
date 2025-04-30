@@ -10,7 +10,6 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { SavedObjectsBatchResponse } from '@kbn/core-saved-objects-api-browser';
 import { Tutorial } from './tutorial';
 import { TutorialType } from '../../../services/tutorials/types';
 
@@ -83,11 +82,6 @@ const addBasePath = (path: string) => {
 const replaceTemplateStrings = (text: string) => {
   return text;
 };
-const bulkCreateMock = jest
-  .fn<Promise<SavedObjectsBatchResponse<unknown>>, []>()
-  .mockResolvedValue({
-    savedObjects: [],
-  });
 
 describe('Tutorial component', () => {
   describe('when isCloudEnabled is false', () => {
@@ -100,7 +94,6 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
@@ -127,7 +120,6 @@ describe('Tutorial component', () => {
             getTutorial={getBasicTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
@@ -146,7 +138,6 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
@@ -169,7 +160,6 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
@@ -189,7 +179,6 @@ describe('Tutorial component', () => {
             getTutorial={getTutorial}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
@@ -220,7 +209,6 @@ describe('Tutorial component', () => {
             getTutorial={getTutorialWithNoDataCheck}
             replaceTemplateStrings={replaceTemplateStrings}
             tutorialId={'my_testing_tutorial'}
-            bulkCreate={bulkCreateMock}
           />
         </I18nProvider>
       );
