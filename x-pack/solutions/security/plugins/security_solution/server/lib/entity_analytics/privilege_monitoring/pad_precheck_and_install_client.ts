@@ -38,7 +38,8 @@ interface PadPrecheckAndInstallClientOpts {
 export class PadPrecheckAndInstallClient {
   private esClient: ElasticsearchClient;
   private soClient: SavedObjectsClientContract;
-  private installationStatus: Record<string, unknown> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private installationStatus: Record<string, any> = {};
   private packageVersion: string = '';
 
   constructor(private readonly opts: PadPrecheckAndInstallClientOpts) {
@@ -111,18 +112,21 @@ export class PadPrecheckAndInstallClient {
 
       if (pipelineResponse[pipelineName]) {
         this.log('debug', `[VERIFIED] Ingest pipeline exists: ${pipelineName}`);
-        const processors = pipelineResponse[pipelineName]?.processors || [];
+        const processors = pipelineResponse[pipelineName].processors || [];
 
         const mlPadProcessorName = `${this.packageVersion}-ml_pad_ingest_pipeline`;
+
+        // Filter processors to detect if our target already exists
         const alreadyHasProcessor = processors.some(
-          (proc) => proc.pipeline?.name === mlPadProcessorName
+          (proc) => proc.pipeline && proc.pipeline.name === mlPadProcessorName
         );
 
+        // Set status object
         this.installationStatus.ingest_pipeline = {
           status: 'exists',
           pipeline_id: pipelineName,
           description:
-            pipelineResponse[pipelineName]?.description || 'Custom pipeline for PAD integration',
+            pipelineResponse[pipelineName].description || 'Custom pipeline for PAD integration',
           processors,
           needs_update: !alreadyHasProcessor,
         };
@@ -332,7 +336,7 @@ export class PadPrecheckAndInstallClient {
       return;
     }
     this.log('debug', `Installing PAD package: ${availablePad.name} ${availablePad.version}`);
-    await bulkInstallPackages({
+    const installResponse = await bulkInstallPackages({
       savedObjectsClient: soClient,
       packagesToInstall: [
         { name: availablePad.name, version: availablePad.version, prerelease: true },
@@ -346,13 +350,14 @@ export class PadPrecheckAndInstallClient {
     this.installationStatus.pad_integration_package = {
       status: 'installed',
       version: availablePad.version,
+      response: installResponse,
     };
     this.log('debug', `PAD package installed: ${availablePad.version}`);
     await this.checkIfPadPackageInstalled();
     // await this.setupMlJob();
   }
-
-  public async runPadPrecheckAndInstall(): Promise<Record<string, unknown>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async runPadPrecheckAndInstall(): Promise<Record<string, any>> {
     const mlEnabled = await this.isMlEnabled();
     this.installationStatus.ml_enabled = mlEnabled;
 
@@ -365,35 +370,40 @@ export class PadPrecheckAndInstallClient {
       pipelineName
     );
 
-    if (exists && !alreadyHasProcessor) {
-      this.log('info', `Appending ml_pad_ingest_pipeline to ${pipelineName}`);
-
-      const updatedProcessors = [
-        ...processors,
-        {
-          pipeline: {
-            name: `${this.packageVersion}-ml_pad_ingest_pipeline`,
-            on_failure: [
-              {
-                set: {
-                  field: '_ingest.error',
-                  value: 'Failed to execute ml_pad_ingest_pipeline',
-                },
-              },
-            ],
-          },
-        },
-      ];
-      await this.esClient.ingest.putPipeline({
-        id: pipelineName,
-        description: 'Custom pipeline for PAD integration',
-        processors: updatedProcessors,
-      });
-
-      this.installationStatus.ingest_pipeline.status = 'updated';
-    } else if (exists && alreadyHasProcessor) {
-      this.log('info', `Pipeline ${pipelineName} already has the ml_pad_ingest_pipeline processor`);
+    if (!exists) {
+      this.log('warn', `Pipeline ${pipelineName} does not exist. Cannot update.`);
     }
+
+    if (alreadyHasProcessor) {
+      this.log('info', `Pipeline ${pipelineName} already has ml_pad processor. No update needed.`);
+    }
+
+    const mlPadProcessorName = `${this.packageVersion}-ml_pad_ingest_pipeline`;
+
+    const updatedProcessors = [
+      ...processors,
+      {
+        pipeline: {
+          name: mlPadProcessorName,
+          on_failure: [
+            {
+              set: {
+                field: '_ingest.error',
+                value: 'Failed to execute ml_pad_ingest_pipeline',
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    await this.esClient.ingest.putPipeline({
+      id: pipelineName,
+      description: 'Custom pipeline for PAD integration',
+      processors: updatedProcessors,
+    });
+
+    this.log('info', `Pipeline ${pipelineName} updated with ml_pad processor.`);
 
     // ############### COMPONENT TEMPLATE MAPPINGS #####################
     await this.checkAndUpdateComponentTemplateMappings();
