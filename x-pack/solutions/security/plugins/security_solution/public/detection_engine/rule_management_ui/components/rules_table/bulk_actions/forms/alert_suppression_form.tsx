@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiIcon,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
@@ -159,10 +160,11 @@ const AlertSuppressionFormComponent = ({
 
   const { formTitle } = getFormConfig(editAction);
 
-  const [{ overwriteGroupBy, removeSuppression }] = useFormData({
-    form,
-    watch: ['overwriteGroupBy', 'removeSuppression'],
-  });
+  const [{ overwriteGroupBy, removeSuppression, overwriteTimeAndMissingFields }] =
+    useFormData<AlertSuppressionFormData>({
+      form,
+      watch: ['overwriteGroupBy', 'removeSuppression', 'overwriteTimeAndMissingFields'],
+    });
   const [_, { indexPatterns }] = useFetchIndex(defaultPatterns, false);
   const fieldOptions = indexPatterns.fields.map((field) => ({
     label: field.name,
@@ -324,7 +326,6 @@ const AlertSuppressionFormComponent = ({
           }}
         />
       )}
-
       {overwriteGroupBy && (
         <EuiFormRow fullWidth>
           <EuiCallOut
@@ -340,7 +341,6 @@ const AlertSuppressionFormComponent = ({
           </EuiCallOut>
         </EuiFormRow>
       )}
-
       {removeSuppression && (
         <EuiFormRow fullWidth>
           <EuiCallOut
@@ -356,9 +356,7 @@ const AlertSuppressionFormComponent = ({
           </EuiCallOut>
         </EuiFormRow>
       )}
-
-      <EuiSpacer size="l" />
-
+      <EuiSpacer size="m" />
       <CommonUseField
         path="overwriteTimeAndMissingFields"
         componentProps={{
@@ -369,39 +367,45 @@ const AlertSuppressionFormComponent = ({
           },
         }}
       />
-      <EuiFormRow data-test-subj="alertSuppressionDuration">
-        <UseMultiFields
-          fields={{
-            groupByRadioSelection: {
-              path: 'groupByRadioSelection',
-            },
-            groupByDurationValue: {
-              path: 'groupByDuration.value',
-            },
-            groupByDurationUnit: {
-              path: 'groupByDuration.unit',
-            },
-          }}
-        >
-          {GroupByChildren}
-        </UseMultiFields>
-      </EuiFormRow>
-
-      <EuiFormRow
-        data-test-subj="alertSuppressionMissingFields"
-        label={i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL}
-        fullWidth
+      <EuiSpacer size="m" />
+      <EuiAccordion
+        id="alertSuppressionAccordion"
+        arrowDisplay="none"
+        forceState={overwriteTimeAndMissingFields ? 'open' : 'closed'}
       >
-        <UseMultiFields
-          fields={{
-            suppressionMissingFields: {
-              path: 'suppressionMissingFields',
-            },
-          }}
+        <EuiFormRow data-test-subj="alertSuppressionDuration">
+          <UseMultiFields
+            fields={{
+              groupByRadioSelection: {
+                path: 'groupByRadioSelection',
+              },
+              groupByDurationValue: {
+                path: 'groupByDuration.value',
+              },
+              groupByDurationUnit: {
+                path: 'groupByDuration.unit',
+              },
+            }}
+          >
+            {GroupByChildren}
+          </UseMultiFields>
+        </EuiFormRow>
+        <EuiFormRow
+          data-test-subj="alertSuppressionMissingFields"
+          label={i18n.BULK_EDIT_FLYOUT_FORM_ALERT_SUPPRESSION_MISSING_FIELDS_LABEL}
+          fullWidth
         >
-          {AlertSuppressionMissingFields}
-        </UseMultiFields>
-      </EuiFormRow>
+          <UseMultiFields
+            fields={{
+              suppressionMissingFields: {
+                path: 'suppressionMissingFields',
+              },
+            }}
+          >
+            {AlertSuppressionMissingFields}
+          </UseMultiFields>
+        </EuiFormRow>
+      </EuiAccordion>
     </BulkEditFormWrapper>
   );
 };
