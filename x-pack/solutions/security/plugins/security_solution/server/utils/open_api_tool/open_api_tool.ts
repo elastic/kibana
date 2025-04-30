@@ -131,8 +131,7 @@ export abstract class OpenApiTool<T> {
     const jsonSchemaToZodWithParserOverride = (schema: JsonSchema): z.ZodTypeAny => {
       return jsonSchemaToZod(schema as JsonSchema, {
         // Overrides to ensure schema is compatible with LLM provider
-        parserOverride: (s, r) =>
-          this.getParserOverride(s, r, jsonSchemaToZodWithParserOverride),
+        parserOverride: (s, r) => this.getParserOverride(s, r, jsonSchemaToZodWithParserOverride),
       });
     };
 
