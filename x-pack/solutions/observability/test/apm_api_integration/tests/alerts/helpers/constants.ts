@@ -8,7 +8,6 @@
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
-  ApmAlertFields,
 } from '../../../../api_integration_deployment_agnostic/services/helpers/alerting_helper';
 
-export { APM_ACTION_VARIABLE_INDEX, APM_ALERTS_INDEX, ApmAlertFields };
+export { APM_ACTION_VARIABLE_INDEX, APM_ALERTS_INDEX };
