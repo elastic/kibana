@@ -23,7 +23,7 @@ import { deleteConnectors } from '../../common/connectors';
 import { deleteConversations } from '../../common/conversations';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');

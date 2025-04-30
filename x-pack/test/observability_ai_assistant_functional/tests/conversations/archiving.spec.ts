@@ -16,7 +16,7 @@ import { deleteConversations } from '../../common/conversations';
 import { interceptRequest } from '../../common/intercept_request';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
