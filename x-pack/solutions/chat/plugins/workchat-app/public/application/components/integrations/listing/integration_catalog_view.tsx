@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiCard,
-  EuiFlexGrid,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
@@ -16,6 +15,8 @@ import {
   EuiText,
   IconType,
   useEuiTheme,
+  useIsWithinBreakpoints,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import { IntegrationType } from '@kbn/wci-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -131,6 +132,9 @@ const integrationCards: Record<IntegrationType, IntegrationCardData> = {
 export const IntegrationCatalogView: React.FC = () => {
   const { navigateToWorkchatUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const isLarge = useIsWithinBreakpoints(['l']);
+  const columns = isMobile ? 1 : isLarge ? 2 : 3;
 
   const backgroundCircle = css`
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
@@ -153,13 +157,6 @@ export const IntegrationCatalogView: React.FC = () => {
     align-items: center;
   `;
 
-  const cardStyle = css`
-    border: 1px solid ${euiTheme.colors.backgroundBaseHighlighted};
-    border-radius: 4px;
-    width: 400px;
-    height: 150px;
-  `;
-
   return (
     <KibanaPageTemplate data-test-subj="integrationsCatalogPage">
       <IntegrationListView tab={'catalog'} />
@@ -173,7 +170,7 @@ export const IntegrationCatalogView: React.FC = () => {
           </strong>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiFlexGrid columns={3}>
+        <EuiFlexGrid gutterSize="m" columns={columns}>
           {Object.entries(integrationCards)
             .filter(([_, cardData]) => !cardData.disabled)
             .map(([type, cardData]) => (
@@ -194,7 +191,6 @@ export const IntegrationCatalogView: React.FC = () => {
                   titleSize="xs"
                   description={cardData.description}
                   paddingSize="l"
-                  className={cardStyle}
                   onClick={() => {
                     return navigateToWorkchatUrl(`${appPaths.integrations.create}?type=${type}`);
                   }}
@@ -212,7 +208,7 @@ export const IntegrationCatalogView: React.FC = () => {
           </strong>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiFlexGrid columns={3}>
+        <EuiFlexGrid gutterSize="m" columns={columns}>
           {Object.entries(integrationCards)
             .filter(([_, cardData]) => cardData.disabled)
             .map(([type, cardData]) => (
@@ -234,7 +230,6 @@ export const IntegrationCatalogView: React.FC = () => {
                   description={cardData.description}
                   paddingSize="l"
                   isDisabled={cardData.disabled}
-                  className={cardStyle}
                 />
               </EuiFlexItem>
             ))}
