@@ -106,10 +106,10 @@ export function convertMessagesForInference(
 
     if (isUserMessage) {
       let contentForInference = message.message.content ?? '';
-      // If nerEntities exist, remove them
+      // If detectedEntities exist, remove them
       if (message.message.detected_entities && message.message.detected_entities.length > 0) {
         contentForInference = redactEntities(
-          message.message.content ?? '',
+          contentForInference,
           message.message.detected_entities
         );
       }
