@@ -47,7 +47,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.icon ? '\u{2193}' : undefined,
+      icon: trendConfig.icon ? '\u{2193}' : undefined, // ↓
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -56,7 +56,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.icon ? '\u{2191}' : undefined,
+      icon: trendConfig.icon ? '\u{2191}' : undefined, // ↑
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -64,7 +64,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     };
   }
   return {
-    icon: trendConfig.icon ? '\u{003D}' : undefined,
+    icon: trendConfig.icon ? '\u{003D}' : undefined, // =
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
