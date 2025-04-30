@@ -86,7 +86,7 @@ pageLoadAssetSize:
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
-  kibanaUtils: 105000
+  kibanaUtils: 79713
   lens: 76079
   licenseManagement: 41817
   licensing: 29004
@@ -149,7 +149,7 @@ pageLoadAssetSize:
   serverlessObservability: 68747
   serverlessSearch: 72995
   sessionView: 77750
-  share: 93000
+  share: 88160
   slo: 45000
   snapshotRestore: 79032
   spaces: 57868
