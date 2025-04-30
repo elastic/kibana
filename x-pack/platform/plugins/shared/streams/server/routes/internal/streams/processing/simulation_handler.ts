@@ -31,6 +31,7 @@ import {
   NamedFieldDefinitionConfig,
   FieldDefinitionConfig,
   InheritedFieldDefinitionConfig,
+  isNamespacedEcsField,
   FieldDefinition,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy, some } from 'lodash';
@@ -43,7 +44,7 @@ export interface ProcessingSimulationParams {
   };
   body: {
     processing: ProcessorDefinitionWithId[];
-    documents: FlattenRecord[];
+    documents: unknown[];
     detected_fields?: NamedFieldDefinitionConfig[];
   };
 }
@@ -77,6 +78,10 @@ export type SimulationError = BaseSimulationError &
       }
     | {
         type: 'non_additive_processor_failure';
+        processor_id: string;
+      }
+    | {
+        type: 'non_namespaced_fields_failure';
         processor_id: string;
       }
     | {
@@ -144,6 +149,7 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
 }: SimulateProcessingDeps) => {
+  const stream = await streamsClient.getStream(params.path.name);
   /* 0. Retrieve required data to prepare the simulation */
   const streamIndex = await getStreamIndex(scopedClusterClient, streamsClient, params.path.name);
 
@@ -176,6 +182,7 @@ export const simulateProcessing = async ({
     ingestSimulationResult.simulation,
     simulationData.docs,
     params.body.processing,
+    isWiredStreamDefinition(stream),
     streamFields
   );
 
@@ -186,10 +193,7 @@ export const simulateProcessing = async ({
   return prepareSimulationResponse(docReports, processorsMetrics, detectedFields);
 };
 
-const prepareSimulationDocs = (
-  documents: FlattenRecord[],
-  streamName: string
-): IngestDocument[] => {
+const prepareSimulationDocs = (documents: unknown[], streamName: string): IngestDocument[] => {
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
@@ -231,16 +235,9 @@ const prepareSimulationProcessors = (
     } as ProcessorDefinition;
   });
 
-  const dotExpanderProcessor: Pick<IngestProcessorContainer, 'dot_expander'> = {
-    dot_expander: {
-      field: '*',
-      override: true,
-    },
-  };
-
   const formattedProcessors = formatToIngestProcessors(processors);
 
-  return [dotExpanderProcessor, ...formattedProcessors];
+  return [...formattedProcessors];
 };
 
 const prepareSimulationData = (params: ProcessingSimulationParams) => {
@@ -392,6 +389,7 @@ const computePipelineSimulationResult = (
   ingestSimulationResult: SimulateIngestResponse,
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: ProcessorDefinitionWithId[],
+  isWiredStream: boolean,
   streamFields: FieldDefinition
 ): {
   docReports: SimulationDocReport[];
@@ -416,6 +414,7 @@ const computePipelineSimulationResult = (
     const diff = computeSimulationDocDiff(
       pipelineDocResult,
       sampleDocs[id]._source,
+      isWiredStream,
       forbiddenFields
     );
 
@@ -509,8 +508,7 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  // Remove the always present base processor for dot expander
-  const processorResults = doc.processor_results.slice(1);
+  const processorResults = doc.processor_results;
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -534,20 +532,18 @@ const getLastDoc = (
 ) => {
   const status = getDocumentStatus(docResult, ingestDocErrors);
   const lastDocSource =
-    docResult.processor_results
-      .slice(1) // Remove the always present base processor for dot expander
-      .filter((proc) => !isSkippedProcessor(proc))
-      .at(-1)?.doc?._source ?? sample;
+    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
+    sample;
 
   if (status === 'parsed') {
     return {
-      value: flattenObjectNestedLast(lastDocSource),
+      value: lastDocSource,
       errors: [] as SimulationError[],
       status,
     };
   } else {
     const { _errors = [], ...value } = lastDocSource;
-    return { value: flattenObjectNestedLast(value), errors: _errors as SimulationError[], status };
+    return { value, errors: _errors as SimulationError[], status };
   }
 };
 
@@ -560,6 +556,7 @@ const getLastDoc = (
 const computeSimulationDocDiff = (
   docResult: SuccessfulPipelineSimulateDocumentResult,
   sample: FlattenRecord,
+  isWiredStream: boolean,
   forbiddenFields: string[]
 ) => {
   // Keep only the successful processors defined from the user, skipping the on_failure processors from the simulation
@@ -605,6 +602,16 @@ const computeSimulationDocDiff = (
     const originalUpdatedFields = updatedFields
       .filter((field) => field in sample && !forbiddenFields.includes(field))
       .sort();
+    if (isWiredStream) {
+      const nonNamespacedFields = addedFields.filter((field) => !isNamespacedEcsField(field));
+      if (!isEmpty(nonNamespacedFields)) {
+        diffResult.errors.push({
+          processor_id: nextDoc.processor_id,
+          type: 'non_namespaced_fields_failure',
+          message: `The fields generated by the processor are not namespaced ECS fields: [${nonNamespacedFields.join()}]`,
+        });
+      }
+    }
     if (forbiddenFields.some((field) => updatedFields.includes(field))) {
       diffResult.errors.push({
         processor_id: nextDoc.processor_id,

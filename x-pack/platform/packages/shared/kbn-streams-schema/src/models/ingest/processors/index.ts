@@ -348,6 +348,36 @@ export const isDateProcessorDefinition = createIsNarrowSchema(
   dateProcessorDefinitionSchema
 );
 
+export const isKvProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  kvProcessorDefinitionSchema
+);
+
+export const isGeoIpProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  geoIpProcessorDefinitionSchema
+);
+
+export const isRenameProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  renameProcessorDefinitionSchema
+);
+
+export const isSetProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  setProcessorDefinitionSchema
+);
+
+export const isUrlDecodeProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  urlDecodeProcessorDefinitionSchema
+);
+
+export const isUserAgentProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  userAgentProcessorDefinitionSchema
+);
+
 const processorTypes: ProcessorType[] = (processorDefinitionSchema as z.ZodUnion<any>).options.map(
   (option: z.ZodUnion<any>['options'][number]) => Object.keys(option.shape)[0]
 );
@@ -364,4 +394,35 @@ export function getProcessorConfig<TProcessorDefinition extends ProcessorDefinit
   const type = getProcessorType(processor);
 
   return processor[type as keyof TProcessorDefinition];
+}
+
+export function getInFields(processor: ProcessorDefinition): string[] {
+  if (isGrokProcessorDefinition(processor)) {
+    return [(processor as GrokProcessorDefinition).grok.field];
+  }
+  if (isDissectProcessorDefinition(processor)) {
+    return [processor.dissect.field];
+  }
+  if (isDateProcessorDefinition(processor)) {
+    return [processor.date.field];
+  }
+  if (isKvProcessorDefinition(processor)) {
+    return [processor.kv.field];
+  }
+  if (isGeoIpProcessorDefinition(processor)) {
+    return [processor.geoip.field];
+  }
+  if (isRenameProcessorDefinition(processor)) {
+    return [processor.rename.field];
+  }
+  if (isSetProcessorDefinition(processor)) {
+    return [processor.set.field];
+  }
+  if (isUrlDecodeProcessorDefinition(processor)) {
+    return [processor.urldecode.field];
+  }
+  if (isUserAgentProcessorDefinition(processor)) {
+    return [processor.user_agent.field];
+  }
+  return [];
 }

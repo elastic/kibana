@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlattenRecord } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
@@ -20,7 +19,7 @@ import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 export interface SimulationRunnerInput {
   streamName: string;
   detectedFields?: SchemaField[];
-  documents: FlattenRecord[];
+  documents: Array<Record<string, unknown>>;
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 

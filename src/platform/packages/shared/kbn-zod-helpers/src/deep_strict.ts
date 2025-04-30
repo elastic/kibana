@@ -14,7 +14,7 @@ import {
   ZodEffects,
   ZodFirstPartySchemaTypes,
   ZodFirstPartyTypeKind,
-  ZodIssueCode,
+  // ZodIssueCode,
   ZodTypeAny,
 } from '@kbn/zod';
 import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
@@ -256,6 +256,10 @@ function getHandledKeys<T extends Record<string, unknown>>(
     all: new Set(),
   };
 
+  if (type === z.unknown()) {
+    return keys;
+  }
+
   forEach(object, (value, key) => {
     const ownPrefix = prefix ? `${prefix}.${key}` : key;
     keys.all.add(ownPrefix);
@@ -316,11 +320,11 @@ export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
     const excessKeys = difference([...keys.all], [...keys.handled]);
 
     if (excessKeys.length) {
-      context.addIssue({
-        code: ZodIssueCode.unrecognized_keys,
-        keys: excessKeys,
-        message: `Excess keys are not allowed`,
-      });
+      // context.addIssue({
+      //   code: ZodIssueCode.unrecognized_keys,
+      //   keys: excessKeys,
+      //   message: `Excess keys are not allowed`,
+      // });
     }
     return value;
   }, schema);

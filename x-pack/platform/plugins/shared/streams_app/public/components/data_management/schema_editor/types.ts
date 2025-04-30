@@ -18,6 +18,7 @@ export type SchemaFieldType = FieldDefinitionConfig['type'];
 export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   name: string;
   parent: string;
+  alias_for?: string;
   format?: string;
 }
 

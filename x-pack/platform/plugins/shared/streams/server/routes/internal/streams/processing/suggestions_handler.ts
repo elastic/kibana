@@ -8,7 +8,6 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get, groupBy, isEmpty, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { FlattenRecord } from '@kbn/streams-schema';
 import { StreamsClient } from '../../../../lib/streams/client';
 import { simulateProcessing } from './simulation_handler';
 import { ProcessingSuggestionBody } from './route';
@@ -53,7 +52,7 @@ export interface SimulationWithPattern extends Awaited<ReturnType<typeof simulat
   pattern: string;
 }
 
-export function extractAndGroupPatterns(samples: FlattenRecord[], field: string) {
+export function extractAndGroupPatterns(samples: unknown[], field: string) {
   const evalPattern = (sample: string) => {
     return sample
       .replace(/[ \t\n]+/g, ' ')
@@ -116,7 +115,7 @@ async function processPattern(
   scopedClusterClient: IScopedClusterClient,
   streamsClient: StreamsClient,
   field: string,
-  samples: FlattenRecord[]
+  samples: unknown[]
 ) {
   const chatResponse = await inferenceClient.output({
     id: 'get_pattern_suggestions',

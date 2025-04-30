@@ -101,7 +101,7 @@ const createCellRenderer =
 
     if (columnId === 'type') {
       if (!field.type) return EMPTY_CONTENT;
-      return <FieldType type={field.type} />;
+      return <FieldType type={field.type} aliasFor={field.alias_for} />;
     }
 
     if (columnId === 'parent') {

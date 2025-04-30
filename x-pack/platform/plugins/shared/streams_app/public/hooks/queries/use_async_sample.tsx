@@ -215,9 +215,11 @@ const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition?
   return Object.fromEntries(
     getFields(condition)
       .filter((field) => !mappedFields.includes(field.name))
-      .map((field) => [
-        field.name,
-        { type: field.type === 'string' ? 'keyword' : 'double' } as MappingRuntimeField,
+      .flatMap((field) => [
+        [
+          field.name,
+          { type: field.type === 'string' ? 'keyword' : 'double' } as MappingRuntimeField,
+        ],
       ])
   );
 };
