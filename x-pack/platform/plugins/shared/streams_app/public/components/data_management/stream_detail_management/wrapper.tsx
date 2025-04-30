@@ -9,7 +9,7 @@ import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isUnwiredStreamDefinition } from '@kbn/streams-schema';
-import { useStreamDetail } from '../../../hooks/use_stream_detail';
+import { useStreamDetailAsIngestStream } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
@@ -32,7 +32,7 @@ export function Wrapper({
   tab: string;
 }) {
   const router = useStreamsAppRouter();
-  const { definition } = useStreamDetail();
+  const { definition } = useStreamDetailAsIngestStream();
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {

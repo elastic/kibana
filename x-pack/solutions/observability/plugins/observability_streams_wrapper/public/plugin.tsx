@@ -13,6 +13,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  ScopedHistory,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { STREAMS_APP_ID } from '@kbn/deeplinks-observability/constants';
@@ -23,6 +24,11 @@ import { css } from '@emotion/css';
 import { StreamsApplicationComponentType } from '@kbn/streams-app-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import { useAbortableAsync } from '@kbn/react-hooks';
+import { isGroupStreamDefinition, isGroupStreamGetResponse } from '@kbn/streams-schema';
+import { EuiLink } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { createObservabilityStreamsAppPageTemplate } from './observability_streams_page_template';
 import type {
   ConfigSchema,
   ObservabilityStreamsWrapperPublicSetup,
@@ -30,7 +36,6 @@ import type {
   ObservabilityStreamsWrapperSetupDependencies,
   ObservabilityStreamsWrapperStartDependencies,
 } from './types';
-import { createObservabilityStreamsAppPageTemplate } from './observability_streams_page_template';
 
 export const renderApp = ({
   appMountParameters,
@@ -74,6 +79,7 @@ export class ObservabilityStreamsWrapperPlugin
     >
 {
   logger: Logger;
+  public localHistory?: ScopedHistory<unknown>;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -156,12 +162,18 @@ export class ObservabilityStreamsWrapperPlugin
         const StreamsApplicationComponent =
           pluginsStart.streamsApp.createStreamsApplicationComponent();
 
-        return renderApp({
+        this.localHistory = appMountParameters.history;
+
+        const onunmout = renderApp({
           StreamsApplicationComponent,
           appMountParameters,
           observabilityShared: pluginsStart.observabilityShared,
           navigation: pluginsStart.navigation,
         });
+        return () => {
+          this.localHistory = undefined;
+          onunmout();
+        };
       },
     });
 
@@ -172,6 +184,196 @@ export class ObservabilityStreamsWrapperPlugin
     coreStart: CoreStart,
     pluginsStart: ObservabilityStreamsWrapperStartDependencies
   ): ObservabilityStreamsWrapperPublicStart {
+    // easiest way to smuggle a component into another place that doesn't have access to corestart
+    (window as any).GroupStreamNavigation = createGroupStreamNavigationComponent(
+      coreStart,
+      pluginsStart,
+      this
+    );
     return {};
   }
 }
+
+const createGroupStreamNavigationComponent =
+  (
+    coreStart: CoreStart,
+    pluginsStart: ObservabilityStreamsWrapperStartDependencies,
+    plugin: ObservabilityStreamsWrapperPlugin
+  ) =>
+  () => {
+    const { streamsRepositoryClient } = pluginsStart.streams;
+
+    const [currentStream, setCurrentStream] = useLocalStorage<string | undefined>(
+      'observability_streams_wrapper.current_stream',
+      undefined
+    );
+
+    const { value } = useAbortableAsync(
+      async ({ signal }) => {
+        const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
+          signal,
+        });
+        return streams;
+      },
+      [streamsRepositoryClient]
+    );
+
+    const { value: currentStreamValue } = useAbortableAsync(
+      async ({ signal }) => {
+        if (!currentStream) {
+          return null;
+        }
+        return streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          signal,
+          params: {
+            path: {
+              name: currentStream,
+            },
+          },
+        });
+      },
+      [currentStream, streamsRepositoryClient]
+    );
+
+    if (!value) {
+      return null;
+    }
+
+    if (!currentStream) {
+      // find the group streams of type application and render links to them
+      const groupStreams = value.filter((stream) => {
+        const def = stream.stream;
+        return isGroupStreamDefinition(def) && def.group.category === 'product';
+      });
+
+      return (
+        <div style={{ margin: '17px' }}>
+          <h2>
+            {i18n.translate('xpack.streams.createGroupStreamNavigationComponent.h2.productsLabel', {
+              defaultMessage: 'Products',
+            })}
+          </h2>
+          {groupStreams.map((stream) => {
+            const groupStream = stream.stream;
+            return (
+              <div key={groupStream.name}>
+                <EuiLink
+                  data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentLink"
+                  onClick={() => {
+                    setCurrentStream(groupStream.name);
+                    if (plugin.localHistory) {
+                      plugin.localHistory.push(`/${groupStream.name}`);
+                    } else {
+                      coreStart.application.navigateToApp(STREAMS_APP_ID, {
+                        path: `/${groupStream.name}`,
+                      });
+                    }
+                  }}
+                >
+                  {groupStream.name}
+                </EuiLink>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // upstream sstreams are other group streams that link to the current stream. Use the list of streams to calculate
+    const upstreamStreams = currentStream
+      ? value.filter((stream) => {
+          const def = stream.stream;
+          if (!isGroupStreamDefinition(def)) {
+            return false;
+          }
+          return def.group.relationships.some((relationship) => {
+            return relationship.name === currentStream;
+          });
+        })
+      : [];
+    const downstreamStreams =
+      currentStream && currentStreamValue && isGroupStreamGetResponse(currentStreamValue)
+        ? currentStreamValue.stream.group.relationships.map((relationship) => {
+            return relationship.name;
+          })
+        : [];
+
+    // render upstream streams, then current stream, then downstream streams
+    return (
+      <div style={{ margin: '17px' }}>
+        <EuiLink
+          data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentAllLink"
+          onClick={() => {
+            setCurrentStream('');
+            coreStart.application.navigateToApp(STREAMS_APP_ID, {
+              path: '/',
+            });
+          }}
+        >
+          {i18n.translate('xpack.streams.createGroupStreamNavigationComponent.allLinkLabel', {
+            defaultMessage: 'All products',
+          })}
+        </EuiLink>
+        {upstreamStreams.map((stream) => {
+          const groupStream = stream.stream;
+          return (
+            <div key={groupStream.name}>
+              <EuiLink
+                data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentLink"
+                onClick={() => {
+                  setCurrentStream(groupStream.name);
+                  if (plugin.localHistory) {
+                    plugin.localHistory.push(`/${groupStream.name}`);
+                  } else {
+                    coreStart.application.navigateToApp(STREAMS_APP_ID, {
+                      path: `/${groupStream.name}`,
+                    });
+                  }
+                }}
+              >
+                {groupStream.name}
+              </EuiLink>
+            </div>
+          );
+        })}
+        <div style={{ fontWeight: 'bold', marginLeft: '15px' }}>
+          <EuiLink
+            css={{ fontWeight: 'bold', color: 'black' }}
+            onClick={() => {
+              if (plugin.localHistory) {
+                plugin.localHistory.push(`/${currentStream}`);
+              } else {
+                coreStart.application.navigateToApp(STREAMS_APP_ID, {
+                  path: `/${currentStream}`,
+                });
+              }
+            }}
+            data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentLink"
+          >
+            {currentStream}
+          </EuiLink>
+        </div>
+        {downstreamStreams.map((stream) => {
+          return (
+            <div key={stream} style={{ marginLeft: '30px' }}>
+              <EuiLink
+                data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentLink"
+                onClick={() => {
+                  setCurrentStream(stream);
+                  if (plugin.localHistory) {
+                    plugin.localHistory.push(`/${stream}`);
+                  } else {
+                    coreStart.application.navigateToApp(STREAMS_APP_ID, {
+                      path: `/${stream}`,
+                    });
+                  }
+                }}
+              >
+                {stream}
+              </EuiLink>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };

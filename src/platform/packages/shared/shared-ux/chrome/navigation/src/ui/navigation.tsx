@@ -74,6 +74,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
     },
     []
   );
+  const GroupStreamNavigation = (window as any).GroupStreamNavigation;
 
   return (
     <PanelProvider
@@ -85,6 +86,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
           <EuiFlexGroup direction="column" justifyContent="spaceBetween" css={{ height: '100%' }}>
+            <GroupStreamNavigation />
             <EuiFlexItem>{renderNodes(navigationTree.body)}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiCollapsibleNavBeta.Body>

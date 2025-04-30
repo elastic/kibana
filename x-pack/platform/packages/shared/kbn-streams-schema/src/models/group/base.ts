@@ -45,13 +45,18 @@ const groupBaseSchema: z.Schema<GroupBase> = z.object({
   relationships: z.array(streamRelationshipSchema),
 });
 
-interface GroupStreamDefinitionBase {
+interface GroupStreamDefinitionBase extends StreamDefinitionBase {
   group: GroupBase;
 }
 
-const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.object({
-  group: groupBaseSchema,
-});
+const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.intersection(
+  z.object({
+    name: NonEmptyString,
+  }),
+  z.object({
+    group: groupBaseSchema,
+  })
+);
 
 type GroupStreamDefinition = StreamDefinitionBase & GroupStreamDefinitionBase;
 

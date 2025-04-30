@@ -17,7 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import {
+  GroupStreamGetResponse,
+  IngestStreamGetResponse,
+  isGroupStreamGetResponse,
+} from '@kbn/streams-schema';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
@@ -31,7 +35,7 @@ import { useKibana } from '../../hooks/use_kibana';
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse | GroupStreamGetResponse;
 }) {
   const [query, setQuery] = useState('');
 
@@ -226,7 +230,7 @@ export function StreamDetailDashboardsView({
           />
         ) : null}
 
-        {definition && isImportFlyoutOpen ? (
+        {definition && !isGroupStreamGetResponse(definition) && isImportFlyoutOpen ? (
           <ImportContentPackFlyout
             definition={definition}
             onImport={() => {
@@ -239,7 +243,7 @@ export function StreamDetailDashboardsView({
           />
         ) : null}
 
-        {definition && isExportFlyoutOpen ? (
+        {definition && !isGroupStreamGetResponse(definition) && isExportFlyoutOpen ? (
           <ExportContentPackFlyout
             definition={definition}
             onExport={() => {

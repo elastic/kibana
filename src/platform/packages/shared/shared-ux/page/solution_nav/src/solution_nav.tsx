@@ -236,6 +236,8 @@ export const SolutionNav: FC<SolutionNavProps> = ({
       }
     `,
   };
+  const GroupStreamNavigation = (window as any).GroupStreamNavigation;
+
   return (
     <>
       {isSmallerBreakpoint && (
@@ -299,6 +301,7 @@ export const SolutionNav: FC<SolutionNavProps> = ({
           >
             {titleText}
             <EuiSpacer size="l" />
+            <GroupStreamNavigation />
             {sideNavContent}
           </div>
           {canBeCollapsed && (

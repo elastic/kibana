@@ -57,5 +57,10 @@ export const asIngestStreamGetResponse = createAsSchemaOrThrow(
   ingestStreamGetResponseSchema
 );
 
+export const isGroupStreamGetResponse = createIsNarrowSchema(
+  streamGetResponseSchema,
+  groupStreamGetResponseSchema
+);
+
 export type StreamGetResponse = IngestStreamGetResponse | GroupStreamGetResponse;
 export type StreamUpsertRequest = IngestStreamUpsertRequest | GroupStreamUpsertRequest;

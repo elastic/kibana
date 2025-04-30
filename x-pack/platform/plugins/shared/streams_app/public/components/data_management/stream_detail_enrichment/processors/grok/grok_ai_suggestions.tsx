@@ -33,7 +33,7 @@ import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
+import { useStreamDetailAsIngestStream } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
@@ -174,7 +174,7 @@ function InnerGrokAiSuggestions({
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
-  const { definition } = useStreamDetail();
+  const { definition } = useStreamDetailAsIngestStream();
   const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
   const form = useFormContext<GrokFormState>();
 
