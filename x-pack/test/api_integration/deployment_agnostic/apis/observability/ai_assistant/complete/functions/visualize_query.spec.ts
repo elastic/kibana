@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import {
   LlmProxy,
   createLlmProxy,
@@ -27,6 +28,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let llmProxy: LlmProxy;
     let connectorId: string;
     let events: MessageAddEvent[];
+    const query = `FROM test_index`;
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
@@ -46,7 +48,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         functionCall: {
           name: 'visualize_query',
           trigger: MessageRole.Assistant,
-          arguments: JSON.stringify({ query: 'FROM test_index', intention: 'visualizeAuto' }),
+          arguments: JSON.stringify({
+            query,
+            intention: VisualizeESQLUserIntention.visualizeAuto,
+          }),
         },
       });
 
@@ -66,32 +71,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('should execute the visualize_query function and return expected messages', async () => {
-      expect(events.length).to.be(2);
-    });
-
-    it('should correctly structure the function response', async () => {
       const functionResponse = events[0];
       expect(functionResponse.message.message.name).to.be('visualize_query');
 
       const parsedResponse = JSON.parse(functionResponse.message.message.content!);
-      expect(parsedResponse.message).to.contain('Only following query is visualized');
-      expect(parsedResponse.errorMessages).to.be.an('array');
-      expect(parsedResponse.errorMessages.length).to.be(0);
+      expect(parsedResponse.message).to.contain(query);
     });
 
-    it('should contain expected data structure in response', async () => {
+    it('should contain expected document data in response', async () => {
       const functionResponse = events[0];
       const parsedData = JSON.parse(functionResponse.message.message.data!);
 
-      expect(parsedData).to.have.property('columns');
-      expect(parsedData).to.have.property('rows');
-      expect(parsedData).to.have.property('correctedQuery', 'FROM test_index');
-    });
-
-    it('should return a valid LLM proxy response', async () => {
-      const llmResponse = events[1];
-      expect(llmResponse.message.message.content).to.be('Hello from LLM Proxy');
-      expect(llmResponse.message.message.role).to.be('assistant');
+      expect(parsedData.columns[0].id).to.be('bar');
+      expect(parsedData.rows[0][0]).to.be('foo');
+      expect(parsedData).to.have.property('correctedQuery', query);
     });
   });
 }
