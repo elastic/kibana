@@ -9,7 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
-export const privilegeMonitoringTypeName = 'monitoring-entity-source';
+export const monitoringEntitySourceTypeName = 'monitoring-entity-source';
 
 export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
@@ -72,7 +72,7 @@ const version1: SavedObjectsModelVersion = {
   ],
 };
 export const privilegeMonitoringType: SavedObjectsType = {
-  name: privilegeMonitoringTypeName,
+  name: monitoringEntitySourceTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
