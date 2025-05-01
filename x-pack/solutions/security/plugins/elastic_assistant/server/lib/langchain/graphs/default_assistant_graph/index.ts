@@ -241,6 +241,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         screenContextTimezone: screenContext?.timeZone,
         uiSettingsDateFormatTimezone,
       }),
+    contentReferencesStore,
   });
   const inputs: GraphInputs = {
     responseLanguage,
