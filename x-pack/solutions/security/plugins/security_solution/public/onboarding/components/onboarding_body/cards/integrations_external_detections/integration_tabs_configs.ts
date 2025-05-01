@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { INTEGRATION_CARD_HEIGHT } from '../../common/integrations/constants';
-import { IntegrationTabId, type Tab } from '../../../../../../common/lib/integrations/types';
-import { AI_FOR_SOC_INTEGRATIONS } from '../../../../../../../common/constants';
+import { INTEGRATION_CARD_HEIGHT } from '../common/integrations/constants';
+import { IntegrationTabId, type Tab } from '../../../../../common/lib/integrations/types';
+import { AI_FOR_SOC_INTEGRATIONS } from '../../../../../../common/constants';
 
 export const INTEGRATION_TABS: Tab[] = [
   {

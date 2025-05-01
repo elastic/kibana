@@ -8,8 +8,8 @@
 import React from 'react';
 import IntegrationsCard from './integrations_card';
 import { render } from '@testing-library/react';
-jest.mock('../../../../onboarding_context');
-jest.mock('../../../../../../common/lib/integrations/components/with_filtered_integrations');
+jest.mock('../../../onboarding_context');
+jest.mock('../../../../../common/lib/integrations/components/with_filtered_integrations');
 const props = {
   setComplete: jest.fn(),
   checkComplete: jest.fn(),
