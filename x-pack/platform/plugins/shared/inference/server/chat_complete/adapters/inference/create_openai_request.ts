@@ -24,7 +24,6 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
   } = applyProviderTransforms(options);
 
   let request: OpenAIRequest;
-
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
