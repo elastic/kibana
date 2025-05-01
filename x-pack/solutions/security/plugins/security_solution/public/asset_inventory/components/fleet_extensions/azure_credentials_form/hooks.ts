@@ -19,7 +19,7 @@ import type { NewPackagePolicyAssetInput } from '../types';
 import type { AzureCredentialsType, AzureSetupFormat } from './types';
 
 const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>
 ): AzureSetupFormat => {
   const credentialsType = getAzureCredentialsType(input);
   if (!credentialsType) {
@@ -33,7 +33,7 @@ const getSetupFormatFromInput = (
 };
 
 const getAzureCredentialsType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>
 ): AzureCredentialsType | undefined => input.streams[0].vars?.['azure.credentials.type']?.value;
 
 const getAzureArmTemplateUrl = (newPolicy: NewPackagePolicy) => {
@@ -100,7 +100,7 @@ export const useAzureCredentialsForm = ({
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
   packageInfo: PackageInfo;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {

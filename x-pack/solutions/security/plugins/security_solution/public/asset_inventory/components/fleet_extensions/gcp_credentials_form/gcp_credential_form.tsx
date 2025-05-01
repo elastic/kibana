@@ -36,7 +36,7 @@ import {
 import { assetIntegrationDocsNavigation } from '../../../constants';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import {
-  CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from '../test_subjects';
 import type { GcpCredentialsType } from './types';
@@ -134,7 +134,7 @@ const GoogleCloudShellSetup = ({
       <EuiText
         color="subdued"
         size="s"
-        data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP}
+        data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.GOOGLE_CLOUD_SHELL_SETUP}
       >
         <ol
           css={css`
@@ -188,7 +188,7 @@ const GoogleCloudShellSetup = ({
           >
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
+              data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
               id={organizationIdFields.id}
               fullWidth
               value={organizationIdFields.value || ''}
@@ -206,7 +206,7 @@ const GoogleCloudShellSetup = ({
           >
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
+              data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
               fullWidth
               value={projectIdFields.value || ''}
@@ -331,7 +331,7 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
 
 export interface GcpFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   // setIsValid?: (isValid: boolean) => void;
@@ -355,7 +355,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFiel
     });
 
 const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>
 ): SetupFormatGCP => {
   const credentialsType = getGcpCredentialsType(input);
 
@@ -431,7 +431,7 @@ const useCloudShellUrl = ({
 };
 
 export const getGcpCredentialsType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>
 ): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
 
 export const GcpCredentialsForm = ({
@@ -644,7 +644,7 @@ export const GcpInputVarFields = ({
           >
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
+              data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
               id={organizationIdFields.id}
               fullWidth
               value={organizationIdFields.value || ''}
@@ -662,7 +662,7 @@ export const GcpInputVarFields = ({
           >
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
+              data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
               fullWidth
               value={projectIdFields.value || ''}
@@ -674,7 +674,7 @@ export const GcpInputVarFields = ({
         {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
             <EuiSelect
-              data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
+              data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
               value={credentialsTypeFields?.value || credentialOptionsList[0].value}
@@ -692,7 +692,7 @@ export const GcpInputVarFields = ({
             error={credentialFilesFieldsInvalid ? credentialFilesError : undefined}
           >
             <EuiFieldText
-              data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
+              data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
               fullWidth
               value={credentialFilesFields.value || ''}
@@ -723,7 +723,7 @@ export const GcpInputVarFields = ({
             >
               <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                 <LazyPackagePolicyInputVarField
-                  data-test-subj={CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
+                  data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
                   varDef={{
                     ...findVariableDef(packageInfo, credentialJSONFields.id),
                     name: credentialJSONFields.id, // Ensure 'name' is explicitly set

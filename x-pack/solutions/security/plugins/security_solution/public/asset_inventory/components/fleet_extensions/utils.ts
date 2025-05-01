@@ -29,7 +29,7 @@ import {
 } from './aws_credentials_form/aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
 import type {
-  CloudAssetDiscoveryIntegrations,
+  CloudAssetInventoryIntegrations,
   AssetInput,
   NewPackagePolicyAssetInput,
 } from './types';
@@ -39,9 +39,9 @@ import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/cons
 import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import {
-  CAD_AWS_OPTION_TEST_SUBJ,
-  CAD_AZURE_OPTION_TEST_SUBJ,
-  CAD_GCP_OPTION_TEST_SUBJ,
+  CAI_AWS_OPTION_TEST_SUBJ,
+  CAI_AZURE_OPTION_TEST_SUBJ,
+  CAI_GCP_OPTION_TEST_SUBJ,
 } from './test_subjects';
 
 export function assert(condition: unknown, message: string): asserts condition {
@@ -60,7 +60,7 @@ const getAssetType = (policyTemplateInput: AssetInput) => {
     case CLOUDBEAT_AWS:
     case CLOUDBEAT_AZURE:
     case CLOUDBEAT_GCP:
-      return 'asset_discovery';
+      return 'asset_inventory';
     default:
       return 'n/a';
   }
@@ -260,19 +260,19 @@ export const getAssetInputHiddenVars = (
   }
 };
 
-const assetInventoryIntegrations: CloudAssetDiscoveryIntegrations = {
-  asset_discovery: {
+const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
+  asset_inventory: {
     policyTemplate: ASSET_POLICY_TEMPLATE,
     name: i18n.translate(
       'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.nameTitle',
       {
-        defaultMessage: 'Cloud Asset Discovery',
+        defaultMessage: 'Cloud Asset Inventory',
       }
     ),
     shortName: i18n.translate(
       'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.shortNameTitle',
       {
-        defaultMessage: 'CAD',
+        defaultMessage: 'CAI',
       }
     ),
     options: [
@@ -287,11 +287,11 @@ const assetInventoryIntegrations: CloudAssetDiscoveryIntegrations = {
         benchmark: i18n.translate(
           'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.benchmarkTitle',
           {
-            defaultMessage: 'CAD AWS',
+            defaultMessage: 'CAI AWS',
           }
         ),
         icon: 'logoAWS',
-        testId: CAD_AWS_OPTION_TEST_SUBJ,
+        testId: CAI_AWS_OPTION_TEST_SUBJ,
       },
       {
         type: CLOUDBEAT_GCP,
@@ -304,11 +304,11 @@ const assetInventoryIntegrations: CloudAssetDiscoveryIntegrations = {
         benchmark: i18n.translate(
           'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.benchmarkTitle',
           {
-            defaultMessage: 'CAD GCP',
+            defaultMessage: 'CAI GCP',
           }
         ),
         icon: googleCloudLogo,
-        testId: CAD_GCP_OPTION_TEST_SUBJ,
+        testId: CAI_GCP_OPTION_TEST_SUBJ,
       },
       {
         type: CLOUDBEAT_AZURE,
@@ -321,18 +321,18 @@ const assetInventoryIntegrations: CloudAssetDiscoveryIntegrations = {
         benchmark: i18n.translate(
           'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.benchmarkTitle',
           {
-            defaultMessage: 'CAD Azure',
+            defaultMessage: 'CAI Azure',
           }
         ),
         icon: 'logoAzure',
-        testId: CAD_AZURE_OPTION_TEST_SUBJ,
+        testId: CAI_AZURE_OPTION_TEST_SUBJ,
       },
     ],
   },
 };
 
 export const getPolicyTemplateInputOptions = () =>
-  assetInventoryIntegrations.asset_discovery.options.map((o) => ({
+  assetInventoryIntegrations.asset_inventory.options.map((o) => ({
     tooltip: o.tooltip,
     value: o.type,
     id: o.type,
@@ -363,7 +363,7 @@ export const getAssetCloudShellDefaultValue = (packageInfo: PackageInfo): string
 };
 
 export const getAwsCredentialsType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_aws' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>
 ): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
 export const isBelowMinVersion = (version: string, minVersion: string) => {
@@ -376,17 +376,17 @@ export const getDefaultCloudCredentialsType = (
   isAgentless: boolean,
   inputType: Extract<
     AssetInput,
-    | 'cloudbeat/asset_discovery_aws'
-    | 'cloudbeat/asset_discovery_azure'
-    | 'cloudbeat/asset_discovery_gcp'
+    | 'cloudbeat/asset_inventory_aws'
+    | 'cloudbeat/asset_inventory_azure'
+    | 'cloudbeat/asset_inventory_gcp'
   >
 ) => {
   const credentialsTypes: Record<
     Extract<
       AssetInput,
-      | 'cloudbeat/asset_discovery_aws'
-      | 'cloudbeat/asset_discovery_azure'
-      | 'cloudbeat/asset_discovery_gcp'
+      | 'cloudbeat/asset_inventory_aws'
+      | 'cloudbeat/asset_inventory_azure'
+      | 'cloudbeat/asset_inventory_gcp'
     >,
     {
       [key: string]: {
@@ -395,7 +395,7 @@ export const getDefaultCloudCredentialsType = (
       };
     }
   > = {
-    'cloudbeat/asset_discovery_aws': {
+    'cloudbeat/asset_inventory_aws': {
       'aws.credentials.type': {
         value: isAgentless
           ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
@@ -403,7 +403,7 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    'cloudbeat/asset_discovery_gcp': {
+    'cloudbeat/asset_inventory_gcp': {
       'gcp.credentials.type': {
         value: isAgentless
           ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
@@ -411,7 +411,7 @@ export const getDefaultCloudCredentialsType = (
         type: 'text',
       },
     },
-    'cloudbeat/asset_discovery_azure': {
+    'cloudbeat/asset_inventory_azure': {
       'azure.credentials.type': {
         value: isAgentless
           ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET

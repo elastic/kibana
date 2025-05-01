@@ -485,7 +485,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
 
     registerExtension({
-      package: 'cloud_asset_discovery',
+      package: 'cloud_asset_inventory',
       view: 'package-policy-replace-define-step',
       Component: LazyAssetInventoryReplaceDefineStepExtension,
     });

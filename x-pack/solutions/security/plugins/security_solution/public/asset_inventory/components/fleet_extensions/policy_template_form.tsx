@@ -14,6 +14,8 @@ import {
   type PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import { i18n } from '@kbn/i18n';
+// // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
+// // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import {
   getAssetInputHiddenVars,
   getAssetPolicy,
@@ -64,7 +66,10 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const getSelectedOption = (options: NewPackagePolicyInput[]) => {
+const getSelectedOption = (
+  options: NewPackagePolicyInput[]
+  // policyTemplate: string = ASSET_POLICY_TEMPLATE
+) => {
   // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
   // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
   const selectedOption = options.find((i) => i.enabled) || options[0];
@@ -72,7 +77,7 @@ const getSelectedOption = (options: NewPackagePolicyInput[]) => {
   return selectedOption as NewPackagePolicyAssetInput;
 };
 
-export const CloudAssetDiscoveryPolicyTemplateForm =
+export const CloudAssetInventoryPolicyTemplateForm =
   memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
     ({
       newPolicy,
@@ -170,6 +175,10 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
         },
       ];
 
+      // if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
+      //   return <SubscriptionNotAllowed />;
+      // }
+
       return (
         <>
           {isEditPage && <EditScreenStepTitle />}
@@ -189,7 +198,7 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.assetInventory.fleetIntegration.editWarning.calloutDescription"
-                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where Cloud Asset Discovery is deployed (Organization vs Single Account), please add a new Cloud Asset Discovery integration."
+                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where Cloud Asset Inventory is deployed (Organization vs Single Account), please add a new Cloud Asset Inventory integration."
                   />
                 </p>
               </EuiCallOut>
@@ -218,17 +227,16 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
             />
           )}
 
-          {input.type === 'cloudbeat/asset_discovery_gcp' && (
+          {input.type === 'cloudbeat/asset_inventory_gcp' && (
             <GcpAccountTypeSelect
               input={input}
               newPolicy={newPolicy}
               updatePolicy={updatePolicy}
-              packageInfo={packageInfo}
               disabled={isEditPage}
             />
           )}
 
-          {input.type === 'cloudbeat/asset_discovery_azure' && (
+          {input.type === 'cloudbeat/asset_inventory_azure' && (
             <AzureAccountTypeSelect
               input={input}
               newPolicy={newPolicy}
@@ -256,9 +264,9 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
                       value === SetupTechnology.AGENTLESS,
                       input.type as Extract<
                         AssetInput,
-                        | 'cloudbeat/asset_discovery_aws'
-                        | 'cloudbeat/asset_discovery_azure'
-                        | 'cloudbeat/asset_discovery_gcp'
+                        | 'cloudbeat/asset_inventory_aws'
+                        | 'cloudbeat/asset_inventory_azure'
+                        | 'cloudbeat/asset_inventory_gcp'
                       >
                     )
                   )
@@ -283,7 +291,7 @@ export const CloudAssetDiscoveryPolicyTemplateForm =
     }
   );
 
-CloudAssetDiscoveryPolicyTemplateForm.displayName = 'CloudAssetDiscoveryPolicyTemplateForm';
+CloudAssetInventoryPolicyTemplateForm.displayName = 'CloudAssetInventoryPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
-export { CloudAssetDiscoveryPolicyTemplateForm as default };
+export { CloudAssetInventoryPolicyTemplateForm as default };

@@ -18,7 +18,7 @@ import type { NewPackagePolicyAssetInput } from '../types';
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 
 const getAwsAccountType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_aws' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>
 ): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
 
 const getAwsAccountTypeOptions = (): AssetRadioGroupProps['options'] => {
@@ -115,7 +115,7 @@ export const AwsAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.fleetIntegration.awsAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Discovery at the organization-level, which automatically connects all accounts (both current and future)."
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization-level, which automatically connects all accounts (both current and future)."
             />
           </EuiText>
         </>

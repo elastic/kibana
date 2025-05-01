@@ -21,7 +21,7 @@ import { getMockPolicyAWS, getPackageInfoMock } from './mocks';
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
     [
-      'cloudbeat/asset_discovery_aws',
+      'cloudbeat/asset_inventory_aws',
       getMockPolicyAWS,
       { 'aws.credentials.type': { value: 'assume_role' } },
     ],
@@ -45,33 +45,33 @@ describe('getPosturePolicy', () => {
   }
 
   it('updates package policy required vars (posture/deployment)', () => {
-    const mockCadAws = getMockPolicyAWS();
-    expect(mockCadAws.vars?.asset.value).toBe('asset_discovery');
-    mockCadAws.vars!.extra = { value: 'value' };
+    const mockCaiAws = getMockPolicyAWS();
+    expect(mockCaiAws.vars?.asset.value).toBe('asset_inventory');
+    mockCaiAws.vars!.extra = { value: 'value' };
   });
 
   it('updates package policy with a single enabled input', () => {
-    const mockCadAws = getMockPolicyAWS();
-    expect(mockCadAws.inputs.filter((i) => i.enabled).length).toBe(1);
-    expect(mockCadAws.inputs.filter((i) => i.enabled)[0].type).toBe(
-      'cloudbeat/asset_discovery_aws'
+    const mockCaiAws = getMockPolicyAWS();
+    expect(mockCaiAws.inputs.filter((i) => i.enabled).length).toBe(1);
+    expect(mockCaiAws.inputs.filter((i) => i.enabled)[0].type).toBe(
+      'cloudbeat/asset_inventory_aws'
     );
 
     // enable all inputs of a policy
-    mockCadAws.inputs = mockCadAws.inputs.map((i) => ({
+    mockCaiAws.inputs = mockCaiAws.inputs.map((i) => ({
       ...i,
       enabled: true,
       streams: i.streams.map((s) => ({ ...s, enabled: true })),
     }));
 
     // change input
-    const policy = getAssetPolicy(mockCadAws, 'cloudbeat/asset_discovery_azure');
+    const policy = getAssetPolicy(mockCaiAws, 'cloudbeat/asset_inventory_azure');
     const enabledInputs = policy.inputs.filter(
       (i) => i.enabled && i.streams.some((s) => s.enabled)
     );
 
     expect(enabledInputs.length).toBe(1);
-    expect(enabledInputs.map((v) => v.type)[0]).toBe('cloudbeat/asset_discovery_azure');
+    expect(enabledInputs.map((v) => v.type)[0]).toBe('cloudbeat/asset_inventory_azure');
   });
 });
 
@@ -81,7 +81,7 @@ describe('getCspmCloudShellDefaultValue', () => {
     const result = getAssetCloudShellDefaultValue(packagePolicy);
     expect(result).toBe('');
   });
-  it('should return empty string when policy_templates.name is not asset_discovery', () => {
+  it('should return empty string when policy_templates.name is not asset_inventory', () => {
     const packagePolicy = {
       name: 'test',
       policy_templates: [{ name: 'some_policy_template_name' }],
@@ -92,7 +92,7 @@ describe('getCspmCloudShellDefaultValue', () => {
   it('should return empty string when policy_templates.inputs is missing', () => {
     const packagePolicy = {
       name: 'test',
-      policy_templates: [{ name: 'asset_discovery' }],
+      policy_templates: [{ name: 'asset_inventory' }],
     } as PackageInfo;
     const result = getAssetCloudShellDefaultValue(packagePolicy);
     expect(result).toBe('');
@@ -104,7 +104,7 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [{}],
         },
       ],
@@ -120,7 +120,7 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: undefined,
         },
       ],
@@ -136,7 +136,7 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [{ vars: [{ name: 'cloud_shell_url_FAKE' }] }],
         },
       ],
@@ -151,7 +151,7 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [{ vars: [{ name: 'cloud_shell_url' }] }],
         },
       ],
@@ -166,7 +166,7 @@ describe('getCspmCloudShellDefaultValue', () => {
         {
           title: '',
           description: '',
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [
             {
               vars: [
@@ -189,7 +189,7 @@ describe('getDefaultAwsCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [
             {
               vars: [
@@ -214,7 +214,7 @@ describe('getDefaultAwsCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [
             {
               vars: [
@@ -245,7 +245,7 @@ describe('getDefaultAzureCredentialsType', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [
             {
               vars: [
@@ -282,7 +282,7 @@ describe('getDefaultGcpHiddenVars', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [
             {
               vars: [
@@ -316,7 +316,7 @@ describe('getDefaultGcpHiddenVars', () => {
     packageInfo = {
       policy_templates: [
         {
-          name: 'asset_discovery',
+          name: 'asset_inventory',
           inputs: [
             {
               vars: [

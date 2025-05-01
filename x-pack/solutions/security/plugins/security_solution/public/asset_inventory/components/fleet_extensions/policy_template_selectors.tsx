@@ -45,7 +45,7 @@ export const PolicyTemplateVarsForm = ({
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
   switch (input.type) {
-    case 'cloudbeat/asset_discovery_aws':
+    case 'cloudbeat/asset_inventory_aws':
       if (isAgentless) {
         return (
           <AwsCredentialsFormAgentless
@@ -68,7 +68,7 @@ export const PolicyTemplateVarsForm = ({
           input={input}
         />
       );
-    case 'cloudbeat/asset_discovery_gcp':
+    case 'cloudbeat/asset_inventory_gcp':
       if (isAgentless) {
         return (
           <GcpCredentialsFormAgentless
@@ -92,7 +92,7 @@ export const PolicyTemplateVarsForm = ({
           isEditPage={isEditPage}
         />
       );
-    case 'cloudbeat/asset_discovery_azure':
+    case 'cloudbeat/asset_inventory_azure':
       if (isAgentless) {
         return (
           <AzureCredentialsFormAgentless

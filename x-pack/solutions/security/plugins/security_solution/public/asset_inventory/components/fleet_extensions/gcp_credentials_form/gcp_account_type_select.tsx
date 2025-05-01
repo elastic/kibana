@@ -7,7 +7,6 @@
 import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from './constants';
@@ -42,20 +41,18 @@ const getGcpAccountTypeOptions = (): AssetRadioGroupProps['options'] => [
 ];
 
 const getGcpAccountType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>
 ): GcpAccountType | undefined => input.streams[0].vars?.['gcp.account_type']?.value;
 
 export const GcpAccountTypeSelect = ({
   input,
   newPolicy,
   updatePolicy,
-  packageInfo,
   disabled,
 }: {
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_gcp' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
-  packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
   const gcpAccountTypeOptions = getGcpAccountTypeOptions();
@@ -151,7 +148,7 @@ export const GcpAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
-              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Discovery at the organization-level, which automatically connects all projects (both current and future)."
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization-level, which automatically connects all projects (both current and future)."
             />
           </EuiText>
         </>

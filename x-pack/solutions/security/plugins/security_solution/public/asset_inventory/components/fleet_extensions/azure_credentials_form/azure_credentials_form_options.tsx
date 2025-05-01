@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import type { AzureCredentialsType } from './types';
-import { CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../test_subjects';
+import { CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../test_subjects';
 import { AZURE_CREDENTIALS_TYPE } from './constants';
 
 export type AzureCredentialsFields = Record<
@@ -112,11 +112,11 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_secret': {
         type: 'password',
@@ -127,7 +127,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
             defaultMessage: 'Client Secret',
           }
         ),
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
       },
     },
   },
@@ -141,11 +141,11 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_certificate_path': {
         label: i18n.translate(
@@ -154,7 +154,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
             defaultMessage: 'Client Certificate Path',
           }
         ),
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
@@ -165,7 +165,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
             defaultMessage: 'Client Certificate Password',
           }
         ),
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
       },
     },
   },
@@ -177,11 +177,11 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_username': {
         label: i18n.translate(
@@ -190,7 +190,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
             defaultMessage: 'Client Username',
           }
         ),
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
       },
       'azure.credentials.client_password': {
         type: 'password',
@@ -201,7 +201,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
             defaultMessage: 'Client Password',
           }
         ),
-        testSubj: CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
+        testSubj: CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
       },
     },
   },

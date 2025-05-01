@@ -43,7 +43,7 @@ const getAzureAccountTypeOptions = (): AssetRadioGroupProps['options'] => [
 ];
 
 const getAzureAccountType = (
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>
 ): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
 
 export const AzureAccountTypeSelect = ({
@@ -53,7 +53,7 @@ export const AzureAccountTypeSelect = ({
   disabled,
   setupTechnology,
 }: {
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_discovery_azure' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;
@@ -124,7 +124,7 @@ export const AzureAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.fleetIntegration.azureAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy Cloud Asset Discovery at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
+              defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
             />
           </EuiText>
         </>

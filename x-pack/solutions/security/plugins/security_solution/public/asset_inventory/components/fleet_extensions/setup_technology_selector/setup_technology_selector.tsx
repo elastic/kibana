@@ -24,10 +24,12 @@ export const SetupTechnologySelector = ({
   disabled,
   setupTechnology,
   onSetupTechnologyChange,
+  showLimitationsMessage = true,
 }: {
   disabled: boolean;
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
+  showLimitationsMessage?: boolean;
 }) => {
   const radioGroupItemId1 = useGeneratedHtmlId({
     prefix: 'radioGroupItem',

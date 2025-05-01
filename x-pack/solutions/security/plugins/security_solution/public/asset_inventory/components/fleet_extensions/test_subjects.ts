@@ -14,9 +14,9 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
   CLOUD_SHELL: 'gcpGoogleCloudShellOptionTestId',
   MANUAL: 'gcpManualOptionTestId',
 };
-export const CAD_AWS_OPTION_TEST_SUBJ = 'cadAwsTestId';
-export const CAD_GCP_OPTION_TEST_SUBJ = 'cadGcpTestId';
-export const CAD_AZURE_OPTION_TEST_SUBJ = 'cadAzureTestId';
+export const CAI_AWS_OPTION_TEST_SUBJ = 'caiAwsTestId';
+export const CAI_GCP_OPTION_TEST_SUBJ = 'caiGcpTestId';
+export const CAI_AZURE_OPTION_TEST_SUBJ = 'caiAzureTestId';
 
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 export const SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_TEST_SUBJ =
@@ -24,20 +24,20 @@ export const SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_TEST_SUBJ =
 export const SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_TEST_SUBJ =
   'setup-technology-selector-agentbased-radio';
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
-export const CAD_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
-  TENANT_ID: 'cadAzureTenantId',
-  CLIENT_ID: 'cadAzureClientId',
+export const CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
+  TENANT_ID: 'caiAzureTenantId',
+  CLIENT_ID: 'caiAzureClientId',
   CLIENT_SECRET: 'passwordInput-client-secret',
-  CLIENT_CERTIFICATE_PATH: 'cadAzureClientCertificatePath',
-  CLIENT_CERTIFICATE_PASSWORD: 'cadAzureClientCertificatePassword',
-  CLIENT_USERNAME: 'cadAzureClientUsername',
-  CLIENT_PASSWORD: 'cadAzureClientPassword',
+  CLIENT_CERTIFICATE_PATH: 'caiAzureClientCertificatePath',
+  CLIENT_CERTIFICATE_PASSWORD: 'caiAzureClientCertificatePassword',
+  CLIENT_USERNAME: 'caiAzureClientUsername',
+  CLIENT_PASSWORD: 'caiAzureClientPassword',
 };
-export const CAD_AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
-  ARM_TEMPLATE: 'cadAzureArmTemplate',
-  MANUAL: 'cadAzureManual',
+export const CAI_AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
+  ARM_TEMPLATE: 'caiAzureArmTemplate',
+  MANUAL: 'caiAzureManual',
 };
-export const CAD_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
+export const CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
   PROJECT_ID: 'project_id_test_id',
   ORGANIZATION_ID: 'organization_id_test_id',

@@ -18,11 +18,11 @@ import type { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 export type AssetInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
 export type AssetInventoryPolicyTemplate = (typeof SUPPORTED_POLICY_TEMPLATES)[number];
 
-export type CloudAssetDiscoveryIntegrations = Record<
+export type CloudAssetInventoryIntegrations = Record<
   AssetInventoryPolicyTemplate,
-  CloudAssetDiscoveryIntegrationProps
+  CloudAssetInventoryIntegrationProps
 >;
-export interface CloudAssetDiscoveryIntegrationProps {
+export interface CloudAssetInventoryIntegrationProps {
   policyTemplate: AssetInventoryPolicyTemplate;
   name: string;
   shortName: string;

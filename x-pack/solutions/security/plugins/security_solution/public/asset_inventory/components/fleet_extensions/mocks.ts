@@ -23,12 +23,12 @@ export const getMockPackageInfo = () => getPackageInfoMock();
 
 export const getMockPackageInfoAssetInventoryAWS = () => {
   return {
-    name: 'cloud_asset_discovery',
+    name: 'cloud_asset_inventory',
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'asset_discovery',
+        name: 'asset_inventory',
         inputs: [
           {
             type: CLOUDBEAT_AWS,
@@ -51,12 +51,12 @@ export const getMockPackageInfoAssetInventoryAWS = () => {
 
 export const getMockPackageInfoAssetGCP = () => {
   return {
-    name: 'cloud_asset_discovery',
+    name: 'cloud_asset_inventory',
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'asset_discovery',
+        name: 'asset_inventory',
         inputs: [
           {
             type: CLOUDBEAT_GCP,
@@ -79,12 +79,12 @@ export const getMockPackageInfoAssetGCP = () => {
 
 export const getMockPackageInfoAssetAzure = () => {
   return {
-    name: 'cloud_asset_discovery',
+    name: 'cloud_asset_inventory',
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'asset_discovery',
+        name: 'asset_inventory',
         inputs: [
           {
             type: CLOUDBEAT_AZURE,
@@ -137,19 +137,19 @@ const getPolicyMock = (
     'azure.credentials.client_password': { type: 'text' },
   };
 
-  const dataStream = { type: 'logs', dataset: 'cloud_asset_discovery.asset_discovery' };
+  const dataStream = { type: 'logs', dataset: 'cloud_asset_inventory.asset_inventory' };
 
   return {
     ...mockPackagePolicy,
-    name: 'cloud_asset_discovery-policy',
+    name: 'cloud_asset_inventory-policy',
     package: {
-      name: 'cloud_asset_discovery',
+      name: 'cloud_asset_inventory',
       title: 'Security Posture Management (CSPM/KSPM)',
       version: '1.1.1',
     },
     vars: {
       asset: {
-        value: 'asset_discovery',
+        value: 'asset_inventory',
         type: 'text',
       },
       deployment: { value: deployment, type: 'text' },
@@ -157,7 +157,7 @@ const getPolicyMock = (
     inputs: [
       {
         type: CLOUDBEAT_AWS,
-        policy_template: 'asset_discovery',
+        policy_template: 'asset_inventory',
         enabled: type === CLOUDBEAT_AWS,
         streams: [
           {
@@ -169,7 +169,7 @@ const getPolicyMock = (
       },
       {
         type: CLOUDBEAT_GCP,
-        policy_template: 'asset_discovery',
+        policy_template: 'asset_inventory',
         enabled: type === CLOUDBEAT_GCP,
         streams: [
           {
@@ -181,7 +181,7 @@ const getPolicyMock = (
       },
       {
         type: CLOUDBEAT_AZURE,
-        policy_template: 'asset_discovery',
+        policy_template: 'asset_inventory',
         enabled: type === CLOUDBEAT_AZURE,
         streams: [
           {
@@ -199,17 +199,17 @@ export const getPackageInfoMock = () => {
   return {
     data_streams: [
       {
-        dataset: 'cloud_asset_discovery.asset_discovery',
+        dataset: 'cloud_asset_inventory.asset_inventory',
         type: 'logs',
 
         package: 'cloud_security_posture',
-        path: 'asset_discovery',
+        path: 'asset_inventory',
         release: 'ga' as RegistryRelease,
 
         title: 'Cloud Assets Inventory',
         streams: [
           {
-            input: 'cloudbeat/asset_discovery_aws',
+            input: 'cloudbeat/asset_inventory_aws',
             template_path: 'aws.yml.hbs',
             title: 'AWS Asset Inventory',
             vars: [
@@ -221,7 +221,7 @@ export const getPackageInfoMock = () => {
             ],
           },
           {
-            input: 'cloudbeat/asset_discovery_gcp',
+            input: 'cloudbeat/asset_inventory_gcp',
             template_path: 'gcp.yml.hbs',
             title: 'GCP Asset Inventory',
             vars: [
@@ -240,7 +240,7 @@ export const getPackageInfoMock = () => {
             ],
           },
           {
-            input: 'cloudbeat/asset_discovery_azure',
+            input: 'cloudbeat/asset_inventory_azure',
             template_path: 'azure.yml.hbs',
             title: 'Azure Asset Inventory',
             vars: [
@@ -278,13 +278,13 @@ export const getPackageInfoMock = () => {
     ],
     format_version: '3.3.2',
     version: '0.0.0',
-    name: 'cloud_asset_discovery',
+    name: 'cloud_asset_inventory',
     description: 'Discover and Create Cloud Assets Inventory',
     owner: {
       github: 'elastic/cloud-security-posture',
       type: 'elastic' as 'elastic' | 'partner' | 'community' | undefined,
     },
-    title: 'Cloud Asset Discovery',
+    title: 'Cloud Asset Inventory',
     latestVersion: '0.0.0',
     assets: {
       kibana: {},

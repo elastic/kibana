@@ -7,7 +7,7 @@
 
 export const AWS_SINGLE_ACCOUNT = 'single-account';
 export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
-export const CLOUDBEAT_AWS = 'cloudbeat/asset_discovery_aws';
+export const CLOUDBEAT_AWS = 'cloudbeat/asset_inventory_aws';
 
 export const AWS_SETUP_FORMAT = {
   CLOUD_FORMATION: 'cloud_formation',

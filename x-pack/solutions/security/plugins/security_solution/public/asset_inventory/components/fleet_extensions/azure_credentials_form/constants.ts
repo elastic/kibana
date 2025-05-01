@@ -8,7 +8,7 @@
 export const AZURE_SINGLE_ACCOUNT = 'single-account';
 export const AZURE_ORGANIZATION_ACCOUNT = 'organization-account';
 
-export const CLOUDBEAT_AZURE = 'cloudbeat/asset_discovery_azure';
+export const CLOUDBEAT_AZURE = 'cloudbeat/asset_inventory_azure';
 
 export const AZURE_SETUP_FORMAT = {
   ARM_TEMPLATE: 'arm_template',
