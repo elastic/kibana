@@ -6,7 +6,6 @@
  */
 
 import { pick } from 'lodash';
-import type { ZodSchema } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { type BindToolsInput } from '@langchain/core/language_models/chat_models';
 import { ToolDefinition } from '@langchain/core/language_models/base';
@@ -19,6 +18,7 @@ import {
   ToolSchema,
 } from '@kbn/inference-common';
 import type { ToolChoice } from '../types';
+import { StructuredToolParams } from '@langchain/core/dist/tools';
 
 export const toolDefinitionToInference = (
   tools: BindToolsInput[]
@@ -61,6 +61,9 @@ function isToolDefinition(def: BindToolsInput): def is ToolDefinition {
   return 'type' in def && def.type === 'function' && 'function' in def && typeof def === 'object';
 }
 
-function zodSchemaToInference(schema: ZodSchema): ToolSchema {
-  return pick(zodToJsonSchema(schema), ['type', 'properties', 'required']) as ToolSchema;
+function zodSchemaToInference(schema: StructuredToolParams['schema']): ToolSchema {
+  if (isZodSchema(schema)) {
+    return pick(zodToJsonSchema(schema), ['type', 'properties', 'required']) as ToolSchema;
+  }
+  throw new Error('Only Zod schemas are supported for now');
 }

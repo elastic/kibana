@@ -50,6 +50,7 @@ export class ActionsClientGeminiChatModel extends ChatGoogleGenerativeAI {
   constructor({ actionsClient, connectorId, ...props }: CustomChatModelInput) {
     super({
       ...props,
+      model: props.model!,
       apiKey: 'asda',
       maxOutputTokens: props.maxTokens ?? 2048,
     });
