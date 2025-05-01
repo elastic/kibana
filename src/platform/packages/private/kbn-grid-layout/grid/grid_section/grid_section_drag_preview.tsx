@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridRowDragPreview = React.memo(({ sectionId }: { sectionId: string }) => {
+export const GridSectionDragPreview = React.memo(({ sectionId }: { sectionId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   useEffect(
@@ -40,4 +40,4 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     position: 'relative',
   });
 
-GridRowDragPreview.displayName = 'KbnGridLayoutRowDragPreview';
+GridSectionDragPreview.displayName = 'KbnGridLayoutSectionDragPreview';

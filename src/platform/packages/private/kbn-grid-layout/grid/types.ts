@@ -23,7 +23,7 @@ export interface GridPanelData extends GridRect {
   id: string;
 }
 
-export interface GridRowData {
+export interface GridSectionData {
   id: string;
   row: number; // position of section in main grid
   title: string;
@@ -40,7 +40,7 @@ export type GridLayoutElementsInOrder = Array<{
 
 export type GridLayoutWidget =
   | (GridPanelData & { type: 'panel' })
-  | (GridRowData & { type: 'section' });
+  | (GridSectionData & { type: 'section' });
 
 export interface GridLayoutData {
   [key: string]: GridLayoutWidget;
@@ -116,12 +116,15 @@ export interface ActiveRowEvent {
 
 /** This is translated from GridLayoutData */
 
-export type MainSection = Omit<GridRowData, 'row' | 'isCollapsed' | 'title'> & {
+export type MainSection = Omit<GridSectionData, 'row' | 'isCollapsed' | 'title'> & {
   order: number;
   isMainSection: true;
 };
 
-export type CollapsibleSection = Omit<GridRowData, 'row'> & { order: number; isMainSection: false };
+export type CollapsibleSection = Omit<GridSectionData, 'row'> & {
+  order: number;
+  isMainSection: false;
+};
 
 export interface OrderedLayout {
   [key: string]: MainSection | CollapsibleSection;
@@ -140,7 +143,7 @@ export interface GridLayoutStateManager {
   activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
-  rowRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
+  sectionRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
   headerRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
   footerRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;

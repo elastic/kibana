@@ -8,7 +8,7 @@
  */
 
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
-import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
+import { getRowKeysInOrder } from '../../utils/resolve_grid_section';
 import { moveAction } from './state_manager_actions';
 
 describe('row state manager actions', () => {

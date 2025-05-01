@@ -13,11 +13,11 @@ import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export interface GridRowProps {
+export interface GridSectionProps {
   sectionId: string;
 }
 
-export const GridRowWrapper = React.memo(({ sectionId }: GridRowProps) => {
+export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const styles = useMemo(() => {
@@ -45,9 +45,9 @@ export const GridRowWrapper = React.memo(({ sectionId }: GridRowProps) => {
           if (!rowRef) return;
           const targetRow = activePanel?.targetRow;
           if (sectionId === targetRow && activePanel) {
-            rowRef.classList.add('kbnGridRow--targeted');
+            rowRef.classList.add('kbnGridSection--targeted');
           } else {
-            rowRef.classList.remove('kbnGridRow--targeted');
+            rowRef.classList.remove('kbnGridSection--targeted');
           }
         }
       );
@@ -66,9 +66,9 @@ export const GridRowWrapper = React.memo(({ sectionId }: GridRowProps) => {
       ref={(rowRef: HTMLDivElement | null) => {
         gridLayoutStateManager.sectionRefs.current[sectionId] = rowRef;
       }}
-      className={'kbnGridRowBackground'}
+      className={'kbnGridSectionBackground'}
     />
   );
 });
 
-GridRowWrapper.displayName = 'KbnGridLayoutRowWrapper';
+GridSectionWrapper.displayName = 'KbnGridLayoutRowWrapper';

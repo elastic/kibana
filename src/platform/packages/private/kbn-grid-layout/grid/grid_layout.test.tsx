@@ -125,18 +125,20 @@ describe('GridLayout', () => {
 
     it('row gets active when dragged', () => {
       renderGridLayout();
-      expect(screen.getByTestId('kbnGridRowHeader-second')).not.toHaveClass(
-        'kbnGridRowHeader--active'
+      expect(screen.getByTestId('kbnGridSectionHeader-second')).not.toHaveClass(
+        'kbnGridSectionHeader--active'
       );
 
-      const rowHandle = screen.getByTestId(`kbnGridRowHeader-second--dragHandle`);
+      const rowHandle = screen.getByTestId(`kbnGridSectionHeader-second--dragHandle`);
       mouseStartDragging(rowHandle);
       mouseMoveTo({ clientX: 256, clientY: 128 });
-      expect(screen.getByTestId('kbnGridRowHeader-second')).toHaveClass('kbnGridRowHeader--active');
+      expect(screen.getByTestId('kbnGridSectionHeader-second')).toHaveClass(
+        'kbnGridSectionHeader--active'
+      );
 
       mouseDrop(rowHandle);
-      expect(screen.getByTestId('kbnGridRowHeader-second')).not.toHaveClass(
-        'kbnGridRowHeader--active'
+      expect(screen.getByTestId('kbnGridSectionHeader-second')).not.toHaveClass(
+        'kbnGridSectionHeader--active'
       );
     });
   });

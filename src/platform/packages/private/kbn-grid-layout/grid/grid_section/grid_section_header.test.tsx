@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { GridLayoutStateManager } from '../types';
-import { GridRowHeader, GridRowHeaderProps } from './grid_section_header';
+import { GridSectionHeader, GridSectionHeaderProps } from './grid_section_header';
 import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
 
 const toggleIsCollapsed = jest
@@ -26,9 +26,9 @@ const toggleIsCollapsed = jest
     gridLayoutStateManager.gridLayout$.next(newLayout);
   });
 
-describe('GridRowHeader', () => {
-  const renderGridRowHeader = (
-    propsOverrides: Partial<GridRowHeaderProps> = {},
+describe('GridSectionHeader', () => {
+  const renderGridSectionHeader = (
+    propsOverrides: Partial<GridSectionHeaderProps> = {},
     contextOverrides: Partial<GridLayoutContextType> = {}
   ) => {
     const stateManagerMock = getGridLayoutStateManagerMock();
@@ -43,7 +43,7 @@ describe('GridRowHeader', () => {
             } as GridLayoutContextType
           }
         >
-          <GridRowHeader
+          <GridSectionHeader
             sectionId={'first'}
             toggleIsCollapsed={() => toggleIsCollapsed('first', stateManagerMock)}
             collapseButtonRef={React.createRef()}
@@ -61,8 +61,8 @@ describe('GridRowHeader', () => {
   });
 
   it('renders the panel count', async () => {
-    const { component, gridLayoutStateManager } = renderGridRowHeader();
-    const initialCount = component.getByTestId('kbnGridRowHeader-first--panelCount');
+    const { component, gridLayoutStateManager } = renderGridSectionHeader();
+    const initialCount = component.getByTestId('kbnGridSectionHeader-first--panelCount');
     expect(initialCount.textContent).toBe('(8 panels)');
 
     act(() => {
@@ -78,14 +78,14 @@ describe('GridRowHeader', () => {
     });
 
     await waitFor(() => {
-      const updatedCount = component.getByTestId('kbnGridRowHeader-first--panelCount');
+      const updatedCount = component.getByTestId('kbnGridSectionHeader-first--panelCount');
       expect(updatedCount.textContent).toBe('(1 panel)');
     });
   });
 
   it('clicking title calls `toggleIsCollapsed`', async () => {
-    const { component, gridLayoutStateManager } = renderGridRowHeader();
-    const title = component.getByTestId('kbnGridRowTitle-first');
+    const { component, gridLayoutStateManager } = renderGridSectionHeader();
+    const title = component.getByTestId('kbnGridSectionTitle-first');
 
     expect(toggleIsCollapsed).toBeCalledTimes(0);
     expect(gridLayoutStateManager.gridLayout$.getValue().first.isCollapsed).toBe(false);
@@ -104,44 +104,46 @@ describe('GridRowHeader', () => {
     };
 
     it('clicking on edit icon triggers inline title editor and does not toggle collapsed', async () => {
-      const { component, gridLayoutStateManager } = renderGridRowHeader();
-      const editIcon = component.getByTestId('kbnGridRowTitle-first--edit');
+      const { component, gridLayoutStateManager } = renderGridSectionHeader();
+      const editIcon = component.getByTestId('kbnGridSectionTitle-first--edit');
 
-      expect(component.queryByTestId('kbnGridRowTitle-first--editor')).not.toBeInTheDocument();
+      expect(component.queryByTestId('kbnGridSectionTitle-first--editor')).not.toBeInTheDocument();
       expect(gridLayoutStateManager.gridLayout$.getValue().first.isCollapsed).toBe(false);
       await userEvent.click(editIcon);
-      expect(component.getByTestId('kbnGridRowTitle-first--editor')).toBeInTheDocument();
+      expect(component.getByTestId('kbnGridSectionTitle-first--editor')).toBeInTheDocument();
       expect(toggleIsCollapsed).toBeCalledTimes(0);
       expect(gridLayoutStateManager.gridLayout$.getValue().first.isCollapsed).toBe(false);
     });
 
     it('can update the title', async () => {
-      const { component, gridLayoutStateManager } = renderGridRowHeader();
-      expect(component.getByTestId('kbnGridRowTitle-first').textContent).toBe('Large section');
+      const { component, gridLayoutStateManager } = renderGridSectionHeader();
+      expect(component.getByTestId('kbnGridSectionTitle-first').textContent).toBe('Large section');
       expect(gridLayoutStateManager.gridLayout$.getValue().first.title).toBe('Large section');
 
-      const editIcon = component.getByTestId('kbnGridRowTitle-first--edit');
+      const editIcon = component.getByTestId('kbnGridSectionTitle-first--edit');
       await userEvent.click(editIcon);
       await setTitle(component);
       const saveButton = component.getByTestId('euiInlineEditModeSaveButton');
       await userEvent.click(saveButton);
 
-      expect(component.queryByTestId('kbnGridRowTitle-first--editor')).not.toBeInTheDocument();
-      expect(component.getByTestId('kbnGridRowTitle-first').textContent).toBe('Large section 123');
+      expect(component.queryByTestId('kbnGridSectionTitle-first--editor')).not.toBeInTheDocument();
+      expect(component.getByTestId('kbnGridSectionTitle-first').textContent).toBe(
+        'Large section 123'
+      );
       expect(gridLayoutStateManager.gridLayout$.getValue().first.title).toBe('Large section 123');
     });
 
     it('clicking on cancel closes the inline title editor without updating title', async () => {
-      const { component, gridLayoutStateManager } = renderGridRowHeader();
-      const editIcon = component.getByTestId('kbnGridRowTitle-first--edit');
+      const { component, gridLayoutStateManager } = renderGridSectionHeader();
+      const editIcon = component.getByTestId('kbnGridSectionTitle-first--edit');
       await userEvent.click(editIcon);
 
       await setTitle(component);
       const cancelButton = component.getByTestId('euiInlineEditModeCancelButton');
       await userEvent.click(cancelButton);
 
-      expect(component.queryByTestId('kbnGridRowTitle-first--editor')).not.toBeInTheDocument();
-      expect(component.getByTestId('kbnGridRowTitle-first').textContent).toBe('Large section');
+      expect(component.queryByTestId('kbnGridSectionTitle-first--editor')).not.toBeInTheDocument();
+      expect(component.getByTestId('kbnGridSectionTitle-first').textContent).toBe('Large section');
       expect(gridLayoutStateManager.gridLayout$.getValue().first.title).toBe('Large section');
     });
   });

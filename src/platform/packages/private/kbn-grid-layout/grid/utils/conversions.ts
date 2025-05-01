@@ -8,8 +8,8 @@
  */
 
 import { cloneDeep, omit } from 'lodash';
-import { GridLayoutData, GridPanelData, GridRowData, OrderedLayout } from '../types';
-import { getMainLayoutInOrder } from './resolve_grid_row';
+import { GridLayoutData, GridPanelData, GridSectionData, OrderedLayout } from '../types';
+import { getMainLayoutInOrder } from './resolve_grid_section';
 
 export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
   let gridLayout: GridLayoutData = {};
@@ -20,7 +20,7 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
     })
     .forEach((section) => {
       const panels: { [key: string]: GridPanelData & { type?: 'panel' } } = cloneDeep(
-        (section as unknown as GridRowData).panels
+        (section as unknown as GridSectionData).panels
       );
       if (section.isMainSection) {
         const panelValues = Object.values(panels);
@@ -35,7 +35,7 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
         gridLayout = { ...gridLayout, ...panels } as GridLayoutData;
         mainRow += maxRow;
       } else {
-        const typedSection = section as unknown as GridRowData;
+        const typedSection = section as unknown as GridSectionData;
         gridLayout[section.id] = {
           ...omit(typedSection, 'order'),
           type: 'section',
@@ -77,7 +77,7 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
       order++;
     } else {
       const sectionId = id;
-      const section = layout[sectionId] as GridRowData;
+      const section = layout[sectionId] as GridSectionData;
       orderedLayout[sectionId] = { ...section, order };
       mainRow++;
       order++;

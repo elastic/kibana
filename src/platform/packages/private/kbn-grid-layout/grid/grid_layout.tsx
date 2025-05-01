@@ -15,9 +15,7 @@ import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridPanel } from './grid_panel';
-import { GridRowFooter } from './grid_section/grid_section_footer';
-import { GridRowHeader } from './grid_section/grid_section_header';
-import { GridRowWrapper } from './grid_section/grid_section_wrapper';
+import { GridSectionFooter, GridSectionHeader, GridSectionWrapper } from './grid_section';
 import {
   GridAccessMode,
   GridLayoutData,
@@ -68,7 +66,7 @@ export const GridLayout = ({
   //      * so, we need to loop through each row and ensure it is compacted
   //      */
   //     Object.entries(newLayout).forEach(([sectionId, row]) => {
-  //       newLayout[sectionId] = resolveGridRow(row);
+  //       newLayout[sectionId] = resolveGridSection(row);
   //     });
   //     gridLayoutStateManager.gridLayout$.next(newLayout);
   //   }
@@ -105,7 +103,7 @@ export const GridLayout = ({
   useEffect(() => {
     const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((sections) => {
       const currentElementsInOrder: GridLayoutElementsInOrder = [];
-      let gridRowTemplateString = '';
+      let gridTemplateString = '';
 
       Object.values(sections)
         .sort((a, b) => {
@@ -113,12 +111,12 @@ export const GridLayout = ({
         })
         .forEach((section) => {
           const { id } = section;
-          gridRowTemplateString += `[start-${id}] `;
+          gridTemplateString += `[start-${id}] `;
           const isMainSection = 'isMainSection' in section && section.isMainSection;
           if (!isMainSection) {
             /** Header */
             currentElementsInOrder.push({ type: 'header', id });
-            gridRowTemplateString += `auto `;
+            gridTemplateString += `auto `;
           }
 
           /** Panels */
@@ -131,7 +129,7 @@ export const GridLayout = ({
                 id: panel.id,
               });
             });
-            gridRowTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
+            gridTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridSectionHeight) * 1px)) `;
             currentElementsInOrder.push({
               type: 'wrapper',
               id,
@@ -141,13 +139,13 @@ export const GridLayout = ({
           if (!isMainSection) {
             /** Footer */
             currentElementsInOrder.push({ type: 'footer', id });
-            gridRowTemplateString += `auto `;
+            gridTemplateString += `auto `;
           }
-          gridRowTemplateString += `[end-${section.id}] `;
+          gridTemplateString += `[end-${section.id}] `;
         });
       setElementsInOrder(currentElementsInOrder);
-      gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
-      if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
+      gridTemplateString = gridTemplateString.replaceAll('] [', ' ');
+      if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridTemplateString;
     });
 
     /**
@@ -210,13 +208,13 @@ export const GridLayout = ({
           {elementsInOrder.map((element) => {
             switch (element.type) {
               case 'header':
-                return <GridRowHeader key={element.id} sectionId={element.id} />;
+                return <GridSectionHeader key={element.id} sectionId={element.id} />;
               case 'panel':
                 return <GridPanel key={element.id} panelId={element.id} />;
               case 'wrapper':
-                return <GridRowWrapper key={`${element.id}--wrapper`} sectionId={element.id} />;
+                return <GridSectionWrapper key={`${element.id}--wrapper`} sectionId={element.id} />;
               case 'footer':
-                return <GridRowFooter key={`${element.id}--footer`} sectionId={element.id} />;
+                return <GridSectionFooter key={`${element.id}--footer`} sectionId={element.id} />;
             }
           })}
         </div>
@@ -234,7 +232,7 @@ const styles = {
     justifyItems: 'stretch',
     display: 'grid',
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
-    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
+    gridAutoRows: 'calc(var(--kbnGridSectionHeight) * 1px)',
     gridTemplateColumns: `repeat(
           var(--kbnGridColumnCount),
           calc(
@@ -244,7 +242,7 @@ const styles = {
         )`,
   }),
   hasActivePanel: css({
-    '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {
+    '&:has(.kbnGridPanel--active), &:has(.kbnGridSectionHeader--active)': {
       // disable pointer events and user select on drag + resize
       userSelect: 'none',
       pointerEvents: 'none',
@@ -252,7 +250,7 @@ const styles = {
   }),
   singleColumn: css({
     '&.kbnGrid--mobileView': {
-      '.kbnGridRow': {
+      '.kbnGridSection': {
         gridTemplateColumns: '100%',
         gridTemplateRows: 'auto',
         gridAutoFlow: 'row',
@@ -267,14 +265,14 @@ const styles = {
     '&:has(.kbnGridPanel--expanded)': {
       height: '100%',
       // targets the grid row container that contains the expanded panel
-      '& .kbnGridRowContainer:has(.kbnGridPanel--expanded)': {
-        '.kbnGridRowHeader': {
+      '& .kbnGridSectionContainer:has(.kbnGridPanel--expanded)': {
+        '.kbnGridSectionHeader': {
           height: '0px', // used instead of 'display: none' due to a11y concerns
           padding: '0px',
           display: 'block',
           overflow: 'hidden',
         },
-        '.kbnGridRow': {
+        '.kbnGridSection': {
           display: 'block !important', // overwrite grid display
           height: '100%',
           '.kbnGridPanel': {
@@ -292,7 +290,7 @@ const styles = {
         },
       },
       // targets the grid row containers that **do not** contain the expanded panel
-      '& .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded))': {
+      '& .kbnGridSectionContainer:not(:has(.kbnGridPanel--expanded))': {
         position: 'absolute',
         top: '-9999px',
         left: '-9999px',

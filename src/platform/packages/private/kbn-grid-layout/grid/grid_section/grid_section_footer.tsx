@@ -13,15 +13,15 @@ import { css } from '@emotion/react';
 
 import { UseEuiTheme } from '@elastic/eui';
 
-export interface GridRowProps {
+export interface GridSectionProps {
   sectionId: string;
 }
 
-export const GridRowFooter = React.memo(({ sectionId }: GridRowProps) => {
+export const GridSectionFooter = React.memo(({ sectionId }: GridSectionProps) => {
   return (
     <span
       data-row-id={sectionId}
-      className={'kbnGridRowFooter'}
+      className={'kbnGridSectionFooter'}
       css={({ euiTheme }: UseEuiTheme) => {
         return css`
           grid-column-start: 1;
@@ -37,4 +37,4 @@ export const GridRowFooter = React.memo(({ sectionId }: GridRowProps) => {
   );
 });
 
-GridRowFooter.displayName = 'KbnGridLayoutRowFooter';
+GridSectionFooter.displayName = 'KbnGridLayoutRowFooter';

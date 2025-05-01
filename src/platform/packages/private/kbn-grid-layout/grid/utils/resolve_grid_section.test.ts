@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolveGridRow } from './resolve_grid_row';
+import { resolveGridSection } from './resolve_grid_section';
 
 describe('resolve grid row', () => {
   test('does nothing if grid row has no collisions', () => {
-    const gridRow = {
+    const gridSection = {
       order: 0,
       id: 'first',
       title: 'Test',
@@ -23,12 +23,12 @@ describe('resolve grid row', () => {
         panel4: { id: 'panel4', row: 0, column: 6, height: 3, width: 1 },
       },
     };
-    const result = resolveGridRow(gridRow);
-    expect(result).toEqual(gridRow);
+    const result = resolveGridSection(gridSection);
+    expect(result).toEqual(gridSection);
   });
 
   test('resolves grid row if it has collisions without drag event', () => {
-    const result = resolveGridRow({
+    const result = resolveGridSection({
       order: 0,
       id: 'first',
       title: 'Test',
@@ -55,7 +55,7 @@ describe('resolve grid row', () => {
   });
 
   test('drag causes no collision', () => {
-    const result = resolveGridRow(
+    const result = resolveGridSection(
       {
         order: 0,
         id: 'first',
@@ -85,7 +85,7 @@ describe('resolve grid row', () => {
   });
 
   test('drag causes collision with one panel that pushes down others', () => {
-    const result = resolveGridRow(
+    const result = resolveGridSection(
       {
         order: 0,
         id: 'first',
@@ -117,7 +117,7 @@ describe('resolve grid row', () => {
   });
 
   test('drag causes collision with multiple panels', () => {
-    const result = resolveGridRow(
+    const result = resolveGridSection(
       {
         order: 0,
         id: 'first',
@@ -146,7 +146,7 @@ describe('resolve grid row', () => {
   });
 
   test('drag causes collision with every panel', () => {
-    const result = resolveGridRow(
+    const result = resolveGridSection(
       {
         order: 0,
         id: 'first',

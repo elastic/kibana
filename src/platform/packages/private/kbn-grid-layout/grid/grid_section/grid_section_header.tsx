@@ -24,17 +24,17 @@ import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutRowEvents } from '../use_grid_layout_events';
-import { deleteRow } from '../utils/row_management';
-import { DeleteGridRowModal } from './delete_grid_section_modal';
-import { GridRowDragPreview } from './grid_section_drag_preview';
-import { GridRowTitle } from './grid_section_title';
-import { GridRowData } from '../types';
+import { deleteRow } from '../utils/section_management';
+import { DeleteGridSectionModal } from './delete_grid_section_modal';
+import { GridSectionDragPreview } from './grid_section_drag_preview';
+import { GridSectionTitle } from './grid_section_title';
+import { GridSectionData } from '../types';
 
-export interface GridRowHeaderProps {
+export interface GridSectionHeaderProps {
   sectionId: string;
 }
 
-export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
+export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -48,14 +48,15 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
   );
   const [panelCount, setPanelCount] = useState<number>(
     Object.keys(
-      (gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridRowData).panels
+      (gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridSectionData)
+        .panels
     ).length
   );
 
   const initialClassNames = useMemo(() => {
-    return classNames('kbnGridRowHeader', {
-      'kbnGridRowHeader--collapsed': (
-        gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridRowData
+    return classNames('kbnGridSectionHeader', {
+      'kbnGridSectionHeader--collapsed': (
+        gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridSectionData
       ).isCollapsed,
     });
   }, [sectionId, gridLayoutStateManager.gridLayout$]);
@@ -143,9 +144,9 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
         if (!headerRef) return;
 
         if (collapsed) {
-          headerRef.classList.add('kbnGridRowHeader--collapsed');
+          headerRef.classList.add('kbnGridSectionHeader--collapsed');
         } else {
-          headerRef.classList.remove('kbnGridRowHeader--collapsed');
+          headerRef.classList.remove('kbnGridSectionHeader--collapsed');
         }
       });
 
@@ -177,7 +178,7 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
     const section = newLayout[sectionId];
 
-    newLayout[sectionId].isCollapsed = !(newLayout[sectionId] as GridRowData).isCollapsed;
+    newLayout[sectionId].isCollapsed = !(newLayout[sectionId] as GridSectionData).isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [gridLayoutStateManager, sectionId]);
 
@@ -189,14 +190,14 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
         alignItems="center"
         css={(theme) => styles.headerStyles(theme, sectionId)}
         className={classNames(initialClassNames, {
-          'kbnGridRowHeader--active': isActive,
+          'kbnGridSectionHeader--active': isActive,
         })}
-        data-test-subj={`kbnGridRowHeader-${sectionId}`}
+        data-test-subj={`kbnGridSectionHeader-${sectionId}`}
         ref={(element: HTMLDivElement | null) =>
           (gridLayoutStateManager.headerRefs.current[sectionId] = element)
         }
       >
-        <GridRowTitle
+        <GridSectionTitle
           sectionId={sectionId}
           readOnly={readOnly || isActive}
           toggleIsCollapsed={toggleIsCollapsed}
@@ -215,7 +216,7 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
                 <EuiText
                   color="subdued"
                   size="s"
-                  data-test-subj={`kbnGridRowHeader-${sectionId}--panelCount`}
+                  data-test-subj={`kbnGridSectionHeader-${sectionId}--panelCount`}
                   className={'kbnGridLayout--panelCount'}
                 >
                   {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
@@ -257,7 +258,7 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
                       onTouchStart={startDrag}
                       onKeyDown={startDrag}
                       onBlur={onBlur}
-                      data-test-subj={`kbnGridRowHeader-${sectionId}--dragHandle`}
+                      data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
                     />
                   </EuiFlexItem>
                 </>
@@ -266,9 +267,12 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
           )
         }
       </EuiFlexGroup>
-      {isActive && <GridRowDragPreview sectionId={sectionId} />}
+      {isActive && <GridSectionDragPreview sectionId={sectionId} />}
       {deleteModalVisible && (
-        <DeleteGridRowModal sectionId={sectionId} setDeleteModalVisible={setDeleteModalVisible} />
+        <DeleteGridSectionModal
+          sectionId={sectionId}
+          setDeleteModalVisible={setDeleteModalVisible}
+        />
       )}
     </>
   );
@@ -277,7 +281,7 @@ export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
 const styles = {
   visibleOnlyWhenCollapsed: css({
     display: 'none',
-    '.kbnGridRowHeader--collapsed &': {
+    '.kbnGridSectionHeader--collapsed &': {
       display: 'block',
     },
   }),
@@ -292,7 +296,7 @@ const styles = {
       gridRowEnd: `auto`,
       height: `${euiTheme.size.xl}`,
       // border: '1px solid transparent', // prevents layout shift
-      '&.kbnGridRowHeader--collapsed:not(.kbnGridRowHeader--active)': {
+      '&.kbnGridSectionHeader--collapsed:not(.kbnGridSectionHeader--active)': {
         // borderBottom: euiTheme.border.thin,
       },
       '.kbnGridLayout--deleteRowIcon': {
@@ -326,7 +330,7 @@ const styles = {
       },
 
       // these styles ensure that dragged rows are rendered **above** everything else + the move icon stays visible
-      '&.kbnGridRowHeader--active': {
+      '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
         '.kbnGridLayout--moveRowIcon': {
           cursor: 'move',
@@ -337,4 +341,4 @@ const styles = {
     }),
 };
 
-GridRowHeader.displayName = 'GridRowHeader';
+GridSectionHeader.displayName = 'GridSectionHeader';

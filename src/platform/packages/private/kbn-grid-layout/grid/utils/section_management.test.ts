@@ -10,7 +10,7 @@
 import { omit } from 'lodash';
 import { getSampleLayout } from '../test_utils/sample_layout';
 import { GridLayoutData } from '../types';
-import { deleteRow, movePanelsToRow } from './row_management';
+import { deleteRow, movePanelsToRow } from './section_management';
 
 describe('row management', () => {
   describe('move panels to row', () => {

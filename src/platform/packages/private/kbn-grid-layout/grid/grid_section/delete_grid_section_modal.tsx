@@ -20,9 +20,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteRow, movePanelsToRow } from '../utils/row_management';
+import { deleteRow, movePanelsToRow } from '../utils/section_management';
 
-export const DeleteGridRowModal = ({
+export const DeleteGridSectionModal = ({
   sectionId,
   setDeleteModalVisible,
 }: {
@@ -39,13 +39,13 @@ export const DeleteGridRowModal = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.title', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.title', {
             defaultMessage: 'Delete section',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {i18n.translate('kbnGridLayout.deleteGridRowModal.body', {
+        {i18n.translate('kbnGridLayout.deleteGridSectionModal.body', {
           defaultMessage:
             'Choose to remove the section, including its contents, or only the section.',
         })}
@@ -56,7 +56,7 @@ export const DeleteGridRowModal = ({
             setDeleteModalVisible(false);
           }}
         >
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.cancelButton', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.cancelButton', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
@@ -72,7 +72,7 @@ export const DeleteGridRowModal = ({
           }}
           color="danger"
         >
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteSection', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.confirmDeleteSection', {
             defaultMessage: 'Delete section only',
           })}
         </EuiButton>
@@ -85,7 +85,7 @@ export const DeleteGridRowModal = ({
           fill
           color="danger"
         >
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteAllPanels', {
+          {i18n.translate('kbnGridLayout.deleteGridSectionModal.confirmDeleteAllPanels', {
             defaultMessage:
               'Delete section and {panelCount} {panelCount, plural, one {panel} other {panels}}',
             values: {

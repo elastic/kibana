@@ -11,7 +11,7 @@ export { GridLayout } from './grid/grid_layout';
 export type {
   GridLayoutData,
   GridPanelData,
-  GridRowData,
+  GridSectionData,
   GridSettings,
   GridAccessMode,
 } from './grid/types';

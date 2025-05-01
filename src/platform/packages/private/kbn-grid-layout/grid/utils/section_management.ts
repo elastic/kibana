@@ -9,7 +9,7 @@
 import { cloneDeep } from 'lodash';
 
 import { GridLayoutData } from '../types';
-import { resolveGridRow } from './resolve_grid_row';
+import { resolveGridSection } from './resolve_grid_section';
 
 /**
  * Move the panels in the `startingRow` to the bottom of the `newRow` and resolve the resulting layout
@@ -28,7 +28,7 @@ export const movePanelsToRow = (layout: GridLayoutData, startingRow: string, new
       : 0;
   Object.keys(panelsToMove).forEach((index) => (panelsToMove[index].row += maxRow));
   newLayout[newRow].panels = { ...newLayout[newRow].panels, ...panelsToMove };
-  newLayout[newRow] = resolveGridRow(newLayout[newRow]);
+  newLayout[newRow] = resolveGridSection(newLayout[newRow]);
   newLayout[startingRow] = { ...newLayout[startingRow], panels: {} };
   return newLayout;
 };

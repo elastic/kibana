@@ -11,7 +11,7 @@ import {
   GridLayoutData,
   GridLayoutWidget,
   GridPanelData,
-  GridRowData,
+  GridSectionData,
   OrderedLayout,
 } from '../types';
 
@@ -26,7 +26,7 @@ const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
 
 const getAllCollisionsWithPanel = (
   panelToCheck: GridPanelData,
-  gridLayout: GridRowData['panels'],
+  gridLayout: GridSectionData['panels'],
   keysInOrder: string[]
 ): GridPanelData[] => {
   const collidingPanels: GridPanelData[] = [];
@@ -41,7 +41,7 @@ const getAllCollisionsWithPanel = (
 };
 
 const getFirstCollision = (
-  gridLayout: GridRowData['panels'],
+  gridLayout: GridSectionData['panels'],
   keysInOrder: string[]
 ): string | undefined => {
   for (const panelA of keysInOrder) {
@@ -69,11 +69,11 @@ export const getMainLayoutInOrder = (
     } else if (widgetA.type !== widgetB.type) {
       if (widgetA.type === 'panel') {
         // widgetB is a section
-        const [panel, section] = [widgetA as GridPanelData, widgetB as GridRowData];
+        const [panel, section] = [widgetA as GridPanelData, widgetB as GridSectionData];
         return panel.row - section.row;
       } else {
         // widgetA is a section
-        const [panel, section] = [widgetB as GridPanelData, widgetA as GridRowData];
+        const [panel, section] = [widgetB as GridPanelData, widgetA as GridSectionData];
         return section.row - panel.row;
       }
     } else {
@@ -84,7 +84,7 @@ export const getMainLayoutInOrder = (
 };
 
 export const getPanelKeysInOrder = (
-  panels: GridRowData['panels'],
+  panels: GridSectionData['panels'],
   draggedId?: string
 ): string[] => {
   const panelKeys = Object.keys(panels);
@@ -118,45 +118,49 @@ const comparePanel = (panelA: GridPanelData, panelB: GridPanelData, draggedId?: 
   return 1;
 };
 
-const compactGridRow = (originalLayout: GridRowData['panels']) => {
-  const nextRowData = { ...originalLayout };
+const compactGridSection = (originalLayout: GridSectionData['panels']) => {
+  const nextSectionData = { ...originalLayout };
   // compact all vertical space.
-  const sortedKeysAfterMove = getPanelKeysInOrder(nextRowData);
+  const sortedKeysAfterMove = getPanelKeysInOrder(nextSectionData);
   for (const panelKey of sortedKeysAfterMove) {
-    const panel = nextRowData[panelKey];
+    const panel = nextSectionData[panelKey];
     // try moving panel up one row at a time until it collides
     while (panel.row > 0) {
       const collisions = getAllCollisionsWithPanel(
         { ...panel, row: panel.row - 1 },
-        nextRowData,
+        nextSectionData,
         sortedKeysAfterMove
       );
       if (collisions.length !== 0) break;
       panel.row -= 1;
     }
   }
-  return nextRowData;
+  return nextSectionData;
 };
 
-export const resolveGridRow = (
-  originalRowData: GridRowData['panels'],
+export const resolveGridSection = (
+  originalSectionData: GridSectionData['panels'],
   dragRequest?: GridPanelData
-): GridRowData['panels'] => {
-  let nextRowData = { ...originalRowData };
+): GridSectionData['panels'] => {
+  let nextSectionData = { ...originalSectionData };
   // apply drag request
   if (dragRequest) {
-    nextRowData[dragRequest.id] = dragRequest;
+    nextSectionData[dragRequest.id] = dragRequest;
   }
   // get keys in order from top to bottom, left to right, with priority on the dragged item if it exists
-  const sortedKeys = getPanelKeysInOrder(nextRowData, dragRequest?.id);
+  const sortedKeys = getPanelKeysInOrder(nextSectionData, dragRequest?.id);
 
   // while the layout has at least one collision, try to resolve them in order
-  let collision = getFirstCollision(nextRowData, sortedKeys);
+  let collision = getFirstCollision(nextSectionData, sortedKeys);
   while (collision !== undefined) {
-    nextRowData = resolvePanelCollisions(nextRowData, nextRowData[collision], sortedKeys);
-    collision = getFirstCollision(nextRowData, sortedKeys);
+    nextSectionData = resolvePanelCollisions(
+      nextSectionData,
+      nextSectionData[collision],
+      sortedKeys
+    );
+    collision = getFirstCollision(nextSectionData, sortedKeys);
   }
-  return compactGridRow(nextRowData); // compact the grid to close any gaps
+  return compactGridSection(nextSectionData); // compact the grid to close any gaps
 };
 
 /**
@@ -164,10 +168,10 @@ export const resolveGridRow = (
  * recursively handle any collisions that result from that move
  */
 function resolvePanelCollisions(
-  rowData: GridRowData['panels'],
+  rowData: GridSectionData['panels'],
   panelToResolve: GridPanelData,
   keysInOrder: string[]
-): GridRowData['panels'] {
+): GridSectionData['panels'] {
   const collisions = getAllCollisionsWithPanel(panelToResolve, rowData, keysInOrder);
   for (const collision of collisions) {
     if (collision.id === panelToResolve.id) continue;

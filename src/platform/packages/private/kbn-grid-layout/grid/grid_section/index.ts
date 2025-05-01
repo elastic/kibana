@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GridRow } from './grid_row';
+export { GridSectionHeader } from './grid_section_header';
+export { GridSectionWrapper } from './grid_section_wrapper';
+export { GridSectionFooter } from './grid_section_footer';

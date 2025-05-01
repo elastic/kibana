@@ -10,10 +10,10 @@
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 
-import { GridLayoutStateManager, GridRowData, OrderedLayout } from '../../types';
+import { GridLayoutStateManager, GridSectionData, OrderedLayout } from '../../types';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { getPanelKeysInOrder, resolveGridRow } from '../../utils/resolve_grid_row';
+import { getPanelKeysInOrder, resolveGridSection } from '../../utils/resolve_grid_section';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -103,9 +103,9 @@ export const moveAction = (
     const { gutterSize, rowHeight } = runtimeSettings;
 
     const targetRow = (() => {
-      const targetedGridRow = gridSectionElements[targetSectionId];
-      const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
-      const targetedGridTop = targetedGridRowRect?.top ?? 0;
+      const targetedGridSection = gridSectionElements[targetSectionId];
+      const targetedGridSectionRect = targetedGridSection?.getBoundingClientRect();
+      const targetedGridTop = targetedGridSectionRect?.top ?? 0;
       const localYCoordinate = activeRowRect.top - targetedGridTop;
       return Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
     })();
@@ -124,8 +124,8 @@ export const moveAction = (
           anotherLayout[id] = section;
         } else if (section.order === firstSectionOrder) {
           // split this section into 2 - one main section above the dragged section, and one below
-          const topSectionPanels: GridRowData['panels'] = {};
-          const bottomSectionPanels: GridRowData['panels'] = {};
+          const topSectionPanels: GridSectionData['panels'] = {};
+          const bottomSectionPanels: GridSectionData['panels'] = {};
           let startingRow: number;
           getPanelKeysInOrder(section.panels).forEach((panelId) => {
             const panel = section.panels[panelId];
@@ -191,7 +191,7 @@ export const moveAction = (
           combinedPanels = { ...combinedPanels, ...secondSection.panels };
           i++;
         }
-        const resolvedCombinedPanels = resolveGridRow(combinedPanels);
+        const resolvedCombinedPanels = resolveGridSection(combinedPanels);
         finalLayout[`main-${mainSectionCount}`] = {
           ...firstSection,
           order: i,

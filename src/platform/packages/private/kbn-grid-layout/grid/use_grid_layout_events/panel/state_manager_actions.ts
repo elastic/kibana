@@ -10,9 +10,9 @@
 import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
-import { GridLayoutStateManager, GridPanelData, GridRowData } from '../../types';
+import { GridLayoutStateManager, GridPanelData, GridSectionData } from '../../types';
 import { isGridDataEqual } from '../../utils/equality_checks';
-import { resolveGridRow } from '../../utils/resolve_grid_row';
+import { resolveGridSection } from '../../utils/resolve_grid_section';
 import { getSensorType, isKeyboardEvent } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
@@ -131,9 +131,9 @@ export const moveAction = (
   const targetRow = (() => {
     if (currentLayout[targetSectionId]) {
       // this section already exists, so use the wrapper element to figure out target row
-      const targetedGridRow = gridSectionElements[targetSectionId];
-      const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
-      const targetedGridTop = targetedGridRowRect?.top ?? 0;
+      const targetedGridSection = gridSectionElements[targetSectionId];
+      const targetedGridSectionRect = targetedGridSection?.getBoundingClientRect();
+      const targetedGridTop = targetedGridSectionRect?.top ?? 0;
       const localYCoordinate = isResize
         ? previewRect.bottom - targetedGridTop
         : previewRect.top - targetedGridTop;
@@ -152,11 +152,11 @@ export const moveAction = (
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;
   }
-  const hasChangedGridRow = targetSectionId !== lastSectionId;
+  const hasChangedGridSection = targetSectionId !== lastSectionId;
 
   // resolve the new grid layout
   if (
-    hasChangedGridRow ||
+    hasChangedGridSection ||
     !isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current)
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
@@ -187,15 +187,15 @@ export const moveAction = (
     delete nextLayout[lastSectionId].panels[activePanel.id];
 
     // resolve destination grid
-    const destinationGrid = nextLayout[targetSectionId] as unknown as GridRowData;
-    const resolvedDestinationGrid = resolveGridRow(destinationGrid.panels, requestedPanelData);
-    (nextLayout[targetSectionId] as unknown as GridRowData).panels = resolvedDestinationGrid;
+    const destinationGrid = nextLayout[targetSectionId] as unknown as GridSectionData;
+    const resolvedDestinationGrid = resolveGridSection(destinationGrid.panels, requestedPanelData);
+    (nextLayout[targetSectionId] as unknown as GridSectionData).panels = resolvedDestinationGrid;
 
     // resolve origin grid
-    if (hasChangedGridRow) {
-      const originGrid = nextLayout[lastSectionId] as unknown as GridRowData;
-      const resolvedOriginGrid = resolveGridRow(originGrid.panels);
-      (nextLayout[lastSectionId] as unknown as GridRowData).panels = resolvedOriginGrid;
+    if (hasChangedGridSection) {
+      const originGrid = nextLayout[lastSectionId] as unknown as GridSectionData;
+      const resolvedOriginGrid = resolveGridSection(originGrid.panels);
+      (nextLayout[lastSectionId] as unknown as GridSectionData).panels = resolvedOriginGrid;
 
       if (
         nextLayout[lastSectionId].isMainSection &&

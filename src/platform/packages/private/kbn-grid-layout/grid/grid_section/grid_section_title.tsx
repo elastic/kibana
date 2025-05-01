@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridRowTitle = React.memo(
+export const GridSectionTitle = React.memo(
   ({
     readOnly,
     sectionId,
@@ -101,11 +101,11 @@ export const GridRowTitle = React.memo(
             iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
             size="m"
-            id={`kbnGridRowTitle-${sectionId}`}
-            aria-controls={`kbnGridRow-${sectionId}`}
-            data-test-subj={`kbnGridRowTitle-${sectionId}`}
+            id={`kbnGridSectionTitle-${sectionId}`}
+            aria-controls={`kbnGridSection-${sectionId}`}
+            data-test-subj={`kbnGridSectionTitle-${sectionId}`}
             textProps={false}
-            className={'kbnGridRowTitle--button'}
+            className={'kbnGridSectionTitle--button'}
             flush="both"
           >
             {editTitleOpen ? null : (
@@ -131,7 +131,7 @@ export const GridRowTitle = React.memo(
               inputAriaLabel={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
                 defaultMessage: 'Edit section title',
               })}
-              data-test-subj={`kbnGridRowTitle-${sectionId}--editor`}
+              data-test-subj={`kbnGridSectionTitle-${sectionId}--editor`}
             />
           </EuiFlexItem>
         ) : (
@@ -145,7 +145,7 @@ export const GridRowTitle = React.memo(
                   aria-label={i18n.translate('kbnGridLayout.section.editRowTitle', {
                     defaultMessage: 'Edit section title',
                   })}
-                  data-test-subj={`kbnGridRowTitle-${sectionId}--edit`}
+                  data-test-subj={`kbnGridSectionTitle-${sectionId}--edit`}
                 />
               </EuiFlexItem>
             )}
@@ -171,7 +171,7 @@ const styles = {
         svg: {
           transition: `transform ${euiTheme.animation.fast} ease`,
           transform: 'rotate(0deg)',
-          '.kbnGridRowHeader--collapsed &': {
+          '.kbnGridSectionHeader--collapsed &': {
             transform: 'rotate(-90deg) !important',
           },
         },
@@ -192,4 +192,4 @@ const styles = {
   }),
 };
 
-GridRowTitle.displayName = 'GridRowTitle';
+GridSectionTitle.displayName = 'GridSectionTitle';

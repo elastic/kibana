@@ -10,7 +10,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
-import { GridPanelData, GridRowData, OrderedLayout } from '../types';
+import { GridPanelData, GridSectionData, OrderedLayout } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { isGridDataEqual } from '../utils/equality_checks';
 
@@ -58,7 +58,7 @@ export const useGridPanelState = ({
 const getPanelState = (layout: OrderedLayout, panelId: string) => {
   const flattenedPanels: { [id: string]: GridPanelData & { sectionId: string } } = {};
   Object.values(layout).forEach((section) => {
-    Object.values((section as unknown as GridRowData).panels).forEach((panel) => {
+    Object.values((section as unknown as GridSectionData).panels).forEach((panel) => {
       flattenedPanels[panel.id] = { ...panel, sectionId: section.id, row: panel.row };
     });
   });
