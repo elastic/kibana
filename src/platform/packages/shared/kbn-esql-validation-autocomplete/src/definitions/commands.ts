@@ -314,7 +314,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
           continue;
         }
 
-        if (hasWildcard(column.name)) {
+        const isQuoted = column.text.startsWith('`') && column.text.endsWith('`');
+        if (hasWildcard(column.name) && !isQuoted) {
           messages.push(
             getMessageFromId({
               messageId: 'wildcardNotSupportedForCommand',
