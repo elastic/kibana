@@ -19,7 +19,7 @@ import {
   getRefineOrEndEdge,
   getRetrieveAnonymizedDocsOrGenerateEdge,
 } from '../../../langchain/output_chunking';
-import { NodeType } from '../../../langchain/graphs';
+import { NodeType } from '../../../langchain/graphs/constants';
 import { getCombinedAttackDiscoveryPrompt } from './prompts/get_combined_attack_discovery_prompt';
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedAlertsNode } from './nodes/retriever';

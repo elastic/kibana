@@ -30,7 +30,11 @@ export const getCombinedRefinePrompt = <T extends GraphInsightTypes>({
 ${refinePrompt}
 
 """
-${JSON.stringify(unrefinedResults, null, 2)}
+\`\`\`json
+{
+  "insights": ${JSON.stringify(unrefinedResults, null, 2)}
+}
+\`\`\`
 """
 
 `;

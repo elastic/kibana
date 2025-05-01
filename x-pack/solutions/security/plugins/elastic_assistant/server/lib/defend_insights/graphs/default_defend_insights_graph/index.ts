@@ -21,7 +21,7 @@ import {
   getRefineOrEndEdge,
   getRetrieveAnonymizedDocsOrGenerateEdge,
 } from '../../../langchain/output_chunking';
-import { NodeType } from '../../../langchain/graphs';
+import { NodeType } from '../../../langchain/graphs/constants';
 import { DefendInsightsCombinedPrompts } from './prompts/incompatible_antivirus';
 import { getCombinedDefendInsightsPrompt } from './prompts/get_combined_prompt';
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';

@@ -72,35 +72,29 @@ export const ASSISTANT_GRAPH_MAP: Record<string, GraphMetadata> = {
   },
 };
 
-export const NodeType = {
-  GENERATE_NODE: 'generate',
-  REFINE_NODE: 'refine',
-  RETRIEVE_ANONYMIZED_DOCS_NODE: 'retrieve_anonymized_docs',
-} as const;
-
 export type GraphInsightTypes = AttackDiscovery | DefendInsight;
 
 export interface BaseGraphState<T extends GraphInsightTypes> {
-  insights: T[] | null;
-  prompt: string;
   anonymizedDocuments: Document[];
   combinedGenerations: string;
   combinedRefinements: string;
+  continuePrompt: string;
+  end?: DateMath;
   errors: string[];
+  filter?: Record<string, unknown> | null;
   generationAttempts: number;
   generations: string[];
   hallucinationFailures: number;
+  insights: T[] | null;
   maxGenerationAttempts: number;
   maxHallucinationFailures: number;
   maxRepeatedGenerations: number;
+  prompt: string;
   refinements: string[];
   refinePrompt: string;
-  continuePrompt: string;
   replacements: Replacements;
-  unrefinedResults: T[] | null;
-  filter?: Record<string, unknown> | null;
   start?: DateMath;
-  end?: DateMath;
+  unrefinedResults: T[] | null;
 }
 
 export type AttackDiscoveryGraphState = BaseGraphState<AttackDiscovery>;
