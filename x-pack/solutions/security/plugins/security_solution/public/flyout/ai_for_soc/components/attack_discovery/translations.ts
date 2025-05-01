@@ -38,3 +38,10 @@ export const NO_RESULTS = i18n.translate(
     defaultMessage: 'Not part of any attack discoveries',
   }
 );
+
+export const ADDITIONAL_DISCOVERIES = i18n.translate(
+  'xpack.securitySolution.alertSummary.attackDiscovery.additionalDiscoveries',
+  {
+    defaultMessage: 'View additional Attack discoveries for this alert',
+  }
+);
