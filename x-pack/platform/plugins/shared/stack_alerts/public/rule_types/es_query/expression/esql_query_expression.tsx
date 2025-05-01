@@ -251,7 +251,6 @@ export const EsqlQueryExpression: React.FC<
           editorIsInline
           expandToFitQueryOnMount
           hasOutline
-          hideRunQueryButton={true}
         />
       </EuiFormRow>
       <EuiSpacer />

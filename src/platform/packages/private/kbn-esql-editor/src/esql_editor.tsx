@@ -852,19 +852,11 @@ export const ESQLEditor = memo(function ESQLEditor({
                     );
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     if (expandToFitQueryOnMount) {
-                      const { wrappingColumn } = editor.getLayoutInfo();
-                      const totalLines = editor
-                        .getValue()
-                        .split('\n')
-                        .map((line) => {
-                          const wrappedLines = Math.ceil(line.length / (wrappingColumn - 1));
-                          return wrappedLines;
-                        })
-                        .reduce((a, b) => a + b);
                       const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+                      const lineCount = editor.getModel()?.getLineCount() || 1;
                       const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
-                      const expandedHeight = totalLines * lineHeight + padding;
-                      if (expandedHeight > editorHeight) setEditorHeight(expandedHeight);
+                      const height = editor.getTopForLineNumber(lineCount + 1) + padding;
+                      if (height > editorHeight) setEditorHeight(height);
                     }
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
