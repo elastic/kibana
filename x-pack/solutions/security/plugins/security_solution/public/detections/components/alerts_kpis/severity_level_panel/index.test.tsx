@@ -8,8 +8,10 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { SeverityLevelPanel } from '.';
+import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../alerts_summary_charts_panel/use_summary_chart_data');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -22,43 +24,47 @@ describe('Severity level panel', () => {
     skip: false,
   };
 
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
+    (useSummaryChartData as jest.Mock).mockReturnValue({
+      items: [],
+      isLoading: false,
+    });
   });
 
-  test('renders correctly', async () => {
-    const { container } = render(
+  test('renders correctly', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityLevelPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector('[data-test-subj="severty-level-panel"]')).toBeInTheDocument();
+    expect(getByTestId('severty-level-panel')).toBeInTheDocument();
   });
 
-  test('render HeaderSection', async () => {
-    const { container } = render(
+  test('render HeaderSection', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityLevelPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
+    expect(getByTestId('header-section')).toBeInTheDocument();
   });
 
-  test('inspect button renders correctly', async () => {
-    const { container } = render(
+  test('inspect button renders correctly', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityLevelPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
+    expect(getByTestId('inspect-icon-button')).toBeInTheDocument();
   });
 
-  test('renders severity chart correctly', async () => {
-    const { container } = render(
+  test('renders severity chart correctly', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityLevelPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector(`[data-test-subj="severity-level-chart"]`)).toBeInTheDocument();
+    expect(getByTestId('severity-level-chart')).toBeInTheDocument();
   });
 });

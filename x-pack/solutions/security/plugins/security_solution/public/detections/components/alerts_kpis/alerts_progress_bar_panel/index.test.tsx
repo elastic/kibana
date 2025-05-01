@@ -11,13 +11,19 @@ import { AlertsProgressBarPanel } from '.';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { STACK_BY_ARIA_LABEL } from '../common/translations';
 import type { GroupBySelection } from './types';
+import { useStackByFields } from '../common/hooks';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../common/hooks');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
+
+jest.mock('../../../../common/components/cell_actions', () => ({
+  ...jest.requireActual('../../../../common/components/cell_actions'),
+  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
+}));
 
 jest.mock('../alerts_summary_charts_panel/use_summary_chart_data');
 const mockUseSummaryChartData = useSummaryChartData as jest.Mock;
@@ -33,52 +39,48 @@ describe('Alert by grouping', () => {
   };
 
   beforeEach(() => {
-    mockUseSummaryChartData.mockReturnValue({ items: [], isLoading: false });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    mockUseSummaryChartData.mockReturnValue({ items: [], isLoading: false });
+    (useStackByFields as jest.Mock).mockReturnValue(jest.fn());
   });
 
-  test('renders correctly', async () => {
-    const { container } = render(
+  test('renders correctly', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsProgressBarPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(
-      container.querySelector('[data-test-subj="alerts-progress-bar-panel"]')
-    ).toBeInTheDocument();
+    expect(getByTestId('alerts-progress-bar-panel')).toBeInTheDocument();
   });
 
-  test('render HeaderSection', async () => {
-    const { container } = render(
+  test('render HeaderSection', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsProgressBarPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
+    expect(getByTestId('header-section')).toBeInTheDocument();
   });
 
-  test('renders inspect button', async () => {
-    const { container } = render(
+  test('renders inspect button', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsProgressBarPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
+    expect(getByTestId('inspect-icon-button')).toBeInTheDocument();
   });
 
   describe('combo box', () => {
     const setGroupBySelection = jest.fn();
 
-    test('renders combo box', async () => {
-      const { container } = render(
+    test('renders combo box', () => {
+      const { getByTestId } = render(
         <TestProviders>
           <AlertsProgressBarPanel {...defaultProps} />
         </TestProviders>
       );
-      expect(container.querySelector('[data-test-subj="stackByComboBox"]')).toBeInTheDocument();
+      expect(getByTestId('stackByComboBox')).toBeInTheDocument();
     });
 
     test('combo box renders corrected options', async () => {
@@ -88,11 +90,12 @@ describe('Alert by grouping', () => {
         </TestProviders>
       );
       const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
-      if (comboBox) {
-        act(() => {
+      act(() => {
+        if (comboBox) {
           comboBox.focus(); // display the combo box options
-        });
-      }
+        }
+      });
+
       const optionsFound = screen.getAllByRole('option').map((option) => option.textContent);
       options.forEach((option, i) => {
         expect(optionsFound[i]).toEqual(option);
@@ -107,11 +110,16 @@ describe('Alert by grouping', () => {
         </TestProviders>
       );
       const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
-      if (comboBox) {
-        comboBox.focus(); // display the combo box options
-      }
+      act(() => {
+        if (comboBox) {
+          comboBox.focus(); // display the combo box options
+        }
+      });
+
       const button = await screen.findByText(toBeSelected);
-      fireEvent.click(button);
+      act(() => {
+        fireEvent.click(button);
+      });
 
       expect(setGroupBySelection).toBeCalledWith(toBeSelected);
     });

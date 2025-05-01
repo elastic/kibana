@@ -13,13 +13,22 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useSummaryChartData } from '../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 
 jest.mock('../../../../common/hooks/use_selector');
-
+jest.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
 const dataView: DataView = createStubDataView({ spec: {} });
 
 describe('<KPIsSection />', () => {
-  it('should render all components', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useSummaryChartData as jest.Mock).mockReturnValue({
+      items: [],
+      isLoading: false,
+    });
+  });
+
+  it('should render all components', () => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
       meta: {},
     });

@@ -8,8 +8,10 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsByRulePanel } from '.';
+import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../alerts_summary_charts_panel/use_summary_chart_data');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -22,43 +24,47 @@ describe('Alert by rule panel', () => {
     skip: false,
   };
 
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
+    (useSummaryChartData as jest.Mock).mockReturnValue({
+      items: [],
+      isLoading: false,
+    });
   });
 
-  test('renders correctly', async () => {
-    const { container } = render(
+  test('renders correctly', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsByRulePanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector('[data-test-subj="alerts-by-rule-panel"]')).toBeInTheDocument();
+    expect(getByTestId('alerts-by-rule-panel')).toBeInTheDocument();
   });
 
-  test('renders HeaderSection', async () => {
-    const { container } = render(
+  test('renders HeaderSection', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsByRulePanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
+    expect(getByTestId('header-section')).toBeInTheDocument();
   });
 
-  test('renders inspect button', async () => {
-    const { container } = render(
+  test('renders inspect button', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsByRulePanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
+    expect(getByTestId('inspect-icon-button')).toBeInTheDocument();
   });
 
-  test('renders alert by rule chart', async () => {
-    const { container } = render(
+  test('renders alert by rule chart', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsByRulePanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector('[data-test-subj="alerts-by-rule"]')).toBeInTheDocument();
+    expect(getByTestId('alerts-by-rule')).toBeInTheDocument();
   });
 });

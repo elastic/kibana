@@ -4,22 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsSummaryChartsPanel } from '.';
 import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
+import { useSummaryChartData } from './use_summary_chart_data';
+import { useStackByFields } from '../common/hooks';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/query_toggle');
+jest.mock('./use_summary_chart_data');
+jest.mock('../common/hooks');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/218302
-describe.skip('AlertsSummaryChartsPanel', () => {
+jest.mock('../../../../common/components/cell_actions', () => ({
+  ...jest.requireActual('../../../../common/components/cell_actions'),
+  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
+}));
+
+describe('AlertsSummaryChartsPanel', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useSummaryChartData as jest.Mock).mockReturnValue({
+      items: [],
+      isLoading: false,
+    });
+    (useStackByFields as jest.Mock).mockReturnValue(jest.fn());
+  });
+
   const mockSetIsExpanded = jest.fn();
   const defaultProps = {
     signalIndexName: 'signalIndexName',
@@ -29,16 +46,16 @@ describe.skip('AlertsSummaryChartsPanel', () => {
     setGroupBySelection: jest.fn(),
   };
 
-  test('renders correctly', async () => {
-    const { container } = render(
+  test('renders correctly', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <AlertsSummaryChartsPanel {...defaultProps} />
       </TestProviders>
     );
-    expect(container.querySelector('[data-test-subj="alerts-charts-panel"]')).toBeInTheDocument();
+    expect(getByTestId('alerts-charts-panel')).toBeInTheDocument();
   });
 
-  test('it renders the header with the specified `alignHeader` alignment', async () => {
+  test('it renders the header with the specified `alignHeader` alignment', () => {
     const { container } = render(
       <TestProviders>
         <AlertsSummaryChartsPanel {...defaultProps} alignHeader="flexEnd" />
@@ -50,23 +67,20 @@ describe.skip('AlertsSummaryChartsPanel', () => {
   });
 
   describe('Query', () => {
-    test('it render with a illegal KQL', async () => {
+    test('it render with a illegal KQL', () => {
       jest.mock('@kbn/es-query', () => ({
         buildEsQuery: jest.fn().mockImplementation(() => {
           throw new Error('Something went wrong');
         }),
       }));
       const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
-      const { container } = render(
+      const { getByTestId } = render(
         <TestProviders>
           <AlertsSummaryChartsPanel {...props} />
         </TestProviders>
       );
-      await waitFor(() => {
-        expect(
-          container.querySelector('[data-test-subj="alerts-charts-panel"]')
-        ).toBeInTheDocument();
-      });
+
+      expect(getByTestId('alerts-charts-panel')).toBeInTheDocument();
     });
   });
 
@@ -78,32 +92,31 @@ describe.skip('AlertsSummaryChartsPanel', () => {
         </TestProviders>
       );
       const element = container.querySelector('[data-test-subj="query-toggle-header"]');
-      if (element) {
-        fireEvent.click(element);
-      }
+      act(() => {
+        if (element) {
+          fireEvent.click(element);
+        }
+      });
+
       expect(mockSetIsExpanded).toBeCalledWith(false);
     });
 
-    it('when isExpanded is true, render summary chart', async () => {
-      const { container } = render(
+    it('when isExpanded is true, render summary chart', () => {
+      const { getByTestId } = render(
         <TestProviders>
           <AlertsSummaryChartsPanel {...defaultProps} />
         </TestProviders>
       );
-      expect(
-        container.querySelector('[data-test-subj="alerts-charts-container"]')
-      ).toBeInTheDocument();
+      expect(getByTestId('alerts-charts-container')).toBeInTheDocument();
     });
 
-    it('when isExpanded is false, hide summary chart', async () => {
-      const { container } = render(
+    it('when isExpanded is false, hide summary chart', () => {
+      const { queryByTestId } = render(
         <TestProviders>
           <AlertsSummaryChartsPanel {...defaultProps} isExpanded={false} />
         </TestProviders>
       );
-      expect(
-        container.querySelector('[data-test-subj="alerts-charts-container"]')
-      ).not.toBeInTheDocument();
+      expect(queryByTestId('alerts-charts-container')).not.toBeInTheDocument();
     });
   });
 });
