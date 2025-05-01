@@ -9,14 +9,13 @@ import {
   getDefaultQueryFields,
   getDefaultSourceFields,
   getIndicesWithNoSourceFields,
-  buildFieldDescriptorForIndex,
 } from './fields';
-import { IndicesQuerySourceFields } from './types';
+import { QueryGenerationFieldDescriptors } from './types';
 
 describe('fields', () => {
   describe('getDefaultQueryFields', () => {
     it('should return default ELSER query fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -35,7 +34,7 @@ describe('fields', () => {
     });
 
     it('should return default elser query fields for multiple indices', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -79,7 +78,7 @@ describe('fields', () => {
     });
 
     it('should return elser query fields for default fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -123,7 +122,7 @@ describe('fields', () => {
     });
 
     it('should fallback to dense vector fields for index', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [
@@ -140,7 +139,7 @@ describe('fields', () => {
     });
 
     it('should fallback to all BM25 fields in index, using suggested fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [],
@@ -157,7 +156,7 @@ describe('fields', () => {
     });
 
     it('should fallback to all BM25 fields in index, only using first unrecognised field', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [],
@@ -176,7 +175,7 @@ describe('fields', () => {
 
   describe('getDefaultSourceFields', () => {
     it('should return source fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         'search-search-labs': {
           elser_query_fields: [],
           dense_vector_query_fields: [],
@@ -241,7 +240,7 @@ describe('fields', () => {
     });
 
     it('should return undefined with index name when no source fields found', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         'search-search-labs': {
           elser_query_fields: [],
           semantic_fields: [],
@@ -262,7 +261,7 @@ describe('fields', () => {
 
   describe('getIndicesWithNoSourceFields', () => {
     it('should return undefined if all indices have source fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         empty_index: {
           elser_query_fields: [],
           dense_vector_query_fields: [],
@@ -281,129 +280,6 @@ describe('fields', () => {
         },
       };
       expect(getIndicesWithNoSourceFields(fieldDescriptors)).toBe('empty_index');
-    });
-  });
-
-  describe('buildFieldDescriptorForIndex', () => {
-    const indexName = 'test';
-    const emptyFieldsDescriptor = {
-      bm25_query_fields: [],
-      dense_vector_query_fields: [],
-      elser_query_fields: [],
-      skipped_fields: 0,
-      source_fields: [],
-      semantic_fields: [],
-    };
-    it('should handle bm25 fields', () => {
-      expect(
-        buildFieldDescriptorForIndex(indexName, {
-          mappings: {
-            properties: {
-              field1: { type: 'text' },
-              field2: { type: 'keyword' },
-            },
-          },
-        })
-      ).toEqual({
-        test: {
-          ...emptyFieldsDescriptor,
-          bm25_query_fields: ['field1', 'field2'],
-        },
-      });
-    });
-    it('should sparse vector fields', () => {
-      expect(
-        buildFieldDescriptorForIndex(indexName, {
-          mappings: {
-            properties: {
-              field1: { type: 'sparse_vector' },
-            },
-          },
-        })
-      ).toEqual({
-        test: {
-          ...emptyFieldsDescriptor,
-          elser_query_fields: [
-            {
-              field: 'field1',
-              model_id: '',
-              indices: [indexName],
-              sparse_vector: true,
-            },
-          ],
-        },
-      });
-    });
-    it('should dense vector fields', () => {
-      expect(
-        buildFieldDescriptorForIndex(indexName, {
-          mappings: {
-            properties: {
-              field1: { type: 'dense_vector' },
-            },
-          },
-        })
-      ).toEqual({
-        test: {
-          ...emptyFieldsDescriptor,
-          dense_vector_query_fields: [
-            {
-              field: 'field1',
-              model_id: '',
-              indices: [indexName],
-            },
-          ],
-        },
-      });
-    });
-    it('should semantic_text fields', () => {
-      expect(
-        buildFieldDescriptorForIndex(indexName, {
-          mappings: {
-            properties: {
-              field1: {
-                type: 'semantic_text',
-                inference_id: '.elser-2-elasticsearch',
-                // @ts-ignore
-                model_settings: {
-                  service: 'elasticsearch',
-                  task_type: 'sparse_embedding',
-                },
-              },
-            },
-          },
-        })
-      ).toEqual({
-        test: {
-          ...emptyFieldsDescriptor,
-          semantic_fields: [
-            {
-              field: 'field1',
-              inferenceId: '.elser-2-elasticsearch',
-              embeddingType: 'sparse_vector',
-              indices: [indexName],
-            },
-          ],
-        },
-      });
-    });
-    it('should ignore non-text fields', () => {
-      expect(
-        buildFieldDescriptorForIndex(indexName, {
-          mappings: {
-            properties: {
-              field1: { type: 'text' },
-              field2: { type: 'float' },
-            },
-          },
-        })
-      ).toEqual({
-        test: {
-          ...emptyFieldsDescriptor,
-          bm25_query_fields: ['field1'],
-          skipped_fields: 1,
-        },
-      });
     });
   });
 });

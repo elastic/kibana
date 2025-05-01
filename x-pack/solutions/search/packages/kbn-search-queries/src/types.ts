@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer, KnnQuery } from '@elastic/elasticsearch/lib/api/types';
+
 export interface GenerateQueryOptions {
   rrf: boolean;
   queryString: string;
 }
 
 export type IndexFields = Record<string, string[]>;
-export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
+export type QueryGenerationFieldDescriptors = Record<string, IndexQueryFields>;
 
 export interface ModelField {
   field: string;
@@ -30,11 +32,20 @@ export interface SemanticField {
   indices: string[];
 }
 
-export interface QuerySourceFields {
-  elser_query_fields: ELSERQueryFields[];
-  dense_vector_query_fields: ModelField[];
+export interface IndexQueryFields {
   bm25_query_fields: string[];
-  source_fields: string[];
+  dense_vector_query_fields: ModelField[];
+  elser_query_fields: ELSERQueryFields[];
   semantic_fields: SemanticField[];
+  source_fields: string[];
   skipped_fields: number;
+}
+
+export interface KnnQueryMatch {
+  knn: KnnQuery;
+}
+
+export interface GenerateQueryMatches {
+  queryMatches: QueryDslQueryContainer[];
+  knnMatches: KnnQueryMatch[];
 }

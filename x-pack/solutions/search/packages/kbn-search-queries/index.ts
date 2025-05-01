@@ -8,3 +8,4 @@
 export * from './src/types';
 export * from './src/generate_query';
 export * from './src/fields';
+export * from './src/field_descriptors';

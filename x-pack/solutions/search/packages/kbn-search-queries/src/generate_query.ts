@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import { RetrieverContainer, SearchHighlight } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  RetrieverContainer,
+  SearchHighlight,
+  SearchHighlightField,
+  QueryDslQueryContainer,
+  KnnQuery,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import {
   IndexFields,
-  IndicesQuerySourceFields,
+  QueryGenerationFieldDescriptors,
   GenerateQueryOptions,
-  QuerySourceFields,
+  IndexQueryFields,
+  GenerateQueryMatches,
+  KnnQueryMatch,
 } from './types';
 
 const SEMANTIC_FIELD_TYPE = 'semantic';
 
-interface Matches {
-  queryMatches: any[];
-  knnMatches: any[];
-}
-
 export function generateSearchQuery(
   fields: IndexFields,
   sourceFields: IndexFields,
-  fieldDescriptors: IndicesQuerySourceFields,
+  fieldDescriptors: QueryGenerationFieldDescriptors,
   options?: Partial<GenerateQueryOptions>
 ): { retriever: RetrieverContainer; highlight?: SearchHighlight } {
   const generateOptions: GenerateQueryOptions = {
@@ -33,13 +36,13 @@ export function generateSearchQuery(
     ...options,
   };
   const indices = Object.keys(fieldDescriptors);
-  const boolMatches = Object.keys(fields).reduce<Matches>(
+  const matches = Object.keys(fields).reduce<GenerateQueryMatches>(
     (acc, index) => {
       if (!fieldDescriptors[index]) {
         return acc;
       }
       const indexFields: string[] = fields[index];
-      const indexFieldDescriptors: QuerySourceFields = fieldDescriptors[index];
+      const indexFieldDescriptors: IndexQueryFields = fieldDescriptors[index];
 
       const semanticMatches = indexFields.map((field) => {
         const semanticField = indexFieldDescriptors.semantic_fields.find((x) => x.field === field);
@@ -123,14 +126,14 @@ export function generateSearchQuery(
           : null;
 
       const knnMatches = indexFields
-        .map((field) => {
+        .map<KnnQueryMatch | null>((field) => {
           const denseVectorField = indexFieldDescriptors.dense_vector_query_fields.find(
             (x) => x.field === field
           );
 
           if (denseVectorField) {
             // when the knn field isn't found in all indices, we need a filter to ensure we only use the field from the correct index
-            const filter =
+            const filter: Partial<KnnQuery> =
               denseVectorField.indices.length < indices.length
                 ? { filter: { terms: { _index: denseVectorField.indices } } }
                 : {};
@@ -151,13 +154,15 @@ export function generateSearchQuery(
           }
           return null;
         })
-        .filter((x) => !!x);
+        .filter((x): x is KnnQueryMatch => !!x);
 
-      const matches = [...sparseMatches, ...semanticMatches, bm25Match].filter((x) => !!x);
+      const qryMatches = [...sparseMatches, ...semanticMatches, bm25Match];
 
       return {
-        queryMatches: [...acc.queryMatches, ...matches],
-        knnMatches: [...acc.knnMatches, ...knnMatches],
+        queryMatches: [...acc.queryMatches, ...qryMatches].filter(
+          (x): x is QueryDslQueryContainer => !!x
+        ),
+        knnMatches: [...acc.knnMatches, ...knnMatches].filter((x): x is KnnQueryMatch => !!x),
       };
     },
     {
@@ -167,23 +172,20 @@ export function generateSearchQuery(
   );
 
   // for single Elser support to make it easy to read - skips bool query
-  if (boolMatches.queryMatches.length === 1 && boolMatches.knnMatches.length === 0) {
-    const semanticField = boolMatches.queryMatches[0].semantic?.field ?? null;
+  if (matches.queryMatches.length === 1 && matches.knnMatches.length === 0) {
+    const match = matches.queryMatches[0];
+    const semanticField = match?.semantic ? match.semantic.field : null;
 
-    let isSourceField = false;
-    indices.forEach((index) => {
-      if (sourceFields?.[index]?.includes(semanticField)) {
-        isSourceField = true;
-      }
-    });
+    const isSourceField =
+      semanticField !== null ? isFieldInSourceFields(semanticField, sourceFields) : false;
 
     return {
       retriever: {
         standard: {
-          query: boolMatches.queryMatches[0],
+          query: match,
         },
       },
-      ...(isSourceField
+      ...(isSourceField && semanticField
         ? {
             highlight: {
               fields: {
@@ -200,19 +202,19 @@ export function generateSearchQuery(
   }
 
   // for single Dense vector support to make it easy to read - skips bool query
-  if (boolMatches.queryMatches.length === 0 && boolMatches.knnMatches.length === 1) {
+  if (matches.queryMatches.length === 0 && matches.knnMatches.length === 1) {
     return {
       retriever: {
         standard: {
-          query: boolMatches.knnMatches[0],
+          query: matches.knnMatches[0],
         },
       },
     };
   }
 
-  const matches = [...boolMatches.queryMatches, ...boolMatches.knnMatches];
+  const allMatches = [...matches.queryMatches, ...matches.knnMatches];
 
-  if (matches.length === 0) {
+  if (allMatches.length === 0) {
     return {
       retriever: {
         standard: {
@@ -226,7 +228,7 @@ export function generateSearchQuery(
 
   // determine if we need to use a rrf query
   if (generateOptions.rrf) {
-    const retrievers = matches.map((clause) => {
+    const retrievers = allMatches.map((clause) => {
       return {
         standard: {
           query: clause,
@@ -234,18 +236,10 @@ export function generateSearchQuery(
       };
     });
 
-    const semanticFields = matches
-      .filter((match) => match.semantic)
-      .map((match) => match.semantic.field)
-      .filter((field) => {
-        let isSourceField = false;
-        indices.forEach((index) => {
-          if (sourceFields?.[index]?.includes(field)) {
-            isSourceField = true;
-          }
-        });
-        return isSourceField;
-      });
+    const highlightSemanticFields = allMatches
+      .map((match) => ('semantic' in match && match.semantic ? match.semantic.field : null))
+      .filter((field): field is string => !!field)
+      .filter((field) => isFieldInSourceFields(field, sourceFields));
 
     return {
       retriever: {
@@ -253,34 +247,46 @@ export function generateSearchQuery(
           retrievers,
         },
       },
-      ...(semanticFields.length > 0
+      ...(highlightSemanticFields.length > 0
         ? {
             highlight: {
-              fields: semanticFields.reduce((acc, field) => {
-                acc[field] = {
-                  type: SEMANTIC_FIELD_TYPE,
-                  number_of_fragments: 2,
-                  order: 'score',
-                };
-                return acc;
-              }, {}),
+              fields: highlightSemanticFields.reduce<Record<string, SearchHighlightField>>(
+                (acc, field) => {
+                  acc[field] = {
+                    type: SEMANTIC_FIELD_TYPE,
+                    number_of_fragments: 2,
+                    order: 'score',
+                  };
+                  return acc;
+                },
+                {}
+              ),
             },
           }
         : {}),
     };
   }
 
-  // No RRF - add all the matches (DENSE + BM25 + SPARSE) to the bool query
+  // No RRF - add all the allMatches (DENSE + BM25 + SPARSE) to the bool query
   return {
     retriever: {
       standard: {
         query: {
           bool: {
-            should: matches,
+            should: allMatches,
             minimum_should_match: 1,
           },
         },
       },
     },
   };
+}
+
+function isFieldInSourceFields(field: string, sourceFields: IndexFields): boolean {
+  for (const fields of Object.values(sourceFields)) {
+    if (fields.includes(field)) {
+      return true;
+    }
+  }
+  return false;
 }
