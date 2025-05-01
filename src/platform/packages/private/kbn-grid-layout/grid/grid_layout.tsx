@@ -129,7 +129,7 @@ export const GridLayout = ({
                 id: panel.id,
               });
             });
-            gridTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridSectionHeight) * 1px)) `;
+            gridTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
             currentElementsInOrder.push({
               type: 'wrapper',
               id,
@@ -232,7 +232,7 @@ const styles = {
     justifyItems: 'stretch',
     display: 'grid',
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
-    gridAutoRows: 'calc(var(--kbnGridSectionHeight) * 1px)',
+    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     gridTemplateColumns: `repeat(
           var(--kbnGridColumnCount),
           calc(
