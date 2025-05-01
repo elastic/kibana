@@ -182,6 +182,16 @@ export const configSchema = schema.object({
         pipelineDebugMode: schema.boolean({ defaultValue: false }),
       }),
     }),
+    monitoring: schema.object({
+      privileges: schema.object({
+        users: schema.object({
+          csvUpload: schema.object({
+            errorRetries: schema.number({ defaultValue: 1 }),
+            maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
+          }),
+        }),
+      }),
+    }),
   }),
   siemRuleMigrations: schema.maybe(
     schema.object({
