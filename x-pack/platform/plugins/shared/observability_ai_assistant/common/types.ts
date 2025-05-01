@@ -42,7 +42,6 @@ export interface Message {
   message: {
     content?: string;
     detected_entities?: DetectedEntity[];
-    anonymized?: boolean;
     name?: string;
     role: MessageRole;
     function_call?: {

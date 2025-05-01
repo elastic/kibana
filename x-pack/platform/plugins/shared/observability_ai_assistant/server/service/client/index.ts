@@ -176,6 +176,19 @@ export class ObservabilityAIAssistantClient {
     unhashedText += contentWithHashes.slice(cursor);
     return { unhashedText, detectedEntities };
   }
+  /**
+   * New user messages are anonymised (NER + regex) and their entities stored.
+   * Assistant messages have any {hash} placeholders replaced with the original values.
+   *
+   * The function keeps a running `hashMap` built from all previously detected
+   * entities so that assistant placeholders originating from earlier user
+   * messages can be restored.
+   *
+   * If a message already has `detected_entities` it is skipped.
+   *
+   * @param messages
+   * @returns         Same array instance with in-place edits.
+   */
   async anonymizeMessages(messages: Message[]): Promise<{ anonymizedMessages: Message[] }> {
     if (!this.dependencies.config.enableAnonymization) {
       return { anonymizedMessages: messages };
@@ -183,10 +196,9 @@ export class ObservabilityAIAssistantClient {
     const hashMap = buildDetectedEntitiesMap(messages);
 
     for (const message of messages) {
-      if (message.message.anonymized) continue;
+      if (message.message.detected_entities) continue;
 
       const { role, content } = message.message;
-
       if (role === 'user' && content) {
         const chunks = chunkTextByChar(content);
         const nerEntities = await this.inferNER(chunks);
@@ -201,35 +213,29 @@ export class ObservabilityAIAssistantClient {
               !regexEntities.some((re) => ent.start_pos < re.end_pos && ent.end_pos > re.start_pos)
         );
 
-        if (deduped.length) {
-          message.message.detected_entities = deduped.map((ent) => ({
-            entity: ent.entity,
+        message.message.detected_entities = deduped.map((ent) => ({
+          entity: ent.entity,
+          class_name: ent.class_name,
+          start_pos: ent.start_pos,
+          end_pos: ent.end_pos,
+          type: ent.type,
+          hash: ent.hash,
+        }));
+        // cache for assistant message reversal
+        deduped.forEach((ent) =>
+          hashMap.set(ent.hash, {
+            value: ent.entity,
             class_name: ent.class_name,
-            start_pos: ent.start_pos,
-            end_pos: ent.end_pos,
             type: ent.type,
-            hash: ent.hash,
-          }));
-          // cache for assistant message reversal
-          deduped.forEach((ent) =>
-            hashMap.set(ent.hash, {
-              value: ent.entity,
-              class_name: ent.class_name,
-              type: ent.type,
-            })
-          );
-        }
-
-        message.message.anonymized = true;
-        continue;
-      }
-
-      if (role === 'assistant') {
+          })
+        );
+        // Assistant messages might include {hash} placeholders coming back
+        // from the LLM – resolve them to real values here using the building map.
+      } else if (role === 'assistant') {
         if (content) {
           const { unhashedText, detectedEntities } = this.processAssistantMessage(content, hashMap);
           message.message.content = unhashedText;
-          if (detectedEntities.length) message.message.detected_entities = detectedEntities;
-          message.message.anonymized = true;
+          message.message.detected_entities = detectedEntities;
         }
         // TODO: unhash other places?
         if (message.message.function_call?.arguments) {
@@ -475,14 +481,7 @@ export class ObservabilityAIAssistantClient {
                 systemMessage$,
               ]).pipe(
                 switchMap(([addedMessages, title, systemMessage]) => {
-                  // ─────────────────────────────────────────────────────────────────
-                  // Call anonymizeMessages on history + new messages:
-                  //   • Internally builds the entity map from all detectedEntities
-                  //     (from previous turns and new user lines) for un‑hashing.
-                  //   • Skips already‑anonymized messages (anonymized:true).
-                  //   • Runs NER/regex on new user messages and un‑hashes new assistant
-                  //     placeholders, attaching new entities.
-                  // ─────────────────────────────────────────────────────────────────
+                  // Call anonymizeMessages on history + new messages
                   return from(this.anonymizeMessages(initialMessages.concat(addedMessages))).pipe(
                     switchMap(({ anonymizedMessages: allAnonymizedMessages }) => {
                       // Extract only the newly sanitised messages (the tail of allAnonyimizedMessages):

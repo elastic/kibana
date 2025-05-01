@@ -72,7 +72,6 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                 content: text,
                 event: text,
                 role: keyword,
-                anonymized: boolean,
                 data: {
                   type: 'object',
                   enabled: false,
