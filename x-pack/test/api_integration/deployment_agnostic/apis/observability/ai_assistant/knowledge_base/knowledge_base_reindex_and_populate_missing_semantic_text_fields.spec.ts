@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return res.hits.hits;
   }
 
-  describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
+  describe('when the knowledge base index was created before 8.15', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
@@ -92,7 +92,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('after migrating', () => {
       before(async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
+          endpoint:
+            'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
         });
         expect(status).to.be(200);
       });
@@ -131,7 +132,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns entries correctly via API', async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
+          endpoint:
+            'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
         });
 
         expect(status).to.be(200);
