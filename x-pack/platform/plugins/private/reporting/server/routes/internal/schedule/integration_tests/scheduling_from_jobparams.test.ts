@@ -194,8 +194,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
           "[request body.schedule.rrule]: types that failed validation:
           - [request body.schedule.rrule.0.freq]: expected value to equal [1]
           - [request body.schedule.rrule.1.freq]: expected value to equal [2]
-          - [request body.schedule.rrule.2.freq]: expected value to equal [3]
-          - [request body.schedule.rrule.3.freq]: expected value to equal [5]"
+          - [request body.schedule.rrule.2.freq]: expected value to equal [3]"
         `)
       );
   });
