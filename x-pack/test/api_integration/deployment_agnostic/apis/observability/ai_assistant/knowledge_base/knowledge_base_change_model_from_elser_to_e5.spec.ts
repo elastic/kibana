@@ -37,16 +37,19 @@ import { animalSampleDocs } from '../utils/sample_docs';
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const ml = getService('ml');
+  const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
+  type KnowledgeBaseEsEntry = Awaited<ReturnType<typeof getKnowledgeBaseEntriesFromEs>>[0];
 
   describe('when changing from ELSER to E5-like model', function () {
     let elserEntriesFromApi: KnowledgeBaseEntry[];
-    let elserEntriesFromEs: Awaited<ReturnType<typeof getKnowledgeBaseEntriesFromEs>>;
+    let elserEntriesFromEs: KnowledgeBaseEsEntry[];
     let elserInferenceId: string;
     let elserWriteIndex: string;
 
     let e5EntriesFromApi: KnowledgeBaseEntry[];
-    let e5EntriesFromEs: Awaited<ReturnType<typeof getKnowledgeBaseEntriesFromEs>>;
+    let e5EntriesFromEs: KnowledgeBaseEsEntry[];
     let e5InferenceId: string;
     let e5WriteIndex: string;
 
@@ -113,12 +116,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('has sparse embeddings', async () => {
-        // sparse embeddings are modelled as key-value pairs
-        const hasSparseEmbeddings = elserEntriesFromEs.every((hit) => {
-          return hit._source?._inference_fields.semantic_text.inference.chunks.semantic_text.every(
-            (chunk) => isObject(chunk.embeddings)
+        const embeddings = getEmbeddings(e5EntriesFromEs);
+
+        const hasSparseEmbeddings = embeddings.every((embedding) => {
+          return (
+            isObject(embedding) &&
+            Object.values(embedding).every((value) => typeof value === 'number')
           );
         });
+
+        if (!hasSparseEmbeddings) {
+          log.warning('Must be sparse embeddings. Found:', JSON.stringify(embeddings, null, 2));
+        }
+
         expect(hasSparseEmbeddings).to.be(true);
       });
     });
@@ -137,14 +147,27 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('has dense embeddings', async () => {
+        const embeddings = getEmbeddings(e5EntriesFromEs);
+
         // dense embeddings are modelled as arrays of numbers
-        const hasDenseEmbeddings = e5EntriesFromEs.every((hit) => {
-          return hit._source?._inference_fields.semantic_text.inference.chunks.semantic_text.every(
-            (chunk) => isArray(chunk.embeddings)
-          );
+        const hasDenseEmbeddings = embeddings.every((embedding) => {
+          return isArray(embedding) && embedding.every((value) => typeof value === 'number');
         });
+
+        if (!hasDenseEmbeddings) {
+          log.warning('Must be dense embeddings. Found:', JSON.stringify(embeddings, null, 2));
+        }
+
         expect(hasDenseEmbeddings).to.be(true);
       });
     });
+
+    function getEmbeddings(hits: KnowledgeBaseEsEntry[]) {
+      return hits.flatMap((hit) => {
+        return hit._source!._inference_fields.semantic_text.inference.chunks.semantic_text.map(
+          (chunk) => chunk.embeddings
+        );
+      });
+    }
   });
 }

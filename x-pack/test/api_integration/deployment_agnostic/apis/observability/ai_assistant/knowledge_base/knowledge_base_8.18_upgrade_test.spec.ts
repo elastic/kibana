@@ -16,11 +16,12 @@ import {
 } from '../utils/index_assets';
 import { restoreKbSnapshot } from '../utils/snapshots';
 import {
-  LEGACY_INFERENCE_ID,
+  LEGACY_CUSTOM_INFERENCE_ID,
   TINY_ELSER_MODEL_ID,
   createTinyElserInferenceEndpoint,
+  deleteInferenceEndpoint,
+  deleteModel,
   importModel,
-  teardownTinyElserModelAndInferenceEndpoint,
 } from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -39,7 +40,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
-      await createTinyElserInferenceEndpoint(getService, { inferenceId: LEGACY_INFERENCE_ID });
+      await createTinyElserInferenceEndpoint(getService, {
+        inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+      });
 
       await deleteIndexAssets(es);
       await restoreKbSnapshot({
@@ -55,7 +58,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      await teardownTinyElserModelAndInferenceEndpoint(getService);
+      await deleteModel(getService, { modelId: TINY_ELSER_MODEL_ID });
+      await deleteInferenceEndpoint(getService, { inferenceId: LEGACY_CUSTOM_INFERENCE_ID });
     });
 
     it('has an index created in 8.18', async () => {

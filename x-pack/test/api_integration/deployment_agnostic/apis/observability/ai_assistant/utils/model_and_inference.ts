@@ -13,7 +13,7 @@ import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
 
-export const LEGACY_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
+export const LEGACY_CUSTOM_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 
 // tiny models
 export const TINY_ELSER_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_ELSER.name;
