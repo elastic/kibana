@@ -83,20 +83,18 @@ function loadFunctionDocs(pathToElasticsearch: string) {
       const functionName = path.basename(file, '.md');
 
       // Add the function name and content to the map
-      if (functionDefinition.type === 'eval') {
-        scalarFunctions.set(functionName, {
+      if (['bucket', 'categorize'].includes(functionDefinition.name)) {
+        groupingFunctions.set(functionName, {
           description: content,
           preview: functionDefinition.preview,
         });
-      }
-      if (functionDefinition.type === 'agg') {
+      } else if (functionDefinition.type === 'agg') {
         aggregationFunctions.set(functionName, {
           description: content,
           preview: functionDefinition.preview,
         });
-      }
-      if (['bucket', 'categorize'].includes(functionDefinition.name)) {
-        groupingFunctions.set(functionName, {
+      } else if (functionDefinition.type === 'eval') {
+        scalarFunctions.set(functionName, {
           description: content,
           preview: functionDefinition.preview,
         });
