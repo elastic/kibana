@@ -49,7 +49,7 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    const envSpecificScope = !this.isServerless ? 'Observability' : 'Observability and Search';
+    const envSpecificScope = this.isServerless ? 'Observability' : 'Observability and Search';
 
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
