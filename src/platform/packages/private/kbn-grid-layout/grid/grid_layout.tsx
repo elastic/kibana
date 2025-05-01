@@ -19,6 +19,10 @@ import { GridSectionFooter, GridSectionHeader, GridSectionWrapper } from './grid
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { isLayoutEqual, isOrderedLayoutEqual } from './utils/equality_checks';
+import { getGridLayout, getOrderedLayout } from './utils/conversions';
+import { cloneDeep } from 'lodash';
+import { resolveGridSection } from './utils/resolve_grid_section';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -58,8 +62,9 @@ export const GridLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   // useEffect(() => {
-  //   if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
-  //     const newLayout = cloneDeep(layout);
+  //   const orderedLayout = getOrderedLayout(layout);
+  //   if (!isOrderedLayoutEqual(orderedLayout, gridLayoutStateManager.gridLayout$.getValue())) {
+  //     const newLayout = cloneDeep(orderedLayout);
   //     /**
   //      * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
   //      * so, we need to loop through each row and ensure it is compacted
@@ -72,32 +77,21 @@ export const GridLayout = ({
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [layout]);
 
-  /**
-   * Set up subscriptions
-   */
-  // useEffect(() => {
-  //   /**
-  //    * This subscription calls the passed `onLayoutChange` callback when the layout changes;
-  //    * if the row IDs have changed, it also sets `sectionIdsInOrder` to trigger a re-render
-  //    */
-  //   const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
-  //     .pipe(pairwise())
-  //     .subscribe(([layoutBefore, layoutAfter]) => {
-  //       console.log({ layoutBefore, layoutAfter });
-  //       if (!isLayoutEqual(layoutBefore, layoutAfter)) {
-  //         onLayoutChange(layoutAfter);
-
-  //         if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-  //           // setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
-  //         }
-  //       }
-  //     });
-
-  //   return () => {
-  //     onLayoutChangeSubscription.unsubscribe();
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [onLayoutChange]);
+  useEffect(() => {
+    /**
+     * This subscription calls the passed `onLayoutChange` callback when the layout changes;
+     * if the row IDs have changed, it also sets `sectionIdsInOrder` to trigger a re-render
+     */
+    const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdated$.subscribe(
+      (newLayout) => {
+        onLayoutChange(newLayout);
+      }
+    );
+    return () => {
+      onLayoutChangeSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onLayoutChange]);
 
   useEffect(() => {
     const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((sections) => {

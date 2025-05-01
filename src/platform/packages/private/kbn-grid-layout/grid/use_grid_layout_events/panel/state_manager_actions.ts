@@ -8,22 +8,15 @@
  */
 
 import { cloneDeep } from 'lodash';
-import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
 
-import {
-  GridLayoutData,
-  GridLayoutStateManager,
-  GridPanelData,
-  GridSectionData,
-  OrderedLayout,
-} from '../../types';
-import { isGridDataEqual } from '../../utils/equality_checks';
+import { GridLayoutStateManager, GridPanelData, GridSectionData, OrderedLayout } from '../../types';
+import { GridLayoutContextType } from '../../use_grid_layout_context';
+import { isGridDataEqual, isOrderedLayoutEqual } from '../../utils/equality_checks';
 import { resolveGridSection } from '../../utils/resolve_grid_section';
 import { getSensorType, isKeyboardEvent } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
-import { GridLayoutContextType } from '../../use_grid_layout_context';
 
 let startingLayout: OrderedLayout | undefined;
 
@@ -225,9 +218,7 @@ export const moveAction = (
         });
       }
     }
-    if (currentLayout && !deepEqual(currentLayout, nextLayout)) {
-      // && isLayoutEqual
-      console.log({ nextLayout });
+    if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
       gridLayout$.next(nextLayout);
     }
   }

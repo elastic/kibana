@@ -30,7 +30,7 @@ export const gridLayoutToDashboardPanelMap = (
         },
       };
     } else {
-      const { panels: rowPanels, isCollapsed, row, ...rest } = widget; // drop panels
+      const { panels: rowPanels, type, isCollapsed, row, ...rest } = widget; // drop panels and type
       rows[widgetId] = { ...rest, y: row, collapsed: isCollapsed };
       Object.values(rowPanels).forEach((panelGridData) => {
         panels[panelGridData.id] = {

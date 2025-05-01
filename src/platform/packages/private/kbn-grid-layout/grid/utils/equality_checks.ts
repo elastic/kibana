@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { GridLayoutData, GridPanelData } from '../types';
+import { GridLayoutData, GridPanelData, OrderedLayout } from '../types';
 
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
   return (
@@ -20,8 +20,43 @@ export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
   );
 };
 
+export const isOrderedSectionEqual = (a?: OrderedLayout[string], b?: OrderedLayout[string]) => {
+  if (!a || !b) {
+    return a === b; // early return for if one grid row is undefined
+  }
+  let isEqual =
+    a.id === b.id &&
+    a.order === b.order &&
+    Object.keys(a.panels).length === Object.keys(b.panels).length;
+  if (a.isMainSection && b.isMainSection) {
+    isEqual = isEqual && a.order === b.order;
+  } else if (!(a.isMainSection || b.isMainSection)) {
+    isEqual = isEqual && a.isCollapsed === b.isCollapsed && a.title === b.title;
+  } else {
+    return false;
+  }
+  for (const panelKey of Object.keys(a.panels)) {
+    if (!isEqual) break;
+    isEqual = isGridDataEqual(a.panels[panelKey], b.panels[panelKey]);
+  }
+  return isEqual;
+};
+
+export const isOrderedLayoutEqual = (a: OrderedLayout, b: OrderedLayout) => {
+  if (Object.keys(a).length !== Object.keys(b).length) return false;
+  let isEqual = true;
+  const sections = Object.keys(a); // keys of A are equal to keys of B
+  for (const sectionId of sections) {
+    const sectionA = a[sectionId];
+    const sectionB = b[sectionId];
+    isEqual = isOrderedSectionEqual(sectionA, sectionB);
+    if (!isEqual) break;
+  }
+  return isEqual;
+};
+
 export const isLayoutEqual = (a: GridLayoutData, b: GridLayoutData) => {
-  if (!deepEqual(Object.keys(a), Object.keys(b))) return false;
+  if (Object.keys(a).length !== Object.keys(b).length) return false;
   let isEqual = true;
   const keys = Object.keys(a); // keys of A are equal to keys of B
   for (const key of keys) {

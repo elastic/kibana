@@ -7,12 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  pairwise,
+  startWith,
+  withLatestFrom,
+} from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
+
+import { useEuiTheme } from '@elastic/eui';
 
 import {
   ActivePanelEvent,
@@ -24,8 +36,9 @@ import {
   OrderedLayout,
   RuntimeGridSettings,
 } from './types';
+import { getGridLayout, getOrderedLayout } from './utils/conversions';
+import { isOrderedLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
-import { getOrderedLayout } from './utils/conversions';
 
 export const useGridLayoutState = ({
   layout,
@@ -97,6 +110,22 @@ export const useGridLayoutState = ({
     const activePanel$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
+    const panelDropped$ = merge(activePanel$, activeRowEvent$).pipe(
+      pairwise(),
+      map(([hasEventBefore, hasEventAfter]) => {
+        return Boolean(hasEventBefore) && !Boolean(hasEventAfter);
+      }),
+      filter((eventEnded) => eventEnded)
+    );
+    const layoutUpdated$ = panelDropped$.pipe(
+      startWith(true),
+      withLatestFrom(gridLayout$),
+      distinctUntilChanged(([, before], [, after]) => {
+        return isOrderedLayoutEqual(before, after);
+      }),
+      map(([, updatedLayout]) => getGridLayout(updatedLayout))
+    );
+
     return {
       layoutRef,
       sectionRefs,
@@ -113,6 +142,8 @@ export const useGridLayoutState = ({
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
       ),
+
+      layoutUpdated$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

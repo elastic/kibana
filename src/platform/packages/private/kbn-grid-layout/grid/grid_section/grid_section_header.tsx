@@ -38,7 +38,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
-  const { startDrag, onBlur } = useGridLayoutRowEvents({ sectionId: sectionId });
+  const { startDrag, onBlur } = useGridLayoutRowEvents({ sectionId });
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);

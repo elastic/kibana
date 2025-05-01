@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
 export interface GridCoordinate {
@@ -144,6 +144,7 @@ export interface GridLayoutStateManager {
 
   activePanel$: BehaviorSubject<ActivePanelEvent | undefined>;
   activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
+  layoutUpdated$: Observable<GridLayoutData>;
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   sectionRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
