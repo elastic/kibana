@@ -76,6 +76,7 @@ export const getImageEmbeddableFactory = ({
         },
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved?.rawState);
+          if (lastSaved) imageConfig$.next(lastSaved.rawState.imageConfig);
         },
       });
 
