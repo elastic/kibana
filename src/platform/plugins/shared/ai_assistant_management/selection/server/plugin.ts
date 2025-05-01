@@ -45,28 +45,29 @@ export class AIAssistantManagementSelectionPlugin
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-
-
   public setup(
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-
-    const envSpecificScope = !this.isServerless ? 'Observability' : 'Observability and Search'
+    const envSpecificScope = !this.isServerless ? 'Observability' : 'Observability and Search';
 
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', //TODO: set different string for serverless or not
+        name: i18n.translate(
+          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', // TODO: set different string for serverless or not
           {
-          defaultMessage: 'AI Assistant for ' + envSpecificScope + ' visibility',
-        }),
+            defaultMessage: 'AI Assistant for ' + envSpecificScope + ' visibility',
+          }
+        ),
         category: [DEFAULT_APP_CATEGORIES.observability.id],
         value: this.config.preferredAIAssistantType,
         description: i18n.translate(
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
-              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in '+ envSpecificScope +', everywhere, or nowhere.',
+              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in ' +
+              envSpecificScope +
+              ', everywhere, or nowhere.',
             values: {
               em: (chunks) => `<em>${chunks}</em>`,
             },
