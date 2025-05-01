@@ -35,6 +35,9 @@ export type FindAnonymizationFieldsRequestQuery = z.infer<
   typeof FindAnonymizationFieldsRequestQuery
 >;
 export const FindAnonymizationFieldsRequestQuery = z.object({
+  /**
+   * Fields to return
+   */
   fields: ArrayFromString(z.string()).optional(),
   /**
    * Search query
