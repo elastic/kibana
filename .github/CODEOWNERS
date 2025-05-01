@@ -2124,13 +2124,13 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
 /x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json @elastic/kibana-management
-/x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-core
+/x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-management
 /x-pack/test/functional/services/ace_editor.js @elastic/kibana-management
 /x-pack/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
 /x-pack/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-core
+/x-pack/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
@@ -2150,10 +2150,10 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/functional/apps/remote_clusters @elastic/kibana-management
-/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-core
+/x-pack/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
-/x-pack/test/upgrade_assistant_integration @elastic/kibana-core
+/x-pack/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/*.ts @elastic/kibana-management
 /src/platform/test/functional/page_objects/embedded_console.ts @elastic/kibana-management
@@ -2174,7 +2174,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/api_integration/services/ingest_pipelines @elastic/kibana-management
 /x-pack/test/functional/apps/watcher @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/watcher @elastic/kibana-management
-/x-pack/platform/test/api_integration/apis/upgrade_assistant @elastic/kibana-core
+/x-pack/platform/test/api_integration/apis/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/searchprofiler @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
