@@ -25,7 +25,6 @@ import { getDataStreamAdapter } from './lib/data_stream_adapter';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
 import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { satisfies } from 'semver';
 
 jest.mock('../alerts_client');
 
