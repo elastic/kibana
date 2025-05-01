@@ -16,6 +16,10 @@ import type {
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { calculateFromValue } from '../../../rule_types/utils/utils';
+import type {
+  AlertSuppressionCamel,
+  AlertSuppressionDuration,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));
@@ -117,16 +121,39 @@ const hasNoAlertSuppressionGroupByFields = (
   action: BulkActionEditPayloadAlertSuppression
 ) => action.value.group_by.every((field) => !groupByFields?.includes(field));
 
+const hasMatchingDuration = (
+  duration: AlertSuppressionDuration | undefined,
+  action: BulkActionEditPayloadAlertSuppression
+) =>
+  duration?.value === action.value.suppression_config?.duration?.value &&
+  duration?.unit === action.value.suppression_config?.duration?.unit;
+
 const shouldSkipAlertSuppressionFieldsBulkAction = (
-  groupByFields: string[] | undefined,
+  alertSuppression: AlertSuppressionCamel | undefined,
   action: BulkActionEditPayloadAlertSuppression
 ) => {
+  // if alert suppression is not configured and group by fields are empty we skip update
+  if (alertSuppression === undefined && action.value.group_by.length === 0) {
+    return true;
+  }
+
+  if (!hasMatchingDuration(alertSuppression?.duration, action)) {
+    return false;
+  }
+
+  if (
+    alertSuppression?.missingFieldsStrategy !==
+    action.value.suppression_config?.missing_fields_strategy
+  ) {
+    return false;
+  }
+
   if (action.type === BulkActionEditTypeEnum.add_alert_suppression) {
-    return hasAlertSuppressionGroupByFields(groupByFields, action);
+    return hasAlertSuppressionGroupByFields(alertSuppression?.groupBy, action);
   }
 
   if (action.type === BulkActionEditTypeEnum.delete_alert_suppression) {
-    return hasNoAlertSuppressionGroupByFields(groupByFields, action);
+    return hasNoAlertSuppressionGroupByFields(alertSuppression?.groupBy, action);
   }
 
   return false;
@@ -141,7 +168,7 @@ const applyBulkActionEditToRuleParams = (
   isActionSkipped: boolean;
 } => {
   let ruleParams = { ...existingRuleParams };
-  // If the action is succesfully applied and the rule params are modified,
+  // If the action is successfully applied and the rule params are modified,
   // we update the following flag to false. As soon as the current function
   // returns this flag as false, at least once, for any action, we know that
   // the rule needs to be marked as having its params updated.
@@ -271,58 +298,114 @@ const applyBulkActionEditToRuleParams = (
     }
     // alert suppression actions
     case BulkActionEditTypeEnum.add_alert_suppression: {
-      invariant(
-        ruleParams.type !== 'threshold',
-        "Threshold rule can't be updated. It does not have Suppressed by fields in configuration"
-      );
+      // for threshold rule type only duration exists in alert suppression
+      if (ruleParams.type === 'threshold') {
+        const duration = action.value?.suppression_config?.duration;
+        if (duration && !hasMatchingDuration(ruleParams.alertSuppression?.duration, action)) {
+          ruleParams.alertSuppression = { duration };
+          break;
+        } else {
+          isActionSkipped = true;
+          break;
+        }
+      }
 
-      if (
-        shouldSkipAlertSuppressionFieldsBulkAction(ruleParams?.alertSuppression?.groupBy, action)
-      ) {
+      if (shouldSkipAlertSuppressionFieldsBulkAction(ruleParams?.alertSuppression, action)) {
         isActionSkipped = true;
         break;
       }
 
       ruleParams.alertSuppression = {
+        ...ruleParams.alertSuppression,
         groupBy: addItemsToArray(
           ruleParams?.alertSuppression?.groupBy ?? [],
           action.value.group_by
         ),
-        duration: action.value.duration,
-        missingFieldsStrategy: action.value.missing_fields_strategy,
+        ...(action.value.suppression_config
+          ? {
+              duration: action.value.suppression_config.duration,
+              missingFieldsStrategy: action.value.suppression_config.missing_fields_strategy,
+            }
+          : {}),
       };
       break;
     }
     case BulkActionEditTypeEnum.delete_alert_suppression: {
-      invariant(
-        ruleParams.type !== 'threshold',
-        "Threshold rule can't be updated. It does not have Suppressed by fields in configuration"
+      // for threshold rule type only duration exists in alert suppression
+      if (ruleParams.type === 'threshold') {
+        const duration = action.value?.suppression_config?.duration;
+        if (duration && !hasMatchingDuration(ruleParams.alertSuppression?.duration, action)) {
+          ruleParams.alertSuppression = { duration };
+          break;
+        } else {
+          isActionSkipped = true;
+          break;
+        }
+      }
+
+      if (shouldSkipAlertSuppressionFieldsBulkAction(ruleParams?.alertSuppression, action)) {
+        isActionSkipped = true;
+        break;
+      }
+
+      const resultingGroupBy = deleteItemsFromArray(
+        ruleParams?.alertSuppression?.groupBy ?? [],
+        action.value.group_by
       );
 
-      if (
-        shouldSkipAlertSuppressionFieldsBulkAction(ruleParams?.alertSuppression?.groupBy, action)
-      ) {
-        isActionSkipped = true;
+      if (resultingGroupBy.length === 0) {
+        ruleParams.alertSuppression = undefined;
         break;
       }
 
       ruleParams.alertSuppression = {
+        ...ruleParams.alertSuppression,
         groupBy: deleteItemsFromArray(
           ruleParams?.alertSuppression?.groupBy ?? [],
           action.value.group_by
         ),
-        duration: action.value.duration,
-        missingFieldsStrategy: action.value.missing_fields_strategy,
+        ...(action.value.suppression_config
+          ? {
+              duration: action.value.suppression_config.duration,
+              missingFieldsStrategy: action.value.suppression_config.missing_fields_strategy,
+            }
+          : {}),
       };
       break;
     }
     case BulkActionEditTypeEnum.set_alert_suppression: {
-      if (shouldSkipInvestigationFieldsBulkAction(ruleParams.alertSuppression, action)) {
+      // for threshold rule type only duration exists in alert suppression
+      if (ruleParams.type === 'threshold') {
+        const duration = action.value?.suppression_config?.duration;
+        if (duration && !hasMatchingDuration(ruleParams.alertSuppression?.duration, action)) {
+          ruleParams.alertSuppression = { duration };
+          break;
+        } else {
+          isActionSkipped = true;
+          break;
+        }
+      }
+
+      if (shouldSkipAlertSuppressionFieldsBulkAction(ruleParams?.alertSuppression, action)) {
         isActionSkipped = true;
         break;
       }
 
-      ruleParams.investigationFields = action.value;
+      if (action.value.group_by.length === 0) {
+        ruleParams.alertSuppression = undefined;
+        break;
+      }
+
+      ruleParams.alertSuppression = {
+        ...ruleParams.alertSuppression,
+        groupBy: action.value.group_by,
+        ...(action.value.suppression_config
+          ? {
+              duration: action.value.suppression_config.duration,
+              missingFieldsStrategy: action.value.suppression_config.missing_fields_strategy,
+            }
+          : {}),
+      };
       break;
     }
     // timeline actions
