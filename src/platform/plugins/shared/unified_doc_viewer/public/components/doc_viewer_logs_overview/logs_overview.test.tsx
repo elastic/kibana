@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
-import { LogsOverview, LogsOverviewProps } from './logs_overview';
+import { act, render, screen } from '@testing-library/react';
+import { LogsOverview, LogsOverviewApi, LogsOverviewProps } from './logs_overview';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
@@ -144,17 +144,20 @@ setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, getCustomUnifedDocViewerServices())
 );
 
-const renderLogsOverview = (props: Partial<LogsOverviewProps> = {}) => {
+const renderLogsOverview = (
+  props: Partial<LogsOverviewProps> = {},
+  ref?: (api: LogsOverviewApi) => void
+) => {
   const { rerender: baseRerender, ...tools } = render(
     <EuiProvider highContrastMode={false}>
-      <LogsOverview dataView={dataView} hit={fullHit} {...props} />
+      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} />
     </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<LogsOverviewProps>) =>
     baseRerender(
       <EuiProvider highContrastMode={false}>
-        <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+        <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
       </EuiProvider>
     );
 
@@ -249,9 +252,12 @@ describe('LogsOverview', () => {
 
 describe('LogsOverview with accordion state', () => {
   it('should open the stacktrace section when the prop is passed', async () => {
-    renderLogsOverview({
-      hit: buildHit({ 'error.stack_trace': STACKTRACE }),
-      docViewerAccordionState: { stacktrace: true },
+    let api: LogsOverviewApi | undefined;
+    renderLogsOverview({ hit: buildHit({ 'error.stack_trace': STACKTRACE }) }, (newApi) => {
+      api = newApi;
+    });
+    act(() => {
+      api?.openAndScrollToSection('stacktrace');
     });
     expect(
       screen.queryByTestId('unifiedDocViewLogsOverviewStacktraceAccordion')
@@ -273,9 +279,12 @@ describe('LogsOverview with accordion state', () => {
   });
 
   it('should open the quality_issues section when the prop is passed', async () => {
-    renderLogsOverview({
-      hit: buildHit({ 'error.stack_trace': STACKTRACE }),
-      docViewerAccordionState: { quality_issues: true },
+    let api: LogsOverviewApi | undefined;
+    renderLogsOverview({ hit: buildHit({ 'error.stack_trace': STACKTRACE }) }, (newApi) => {
+      api = newApi;
+    });
+    act(() => {
+      api?.openAndScrollToSection('quality_issues');
     });
     expect(
       screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion')

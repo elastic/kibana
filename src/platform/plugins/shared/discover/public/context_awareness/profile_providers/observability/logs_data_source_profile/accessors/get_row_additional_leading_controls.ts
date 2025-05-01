@@ -50,29 +50,6 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
             initialAccordionSection: actionName,
           });
           setExpandedDoc(props.record, { initialTabId: 'doc_view_logs_overview' });
-
-          const dataTestSubj = {
-            stacktrace: 'unifiedDocViewLogsOverviewStacktraceAccordion',
-            quality_issues: 'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
-          };
-
-          // Scroll the section into view
-          const observer = new MutationObserver((mutations, obs) => {
-            const element = document.querySelector(
-              `[data-test-subj="${dataTestSubj[actionName]}"]`
-            );
-            if (element) {
-              setTimeout(() => {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }, 100); // We need this delay because after the element is rendered, it takes some time before it can be scrolledIntoView
-              obs.disconnect();
-            }
-          });
-
-          observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-          });
         };
 
       return [
