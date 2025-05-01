@@ -73,27 +73,6 @@ paths:
         "200":
           description: Entity source deleted successfully
 
-  /api/entity_analytics/monitoring/entity_source/list:
-    get:
-      operationId: listEntitySources
-      summary: List all entity source configurations
-      parameters:
-        - name: kql
-          in: query
-          required: false
-          schema:
-            type: string
-          description: KQL query to filter the list of entity sources
-      responses:
-        "200":
-          description: List of entity sources
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/MonitoringEntitySourceResponse"
-
 components:
   schemas:
     MonitoringEntitySourceDescriptor:

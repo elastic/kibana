@@ -19,152 +19,605 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
+import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
 
-import { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
-import { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
-import { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
-import { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
-import { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
-import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
-import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
-import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { routeWithNamespace } from 'x-pack/test/common/utils/security_solution';
+
 import {
+  AlertsMigrationCleanupRequestQueryInput,
+  AlertsMigrationCleanupRequestParamsInput,
+  AlertsMigrationCleanupRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
+import {
+  ApplyEntityEngineDataviewIndicesRequestQueryInput,
+  ApplyEntityEngineDataviewIndicesRequestParamsInput,
+  ApplyEntityEngineDataviewIndicesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
+import {
+  AssetCriticalityGetPrivilegesRequestQueryInput,
+  AssetCriticalityGetPrivilegesRequestParamsInput,
+  AssetCriticalityGetPrivilegesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
+import {
+  BootstrapPrebuiltRulesRequestQueryInput,
+  BootstrapPrebuiltRulesRequestParamsInput,
+  BootstrapPrebuiltRulesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import {
+  BulkUpsertAssetCriticalityRecordsRequestQueryInput,
+  BulkUpsertAssetCriticalityRecordsRequestParamsInput,
+  BulkUpsertAssetCriticalityRecordsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
+import {
+  CleanDraftTimelinesRequestQueryInput,
+  CleanDraftTimelinesRequestParamsInput,
+  CleanDraftTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
+import {
+  CleanUpRiskEngineRequestQueryInput,
+  CleanUpRiskEngineRequestParamsInput,
+  CleanUpRiskEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_cleanup_route.gen';
+import {
+  ConfigureRiskEngineSavedObjectRequestQueryInput,
+  ConfigureRiskEngineSavedObjectRequestParamsInput,
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
+import {
+  CopyTimelineRequestQueryInput,
+  CopyTimelineRequestParamsInput,
+  CopyTimelineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/copy_timeline/copy_timeline_route.gen';
+import {
+  CreateAlertsIndexRequestQueryInput,
+  CreateAlertsIndexRequestParamsInput,
+  CreateAlertsIndexRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/index_management/create_index/create_index.gen';
+import {
+  CreateAlertsMigrationRequestQueryInput,
+  CreateAlertsMigrationRequestParamsInput,
+  CreateAlertsMigrationRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
+import {
+  CreateAssetCriticalityRecordRequestQueryInput,
+  CreateAssetCriticalityRecordRequestParamsInput,
+  CreateAssetCriticalityRecordRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
+import {
+  CreateRuleRequestQueryInput,
+  CreateRuleRequestParamsInput,
+  CreateRuleRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import {
+  CreateRuleMigrationRequestQueryInput,
   CreateRuleMigrationRequestParamsInput,
   CreateRuleMigrationRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
+  CreateTimelinesRequestQueryInput,
+  CreateTimelinesRequestParamsInput,
+  CreateTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/create_timelines/create_timelines_route.gen';
+import {
+  CreateUpdateProtectionUpdatesNoteRequestQueryInput,
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
-import { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+import {
+  DeleteAlertsIndexRequestQueryInput,
+  DeleteAlertsIndexRequestParamsInput,
+  DeleteAlertsIndexRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/index_management/delete_index/delete_index.gen';
+import {
+  DeleteAssetCriticalityRecordRequestQueryInput,
+  DeleteAssetCriticalityRecordRequestParamsInput,
+  DeleteAssetCriticalityRecordRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
 import {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
-import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
-import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
-import { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
-import { DeprecatedTriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
-import { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
-import { EndpointFileDownloadRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_download/file_download.gen';
-import { EndpointFileInfoRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_info/file_info.gen';
-import { EndpointGetActionsDetailsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/details/details.gen';
-import { EndpointGetActionsListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/list/list.gen';
-import { EndpointGetActionsStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/status/status.gen';
-import { EndpointGetFileActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/get_file/get_file.gen';
-import { EndpointGetProcessesActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/running_procs/running_procs.gen';
-import { EndpointIsolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/isolate.gen';
-import { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/kill_process/kill_process.gen';
-import { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
-import { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
-import { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
+  DeleteEntityEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/delete.gen';
+import {
+  DeleteNoteRequestQueryInput,
+  DeleteNoteRequestParamsInput,
+  DeleteNoteRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/delete_note/delete_note_route.gen';
+import {
+  DeleteRuleRequestQueryInput,
+  DeleteRuleRequestParamsInput,
+  DeleteRuleRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import {
+  DeleteTimelinesRequestQueryInput,
+  DeleteTimelinesRequestParamsInput,
+  DeleteTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/delete_timelines/delete_timelines_route.gen';
+import {
+  DeprecatedTriggerRiskScoreCalculationRequestQueryInput,
+  DeprecatedTriggerRiskScoreCalculationRequestParamsInput,
+  DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import {
+  DisableRiskEngineRequestQueryInput,
+  DisableRiskEngineRequestParamsInput,
+  DisableRiskEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+import {
+  EnableRiskEngineRequestQueryInput,
+  EnableRiskEngineRequestParamsInput,
+  EnableRiskEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_enable_route.gen';
+import {
+  EndpointExecuteActionRequestQueryInput,
+  EndpointExecuteActionRequestParamsInput,
+  EndpointExecuteActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/execute/execute.gen';
+import {
+  EndpointFileDownloadRequestQueryInput,
+  EndpointFileDownloadRequestParamsInput,
+  EndpointFileDownloadRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/file_download/file_download.gen';
+import {
+  EndpointFileInfoRequestQueryInput,
+  EndpointFileInfoRequestParamsInput,
+  EndpointFileInfoRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/file_info/file_info.gen';
+import {
+  EndpointGetActionsDetailsRequestQueryInput,
+  EndpointGetActionsDetailsRequestParamsInput,
+  EndpointGetActionsDetailsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/details/details.gen';
+import {
+  EndpointGetActionsListRequestQueryInput,
+  EndpointGetActionsListRequestParamsInput,
+  EndpointGetActionsListRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/list/list.gen';
+import {
+  EndpointGetActionsStateRequestQueryInput,
+  EndpointGetActionsStateRequestParamsInput,
+  EndpointGetActionsStateRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/state/state.gen';
+import {
+  EndpointGetActionsStatusRequestQueryInput,
+  EndpointGetActionsStatusRequestParamsInput,
+  EndpointGetActionsStatusRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/status/status.gen';
+import {
+  EndpointGetFileActionRequestQueryInput,
+  EndpointGetFileActionRequestParamsInput,
+  EndpointGetFileActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/get_file/get_file.gen';
+import {
+  EndpointGetProcessesActionRequestQueryInput,
+  EndpointGetProcessesActionRequestParamsInput,
+  EndpointGetProcessesActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/running_procs/running_procs.gen';
+import {
+  EndpointIsolateActionRequestQueryInput,
+  EndpointIsolateActionRequestParamsInput,
+  EndpointIsolateActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/isolate/isolate.gen';
+import {
+  EndpointKillProcessActionRequestQueryInput,
+  EndpointKillProcessActionRequestParamsInput,
+  EndpointKillProcessActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/kill_process/kill_process.gen';
+import {
+  EndpointScanActionRequestQueryInput,
+  EndpointScanActionRequestParamsInput,
+  EndpointScanActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/scan/scan.gen';
+import {
+  EndpointSuspendProcessActionRequestQueryInput,
+  EndpointSuspendProcessActionRequestParamsInput,
+  EndpointSuspendProcessActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
+import {
+  EndpointUnisolateActionRequestQueryInput,
+  EndpointUnisolateActionRequestParamsInput,
+  EndpointUnisolateActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
+import {
+  EndpointUploadActionRequestQueryInput,
+  EndpointUploadActionRequestParamsInput,
+  EndpointUploadActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/upload/upload.gen';
+import {
+  EntityStoreGetPrivilegesRequestQueryInput,
+  EntityStoreGetPrivilegesRequestParamsInput,
+  EntityStoreGetPrivilegesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/get_privileges.gen';
 import {
   ExportRulesRequestQueryInput,
+  ExportRulesRequestParamsInput,
   ExportRulesRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
 import {
   ExportTimelinesRequestQueryInput,
+  ExportTimelinesRequestParamsInput,
   ExportTimelinesRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/timeline/export_timelines/export_timelines_route.gen';
-import { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
-import { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
-import { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
-import { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
-import { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
-import { GetEndpointMetadataListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/metadata/get_metadata.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/export_timelines/export_timelines_route.gen';
 import {
+  FinalizeAlertsMigrationRequestQueryInput,
+  FinalizeAlertsMigrationRequestParamsInput,
+  FinalizeAlertsMigrationRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
+import {
+  FindAssetCriticalityRecordsRequestQueryInput,
+  FindAssetCriticalityRecordsRequestParamsInput,
+  FindAssetCriticalityRecordsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
+import {
+  FindRulesRequestQueryInput,
+  FindRulesRequestParamsInput,
+  FindRulesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
+import {
+  GetAllStatsRuleMigrationRequestQueryInput,
+  GetAllStatsRuleMigrationRequestParamsInput,
+  GetAllStatsRuleMigrationRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetAssetCriticalityRecordRequestQueryInput,
+  GetAssetCriticalityRecordRequestParamsInput,
+  GetAssetCriticalityRecordRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
+import {
+  GetAssetCriticalityStatusRequestQueryInput,
+  GetAssetCriticalityStatusRequestParamsInput,
+  GetAssetCriticalityStatusRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/get_asset_criticality_status.gen';
+import {
+  GetDraftTimelinesRequestQueryInput,
+  GetDraftTimelinesRequestParamsInput,
+  GetDraftTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
+import {
+  GetEndpointMetadataListRequestQueryInput,
+  GetEndpointMetadataListRequestParamsInput,
+  GetEndpointMetadataListRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/metadata/get_metadata.gen';
+import {
+  GetEndpointSuggestionsRequestQueryInput,
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
-import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
-import { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
-import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
-import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
-import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/suggestions/get_suggestions.gen';
+import {
+  GetEntityEngineRequestQueryInput,
+  GetEntityEngineRequestParamsInput,
+  GetEntityEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/get.gen';
+import {
+  GetEntityStoreStatusRequestQueryInput,
+  GetEntityStoreStatusRequestParamsInput,
+  GetEntityStoreStatusRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/status.gen';
+import {
+  GetNotesRequestQueryInput,
+  GetNotesRequestParamsInput,
+  GetNotesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/get_notes/get_notes_route.gen';
+import {
+  GetPolicyResponseRequestQueryInput,
+  GetPolicyResponseRequestParamsInput,
+  GetPolicyResponseRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/policy/policy_response.gen';
+import {
+  GetProtectionUpdatesNoteRequestQueryInput,
+  GetProtectionUpdatesNoteRequestParamsInput,
+  GetProtectionUpdatesNoteRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+import {
+  GetRiskEngineStatusRequestQueryInput,
+  GetRiskEngineStatusRequestParamsInput,
+  GetRiskEngineStatusRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import {
   GetRuleExecutionEventsRequestQueryInput,
   GetRuleExecutionEventsRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
+  GetRuleExecutionEventsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
 import {
   GetRuleExecutionResultsRequestQueryInput,
   GetRuleExecutionResultsRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
+  GetRuleExecutionResultsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import {
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationPrebuiltRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+  GetRuleMigrationRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationIntegrationsRequestQueryInput,
+  GetRuleMigrationIntegrationsRequestParamsInput,
+  GetRuleMigrationIntegrationsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationPrebuiltRulesRequestQueryInput,
+  GetRuleMigrationPrebuiltRulesRequestParamsInput,
+  GetRuleMigrationPrebuiltRulesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationPrivilegesRequestQueryInput,
+  GetRuleMigrationPrivilegesRequestParamsInput,
+  GetRuleMigrationPrivilegesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationResourcesMissingRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetRuleMigrationTranslationStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
-import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
-import { GetWorkflowInsightsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
-import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
-import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
+  GetRuleMigrationResourcesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
+  GetRuleMigrationResourcesMissingRequestQueryInput,
+  GetRuleMigrationResourcesMissingRequestParamsInput,
+  GetRuleMigrationResourcesMissingRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationStatsRequestQueryInput,
+  GetRuleMigrationStatsRequestParamsInput,
+  GetRuleMigrationStatsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationTranslationStatsRequestQueryInput,
+  GetRuleMigrationTranslationStatsRequestParamsInput,
+  GetRuleMigrationTranslationStatsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetTimelineRequestQueryInput,
+  GetTimelineRequestParamsInput,
+  GetTimelineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/get_timeline/get_timeline_route.gen';
+import {
+  GetTimelinesRequestQueryInput,
+  GetTimelinesRequestParamsInput,
+  GetTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/get_timelines/get_timelines_route.gen';
+import {
+  GetWorkflowInsightsRequestQueryInput,
+  GetWorkflowInsightsRequestParamsInput,
+  GetWorkflowInsightsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/workflow_insights/workflow_insights.gen';
+import {
+  ImportRulesRequestQueryInput,
+  ImportRulesRequestParamsInput,
+  ImportRulesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
+import {
+  ImportTimelinesRequestQueryInput,
+  ImportTimelinesRequestParamsInput,
+  ImportTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/import_timelines/import_timelines_route.gen';
+import {
+  InitEntityEngineRequestQueryInput,
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
-import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/init.gen';
 import {
+  InitEntityStoreRequestQueryInput,
+  InitEntityStoreRequestParamsInput,
+  InitEntityStoreRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/enable.gen';
+import {
+  InitMonitoringEngineRequestQueryInput,
+  InitMonitoringEngineRequestParamsInput,
+  InitMonitoringEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import {
+  InitRiskEngineRequestQueryInput,
+  InitRiskEngineRequestParamsInput,
+  InitRiskEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import {
+  InstallMigrationRulesRequestQueryInput,
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
-import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
-import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
-import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  InstallPrebuiltRulesAndTimelinesRequestQueryInput,
+  InstallPrebuiltRulesAndTimelinesRequestParamsInput,
+  InstallPrebuiltRulesAndTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
+import {
+  InstallPrepackedTimelinesRequestQueryInput,
+  InstallPrepackedTimelinesRequestParamsInput,
+  InstallPrepackedTimelinesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
+import {
+  InternalUploadAssetCriticalityRecordsRequestQueryInput,
+  InternalUploadAssetCriticalityRecordsRequestParamsInput,
+  InternalUploadAssetCriticalityRecordsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import {
+  ListEntitiesRequestQueryInput,
+  ListEntitiesRequestParamsInput,
+  ListEntitiesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/entities/list_entities.gen';
+import {
+  ListEntityEnginesRequestQueryInput,
+  ListEntityEnginesRequestParamsInput,
+  ListEntityEnginesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/list.gen';
+import {
+  PatchRuleRequestQueryInput,
+  PatchRuleRequestParamsInput,
+  PatchRuleRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
+import {
+  PatchTimelineRequestQueryInput,
+  PatchTimelineRequestParamsInput,
+  PatchTimelineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
   PerformRulesBulkActionRequestQueryInput,
+  PerformRulesBulkActionRequestParamsInput,
   PerformRulesBulkActionRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
-import { PersistFavoriteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
-import { PersistNoteRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
-import { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
-import { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
-import { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
-import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
-import { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
+import {
+  PersistFavoriteRouteRequestQueryInput,
+  PersistFavoriteRouteRequestParamsInput,
+  PersistFavoriteRouteRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/persist_favorite/persist_favorite_route.gen';
+import {
+  PersistNoteRouteRequestQueryInput,
+  PersistNoteRouteRequestParamsInput,
+  PersistNoteRouteRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/persist_note/persist_note_route.gen';
+import {
+  PersistPinnedEventRouteRequestQueryInput,
+  PersistPinnedEventRouteRequestParamsInput,
+  PersistPinnedEventRouteRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/pinned_events/pinned_events_route.gen';
+import {
+  PreviewRiskScoreRequestQueryInput,
+  PreviewRiskScoreRequestParamsInput,
+  PreviewRiskScoreRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/preview_route.gen';
+import {
+  PrivMonHealthRequestQueryInput,
+  PrivMonHealthRequestParamsInput,
+  PrivMonHealthRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/privilege_monitoring/health.gen';
+import {
+  ReadAlertsIndexRequestQueryInput,
+  ReadAlertsIndexRequestParamsInput,
+  ReadAlertsIndexRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/index_management/read_index/read_index.gen';
+import {
+  ReadAlertsMigrationStatusRequestQueryInput,
+  ReadAlertsMigrationStatusRequestParamsInput,
+  ReadAlertsMigrationStatusRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
+import {
+  ReadPrebuiltRulesAndTimelinesStatusRequestQueryInput,
+  ReadPrebuiltRulesAndTimelinesStatusRequestParamsInput,
+  ReadPrebuiltRulesAndTimelinesStatusRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
+import {
+  ReadPrivilegesRequestQueryInput,
+  ReadPrivilegesRequestParamsInput,
+  ReadPrivilegesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/index_management/read_privileges/read_privileges.gen';
+import {
+  ReadRiskEngineSettingsRequestQueryInput,
+  ReadRiskEngineSettingsRequestParamsInput,
+  ReadRiskEngineSettingsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_settings_route.gen';
+import {
+  ReadRuleRequestQueryInput,
+  ReadRuleRequestParamsInput,
+  ReadRuleRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
+import {
+  ReadTagsRequestQueryInput,
+  ReadTagsRequestParamsInput,
+  ReadTagsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/read_tags/read_tags_route.gen';
+import {
+  ResolveTimelineRequestQueryInput,
+  ResolveTimelineRequestParamsInput,
+  ResolveTimelineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
+import {
+  RiskEngineGetPrivilegesRequestQueryInput,
+  RiskEngineGetPrivilegesRequestParamsInput,
+  RiskEngineGetPrivilegesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/get_risk_engine_privileges.gen';
 import {
   RulePreviewRequestQueryInput,
+  RulePreviewRequestParamsInput,
   RulePreviewRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
-import { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
-import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
-import { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
-import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
-import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
-import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
-import { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_preview/rule_preview.gen';
 import {
+  RunScriptActionRequestQueryInput,
+  RunScriptActionRequestParamsInput,
+  RunScriptActionRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
+import {
+  ScheduleRiskEngineNowRequestQueryInput,
+  ScheduleRiskEngineNowRequestParamsInput,
+  ScheduleRiskEngineNowRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/engine_schedule_now_route.gen';
+import {
+  SearchAlertsRequestQueryInput,
+  SearchAlertsRequestParamsInput,
+  SearchAlertsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
+import {
+  SearchPrivilegesIndicesRequestQueryInput,
+  SearchPrivilegesIndicesRequestParamsInput,
+  SearchPrivilegesIndicesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/monitoring/search_indices.gen';
+import {
+  SetAlertAssigneesRequestQueryInput,
+  SetAlertAssigneesRequestParamsInput,
+  SetAlertAssigneesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import {
+  SetAlertsStatusRequestQueryInput,
+  SetAlertsStatusRequestParamsInput,
+  SetAlertsStatusRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import {
+  SetAlertTagsRequestQueryInput,
+  SetAlertTagsRequestParamsInput,
+  SetAlertTagsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import {
+  StartEntityEngineRequestQueryInput,
+  StartEntityEngineRequestParamsInput,
+  StartEntityEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/start.gen';
+import {
+  StartRuleMigrationRequestQueryInput,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
-import { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
-import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
-import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
+  StopEntityEngineRequestQueryInput,
+  StopEntityEngineRequestParamsInput,
+  StopEntityEngineRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/engine/stop.gen';
+import {
+  StopRuleMigrationRequestQueryInput,
+  StopRuleMigrationRequestParamsInput,
+  StopRuleMigrationRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  SuggestUserProfilesRequestQueryInput,
+  SuggestUserProfilesRequestParamsInput,
+  SuggestUserProfilesRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/users/suggest_user_profiles_route.gen';
+import {
+  TriggerRiskScoreCalculationRequestQueryInput,
+  TriggerRiskScoreCalculationRequestParamsInput,
+  TriggerRiskScoreCalculationRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import {
+  UpdateRuleRequestQueryInput,
+  UpdateRuleRequestParamsInput,
+  UpdateRuleRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
+import {
+  UpdateRuleMigrationRequestQueryInput,
   UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
+  UpdateWorkflowInsightRequestQueryInput,
   UpdateWorkflowInsightRequestParamsInput,
   UpdateWorkflowInsightRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/endpoint/workflow_insights/workflow_insights.gen';
 import {
+  UploadAssetCriticalityRecordsRequestQueryInput,
+  UploadAssetCriticalityRecordsRequestParamsInput,
+  UploadAssetCriticalityRecordsRequestBodyInput,
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import {
+  UpsertRuleMigrationResourcesRequestQueryInput,
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
-import { FtrProviderContext } from '../ftr_provider_context';
+} from '/Users/charlottealexandrawilson/Public/kibana/kibana-fork/kibana/x-pack/solutions/security/plugins/security_solution/common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
