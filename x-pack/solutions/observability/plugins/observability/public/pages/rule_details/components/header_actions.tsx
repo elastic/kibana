@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -143,19 +144,6 @@ export function HeaderActions({
       id: 0,
       hasFocus: false,
       items: [
-        {
-          'data-test-subj': 'snoozeRuleButton',
-          icon: !getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell',
-          onClick: () => {
-            setSnoozeModalOpen(true);
-          },
-          name: i18n.translate('xpack.observability.ruleDetails.snoozeButton.snoozeSchedule', {
-            defaultMessage: 'Update snooze schedule',
-          }),
-        },
-        {
-          isSeparator: true as const,
-        },
         ...[rule.enabled ? disableRuleOption : enableRuleOption],
         {
           'data-test-subj': 'runButton',
@@ -197,7 +185,7 @@ export function HeaderActions({
 
   return (
     <>
-      <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
+      <EuiFlexGroup direction="rowReverse" alignItems="center">
         <EuiFlexItem>
           <EuiPopover
             id="contextRuleEditMenu"
@@ -228,6 +216,16 @@ export function HeaderActions({
               css={collapsedItemActionsCss}
             />
           </EuiPopover>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiButtonIcon
+            className="snoozeButton"
+            data-test-subj="snoozeRuleButton"
+            iconType={!getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
+            onClick={() => {
+              setSnoozeModalOpen(true);
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
