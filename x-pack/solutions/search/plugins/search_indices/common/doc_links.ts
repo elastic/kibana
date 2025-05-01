@@ -19,7 +19,7 @@ class SearchIndicesDocLinks {
     this.apiReference = newDocLinks.apiReference;
     this.setupSemanticSearch = newDocLinks.enterpriseSearch.semanticSearch;
     this.analyzeLogs = newDocLinks.serverlessSearch.integrations;
-    this.searchAPIReference = newDocLinks.query.queryDsl; // TODO: confirm where we want to point this to
+    this.searchAPIReference = newDocLinks.query.queryDsl;
   }
 }
 export const docLinks = new SearchIndicesDocLinks();
