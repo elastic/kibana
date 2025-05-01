@@ -6,6 +6,7 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { TOOL_CALLING_LLM_TYPES } from './agentRunnable';
 
 const formatPromptToolcalling = (prompt: string, additionalPrompt?: string) =>
   ChatPromptTemplate.fromMessages([
@@ -14,6 +15,17 @@ const formatPromptToolcalling = (prompt: string, additionalPrompt?: string) =>
     ['placeholder', '{chat_history}'],
     ['human', '{input}'],
     ['placeholder', '{agent_scratchpad}'],
+  ]);
+
+const formatPromptStructured = (prompt: string, additionalPrompt?: string) =>
+  ChatPromptTemplate.fromMessages([
+    ['system', additionalPrompt ? `${prompt}\n\n${additionalPrompt}` : prompt],
+    ['placeholder', '{knowledge_history}'],
+    ['placeholder', '{chat_history}'],
+    [
+      'human',
+      '{input}\n\n{agent_scratchpad}\n\n(reminder to respond in a JSON blob no matter what)',
+    ],
   ]);
 
 export const formatPrompt = ({

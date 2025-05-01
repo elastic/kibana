@@ -104,15 +104,6 @@ export const streamGraph = async ({
       : undefined
   );
 
-    const pushStreamUpdate = async () => {
-      for await (const { event, data, tags } of stream) {
-        if ((tags || []).includes(AGENT_NODE_TAG)) {
-          if (event === 'on_chat_model_stream' && !inputs.isOssModel) {
-            const msg = data.chunk as AIMessageChunk;
-            if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
-              push({ payload: msg.content as string, type: 'content' });
-            }
-          }
   const pushStreamUpdate = async () => {
     for await (const { event, data, tags } of stream) {
       if ((tags || []).includes(AGENT_NODE_TAG)) {
@@ -192,7 +183,6 @@ export const invokeGraph = async ({
       ],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
-      recursionLimit: inputs?.isOssModel ? 50 : 25,
     });
     const output = (result.agentOutcome as AgentFinish).returnValues.output;
     const conversationId = result.conversation?.id;
