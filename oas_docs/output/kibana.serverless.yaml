@@ -958,6 +958,7 @@ paths:
                         type: object
                         properties:
                           blob:
+                            description: User-created content that describes alert causes and remdiation.
                             type: string
                         required:
                           - blob
@@ -2353,6 +2354,7 @@ paths:
                         type: object
                         properties:
                           blob:
+                            description: User-created content that describes alert causes and remdiation.
                             type: string
                         required:
                           - blob
@@ -3385,6 +3387,7 @@ paths:
                         type: object
                         properties:
                           blob:
+                            description: User-created content that describes alert causes and remdiation.
                             type: string
                         required:
                           - blob
@@ -4796,6 +4799,7 @@ paths:
                         type: object
                         properties:
                           blob:
+                            description: User-created content that describes alert causes and remdiation.
                             type: string
                         required:
                           - blob

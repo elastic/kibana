@@ -1116,6 +1116,7 @@
                           "additionalProperties": false,
                           "properties": {
                             "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
                               "type": "string"
                             }
                           },
@@ -2910,6 +2911,7 @@
                           "additionalProperties": false,
                           "properties": {
                             "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
                               "type": "string"
                             }
                           },
@@ -4278,6 +4280,7 @@
                           "additionalProperties": false,
                           "properties": {
                             "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
                               "type": "string"
                             }
                           },
@@ -6227,6 +6230,7 @@
                           "additionalProperties": false,
                           "properties": {
                             "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
                               "type": "string"
                             }
                           },

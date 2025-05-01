@@ -481,7 +481,7 @@ export const investigationGuideSchema = schema.object({
   blob: schema.string({
     meta: {
       description: 'User-created content that describes alert causes and remdiation.',
-    }
+    },
   }),
 });
 
