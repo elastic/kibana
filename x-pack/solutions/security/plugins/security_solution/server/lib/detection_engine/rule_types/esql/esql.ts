@@ -111,7 +111,7 @@ export const esqlExecutor = async ({
       while (result.createdSignalsCount <= tuple.maxSignals) {
         if (excludedDocuments.length > MAX_EXCLUDED_DOCUMENTS) {
           result.warningMessages.push(
-            `Excluded documents exceeded the limit of ${MAX_EXCLUDED_DOCUMENTS}. Consider reducing lookback time for rule.`
+            `Excluded documents exceeded the limit of ${MAX_EXCLUDED_DOCUMENTS}, some alerts might not have been created. Consider reducing the lookback time for the rule.`
           );
           break;
         }

@@ -124,7 +124,7 @@ describe('esqlExecutor', () => {
       const result = await esqlExecutor(mockedArguments);
 
       expect(result.warningMessages).toContain(
-        'Excluded documents exceeded the limit of 100000. Consider reducing lookback time for rule.'
+        'Excluded documents exceeded the limit of 100000, some alerts might not have been created. Consider reducing the lookback time for the rule.'
       );
       expect(
         ruleServices.scopedClusterClient.asCurrentUser.transport.request
