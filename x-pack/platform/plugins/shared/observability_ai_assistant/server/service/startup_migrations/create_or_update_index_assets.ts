@@ -7,10 +7,10 @@
 
 import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
-import { conversationComponentTemplate } from './conversation_component_template';
-import { kbComponentTemplate } from './kb_component_template';
-import { resourceNames } from '.';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { conversationComponentTemplate } from '../conversation_component_template';
+import { kbComponentTemplate } from '../kb_component_template';
+import { resourceNames } from '..';
 
 export async function updateExistingIndexAssets({
   logger,

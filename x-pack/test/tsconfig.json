@@ -199,6 +199,7 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
+    "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
   ]
 }
