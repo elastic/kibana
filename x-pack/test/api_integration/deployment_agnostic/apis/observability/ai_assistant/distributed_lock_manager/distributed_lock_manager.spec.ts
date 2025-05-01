@@ -37,6 +37,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
+    // see details: https://github.com/elastic/kibana/issues/219091
+    this.tags(['failsOnMKI']);
     before(async () => {
       // delete existing index mappings to ensure we start from a clean state
       await deleteLockIndexAssets(es, log);
@@ -52,9 +54,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('Manual locking API', function () {
       this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
-        await clearAllLocks(es);
+        await clearAllLocks(es, log);
       });
 
       describe('Basic lock operations', () => {
@@ -429,7 +429,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lock!.token).to.be(newToken);
 
           // cleanup
-          await clearAllLocks(es);
+          await clearAllLocks(es, log);
         });
 
         it('should use a fresh token on subsequent acquisitions', async () => {
@@ -456,9 +456,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('withLock API', function () {
       this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
-        await clearAllLocks(es);
+        await clearAllLocks(es, log);
       });
 
       const LOCK_ID = 'my_lock_with_lock';
