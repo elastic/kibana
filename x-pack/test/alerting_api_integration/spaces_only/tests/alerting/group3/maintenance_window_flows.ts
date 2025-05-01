@@ -215,7 +215,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       });
     });
 
-    it.only('alerts triggered within a MW should fire actions if still active or recoveres after the MW expired', async () => {
+    it('alerts triggered within a MW should fire actions if still active or recoveres after the MW expired', async () => {
       const pattern = {
         instance: [true, true, false, true],
       };
