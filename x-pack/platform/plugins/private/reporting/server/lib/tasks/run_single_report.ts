@@ -29,13 +29,6 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   }
 
   private async claimJob(task: ReportTaskParams): Promise<SavedReport> {
-    if (this.kibanaId == null) {
-      throw new Error(`Kibana instance ID is undefined!`);
-    }
-    if (this.kibanaName == null) {
-      throw new Error(`Kibana instance name is undefined!`);
-    }
-
     const store = await this.opts.reporting.getStore();
     const report = await store.findReportFromTask(task); // receives seq_no and primary_term
     const logger = this.logger.get(report._id);

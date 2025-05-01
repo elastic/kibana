@@ -49,15 +49,7 @@ const rruleDaily = rruleCommon.extends({
   byhour,
   byminute,
   byweekday,
-  bymonthday: schema.never(),
+  bymonthday: schema.maybe(schema.never()),
 });
 
-const rruleMinutely = rruleCommon.extends({
-  freq: schema.literal(Frequency.MINUTELY),
-  byhour,
-  byminute,
-  byweekday,
-  bymonthday,
-});
-
-export const rruleSchedule = schema.oneOf([rruleMonthly, rruleWeekly, rruleDaily, rruleMinutely]);
+export const rruleSchedule = schema.oneOf([rruleMonthly, rruleWeekly, rruleDaily]);

@@ -427,6 +427,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
+          if (this.kibanaId == null) {
+            throw new Error(`Kibana instance ID is undefined!`);
+          }
+          if (this.kibanaName == null) {
+            throw new Error(`Kibana instance name is undefined!`);
+          }
+
           let report: SavedReport | undefined;
           const {
             isLastAttempt,

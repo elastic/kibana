@@ -259,12 +259,11 @@ export interface IntervalSchedule {
   rrule?: never;
 }
 
+export type Rrule = RruleMonthly | RruleWeekly | RruleDaily;
 export interface RruleSchedule {
-  rrule: RruleMonthly | RruleWeekly | RruleDaily | RruleMinutely;
+  rrule: Rrule;
   interval?: never;
 }
-
-export type Rrule = RruleMonthly | RruleWeekly | RruleDaily | RruleMinutely;
 
 interface RruleCommon {
   freq: Frequency;
@@ -291,13 +290,6 @@ interface RruleDaily extends RruleCommon {
   byminute?: number[];
   byweekday?: Weekday[];
   bymonthday?: never;
-}
-interface RruleMinutely extends RruleCommon {
-  freq: Frequency.MINUTELY;
-  bymonthday?: number[];
-  byhour?: number[];
-  byminute?: number[];
-  byweekday?: Weekday[];
 }
 
 export interface TaskUserScope {

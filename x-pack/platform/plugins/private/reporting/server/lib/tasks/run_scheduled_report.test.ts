@@ -18,9 +18,15 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RunScheduledReportTask, SCHEDULED_REPORTING_EXECUTE_TYPE } from '.';
 import { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
-import { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  FakeRawRequest,
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { Frequency } from '@kbn/rrule';
-import { ReportingStore, Report, SavedReport } from '../store';
+import { ReportingStore, SavedReport } from '../store';
+import { RawScheduledReport } from '../../saved_objects/scheduled_report/schemas/latest';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -73,6 +79,23 @@ const payload = {
   version: '8.0.0',
 };
 
+const reportSO: SavedObject<RawScheduledReport> = {
+  id: 'report-so-id',
+  attributes: {
+    createdAt: new Date().toISOString(),
+    createdBy: 'test-user',
+    enabled: true,
+    jobType: 'test1',
+    meta: { objectType: 'test' },
+    migrationVersion: '8.0.0',
+    payload: JSON.stringify(payload),
+    schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
+    title: 'Test Report',
+  },
+  references: [],
+  type: 'scheduled-report',
+};
+
 describe('Run Scheduled Report Task', () => {
   let mockReporting: ReportingCore;
   let configType: ReportingConfigType;
@@ -86,21 +109,7 @@ describe('Run Scheduled Report Task', () => {
 
     soClient = await mockReporting.getSoClient();
     soClient.get = jest.fn().mockImplementation(async () => {
-      return {
-        id: 'report-so-id',
-        attributes: {
-          createdAt: new Date().toISOString(),
-          createdBy: 'test-user',
-          enabled: true,
-          jobType: 'test1',
-          meta: { objectType: 'test' },
-          migrationVersion: '8.0.0',
-          payload: JSON.stringify(payload),
-          schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
-          title: 'Test Report',
-        },
-        type: 'scheduled-report',
-      };
+      return reportSO;
     });
 
     mockReporting.getExportTypesRegistry().register({
@@ -118,7 +127,7 @@ describe('Run Scheduled Report Task', () => {
 
   beforeEach(async () => {
     reportStore = await mockReporting.getStore();
-    reportStore.addReport = jest.fn().mockImplementation(async (opts) => {
+    reportStore.addReport = jest.fn().mockImplementation(async () => {
       return new SavedReport({
         _id: '290357209345723095',
         _index: '.reporting-fantastic',
@@ -249,6 +258,7 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('uses authorization headers from task manager fake request', async () => {
+    const runAt = new Date('2023-10-01T00:00:00Z');
     const task = new RunScheduledReportTask({
       reporting: mockReporting,
       config: configType,
@@ -266,6 +276,7 @@ describe('Run Scheduled Report Task', () => {
     const taskRunner = taskDef.createTaskRunner({
       taskInstance: {
         id: 'report-so-id',
+        runAt,
         params: {
           id: 'report-so-id',
           jobtype: 'test1',
@@ -281,23 +292,31 @@ describe('Run Scheduled Report Task', () => {
 
     expect(soClient.get).toHaveBeenCalledWith('scheduled_report', 'report-so-id');
     expect(reportStore.addReport).toHaveBeenCalledWith(
-      new Report({
+      expect.objectContaining({
         _id: expect.any(String),
-        migration_version: '7.14.0',
+        _index: '.kibana-reporting',
         jobtype: 'test1',
         created_at: expect.any(String),
         created_by: 'test-user',
-        payload,
+        payload: {
+          headers: '',
+          title: 'Test Report',
+          browserTimezone: '',
+          objectType: 'test',
+          version: '8.0.0',
+          forceNow: expect.any(String),
+        },
         meta: { objectType: 'test' },
-        status: JOB_STATUS.PROCESSING,
+        status: 'processing',
         attempts: 1,
-        process_expiration: expect.any(String),
-        kibana_id: 'instance-uuid',
+        scheduled_report_id: 'report-so-id',
         kibana_name: 'kibana',
-        max_attempts: 1,
+        kibana_id: 'instance-uuid',
         started_at: expect.any(String),
         timeout: 120000,
-        scheduled_report_id: 'report-so-id',
+        max_attempts: 1,
+        process_expiration: expect.any(String),
+        migration_version: '7.14.0',
       })
     );
     expect(runTaskFn.mock.calls[0][0].request.headers).toEqual({
@@ -319,6 +338,7 @@ describe('Run Scheduled Report Task', () => {
     const taskRunner = taskDef.createTaskRunner({
       taskInstance: {
         id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
         params: {
           id: 'report-so-id',
           jobtype: 'test1',
