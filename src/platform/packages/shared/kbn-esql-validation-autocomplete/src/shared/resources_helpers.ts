@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BasicPrettyPrinter,
-  Builder,
-  ESQLAstQueryExpression,
-  ESQLCommand,
-  parse,
-} from '@kbn/esql-ast';
+import { ESQLCommand, parse } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
@@ -27,38 +21,6 @@ import {
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
 export function buildQueryUntilPreviousCommand(queryString: string, commands: ESQLCommand[]) {
-  const finalCommand = commands[commands.length - 1];
-  if (finalCommand.name === 'fork') {
-    const currentSubQuery = finalCommand.args[
-      finalCommand.args.length - 1
-    ] as ESQLAstQueryExpression;
-
-    if (currentSubQuery.commands.length > 1) {
-      // FORK requires at least two branches but we are
-      // really only interested in the current branch so
-      // this LIMIT branch is just to make the query pass
-      // muster with Elasticsearch
-      const limitBranch = Builder.expression.query([
-        Builder.command<'limit'>({
-          name: 'limit',
-          args: [Builder.expression.literal.integer(0)],
-        }),
-      ]);
-
-      const newForkCommand = Builder.command<'fork'>({
-        name: 'fork',
-        args: [
-          limitBranch,
-          { ...currentSubQuery, commands: currentSubQuery.commands.slice(0, -1) },
-        ],
-      });
-
-      const query = Builder.expression.query([...commands.slice(0, -1), newForkCommand]);
-
-      return BasicPrettyPrinter.print(query);
-    }
-  }
-
   const prevCommand = commands[Math.max(commands.length - 2, 0)];
   return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }

@@ -121,16 +121,55 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
             );
           });
 
-          it('allows user-defined columns within sub-commands', async () => {
-            const { expectErrors } = await setup();
+          describe('user-defined columns', () => {
+            it('allows columns to be defined within sub-commands', async () => {
+              const { expectErrors } = await setup();
 
-            await expectErrors(
-              `FROM index 
-| FORK
-    (EVAL foo = TO_UPPER(keywordField) | LIMIT 100)
-    (EVAL bar = 1)`,
-              []
-            );
+              await expectErrors(
+                `FROM index 
+  | FORK
+      (EVAL foo = TO_UPPER(keywordField) | LIMIT 100)
+      (EVAL bar = 1)`,
+                []
+              );
+            });
+
+            it('recognizes user-defined columns within branches', async () => {
+              const { expectErrors } = await setup();
+
+              await expectErrors(
+                `FROM index
+  | FORK
+      (EVAL foo = TO_UPPER(keywordField) | WHERE foo | LIMIT 100)
+      (LIMIT 1)`,
+                []
+              );
+            });
+
+            it('does not recognize user-defined columns between branches', async () => {
+              const { expectErrors } = await setup();
+
+              await expectErrors(
+                `FROM index 
+  | FORK
+      (EVAL foo = TO_UPPER(keywordField) | LIMIT 100)
+      (EVAL foo + 1)`,
+                ['Unknown column [foo]']
+              );
+            });
+
+            it('recognizes user-defined columns from all branches after FORK', async () => {
+              const { expectErrors } = await setup();
+
+              await expectErrors(
+                `FROM index
+  | FORK
+      (EVAL foo = 1)
+      (EVAL bar = 1)
+  | KEEP foo, bar`,
+                []
+              );
+            });
           });
         });
       });

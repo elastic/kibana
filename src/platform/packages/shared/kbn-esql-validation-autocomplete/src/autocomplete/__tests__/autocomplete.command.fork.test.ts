@@ -201,6 +201,29 @@ describe('autocomplete.suggest', () => {
             FORK_SUBCOMMANDS
           );
         });
+
+        describe('user-defined columns', () => {
+          it('suggests user-defined columns from earlier in this branch', async () => {
+            const suggestions = await suggest(
+              'FROM a | FORK (EVAL foo = 1 | EVAL bar = 2 | WHERE /)'
+            );
+            expect(suggestions.map(({ text }) => text)).toContain('foo');
+            expect(suggestions.map(({ text }) => text)).toContain('bar');
+          });
+
+          it('does NOT suggest user-defined columns from another branch', async () => {
+            const suggestions = await suggest('FROM a | FORK (EVAL foo = 1) (WHERE /)');
+            expect(suggestions.map(({ text }) => text)).not.toContain('foo');
+          });
+
+          it('suggests user-defined columns from all branches after FORK', async () => {
+            const suggestions = await suggest(
+              'FROM a | FORK (EVAL foo = 1) (EVAL bar = 2) | WHERE /'
+            );
+            expect(suggestions.map(({ text }) => text)).not.toContain('foo');
+            expect(suggestions.map(({ text }) => text)).not.toContain('bar');
+          });
+        });
       });
     });
   });
