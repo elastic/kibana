@@ -9,9 +9,7 @@ import expect from '@kbn/expect';
 import * as semver from 'semver';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  getKbIndexCreatedVersion,
-} from '../utils/knowledge_base';
+import { getKbIndexCreatedVersion } from '../utils/knowledge_base';
 import {
   TINY_ELSER_INFERENCE_ID,
   TINY_ELSER_MODEL_ID,
@@ -51,7 +49,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     after(async () => {
       log.info('Restoring index assets');
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      
+
       log.info('Tearing down tiny ELSER model and inference endpoint');
       await teardownTinyElserModelAndInferenceEndpoint(getService);
     });
