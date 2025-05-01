@@ -23,6 +23,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
         SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
+        SLACK_CHANNEL: ${{secrets.CODE_SCANNING_SLACK_CHANNEL}}
         CODE_SCANNING_BRANCHES: main,8.19
       run: |
         npm ci --omit=dev
