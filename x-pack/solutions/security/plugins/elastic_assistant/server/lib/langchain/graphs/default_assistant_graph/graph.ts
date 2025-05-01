@@ -11,7 +11,7 @@ import { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, Replacements } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -42,6 +42,7 @@ export interface GetDefaultAssistantGraphParams {
   tools: StructuredTool[];
   replacements: Replacements;
   getFormattedTime?: () => string;
+  contentReferencesStore: ContentReferencesStore;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -49,6 +50,7 @@ export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
 export const getDefaultAssistantGraph = ({
   actionsClient,
   agentRunnable,
+  contentReferencesStore,
   dataClients,
   createLlmInstance,
   logger,
@@ -65,6 +67,7 @@ export const getDefaultAssistantGraph = ({
       actionsClient,
       logger,
       savedObjectsClient,
+      contentReferencesStore,
     };
 
     const stateAnnotation = getStateAnnotation({ getFormattedTime });
