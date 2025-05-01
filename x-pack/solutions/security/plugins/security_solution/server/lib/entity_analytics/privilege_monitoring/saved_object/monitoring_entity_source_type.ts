@@ -42,6 +42,7 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     },
     matchers: {
       type: 'object',
+      dynamic: false,
       properties: {
         field: {
           type: 'keyword',
