@@ -34,6 +34,7 @@ import {
 import { isEqual } from 'lodash';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useGroupTakeActionsItems } from '../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
   defaultGroupStatsAggregations,
@@ -340,6 +341,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     [alertsTableDefaultFilters, isAlertTableLoading]
   );
 
+  const groupTakeActionItems = useGroupTakeActionsItems({
+    currentStatus: statusFilter,
+    showAlertStatusActions: (hasIndexWrite ?? false) && (hasIndexMaintenance ?? false),
+  });
+
   const accordionExtraActionGroupStats = useMemo(
     () => ({
       aggregations: defaultGroupStatsAggregations,
@@ -449,14 +455,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-              currentAlertStatusFilterValue={statusFilter}
               defaultFilters={alertsTableDefaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}
               globalFilters={filters}
               globalQuery={query}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              hasIndexWrite={hasIndexWrite ?? false}
+              groupTakeActionItems={groupTakeActionItems}
               loading={isAlertTableLoading}
               renderChildComponent={renderAlertTable}
               runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
