@@ -55,7 +55,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
   };
 
   return (
-    <>
+    <div data-test-subj="dataVisualizerPageFileUpload">
       <>
         {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
           <>
@@ -147,6 +147,6 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
           />
         </>
       ) : null}
-    </>
+    </div>
   );
 };
