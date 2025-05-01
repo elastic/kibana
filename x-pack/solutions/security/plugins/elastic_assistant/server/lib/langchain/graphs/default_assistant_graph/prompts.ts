@@ -17,11 +17,16 @@ const formatPromptToolcalling = (prompt: string, additionalPrompt?: string) =>
   ]);
 
 export const formatPrompt = ({
+  llmType,
   prompt,
   additionalPrompt,
 }: {
+  llmType: string | undefined;
   prompt: string;
   additionalPrompt?: string;
 }) => {
-  return formatPromptToolcalling(prompt, additionalPrompt);
+  if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
+    return formatPromptToolcalling(prompt, additionalPrompt);
+  }
+  return formatPromptStructured(prompt, additionalPrompt);
 };

@@ -86,24 +86,23 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  // Stream is from tool calling agent or structured chat agent
-  if (inputs.isOssModel || inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') {
-    const stream = await assistantGraph.streamEvents(
-      inputs,
-      {
-        callbacks: [
-          apmTracer,
-          ...(traceOptions?.tracers ?? []),
-          ...(telemetryTracer ? [telemetryTracer] : []),
-        ],
-        runName: DEFAULT_ASSISTANT_GRAPH_ID,
-        tags: traceOptions?.tags ?? [],
-        version: 'v2',
-        streamMode: 'values',
-        recursionLimit: inputs?.isOssModel ? 50 : 25,
-      },
-      inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
-    );
+  const stream = await assistantGraph.streamEvents(
+    inputs,
+    {
+      callbacks: [
+        apmTracer,
+        ...(traceOptions?.tracers ?? []),
+        ...(telemetryTracer ? [telemetryTracer] : []),
+      ],
+      runName: DEFAULT_ASSISTANT_GRAPH_ID,
+      tags: traceOptions?.tags ?? [],
+      version: 'v2',
+      streamMode: 'values',
+    },
+    inputs.isOssModel || inputs?.llmType === 'bedrock'
+      ? { includeNames: ['Summarizer'] }
+      : undefined
+  );
 
     const pushStreamUpdate = async () => {
       for await (const { event, data, tags } of stream) {
@@ -114,71 +113,22 @@ export const streamGraph = async ({
               push({ payload: msg.content as string, type: 'content' });
             }
           }
-
-          if (
-            event === 'on_chat_model_end' &&
-            !data.output.lc_kwargs?.tool_calls?.length &&
-            !didEnd
-          ) {
-            handleStreamEnd(data.output.content);
-          }
-        }
-      }
-    };
-
-    pushStreamUpdate().catch((err) => {
-      logger.error(`Error streaming graph: ${err}`);
-      handleStreamEnd(err.message, true);
-    });
-
-    return responseWithHeaders;
-  }
-
-  // Stream is from openai functions agent
-  let finalMessage = '';
-  const stream = assistantGraph.streamEvents(
-    inputs,
-    {
-      callbacks: [
-        apmTracer,
-        ...(traceOptions?.tracers ?? []),
-        ...(telemetryTracer ? [telemetryTracer] : []),
-      ],
-      runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      streamMode: 'values',
-      tags: traceOptions?.tags ?? [],
-      version: 'v1',
-    },
-    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
-  );
-
   const pushStreamUpdate = async () => {
     for await (const { event, data, tags } of stream) {
       if ((tags || []).includes(AGENT_NODE_TAG)) {
-        if (event === 'on_llm_stream') {
-          const chunk = data?.chunk;
-          const msg = chunk.message;
-          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-            /* empty */
-          } else if (!didEnd) {
-            push({ payload: msg.content, type: 'content' });
-            finalMessage += msg.content;
+        if (event === 'on_chat_model_stream') {
+          const msg = data.chunk as AIMessageChunk;
+          if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+            push({ payload: msg.content as string, type: 'content' });
           }
         }
 
-        if (event === 'on_llm_end' && !didEnd) {
-          const generation = data.output?.generations[0][0];
-          if (
-            // if generation is null, an error occurred - do nothing and let error handling complete the stream
-            generation != null &&
-            // no finish_reason means the stream was aborted
-            (!generation?.generationInfo?.finish_reason ||
-              generation?.generationInfo?.finish_reason === 'stop')
-          ) {
-            handleStreamEnd(
-              generation?.text && generation?.text.length ? generation?.text : finalMessage
-            );
-          }
+        if (
+          event === 'on_chat_model_end' &&
+          !data.output.lc_kwargs?.tool_calls?.length &&
+          !didEnd
+        ) {
+          handleStreamEnd(data.output.content);
         }
       }
     }

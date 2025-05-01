@@ -35,7 +35,7 @@ export interface GetDefaultAssistantGraphParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
   agentRunnable: AgentRunnableSequence;
   dataClients?: AssistantDataClients;
-  createLlmInstance: () => BaseChatModel;
+  createLlmInstance: () => Promise<BaseChatModel>;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   signal?: AbortSignal;
@@ -81,9 +81,10 @@ export const getDefaultAssistantGraph = ({
           conversationsDataClient: dataClients?.conversationsDataClient,
         })
       )
-      .addNode(NodeType.GENERATE_CHAT_TITLE, (state: AgentState) =>
-        generateChatTitle({ ...nodeParams, state, model: createLlmInstance() })
-      )
+      .addNode(NodeType.GENERATE_CHAT_TITLE, async (state: AgentState) => {
+        const model = await createLlmInstance();
+        return generateChatTitle({ ...nodeParams, state, model });
+      })
       .addNode(NodeType.PERSIST_CONVERSATION_CHANGES, (state: AgentState) =>
         persistConversationChanges({
           ...nodeParams,
@@ -104,9 +105,10 @@ export const getDefaultAssistantGraph = ({
       .addNode(NodeType.TOOLS, (state: AgentState) =>
         executeTools({ ...nodeParams, config: { signal }, state, tools })
       )
-      .addNode(NodeType.RESPOND, (state: AgentState) =>
-        respond({ ...nodeParams, config: { signal }, state, model: createLlmInstance() })
-      )
+      .addNode(NodeType.RESPOND, async (state: AgentState) => {
+        const model = await createLlmInstance();
+        return respond({ ...nodeParams, config: { signal }, state, model });
+      })
       .addNode(NodeType.MODEL_INPUT, (state: AgentState) => modelInput({ ...nodeParams, state }))
       .addEdge(START, NodeType.MODEL_INPUT)
       .addEdge(NodeType.RESPOND, END)

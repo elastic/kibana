@@ -16,7 +16,6 @@ import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
-import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
@@ -62,8 +61,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai' && !isOssModel;
-  const llmClass = getLlmClass(llmType);
 
   /**
    * Creates a new instance of llmClass.
@@ -71,29 +68,24 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * This function ensures that a new llmClass instance is created every time it is called.
    * This is necessary to avoid any potential side effects from shared state. By always
    * creating a new instance, we prevent other uses of llm from binding and changing
-   * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
+   * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
-  const createLlmInstance = () =>
-    new llmClass({
-      actionsClient,
+  const createLlmInstance = async () =>
+    inference.getChatModel({
+      request,
       connectorId,
-      llmType,
-      logger,
-      // possible client model override,
-      // let this be undefined otherwise so the connector handles the model
-      model: request.body.model,
-      // ensure this is defined because we default to it in the language_models
-      // This is where the LangSmith logs (Metadata > Invocation Params) are set
-      temperature: getDefaultArguments(llmType).temperature,
-      signal: abortSignal,
-      streaming: isStream,
-      // prevents the agent from retrying on failure
-      // failure could be due to bad connector, we should deliver that result to the client asap
-      maxRetries: 0,
-      convertSystemMessageToHumanContent: false,
-      timeout,
-      telemetryMetadata: {
-        pluginId: 'security_ai_assistant',
+      chatModelOptions: {
+        model: request.body.model,
+        signal: abortSignal,
+        temperature: getDefaultArguments(llmType).temperature,
+        // prevents the agent from retrying on failure
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+        metadata: {
+          connectorTelemetry: {
+            pluginId: 'security_ai_assistant',
+          },
+        },
       },
     });
 
@@ -153,9 +145,10 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         } catch (e) {
           logger.error(`Failed to get prompt for tool: ${tool.name}`);
         }
+        const llm = await createLlmInstance();
         return tool.getTool({
           ...assistantToolParams,
-          llm: createLlmInstance(),
+          llm,
           isOssModel,
           description,
         });
@@ -187,11 +180,12 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const chatPromptTemplate = formatPrompt({
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
+    llmType,
   });
 
+  const llm = await createLlmInstance();
   const agentRunnable = await agentRunnableFactory({
-    llm: createLlmInstance(),
-    isOpenAI,
+    llm,
     llmType,
     tools,
     isStream,
