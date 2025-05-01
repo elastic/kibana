@@ -70,6 +70,7 @@ packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
+packages/kbn-lock-manager @elastic/obs-ai-assistant
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-manifest @elastic/kibana-core
@@ -1862,7 +1863,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional_embedded @elastic/kibana-core
 /src/platform/test/node_roles_functional @elastic/kibana-core
 /src/platform/test/functional/page_objects/newsfeed_page.ts @elastic/kibana-core # assigned per https://github.com/elastic/kibana/pull/160210
-/src/platform/test/functional/page_objects/home_page.ts @elastic/kibana-core
+/src/platform/test/functional/page_objects/home_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/fixtures/es_archiver/deprecations_service @elastic/kibana-core
 /src/platform/test/health_gateway @elastic/kibana-core
 /src/platform/test/api_integration/apis/saved_objects* @elastic/kibana-core
