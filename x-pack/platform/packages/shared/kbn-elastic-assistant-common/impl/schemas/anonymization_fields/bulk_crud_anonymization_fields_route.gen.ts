@@ -87,7 +87,7 @@ export const AnonymizationFieldResponse = z.object({
   /**
    * Timestamp of the field creation
    */
-  timestamp: NonEmptyString,
+  timestamp: NonEmptyString.optional(),
   /**
    * Field name
    */
@@ -144,14 +144,14 @@ export type AnonymizationFieldsBulkCrudActionResponse = z.infer<
   typeof AnonymizationFieldsBulkCrudActionResponse
 >;
 export const AnonymizationFieldsBulkCrudActionResponse = z.object({
-  success: z.boolean(),
-  status_code: z.number().int(),
-  message: z.string(),
-  anonymization_fields_count: z.number().int(),
+  success: z.boolean().optional(),
+  status_code: z.number().int().optional(),
+  message: z.string().optional(),
+  anonymization_fields_count: z.number().int().optional(),
   attributes: z.object({
     results: AnonymizationFieldsBulkCrudActionResults,
     summary: BulkCrudActionSummary,
-    errors: z.array(NormalizedAnonymizationFieldError),
+    errors: z.array(NormalizedAnonymizationFieldError).optional(),
   }),
 });
 

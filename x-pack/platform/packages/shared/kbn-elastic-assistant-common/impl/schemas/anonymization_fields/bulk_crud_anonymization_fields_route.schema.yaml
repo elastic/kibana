@@ -182,7 +182,6 @@ components:
       required:
         - id
         - field
-        - timestamp
       properties:
         id:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
@@ -287,12 +286,7 @@ components:
           required:
             - results
             - summary
-            - errors
       required:
-        - success
-        - status_code
-        - message
-        - anonymization_fields_count
         - attributes
 
     BulkActionBase:

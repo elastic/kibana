@@ -1376,7 +1376,6 @@ components:
       required:
         - id
         - field
-        - timestamp
     AnonymizationFieldsBulkActionSkipReason:
       description: Reason why the anonymization field was not modified
       enum:
@@ -1416,7 +1415,6 @@ components:
           required:
             - results
             - summary
-            - errors
         message:
           type: string
         status_code:
@@ -1424,10 +1422,6 @@ components:
         success:
           type: boolean
       required:
-        - success
-        - status_code
-        - message
-        - anonymization_fields_count
         - attributes
     AnonymizationFieldsBulkCrudActionResults:
       type: object
