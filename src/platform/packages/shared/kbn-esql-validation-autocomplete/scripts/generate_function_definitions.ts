@@ -692,13 +692,13 @@ const enrichGrouping = (
       ];
       return {
         ...op,
-        locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
+        locationsAvailable: [Location.STATS, Location.STATS_BY],
         signatures,
       };
     }
     return {
       ...op,
-      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
+      locationsAvailable: [Location.STATS, Location.STATS_BY],
     };
   });
 };
