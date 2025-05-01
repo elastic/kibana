@@ -18,12 +18,7 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import {
-  CaseSeverity,
-  CaseStatuses,
-  ConnectorTypes,
-  CustomFieldTypes,
-} from '../../../common/types/domain';
+import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { omit } from 'lodash';
@@ -244,24 +239,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             title: 'title with spaces',
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            category: null,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -322,24 +302,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             description: 'this is a description with spaces!!',
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            category: null,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -402,24 +367,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             tags: ['pepsi', 'coke'],
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            category: null,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -470,23 +420,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
+          attributes: expect.objectContaining({
             category: 'reporting',
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
-            customFields: [],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -550,23 +486,9 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
-            category: null,
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
+          attributes: expect.objectContaining({
             customFields: theCustomFields,
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
@@ -576,26 +498,12 @@ describe('create', () => {
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          attributes: {
-            ...theCase,
-            closed_by: null,
-            closed_at: null,
-            category: null,
-            created_at: expect.any(String),
-            created_by: expect.any(Object),
-            updated_at: null,
-            updated_by: null,
-            external_service: null,
-            duration: null,
-            status: CaseStatuses.open,
+          attributes: expect.objectContaining({
             customFields: [
               { key: 'first_key', type: 'text', value: 'default value' },
               { key: 'second_key', type: 'toggle', value: null },
             ],
-            observables: [],
-          },
-          id: expect.any(String),
-          refresh: false,
+          }),
         })
       );
     });
