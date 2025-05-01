@@ -14,7 +14,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
-import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -40,6 +40,7 @@ export interface DiscoverGridFlyoutProps {
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void;
   initialTabId?: string;
+  docViewerRef?: DocViewerProps['ref'];
 }
 
 /**
@@ -60,6 +61,7 @@ export function DiscoverGridFlyout({
   onAddColumn,
   setExpandedDoc,
   initialTabId,
+  docViewerRef,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -121,6 +123,7 @@ export function DiscoverGridFlyout({
       onFilter={onFilter}
       setExpandedDoc={setExpandedDoc}
       initialTabId={initialTabId}
+      docViewerRef={docViewerRef}
     />
   );
 }

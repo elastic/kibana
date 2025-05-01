@@ -33,10 +33,12 @@ import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
 
 export interface UnifiedDocViewerFlyoutProps {
+  docViewerRef?: DocViewerProps['ref'];
   'data-test-subj'?: string;
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
@@ -78,6 +80,7 @@ export const FLYOUT_WIDTH_KEY = 'unifiedDocViewer:flyoutWidth';
  * Flyout displaying an expanded row details
  */
 export function UnifiedDocViewerFlyout({
+  docViewerRef,
   'data-test-subj': dataTestSubj,
   flyoutTitle,
   flyoutActions,
@@ -193,6 +196,7 @@ export function UnifiedDocViewerFlyout({
   const renderDefaultContent = useCallback(
     () => (
       <UnifiedDocViewer
+        ref={docViewerRef}
         columns={columns}
         columnsMeta={columnsMeta}
         dataView={dataView}
@@ -207,15 +211,16 @@ export function UnifiedDocViewerFlyout({
       />
     ),
     [
-      actualHit,
-      addColumn,
+      docViewerRef,
       columns,
       columnsMeta,
       dataView,
-      hits,
-      isEsqlQuery,
       onFilter,
+      actualHit,
+      addColumn,
       removeColumn,
+      isEsqlQuery,
+      hits,
       docViewsRegistry,
       initialTabId,
     ]

@@ -18,7 +18,6 @@ import {
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DocView } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager } from './runtime_state';
@@ -63,7 +62,6 @@ const initialState: DiscoverInternalState = {
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
-  resetDocTabId: uuidv4(),
   isESQLToDataViewTransitionModalVisible: false,
   tabs: { byId: {}, allIds: [], unsafeCurrentId: '' },
 };
@@ -125,16 +123,15 @@ export const internalStateSlice = createSlice({
       state.defaultProfileAdHocDataViewIds = action.payload;
     },
 
-    setExpandedDoc: (state, action: PayloadAction<DataTableRecord | undefined>) => {
-      state.expandedDoc = action.payload;
-    },
-
-    setInitialDocViewerTabId: (state, action: PayloadAction<DocView['id']>) => {
-      state.initialDocViewerTabId = action.payload;
-    },
-
-    resetDocTab: (state) => {
-      state.resetDocTabId = uuidv4();
+    setExpandedDoc: (
+      state,
+      action: PayloadAction<{
+        expandedDoc: DataTableRecord | undefined;
+        initialDocViewerTabId?: string;
+      }>
+    ) => {
+      state.expandedDoc = action.payload.expandedDoc;
+      state.initialDocViewerTabId = action.payload.initialDocViewerTabId;
     },
 
     setDataRequestParams: (
