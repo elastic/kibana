@@ -563,6 +563,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       TMeta
     >
   ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const isSpacesEnabled =
+      this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -581,14 +583,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
+
+      // Add the `originSpaceId` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
+
       // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
       // It will be removed once we enable the feature and delete the feature flag checks.
       // @ts-expect-error
       agent: {
         id: actionRequest.endpoint_ids,
         // add the `policy` info if space awareness is enabled
-        ...(this.options.endpointService.experimentalFeatures
-          .endpointManagementSpaceAwarenessEnabled
+        ...(isSpacesEnabled
           ? {
               policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
             }
