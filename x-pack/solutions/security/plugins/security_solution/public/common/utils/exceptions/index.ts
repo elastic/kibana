@@ -17,3 +17,10 @@ export const isIndexNotFoundError = (error: unknown): boolean => {
     castError.attributes?.error?.caused_by?.type === 'index_not_found_exception'
   );
 };
+
+export const isAbortError = (error: unknown): boolean => {
+  const castError = error as {
+    name?: string;
+  };
+  return castError.name === 'AbortError';
+};
