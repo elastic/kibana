@@ -10,10 +10,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DashboardApi,
   DashboardCreationOptions,
-  DashboardLocatorParams,
   DashboardRendererProps,
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
@@ -150,7 +150,8 @@ const DashboardRendererComponent = ({
   }, [dashboardContainer, query]);
 
   useEffect(() => {
-    dashboardContainer?.setTimeRange(timeRange);
+    const { from, to } = timeRange;
+    dashboardContainer?.setTimeRange({ from, to });
   }, [dashboardContainer, timeRange]);
 
   useEffect(() => {

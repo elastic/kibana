@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        branch: [ 'main', '7.17', '8.x' ]
+        branch: [ 'main', '8.19' ]
 
     steps:
     - name: Checkout repository
@@ -27,7 +27,7 @@ jobs:
         ref: ${{ matrix.branch }}
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
+      uses: github/codeql-action/init@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
@@ -46,15 +46,11 @@ jobs:
         echo "CHECKOUT_REF=$(git symbolic-ref HEAD)" >> "$GITHUB_ENV"
         echo "CHECKOUT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-    - name: Set experimental environment variable for 8.x branch
-      if: env.CHECKOUT_REF == 'refs/heads/8.x'
-      run: echo "CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES=true" >> "$GITHUB_ENV"
-
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
+      uses: github/codeql-action/analyze@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
-        CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: ${{ env.CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES }}
+        CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: true
         # CodeQL divides the memory between ts and jvm, though most of the memory is used by the ts.
         # We double the memory, so ts can use it in full capacity.
         # Refer to https://github.com/github/codeql/blob/59a77a873c894bca7274a7ed7c7c6d937547e9b3/javascript/resources/tools/autobuild.sh#L7-L13
@@ -64,15 +60,6 @@ jobs:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
         sha: ${{ env.CHECKOUT_SHA }}
-    - name: Notify to slack on failure
-      if: ${{ failure() }}
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        method: chat.postMessage
-        token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
-        payload: |
-          channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
-          text: ":broken_heart: CodeQL analysis failed for ${{ github.repository }} on ${{ env.CHECKOUT_SHA }}."
   alert:
     name: Alert
     runs-on: ubuntu-latest
@@ -94,7 +81,43 @@ jobs:
         SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
         CODE_SCANNING_ES_HOST: ${{secrets.CODE_SCANNING_ES_HOST}}
         CODE_SCANNING_ES_API_KEY: ${{secrets.CODE_SCANNING_ES_API_KEY}}
-        CODE_SCANNING_BRANCHES: 7.17,8.x,main
+        CODE_SCANNING_BRANCHES: main,8.19
       run: |
         npm ci --omit=dev
         node codeql-alert
+  notify_on_failure:
+    name: Failure notification
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: failure()
+    steps:
+      - name: Send notification to slack
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
+          payload: |
+            channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
+            "blocks": [
+            	{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":broken_heart: CodeQL analysis failed for ${{ github.repository }}."
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Workflow Run"
+                    },
+                    "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+

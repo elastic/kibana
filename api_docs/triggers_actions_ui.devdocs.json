@@ -3989,20 +3989,6 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.RuleType.hasFieldsForAAD",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hasFieldsForAAD",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
             "id": "def-public.RuleType.hasAlertsMappings",
             "type": "CompoundType",
             "tags": [],
@@ -4391,7 +4377,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -7869,6 +7855,39 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-common.isPerRowAggregation",
+        "type": "Function",
+        "tags": [],
+        "label": "isPerRowAggregation",
+        "description": [],
+        "signature": [
+          "(groupBy?: string | undefined) => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.isPerRowAggregation.$1",
+            "type": "string",
+            "tags": [],
+            "label": "groupBy",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-common.isValidExperimentalValue",
         "type": "Function",
         "tags": [],
@@ -7908,7 +7927,15 @@
         "label": "parseAggregationResults",
         "description": [],
         "signature": [
-          "({ isCountAgg, isGroupAgg, esResult, resultLimit, sourceFieldsParams, generateSourceFieldsFromHits, termField, }: ParseAggregationResultsOpts) => ",
+          "({ isCountAgg, isGroupAgg, esResult, resultLimit, sourceFieldsParams, generateSourceFieldsFromHits, termField, }: ",
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "common",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-common.ParseAggregationResultsOpts",
+            "text": "ParseAggregationResultsOpts"
+          },
+          ") => ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "common",
@@ -7929,7 +7956,13 @@
             "label": "{\n  isCountAgg,\n  isGroupAgg,\n  esResult,\n  resultLimit,\n  sourceFieldsParams = [],\n  generateSourceFieldsFromHits = false,\n  termField,\n}",
             "description": [],
             "signature": [
-              "ParseAggregationResultsOpts"
+              {
+                "pluginId": "triggersActionsUi",
+                "scope": "common",
+                "docId": "kibTriggersActionsUiPluginApi",
+                "section": "def-common.ParseAggregationResultsOpts",
+                "text": "ParseAggregationResultsOpts"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
             "deprecated": false,
@@ -8328,6 +8361,115 @@
             "label": "window",
             "description": [],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/date_range_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-common.ParseAggregationResultsOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParseAggregationResultsOpts",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParseAggregationResultsOpts.isCountAgg",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCountAgg",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParseAggregationResultsOpts.isGroupAgg",
+            "type": "boolean",
+            "tags": [],
+            "label": "isGroupAgg",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParseAggregationResultsOpts.esResult",
+            "type": "Object",
+            "tags": [],
+            "label": "esResult",
+            "description": [],
+            "signature": [
+              "SearchResponseBody",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParseAggregationResultsOpts.resultLimit",
+            "type": "number",
+            "tags": [],
+            "label": "resultLimit",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParseAggregationResultsOpts.sourceFieldsParams",
+            "type": "Array",
+            "tags": [],
+            "label": "sourceFieldsParams",
+            "description": [],
+            "signature": [
+              "{ label: string; searchPath: string; }[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParseAggregationResultsOpts.generateSourceFieldsFromHits",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "generateSourceFieldsFromHits",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.ParseAggregationResultsOpts.termField",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "termField",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
             "deprecated": false,
             "trackAdoption": false
           }

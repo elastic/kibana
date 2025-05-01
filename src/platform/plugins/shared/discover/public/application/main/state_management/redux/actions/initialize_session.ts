@@ -35,9 +35,12 @@ import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
+import type { ConnectedCustomizationService } from '../../../../../customizations';
+import { disconnectTab } from './tabs';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
+  customizationService: ConnectedCustomizationService;
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
@@ -49,13 +52,20 @@ export const initializeSession: InternalStateThunkActionCreator<
 > =
   ({
     tabId,
-    initializeSessionParams: { stateContainer, discoverSessionId, dataViewSpec, defaultUrlState },
+    initializeSessionParams: {
+      stateContainer,
+      customizationService,
+      discoverSessionId,
+      dataViewSpec,
+      defaultUrlState,
+    },
   }) =>
   async (
     dispatch,
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage }
   ) => {
+    dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
     /**
@@ -98,6 +108,7 @@ export const initializeSession: InternalStateThunkActionCreator<
      * Session initialization
      */
 
+    // TODO: Needs to happen when switching tabs too?
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       if (persistedDiscoverSession.id) {
         services.chrome.recentlyAccessed.add(
@@ -113,11 +124,13 @@ export const initializeSession: InternalStateThunkActionCreator<
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
+    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
@@ -239,6 +252,12 @@ export const initializeSession: InternalStateThunkActionCreator<
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
+    stateContainer$.next(stateContainer);
+    customizationService$.next(customizationService);
+
+    // Begin syncing the state and trigger the initial fetch
+    stateContainer.actions.initializeAndSync();
+    stateContainer.actions.fetchData(true);
     discoverSessionLoadTracker.reportEvent();
 
     return { showNoDataPage: false };

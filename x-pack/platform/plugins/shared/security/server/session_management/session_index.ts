@@ -761,8 +761,7 @@ export class SessionIndex {
       try {
         await this.options.elasticsearchClient.indices.putMapping({
           index: this.aliasName,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          body: sessionIndexSettings.mappings,
+          ...sessionIndexSettings.mappings,
         });
         this.options.logger.debug('Successfully updated session index mappings.');
       } catch (err) {

@@ -135,6 +135,7 @@ export const CloudSecurityDataTable = ({
     columnsLocalStorageKey,
     defaultColumns.map((c) => c.id)
   );
+
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {

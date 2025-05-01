@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import datemath from '@elastic/datemath';
-import { TimeRange, getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
-import { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
-import { lastValueFrom } from 'rxjs';
+import moment from 'moment';
+import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
+import { TimeState } from '@kbn/es-query';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { Streams, PhaseName } from '@kbn/streams-schema';
+import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { DataStreamStats } from './use_data_stream_stats';
@@ -22,14 +22,14 @@ const RANDOM_SAMPLER_PROBABILITY = 0.1;
 // this function uses the calculateAutoTimeExpression function to determine
 // if the interval should be a calendar_interval or a fixed_interval
 const getIntervalAndType = (
-  timeRange: TimeRange,
+  timeState: TimeState,
   core: { uiSettings: { get: (key: string) => any } }
 ): { interval: string; intervalType: string } | undefined => {
-  const start = datemath.parse(timeRange.from);
-  const end = datemath.parse(timeRange.to);
-  const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
+  const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(
+    timeState.asAbsoluteTimeRange
+  );
 
-  if (!start || !end || !interval) {
+  if (!interval) {
     return undefined;
   }
 
@@ -45,11 +45,11 @@ const getIntervalAndType = (
 export const useIngestionRate = ({
   definition,
   stats,
-  timeRange,
+  timeState,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
-  timeRange: TimeRange;
+  timeState: TimeState;
 }) => {
   const {
     core,
@@ -64,10 +64,8 @@ export const useIngestionRate = ({
         return;
       }
 
-      const start = datemath.parse(timeRange.from);
-      const end = datemath.parse(timeRange.to);
-      const intervalData = getIntervalAndType(timeRange, core);
-      if (!start || !end || !intervalData) {
+      const intervalData = getIntervalAndType(timeState, core);
+      if (!intervalData) {
         return;
       }
       const { interval, intervalType } = intervalData;
@@ -91,7 +89,16 @@ export const useIngestionRate = ({
                 size: 0,
                 query: {
                   bool: {
-                    filter: [{ range: { [TIMESTAMP_FIELD]: { gte: start, lte: end } } }],
+                    filter: [
+                      {
+                        range: {
+                          [TIMESTAMP_FIELD]: {
+                            gte: timeState.start,
+                            lte: timeState.end,
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
                 aggs: {
@@ -106,7 +113,7 @@ export const useIngestionRate = ({
                           field: TIMESTAMP_FIELD,
                           [intervalType]: interval,
                           min_doc_count: 0,
-                          extended_bounds: { min: start, max: end },
+                          extended_bounds: { min: timeState.start, max: timeState.end },
                         },
                       },
                     },
@@ -120,8 +127,8 @@ export const useIngestionRate = ({
       );
 
       return {
-        start,
-        end,
+        start: moment(timeState.start),
+        end: moment(timeState.end),
         interval,
         buckets: aggregations.sampler.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
           key,
@@ -129,7 +136,7 @@ export const useIngestionRate = ({
         })),
       };
     },
-    [definition, stats, timeRange, core, data.search]
+    [definition, stats, timeState, core, data.search]
   );
 
   return {
@@ -144,11 +151,11 @@ type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
 export const useIngestionRatePerTier = ({
   definition,
   stats,
-  timeRange,
+  timeState,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
-  timeRange: TimeRange;
+  timeState: TimeState;
 }) => {
   const {
     core,
@@ -168,12 +175,15 @@ export const useIngestionRatePerTier = ({
         return;
       }
 
-      const start = datemath.parse(timeRange.from);
-      const end = datemath.parse(timeRange.to);
-      const intervalData = getIntervalAndType(timeRange, core);
-      if (!start || !end || !intervalData) {
+      const intervalData = getIntervalAndType(timeState, core);
+
+      if (!timeState.start || !timeState.end || !intervalData) {
         return;
       }
+
+      const start = moment(timeState.start);
+      const end = moment(timeState.end);
+
       const { interval, intervalType } = intervalData;
 
       const {
@@ -280,7 +290,7 @@ export const useIngestionRatePerTier = ({
 
       return { start, end, interval, buckets };
     },
-    [definition, stats, timeRange, core, data.search, streamsRepositoryClient, ilmPhases]
+    [definition, stats, timeState, core, data.search, streamsRepositoryClient, ilmPhases]
   );
 
   return {

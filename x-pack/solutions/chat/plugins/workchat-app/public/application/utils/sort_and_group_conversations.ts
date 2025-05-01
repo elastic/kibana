@@ -19,7 +19,13 @@ type ConversationGroupWithDate = ConversationGroup & {
   dateLimit: number;
 };
 
-const getGroups = () => {
+interface ConversationBucketDefinition {
+  code: string;
+  label: string;
+  limit: string | false;
+}
+
+export const getDefaultBuckets = (): ConversationBucketDefinition[] => {
   return [
     {
       code: 'TODAY',
@@ -36,18 +42,53 @@ const getGroups = () => {
       limit: 'now-1d/d',
     },
     {
-      code: 'THIS_WEEK',
-      label: i18n.translate('xpack.workchatApp.conversationGroups.labels.thisWeek', {
-        defaultMessage: 'This week',
+      code: 'LAST_WEEK',
+      label: i18n.translate('xpack.workchatApp.conversationGroups.labels.lastWeek', {
+        defaultMessage: 'Last week',
       }),
       limit: 'now/w',
+    },
+    {
+      code: 'LAST_2_WEEKS',
+      label: i18n.translate('xpack.workchatApp.conversationGroups.labels.lastTwoWeeks', {
+        defaultMessage: 'Last 2 weeks',
+      }),
+      limit: 'now/2w',
+    },
+    {
+      code: 'LAST_MONTH',
+      label: i18n.translate('xpack.workchatApp.conversationGroups.labels.lastMonth', {
+        defaultMessage: 'Last month',
+      }),
+      limit: 'now/m',
+    },
+    {
+      code: 'LAST_3_MONTHS',
+      label: i18n.translate('xpack.workchatApp.conversationGroups.labels.lastThreeMonths', {
+        defaultMessage: 'Last 3 months',
+      }),
+      limit: 'now/3m',
+    },
+    {
+      code: 'LAST_6_MONTHS',
+      label: i18n.translate('xpack.workchatApp.conversationGroups.labels.lastSixMonths', {
+        defaultMessage: 'Last 6 months',
+      }),
+      limit: 'now/6m',
+    },
+    {
+      code: 'LAST_YEAR',
+      label: i18n.translate('xpack.workchatApp.conversationGroups.labels.lastYear', {
+        defaultMessage: 'Last month',
+      }),
+      limit: 'now/y',
     },
     {
       code: 'OLDER',
       label: i18n.translate('xpack.workchatApp.conversationGroups.labels.before', {
         defaultMessage: 'Before',
       }),
-      limit: '',
+      limit: false,
     },
   ];
 };
@@ -56,15 +97,18 @@ const getGroups = () => {
  * Sort and group conversation by time period to display them in the ConversationList component.
  */
 export const sortAndGroupConversations = (
-  conversations: ConversationSummary[]
+  conversations: ConversationSummary[],
+  buckets: ConversationBucketDefinition[] = getDefaultBuckets(),
+  now: Date = new Date()
 ): ConversationGroup[] => {
-  const now = new Date();
-
-  const getEpochLimit = (range: string) => {
+  const getEpochLimit = (range: string | false) => {
+    if (range === false) {
+      return 0;
+    }
     return getAbsoluteTime(range, { forceNow: now })?.valueOf() ?? 0;
   };
 
-  const groups = getGroups().map(({ label, limit }) => {
+  const groups = buckets.map(({ label, limit }) => {
     return emptyGroup(label, getEpochLimit(limit));
   });
 

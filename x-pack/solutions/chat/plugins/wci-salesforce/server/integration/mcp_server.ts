@@ -9,7 +9,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createMcpServer as createServer, McpServerTool, toolResultFactory } from '@kbn/wci-server';
-import { getCases, getAccounts } from './tools';
+import { getCases, getAccounts, searchDocs, getById } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -59,21 +59,121 @@ export async function createMcpServer({
     priorityValues.length ? (priorityValues as [string, ...string[]]) : ['']
   );
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
+  const dataSources = ['support_case', 'account'];
 
-  const getCasesTool: McpServerTool = {
-    name: 'search_cases',
-    description: 'Retrieves Salesforce support cases with flexible filtering options',
+  const searchTool: McpServerTool = {
+    name: 'search',
+    description: 'Use to search through Salesforce data (like Cases)',
     schema: {
-      caseNumber: z
-        .array(z.string())
-        .optional()
-        .describe('Salesforce case number identifiers (preferred lookup method)'),
-      id: z
+      objects: z
         .array(z.string())
         .optional()
         .describe(
-          'Salesforce internal IDs of the support cases (use only when specifically requested)'
+          `If provided, will limit the types of Salesforce documents to return. Can only be a out of these ${dataSources}.`
         ),
+      query: z
+        .string()
+        .describe(
+          'Only Salesforce documents that relate to this query string will be returned. For example, a query of "memory error" may return Case records where the issue was related to running out of RAM.'
+        ),
+      createdAfter: z
+        .string()
+        .optional()
+        .describe(
+          'If provided, will limit results to only include documents created after this date (format: YYYY-MM-DD).'
+        ),
+      createdBefore: z
+        .string()
+        .optional()
+        .describe(
+          'If provided, will limit results to only include documents created before this date (format: YYYY-MM-DD).'
+        ),
+      updatedAfter: z
+        .string()
+        .optional()
+        .describe(
+          'If provided, will limit results to only include documents updated after this date (format: YYYY-MM-DD).'
+        ),
+      updatedBefore: z
+        .string()
+        .optional()
+        .describe(
+          'If provided, will limit results to only include documents updated before this date (format: YYYY-MM-DD).'
+        ),
+    },
+    execute: async ({
+      objects,
+      query,
+      createdAfter,
+      createdBefore,
+      updatedAfter,
+      updatedBefore,
+    }) => {
+      try {
+        const content = await searchDocs({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          filters: {
+            query,
+            objects,
+            createdAfter,
+            createdBefore,
+            updatedAfter,
+            updatedBefore,
+          },
+        });
+
+        return toolResultFactory.contentList(content);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
+  const getTool: McpServerTool = {
+    name: 'get',
+    description:
+      'Retrieves a single Salesforce document by its ID. If there is no ID, use another tool (like "search").',
+    schema: {
+      id: z.string().describe('ID of the Salesforce document').min(1, 'ID cannot be empty'),
+      dataSource: z
+        .string()
+        .describe(
+          `which Salesforce object type to search through. Supported object types ${dataSources}`
+        ),
+    },
+    execute: async ({ id, dataSource }) => {
+      try {
+        if (!id) {
+          logger.warn('Salesforce `get` tool called without an ID.');
+          throw new Error(
+            "ID must have a non-empty value. If no ID is present, use another tool, like 'search'."
+          );
+        }
+        const content = await getById({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          dataSource,
+          id,
+        });
+
+        return toolResultFactory.contentList(content);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
+  const getCasesTool: McpServerTool = {
+    name: 'get_cases',
+    description: 'Retrieves Salesforce support cases with flexible filtering options',
+    schema: {
+      caseNumber: z.array(z.string()).optional().describe('Salesforce case number identifiers'),
+      id: z.array(z.string()).optional().describe('Salesforce internal IDs of the support cases'),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
       sortField: z
         .string()
@@ -114,10 +214,6 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Return cases created before this date (format: YYYY-MM-DD)'),
-      semanticQuery: z
-        .string()
-        .optional()
-        .describe('Natural language query to search case content semantically'),
       updatedAfter: z
         .string()
         .optional()
@@ -149,7 +245,6 @@ export async function createMcpServer({
       caseNumber,
       createdAfter,
       createdBefore,
-      semanticQuery,
       status,
       updatedAfter,
       updatedBefore,
@@ -174,7 +269,6 @@ export async function createMcpServer({
             caseNumber,
             createdAfter,
             createdBefore,
-            semanticQuery,
             status,
             updatedAfter,
             updatedBefore,
@@ -185,9 +279,8 @@ export async function createMcpServer({
           },
         });
 
-        logger.info(`Retrieved ${caseContent.length} support cases`);
+        logger.debug(`Retrieved ${caseContent.length} support cases`);
 
-        logger.info(() => `Case content: ${JSON.stringify(caseContent)}`);
         return toolResultFactory.contentList(caseContent);
       } catch (e) {
         return toolResultFactory.error(`Error fetching cases: ${e.message}`);
@@ -196,7 +289,7 @@ export async function createMcpServer({
   };
 
   const getAccountsTool: McpServerTool = {
-    name: 'search_accounts',
+    name: 'get_accounts',
     description: 'Retrieves Salesforce accounts with flexible filtering options',
     schema: {
       id: z.array(z.string()).optional().describe('Salesforce internal IDs of the accounts'),
@@ -257,7 +350,7 @@ export async function createMcpServer({
         },
       });
 
-      logger.info(`Retrieved ${accountContent.length} accounts`);
+      logger.debug(`Retrieved ${accountContent.length} accounts`);
 
       return toolResultFactory.contentList(accountContent);
     },
@@ -266,7 +359,7 @@ export async function createMcpServer({
   return createServer({
     name: 'wci-salesforce',
     version: '1.0.0',
-    tools: [getCasesTool, getAccountsTool],
+    tools: [searchTool, getTool, getCasesTool, getAccountsTool],
   });
 }
 
@@ -328,7 +421,7 @@ async function getSortableFields(
       for (const [fieldName, fieldConfig] of Object.entries(properties)) {
         if (sortableFieldTypes.includes(fieldConfig.type)) {
           const sortableField = { field: fieldName, type: fieldConfig.type };
-          sortableFields.push(sortableField);
+          sortableFields.push(sortableField.field);
         }
       }
       return sortableFields;

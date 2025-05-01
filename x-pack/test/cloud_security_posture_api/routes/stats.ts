@@ -68,7 +68,8 @@ export default function (providerContext: FtrProviderContext) {
   const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
   const benchmarkScoreIndex = new EsIndexDataProvider(es, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
 
-  describe('GET /internal/cloud_security_posture/stats', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/214191
+  describe.skip('GET /internal/cloud_security_posture/stats', () => {
     describe('CSPM Compliance Dashboard Stats API', async () => {
       beforeEach(async () => {
         await findingsIndex.deleteAll();

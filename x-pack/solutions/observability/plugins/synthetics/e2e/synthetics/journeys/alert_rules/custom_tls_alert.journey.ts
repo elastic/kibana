@@ -55,6 +55,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
   step('Should open the create TLS rule flyout', async () => {
     await page.getByTestId('syntheticsRefreshButtonButton').click();
+    await expect(page.getByTestId('syntheticsAlertsRulesButton')).toBeEnabled();
     await page.getByTestId('syntheticsAlertsRulesButton').click();
     await page.getByTestId('manageTlsRuleName').click();
     await page.getByTestId('createNewTLSRule').click();
@@ -62,13 +63,11 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
     await expect(page.getByTestId('addRuleFlyoutTitle')).toBeVisible();
   });
 
-  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
-  // After the next serverless release the commit containing these changes can be reverted
-  step.skip('Should filter monitors using the KQL filter bar', async () => {
+  step('Should filter monitors using the KQL filter bar', async () => {
     // Using the KQL filter to search for a monitor type of "tcp", 0 existing monitors should be found because the type of the test monitor is 'http'
     await page.fill('[data-test-subj="queryInput"]', `monitor.type: "tcp" `);
     await page.keyboard.press('Enter');
-    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
+    await expect(page.getByTestId('syntheticsStatusRuleVizMonitorQueryIDsButton')).toHaveText(
       '0 existing monitors'
     );
 
@@ -77,14 +76,12 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
     await page.keyboard.press('Enter');
   });
 
-  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
-  // After the next serverless release the commit containing these changes can be reverted
-  step.skip('Should filter monitors by type', async () => {
+  step('Should filter monitors by type', async () => {
     await page.getByRole('button', { name: 'Type All' }).click();
     await page.getByTestId('comboBoxInput').click();
     await page.getByRole('option', { name: 'http' }).click();
     await page.getByTestId('ruleDefinition').getByRole('button', { name: 'Type http' }).click();
-    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
+    await expect(page.getByTestId('syntheticsStatusRuleVizMonitorQueryIDsButton')).toHaveText(
       '1 existing monitor'
     );
   });
@@ -119,7 +116,9 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
     await retry.tryForTime(5 * 1000, async () => {
       await page.getByTestId('querySubmitButton').click();
-      await expect(page.getByText(tlsRuleName)).toBeVisible();
+      if (!(await page.getByText(tlsRuleName).isVisible())) {
+        throw new Error('Alert not found');
+      }
     });
   });
 });

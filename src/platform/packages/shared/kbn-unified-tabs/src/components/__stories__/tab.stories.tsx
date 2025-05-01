@@ -38,15 +38,17 @@ const tabsSizeConfig = {
 };
 
 const TabTemplate: StoryFn<TabProps> = (args) => (
-  <Tab
-    {...args}
-    tabsSizeConfig={tabsSizeConfig}
-    getPreviewData={getPreviewDataMock}
-    services={servicesMock}
-    onLabelEdited={asyncAction('onLabelEdited')}
-    onSelect={asyncAction('onSelect')}
-    onClose={asyncAction('onClose')}
-  />
+  <div role="tablist">
+    <Tab
+      {...args}
+      tabsSizeConfig={tabsSizeConfig}
+      getPreviewData={getPreviewDataMock}
+      services={servicesMock}
+      onLabelEdited={asyncAction('onLabelEdited')}
+      onSelect={asyncAction('onSelect')}
+      onClose={asyncAction('onClose')}
+    />
+  </div>
 );
 
 export const Default: StoryObj<TabProps> = {

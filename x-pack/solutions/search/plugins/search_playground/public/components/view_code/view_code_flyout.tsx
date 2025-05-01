@@ -22,7 +22,7 @@ import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm, PlaygroundPageMode } from '../../types';
+import { PlaygroundForm, PlaygroundPageMode } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../common/routes';
 import { LangchainPythonExmaple } from './examples/py_langchain_python';
@@ -46,7 +46,7 @@ es_client = Elasticsearch(
 export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selectedPageMode }) => {
   const usageTracker = useUsageTracker();
   const [selectedLanguage, setSelectedLanguage] = useState('py-es-client');
-  const { getValues } = useFormContext<ChatForm>();
+  const { getValues } = useFormContext<PlaygroundForm>();
   const formValues = getValues();
   const {
     services: { cloud, http },
@@ -103,6 +103,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiSelect
+                    data-test-subj="view-code-lang-select"
                     options={[
                       { value: 'py-es-client', text: 'Python Elasticsearch Client with OpenAI' },
                       { value: 'lc-py', text: 'LangChain Python with OpenAI' },

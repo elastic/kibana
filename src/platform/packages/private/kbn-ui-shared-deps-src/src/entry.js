@@ -30,7 +30,12 @@ export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 
+export const FpTs = require('fp-ts');
 export const IoTs = require('io-ts');
+export const IoTsReporter = require('io-ts/Reporter');
+export const IoTsPathReporter = require('io-ts/PathReporter');
+export const IoTsThrowReporter = require('io-ts/ThrowReporter');
+
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
@@ -43,6 +48,25 @@ export const ReactRouterDomV5Compat = require('react-router-dom-v5-compat');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const StyledComponents = require('styled-components');
 export const FastestLevenshtein = require('fastest-levenshtein');
+export const ReactUse = {
+  useAsync: require('react-use/lib/useAsync'),
+  useAsyncFn: require('react-use/lib/useAsyncFn'),
+  useDebounce: require('react-use/lib/useDebounce'),
+  useDeepCompareEffect: require('react-use/lib/useDeepCompareEffect'),
+  useEffectOnce: require('react-use/lib/useEffectOnce'),
+  useEvent: require('react-use/lib/useEvent'),
+  useLatest: require('react-use/lib/useLatest'),
+  useList: require('react-use/lib/useList'),
+  useLocalStorage: require('react-use/lib/useLocalStorage'),
+  useMount: require('react-use/lib/useMount'),
+  useMountedState: require('react-use/lib/useMountedState'),
+  usePrevious: require('react-use/lib/usePrevious'),
+  useSessionStorage: require('react-use/lib/useSessionStorage'),
+  useTimeoutFn: require('react-use/lib/useTimeoutFn'),
+  useToggle: require('react-use/lib/useToggle'),
+  useUnmount: require('react-use/lib/useUnmount'),
+  useUpdateEffect: require('react-use/lib/useUpdateEffect'),
+};
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 
@@ -64,9 +88,6 @@ export const Reselect = require('reselect');
 
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
-
-const { unzlibSync, strFromU8 } = require('fflate');
-export const Fflate = { unzlibSync, strFromU8 };
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
@@ -93,3 +114,4 @@ export const KbnReactKibanaContextRoot = require('@kbn/react-kibana-context-root
 export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-render');
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
+export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');

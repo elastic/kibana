@@ -14,23 +14,21 @@ import React, {
   useContext,
   useMemo,
   useState,
-  ReactNode,
   useEffect,
   useRef,
 } from 'react';
-import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
+import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
-import { ContentProvider } from './types';
 
 export interface PanelContext {
   isOpen: boolean;
   toggle: () => void;
   open: (navNode: PanelSelectedNode, openerEl: Element | null) => void;
   close: () => void;
-  /** The selected node is the node in the main panel that opens the Panel */
+  /** The expanded node is the node in the main panel that opens the Panel */
   selectedNode: PanelSelectedNode | null;
-  /** Reference to the selected nav node element in the DOM */
+  /** Reference to the expanded nav node element in the DOM */
   selectedNodeEl: React.MutableRefObject<Element | null>;
   /** Handler to retrieve the component to render in the panel */
   getContent: () => React.ReactNode;
@@ -39,21 +37,17 @@ export interface PanelContext {
 const Context = React.createContext<PanelContext | null>(null);
 
 interface Props {
-  contentProvider?: ContentProvider;
-  activeNodes: ChromeProjectNavigationNode[][];
   selectedNode?: PanelSelectedNode | null;
   setSelectedNode?: (node: PanelSelectedNode | null) => void;
 }
 
 export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   children,
-  contentProvider,
-  activeNodes,
   selectedNode: selectedNodeProp = null,
-  setSelectedNode,
+  setSelectedNode: setSelectedNodeProp,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedNode, setActiveNode] = useState<PanelSelectedNode | null>(selectedNodeProp);
+  const [selectedNode, setSelectedNode] = useState<PanelSelectedNode | null>(selectedNodeProp);
   const selectedNodeEl = useRef<Element | null>(null);
 
   const toggle = useCallback(() => {
@@ -62,7 +56,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
 
   const open = useCallback(
     (navNode: PanelSelectedNode, openerEl: Element | null) => {
-      setActiveNode(navNode);
+      setSelectedNode(navNode);
 
       const navNodeEl = openerEl?.closest(`[data-test-subj~=nav-item]`);
       if (navNodeEl) {
@@ -70,22 +64,22 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
       }
 
       setIsOpen(true);
-      setSelectedNode?.(navNode);
+      setSelectedNodeProp?.(navNode);
     },
-    [setSelectedNode]
+    [setSelectedNodeProp]
   );
 
   const close = useCallback(() => {
-    setActiveNode(null);
+    setSelectedNode(null);
     selectedNodeEl.current = null;
     setIsOpen(false);
-    setSelectedNode?.(null);
-  }, [setSelectedNode]);
+    setSelectedNodeProp?.(null);
+  }, [setSelectedNodeProp]);
 
   useEffect(() => {
     if (selectedNodeProp === undefined) return;
 
-    setActiveNode(selectedNodeProp);
+    setSelectedNode(selectedNodeProp);
 
     if (selectedNodeProp) {
       setIsOpen(true);
@@ -99,20 +93,8 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
       return null;
     }
 
-    const provided = contentProvider?.(selectedNode.path);
-
-    if (!provided) {
-      return <DefaultContent selectedNode={selectedNode} />;
-    }
-
-    if (provided.content) {
-      const Component = provided.content;
-      return <Component closePanel={close} selectedNode={selectedNode} activeNodes={activeNodes} />;
-    }
-
-    const title: string | ReactNode = provided.title ?? selectedNode.title;
-    return <DefaultContent selectedNode={{ ...selectedNode, title }} />;
-  }, [selectedNode, contentProvider, close, activeNodes]);
+    return <DefaultContent selectedNode={selectedNode} />;
+  }, [selectedNode]);
 
   const ctx: PanelContext = useMemo(
     () => ({

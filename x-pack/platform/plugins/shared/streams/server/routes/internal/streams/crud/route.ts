@@ -6,17 +6,17 @@
  */
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { StreamDefinition, isGroupStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { estypes } from '@elastic/elasticsearch';
-import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { Streams, UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
-  stream: StreamDefinition;
+  stream: Streams.all.Definition;
   effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
-  data_stream: estypes.IndicesDataStream;
+  data_stream?: estypes.IndicesDataStream;
 }
 
 export const listStreamsRoute = createServerRoute({
@@ -25,22 +25,25 @@ export const listStreamsRoute = createServerRoute({
     access: 'internal',
   },
   params: z.object({}),
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
-    const streams = await streamsClient.listStreams();
+    const streams = await streamsClient.listStreamsWithDataStreamExistence();
     const dataStreams = await scopedClusterClient.asCurrentUser.indices.getDataStream({
-      name: streams.map((stream) => stream.name),
+      name: streams.filter(({ exists }) => exists).map(({ stream }) => stream.name),
     });
 
-    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, stream) => {
+    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
-      if (match) {
-        acc.push({
-          stream,
-          effective_lifecycle: getDataStreamLifecycle(match),
-          data_stream: match,
-        });
-      }
+      acc.push({
+        stream,
+        effective_lifecycle: getDataStreamLifecycle(match ?? null),
+        data_stream: match,
+      });
       return acc;
     }, []);
 
@@ -61,9 +64,7 @@ export const streamDetailRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -77,7 +78,7 @@ export const streamDetailRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
 
-    const indexPattern = isGroupStreamDefinition(streamEntity)
+    const indexPattern = Streams.GroupStream.Definition.is(streamEntity)
       ? streamEntity.group.members.join(',')
       : streamEntity.name;
     // check doc count
@@ -113,9 +114,7 @@ export const resolveIndexRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -127,7 +126,7 @@ export const resolveIndexRoute = createServerRoute({
     request,
     params,
     getScopedClients,
-  }): Promise<{ stream?: StreamDefinition }> => {
+  }): Promise<{ stream?: Streams.all.Definition }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const response = (
       await scopedClusterClient.asCurrentUser.indices.get({ index: params.query.index })

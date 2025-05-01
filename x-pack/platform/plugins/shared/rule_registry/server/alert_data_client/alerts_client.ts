@@ -22,7 +22,6 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
-  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 
 import type {
@@ -173,8 +172,6 @@ export class AlertsClient {
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
-  private readonly getRuleType: RuleTypeRegistry['get'];
-  private readonly getRuleList: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
@@ -186,8 +183,6 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
-    this.getRuleType = options.getRuleType;
-    this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
@@ -1209,52 +1204,29 @@ export class AlertsClient {
     indices,
     metaFields,
     allowNoIndex,
+    includeEmptyFields,
+    indexFilter,
   }: {
     ruleTypeIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
+    includeEmptyFields: boolean;
+    indexFilter?: estypes.QueryDslQueryContainer;
   }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const ruleTypeList = this.getRuleList();
-    const fieldsForAAD = new Set<string>();
-
-    for (const rule of ruleTypeList.values()) {
-      if (ruleTypeIds.includes(rule.id) && rule.hasFieldsForAAD) {
-        (rule.fieldsForAAD ?? []).forEach((f) => {
-          fieldsForAAD.add(f);
-        });
-      }
-    }
 
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
-      fields: [...fieldsForAAD, 'kibana.*'],
+      includeEmptyFields,
+      indexFilter,
     });
 
     return {
       browserFields: fieldDescriptorToBrowserFieldMapper(fields),
       fields,
     };
-  }
-
-  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
-    const { fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
-    if (isSiemRuleType(ruleTypeId)) {
-      throw Boom.badRequest(`Security solution rule type is not supported`);
-    }
-
-    const indices = await this.getAuthorizedAlertsIndices([ruleTypeId]);
-    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: indices ?? [],
-      metaFields: ['_id', '_index'],
-      fieldCapsOptions: { allow_no_indices: true },
-      fields: [...fieldsForAAD, 'kibana.*'],
-    });
-
-    return fields;
   }
 }

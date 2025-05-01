@@ -82,7 +82,6 @@ describe('createInitialState', () => {
           changes: [],
         },
       },
-      switchToModelVersionAt: '8.10.0',
     });
     typeRegistry.registerType({
       name: 'bar',
@@ -99,7 +98,6 @@ describe('createInitialState', () => {
           changes: [{ type: 'mappings_addition', addedMappings: {} }],
         },
       },
-      switchToModelVersionAt: '8.10.0',
     });
     docLinks = docLinksServiceMock.createSetupContract();
     logger = mockLogger.get();
@@ -192,6 +190,11 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "guided-setup-state",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "investigation",
                 },
               },
               Object {

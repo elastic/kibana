@@ -4253,6 +4253,22 @@
                 "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
+                "plugin": "files",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
               },
@@ -4271,22 +4287,6 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/search_strategy/search_strategy.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
               },
               {
                 "plugin": "cases",
@@ -4377,6 +4377,22 @@
                 "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
               },
@@ -4395,22 +4411,6 @@
               {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/setup/fleet_server_policies_enrollment_keys.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
               },
               {
                 "plugin": "transform",
@@ -4451,6 +4451,10 @@
               {
                 "plugin": "entityManager",
                 "path": "x-pack/platform/plugins/shared/entity_manager/server/routes/enablement/disable.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
               },
               {
                 "plugin": "fleet",

@@ -14,10 +14,8 @@ The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../images/torq-configured-connector.png
-:alt: configured Torq connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![configured Torq connector](../images/torq-configured-connector.png)
 
 
 ### Connector configuration [torq-connector-configuration]
@@ -38,10 +36,8 @@ Torq authentication header secret
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../images/torq-connector-test.png
-:alt: Torq connector test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Torq connector test](../images/torq-connector-test.png)
 
 Torq actions have the following configuration properties.
 

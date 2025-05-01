@@ -19,10 +19,8 @@ The `Advanced Settings` {{kib}} privilege is required to access **Advanced Setti
 
 When you have insufficient privileges to edit advanced settings, the edit options are not visible, and the following indicator is displayed:
 
-:::{image} images/settings-read-only-badge.png
-:alt: Example of Advanced Settings Management's read only access indicator in Kibana's header
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Example of Advanced Settings Management's read only access indicator in Kibana's header](images/settings-read-only-badge.png)
 
 To add the privilege, go to the **Roles** management page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
 
@@ -327,7 +325,7 @@ $$$observability-apm-critical-path$$$`observability:apmEnableCriticalPath`
 :   When enabled, displays the critical path of a trace.
 
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
-:   [preview] When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
+:   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
 $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServices`
 :   Limit the number of services in a given service group.
@@ -394,9 +392,6 @@ $$$observability-profiling-aws-cost-discount-rate$$$`observability:profilingAWSC
 
 $$$observability-profiling-azure-cost-discount-rate$$$`observability:profilingAzureCostDiscountRate`
 :   If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
-
-$$$observability-profiling-use-topNFunctions-from-stacktraces$$$`observability:profilingFetchTopNFunctionsFromStacktraces`
-:   Switch to fetch the TopN Functions from the Stacktraces API.
 
 $$$observability-profiling-cost-per-vcpu-per-hour$$$`observability:profilingCostPervCPUPerHour`
 :   Default Hourly Cost per CPU Core for machines not on AWS or Azure.

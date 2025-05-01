@@ -9,6 +9,7 @@ export interface IntegrationsData {
   package_name: string;
   package_version: string;
   updated_at: string;
+  install_status: string;
 }
 
 export interface BaseCustomAssetsData {
@@ -16,9 +17,9 @@ export interface BaseCustomAssetsData {
   name: string;
   package_name: string;
   package_version: string;
+  is_deleted?: boolean;
 }
 export interface CustomAssetsData extends BaseCustomAssetsData {
-  is_deleted: boolean;
   deleted_at?: string;
   [key: string]: any;
 }
