@@ -33,12 +33,16 @@ export default function ({ getService }: FtrProviderContext) {
     expect(task._source?.task.schedule?.interval).to.be(undefined);
   }
   describe('Security Roles and Privileges for Applications', () => {
+    const scheduledReportIds: string[] = [];
+    const scheduledReportTaskIds: string[] = [];
     before(async () => {
       await reportingAPI.initEcommerce();
     });
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+      await reportingAPI.deleteScheduledReportSOs(scheduledReportIds);
+      await reportingAPI.deleteTasks(scheduledReportTaskIds);
     });
 
     describe('Dashboard: Generate PDF report', () => {
@@ -215,10 +219,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
 
         const taskResult = await reportingAPI.getTask(res.body.job.id);
         expect(taskResult.status).to.eql(200);
         testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -257,10 +263,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
 
         const taskResult = await reportingAPI.getTask(res.body.job.id);
         expect(taskResult.status).to.eql(200);
         testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -299,10 +307,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
 
         const taskResult = await reportingAPI.getTask(res.body.job.id);
         expect(taskResult.status).to.eql(200);
         testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
@@ -344,10 +354,12 @@ export default function ({ getService }: FtrProviderContext) {
         const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('allowed search');
+        scheduledReportIds.push(res.body.job.id);
 
         const taskResult = await reportingAPI.getTask(res.body.job.id);
         expect(taskResult.status).to.eql(200);
         testExpectedTask(res.body.job.id, 'csv_searchsource', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 
