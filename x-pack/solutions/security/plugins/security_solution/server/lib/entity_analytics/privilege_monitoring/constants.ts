@@ -31,3 +31,8 @@ export const PRE_EXCLUDE_INDICES: string[] = [
 
 // Indices that are excludes from the search result (This patterns can't be excluded from the search)
 export const POST_EXCLUDE_INDICES = ['.']; // internal indices
+
+export const PRIVMON_USERS_CSV_MAX_SIZE_BYTES = 1024 * 1024; // 1MB
+export const PRIVMON_USERS_CSV_SIZE_TOLERANCE_BYTES = 1024 * 50; // ~= 50kb
+export const PRIVMON_USERS_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE =
+  PRIVMON_USERS_CSV_MAX_SIZE_BYTES + PRIVMON_USERS_CSV_SIZE_TOLERANCE_BYTES;

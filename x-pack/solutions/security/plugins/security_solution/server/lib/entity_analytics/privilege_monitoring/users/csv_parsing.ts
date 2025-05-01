@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { TransformOptions } from 'stream';
+import type { Either } from 'fp-ts/Either';
+import * as E from 'fp-ts/Either';
+
+import { i18n } from '@kbn/i18n';
+import type { UpsertMonitoredUserDocData } from './model';
+
+export const csvToUserDoc: TransformOptions['transform'] = function (
+  chunk: string[],
+  encoding: string,
+  callback: (error: Error | null, data?: Either<string, UpsertMonitoredUserDocData>) => void
+) {
+  callback(null, parseMonitoredPrivilegedUserCsvRow(chunk));
+};
+
+export const parseMonitoredPrivilegedUserCsvRow = (
+  row: string[]
+): Either<string, UpsertMonitoredUserDocData> => {
+  if (row.length !== 1) {
+    return E.left(expectedColumnsError(row.length));
+  }
+
+  const [username] = row;
+  if (!username) {
+    return E.left(missingUserNameError());
+  }
+
+  return E.right({
+    user: { name: username },
+    labels: {
+      monitoring: { privileged_users: 'monitored' },
+      sources: ['csv'],
+    },
+  });
+};
+
+const expectedColumnsError = (rowLength: number) =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.monitoring.privilegedUsers.csvUpload.expectedColumnsError',
+    {
+      defaultMessage: 'Expected 1 column, got {rowLength}',
+      values: { rowLength },
+    }
+  );
+
+const missingUserNameError = () =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.monitoring.privilegedUsers.csvUpload.missingUserNameError',
+    {
+      defaultMessage: 'Missing user name',
+    }
+  );

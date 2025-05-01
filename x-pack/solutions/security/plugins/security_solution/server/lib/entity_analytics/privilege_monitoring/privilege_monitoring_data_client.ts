@@ -19,7 +19,11 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { merge } from 'lodash';
+import Papa from 'papaparse';
+import { Transform } from 'stream';
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
+import type { HapiReadableStream } from '../../../types';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -49,6 +53,10 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
+
+import { csvToUserDoc } from './users/csv_parsing';
+import type { BulkProcessingError } from '../shared/streams/bulk_processing';
+import { bulkProcessingGenerator } from '../shared/streams/bulk_processing';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -245,6 +253,66 @@ export class PrivilegeMonitoringDataClient {
       id: hit._id,
       ...(hit._source as {}),
     })) as MonitoredUserDoc[];
+  }
+
+  public async uploadUsersCSV(
+    stream: HapiReadableStream,
+    { retries, flushBytes }: { retries: number; flushBytes: number }
+  ): Promise<PrivmonBulkUploadUsersCSVResponse> {
+    const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
+      header: false,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    });
+    const recordsStream = stream
+      .pipe(csvStream)
+      .pipe(new Transform({ transform: csvToUserDoc, objectMode: true }));
+
+    const { generator, getState } = bulkProcessingGenerator<UpsertMonitoredUserDocData>({
+      recordsStream,
+      streamIndexStart: 1, // It is the first line number
+    });
+
+    const bulkUploadErrors: BulkProcessingError[] = [];
+    const indexedRecords: UpsertMonitoredUserDocData[] = [];
+
+    const { failed, successful } = await this.esClient.helpers.bulk({
+      datasource: generator(),
+      index: this.getIndex(),
+      flushBytes,
+      retries,
+      refreshOnCompletion: this.getIndex(),
+      onSuccess: ({ document }) => indexedRecords.push(document as UpsertMonitoredUserDocData),
+      onDocument: ({ record }) => {
+        return [
+          { update: {} },
+          {
+            doc: {
+              ...record,
+              labels: { sources: ['csv'] },
+              '@timestamp': new Date().toISOString(),
+            },
+            doc_as_upsert: true,
+          },
+        ];
+      },
+      onDrop: ({ document, error }) => {
+        bulkUploadErrors.push({
+          message: error?.reason || 'Unknown error',
+          index: document.index,
+        });
+      },
+    });
+
+    const { errors, stats } = getState();
+    return {
+      errors: errors.concat(bulkUploadErrors),
+      stats: {
+        successful,
+        failed: stats.failed + failed,
+        total: stats.total,
+      },
+    };
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
