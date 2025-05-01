@@ -33,6 +33,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
+import pLimit from 'p-limit';
 import { HASH_REGEX, unhashString } from '../../../common/utils/redaction';
 import { buildDetectedEntitiesMap } from '../../../common/utils/build_detected_entities_map';
 import { getRegexEntities } from '../../../common/utils/get_regex_entities';
@@ -106,7 +107,14 @@ export class ObservabilityAIAssistantClient {
     }
   ) {}
   async inferNER(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {
-    const promises = chunks.map(async ({ chunkText, charStartOffset }) => {
+    // Maximum number of concurrent requests to the ML model
+    const MAX_CONCURRENT_REQUESTS = 5;
+    const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
+
+    const processChunk = async ({
+      chunkText,
+      charStartOffset,
+    }: InferenceChunk): Promise<DetectedEntity[]> => {
       let response;
       try {
         response = await this.dependencies.esClient.asCurrentUser.ml.inferTrainedModel({
@@ -127,10 +135,12 @@ export class ObservabilityAIAssistantClient {
       }));
 
       return adjustedEntities;
-    });
+    };
 
-    const settled = await Promise.all(promises);
-    return settled.flat();
+    const promises = chunks.map((chunk) => limiter(() => processChunk(chunk)));
+    const results = await Promise.all(promises);
+
+    return results.flat();
   }
 
   /**
