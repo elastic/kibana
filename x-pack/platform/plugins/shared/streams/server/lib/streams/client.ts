@@ -135,8 +135,6 @@ export class StreamsClient {
    * AND its descendants, including any Elasticsearch objects,
    * such as data streams. That means it deletes all data
    * belonging to wired streams.
-   *
-   * It does NOT delete unwired streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
     const isEnabled = await this.isStreamsEnabled();
@@ -145,13 +143,12 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
+    const streams = await this.getManagedStreams();
     const result = await State.attemptChanges(
-      [
-        {
-          type: 'delete',
-          name: rootStreamDefinition.name,
-        },
-      ],
+      streams.map((stream) => ({
+        type: 'delete',
+        name: stream.name,
+      })),
       {
         ...this.dependencies,
         streamsClient: this,

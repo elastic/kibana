@@ -60,7 +60,14 @@ describe('State', () => {
     const groupStream: GroupStreamDefinition = {
       name: 'group_stream',
       group: {
-        members: [],
+        category: 'test',
+        owner: 'test_user',
+        tier: 1,
+        tags: [],
+        relationships: [],
+        documentation_links: [],
+        repository_links: [],
+        runbook_links: [],
       },
     };
 
@@ -121,7 +128,14 @@ describe('State', () => {
               definition: {
                 name: 'whatever',
                 group: {
-                  members: [],
+                  category: 'test',
+                  owner: 'test_user',
+                  tier: 1,
+                  tags: [],
+                  relationships: [],
+                  documentation_links: [],
+                  repository_links: [],
+                  runbook_links: [],
                 },
               },
             },
@@ -152,7 +166,14 @@ describe('State', () => {
               definition: {
                 name: 'new_group_stream',
                 group: {
-                  members: [],
+                  category: 'test',
+                  owner: 'test_user',
+                  tier: 1,
+                  tags: [],
+                  relationships: [],
+                  documentation_links: [],
+                  repository_links: [],
+                  runbook_links: [],
                 },
               },
             },
@@ -185,7 +206,14 @@ describe('State', () => {
               definition: {
                 name: 'new_test_stream',
                 group: {
-                  members: [],
+                  category: 'test',
+                  owner: 'test_user',
+                  tier: 1,
+                  tags: [],
+                  relationships: [],
+                  documentation_links: [],
+                  repository_links: [],
+                  runbook_links: [],
                 },
               },
             },
@@ -323,7 +351,14 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
             definition: {
               name: 'and_another',
               group: {
-                members: [],
+                category: 'test',
+                owner: 'test_user',
+                tier: 1,
+                tags: [],
+                relationships: [],
+                documentation_links: [],
+                repository_links: [],
+                runbook_links: [],
               },
             },
           },
@@ -457,6 +492,3 @@ function flowStream() {
 
   return FlowStream;
 }
-
-// Check that the various flows ends up calling the right stream AR functions?
-// As well as calling the right ExecutionPlan methods

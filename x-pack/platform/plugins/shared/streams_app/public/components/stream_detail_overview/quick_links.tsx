@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { GroupStreamGetResponse, IngestStreamGetResponse } from '@kbn/streams-schema';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
@@ -18,7 +18,11 @@ import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_tabl
 
 const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
 
-export function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
+export function QuickLinks({
+  definition,
+}: {
+  definition?: IngestStreamGetResponse | GroupStreamGetResponse;
+}) {
   const router = useStreamsAppRouter();
   const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
 

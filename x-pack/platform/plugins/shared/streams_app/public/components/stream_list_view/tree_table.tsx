@@ -14,6 +14,7 @@ import {
   isUnwiredStreamDefinition,
   getSegments,
   isDescendantOf,
+  isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -114,6 +115,9 @@ export function asTrees(streams: ListStreamDetail[]) {
   const trees: StreamTree[] = [];
   const sortedStreams = streams
     .slice()
+    .filter(
+      (stream) => isWiredStreamDefinition(stream.stream) || isUnwiredStreamDefinition(stream.stream)
+    )
     .sort((a, b) => getSegments(a.stream.name).length - getSegments(b.stream.name).length);
 
   sortedStreams.forEach((streamDetail) => {

@@ -11,6 +11,8 @@ import {
   IngestStreamGetResponse,
   isWiredStreamGetResponse,
   isUnwiredStreamGetResponse,
+  GroupStreamGetResponse,
+  isGroupStreamGetResponse,
 } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -23,7 +25,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse | GroupStreamGetResponse;
   loading: boolean;
   refresh: () => void;
 }
@@ -72,7 +74,11 @@ export function StreamDetailContextProvider({
             };
           }
 
-          throw new Error('Stream detail only supports IngestStreams.');
+          if (isGroupStreamGetResponse(response)) {
+            return response;
+          }
+
+          throw new Error('Stream detail only supports IngestStreams and group streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]
@@ -106,4 +112,34 @@ export function useStreamDetail() {
     throw new Error('useStreamDetail must be used within a StreamDetailContextProvider');
   }
   return ctx;
+}
+
+export function useStreamDetailAsIngestStream() {
+  const ctx = React.useContext(StreamDetailContext);
+  if (!ctx) {
+    throw new Error('useStreamDetail must be used within a StreamDetailContextProvider');
+  }
+  if (!isWiredStreamGetResponse(ctx.definition) && !isUnwiredStreamGetResponse(ctx.definition)) {
+    throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
+  }
+  return ctx as {
+    definition: IngestStreamGetResponse;
+    loading: boolean;
+    refresh: () => void;
+  };
+}
+
+export function useStreamDetailAsGroupStream() {
+  const ctx = React.useContext(StreamDetailContext);
+  if (!ctx) {
+    throw new Error('useStreamDetail must be used within a StreamDetailContextProvider');
+  }
+  if (!isGroupStreamGetResponse(ctx.definition)) {
+    throw new Error('useStreamDetailAsIngestStream can only be used with IngestStreams');
+  }
+  return ctx as {
+    definition: GroupStreamGetResponse;
+    loading: boolean;
+    refresh: () => void;
+  };
 }
