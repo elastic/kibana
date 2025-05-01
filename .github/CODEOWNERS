@@ -2503,7 +2503,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/rules @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions @elastic/security-detection-rule-management
 
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/fleet_integrations @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
@@ -2528,6 +2527,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test/api_integration/apis/lists @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/value_list @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/value_lists_management_flyout @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions @elastic/security-detection-engine
 
 /x-pack/solutions/security/plugins/security_solution/public/sourcerer @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation @elastic/security-detection-engine
