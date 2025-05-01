@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import { AggregationsDateHistogramAggregate } from '@elastic/elasticsearch/lib/api/types';
+import {
+  AggregationsAggregate,
+  AggregationsDateHistogramAggregate,
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { buildEsQuery } from '@kbn/es-query';
 import { ChangePointType } from '@kbn/es-types/src';
-import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
+
+export type SignificantEventsGetResponse = Array<{
+  id: string;
+  title: string;
+  kql: {
+    query: string;
+  };
+  occurrences: Array<{
+    date: string;
+    count: number;
+  }>;
+  change_points: AggregationsAggregate;
+}>;
 
 export async function readSignificantEvents(
   params: { name: string; from: Date; to: Date; bucketSize: string },
