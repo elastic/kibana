@@ -25,10 +25,6 @@ const dynamic = {
   dynamic: true,
 };
 
-const boolean = {
-  type: 'boolean' as const,
-};
-
 export const conversationComponentTemplate: ClusterComponentTemplate['component_template']['template'] =
   {
     mappings: {
