@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe.only('/internal/observability_ai_assistant/kb/status', function () {
+  describe('/internal/observability_ai_assistant/kb/status', function () {
     // see details: https://github.com/elastic/kibana/issues/219217
     this.tags(['failsOnMKI']);
 

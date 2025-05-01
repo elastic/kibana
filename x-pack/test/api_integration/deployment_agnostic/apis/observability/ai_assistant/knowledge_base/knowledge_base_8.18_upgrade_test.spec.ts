@@ -16,7 +16,10 @@ import {
 } from '../utils/index_assets';
 import { restoreKbSnapshot } from '../utils/snapshots';
 import {
-  setupTinyElserModelAndInferenceEndpoint,
+  LEGACY_INFERENCE_ID,
+  TINY_ELSER_MODEL_ID,
+  createTinyElserInferenceEndpoint,
+  importModel,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../utils/model_and_inference';
 
@@ -25,16 +28,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const retry = getService('retry');
   const log = getService('log');
+  const ml = getService('ml');
 
   // In 8.18 inference happens via the custom inference endpoint "obs_ai_assistant_kb_inference"
   // In 8.19 / 9.1 the custom inference endpoint ("obs_ai_assistant_kb_inference") is replaced with the preconfigured endpoint ".elser-2-elasticsearch"
   // We need to make sure that the custom inference endpoint continues to work after the migration
 
-  describe.only('when upgrading from 8.18 to 8.19', function () {
+  describe('when upgrading from 8.18 to 8.19', function () {
     this.tags(['skipServerless']);
 
     before(async () => {
-      await setupTinyElserModelAndInferenceEndpoint(getService);
+      await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
+      await createTinyElserInferenceEndpoint({ es, log, inferenceId: LEGACY_INFERENCE_ID });
+
       await deleteIndexAssets(es);
       await restoreKbSnapshot({
         log,

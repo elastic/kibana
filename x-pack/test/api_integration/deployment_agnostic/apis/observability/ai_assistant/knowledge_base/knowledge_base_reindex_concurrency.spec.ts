@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe.only('POST /internal/observability_ai_assistant/kb/reindex', function () {
+  describe('POST /internal/observability_ai_assistant/kb/reindex', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);

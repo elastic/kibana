@@ -59,7 +59,7 @@ export async function teardownTinyElserModelAndInferenceEndpoint(
 export function createTinyElserInferenceEndpoint({
   es,
   log,
-  inferenceId = TINY_ELSER_INFERENCE_ID,
+  inferenceId,
 }: {
   es: Client;
   log: ToolingLog;
