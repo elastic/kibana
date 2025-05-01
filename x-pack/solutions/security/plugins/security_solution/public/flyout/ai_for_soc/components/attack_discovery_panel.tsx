@@ -11,25 +11,50 @@ import { EuiButtonEmpty, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
+import { i18n } from '@kbn/i18n';
 import { AttackDiscoveryDetails } from './attack_discovery_details';
-import * as i18n from './translations';
-import { useIdsFromUrl } from '../../../../attack_discovery/pages/results/history/use_ids_from_url';
-import { useAttackDiscoveryHistoryTimerange } from '../../../../attack_discovery/pages/use_attack_discovery_history_timerange';
+import { useIdsFromUrl } from '../../../attack_discovery/pages/results/history/use_ids_from_url';
+import { useAttackDiscoveryHistoryTimerange } from '../../../attack_discovery/pages/use_attack_discovery_history_timerange';
+
+export const ATTACK_DISCOVERY_VIEW_DETAILS_BUTTON_TEST_ID =
+  'ai-for-soc-alert-flyout-attack-discovery-view-details-button';
+
+const ALERT_PART = i18n.translate('xpack.securitySolution.alertSummary.attackDiscovery.alertPart', {
+  defaultMessage: 'This alert is part of a',
+});
+const VIEW_DETAILS = i18n.translate(
+  'xpack.securitySolution.alertSummary.attackDiscovery.viewDetails',
+  {
+    defaultMessage: 'View details in Attack Discovery',
+  }
+);
 
 export interface AttackDiscoveryPanelProps {
+  /**
+   * Attack discovery object
+   */
   attackDiscovery: AttackDiscoveryAlert;
-  // timerange end
+  /**
+   * Timerange end retrieved from the global KQL bar
+   */
   end: string;
-  // timerange start
+  /**
+   * Timerange start  retrieved from the global KQL bar
+   */
   start: string;
 }
 
+/**
+ * Component rendered in the attack discovery section of the AI for SOC alert flyout.
+ * It wraps all the details for the attack discovery for the visualized alert.
+ */
 export const AttackDiscoveryPanel = memo(
   ({ attackDiscovery, end, start }: AttackDiscoveryPanelProps) => {
     const { navigateTo } = useNavigateTo();
     const { pathname } = useLocation();
     const { setIdsUrl } = useIdsFromUrl();
     const { setHistoryEnd, setHistoryStart } = useAttackDiscoveryHistoryTimerange();
+
     const handleNavigateToAttackDiscovery = useCallback(() => {
       setHistoryStart(start);
       setHistoryEnd(end);
@@ -50,13 +75,14 @@ export const AttackDiscoveryPanel = memo(
       setIdsUrl,
       navigateTo,
     ]);
+
     return (
       <>
         {/* EuiSpacer used instead of css due to rendering issues with EuiAccordion */}
         <EuiSpacer size="s" />
         <EuiPanel paddingSize="m" hasBorder>
           <EuiText color="subdued" size="s">
-            <p>{i18n.ALERT_PART}</p>
+            <p>{ALERT_PART}</p>
           </EuiText>
           <EuiTitle size="xs">
             <h3>{attackDiscovery.title}</h3>
@@ -66,13 +92,13 @@ export const AttackDiscoveryPanel = memo(
           <EuiButtonEmpty
             iconSide="right"
             iconType="popout"
-            data-test-subj="attackDiscoveryViewDetails"
+            data-test-subj={ATTACK_DISCOVERY_VIEW_DETAILS_BUTTON_TEST_ID}
             onClick={handleNavigateToAttackDiscovery}
             css={css`
               padding: 0;
             `}
           >
-            {i18n.VIEW_DETAILS}
+            {VIEW_DETAILS}
           </EuiButtonEmpty>
         </EuiPanel>
         <EuiSpacer size="s" />

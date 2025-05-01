@@ -18,31 +18,71 @@ import {
 import type { PromptContext } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { i18n } from '@kbn/i18n';
 import { ConnectorMissingCallout } from './connector_missing_callout';
-import { useAlertSummary } from '../../hooks/use_alert_summary';
-import { MessageText } from '../message_text';
-import * as i18n from '../../constants/translations';
+import { useAlertSummary } from '../hooks/use_alert_summary';
+import { MessageText } from './message_text';
 
-interface Props {
+export const ALERT_SUMMARY_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary';
+export const GENERATE_INSIGHTS_BUTTON_TEST_ID = 'ai-for-soc-alert-flyout-generate-insights-button';
+export const REGENERATE_INSIGHTS_BUTTON_TEST_ID =
+  'ai-for-soc-alert-flyout-regenerate-insights-button';
+
+const RECOMMENDED_ACTIONS = i18n.translate(
+  'xpack.securitySolution.alertSummary.recommendedActions',
+  {
+    defaultMessage: 'Recommended actions',
+  }
+);
+const GENERATING = i18n.translate('xpack.securitySolution.alertSummary.generating', {
+  defaultMessage: 'Generating AI description and recommended actions.',
+});
+const GENERATE = i18n.translate('xpack.securitySolution.alertSummary.generate', {
+  defaultMessage: 'Generate insights',
+});
+const REGENERATE = i18n.translate('xpack.securitySolution.alertSummary.regenerate', {
+  defaultMessage: 'Regenerate insights',
+});
+
+export interface AlertSummaryProps {
+  /**
+   * Id of the alert for which we will generate the summary
+   */
   alertId: string;
+  /**
+   * Value of useKibana.services.application.capabilities.management.kibana.settings
+   */
   canSeeAdvancedSettings: boolean;
+  /**
+   * Value of securitySolution:defaultAIConnector
+   */
   defaultConnectorId: string;
-  isContextReady: boolean;
+  /**
+   * The context for the prompt
+   */
   promptContext: PromptContext;
+  /**
+   * Callback to set the value to the parent to be able to control the menu options
+   */
   setHasAlertSummary: React.Dispatch<React.SetStateAction<boolean>>;
+  /**
+   * If true we'll show anonymized values
+   */
   showAnonymizedValues?: boolean;
 }
 
+/**
+ * Component generating the AI summary for the visualized alert and showing in the alert summary section of the AI for SOC flyout.
+ */
 export const AlertSummary = memo(
   ({
     alertId,
     canSeeAdvancedSettings,
     defaultConnectorId,
-    isContextReady,
     promptContext,
     setHasAlertSummary,
     showAnonymizedValues,
-  }: Props) => {
+  }: AlertSummaryProps) => {
     const {
       alertSummary,
       recommendedActions,
@@ -54,13 +94,14 @@ export const AlertSummary = memo(
     } = useAlertSummary({
       alertId,
       defaultConnectorId,
-      isContextReady,
       promptContext,
       showAnonymizedValues,
     });
+
     useEffect(() => {
       setHasAlertSummary(hasAlertSummary);
     }, [hasAlertSummary, setHasAlertSummary]);
+
     return (
       <>
         {hasAlertSummary ? (
@@ -72,9 +113,9 @@ export const AlertSummary = memo(
                   font-style: italic;
                 `}
                 size="s"
-                data-test-subj="generating-summary"
+                data-test-subj={ALERT_SUMMARY_TEST_ID}
               >
-                {i18n.GENERATING}
+                {GENERATING}
               </EuiText>
               <EuiSkeletonText lines={3} size="s" />
             </>
@@ -93,7 +134,7 @@ export const AlertSummary = memo(
                 <>
                   <EuiPanel hasShadow={false} hasBorder paddingSize="s">
                     <EuiText size="xs" color="subdued">
-                      {i18n.RECOMMENDED_ACTIONS}
+                      {RECOMMENDED_ACTIONS}
                     </EuiText>
                     <EuiSpacer size="s" />
                     <MessageText content={recommendedActions} />
@@ -107,7 +148,7 @@ export const AlertSummary = memo(
                     onClick={fetchAISummary}
                     color="primary"
                     size="m"
-                    data-test-subj="regenerateInsights"
+                    data-test-subj={REGENERATE_INSIGHTS_BUTTON_TEST_ID}
                     isLoading={messageAndReplacements == null}
                   >
                     <EuiFlexGroup
@@ -119,7 +160,7 @@ export const AlertSummary = memo(
                       <EuiFlexItem grow={false}>
                         <AssistantIcon size="m" />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{i18n.REGENERATE}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{REGENERATE}</EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiButton>
                 </EuiFlexItem>
@@ -133,14 +174,14 @@ export const AlertSummary = memo(
                 onClick={fetchAISummary}
                 color="primary"
                 size="m"
-                data-test-subj="generateInsights"
+                data-test-subj={GENERATE_INSIGHTS_BUTTON_TEST_ID}
                 isLoading={messageAndReplacements == null}
               >
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <AssistantIcon size="m" />
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{i18n.GENERATE}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>{GENERATE}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiButton>
             </EuiFlexItem>
