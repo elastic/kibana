@@ -9,6 +9,7 @@ import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
 import {
+  isLensAlertRule,
   isLensBrushEvent,
   isLensEditEvent,
   isLensFilterEvent,
@@ -44,18 +45,36 @@ export const prepareEventHandler =
       | LensPublicCallbacks['onFilter']
       | LensPublicCallbacks['onTableRowClick'];
     let shouldExecuteDefaultTriggers = true;
-
     if (isLensBrushEvent(event)) {
       eventHandler = callbacks.onBrushEnd;
     } else if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
       eventHandler = callbacks.onFilter;
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = callbacks.onTableRowClick;
+    } else if (shouldExecuteDefaultTriggers){
+      // TODO: here is where we run the uiActions on the embeddable for the alert rule
+      eventHandler = callbacks.onAlertRule;
+      let trigger;
+      try {
+        trigger = uiActions.getTrigger(event.name);
+      } catch (e) {
+        // this is a workaround for the fact that the alert rule trigger is not registered in the uiActions
+      }
+      if (trigger) {
+        trigger.exec(
+          {
+            data: event.data,
+            embeddable: api,
+          },
+          true
+        );
+      }
     }
     const currentState = getState();
 
     eventHandler?.({
       ...event.data,
+      embeddable: api,
       preventDefault: () => {
         shouldExecuteDefaultTriggers = false;
       },

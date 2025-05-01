@@ -64,6 +64,8 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { RuleFormData, RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
+import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -227,6 +229,7 @@ export interface LensPublicCallbacks extends LensApiProps {
    * Let the consumer overwrite embeddable user messages
    */
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
+  onAlertRule?: (data: unknown) => void;
 }
 
 /**
@@ -373,6 +376,14 @@ export interface LensInspectorAdapters {
   adapters$: PublishingSubject<Adapters>;
 }
 
+export interface LensAlertRulesApi {
+  createAlertRule: (
+    initialValues: Partial<RuleFormData>,
+    ruleTypeRegistry: RuleTypeRegistryContract,
+    actionTypeRegistry: ActionTypeRegistryContract
+  ) => void;
+}
+
 export type LensApi = Simplify<
   DefaultEmbeddableApi<LensSerializedState, LensRuntimeState> &
     // This is used by actions to operate the edit action
@@ -405,7 +416,8 @@ export type LensApi = Simplify<
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
     LensRequestHandlersProps &
-    LensApiCallbacks
+    LensApiCallbacks &
+    LensAlertRulesApi
 >;
 
 // This is an API only used internally to the embeddable but not exported elsewhere
@@ -461,6 +473,7 @@ export interface ExpressionWrapperProps {
   syncTooltips?: boolean;
   syncCursor?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
+  getCompatibleActions?: ReactExpressionRendererProps['getCompatibleActions'];
   getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
   style?: React.CSSProperties;
   className?: string;

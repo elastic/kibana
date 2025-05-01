@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './trigger';
-export * from './row_click_trigger';
-export * from './default_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './dashboard_app_panel_trigger';
-export * from './alert_rule_trigger';
+import { i18n } from '@kbn/i18n';
+import { Trigger } from '.';
+
+export const ALERT_RULE_TRIGGER = 'alertRule';
+
+export const alertRuleTrigger: Trigger = {
+  id: ALERT_RULE_TRIGGER,
+  title: i18n.translate('uiActions.triggers.dashboard.alertRule.title', {
+    defaultMessage: 'Add alert rule',
+  }),
+  description: i18n.translate('uiActions.triggers.dashboard.alertRule.description', {
+    defaultMessage: 'Create an alert rule from this dashboard panel',
+  }),
+};

@@ -29,7 +29,7 @@ import type {
   ExpressionRenderError,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { DropIllustration } from '@kbn/chart-icons';
@@ -490,6 +490,25 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [plugins.uiActions]
   );
 
+  const getCompatibleActions = useCallback(
+    async (event: ExpressionRendererEvent) => {
+      if (!plugins.uiActions) {
+        // ui actions not available, not handling event...
+        return false;
+      }
+      const name = VIS_EVENT_TO_TRIGGER[event.name] ?? event.name;
+      return (
+        (
+          await plugins.uiActions.getTriggerCompatibleActions(
+            name,
+            event.event
+          )
+        )
+      );
+    },
+    [plugins.uiActions]
+  );
+
   const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
       trackUiCounterEvents('drop_onto_workspace');
@@ -614,6 +633,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         lensInspector={lensInspector}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
+        getCompatibleActions={getCompatibleActions}
         setLocalState={setLocalState}
         localState={{ ...localState }}
         errors={localState.errors}
@@ -731,6 +751,7 @@ export const VisualizationWrapper = ({
   lensInspector,
   onEvent,
   hasCompatibleActions,
+  getCompatibleActions,
   setLocalState,
   localState,
   errors,
@@ -745,6 +766,7 @@ export const VisualizationWrapper = ({
   lensInspector: LensInspector;
   onEvent: (event: ExpressionRendererEvent) => void;
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
+  getCompatibleActions: (event: ExpressionRendererEvent) => Promise<Action[]>;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState;
   errors: UserMessage[];
@@ -819,6 +841,7 @@ export const VisualizationWrapper = ({
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
+        getCompatibleActions={getCompatibleActions}
         // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './trigger';
-export * from './row_click_trigger';
-export * from './default_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './dashboard_app_panel_trigger';
-export * from './alert_rule_trigger';
+export interface AlertRuleFromVisUIActionData {
+  query: string | null;
+  thresholdValues: Record<string, number>;
+  splitValues: Record<string, Array<string | number | null | undefined>>;
+  usesPlaceholderValues?: boolean;
+}

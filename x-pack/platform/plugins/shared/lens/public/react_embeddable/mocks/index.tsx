@@ -20,6 +20,7 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -81,6 +82,7 @@ function getDefaultLensApiMock() {
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
+    createAlertRule: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',
@@ -206,6 +208,7 @@ export function makeEmbeddableServices(
           } as unknown as ReactEmbeddableDynamicActionsApi)
       ),
     },
+    fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
 }
 

@@ -58,6 +58,7 @@ import {
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type {
   FilterEvent,
   BrushEvent,
@@ -118,6 +119,7 @@ import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
 import { GlobalXYChartStyles } from './xy_chart.styles';
+import { ExpressionRenderHandlerParams } from '@kbn/expressions-plugin/public/render';
 
 declare global {
   interface Window {
@@ -139,7 +141,9 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
+  handlers: ExpressionRenderHandlerParams;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
+  onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   renderMode: RenderMode;
@@ -201,8 +205,10 @@ export function XYChart({
   chartsActiveCursorService,
   paletteService,
   minInterval,
+  handlers,
   onClickValue,
   onClickMultiValue,
+  onCreateAlertRule,
   layerCellValueActions,
   onSelectRange,
   setChartSize,
@@ -231,6 +237,7 @@ export function XYChart({
     singleTable,
     annotations,
   } = args;
+
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
@@ -790,15 +797,21 @@ export function XYChart({
                     )
                   : undefined
               }
-              actions={getTooltipActions(
-                dataLayers,
-                onClickMultiValue,
-                fieldFormats,
-                formattedDatatables,
-                xAxisFormatter,
-                formatFactory,
-                interactive && !args.detailedTooltip && !isEsqlMode
-              )}
+              actions={(selected) => {
+                return getTooltipActions(
+                  selected,
+                  handlers,
+                  dataLayers,
+                  onClickMultiValue,
+                  onCreateAlertRule,
+                  fieldFormats,
+                  formattedDatatables,
+                  xAxisFormatter,
+                  formatFactory,
+                  isEsqlMode,
+                  interactive && !args.detailedTooltip
+                ) ?? [];
+              }}
               customTooltip={
                 args.detailedTooltip
                   ? ({ header, values }) => (

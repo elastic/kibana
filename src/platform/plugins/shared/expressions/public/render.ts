@@ -22,6 +22,7 @@ import {
 } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import { getRenderersRegistry } from './services';
 
@@ -35,6 +36,7 @@ export interface ExpressionRenderHandlerParams {
   syncTooltips?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
+  getCompatibleActions?: (event: ExpressionRendererEvent) => Promise<Action[]>;
   getCompatibleCellValueActions?: (data: object[]) => Promise<unknown[]>;
   executionContext?: KibanaExecutionContext;
 }
@@ -66,6 +68,7 @@ export class ExpressionRenderHandler {
       interactive,
       hasCompatibleActions = async () => false,
       getCompatibleCellValueActions = async () => [],
+      getCompatibleActions = async () => [],
       executionContext,
     }: ExpressionRenderHandlerParams = {}
   ) {
@@ -119,6 +122,7 @@ export class ExpressionRenderHandler {
       },
       hasCompatibleActions,
       getCompatibleCellValueActions,
+      getCompatibleActions,
     };
   }
 
