@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Customization', function () {
     loadTestFile(require.resolve('./calculate_is_customized'));
+    loadTestFile(require.resolve('./customize_via_bulk_editing'));
   });
 };

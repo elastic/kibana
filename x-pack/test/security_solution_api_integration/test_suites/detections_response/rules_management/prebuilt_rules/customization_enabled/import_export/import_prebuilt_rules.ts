@@ -331,6 +331,53 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('accepts rules with "immutable: true"', async () => {
+        const rule = getCustomQueryRuleParams({
+          rule_id: 'rule-immutable',
+          // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
+          immutable: true,
+        });
+
+        const { body } = await importRules([rule]);
+
+        expect(body).toMatchObject({
+          success: true,
+        });
+      });
+
+      it('allows (but ignores) rules with a value for rule_source', async () => {
+        const rule = getCustomQueryRuleParams({
+          rule_id: 'with-rule-source',
+          // @ts-expect-error the API supports this param, but we only need it in {@link RuleToImport}
+          rule_source: {
+            type: 'ignored',
+          },
+        });
+
+        const { body } = await importRules([rule]);
+
+        expect(body).toMatchObject({
+          success: true,
+          success_count: 1,
+        });
+
+        const importedRule = await fetchRule(supertest, { ruleId: 'with-rule-source' });
+
+        expect(importedRule.rule_source).toMatchObject({ type: 'internal' });
+      });
+
+      it('rejects rules without a rule_id', async () => {
+        const rule = getCustomQueryRuleParams({});
+        delete rule.rule_id;
+
+        const { body } = await importRules([rule]);
+
+        expect(body.errors).toHaveLength(1);
+        expect(body.errors[0]).toMatchObject({
+          error: { message: 'rule_id: Required', status_code: 400 },
+        });
+      });
+
       // TODO: Fix the test setup https://github.com/elastic/kibana/pull/206893#discussion_r1966170712
       it.skip('imports prebuilt rules when the rules package is not installed', async () => {
         await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService }); // First we delete the rule package
