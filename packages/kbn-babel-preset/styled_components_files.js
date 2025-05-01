@@ -331,6 +331,7 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]components[\/\\]rules_table[\/\\]rules_table_filters[\/\\]rules_table_filters.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]components[\/\\]rules_table[\/\\]upgrade_prebuilt_rules_table[\/\\]upgrade_prebuilt_rules_table_filters.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]components[\/\\]rules_table[\/\\]upgrade_prebuilt_rules_table[\/\\]use_ml_jobs_upgrade_modal[\/\\]ml_jobs_upgrade_modal.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]pages[\/\\]rule_management[\/\\]__integration_tests__[\/\\]rules_upgrade[\/\\]test_utils[\/\\]rule_upgrade_test_providers.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_response_actions[\/\\]response_action_type_form.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_response_actions[\/\\]response_actions_form.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]components[\/\\]alerts_kpis[\/\\]alerts_by_rule_panel[\/\\]alerts_by_rule.tsx/,
