@@ -8,6 +8,7 @@ import { promises as Fs } from 'fs';
 import Path from 'path';
 import os from 'os';
 import simpleGit from 'simple-git';
+import { load } from 'js-yaml';
 
 class GitCheckoutError extends Error {
   constructor(cause: Error) {
