@@ -310,7 +310,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
 
       for (const expression of renameExpressions) {
         const [column] = expression.args;
-        if (!isColumnItem(column)) {
+        if (!isColumnItem(column) || (isColumnItem(column) && column.quoted)) {
           continue;
         }
 

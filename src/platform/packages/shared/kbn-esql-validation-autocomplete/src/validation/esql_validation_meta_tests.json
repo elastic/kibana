@@ -2655,6 +2655,11 @@
       "warning": []
     },
     {
+      "query": "ROW `C*OUNT` = 5 | RENAME `C*OUNT` AS meow",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row a = 10 | rename a as this is fine",
       "error": [
         "SyntaxError: mismatched input 'is' expecting <EOF>"

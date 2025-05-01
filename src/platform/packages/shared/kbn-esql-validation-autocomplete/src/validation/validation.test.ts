@@ -685,6 +685,7 @@ describe('validation logic', () => {
         'Unknown column [strings]',
       ]);
       testErrorsAndWarnings('row a = 10 | rename a as `this``is fine`', []);
+      testErrorsAndWarnings('ROW `C*OUNT` = 5 | RENAME `C*OUNT` AS meow', []);
       testErrorsAndWarnings('row a = 10 | rename a as this is fine', [
         "SyntaxError: mismatched input 'is' expecting <EOF>",
       ]);
