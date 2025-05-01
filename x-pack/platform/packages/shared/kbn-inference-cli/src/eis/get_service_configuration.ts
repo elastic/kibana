@@ -8,7 +8,7 @@ import { promises as Fs } from 'fs';
 import Path from 'path';
 import os from 'os';
 import simpleGit from 'simple-git';
-import { load } from 'js-yaml';
+import { safeLoad } from 'js-yaml';
 
 class GitCheckoutError extends Error {
   constructor(cause: Error) {
@@ -66,8 +66,8 @@ export async function getServiceConfigurationFromYaml<T>(
     `services/${serviceName}/versions.yaml`,
   ]);
 
-  const config = load(configFile) as T;
-  const versions = load(versionsFile) as {
+  const config = safeLoad(configFile) as T;
+  const versions = safeLoad(versionsFile) as {
     services: {
       [x: string]: {
         versions: Record<string, string>;

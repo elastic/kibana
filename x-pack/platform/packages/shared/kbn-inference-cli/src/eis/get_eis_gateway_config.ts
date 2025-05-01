@@ -9,7 +9,7 @@ import { writeTempfile } from './file_utils';
 import { generateCertificates } from './generate_certificate';
 import { getServiceConfigurationFromYaml } from './get_service_configuration';
 import { EisCredentials } from './get_eis_credentials';
-import { dump } from 'js-yaml';
+import { safeDump } from 'js-yaml';
 
 export interface EisGatewayConfig {
   image: string;
@@ -75,7 +75,7 @@ export async function getEisGatewayConfig({
     },
   };
 
-  const aclFilePath = await writeTempfile('acl.yaml', dump(aclContents));
+  const aclFilePath = await writeTempfile('acl.yaml', safeDump(aclContents));
 
   log.debug(`Wrote ACL file to ${aclFilePath}`);
 
