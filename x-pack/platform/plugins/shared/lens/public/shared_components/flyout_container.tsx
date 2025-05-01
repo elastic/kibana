@@ -108,8 +108,7 @@ export function FlyoutContainer({
             if (isOpen) {
               // EuiFocusTrap interferes with animating elements with absolute position:
               // running this onAnimationEnd, otherwise the flyout pushes content when animating.
-              // The EuiFocusTrap is disabled when inline editing as it causes bugs with comboboxes
-              setFocusTrapIsEnabled(!Boolean(isInlineEditing));
+              setFocusTrapIsEnabled(true);
             }
           }}
         >
