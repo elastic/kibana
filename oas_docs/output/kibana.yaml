@@ -113,7 +113,7 @@ tags:
       > Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs.
     externalDocs:
       description: Centralized pipeline management
-      url: https://www.elastic.co/guide/en/logstash/current/logstash-centralized-pipeline-management.html
+      url: https://www.elastic.co/docs/reference/logstash/logstash-centralized-pipeline-management
     name: logstash
     x-displayName: Logstash configuration management
   - name: Message Signing Service
@@ -43767,7 +43767,7 @@ paths:
         If your Elasticsearch cluster is protected with basic authentication, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
       externalDocs:
         description: Secure your connection
-        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+        url: https://www.elastic.co/docs/reference/logstash/secure-connection
       operationId: delete-logstash-pipeline
       parameters:
         - description: An identifier for the pipeline.
@@ -43789,7 +43789,7 @@ paths:
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
       externalDocs:
         description: Secure your connection
-        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+        url: https://www.elastic.co/docs/reference/logstash/secure-connection
       operationId: get-logstash-pipeline
       parameters:
         - description: An identifier for the pipeline.
@@ -43827,7 +43827,7 @@ paths:
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
       externalDocs:
         description: Secure your connection
-        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+        url: https://www.elastic.co/docs/reference/logstash/secure-connection
       operationId: put-logstash-pipeline
       parameters:
         - description: |
@@ -43892,7 +43892,7 @@ paths:
         The `username` property appears in the response when security is enabled and depends on when the pipeline was created or last updated.
       externalDocs:
         description: Secure your connection
-        url: https://www.elastic.co/guide/en/logstash/current/ls-security.html
+        url: https://www.elastic.co/docs/reference/logstash/secure-connection
       operationId: get-logstash-pipelines
       responses:
         '200':
