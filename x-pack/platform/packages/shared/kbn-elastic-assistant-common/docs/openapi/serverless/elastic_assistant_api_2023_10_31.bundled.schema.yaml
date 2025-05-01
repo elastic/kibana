@@ -1068,34 +1068,53 @@ paths:
         - Knowledge Base Entries API
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
-      description: >-
+      description: >
         Apply a bulk action to multiple prompts. The bulk action is applied to
         all prompts that match the filter or to the list of prompts by their
-        IDs.
+        IDs. This action allows for bulk create, update, or delete operations.
       operationId: PerformPromptsBulkAction
       requestBody:
         content:
           application/json:
+            example:
+              create:
+                - content: Please verify the security settings.
+                  name: New Security Prompt
+                  promptType: system
+              delete:
+                ids:
+                  - prompt1
+                  - prompt2
+              update:
+                - content: Updated content for security prompt.
+                  id: prompt123
             schema:
               type: object
               properties:
                 create:
+                  description: List of prompts to be created.
                   items:
                     $ref: '#/components/schemas/PromptCreateProps'
                   type: array
                 delete:
+                  description: Criteria for deleting prompts in bulk.
                   type: object
                   properties:
                     ids:
-                      description: Array of prompts IDs
+                      description: List of prompt IDs to be affected by the bulk action.
+                      example:
+                        - prompt1
+                        - prompt2
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: Query to filter promps
+                      description: The query used to filter prompts for the bulk action.
+                      example: status:active
                       type: string
                 update:
+                  description: List of prompts to be updated.
                   items:
                     $ref: '#/components/schemas/PromptUpdateProps'
                   type: array
@@ -1103,9 +1122,41 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                success:
+                  value:
+                    attributes:
+                      errors: []
+                      results:
+                        created:
+                          - content: Please verify the security settings.
+                            id: prompt6
+                            name: New Security Prompt
+                            promptType: system
+                        deleted:
+                          - prompt2
+                          - prompt3
+                        skipped:
+                          - id: prompt4
+                            name: Security Prompt
+                            skip_reason: PROMPT_FIELD_NOT_MODIFIED
+                        updated:
+                          - content: Updated security settings prompt
+                            id: prompt1
+                            name: Security Prompt
+                            promptType: system
+                      summary:
+                        failed: 0
+                        skipped: 1
+                        succeeded: 4
+                        total: 5
+                    message: Bulk action completed successfully.
+                    prompts_count: 5
+                    status_code: 200
+                    success: true
               schema:
                 $ref: '#/components/schemas/PromptsBulkCrudActionResponse'
-          description: Indicates a successful call.
+          description: Indicates a successful call with the results of the bulk action.
         '400':
           content:
             application/json:
@@ -1113,60 +1164,76 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short error message.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed error message.
+                    example: Invalid prompt ID or missing required fields.
                     type: string
                   statusCode:
+                    description: The HTTP status code for the error.
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Indicates a generic error due to a bad request.
       summary: Apply a bulk action to prompts
       tags:
         - Security AI Assistant API
         - Bulk API
   /api/security_ai_assistant/prompts/_find:
     get:
-      description: Get a list of all prompts.
+      description: >-
+        Get a list of all prompts based on optional filters, sorting, and
+        pagination.
       operationId: FindPrompts
       parameters:
-        - in: query
+        - description: List of specific fields to include in each returned prompt.
+          in: query
           name: fields
           required: false
           schema:
+            example:
+              - id
+              - name
+              - content
             items:
               type: string
             type: array
-        - description: Search query
+        - description: Search query string to filter prompts by matching fields.
           in: query
           name: filter
           required: false
           schema:
+            example: error handling
             type: string
-        - description: Field to sort by
+        - description: Field to sort prompts by.
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/FindPromptsSortField'
-        - description: Sort order
+        - description: Sort order, either ascending or descending.
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/SortOrder'
-        - description: Page number
+        - description: Page number for pagination.
           in: query
           name: page
           required: false
           schema:
             default: 1
+            example: 1
             minimum: 1
             type: integer
-        - description: Prompts per page
+        - description: Number of prompts per page.
           in: query
           name: per_page
           required: false
           schema:
             default: 20
+            example: 20
             minimum: 0
             type: integer
       responses:
@@ -1174,24 +1241,58 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  data:
+                    - categories:
+                        - troubleshooting
+                        - logging
+                      color: '#FF5733'
+                      consumer: security
+                      content: If you encounter an error, check the logs and retry.
+                      createdAt: '2025-04-20T21:00:00Z'
+                      createdBy: jdoe
+                      id: prompt-123
+                      isDefault: true
+                      isNewConversationDefault: false
+                      name: Error Troubleshooting Prompt
+                      namespace: default
+                      promptType: standard
+                      timestamp: '2025-04-30T22:30:00Z'
+                      updatedAt: '2025-04-30T22:45:00Z'
+                      updatedBy: jdoe
+                      users:
+                        - full_name: John Doe
+                          username: jdoe
+                  page: 1
+                  perPage: 20
+                  total: 142
                 type: object
                 properties:
                   data:
+                    description: >-
+                      The list of prompts returned based on the search query,
+                      sorting, and pagination.
                     items:
                       $ref: '#/components/schemas/PromptResponse'
                     type: array
                   page:
+                    description: Current page number.
+                    example: 1
                     type: integer
                   perPage:
+                    description: Number of prompts per page.
+                    example: 20
                     type: integer
                   total:
+                    description: Total number of prompts matching the query.
+                    example: 142
                     type: integer
                 required:
                   - page
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: Successful response containing a list of prompts.
         '400':
           content:
             application/json:
@@ -1199,12 +1300,18 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: Short error message.
+                    example: Bad Request
                     type: string
                   message:
+                    description: Detailed description of the error.
+                    example: Invalid sort order value provided.
                     type: string
                   statusCode:
+                    description: HTTP status code for the error.
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Bad request due to invalid parameters or malformed query.
       summary: Get prompts
       tags:
         - Security AI Assistant API
@@ -1403,12 +1510,16 @@ components:
       type: object
       properties:
         failed:
+          example: 1
           type: integer
         skipped:
+          example: 2
           type: integer
         succeeded:
+          example: 3
           type: integer
         total:
+          example: 6
           type: integer
       required:
         - failed
@@ -1855,11 +1966,13 @@ components:
         - updated_at
       type: string
     FindPromptsSortField:
+      description: Field by which to sort the prompts.
       enum:
         - created_at
         - is_default
         - name
         - updated_at
+      example: created_at
       type: string
     IndexEntry:
       allOf:
@@ -2274,14 +2387,18 @@ components:
       type: object
       properties:
         err_code:
+          description: A code representing the error type.
           type: string
         message:
+          description: A message describing the error encountered.
           type: string
         prompts:
+          description: List of prompts that encountered errors.
           items:
             $ref: '#/components/schemas/PromptDetailsInError'
           type: array
         status_code:
+          description: The HTTP status code associated with the error.
           type: integer
       required:
         - message
@@ -2314,23 +2431,41 @@ components:
       type: object
       properties:
         categories:
+          description: List of categories for the prompt.
+          example:
+            - security
+            - verification
           items:
             type: string
           type: array
         color:
+          description: The color associated with the prompt.
+          example: blue
           type: string
         consumer:
+          description: The consumer associated with the prompt.
+          example: admin
           type: string
         content:
+          description: The content of the prompt.
+          example: Please verify the security settings.
           type: string
         isDefault:
+          description: Whether this prompt should be the default.
+          example: false
           type: boolean
         isNewConversationDefault:
+          description: Whether this prompt should be the default for new conversations.
+          example: true
           type: boolean
         name:
+          description: The name of the prompt.
+          example: New Security Prompt
           type: string
         promptType:
           $ref: '#/components/schemas/PromptType'
+          description: The type of the prompt.
+          example: system
       required:
         - name
         - content
@@ -2339,8 +2474,10 @@ components:
       type: object
       properties:
         id:
+          description: The ID of the prompt that encountered an error.
           type: string
         name:
+          description: The name of the prompt that encountered an error.
           type: string
       required:
         - id
@@ -2348,39 +2485,52 @@ components:
       type: object
       properties:
         categories:
+          description: Categories associated with the prompt.
           items:
             type: string
           type: array
         color:
+          description: The color associated with the prompt.
           type: string
         consumer:
+          description: The consumer that the prompt is associated with.
           type: string
         content:
+          description: The content of the prompt.
           type: string
         createdAt:
+          description: The timestamp of when the prompt was created.
           type: string
         createdBy:
+          description: The user who created the prompt.
           type: string
         id:
           $ref: '#/components/schemas/NonEmptyString'
         isDefault:
+          description: Whether this prompt is the default.
           type: boolean
         isNewConversationDefault:
+          description: Whether this prompt is the default for new conversations.
           type: boolean
         name:
+          description: The name of the prompt.
           type: string
         namespace:
-          description: Kibana space
+          description: Kibana space where the prompt is located.
           type: string
         promptType:
           $ref: '#/components/schemas/PromptType'
+          description: The type of the prompt.
         timestamp:
           $ref: '#/components/schemas/NonEmptyString'
         updatedAt:
+          description: The timestamp of when the prompt was last updated.
           type: string
         updatedBy:
+          description: The user who last updated the prompt.
           type: string
         users:
+          description: List of users associated with the prompt.
           items:
             $ref: '#/components/schemas/User'
           type: array
@@ -2390,6 +2540,7 @@ components:
         - promptType
         - content
     PromptsBulkActionSkipReason:
+      description: Reason why a prompt was skipped during the bulk action.
       enum:
         - PROMPT_FIELD_NOT_MODIFIED
       type: string
@@ -2397,11 +2548,14 @@ components:
       type: object
       properties:
         id:
+          description: The ID of the prompt that was skipped.
           type: string
         name:
+          description: The name of the prompt that was skipped.
           type: string
         skip_reason:
           $ref: '#/components/schemas/PromptsBulkActionSkipReason'
+          description: The reason for skipping the prompt.
       required:
         - id
         - skip_reason
@@ -2423,12 +2577,20 @@ components:
             - results
             - summary
         message:
+          description: A message describing the result of the bulk action.
+          example: Bulk action completed successfully.
           type: string
         prompts_count:
+          description: The number of prompts processed in the bulk action.
+          example: 6
           type: integer
         status_code:
+          description: The HTTP status code of the response.
+          example: 200
           type: integer
         success:
+          description: Indicates if the bulk action was successful.
+          example: true
           type: boolean
       required:
         - attributes
@@ -2436,18 +2598,22 @@ components:
       type: object
       properties:
         created:
+          description: List of prompts that were created.
           items:
             $ref: '#/components/schemas/PromptResponse'
           type: array
         deleted:
+          description: List of IDs of prompts that were deleted.
           items:
             type: string
           type: array
         skipped:
+          description: List of prompts that were skipped.
           items:
             $ref: '#/components/schemas/PromptsBulkActionSkipResult'
           type: array
         updated:
+          description: List of prompts that were updated.
           items:
             $ref: '#/components/schemas/PromptResponse'
           type: array
@@ -2457,7 +2623,7 @@ components:
         - deleted
         - skipped
     PromptType:
-      description: Prompt type
+      description: Type of the prompt (either system or quick).
       enum:
         - system
         - quick
@@ -2466,20 +2632,36 @@ components:
       type: object
       properties:
         categories:
+          description: The updated categories for the prompt.
+          example:
+            - security
+            - alert
           items:
             type: string
           type: array
         color:
+          description: The updated color associated with the prompt.
+          example: green
           type: string
         consumer:
+          description: The updated consumer for the prompt.
+          example: user123
           type: string
         content:
+          description: The updated content for the prompt.
+          example: Updated content for security prompt.
           type: string
         id:
+          description: The ID of the prompt to update.
+          example: prompt123
           type: string
         isDefault:
+          description: Whether this prompt should be the default.
+          example: true
           type: boolean
         isNewConversationDefault:
+          description: Whether the prompt should be the default for new conversations.
+          example: false
           type: boolean
       required:
         - id

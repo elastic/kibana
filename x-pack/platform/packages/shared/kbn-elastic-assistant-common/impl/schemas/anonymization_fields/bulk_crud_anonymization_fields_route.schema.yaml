@@ -246,12 +246,16 @@ components:
       properties:
         failed:
           type: integer
+          example: 1
         skipped:
           type: integer
+          example: 2
         succeeded:
           type: integer
+          example: 3
         total:
           type: integer
+          example: 6
       required:
         - failed
         - skipped
