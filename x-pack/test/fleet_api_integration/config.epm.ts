@@ -18,9 +18,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     kbnTestServer: {
-      ...baseConfig.get('kbnTestServer'),
+      ...baseFleetApiConfig.get('kbnTestServer'),
       serverArgs: [
-        ...baseConfig.get('kbnTestServer.serverArgs'),
+        ...baseFleetApiConfig.get('kbnTestServer.serverArgs'),
         // this will be removed in 9.2 when security AI prompts feature is GA
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'securityAIPromptsEnabled',
