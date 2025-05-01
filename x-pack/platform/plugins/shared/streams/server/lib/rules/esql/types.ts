@@ -12,7 +12,7 @@ export interface EsqlRuleInstanceState extends RuleTypeState {
   previousOriginalDocumentIds?: string[];
 }
 
-export const esqlRuleInstanceState: z.Schema<EsqlRuleInstanceState> = z.object({
+export const esqlRuleInstanceState = z.object({
   previousOriginalDocumentIds: z.string().array().optional(),
 });
 
@@ -21,7 +21,7 @@ export interface EsqlRuleParams extends RuleTypeParams {
   timestampField: string;
 }
 
-export const esqlRuleParams: z.Schema<EsqlRuleParams> = z.object({
+export const esqlRuleParams = z.object({
   query: z.string(),
   timestampField: z.string(),
 });
