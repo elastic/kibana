@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
-import { orderBy } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   getKnowledgeBaseEntriesFromEs,
@@ -102,8 +101,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .filter((hit) => omitLensEntry(hit._source))
               // @ts-expect-error
               .map((hit) => hit._source?.semantic_text.text)
-              .sort()
-          ).to.eql(['To infinity and beyond!', "The user's favourite color is blue."].sort());
+          ).to.eql(["The user's favourite color is blue.", 'To infinity and beyond!']);
         });
       });
 
@@ -112,29 +110,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(res.status).to.be(200);
 
         expect(
-          orderBy(
-            res.body.entries
-              .filter(omitLensEntry)
-              .map(({ title, text, type }) => ({ title, text, type })),
-            (entry) => entry.title
-          )
-        ).to.eql(
-          orderBy(
-            [
-              {
-                title: 'movie_quote',
-                type: 'contextual',
-                text: 'To infinity and beyond!',
-              },
-              {
-                title: 'user_color',
-                type: 'contextual',
-                text: "The user's favourite color is blue.",
-              },
-            ],
-            (entry) => entry.title
-          )
-        );
+          res.body.entries
+            .filter(omitLensEntry)
+            .map(({ title, text, type }) => ({ title, text, type }))
+        ).to.eql([
+          {
+            title: 'user_color',
+            type: 'contextual',
+            text: "The user's favourite color is blue.",
+          },
+          {
+            title: 'movie_quote',
+            type: 'contextual',
+            text: 'To infinity and beyond!',
+          },
+        ]);
       });
     });
   });

@@ -162,16 +162,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('when sorting ', () => {
-        const ascendingOrder = ['my_doc_a', 'my_doc_b', 'my_doc_c'];
-
         it('allows sorting ascending', async () => {
           const entries = await getEntries({ sortBy: 'title', sortDirection: 'asc' });
-          expect(entries.map(({ id }) => id)).to.eql(ascendingOrder);
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_a', 'my_doc_b', 'my_doc_c']);
         });
 
         it('allows sorting descending', async () => {
           const entries = await getEntries({ sortBy: 'title', sortDirection: 'desc' });
-          expect(entries.map(({ id }) => id)).to.eql([...ascendingOrder].reverse());
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_c', 'my_doc_b', 'my_doc_a']);
         });
       });
 
