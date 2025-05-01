@@ -15,7 +15,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
@@ -26,7 +26,7 @@ const DISCOVER_CONSUMER = 'discover';
 const basicAlertingFeatures = [IndexThreshold, GeoContainment, TransformHealth].map(
   (ruleTypeId) => ({
     ruleTypeId,
-    consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
+    consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
   })
 );
 
@@ -39,7 +39,12 @@ const basicAlertingFeatures = [IndexThreshold, GeoContainment, TransformHealth].
  */
 const esQueryAlertingFeature = {
   ruleTypeId: ElasticsearchQuery,
-  consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID, DISCOVER_CONSUMER],
+  consumers: [
+    STACK_ALERTS_FEATURE_ID,
+    ALERTING_FEATURE_ID,
+    DISCOVER_CONSUMER,
+    ...DEPRECATED_ALERTING_CONSUMERS,
+  ],
 };
 
 /**

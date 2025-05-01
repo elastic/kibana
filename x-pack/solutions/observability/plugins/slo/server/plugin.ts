@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/alerting-plugin/common';
 import {
   CoreSetup,
   CoreStart,
@@ -78,7 +78,7 @@ export class SLOPlugin
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
-      consumers: [sloFeatureId, ALERTING_FEATURE_ID],
+      consumers: [sloFeatureId, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
     }));
 
     plugins.features.registerKibanaFeature({
