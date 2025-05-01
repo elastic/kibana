@@ -1063,6 +1063,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-01',
             },
           ],
+          'kibana.alert.grouping': {
+            'host.name': 'host-01',
+          },
           'kibana.alert.reason':
             'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-01)',
           tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
@@ -1084,6 +1087,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-02',
             },
           ],
+          'kibana.alert.grouping': {
+            'host.name': 'host-02',
+          },
           'kibana.alert.reason':
             'Average test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
@@ -1312,6 +1318,9 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
+          'kibana.alert.grouping': {
+            groupByField: 'a',
+          },
           'kibana.alert.reason':
             'Average test.metric.1 is 1, above or equal the threshold of 1; Average test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName, group: a)',
           tags: [],
@@ -3099,6 +3108,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-01',
             },
           ],
+          'kibana.alert.grouping': {
+            'host.name': 'host-01',
+          },
           'kibana.alert.reason':
             'Last value of test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-01)',
           tags: ['host-01_tag1', 'host-01_tag2', 'ruleTag1', 'ruleTag2'],
@@ -3120,6 +3132,9 @@ describe('The custom threshold alert type', () => {
               value: 'host-02',
             },
           ],
+          'kibana.alert.grouping': {
+            'host.name': 'host-02',
+          },
           'kibana.alert.reason':
             'Last value of test.metric.1 is 3, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName, group: host-02)',
           tags: ['host-02_tag1', 'host-02_tag2', 'ruleTag1', 'ruleTag2'],
@@ -3348,6 +3363,9 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
+          'kibana.alert.grouping': {
+            groupByField: 'a',
+          },
           'kibana.alert.reason':
             'Last value of test.metric.1 is 1, above or equal the threshold of 1; Last value of test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName, group: a)',
           tags: [],
