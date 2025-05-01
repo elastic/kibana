@@ -71,7 +71,7 @@ const version1: SavedObjectsModelVersion = {
     },
   ],
 };
-export const privilegeMonitoringType: SavedObjectsType = {
+export const monitoringEntitySourceType: SavedObjectsType = {
   name: monitoringEntitySourceTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
