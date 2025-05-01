@@ -60,10 +60,10 @@ export function HeaderActions({
     }
   `;
 
-  const { mutateAsync: enableRule } = useEnableRule();
-  const { mutateAsync: disableRule } = useDisableRule();
-  const { mutateAsync: runRule } = useRunRule();
-  const { mutateAsync: updateAPIKey } = useUpdateAPIKey();
+  const { mutate: enableRule } = useEnableRule();
+  const { mutate: disableRule } = useDisableRule();
+  const { mutate: runRule } = useRunRule();
+  const { mutate: updateAPIKey } = useUpdateAPIKey();
 
   const onDisableModalClose = () => {
     setIsUntrackAlertsModalOpen(false);
