@@ -18,7 +18,7 @@ export function useUpdateAPIKey() {
   const queryClient = useQueryClient();
 
   const updateAPIKey = useMutation<string, string, { id: string }>(
-    ['runRule'],
+    ['updateAPIKey'],
     ({ id }) => {
       try {
         return http.post(`/api/alerting/rule/${id}/_update_api_key`);
