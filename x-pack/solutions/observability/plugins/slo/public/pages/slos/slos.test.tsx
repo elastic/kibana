@@ -71,8 +71,8 @@ const mockDeleteSlo = jest.fn();
 const mockDeleteInstance = jest.fn();
 
 useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
-useDeleteSloMock.mockReturnValue({ mutateAsync: mockDeleteSlo });
-useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
+useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
+useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
 useCreateDataViewMock.mockReturnValue({});
 
 const mockNavigate = jest.fn();
