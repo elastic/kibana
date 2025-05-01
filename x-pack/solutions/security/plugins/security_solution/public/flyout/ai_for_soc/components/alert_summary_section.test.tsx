@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { useAIForSOCDetailsContext } from '../context';
 import { TestProviders } from '../../../common/mock';
-import { AISummarySection, ALERT_SUMMARY_SECTION_TEST_ID } from './ai_summary_section';
+import { ALERT_SUMMARY_SECTION_TEST_ID, AlertSummarySection } from './alert_summary_section';
 import { ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from './settings_menu';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 
@@ -41,7 +41,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-describe('AISummarySection', () => {
+describe('AlertSummarySection', () => {
   it('should render the AI summary section', () => {
     (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
       eventId: 'eventId',
@@ -52,7 +52,7 @@ describe('AISummarySection', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AISummarySection getPromptContext={getPromptContext} />
+        <AlertSummarySection getPromptContext={getPromptContext} />
       </TestProviders>
     );
 

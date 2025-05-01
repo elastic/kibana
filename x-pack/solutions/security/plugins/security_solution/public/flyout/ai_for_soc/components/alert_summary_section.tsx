@@ -21,7 +21,7 @@ const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummary
   defaultMessage: 'AI summary',
 });
 
-export interface AISummarySectionProps {
+export interface AlertSummarySectionProps {
   /**
    * The Elastic AI Assistant will invoke this function to retrieve the context data,
    * which will be included in a prompt (e.g. the contents of an alert or an event)
@@ -30,9 +30,9 @@ export interface AISummarySectionProps {
 }
 
 /**
- * AI summary section of the AI for SOC alert summary alert flyout.
+ * Alert summary section of the AI for SOC alert summary alert flyout.
  */
-export const AISummarySection = memo(({ getPromptContext }: AISummarySectionProps) => {
+export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySectionProps) => {
   const [hasAlertSummary, setHasAlertSummary] = useState(false);
 
   const {
@@ -40,8 +40,7 @@ export const AISummarySection = memo(({ getPromptContext }: AISummarySectionProp
     uiSettings,
   } = useKibana().services;
 
-  const { eventId, dataFormattedForFieldBrowser, showAnonymizedValues } =
-    useAIForSOCDetailsContext();
+  const { eventId, showAnonymizedValues } = useAIForSOCDetailsContext();
 
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
   const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
@@ -74,7 +73,6 @@ export const AISummarySection = memo(({ getPromptContext }: AISummarySectionProp
         alertId={eventId}
         canSeeAdvancedSettings={canSeeAdvancedSettings}
         defaultConnectorId={defaultConnectorId}
-        isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
         promptContext={promptContext}
         setHasAlertSummary={setHasAlertSummary}
         showAnonymizedValues={showAnonymizedValues}
@@ -83,4 +81,4 @@ export const AISummarySection = memo(({ getPromptContext }: AISummarySectionProp
   );
 });
 
-AISummarySection.displayName = 'AISummarySection';
+AlertSummarySection.displayName = 'AlertSummarySection';

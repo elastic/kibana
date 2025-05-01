@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useAlertSummary } from './use_alert_summary';
 import { useChatComplete } from '../../assistant/api/chat_complete/use_chat_complete';
 import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
@@ -63,7 +63,6 @@ describe('useAlertSummary', () => {
       useAlertSummary({
         alertId: 'test-alert-id',
         defaultConnectorId: 'test-connector-id',
-        isContextReady: false,
         promptContext,
         showAnonymizedValues: false,
       })
@@ -114,7 +113,6 @@ describe('useAlertSummary', () => {
       useAlertSummary({
         alertId: 'test-alert-id',
         defaultConnectorId: 'test-connector-id',
-        isContextReady: true,
         promptContext,
         showAnonymizedValues: false,
       })
@@ -163,7 +161,6 @@ describe('useAlertSummary', () => {
       useAlertSummary({
         alertId: 'test-alert-id',
         defaultConnectorId: 'test-connector-id',
-        isContextReady: false,
         promptContext,
         showAnonymizedValues: false,
       })

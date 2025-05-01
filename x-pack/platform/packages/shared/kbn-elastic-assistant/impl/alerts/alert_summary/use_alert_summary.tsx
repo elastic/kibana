@@ -19,35 +19,72 @@ import { getCombinedMessage } from '../../assistant/prompt/helpers';
 import type { PromptContext } from '../../..';
 import * as i18n from '../translations';
 
-interface Props {
+export interface UseAlertSummaryParams {
+  /**
+   * If of the alert we want to generate the summary for
+   */
   alertId: string;
+  /**
+   * Value of securitySolution:defaultAIConnector
+   */
   defaultConnectorId: string;
-  isContextReady: boolean;
+  /**
+   * The context for the prompt
+   */
   promptContext: PromptContext;
+  /**
+   * If true we'll show anonymized values
+   */
   showAnonymizedValues?: boolean;
 }
-interface UseAlertSummary {
+
+export interface UseAlertSummaryResult {
+  /**
+   * Generated summary for the alert
+   */
   alertSummary: string;
+  /**
+   * Returns true if the alert has a summary
+   */
   hasAlertSummary: boolean;
+  /**
+   * Callback that fetches the AI summary
+   */
   fetchAISummary: () => void;
+  /**
+   * Returns true if no connector has been setup
+   */
   isConnectorMissing: boolean;
+  /**
+   * Returns true while the fetch call is happening
+   */
   isLoading: boolean;
+  /**
+   * Potenial user or prompt message replacements
+   */
   messageAndReplacements: { message: string; replacements: Replacements } | null;
+  /**
+   * Recommended actions return when fetching the alert summary
+   */
   recommendedActions: string | undefined;
 }
 
+/**
+ * Hook that generates the alert AI summary along side other related items
+ */
 export const useAlertSummary = ({
   alertId,
   defaultConnectorId,
-  isContextReady,
   promptContext,
   showAnonymizedValues = false,
-}: Props): UseAlertSummary => {
+}: UseAlertSummaryParams): UseAlertSummaryResult => {
   const { abortStream, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
   });
+
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
     useFetchAnonymizationFields();
+
   const [isConnectorMissing, setIsConnectorMissing] = useState<boolean>(false);
   const [alertSummary, setAlertSummary] = useState<string>(i18n.NO_SUMMARY_AVAILABLE);
   const [recommendedActions, setRecommendedActions] = useState<string | undefined>();
@@ -119,11 +156,10 @@ export const useAlertSummary = ({
       setMessageAndReplacements({ message: userMessage.content ?? '', replacements });
     };
 
-    if (isFetchedAnonymizationFields && isContextReady && isAlertSummaryFetched) fetchContext();
+    if (isFetchedAnonymizationFields && isAlertSummaryFetched) fetchContext();
   }, [
     anonymizationFields,
     isFetchedAnonymizationFields,
-    isContextReady,
     isAlertSummaryFetched,
     fetchedAlertSummary.prompt,
     promptContext,
