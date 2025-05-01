@@ -6,4 +6,10 @@
  */
 
 require('@kbn/babel-register').install();
-require('./manage_secrets').exportToEnvVar();
+const { getVaultWriteCommand } = require('./manage_secrets');
+
+async function getCommand() {
+  console.log(await getVaultWriteCommand());
+}
+
+getCommand();

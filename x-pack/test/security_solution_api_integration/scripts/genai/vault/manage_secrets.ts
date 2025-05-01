@@ -11,36 +11,41 @@ import { writeFile, readFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 
-const SECURITY_GEN_AI_CONNECTORS_ENV_VAR = 'KIBANA_SECURITY_TESTING_AI_CONNECTORS';
-const SECURITY_GEN_AI_LANGSMITH_KEY_ENV_VAR = 'KIBANA_SECURITY_TESTING_LANGSMITH_KEY';
+// Environment variable set within BuildKite and read from in FTR tests
+const KIBANA_SECURITY_GEN_AI_CONFIG = 'KIBANA_SECURITY_GEN_AI_CONFIG';
 
-// siem-team secrets discussed w/ operations and we will mirror them here
-// const SECURITY_GEN_AI_VAULT = 'secret/siem-team/security-gen-ai';
+// Vault paths
+// siem-team users (secrets.elastic.co vault) do not have access to the ci-prod vault, so secrets
+// are mirrored between the two vaults
+type VaultType = 'siem-team' | 'ci-prod';
+const VAULT_PATHS: Record<VaultType, string> = {
+  'siem-team': 'secret/siem-team/security-gen-ai',
+  'ci-prod': 'secret/ci/elastic-kibana/security-gen-ai',
+};
 
-// CI Vault
-const SECURITY_GEN_AI_VAULT = 'secret/ci/elastic-kibana/security-gen-ai';
-const SECURITY_GEN_AI_VAULT_CONNECTORS = `${SECURITY_GEN_AI_VAULT}/connectors`;
-const SECURITY_GEN_AI_VAULT_LANGSMITH = `${SECURITY_GEN_AI_VAULT}/langsmith`;
-const SECURITY_GEN_AI_CONNECTORS_FIELD = 'config';
-const SECURITY_GEN_AI_LANGSMITH_FIELD = 'key';
-const CONNECTOR_FILE = Path.join(
+const getVaultPath = (vault: VaultType = 'siem-team') => {
+  return VAULT_PATHS[vault];
+};
+
+const SECURITY_GEN_AI_CONFIG_FIELD = 'config';
+const SECURITY_GEN_AI_CONFIG_FILE = Path.join(
   REPO_ROOT,
-  'x-pack/test/security_solution_api_integration/scripts/genai/vault/connector_config.json'
-);
-const LANGSMITH_FILE = Path.join(
-  REPO_ROOT,
-  'x-pack/test/security_solution_api_integration/scripts/genai/vault/langsmith_key.txt'
+  'x-pack/test/security_solution_api_integration/scripts/genai/vault/config.json'
 );
 
-const connectorsSchema = schema.recordOf(
-  schema.string(),
-  schema.object({
-    name: schema.string(),
-    actionTypeId: schema.string(),
-    config: schema.recordOf(schema.string(), schema.any()),
-    secrets: schema.recordOf(schema.string(), schema.any()),
-  })
-);
+const configSchema = schema.object({
+  evaluatorConnectorId: schema.string(),
+  langsmithKey: schema.string(),
+  connectors: schema.recordOf(
+    schema.string(),
+    schema.object({
+      name: schema.string(),
+      actionTypeId: schema.string(),
+      config: schema.recordOf(schema.string(), schema.any()),
+      secrets: schema.recordOf(schema.string(), schema.any()),
+    })
+  ),
+});
 
 export interface AvailableConnector {
   name: string;
@@ -49,50 +54,62 @@ export interface AvailableConnector {
   secrets: Record<string, unknown>;
 }
 
-export const retrieveFromVault = async (
-  vault: string,
-  filePath: string,
-  field: string,
-  isJson = true
-) => {
+/**
+ * Retrieve generic value from vault and write to file
+ *
+ * @param vault
+ * @param filePath
+ * @param field
+ */
+export const retrieveFromVault = async (vault: string, filePath: string, field: string) => {
   const { stdout } = await execa('vault', ['read', `-field=${field}`, vault], {
     cwd: REPO_ROOT,
     buffer: true,
   });
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
-  const config = isJson ? JSON.stringify(JSON.parse(value), null, 2) : value;
+  const config = JSON.stringify(JSON.parse(value), null, 2);
 
   await writeFile(filePath, config);
 
   // eslint-disable-next-line no-console
-  console.log(`Config dumped into ${filePath}`);
+  console.log(`Config written to: ${filePath}`);
 };
 
-export const retrieveConnectorConfig = async () => {
+/**
+ * Retrieve Security Gen AI secrets config from vault and write to file
+ * @param vault
+ */
+export const retrieveConfigFromVault = async (vault: VaultType = 'siem-team') => {
   await retrieveFromVault(
-    SECURITY_GEN_AI_VAULT_CONNECTORS,
-    CONNECTOR_FILE,
-    SECURITY_GEN_AI_CONNECTORS_FIELD
+    getVaultPath(vault),
+    SECURITY_GEN_AI_CONFIG_FILE,
+    SECURITY_GEN_AI_CONFIG_FIELD
   );
 };
 
-export const retrieveLangsmithKey = async () => {
-  await retrieveFromVault(
-    SECURITY_GEN_AI_VAULT_LANGSMITH,
-    LANGSMITH_FILE,
-    SECURITY_GEN_AI_LANGSMITH_FIELD,
-    false
-  );
-};
-
-export const formatCurrentConfig = async (filePath: string) => {
-  const config = await readFile(filePath, 'utf-8');
+/**
+ * Returns command for manually writing secrets from `config.json` to vault. Run this command and share with
+ * @kibana-ops via https://p.elstc.co to make updating secrets easier. Alternatively, have @kibana-ops run the following:
+ *
+ * node retrieve_secrets.js --vault siem-team
+ * node upload_secrets.js --vault ci-prod
+ *
+ */
+export const getVaultWriteCommand = async () => {
+  const config = await readFile(SECURITY_GEN_AI_CONFIG_FILE, 'utf-8');
   const asB64 = Buffer.from(config).toString('base64');
-  // eslint-disable-next-line no-console
-  console.log(asB64);
+
+  return `vault write ${getVaultPath('ci-prod')} ${SECURITY_GEN_AI_CONFIG_FIELD}=${asB64}`;
 };
 
+/**
+ * Write generic value to vault from a file
+ *
+ * @param vault
+ * @param filePath
+ * @param field
+ */
 export const uploadToVault = async (vault: string, filePath: string, field: string) => {
   const config = await readFile(filePath, 'utf-8');
   const asB64 = Buffer.from(config).toString('base64');
@@ -103,69 +120,52 @@ export const uploadToVault = async (vault: string, filePath: string, field: stri
   });
 };
 
-export const uploadConnectorConfigToVault = async () => {
+/**
+ * Read Security Gen AI secrets from `config.json` and upload to vault
+ * @param vault
+ */
+export const uploadConfigToVault = async (vault: VaultType = 'siem-team') => {
   await uploadToVault(
-    SECURITY_GEN_AI_VAULT_CONNECTORS,
-    CONNECTOR_FILE,
-    SECURITY_GEN_AI_CONNECTORS_FIELD
-  );
-};
-
-export const uploadLangsmithKeyToVault = async () => {
-  await uploadToVault(
-    SECURITY_GEN_AI_VAULT_LANGSMITH,
-    LANGSMITH_FILE,
-    SECURITY_GEN_AI_LANGSMITH_FIELD
+    getVaultPath(vault),
+    SECURITY_GEN_AI_CONFIG_FILE,
+    SECURITY_GEN_AI_CONFIG_FIELD
   );
 };
 
 /**
- * FOR LOCAL USE ONLY! Export connectors and langsmith secrets from vault to env vars before manually
- * running evaluations. CI env vars are set by .buildkite/scripts/common/setup_job_env.sh
+ * FOR LOCAL USE ONLY! Export config from `siem-team` vault to env var before manually running evaluations.
+ * CI env vars are set by .buildkite/scripts/common/setup_job_env.sh
  */
-export const exportToEnvVars = async () => {
-  const { stdout: connectors } = await execa(
+export const exportToEnvVar = async () => {
+  const { stdout: config } = await execa(
     'vault',
-    ['read', `-field=${SECURITY_GEN_AI_CONNECTORS_FIELD}`, SECURITY_GEN_AI_VAULT_CONNECTORS],
+    ['read', `-field=${SECURITY_GEN_AI_CONFIG_FIELD}`, getVaultPath('siem-team')],
     {
       cwd: REPO_ROOT,
       buffer: true,
     }
   );
-  const { stdout: langsmithKey } = await execa(
-    'vault',
-    ['read', `-field=${SECURITY_GEN_AI_LANGSMITH_FIELD}`, SECURITY_GEN_AI_VAULT_LANGSMITH],
-    {
-      cwd: REPO_ROOT,
-      buffer: true,
-    }
-  );
-  process.env[SECURITY_GEN_AI_CONNECTORS_ENV_VAR] = connectors;
-  process.env[SECURITY_GEN_AI_LANGSMITH_KEY_ENV_VAR] = langsmithKey;
+
+  process.env[KIBANA_SECURITY_GEN_AI_CONFIG] = config;
 };
 
-export const loadConnectorsFromEnvVar = (): Record<string, AvailableConnector> => {
-  const connectorsValue = process.env[SECURITY_GEN_AI_CONNECTORS_ENV_VAR];
-  if (!connectorsValue) {
-    return {};
+/**
+ * Returns parsed config from environment variable
+ */
+export const getSecurityGenAIConfigFromEnvVar = () => {
+  const configValue = process.env[KIBANA_SECURITY_GEN_AI_CONFIG];
+  if (!configValue) {
+    throw new Error(`Environment variable ${KIBANA_SECURITY_GEN_AI_CONFIG} does not exist!`);
   }
 
-  let connectors: Record<string, AvailableConnector>;
+  let config: typeof configSchema;
   try {
-    connectors = JSON.parse(Buffer.from(connectorsValue, 'base64').toString('utf-8'));
+    config = JSON.parse(Buffer.from(configValue, 'base64').toString('utf-8'));
   } catch (e) {
     throw new Error(
-      `Error trying to parse value from ${SECURITY_GEN_AI_CONNECTORS_ENV_VAR} environment variable: ${e.message}`
+      `Error trying to parse value from ${KIBANA_SECURITY_GEN_AI_CONFIG} environment variable: ${e.message}`
     );
   }
-  return connectorsSchema.validate(connectors);
-};
 
-export const loadLangSmithKeyFromEnvVar = (): string | undefined => {
-  const langsmithKeyValue = process.env[SECURITY_GEN_AI_LANGSMITH_KEY_ENV_VAR];
-  if (!langsmithKeyValue) {
-    return undefined;
-  }
-
-  return Buffer.from(langsmithKeyValue, 'base64').toString('utf-8').trim();
+  return configSchema.validate(config);
 };
