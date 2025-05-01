@@ -808,6 +808,11 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
         {
+          id: '5d12ad91-0624-5dce-800d-b1f9a7732f7c',
+          path: 'all_assets-0.1.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
+          type: 'epm-packages-assets',
+        },
+        {
           id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2',
           path: 'all_assets-0.1.0/kibana/security_rule/sample_security_rule.json',
           type: 'epm-packages-assets',
