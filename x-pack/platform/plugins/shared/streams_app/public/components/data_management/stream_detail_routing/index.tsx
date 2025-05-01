@@ -12,7 +12,7 @@ import {
   EuiResizableContainer,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +34,7 @@ import {
 } from '../../../hooks/use_streams_app_router';
 
 interface StreamDetailRoutingProps {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }
 
