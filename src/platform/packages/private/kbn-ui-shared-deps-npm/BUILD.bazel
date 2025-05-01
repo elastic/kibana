@@ -53,7 +53,7 @@ RUNTIME_DEPS = [
   "@npm//jquery",
   "@npm//lodash",
   "@npm//moment-timezone",
-  "@npm//node-libs-browser",
+  "@npm//node-stdlib-browser",
   "@npm//react-dom",
   "@npm//react-dom-18",
   "@npm//react-router-dom",
@@ -70,7 +70,7 @@ RUNTIME_DEPS = [
   "@npm//redux",
   "@npm//react-redux",
   "@npm//immer",
-  "@npm//reselect"
+  "@npm//reselect",
 ]
 
 webpack_cli(
