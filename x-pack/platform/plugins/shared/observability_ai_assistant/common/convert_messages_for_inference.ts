@@ -34,23 +34,24 @@ export function convertMessagesForInference(
   const inferenceMessages: InferenceMessage[] = [];
 
   messages.forEach((message) => {
+    const detectedEntities = message.message.detected_entities;
+    const hasDetectedEntities = (detectedEntities?.length ?? 0) > 0;
     if (message.message.role === MessageRole.Assistant) {
       let assistantContent = message.message.content ?? null;
       // Stored assistant content is un‑redacted, so reapply hashes here
       // before sending the history back to the LLM.
-      if (message.message.detected_entities?.length && assistantContent) {
-        assistantContent = redactEntities(assistantContent, message.message.detected_entities);
+      if (hasDetectedEntities && assistantContent) {
+        assistantContent = redactEntities(assistantContent, detectedEntities!);
       }
 
       // Reapply redaction inside function_call.arguments JSON, if any
       let toolCalls;
       if (message.message.function_call?.name) {
         const functionArgs = message.message.function_call.arguments;
-        const detectedEntities = message.message.detected_entities;
         // Replace any entity values with their hashes
         const redactedArgs =
-          detectedEntities && functionArgs
-            ? redactEntities(functionArgs, detectedEntities)
+          hasDetectedEntities && functionArgs
+            ? redactEntities(functionArgs, detectedEntities!)
             : functionArgs;
         const parsedArgs = safeJsonParse(redactedArgs, logger);
 
@@ -87,10 +88,10 @@ export function convertMessagesForInference(
         throw new Error(`Could not find tool call request for ${message.message.name}`);
       }
       let contentWithToolCallForInference = message.message.content ?? '';
-      if (message.message.detected_entities && message.message.detected_entities.length > 0) {
+      if (hasDetectedEntities) {
         contentWithToolCallForInference = redactEntities(
-          message.message.content ?? '',
-          message.message.detected_entities
+          contentWithToolCallForInference,
+          detectedEntities!
         );
       }
 
@@ -107,11 +108,8 @@ export function convertMessagesForInference(
     if (isUserMessage) {
       let contentForInference = message.message.content ?? '';
       // If detectedEntities exist, remove them
-      if (message.message.detected_entities && message.message.detected_entities.length > 0) {
-        contentForInference = redactEntities(
-          contentForInference,
-          message.message.detected_entities
-        );
+      if (hasDetectedEntities) {
+        contentForInference = redactEntities(contentForInference, detectedEntities!);
       }
       inferenceMessages.push({
         role: InferenceMessageRole.User,
