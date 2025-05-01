@@ -7696,6 +7696,37 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.routingDefinitionListSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "routingDefinitionListSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RoutingDefinition",
+            "text": "RoutingDefinition"
+          },
+          "[], Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RoutingDefinition",
+            "text": "RoutingDefinition"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.routingDefinitionSchema",
         "type": "Object",
         "tags": [],
