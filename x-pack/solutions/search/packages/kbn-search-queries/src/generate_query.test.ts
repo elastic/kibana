@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesQuerySourceFields } from './types';
+import { QueryGenerationFieldDescriptors } from './types';
 import { generateSearchQuery } from './generate_query';
 
 describe('generate_query', () => {
@@ -17,7 +17,7 @@ describe('generate_query', () => {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -50,7 +50,7 @@ describe('generate_query', () => {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: false },
@@ -84,7 +84,7 @@ describe('generate_query', () => {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', indices: ['index1'] }],
@@ -121,7 +121,7 @@ describe('generate_query', () => {
         index2: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             {
@@ -175,7 +175,7 @@ describe('generate_query', () => {
         index2: ['field2'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [
             { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -237,7 +237,7 @@ describe('generate_query', () => {
           index2: ['field2'],
         };
 
-        const fieldDescriptors: IndicesQuerySourceFields = {
+        const fieldDescriptors: QueryGenerationFieldDescriptors = {
           index1: {
             elser_query_fields: [
               { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -305,7 +305,7 @@ describe('generate_query', () => {
           index2: ['field2'],
         };
 
-        const fieldDescriptors: IndicesQuerySourceFields = {
+        const fieldDescriptors: QueryGenerationFieldDescriptors = {
           index1: {
             elser_query_fields: [
               { field: 'field1', model_id: 'model1', indices: ['index1'], sparse_vector: true },
@@ -376,7 +376,7 @@ describe('generate_query', () => {
         index1: ['field1'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', indices: ['index1'] }],
@@ -423,7 +423,7 @@ describe('generate_query', () => {
         index1: ['field1', 'title', 'content'],
       };
 
-      const fieldDescriptors: IndicesQuerySourceFields = {
+      const fieldDescriptors: QueryGenerationFieldDescriptors = {
         index1: {
           elser_query_fields: [],
           dense_vector_query_fields: [{ field: 'field1', model_id: 'model1', indices: ['index1'] }],
@@ -478,7 +478,7 @@ describe('generate_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
@@ -546,7 +546,7 @@ describe('generate_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
@@ -598,7 +598,7 @@ describe('generate_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
@@ -666,7 +666,7 @@ describe('generate_query', () => {
             index1: ['field2', 'title', 'content'],
           };
 
-          const fieldDescriptors: IndicesQuerySourceFields = {
+          const fieldDescriptors: QueryGenerationFieldDescriptors = {
             index1: {
               elser_query_fields: [],
               dense_vector_query_fields: [
