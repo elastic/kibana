@@ -17,8 +17,8 @@ import {
   ToolChoiceType,
   ToolSchema,
 } from '@kbn/inference-common';
-import type { ToolChoice } from '../types';
 import { StructuredToolParams } from '@langchain/core/dist/tools';
+import type { ToolChoice } from '../types';
 
 export const toolDefinitionToInference = (
   tools: BindToolsInput[]
