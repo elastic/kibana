@@ -131,7 +131,7 @@ describe('OpenApiTool', () => {
     ]);
   });
 
-  it('returns tool agents grouped by tags', async () => {
+  it('returns tool agents grouped correctly', async () => {
     const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
       llmType: 'openai',
     });
@@ -150,12 +150,12 @@ describe('OpenApiTool', () => {
     expect(tools).toEqual([
       {
         name: 'debug_agent',
-        description: 'listPets',
+        description: 'debug',
         tools: expect.any(Promise),
       },
       {
         name: 'pets_agent',
-        description: 'createPets\nshowPetById',
+        description: 'pets',
         tools: expect.any(Promise),
       },
     ]);
