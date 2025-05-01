@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { wiredStreamConfig } from './wired_stream_config';
+import { z } from '@kbn/zod';
 
-export const wiredStream = {
-  name: 'logs.nginx',
-  elasticsearch_assets: [],
-  stream: wiredStreamConfig,
-};
+interface ContentPack {
+  content: string;
+}
+
+const contentPackSchema: z.Schema<ContentPack> = z.object({
+  content: z.string(),
+});
+
+export { contentPackSchema, type ContentPack };

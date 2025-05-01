@@ -11,9 +11,9 @@ import {
   isAndCondition,
   isOrCondition,
   FilterCondition,
-} from '../models';
+} from '../conditions';
 
-export function getFields(
+export function getConditionFields(
   condition: Condition
 ): Array<{ name: string; type: 'number' | 'string' }> {
   const fields = collectFields(condition);

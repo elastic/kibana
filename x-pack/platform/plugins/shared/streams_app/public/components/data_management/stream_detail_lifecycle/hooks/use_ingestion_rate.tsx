@@ -8,7 +8,7 @@ import moment from 'moment';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import { TimeState } from '@kbn/es-query';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
+import { Streams, PhaseName } from '@kbn/streams-schema';
 import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -47,7 +47,7 @@ export const useIngestionRate = ({
   stats,
   timeState,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
 }) => {
@@ -153,7 +153,7 @@ export const useIngestionRatePerTier = ({
   stats,
   timeState,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeState: TimeState;
 }) => {

@@ -128,6 +128,9 @@ type Exact<T, U> = T extends U
     : false
   : false;
 
+type MissingKeysError<T extends string> = Error &
+  `The following keys are missing from the schema: ${T}`;
+
 // The storage settings need to support the application payload type, but it's OK if the
 // storage document can hold more fields than the application document.
 // To keep the type safety of the application type in the consuming code, both the storage
@@ -140,7 +143,7 @@ export type IStorageClient<
   TApplicationType extends StorageDocumentOf<TSchema>
 > = Exact<TApplicationType, StorageDocumentOf<TSchema>> extends true
   ? InternalIStorageClient<TApplicationType>
-  : never;
+  : MissingKeysError<Exclude<UnionKeys<TApplicationType>, UnionKeys<StorageDocumentOf<TSchema>>>>;
 
 export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> = IStorageClient<
   TStorageSettings,

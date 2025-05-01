@@ -8,7 +8,7 @@
  */
 
 import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
-import { Condition, StreamUpsertRequest } from '@kbn/streams-schema';
+import { Condition, Streams } from '@kbn/streams-schema';
 import { Readable, Transform, pipeline } from 'stream';
 import { Required } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
@@ -42,7 +42,7 @@ export class StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument>
 
   async putStream(
     streamName: string,
-    request: StreamUpsertRequest
+    request: Streams.all.UpsertRequest
   ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
     return this.kibana!.fetch(`/api/streams/${streamName}`, {
       method: 'PUT',

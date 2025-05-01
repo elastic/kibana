@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  IngestStreamDefinition,
-  StreamDefinition,
-  getParentId,
-  isRoot,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { Streams, getParentId, isRoot } from '@kbn/streams-schema';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
@@ -20,9 +14,9 @@ import { formatToIngestProcessors } from '../helpers/processing';
 
 export function generateIngestPipeline(
   name: string,
-  definition: StreamDefinition
+  definition: Streams.all.Definition
 ): IngestPutPipelineRequest {
-  const isWiredStream = isWiredStreamDefinition(definition);
+  const isWiredStream = Streams.WiredStream.Definition.is(definition);
   return {
     id: getProcessingPipelineName(name),
     processors: [
@@ -69,7 +63,7 @@ export function generateIngestPipeline(
   };
 }
 
-export function generateClassicIngestPipelineBody(definition: IngestStreamDefinition) {
+export function generateClassicIngestPipelineBody(definition: Streams.ingest.all.Definition) {
   return {
     processors: formatToIngestProcessors(definition.ingest.processing),
     _meta: {

@@ -9,9 +9,9 @@ import { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Condition,
   SampleDocument,
-  WiredStreamGetResponse,
+  Streams,
   conditionToQueryDsl,
-  getFields,
+  getConditionFields,
   isAlwaysCondition,
 } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
@@ -28,7 +28,7 @@ interface Options {
   start: number;
   end: number;
   size?: number;
-  streamDefinition: WiredStreamGetResponse;
+  streamDefinition: Streams.WiredStream.GetResponse;
 }
 
 export const useAsyncSample = (options: Options) => {
@@ -203,7 +203,10 @@ export type AsyncSample = ReturnType<typeof useAsyncSample>;
 // Conditions could be using fields which are not indexed or they could use it with other types than they are eventually mapped as.
 // Because of this we can't rely on mapped fields to draw a sample, instead we need to use runtime fields to simulate what happens during
 // ingest in the painless condition checks.
-const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition?: Condition) => {
+const getRuntimeMappings = (
+  streamDefinition: Streams.WiredStream.GetResponse,
+  condition?: Condition
+) => {
   if (!condition) return {};
 
   const wiredMappedFields =
@@ -213,7 +216,7 @@ const getRuntimeMappings = (streamDefinition: WiredStreamGetResponse, condition?
   );
 
   return Object.fromEntries(
-    getFields(condition)
+    getConditionFields(condition)
       .filter((field) => !mappedFields.includes(field.name))
       .map((field) => [
         field.name,

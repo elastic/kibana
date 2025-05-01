@@ -60,6 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
