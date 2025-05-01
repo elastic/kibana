@@ -39,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
-      await createTinyElserInferenceEndpoint({ es, log, inferenceId: LEGACY_INFERENCE_ID });
+      await createTinyElserInferenceEndpoint(getService, { inferenceId: LEGACY_INFERENCE_ID });
 
       await deleteIndexAssets(es);
       await restoreKbSnapshot({

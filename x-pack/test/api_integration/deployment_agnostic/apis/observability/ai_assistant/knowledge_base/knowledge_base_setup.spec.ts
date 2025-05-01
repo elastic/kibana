@@ -22,7 +22,6 @@ import { getConcreteWriteIndexFromAlias, waitForKnowledgeBaseReady } from '../ut
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
-  const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
@@ -61,19 +60,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           await deployTinyElserAndSetupKb(getService);
 
           // setup KB with custom inference endpoint
-          await createTinyElserInferenceEndpoint({
-            es,
-            log,
+          await createTinyElserInferenceEndpoint(getService, {
             inferenceId: CUSTOM_TINY_ELSER_INFERENCE_ID,
           });
           const res = await setupKbAsAdmin(CUSTOM_TINY_ELSER_INFERENCE_ID);
           body = res.body;
 
-          await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+          await waitForKnowledgeBaseReady(getService);
         });
 
         after(async () => {
-          await deleteInferenceEndpoint({ es, log, inferenceId: CUSTOM_TINY_ELSER_INFERENCE_ID });
+          await deleteInferenceEndpoint(getService, {
+            inferenceId: CUSTOM_TINY_ELSER_INFERENCE_ID,
+          });
         });
 
         it('should re-index the KB', async () => {

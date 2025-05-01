@@ -12,8 +12,6 @@ import {
   KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
-import { ToolingLog } from '@kbn/tooling-log';
-import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from '@kbn/expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { setAdvancedSettings } from './advanced_settings';
@@ -29,15 +27,26 @@ export async function clearKnowledgeBase(es: Client) {
   });
 }
 
-export async function waitForKnowledgeBaseReady({
-  observabilityAIAssistantAPIClient,
-  log,
-  retry,
-}: {
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
-  log: ToolingLog;
-  retry: RetryService;
-}) {
+export async function waitForKnowledgeBaseIndex(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  expectedIndex: string
+) {
+  const retry = getService('retry');
+  const es = getService('es');
+
+  await retry.try(async () => {
+    const currentIndex = await getConcreteWriteIndexFromAlias(es);
+    expect(currentIndex).to.be(expectedIndex);
+  });
+}
+
+export async function waitForKnowledgeBaseReady(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const retry = getService('retry');
+  const log = getService('log');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
   await retry.tryForTime(5 * 60 * 1000, async () => {
     log.debug(`Waiting for knowledge base to be ready...`);
     const res = await observabilityAIAssistantAPIClient.editor({
@@ -183,8 +192,8 @@ export async function reIndexKnowledgeBase(
 
 interface SemanticTextField {
   semantic_text: string;
-  _inference_fields?: {
-    semantic_text?: {
+  _inference_fields: {
+    semantic_text: {
       inference: {
         inference_id: string;
         chunks: {

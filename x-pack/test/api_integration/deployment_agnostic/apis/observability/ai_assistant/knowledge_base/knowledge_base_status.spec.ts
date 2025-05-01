@@ -18,8 +18,6 @@ import {
 } from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const es = getService('es');
-  const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
@@ -63,7 +61,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns correct status after inference endpoint is deleted', async () => {
-      await deleteInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID });
+      await deleteInferenceEndpoint(getService,{  inferenceId: TINY_ELSER_INFERENCE_ID });
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',

@@ -39,33 +39,26 @@ export async function importModel(
 export async function setupTinyElserModelAndInferenceEndpoint(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
-  const log = getService('log');
   const ml = getService('ml');
-  const es = getService('es');
 
   await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
-  await createTinyElserInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID });
+  await createTinyElserInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
 }
 
 export async function teardownTinyElserModelAndInferenceEndpoint(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
-  const log = getService('log');
-  const es = getService('es');
-
   await deleteModel(getService, { modelId: TINY_ELSER_MODEL_ID });
-  await deleteInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID });
+  await deleteInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
 }
 
-export function createTinyElserInferenceEndpoint({
-  es,
-  log,
-  inferenceId,
-}: {
-  es: Client;
-  log: ToolingLog;
-  inferenceId: string;
-}) {
+export function createTinyElserInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  { inferenceId }: { inferenceId: string }
+) {
+  const es = getService('es');
+  const log = getService('log');
+
   return createInferenceEndpoint({
     es,
     log,
@@ -75,15 +68,13 @@ export function createTinyElserInferenceEndpoint({
   });
 }
 
-export function createTinyTextEmbeddingInferenceEndpoint({
-  es,
-  log,
-  inferenceId,
-}: {
-  es: Client;
-  log: ToolingLog;
-  inferenceId: string;
-}) {
+export function createTinyTextEmbeddingInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  { inferenceId }: { inferenceId: string }
+) {
+  const es = getService('es');
+  const log = getService('log');
+
   return createInferenceEndpoint({
     es,
     log,
@@ -96,8 +87,6 @@ export function createTinyTextEmbeddingInferenceEndpoint({
 export async function deployTinyElserAndSetupKb(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
-  const log = getService('log');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   await setupTinyElserModelAndInferenceEndpoint(getService);
@@ -105,20 +94,22 @@ export async function deployTinyElserAndSetupKb(
     observabilityAIAssistantAPIClient,
     TINY_ELSER_INFERENCE_ID
   );
-  await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+  await waitForKnowledgeBaseReady(getService);
 
   return { status, body };
 }
 
-export async function deleteInferenceEndpoint({
-  es,
-  log,
-  inferenceId,
-}: {
-  es: Client;
-  log: ToolingLog;
-  inferenceId: string;
-}) {
+export async function deleteInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  {
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }
+) {
+  const es = getService('es');
+  const log = getService('log');
+
   try {
     await es.inference.delete({ inference_id: inferenceId, force: true });
     log.info(`Inference endpoint "${inferenceId}" deleted.`);
