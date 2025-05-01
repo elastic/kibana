@@ -55,6 +55,7 @@ const getTestUtils = (
             ? {
                 artifacts: {
                   dashboards: [],
+                  investigation_guide: { blob: '' },
                 },
               }
             : {}),
