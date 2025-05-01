@@ -8,8 +8,7 @@
 import expect from '@kbn/expect';
 import {
   IngestStreamLifecycle,
-  IngestStreamUpsertRequest,
-  WiredStreamGetResponse,
+  Streams,
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
@@ -42,8 +41,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await putStream(apiClient, 'logs', {
           stream: {
+            description: '',
             ingest: {
-              ...(streamDefinition as WiredStreamGetResponse).stream.ingest,
+              ...(streamDefinition as Streams.WiredStream.GetResponse).stream.ingest,
             },
           },
           dashboards: [],
@@ -62,8 +62,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Unwired streams update', () => {
-      const unwiredPutBody: IngestStreamUpsertRequest = {
+      const unwiredPutBody: Streams.UnwiredStream.UpsertRequest = {
         stream: {
+          description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],

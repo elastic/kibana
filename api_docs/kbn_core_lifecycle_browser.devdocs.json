@@ -464,10 +464,6 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "home",
-                "path": "src/platform/plugins/shared/home/public/plugin.ts"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/platform/plugins/shared/unified_search/public/types.ts"
               },
