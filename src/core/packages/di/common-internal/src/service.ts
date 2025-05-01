@@ -10,12 +10,17 @@
 import { Container } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './contracts';
-import { Plugin, PluginModule } from './modules/plugin';
-import { InternalContainer } from './container';
+import { Fork, PluginModule, Scope } from './modules/plugin';
 
 /** @internal */
 export class CoreInjectionService {
-  private root = new InternalContainer({ defaultScope: 'Singleton' });
+  private static readonly DEFAULT_CONTAINER_OPTIONS = {
+    autoBind: false,
+    defaultScope: 'Singleton' as const,
+  };
+
+  private root = new Container(CoreInjectionService.DEFAULT_CONTAINER_OPTIONS);
+  private module = new PluginModule(this.root, CoreInjectionService.DEFAULT_CONTAINER_OPTIONS);
 
   constructor() {
     this.fork = this.fork.bind(this);
@@ -23,27 +28,18 @@ export class CoreInjectionService {
   }
 
   protected getContainer(id?: PluginOpaqueId, container: Container = this.root): Container {
-    return id ? container.get(Plugin)(id) : container;
+    return container.get(Scope)(id);
   }
 
   protected fork(id?: PluginOpaqueId, container: Container = this.root): Container {
-    if (!(container instanceof InternalContainer)) {
-      throw new Error('The container has not been created using the dependency injection service.');
-    }
-
-    const fork = container.createChild();
-    if (id) {
-      fork.onDeactivation(id, () => void setTimeout(() => fork.unbindAll()));
-    }
-
-    return this.getContainer(id, fork);
+    return container.get(Fork)(id);
   }
 
   public setup(): InternalCoreDiServiceSetup {
     const contract = {
       getContainer: this.getContainer,
     };
-    this.root.loadSync(new PluginModule());
+    this.root.loadSync(this.module);
 
     return contract;
   }
