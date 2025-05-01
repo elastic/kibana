@@ -38,29 +38,41 @@ paths-ignore:
   - oas_docs
   - packages/kbn-babel-*
   - packages/kbn-bazel-*
+  - packages/kbn-capture-oas-snapshot-cli
+  - packages/kbn-check-mappings-update-cli
+  - packages/kbn-check-prod-native-modules-cli
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
+  - packages/kbn-dependency-*
   - packages/kbn-docs-utils
   - packages/kbn-eslint-*
   - packages/kbn-failed-test-reporter-cli
   - packages/kbn-find-used-node-modules
   - packages/kbn-ftr-*
+  - packages/kbn-import-locator
   - packages/kbn-generate
+  - packages/kbn-generate-console-definitions
+  - packages/kbn-json-ast
   - packages/kbn-kibana-manifest-schema
-  - packages/kbn-managed-vscode-config
-  - packages/kbn-managed-vscode-config-cli
+  - packages/kbn-lint-*
+  - packages/kbn-managed-vscode-*
+  - packages/kbn-manifest
+  - packages/kbn-mock-idp-plugin
   - packages/kbn-optimizer
   - packages/kbn-peggy-loader
   - packages/kbn-performance-testing-dataset-extractor
-  - packages/kbn-plugin-generator
-  - packages/kbn-plugin-helpers
+  - packages/kbn-picomatcher
+  - packages/kbn-plugin-*
   - packages/kbn-relocate
-  - packages/kbn-repo-source-classifier
-  - packages/kbn-repo-source-classifier-cli
+  - packages/kbn-repo-*
+  - packages/kbn-set-map
   - packages/kbn-sort-package-json
+  - packages/kbn-styled-components-mapping-cli
   - packages/kbn-test-*
   - packages/kbn-ts-*
+  - packages/kbn-validate-next-docs-cli
   - packages/kbn-web-worker-stub
+  - packages/kbn-whereis-pkg-cli
   - packages/kbn-yarn-lock-validator
   - scripts
   - src/platform/packages/*/kbn-ambient-*-types
@@ -71,10 +83,15 @@ paths-ignore:
   - src/platform/packages/*/kbn-jest-*
   - src/platform/packages/*/kbn-optimizer-*
   - src/platform/packages/*/kbn-test-*
+  - src/platform/packages/private/kbn-code-owners
   - src/platform/packages/private/kbn-gen-ai-functional-testing
   - src/platform/packages/private/kbn-get-repo-files
   - src/platform/packages/private/kbn-import-resolver
   - src/platform/packages/private/kbn-journeys
+  - src/platform/packages/private/kbn-mock-idp-utils
+  - src/platform/packages/private/kbn-node-libs-browser-webpack-plugin
+  - src/platform/packages/private/kbn-optimizer-webpack-helpers
+  - src/platform/packages/private/kbn-reporting/mocks_server
   - src/platform/packages/private/kbn-peggy
   - src/platform/packages/private/kbn-repo-path
   - src/platform/packages/private/kbn-some-dev-log
@@ -89,6 +106,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-es
   - src/platform/packages/shared/kbn-es-archiver
   - src/platform/packages/shared/kbn-expect
+  - src/platform/packages/shared/kbn-openapi-*
   - src/platform/packages/shared/kbn-scout
   - src/platform/packages/shared/kbn-storybook
   - src/platform/packages/shared/kbn-test
@@ -97,9 +115,12 @@ paths-ignore:
   - typings
   - x-pack/examples
   - x-pack/packages/ai-infra/product-doc-artifact-builder
+  - x-pack/packages/kbn-synthetics-private-location
   - x-pack/platform/packages/shared/kbn-inference-cli
+  - x-pack/platform/packages/shared/kbn-sample-parser
   - x-pack/platform/test
   - x-pack/performance
   - x-pack/scripts
+  - x-pack/solutions/observability/packages/kbn-genai-cli
   - x-pack/test
   - x-pack/test_serverless
