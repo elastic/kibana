@@ -9,7 +9,6 @@ import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-p
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
@@ -23,6 +22,7 @@ import {
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
 } from './complete_external_actions_task';
+import { fetchSpaceIdsWithMaybePendingActions } from '../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions';
 
 /**
  * A task manager runner responsible for checking the status of and completing pending actions
@@ -111,7 +111,9 @@ export class CompleteExternalActionsTaskRunner
       return getDeleteTaskRunResult();
     }
 
-    this.log.debug(`Started: Checking status of external response actions`);
+    this.log.debug(
+      `Started: Checking status of external response actions. Task Type:[${this.taskType}] Task Id:[${this.taskId}]`
+    );
     this.abortController = new AbortController();
 
     // If license is not `enterprise`, then exit. Support for external response actions is a
@@ -122,44 +124,58 @@ export class CompleteExternalActionsTaskRunner
       return;
     }
 
+    const allPendingActionsProcessing: Array<Promise<void>> = [];
+
     // Collect update needed to complete response actions
-    await Promise.all(
-      RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint').map(
-        (agentType) => {
-          // If run was aborted, then stop looping through
-          if (this.abortController.signal.aborted) {
-            return null;
-          }
+    for (const agentType of RESPONSE_ACTION_AGENT_TYPE) {
+      if (agentType !== 'endpoint') {
+        // If run was aborted, then stop looping through
+        if (this.abortController.signal.aborted) {
+          break;
+        }
+
+        const spaceIds = await fetchSpaceIdsWithMaybePendingActions(
+          this.endpointContextServices,
+          agentType
+        );
+
+        for (const spaceId of spaceIds) {
+          this.log.debug(
+            () => `Processing pending actions for [${agentType}] in space [${spaceId}]`
+          );
 
           const agentTypeActionsClient =
             this.endpointContextServices.getInternalResponseActionsClient({
               agentType,
+              spaceId,
               taskType: this.taskType,
               taskId: this.taskInstanceId,
-              spaceId: DEFAULT_SPACE_ID,
             });
 
-          return agentTypeActionsClient
-            .processPendingActions({
-              abortSignal: this.abortController.signal,
-              addToQueue: this.updatesQueue.addToQueue.bind(this.updatesQueue),
-            })
-            .catch((err) => {
-              // ignore errors due to connector not being configured - no point in logging errors if a customer
-              // is not using response actions for the given agent type
-              if (err instanceof ResponseActionsConnectorNotConfiguredError) {
-                this.log.debug(
-                  `Skipping agentType [${agentType}]: No stack connector configured for this agent type`
-                );
-                return null;
-              }
+          allPendingActionsProcessing.push(
+            agentTypeActionsClient
+              .processPendingActions({
+                abortSignal: this.abortController.signal,
+                addToQueue: this.updatesQueue.addToQueue.bind(this.updatesQueue),
+              })
+              .catch((err) => {
+                // ignore errors due to connector not being configured - no point in logging errors if a customer
+                // is not using response actions for the given agent type
+                if (err instanceof ResponseActionsConnectorNotConfiguredError) {
+                  this.log.debug(
+                    `Skipping agentType [${agentType}] for space [${spaceId}]: No stack connector configured for this agent type`
+                  );
+                  return;
+                }
 
-              this.errors.push(err.stack);
-            });
+                this.errors.push(err.stack);
+              })
+          );
         }
-      )
-    );
+      }
+    }
 
+    await Promise.all(allPendingActionsProcessing);
     await this.updatesQueue.complete();
     this.abortController.abort(`Run complete.`);
 
