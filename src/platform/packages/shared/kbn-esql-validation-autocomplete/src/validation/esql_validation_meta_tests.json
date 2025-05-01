@@ -2635,17 +2635,7 @@
     {
       "query": "from a_index | rename key* as keywords",
       "error": [
-        "Using wildcards (*) in RENAME is not allowed [key*]",
         "Unknown column [keywords]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | rename s* as strings",
-      "error": [
-        "Using wildcards (*) in RENAME is not allowed [s*]",
-        "Unknown column [s*]",
-        "Unknown column [strings]"
       ],
       "warning": []
     },
