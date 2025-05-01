@@ -52,6 +52,8 @@ import {
 import { bulkCreate } from '../factories';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
+const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
+
 export const esqlExecutor = async ({
   sharedParams,
   services,
@@ -107,6 +109,13 @@ export const esqlExecutor = async ({
     let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
+        if (excludedDocuments.length > MAX_EXCLUDED_DOCUMENTS) {
+          result.warningMessages.push(
+            `Excluded documents exceeded the limit of ${MAX_EXCLUDED_DOCUMENTS}. Consider reducing lookback time for rule.`
+          );
+          break;
+        }
+
         const esqlRequest = buildEsqlSearchRequest({
           query: ruleParams.query,
           from: tuple.from.toISOString(),
