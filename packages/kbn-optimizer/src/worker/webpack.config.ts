@@ -31,8 +31,8 @@ import { BundleRemoteUsedExportsPlugin } from './bundle_remote_used_exports_plug
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
-const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
+const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 
 export function getWebpackConfig(
   bundle: Bundle,
@@ -242,11 +242,11 @@ export function getWebpackConfig(
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: 'swc-loader',
             options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+              // babelrc: false,
+              // envName: worker.dist ? 'production' : 'development',
+              // presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
             },
           },
         },

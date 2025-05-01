@@ -62,6 +62,8 @@ const observeCompiler = (
       }
 
       if (isFailureStats(stats)) {
+        // eslint-ignore-next-line no-console
+        console.log(stats.compilation.errors);
         return compilerMsgs.compilerFailure({
           failure: failedStatsToErrorMessage(stats),
         });

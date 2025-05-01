@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+const swc = require('@swc/core');
 const babel = require('@babel/core');
 
+const { getSwcOptions } = require('./options');
 const { getBabelOptions } = require('./options');
 
 /**
@@ -20,11 +23,21 @@ const { getBabelOptions } = require('./options');
  * @returns
  */
 function transformCode(path, source, config = {}) {
-  const options = getBabelOptions(path, config);
-  const result =
-    source === undefined
-      ? babel.transformFileSync(path, options)
-      : babel.transformSync(source, options);
+  const useSwc = config.useSwc;
+  let result;
+  if (useSwc) {
+    const swcOptions = getSwcOptions(path, config);
+    result =
+      source === undefined
+        ? swc.transformFileSync(path, swcOptions)
+        : swc.transformSync(source, swcOptions);
+  } else {
+    const options = getBabelOptions(path, config);
+    result =
+      source === undefined
+        ? babel.transformFileSync(path, options)
+        : babel.transformSync(source, options);
+  }
 
   if (!result || !result.code) {
     throw new Error(`babel failed to transpile [${path}]`);

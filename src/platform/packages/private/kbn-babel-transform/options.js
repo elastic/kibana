@@ -30,4 +30,55 @@ function getBabelOptions(path, config = {}) {
   };
 }
 
-module.exports = { getBabelOptions };
+/**
+ *
+ * @param {string} path
+ * @param {import('./types').TransformConfig} config
+ * @returns {import('@swc/core').Options}
+ */
+function getSwcOptions(path, config = {}) {
+  const babelOptions = nullsAsUndefined(getBabelOptions(path, config));
+
+  const isTypescript = path.endsWith('.ts') || path.endsWith('.tsx');
+
+  return {
+    cwd: babelOptions.cwd,
+    swcrc: false,
+    sourceMaps: babelOptions.sourceMaps === 'both' ? true : babelOptions.sourceMaps,
+    filename: babelOptions.filename,
+    jsc: {
+      loose: true,
+      target: 'es2015',
+      transform: {
+        legacyDecorator: true,
+        decoratorMetadata: true,
+      },
+      parser: isTypescript
+        ? {
+            syntax: 'typescript',
+            tsx: babelOptions.filename.endsWith('.tsx'),
+          }
+        : {
+            syntax: 'ecmascript',
+            jsx: true,
+          },
+    },
+    module: {
+      type: 'commonjs',
+      strict: true,
+      noInterop: false,
+    },
+  };
+}
+
+/**
+ * @param {{[p: string]: any | null}} obj
+ * @returns {{[p: string]: any}}
+ */
+function nullsAsUndefined(obj) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [key, value === null ? undefined : value])
+  );
+}
+
+module.exports = { getBabelOptions, getSwcOptions };

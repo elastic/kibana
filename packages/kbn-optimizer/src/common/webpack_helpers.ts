@@ -12,3 +12,7 @@ import webpack from 'webpack';
 export function isRuntimeModule(module: any): boolean {
   return module instanceof webpack.RuntimeModule;
 }
+
+export function isContextModule(module: any): boolean {
+  return module?.constructor?.name === 'ContextModule';
+}
