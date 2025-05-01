@@ -837,9 +837,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       lowercase: `${ELASTIC_DOCS}reference/enrich-processor/lowercase-processor`,
       network: `${ELASTIC_DOCS}reference/enrich-processor/network-direction-processor`,
       pipeline: `${ELASTIC_DOCS}reference/enrich-processor/pipeline-processor`,
-      pipelines: isServerless
-        ? `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines-serverless`
-        : `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines`,
+      pipelines: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines`,
       csvPipelines: `${ELASTIC_DOCS}reference/ecs/ecs-converting`,
       pipelineFailure: `${ELASTIC_DOCS}manage-data/ingest/transform-enrich/ingest-pipelines#handling-pipeline-failures`,
       processors: `${ELASTIC_DOCS}reference/enrich-processor`,
