@@ -26,7 +26,7 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
@@ -145,7 +145,7 @@ export class MlServerPlugin
       },
       alerting: Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
         ruleTypeId,
-        consumers: [PLUGIN_ID, ALERTING_FEATURE_ID],
+        consumers: [PLUGIN_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
       })),
       privileges: {
         all: admin,

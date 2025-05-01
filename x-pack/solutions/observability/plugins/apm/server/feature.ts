@@ -15,14 +15,14 @@ import type {
 
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-sources-access-plugin/server/saved_objects/apm_indices';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/alerting-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
 const alertingFeatures = Object.values(ApmRuleType).map((ruleTypeId) => ({
   ruleTypeId,
-  consumers: [APM_SERVER_FEATURE_ID, ALERTING_FEATURE_ID],
+  consumers: [APM_SERVER_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
 }));
 
 export const APM_FEATURE: KibanaFeatureConfig = {
