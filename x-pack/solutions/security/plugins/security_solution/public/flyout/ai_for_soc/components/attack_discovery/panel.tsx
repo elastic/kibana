@@ -30,20 +30,26 @@ export const AttackDiscoveryPanel = memo(
     const { pathname } = useLocation();
     const { setIdsUrl } = useIdsFromUrl();
     const { setHistoryEnd, setHistoryStart } = useAttackDiscoveryHistoryTimerange();
-    const handleNavigateToAttackDiscovery = useCallback(
-      (attackDiscoveryId: string) => {
-        setHistoryStart(start);
-        setHistoryEnd(end);
-        if (pathname.includes('attack_discovery')) {
-          setIdsUrl([attackDiscoveryId]);
-        } else {
-          navigateTo({
-            path: `attack_discovery?id=${attackDiscoveryId}`,
-          });
-        }
-      },
-      [setHistoryStart, start, setHistoryEnd, end, pathname, setIdsUrl, navigateTo]
-    );
+    const handleNavigateToAttackDiscovery = useCallback(() => {
+      setHistoryStart(start);
+      setHistoryEnd(end);
+      if (pathname.includes('attack_discovery')) {
+        setIdsUrl([attackDiscovery.id]);
+      } else {
+        navigateTo({
+          path: `attack_discovery?id=${attackDiscovery.id}`,
+        });
+      }
+    }, [
+      attackDiscovery.id,
+      setHistoryStart,
+      start,
+      setHistoryEnd,
+      end,
+      pathname,
+      setIdsUrl,
+      navigateTo,
+    ]);
     return (
       <>
         {/* EuiSpacer used instead of css due to rendering issues with EuiAccordion */}
@@ -61,7 +67,7 @@ export const AttackDiscoveryPanel = memo(
             iconSide="right"
             iconType="popout"
             data-test-subj="attackDiscoveryViewDetails"
-            onClick={() => handleNavigateToAttackDiscovery(attackDiscovery.id)}
+            onClick={handleNavigateToAttackDiscovery}
             css={css`
               padding: 0;
             `}
