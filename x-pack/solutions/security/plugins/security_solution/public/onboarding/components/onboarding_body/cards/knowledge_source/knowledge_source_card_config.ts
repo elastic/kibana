@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { KnowledgeSourceCardItemId } from './types';
-import type { CardSelectorAssetListItem } from '../../types';
-import { CardAssetType } from '../../types';
+import type { CardSelectorAssetListItem } from '../types';
+import { CardAssetType } from '../types';
 
 export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
