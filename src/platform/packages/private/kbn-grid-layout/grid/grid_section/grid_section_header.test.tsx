@@ -14,7 +14,7 @@ import { RenderResult, act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
-import { GridLayoutStateManager } from '../types';
+import { CollapsibleSection, GridLayoutStateManager } from '../types';
 import { GridSectionHeader, GridSectionHeaderProps } from './grid_section_header';
 import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
 
@@ -22,7 +22,9 @@ const toggleIsCollapsed = jest
   .fn()
   .mockImplementation((sectionId: string, gridLayoutStateManager: GridLayoutStateManager) => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    newLayout[sectionId].isCollapsed = !newLayout[sectionId].isCollapsed;
+    const section = newLayout[sectionId];
+    if (section.isMainSection) return;
+    section.isCollapsed = !section.isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   });
 
@@ -43,12 +45,7 @@ describe('GridSectionHeader', () => {
             } as GridLayoutContextType
           }
         >
-          <GridSectionHeader
-            sectionId={'first'}
-            toggleIsCollapsed={() => toggleIsCollapsed('first', stateManagerMock)}
-            collapseButtonRef={React.createRef()}
-            {...propsOverrides}
-          />
+          <GridSectionHeader sectionId={'first'} {...propsOverrides} />
         </GridLayoutContext.Provider>,
         { wrapper: EuiThemeProvider }
       ),
@@ -88,10 +85,14 @@ describe('GridSectionHeader', () => {
     const title = component.getByTestId('kbnGridSectionTitle-first');
 
     expect(toggleIsCollapsed).toBeCalledTimes(0);
-    expect(gridLayoutStateManager.gridLayout$.getValue().first.isCollapsed).toBe(false);
+    expect(
+      (gridLayoutStateManager.gridLayout$.getValue().first as CollapsibleSection).isCollapsed
+    ).toBe(false);
     await userEvent.click(title);
     expect(toggleIsCollapsed).toBeCalledTimes(1);
-    expect(gridLayoutStateManager.gridLayout$.getValue().first.isCollapsed).toBe(true);
+    expect(
+      (gridLayoutStateManager.gridLayout$.getValue().first as CollapsibleSection).isCollapsed
+    ).toBe(true);
   });
 
   describe('title editor', () => {
@@ -108,17 +109,23 @@ describe('GridSectionHeader', () => {
       const editIcon = component.getByTestId('kbnGridSectionTitle-first--edit');
 
       expect(component.queryByTestId('kbnGridSectionTitle-first--editor')).not.toBeInTheDocument();
-      expect(gridLayoutStateManager.gridLayout$.getValue().first.isCollapsed).toBe(false);
+      expect(
+        (gridLayoutStateManager.gridLayout$.getValue().first as CollapsibleSection).isCollapsed
+      ).toBe(false);
       await userEvent.click(editIcon);
       expect(component.getByTestId('kbnGridSectionTitle-first--editor')).toBeInTheDocument();
       expect(toggleIsCollapsed).toBeCalledTimes(0);
-      expect(gridLayoutStateManager.gridLayout$.getValue().first.isCollapsed).toBe(false);
+      expect(
+        (gridLayoutStateManager.gridLayout$.getValue().first as CollapsibleSection).isCollapsed
+      ).toBe(false);
     });
 
     it('can update the title', async () => {
       const { component, gridLayoutStateManager } = renderGridSectionHeader();
       expect(component.getByTestId('kbnGridSectionTitle-first').textContent).toBe('Large section');
-      expect(gridLayoutStateManager.gridLayout$.getValue().first.title).toBe('Large section');
+      expect(
+        (gridLayoutStateManager.gridLayout$.getValue().first as CollapsibleSection).title
+      ).toBe('Large section');
 
       const editIcon = component.getByTestId('kbnGridSectionTitle-first--edit');
       await userEvent.click(editIcon);
@@ -130,7 +137,9 @@ describe('GridSectionHeader', () => {
       expect(component.getByTestId('kbnGridSectionTitle-first').textContent).toBe(
         'Large section 123'
       );
-      expect(gridLayoutStateManager.gridLayout$.getValue().first.title).toBe('Large section 123');
+      expect(
+        (gridLayoutStateManager.gridLayout$.getValue().first as CollapsibleSection).title
+      ).toBe('Large section 123');
     });
 
     it('clicking on cancel closes the inline title editor without updating title', async () => {
@@ -144,7 +153,9 @@ describe('GridSectionHeader', () => {
 
       expect(component.queryByTestId('kbnGridSectionTitle-first--editor')).not.toBeInTheDocument();
       expect(component.getByTestId('kbnGridSectionTitle-first').textContent).toBe('Large section');
-      expect(gridLayoutStateManager.gridLayout$.getValue().first.title).toBe('Large section');
+      expect(
+        (gridLayoutStateManager.gridLayout$.getValue().first as CollapsibleSection).title
+      ).toBe('Large section');
     });
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData, GridRowData } from '@kbn/grid-layout';
+import { GridLayoutData, GridSectionData } from '@kbn/grid-layout';
 import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
 
 export const gridLayoutToDashboardPanelMap = (
@@ -73,7 +73,7 @@ export const dashboardInputToGridLayout = ({
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
     if (gridData.row) {
-      (layout[gridData.row] as GridRowData).panels[panelId] = {
+      (layout[gridData.row] as GridSectionData).panels[panelId] = {
         id: panelId,
         row: gridData.y,
         column: gridData.x,

@@ -10,13 +10,22 @@
 import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
-import { GridLayoutStateManager, GridPanelData, GridSectionData } from '../../types';
+
+import {
+  GridLayoutData,
+  GridLayoutStateManager,
+  GridPanelData,
+  GridSectionData,
+  OrderedLayout,
+} from '../../types';
 import { isGridDataEqual } from '../../utils/equality_checks';
 import { resolveGridSection } from '../../utils/resolve_grid_section';
 import { getSensorType, isKeyboardEvent } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 import { GridLayoutContextType } from '../../use_grid_layout_context';
+
+let startingLayout: OrderedLayout | undefined;
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -28,6 +37,7 @@ export const startAction = (
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
   if (!panelRef) return;
 
+  startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const panelRect = panelRef.getBoundingClientRect();
   gridLayoutStateManager.activePanel$.next({
     type,
@@ -94,11 +104,13 @@ export const moveAction = (
     let highestOverlap = -Infinity;
     let highestOverlapSectionId = '';
     Object.keys(currentLayout).forEach((sectionId) => {
-      const row = currentLayout[sectionId].isCollapsed
-        ? gridHeaderElements[sectionId]
-        : gridSectionElements[sectionId];
-      if (!row) return;
-      const rowRect = row.getBoundingClientRect();
+      const section = currentLayout[sectionId];
+      const sectionElement =
+        !section.isMainSection && section.isCollapsed
+          ? gridHeaderElements[sectionId]
+          : gridSectionElements[sectionId];
+      if (!sectionElement) return;
+      const rowRect = sectionElement.getBoundingClientRect();
       const overlap =
         Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
       if (overlap > highestOverlap) {
@@ -106,7 +118,8 @@ export const moveAction = (
         highestOverlapSectionId = sectionId;
       }
     });
-    if (currentLayout[highestOverlapSectionId].isCollapsed) {
+    const section = currentLayout[highestOverlapSectionId];
+    if (!section.isMainSection && section.isCollapsed) {
       previousSection = highestOverlapSectionId;
       // skip past collapsed section into next "main" section
       const previousOrder = currentLayout[highestOverlapSectionId].order;
@@ -231,6 +244,7 @@ export const moveAction = (
 export const commitAction = ({ activePanel$, panelRefs }: GridLayoutStateManager) => {
   const event = activePanel$.getValue();
   activePanel$.next(undefined);
+  startingLayout = undefined;
 
   if (!event) return;
   panelRefs.current[event.id]?.scrollIntoView({
@@ -239,6 +253,10 @@ export const commitAction = ({ activePanel$, panelRefs }: GridLayoutStateManager
   });
 };
 
-export const cancelAction = ({ activePanel$ }: GridLayoutStateManager) => {
+export const cancelAction = ({ activePanel$, gridLayout$ }: GridLayoutStateManager) => {
   activePanel$.next(undefined);
+  if (startingLayout) {
+    gridLayout$.next(startingLayout);
+    startingLayout = undefined;
+  }
 };

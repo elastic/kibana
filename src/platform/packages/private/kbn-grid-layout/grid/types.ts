@@ -33,19 +33,6 @@ export interface GridSectionData {
   };
 }
 
-export type GridLayoutElementsInOrder = Array<{
-  type: 'header' | 'footer' | 'panel' | 'wrapper';
-  id: string;
-}>;
-
-export type GridLayoutWidget =
-  | (GridPanelData & { type: 'panel' })
-  | (GridSectionData & { type: 'section' });
-
-export interface GridLayoutData {
-  [key: string]: GridLayoutWidget;
-}
-
 export interface GridSettings {
   gutterSize: number;
   rowHeight: number;
@@ -93,6 +80,9 @@ export interface ActivePanelEvent {
   };
   sensorType: 'mouse' | 'touch' | 'keyboard';
 
+  /**
+   * This position of the fixed position panel
+   */
   position: {
     top: number;
     left: number;
@@ -114,8 +104,20 @@ export interface ActiveRowEvent {
   };
 }
 
-/** This is translated from GridLayoutData */
+/**
+ *
+ */
+export type GridLayoutWidget =
+  | (GridPanelData & { type: 'panel' })
+  | (GridSectionData & { type: 'section' });
 
+export interface GridLayoutData {
+  [key: string]: GridLayoutWidget;
+}
+
+/**
+ *
+ */
 export type MainSection = Omit<GridSectionData, 'row' | 'isCollapsed' | 'title'> & {
   order: number;
   isMainSection: true;
@@ -126,6 +128,7 @@ export type CollapsibleSection = Omit<GridSectionData, 'row'> & {
   isMainSection: false;
 };
 
+/** This is translated from GridLayoutData */
 export interface OrderedLayout {
   [key: string]: MainSection | CollapsibleSection;
 }

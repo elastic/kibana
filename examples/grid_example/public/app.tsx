@@ -311,7 +311,7 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
   const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
   return css({
     // background for grid row that is being targetted
-    '.kbnGridRow--targeted': {
+    '.kbnGridSection--targeted': {
       backgroundPosition: `top calc((var(--kbnGridGutterSize) / 2) * -1px) left calc((var(--kbnGridGutterSize) / 2) * -1px)`,
       backgroundSize: `calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px) calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px)`,
       backgroundImage: `linear-gradient(to right, ${gridColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`,
@@ -337,13 +337,13 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
       },
     },
     // styling for what the grid row header looks like when being dragged
-    '.kbnGridRowHeader--active': {
+    '.kbnGridSectionHeader--active': {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       border: `1px solid ${euiTheme.border.color}`,
       borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
       paddingLeft: '8px',
       // hide accordian arrow + panel count text when row is being dragged
-      '& .kbnGridRowTitle--button svg, & .kbnGridLayout--panelCount': {
+      '& .kbnGridSectionTitle--button svg, & .kbnGridLayout--panelCount': {
         display: 'none',
       },
     },

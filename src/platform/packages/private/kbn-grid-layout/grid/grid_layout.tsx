@@ -16,13 +16,7 @@ import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridPanel } from './grid_panel';
 import { GridSectionFooter, GridSectionHeader, GridSectionWrapper } from './grid_section';
-import {
-  GridAccessMode,
-  GridLayoutData,
-  GridLayoutElementsInOrder,
-  GridSettings,
-  UseCustomDragHandle,
-} from './types';
+import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 
@@ -34,6 +28,11 @@ export type GridLayoutProps = {
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
 } & UseCustomDragHandle;
+
+type GridLayoutElementsInOrder = Array<{
+  type: 'header' | 'footer' | 'panel' | 'wrapper';
+  id: string;
+}>;
 
 export const GridLayout = ({
   layout,
