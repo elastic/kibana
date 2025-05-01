@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { getKnowledgeBaseEntries } from '../utils/knowledge_base';
+import {
+  getKnowledgeBaseEntriesFromEs,
+  getKnowledgeBaseEntriesFromApi,
+} from '../utils/knowledge_base';
 import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
@@ -57,7 +60,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('before migrating', () => {
       it('the docs do not have semantic_text embeddings', async () => {
-        const hits = await getKnowledgeBaseEntries(es);
+        const hits = await getKnowledgeBaseEntriesFromEs(es);
         const hasSemanticTextEmbeddings = hits.some((hit) => hit._source?.semantic_text);
 
         expect(hits.length).to.be(10);
@@ -72,7 +75,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('the docs have semantic_text field', async () => {
         await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntries(es);
+          const hits = await getKnowledgeBaseEntriesFromEs(es);
           const hasSemanticTextField = hits.every((hit) => hit._source?.semantic_text);
           expect(hasSemanticTextField).to.be(true);
         });
@@ -80,7 +83,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('the docs have embeddings', async () => {
         await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntries(es);
+          const hits = await getKnowledgeBaseEntriesFromEs(es);
           const hasEmbeddings = hits.every(
             (hit) =>
               // @ts-expect-error
@@ -92,7 +95,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('the docs have correct text content', async () => {
         await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntries(es);
+          const hits = await getKnowledgeBaseEntriesFromEs(es);
           expect(
             hits
               .filter((hit) => omitLensEntry(hit._source))
@@ -104,17 +107,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns entries correctly via API', async () => {
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-        });
-
+        const res = await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient);
         expect(res.status).to.be(200);
 
         expect(

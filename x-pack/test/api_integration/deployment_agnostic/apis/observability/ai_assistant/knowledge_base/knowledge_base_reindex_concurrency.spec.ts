@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         const writeIndex = await getConcreteWriteIndexFromAlias(es);
         // get sequence number from write index
-        initialIndexSequenceNumber = parseInt(writeIndex!.slice(-6), 10);
+        initialIndexSequenceNumber = parseInt(writeIndex.slice(-6), 10);
 
         results = [];
         for (const _ of times(iterations)) {

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { orderBy, size, toPairs } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { clearKnowledgeBase, getKnowledgeBaseEntries } from '../utils/knowledge_base';
+import { clearKnowledgeBase, getKnowledgeBaseEntriesFromEs } from '../utils/knowledge_base';
 import {
   teardownTinyElserModelAndInferenceEndpoint,
   deployTinyElserAndSetupKb,
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('generates sparse embeddings', async () => {
-        const hits = await getKnowledgeBaseEntries(es);
+        const hits = await getKnowledgeBaseEntriesFromEs(es);
         const embeddings =
           hits[0]._source?._inference_fields?.semantic_text?.inference.chunks.semantic_text[0]
             .embeddings;

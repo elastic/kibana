@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { getKbIndexCreatedVersion } from '../utils/knowledge_base';
+import { getKbIndexCreatedVersion, getKnowledgeBaseEntriesFromApi } from '../utils/knowledge_base';
 import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
@@ -66,16 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('can retrieve entries', async () => {
-      const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-        params: {
-          query: {
-            query: '',
-            sortBy: 'title',
-            sortDirection: 'asc',
-          },
-        },
-      });
+      const res = await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient);
       expect(res.status).to.be(200);
       expect(res.body.entries).to.have.length(1);
       expect(res.body.entries[0].text).to.be(

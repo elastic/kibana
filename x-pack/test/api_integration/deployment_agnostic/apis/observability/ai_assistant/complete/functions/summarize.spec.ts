@@ -17,7 +17,7 @@ import {
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
-import { clearKnowledgeBase } from '../../utils/knowledge_base';
+import { clearKnowledgeBase, getKnowledgeBaseEntriesFromApi } from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -71,16 +71,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('persists entry in knowledge base', async () => {
-      const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-        params: {
-          query: {
-            query: '',
-            sortBy: 'title',
-            sortDirection: 'asc',
-          },
-        },
-      });
+      const res = await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient);
 
       const { role, public: isPublic, text, type, user, title } = res.body.entries[0];
 

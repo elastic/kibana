@@ -15,12 +15,13 @@ import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base'
 
 export const LEGACY_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 
-// models
+// tiny models
 export const TINY_ELSER_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_ELSER.name;
 export const TINY_TEXT_EMBEDDING_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_TEXT_EMBEDDING.name;
 
-// inference endpoints
+// tiny inference endpoints
 export const TINY_ELSER_INFERENCE_ID = 'pt_tiny_elser_inference_id';
+export const TINY_TEXT_EMBEDDING_INFERENCE_ID = 'pt_tiny_text_embedding_inference_id';
 
 export async function importModel(
   ml: ReturnType<typeof MachineLearningProvider>,
@@ -71,6 +72,24 @@ export function createTinyElserInferenceEndpoint({
     modelId: TINY_ELSER_MODEL_ID,
     inferenceId,
     taskType: 'sparse_embedding',
+  });
+}
+
+export function createTinyTextEmbeddingInferenceEndpoint({
+  es,
+  log,
+  inferenceId,
+}: {
+  es: Client;
+  log: ToolingLog;
+  inferenceId: string;
+}) {
+  return createInferenceEndpoint({
+    es,
+    log,
+    modelId: TINY_TEXT_EMBEDDING_MODEL_ID,
+    inferenceId,
+    taskType: 'text_embedding',
   });
 }
 

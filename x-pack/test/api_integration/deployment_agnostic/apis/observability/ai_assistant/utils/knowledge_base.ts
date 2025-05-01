@@ -61,14 +61,6 @@ export async function setupKnowledgeBase(
   });
 }
 
-export async function getAllKbEntries(es: Client) {
-  const response = await es.search({
-    index: resourceNames.indexPatterns.kb,
-    query: { match_all: {} },
-  });
-  return response.hits.hits;
-}
-
 export async function addSampleDocsToInternalKb(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   sampleDocs: Array<Instruction & { title: string }>
@@ -145,9 +137,15 @@ export async function deleteKbIndices(es: Client) {
 
 export async function getConcreteWriteIndexFromAlias(es: Client) {
   const response = await es.indices.getAlias({ index: resourceNames.writeIndexAlias.kb });
-  return Object.entries(response).find(
+  const writeIndex = Object.entries(response).find(
     ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index
   )?.[0];
+
+  if (!writeIndex) {
+    throw new Error(`Could not find write index for alias ${resourceNames.writeIndexAlias.kb}`);
+  }
+
+  return writeIndex;
 }
 
 export async function hasIndexWriteBlock(es: Client, index: string) {
@@ -170,6 +168,19 @@ export async function getKbIndexCreatedVersion(es: Client) {
   return createdVersion;
 }
 
+export async function reIndexKnowledgeBase(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
+) {
+  return observabilityAIAssistantAPIClient.admin({
+    endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+    params: {
+      query: {
+        inference_id: TINY_ELSER_INFERENCE_ID,
+      },
+    },
+  });
+}
+
 interface SemanticTextField {
   semantic_text: string;
   _inference_fields?: {
@@ -188,20 +199,7 @@ interface SemanticTextField {
   };
 }
 
-export async function reIndexKnowledgeBase(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
-) {
-  return observabilityAIAssistantAPIClient.admin({
-    endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
-    params: {
-      query: {
-        inference_id: TINY_ELSER_INFERENCE_ID,
-      },
-    },
-  });
-}
-
-export async function getKnowledgeBaseEntries(es: Client) {
+export async function getKnowledgeBaseEntriesFromEs(es: Client) {
   const res = await es.search<KnowledgeBaseEntry & SemanticTextField>({
     index: resourceNames.writeIndexAlias.kb,
     // Add fields parameter to include inference metadata
@@ -212,4 +210,16 @@ export async function getKnowledgeBaseEntries(es: Client) {
   });
 
   return res.hits.hits;
+}
+
+export function getKnowledgeBaseEntriesFromApi(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
+  query = '',
+  sortBy = 'title',
+  sortDirection: 'asc' | 'desc' = 'asc'
+) {
+  return observabilityAIAssistantAPIClient.editor({
+    endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+    params: { query: { query, sortBy, sortDirection } },
+  });
 }

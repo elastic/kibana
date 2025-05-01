@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      it.only('cannot add new entries to KB until reindex has completed', async () => {
+      it('cannot add new entries to KB until reindex has completed', async () => {
         const res1 = await createKnowledgeBaseEntry();
 
         expect(res1.status).to.be(503);
