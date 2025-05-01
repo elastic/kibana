@@ -9,32 +9,34 @@
 
 import { noop, once } from 'lodash';
 import {
-  type Container,
+  Container,
   ContainerModule,
+  type ContainerOptions,
   type ResolutionContext,
   type ServiceIdentifier,
 } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
-import { InternalContainer } from '../container';
 
-const Context = Symbol('Context') as ServiceIdentifier<InternalContainer>;
+type ScopeFactory = (id?: PluginOpaqueId) => Container;
+
+const Context = Symbol('Context') as ServiceIdentifier<Container>;
 const Id = Symbol('Id') as ServiceIdentifier<PluginOpaqueId>;
-
-type PluginFactory = (id: PluginOpaqueId) => Container;
-export const Plugin = Symbol.for('Plugin') as ServiceIdentifier<PluginFactory>;
+const Parent = Symbol('Parent') as ServiceIdentifier<Container>;
+export const Scope = Symbol.for('Scope') as ServiceIdentifier<ScopeFactory>;
+export const Fork = Symbol.for('Fork') as ServiceIdentifier<ScopeFactory>;
 
 export class PluginModule extends ContainerModule {
   private services = new WeakMap<Container, Map<ServiceIdentifier, number>>();
   private activated = new WeakSet<Container>();
   private bound = new WeakSet<Container>();
 
-  constructor() {
+  constructor(root: Container, private readonly options?: Omit<ContainerOptions, 'parent'>) {
     super(({ bind, onActivation }) => {
-      bind(OnSetup).toConstantValue(this.onSetup.bind(this));
-      bind(Plugin)
-        .toResolvedValue(this.getPluginFactory.bind(this), [InternalContainer])
-        .inRequestScope();
+      bind(Container).toConstantValue(root);
+      bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
+      bind(OnSetup).toConstantValue(this.registerGlobals.bind(this));
+      bind(Scope).toDynamicValue(this.getScopeFactory.bind(this)).inRequestScope();
       bind(Setup).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       bind(Start).toResolvedValue(this.getDefaultContract.bind(this)).inRequestScope();
       onActivation(Global, this.onGlobalActivation.bind(this));
@@ -52,12 +54,16 @@ export class PluginModule extends ContainerModule {
     { get }: ResolutionContext,
     contract: T
   ): T {
-    const container = get(InternalContainer);
+    const container = get(Container);
     if (this.activated.has(container)) {
       return contract;
     }
 
-    for (let current = container as typeof container.parent; current; current = current.parent) {
+    for (
+      let current: Container | undefined = container;
+      current;
+      current = current.get(Parent, { optional: true })
+    ) {
       if (current.isCurrentBound(hook)) {
         current.getAll(hook).forEach((callback) => callback(container));
       }
@@ -72,54 +78,66 @@ export class PluginModule extends ContainerModule {
     { get }: ResolutionContext,
     service: T
   ): T {
-    const scope = get(InternalContainer);
+    const scope = get(Container);
+    const parent = get(Parent, { optional: true });
     const context = get(Context);
     const id = get(Id);
     const index = this.getServicesCount(scope, service);
 
     this.incrementServicesCount(scope, service);
-    if (scope.parent !== context) {
+    if (parent !== context) {
       this.incrementServicesCount(context, service);
     }
 
     context
       .bind(service)
-      .toResolvedValue<[InternalContainer, InternalContainer | undefined]>(
+      .toResolvedValue<[Container, Container | undefined]>(
         // eslint-disable-next-line @typescript-eslint/no-shadow
         (origin, context = origin) => {
-          const target = context.get(Plugin)(id);
+          const target = context.get(Scope)(id);
 
-          this.onSetup(origin);
-          this.bindServices(target);
+          this.registerGlobals(origin);
+          this.inheritGlobals(target);
 
           return this.getServicesCount(scope, service) > 1
             ? target.getAll(service)[index]
             : target.get(service);
         },
-        [InternalContainer, { serviceIdentifier: Context, optional: true }]
+        [Container, { serviceIdentifier: Context, optional: true }]
       )
       .inRequestScope();
 
     return service;
   }
 
-  protected onSetup(scope: Container) {
-    if (this.bound.has(scope)) {
-      return;
-    }
-    this.bound.add(scope);
+  protected getForkFactory({ get }: ResolutionContext): ScopeFactory {
+    const container = get(Container);
 
-    if (!scope.isCurrentBound(Global)) {
-      return;
-    }
-    scope.getAll(Global);
+    return (id) => {
+      const fork = this.createChild(container);
+
+      if (id) {
+        fork.onDeactivation(
+          id,
+          once(() => fork.unbindAll())
+        );
+      }
+
+      return fork.get(Scope)(id);
+    };
   }
 
-  protected getPluginFactory(context: InternalContainer): PluginFactory {
+  protected getScopeFactory({ get }: ResolutionContext): ScopeFactory {
+    const context = get(Container);
+
     return (id) => {
+      if (!id) {
+        return context;
+      }
+
       if (!context.isCurrentBound(id)) {
-        const parent = context.parent?.get(Plugin)(id) ?? context;
-        const scope = (parent as InternalContainer).createChild();
+        const parent = context.get(Parent, { optional: true })?.get(Scope)(id) ?? context;
+        const scope = this.createChild(parent);
 
         scope.bind(Id).toConstantValue(id);
         scope
@@ -138,7 +156,19 @@ export class PluginModule extends ContainerModule {
     };
   }
 
-  private bindServices(scope: Container) {
+  protected registerGlobals(scope: Container) {
+    if (this.bound.has(scope)) {
+      return;
+    }
+    this.bound.add(scope);
+
+    if (!scope.isCurrentBound(Global)) {
+      return;
+    }
+    scope.getAll(Global);
+  }
+
+  private inheritGlobals(scope: Container) {
     if (this.bound.has(scope)) {
       return;
     }
@@ -155,6 +185,14 @@ export class PluginModule extends ContainerModule {
           .inRequestScope();
       }
     }
+  }
+
+  private createChild(parent: Container) {
+    const child = new Container({ ...this.options, parent });
+    child.bind(Container).toConstantValue(child);
+    child.bind(Parent).toConstantValue(parent);
+
+    return child;
   }
 
   private getServicesCount(scope: Container, service: ServiceIdentifier<unknown>) {
