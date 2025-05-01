@@ -5,18 +5,37 @@
  * 2.0.
  */
 
-import { createOrUpdateFleetSyncedIntegrationsIndex } from './fleet_synced_integrations';
+import {
+  createCCSIndexPatterns,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from './fleet_synced_integrations';
 
 jest.mock('../app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
+    getLogger: jest.fn().mockReturnValue({
+      error: jest.fn(),
+    }),
+    getConfig: jest.fn().mockReturnValue({
+      enableManagedLogsAndMetricsDataviews: true,
+    }),
   },
+}));
+
+jest.mock('@kbn/utils', () => ({
+  createListStream: jest
+    .fn()
+    .mockImplementation((indexPatterns) =>
+      indexPatterns.map((indexPattern: any) => indexPattern.id)
+    ),
 }));
 
 describe('fleet_synced_integrations', () => {
   let esClientMock: any;
   const mockExists = jest.fn();
   const mockGetMapping = jest.fn();
+  let soClientMock: any;
+  let soImporterMock: any;
 
   beforeEach(() => {
     esClientMock = {
@@ -26,6 +45,24 @@ describe('fleet_synced_integrations', () => {
         getMapping: mockGetMapping,
         putMapping: jest.fn(),
       },
+      cluster: {
+        remoteInfo: jest.fn().mockReturnValue({
+          remote1: {},
+          remote2: {},
+        }),
+      },
+    };
+    soClientMock = {
+      updateObjectsSpaces: jest.fn(),
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          { id: 'remote1:logs-*', type: 'index-pattern', namespaces: ['default', '*'] },
+          { id: 'remote2:logs-*', type: 'index-pattern', namespaces: ['default'] },
+        ],
+      }),
+    };
+    soImporterMock = {
+      import: jest.fn(),
     };
   });
 
@@ -69,5 +106,32 @@ describe('fleet_synced_integrations', () => {
     await createOrUpdateFleetSyncedIntegrationsIndex(esClientMock);
 
     expect(esClientMock.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('should create index patterns for remote clusters', async () => {
+    await createCCSIndexPatterns(esClientMock, soClientMock, soImporterMock);
+
+    expect(soImporterMock.import).toHaveBeenCalledWith(
+      expect.objectContaining({
+        readStream: ['remote1:metrics-*', 'remote2:metrics-*'],
+      })
+    );
+
+    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledTimes(3);
+    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
+      [{ id: 'remote1:metrics-*', type: 'index-pattern' }],
+      ['*'],
+      []
+    );
+    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
+      [{ id: 'remote2:logs-*', type: 'index-pattern' }],
+      ['*'],
+      []
+    );
+    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
+      [{ id: 'remote2:metrics-*', type: 'index-pattern' }],
+      ['*'],
+      []
+    );
   });
 });

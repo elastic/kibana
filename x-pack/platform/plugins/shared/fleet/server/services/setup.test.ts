@@ -24,7 +24,11 @@ import { getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig } from './preco
 import { _runSetupWithLock, setupFleet } from './setup';
 import { isPackageInstalled } from './epm/packages/install';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
-import { createOrUpdateFleetSyncedIntegrationsIndex } from './setup/fleet_synced_integrations';
+import {
+  createCCSIndexPatterns,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from './setup/fleet_synced_integrations';
+import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 
 jest.mock('./app_context');
 jest.mock('./preconfiguration');
@@ -49,6 +53,7 @@ jest.mock('./backfill_agentless');
 jest.mock('./epm/packages/install');
 jest.mock('./setup/upgrade_agent_policy_schema_version');
 jest.mock('./setup/fleet_synced_integrations');
+jest.mock('./epm/kibana/assets/saved_objects');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
@@ -103,6 +108,8 @@ describe('setupFleet', () => {
     (isPackageInstalled as jest.Mock).mockResolvedValue(true);
     (upgradeAgentPolicySchemaVersion as jest.Mock).mockResolvedValue(undefined);
     (createOrUpdateFleetSyncedIntegrationsIndex as jest.Mock).mockResolvedValue(undefined);
+    (createCCSIndexPatterns as jest.Mock).mockResolvedValue(undefined);
+    (getSpaceAwareSaveobjectsClients as jest.Mock).mockReturnValue({});
   });
 
   afterEach(async () => {
