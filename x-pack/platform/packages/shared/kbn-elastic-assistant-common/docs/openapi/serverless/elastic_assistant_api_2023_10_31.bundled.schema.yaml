@@ -21,112 +21,107 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              create:
+                - allowed: true
+                  anonymized: false
+                  field: field1
+                - allowed: false
+                  anonymized: true
+                  field: field2
+              delete:
+                ids:
+                  - field1
+                  - field2
+                query: 'field: field1'
+              update:
+                - allowed: true
+                  anonymized: false
+                  id: field1
+                - allowed: false
+                  anonymized: true
+                  id: field2
             schema:
               type: object
               properties:
                 create:
+                  description: Array of objects with anonymization fields to create
                   items:
                     $ref: '#/components/schemas/AnonymizationFieldCreateProps'
-                    description: Array of objects with anonymization fields to create
-                    example:
-                      - allowed: true
-                        anonymized: false
-                        field: field1
-                      - allowed: false
-                        anonymized: true
-                        field: field2
                   type: array
                 delete:
                   description: >-
                     Object with query to filter anonymization fields and array
                     of anonymization fields IDs
-                  example:
-                    ids:
-                      - field1
-                      - field2
-                    query: 'field: field1'
                   type: object
                   properties:
                     ids:
-                      description: Array of anonymization fields IDs
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: Query to filter anonymization fields
                       type: string
                 update:
+                  description: Array of objects with anonymization fields to update
                   items:
                     $ref: '#/components/schemas/AnonymizationFieldUpdateProps'
-                    description: Array of objects with anonymization fields to update
-                    example:
-                      - allowed: true
-                        anonymized: false
-                        id: field1
-                      - allowed: false
-                        anonymized: true
-                        id: field2
                   type: array
       responses:
         '200':
           content:
             application/json:
+              example:
+                anonymization_fields_count: 5
+                attributes:
+                  results:
+                    created:
+                      - allowed: false
+                        anonymized: true
+                        createdAt: '2023-10-31T12:00:00Z'
+                        createdBy: user1
+                        field: field2
+                        id: field2
+                        namespace: default
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        updatedBy: user1
+                    deleted:
+                      - field3
+                    skipped:
+                      - id: field4
+                        name: field4
+                        skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
+                    updated:
+                      - allowed: true
+                        anonymized: false
+                        createdAt: '2023-10-31T12:00:00Z'
+                        createdBy: user1
+                        field: field1
+                        id: field1
+                        namespace: default
+                        timestamp: '2023-10-31T12:00:00Z'
+                        updatedAt: '2023-10-31T12:00:00Z'
+                        updatedBy: user1
+                  summary:
+                    failed: 1
+                    skipped: 1
+                    succeeded: 2
+                    total: 5
+                message: Bulk action completed successfully
+                status_code: 200
+                success: true
               schema:
                 $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResponse'
-                description: >-
-                  The response contains the results of the bulk action,
-                  including the number of updated, created, deleted, and skipped
-                  anonymization fields.
-                example:
-                  anonymization_fields_count: 5
-                  attributes:
-                    results:
-                      created:
-                        - allowed: false
-                          anonymized: true
-                          createdAt: '2023-10-31T12:00:00Z'
-                          createdBy: user1
-                          field: field2
-                          id: field2
-                          namespace: default
-                          timestamp: '2023-10-31T12:00:00Z'
-                          updatedAt: '2023-10-31T12:00:00Z'
-                          updatedBy: user1
-                      deleted:
-                        - field3
-                      skipped:
-                        - id: field4
-                          name: field4
-                          skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
-                      summary:
-                        failed: 1
-                        skipped: 1
-                        succeeded: 2
-                        total: 5
-                      updated:
-                        - allowed: true
-                          anonymized: false
-                          createdAt: '2023-10-31T12:00:00Z'
-                          createdBy: user1
-                          field: field1
-                          id: field1
-                          namespace: default
-                          timestamp: '2023-10-31T12:00:00Z'
-                          updatedAt: '2023-10-31T12:00:00Z'
-                          updatedBy: user1
-                  message: Bulk action completed successfully
-                  status_code: 200
-                  success: true
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request body
+                statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: Invalid request body
-                  statusCode: 400
                 type: object
                 properties:
                   error:
@@ -149,73 +144,77 @@ paths:
       operationId: FindAnonymizationFields
       parameters:
         - description: Fields to return
+          example:
+            - id
+            - field
+            - anonymized
+            - allowed
           in: query
           name: fields
           required: false
           schema:
             items:
-              example:
-                - id
-                - field
-                - anonymized
-                - allowed
               type: string
             type: array
         - description: Search query
+          example: 'field: "user.name"'
           in: query
           name: filter
           required: false
           schema:
-            example: 'field: "user.name"'
             type: string
         - description: Field to sort by
+          example: created_at
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/FindAnonymizationFieldsSortField'
-            example: created_at
         - description: Sort order
+          example: asc
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/SortOrder'
-            example: asc
         - description: Page number
+          example: 1
           in: query
           name: page
           required: false
           schema:
             default: 1
-            example: 1
             minimum: 1
             type: integer
         - description: AnonymizationFields per page
+          example: 20
           in: query
           name: per_page
           required: false
           schema:
             default: 20
-            example: 20
             minimum: 0
             type: integer
       responses:
         '200':
           content:
             application/json:
+              example:
+                data:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
+                page: 1
+                perPage: 20
+                total: 100
               schema:
-                example:
-                  data:
-                    - allowed: true
-                      anonymized: true
-                      created_at: '2023-10-31T12:00:00Z'
-                      field: user.name
-                      id: '1'
-                      updated_at: '2023-10-31T12:00:00Z'
-                  page: 1
-                  perPage: 20
-                  total: 100
                 type: object
                 properties:
                   data:
@@ -237,11 +236,11 @@ paths:
         '400':
           content:
             application/json:
+              example:
+                error: Bad Request
+                message: Invalid request parameters
+                statusCode: 400
               schema:
-                example:
-                  error: Bad Request
-                  message: Invalid request parameters
-                  statusCode: 400
                 type: object
                 properties:
                   error:
@@ -1021,13 +1020,10 @@ components:
       type: object
       properties:
         allowed:
-          description: Whether field is allowed to be sent to the model
           type: boolean
         anonymized:
-          description: Whether field is anonymized
           type: boolean
         field:
-          description: Field name
           type: string
       required:
         - field
@@ -1078,6 +1074,7 @@ components:
       required:
         - id
         - field
+        - timestamp
     AnonymizationFieldsBulkActionSkipReason:
       description: Reason why the anonymization field was not modified
       enum:
@@ -1102,7 +1099,6 @@ components:
       type: object
       properties:
         anonymization_fields_count:
-          description: the number of anonymization fields processed
           type: integer
         attributes:
           type: object
@@ -1110,26 +1106,26 @@ components:
             errors:
               items:
                 $ref: '#/components/schemas/NormalizedAnonymizationFieldError'
-                description: array of anonymization fields errors
               type: array
             results:
               $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResults'
-              description: results of the anonymization fields bulk action
             summary:
               $ref: '#/components/schemas/BulkCrudActionSummary'
           required:
             - results
             - summary
+            - errors
         message:
-          description: the message of the response
           type: string
         status_code:
-          description: the status code of the response
           type: integer
         success:
-          description: Indicates whether the request was successful
           type: boolean
       required:
+        - success
+        - status_code
+        - message
+        - anonymization_fields_count
         - attributes
     AnonymizationFieldsBulkCrudActionResults:
       type: object
@@ -1137,22 +1133,19 @@ components:
         created:
           items:
             $ref: '#/components/schemas/AnonymizationFieldResponse'
-            description: array of created anonymization fields
           type: array
         deleted:
           items:
-            description: array of deleted anonymization fields IDs
+            description: array of deleted anonymization field IDs
             type: string
           type: array
         skipped:
           items:
             $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipResult'
-            description: array of anonymization fields that were not modified
           type: array
         updated:
           items:
             $ref: '#/components/schemas/AnonymizationFieldResponse'
-            description: array of updated anonymization fields
           type: array
       required:
         - updated
@@ -1163,13 +1156,10 @@ components:
       type: object
       properties:
         allowed:
-          description: Whether field is allowed to be sent to the model
           type: boolean
         anonymized:
-          description: Whether field is anonymized
           type: boolean
         id:
-          description: Field id
           type: string
       required:
         - id
@@ -1960,9 +1950,9 @@ components:
       type: object
       properties:
         anonymization_fields:
+          description: array of anonymization fields that caused the error
           items:
             $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
-            description: array of anonymization fields that caused the error
           type: array
         err_code:
           description: error code

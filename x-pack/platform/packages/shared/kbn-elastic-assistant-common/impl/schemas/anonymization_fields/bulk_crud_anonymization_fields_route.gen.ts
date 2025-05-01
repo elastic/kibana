@@ -72,6 +72,9 @@ export const NormalizedAnonymizationFieldError = z.object({
    * error code
    */
   err_code: z.string().optional(),
+  /**
+   * array of anonymization fields that caused the error
+   */
   anonymization_fields: z.array(AnonymizationFieldDetailsInError),
 });
 
@@ -84,7 +87,7 @@ export const AnonymizationFieldResponse = z.object({
   /**
    * Timestamp of the field creation
    */
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyString,
   /**
    * Field name
    */
@@ -141,73 +144,34 @@ export type AnonymizationFieldsBulkCrudActionResponse = z.infer<
   typeof AnonymizationFieldsBulkCrudActionResponse
 >;
 export const AnonymizationFieldsBulkCrudActionResponse = z.object({
-  /**
-   * Indicates whether the request was successful
-   */
-  success: z.boolean().optional(),
-  /**
-   * the status code of the response
-   */
-  status_code: z.number().int().optional(),
-  /**
-   * the message of the response
-   */
-  message: z.string().optional(),
-  /**
-   * the number of anonymization fields processed
-   */
-  anonymization_fields_count: z.number().int().optional(),
+  success: z.boolean(),
+  status_code: z.number().int(),
+  message: z.string(),
+  anonymization_fields_count: z.number().int(),
   attributes: z.object({
-    /**
-     * results of the anonymization fields bulk action
-     */
     results: AnonymizationFieldsBulkCrudActionResults,
     summary: BulkCrudActionSummary,
-    errors: z.array(NormalizedAnonymizationFieldError).optional(),
+    errors: z.array(NormalizedAnonymizationFieldError),
   }),
 });
 
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
 export const BulkActionBase = z.object({
-  /**
-   * Query to filter anonymization fields
-   */
   query: z.string().optional(),
-  /**
-   * Array of anonymization fields IDs
-   */
   ids: z.array(z.string()).min(1).optional(),
 });
 
 export type AnonymizationFieldCreateProps = z.infer<typeof AnonymizationFieldCreateProps>;
 export const AnonymizationFieldCreateProps = z.object({
-  /**
-   * Field name
-   */
   field: z.string(),
-  /**
-   * Whether field is allowed to be sent to the model
-   */
   allowed: z.boolean().optional(),
-  /**
-   * Whether field is anonymized
-   */
   anonymized: z.boolean().optional(),
 });
 
 export type AnonymizationFieldUpdateProps = z.infer<typeof AnonymizationFieldUpdateProps>;
 export const AnonymizationFieldUpdateProps = z.object({
-  /**
-   * Field id
-   */
   id: z.string(),
-  /**
-   * Whether field is allowed to be sent to the model
-   */
   allowed: z.boolean().optional(),
-  /**
-   * Whether field is anonymized
-   */
   anonymized: z.boolean().optional(),
 });
 
@@ -219,16 +183,19 @@ export const PerformAnonymizationFieldsBulkActionRequestBody = z.object({
    * Object with query to filter anonymization fields and array of anonymization fields IDs
    */
   delete: BulkActionBase.optional(),
+  /**
+   * Array of objects with anonymization fields to create
+   */
   create: z.array(AnonymizationFieldCreateProps).optional(),
+  /**
+   * Array of objects with anonymization fields to update
+   */
   update: z.array(AnonymizationFieldUpdateProps).optional(),
 });
 export type PerformAnonymizationFieldsBulkActionRequestBodyInput = z.input<
   typeof PerformAnonymizationFieldsBulkActionRequestBody
 >;
 
-/**
- * The response contains the results of the bulk action, including the number of updated, created, deleted, and skipped anonymization fields.
- */
 export type PerformAnonymizationFieldsBulkActionResponse = z.infer<
   typeof PerformAnonymizationFieldsBulkActionResponse
 >;
