@@ -21,7 +21,7 @@ export const SettingUpKnowledgeBase = () => (
     <EuiSpacer size="m" />
 
     <EuiButtonEmpty
-      data-test-subj="observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseButton"
+      data-test-subj="observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseText"
       isLoading
     >
       {i18n.translate('xpack.aiAssistant.welcomeMessage.div.settingUpKnowledgeBaseLabel', {

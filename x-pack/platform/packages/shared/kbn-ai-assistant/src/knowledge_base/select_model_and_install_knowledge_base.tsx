@@ -151,6 +151,7 @@ export function SelectModelAndInstallKnowledgeBase({
             valueOfSelected={selectedInferenceId}
             onChange={(value) => setSelectedInferenceId(value)}
             disabled={isInstalling}
+            data-test-subj="observabilityAiAssistantKnowledgeBaseModelDropdown"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

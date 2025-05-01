@@ -40,7 +40,11 @@ export function WelcomeMessageKnowledgeBase({
             <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
+            <EuiText
+              color="subdued"
+              size="s"
+              data-test-subj="observabilityAiAssistantKnowledgeBaseInstalled"
+            >
               {i18n.translate(
                 'xpack.aiAssistant.welcomeMessage.knowledgeBaseSuccessfullyInstalledLabel',
                 { defaultMessage: 'Knowledge base successfully installed' }

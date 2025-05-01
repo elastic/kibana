@@ -184,7 +184,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             });
 
             it('shows a setup kb button', async () => {
-              await testSubjects.existOrFail(ui.pages.conversations.retryButton);
+              await testSubjects.existOrFail(ui.pages.conversations.installKnowledgeBaseButton);
             });
 
             it('has an input field enabled', async () => {

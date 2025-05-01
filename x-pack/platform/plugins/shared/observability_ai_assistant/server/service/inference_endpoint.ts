@@ -156,7 +156,7 @@ export async function getKbModelStatus({
 
   if (trainedModelStatsResponse.trained_model_stats?.length && !modelStats) {
     // model has been deployed at least once, but stopped later
-    kbState = KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT;
+    kbState = KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
   } else if (modelStats?.deployment_stats?.state === 'failed') {
     kbState = KnowledgeBaseState.ERROR;
   } else if (

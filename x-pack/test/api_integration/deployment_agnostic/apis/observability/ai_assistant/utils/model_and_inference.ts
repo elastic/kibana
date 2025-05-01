@@ -182,3 +182,17 @@ export async function deleteModel(
     }
   }
 }
+
+export async function stopTinyElserModel(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const log = getService('log');
+  const ml = getService('ml');
+
+  try {
+    await ml.api.stopTrainedModelDeploymentES(TINY_ELSER_INFERENCE_ID, true);
+    log.info(`Knowledge base model (${TINY_ELSER_MODEL_ID}) stopped.`);
+  } catch (e) {
+    log.error(`Could not stop knowledge base model (${TINY_ELSER_MODEL_ID}): ${e}`);
+  }
+}

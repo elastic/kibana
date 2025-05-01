@@ -36,7 +36,11 @@ const WarmUpModel = ({
   };
 
   const label = (
-    <EuiText color="subdued" size="s">
+    <EuiText
+      color="subdued"
+      size="s"
+      data-test-subj="observabilityAiAssistantKnowledgeBaseModelPendingText"
+    >
       {i18n.translate(
         knowledgeBase.isWarmingUpModel
           ? 'xpack.aiAssistant.welcomeMessage.redeployingKnowledgeBaseTextLabel'
@@ -64,7 +68,7 @@ const WarmUpModel = ({
             color="primary"
             fill
             isLoading={knowledgeBase.isWarmingUpModel}
-            data-test-subj="observabilityAiAssistantWelcomeMessageReDeployModelButton"
+            data-test-subj="observabilityAiAssistantKnowledgeBaseReDeployModelButton"
             onClick={handleWarmup}
           >
             {i18n.translate('xpack.aiAssistant.knowledgeBase.wakeUpKnowledgeBaseModel', {
@@ -134,7 +138,7 @@ export const KnowledgeBaseInstallationStatusPanel = ({
           </EuiFlexItem>
         </>
       );
-    case KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT:
+    case KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT:
       return <WarmUpModel knowledgeBase={knowledgeBase} pendingDeployment />;
     case KnowledgeBaseState.DEPLOYING_MODEL:
       return (
