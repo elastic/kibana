@@ -19,6 +19,7 @@ import {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   indexPatternTypes,
 } from '../epm/kibana/index_pattern/install';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 export const FLEET_SYNCED_INTEGRATIONS_INDEX_NAME = 'fleet-synced-integrations';
 export const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
@@ -167,16 +168,39 @@ export async function createCCSIndexPatterns(
     }
   }
 
-  await savedObjectsImporter.import({
-    overwrite: false,
-    readStream: createListStream(indexPatternSavedObjectsWithRemoteCluster),
-    createNewCopies: false,
-    refresh: false,
-    managed: true,
+  const results = await savedObjectsClient.find({
+    type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
+    namespaces: ['*'],
+    fields: ['namespaces'],
   });
+  const existingIndexPatterns = results.saved_objects.reduce((acc, savedObject) => {
+    acc[savedObject.id] = { namespaces: savedObject.namespaces ?? [], id: savedObject.id };
+    return acc;
+  }, {} as Record<string, { namespaces: string[]; id: string }>);
+
+  const notExistingIndexPatterns = indexPatternSavedObjectsWithRemoteCluster.filter(
+    (indexPatternSavedObject) => !existingIndexPatterns[indexPatternSavedObject.id]
+  );
+
+  if (notExistingIndexPatterns.length > 0) {
+    await savedObjectsImporter.import({
+      overwrite: false,
+      readStream: createListStream(notExistingIndexPatterns),
+      createNewCopies: false,
+      refresh: false,
+      managed: true,
+    });
+  }
+
+  const indexPatternsNotInAllSpaces = indexPatternSavedObjectsWithRemoteCluster.filter(
+    (indexPatternSavedObject) =>
+      !existingIndexPatterns[indexPatternSavedObject.id] ||
+      !existingIndexPatterns[indexPatternSavedObject.id].namespaces.includes('*')
+  );
 
   // Make index patterns available in all spaces
-  for (const indexPatternSavedObject of indexPatternSavedObjectsWithRemoteCluster) {
+  for (const indexPatternSavedObject of indexPatternsNotInAllSpaces) {
     try {
       await savedObjectsClient.updateObjectsSpaces(
         [{ id: indexPatternSavedObject.id, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }],

@@ -54,6 +54,12 @@ describe('fleet_synced_integrations', () => {
     };
     soClientMock = {
       updateObjectsSpaces: jest.fn(),
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [
+          { id: 'remote1:logs-*', type: 'index-pattern', namespaces: ['default', '*'] },
+          { id: 'remote2:logs-*', type: 'index-pattern', namespaces: ['default'] },
+        ],
+      }),
     };
     soImporterMock = {
       import: jest.fn(),
@@ -107,15 +113,11 @@ describe('fleet_synced_integrations', () => {
 
     expect(soImporterMock.import).toHaveBeenCalledWith(
       expect.objectContaining({
-        readStream: ['remote1:logs-*', 'remote1:metrics-*', 'remote2:logs-*', 'remote2:metrics-*'],
+        readStream: ['remote1:metrics-*', 'remote2:metrics-*'],
       })
     );
 
-    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
-      [{ id: 'remote1:logs-*', type: 'index-pattern' }],
-      ['*'],
-      []
-    );
+    expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledTimes(3);
     expect(soClientMock.updateObjectsSpaces).toHaveBeenCalledWith(
       [{ id: 'remote1:metrics-*', type: 'index-pattern' }],
       ['*'],
