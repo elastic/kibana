@@ -22,12 +22,14 @@ import {
 import { toolbarSlice } from './toolbar/slice';
 import { headerSlice } from './header/slice';
 import { navigationSlice } from './navigation/slice';
+import { notificationSlice } from './notifications/slice';
 
 const initialState = {
   workspace: workspaceSlice.getInitialState(),
   toolbar: toolbarSlice.getInitialState(),
   header: headerSlice.getInitialState(),
   navigation: navigationSlice.getInitialState(),
+  notification: notificationSlice.getInitialState(),
 };
 
 const preloadedState = JSON.parse(
@@ -44,6 +46,7 @@ export const createStore = () => {
       navigation: navigationReducer,
       toolbar: toolbarReducer,
       header: headerReducer,
+      notifications: notificationSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(listenerMiddleware.middleware),

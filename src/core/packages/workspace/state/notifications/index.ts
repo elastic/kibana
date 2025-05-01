@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  ErrorToastOptions,
-  ToastOptions,
-  Toast,
-  ToastInput,
-  IToasts,
-  ToastInputFields,
-  INotificationEvents,
-  NotificationEvent,
-  TypedNotificationEvent,
-  RegisteredNotificationEventType,
-  NotificationEventTypeData,
-} from './src/types';
-export type {
-  ToastsSetup,
-  ToastsStart,
-  NotificationsSetup,
-  NotificationsStart,
-} from './src/contracts';
+export {
+  type WorkspaceNotification,
+  notificationReducer,
+  addNotification,
+  markAsArchived,
+  markAsRead,
+  removeNotification,
+} from './slice';
+
+export {
+  useArchivedNotifications,
+  useGroupedNotifications,
+  useNotifications,
+  useNotificationsState,
+  useReadNotifications,
+  useUnreadNotificationCount,
+  useUnreadNotifications,
+} from './hooks';

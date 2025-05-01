@@ -80,4 +80,18 @@ export {
   useWorkspaceTools,
 } from './provider';
 
+export {
+  type WorkspaceNotification,
+  addNotification,
+  markAsArchived,
+  markAsRead,
+  removeNotification,
+  useArchivedNotifications,
+  useGroupedNotifications,
+  useNotifications,
+  useReadNotifications,
+  useUnreadNotificationCount,
+  useUnreadNotifications,
+} from './notifications';
+
 export type { ToolbarSize } from './types';
