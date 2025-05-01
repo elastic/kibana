@@ -324,11 +324,26 @@ paths:
         - Chat Complete API
   /api/security_ai_assistant/current_user/conversations:
     post:
-      description: Create a new Security AI Assistant conversation.
+      description: >-
+        Create a new Security AI Assistant conversation. This endpoint allows
+        the user to initiate a conversation with the Security AI Assistant by
+        providing the required parameters.
       operationId: CreateConversation
       requestBody:
         content:
           application/json:
+            example:
+              apiConfig:
+                actionTypeId: '67890'
+                connectorId: '12345'
+              category: assistant
+              excludeFromLastConversationStorage: false
+              messages:
+                - content: Hello, how can I assist you today?
+                  role: system
+                  timestamp: '2023-10-31T12:00:00Z'
+              replacements: {}
+              title: Security Discussion
             schema:
               $ref: '#/components/schemas/ConversationCreateProps'
         required: true
@@ -336,9 +351,29 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '67890'
+                  connectorId: '12345'
+                category: assistant
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: false
+                id: abc123
+                messages:
+                  - content: Hello, how can I assist you today?
+                    role: system
+                    timestamp: '2023-10-31T12:00:00Z'
+                replacements: {}
+                title: Security Discussion
+                updatedAt: '2023-10-31T12:01:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call.
+          description: >-
+            Indicates a successful call. The conversation was created
+            successfully.
         '400':
           content:
             application/json:
@@ -346,60 +381,86 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: 'Missing required parameter: title'
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: >-
+            Generic Error. This response indicates an issue with the request,
+            such as missing required parameters or incorrect data.
       summary: Create a conversation
       tags:
         - Security AI Assistant API
         - Conversation API
   /api/security_ai_assistant/current_user/conversations/_find:
     get:
-      description: Get a list of all conversations for the current user.
+      description: >-
+        Get a list of all conversations for the current user. This endpoint
+        allows users to search, filter, sort, and paginate through their
+        conversations.
       operationId: FindConversations
       parameters:
-        - in: query
+        - description: >-
+            A list of fields to include in the response. If omitted, all fields
+            are returned.
+          in: query
           name: fields
           required: false
           schema:
+            example:
+              - id
+              - title
+              - createdAt
             items:
               type: string
             type: array
-        - description: Search query
+        - description: >-
+            A search query to filter the conversations. Can match against
+            titles, messages, or other conversation attributes.
           in: query
           name: filter
           required: false
           schema:
+            example: Security Issue
             type: string
-        - description: Field to sort by
+        - description: >-
+            The field by which to sort the results. Valid fields are
+            `created_at`, `title`, and `updated_at`.
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/FindConversationsSortField'
-        - description: Sort order
+            example: created_at
+        - description: >-
+            The order in which to sort the results. Can be either `asc` for
+            ascending or `desc` for descending.
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/SortOrder'
-        - description: Page number
+            example: desc
+        - description: The page number of the results to retrieve. Default is 1.
           in: query
           name: page
           required: false
           schema:
             default: 1
+            example: 1
             minimum: 1
             type: integer
-        - description: Conversations per page
+        - description: The number of conversations to return per page. Default is 20.
           in: query
           name: per_page
           required: false
           schema:
             default: 20
+            example: 20
             minimum: 0
             type: integer
       responses:
@@ -410,21 +471,32 @@ paths:
                 type: object
                 properties:
                   data:
+                    description: A list of conversations.
                     items:
                       $ref: '#/components/schemas/ConversationResponse'
                     type: array
                   page:
+                    description: The current page of the results.
+                    example: 1
                     type: integer
                   perPage:
+                    description: The number of results returned per page.
+                    example: 20
                     type: integer
                   total:
+                    description: >-
+                      The total number of conversations matching the filter
+                      criteria.
+                    example: 100
                     type: integer
                 required:
                   - page
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: >-
+            Successful response, returns a paginated list of conversations
+            matching the specified criteria.
         '400':
           content:
             application/json:
@@ -432,22 +504,30 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: Invalid filter query parameter
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: >-
+            Generic Error. The request could not be processed due to an invalid
+            query parameter or other issue.
       summary: Get conversations
       tags:
         - Security AI Assistant API
         - Conversations API
   /api/security_ai_assistant/current_user/conversations/{id}:
     delete:
-      description: Delete an existing conversation using the conversation ID.
+      description: >-
+        Delete an existing conversation using the conversation ID. This endpoint
+        allows users to permanently delete a conversation.
       operationId: DeleteConversation
       parameters:
         - description: The conversation's `id` value.
+          example: abc123
           in: path
           name: id
           required: true
@@ -457,9 +537,29 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '67890'
+                  connectorId: '12345'
+                category: assistant
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: false
+                id: abc123
+                messages:
+                  - content: The conversation has been deleted.
+                    role: system
+                    timestamp: '2023-10-31T12:35:00Z'
+                replacements: {}
+                title: Deleted Security Discussion
+                updatedAt: '2023-10-31T12:01:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call.
+          description: >-
+            Indicates a successful call. The conversation was deleted
+            successfully.
         '400':
           content:
             application/json:
@@ -467,21 +567,30 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: Invalid conversation ID
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error. This response indicates an issue with the request.
       summary: Delete a conversation
       tags:
         - Security AI Assistant API
         - Conversation API
     get:
-      description: Get the details of an existing conversation using the conversation ID.
+      description: >-
+        Get the details of an existing conversation using the conversation ID.
+        This allows users to fetch the specific conversation data by its unique
+        ID.
       operationId: ReadConversation
       parameters:
-        - description: The conversation's `id` value.
+        - description: >-
+            The conversation's `id` value, a unique identifier for the
+            conversation.
+          example: abc123
           in: path
           name: id
           required: true
@@ -491,9 +600,27 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '67890'
+                  connectorId: '12345'
+                category: assistant
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: false
+                id: abc123
+                messages:
+                  - content: Hello, how can I assist you today?
+                    role: system
+                    timestamp: '2023-10-31T12:00:00Z'
+                replacements: {}
+                title: Security Discussion
+                updatedAt: '2023-10-31T12:01:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call.
+          description: Indicates a successful call. The conversation details are returned.
         '400':
           content:
             application/json:
@@ -501,21 +628,27 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: Invalid conversation ID
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error. The request could not be processed due to an error.
       summary: Get a conversation
       tags:
         - Security AI Assistant API
         - Conversations API
     put:
-      description: Update an existing conversation using the conversation ID.
+      description: >-
+        Update an existing conversation using the conversation ID. This endpoint
+        allows users to modify the details of an existing conversation.
       operationId: UpdateConversation
       parameters:
         - description: The conversation's `id` value.
+          example: abc123
           in: path
           name: id
           required: true
@@ -524,6 +657,18 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              apiConfig:
+                actionTypeId: '09876'
+                connectorId: '54321'
+              category: insights
+              excludeFromLastConversationStorage: true
+              messages:
+                - content: The issue was resolved.
+                  role: assistant
+                  timestamp: '2023-10-31T12:30:00Z'
+              replacements: {}
+              title: Updated Security Discussion
             schema:
               $ref: '#/components/schemas/ConversationUpdateProps'
         required: true
@@ -531,9 +676,29 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                apiConfig:
+                  actionTypeId: '09876'
+                  connectorId: '54321'
+                category: insights
+                createdAt: '2023-10-31T12:01:00Z'
+                excludeFromLastConversationStorage: true
+                id: abc123
+                messages:
+                  - content: The issue was resolved.
+                    role: assistant
+                    timestamp: '2023-10-31T12:30:00Z'
+                replacements: {}
+                title: Updated Security Discussion
+                updatedAt: '2023-10-31T12:31:00Z'
+                users:
+                  - id: user1
+                    name: John Doe
               schema:
                 $ref: '#/components/schemas/ConversationResponse'
-          description: Indicates a successful call.
+          description: >-
+            Indicates a successful call. The conversation was updated
+            successfully.
         '400':
           content:
             application/json:
@@ -541,12 +706,17 @@ paths:
                 type: object
                 properties:
                   error:
+                    example: Bad Request
                     type: string
                   message:
+                    example: 'Missing required field: title'
                     type: string
                   statusCode:
+                    example: 400
                     type: number
-          description: Generic Error
+          description: >-
+            Generic Error. This response indicates an issue with the request,
+            such as missing required parameters or incorrect data.
       summary: Update a conversation
       tags:
         - Security AI Assistant API
@@ -1192,20 +1362,25 @@ components:
       type: object
       properties:
         actionTypeId:
-          description: action type id
+          description: Action type ID
+          example: actionType456
           type: string
         connectorId:
-          description: connector id
+          description: Connector ID
+          example: connector123
           type: string
         defaultSystemPromptId:
-          description: defaultSystemPromptId
+          description: Default system prompt ID
+          example: systemPrompt001
           type: string
         model:
-          description: model
+          description: Model
+          example: gpt-4
           type: string
         provider:
           $ref: '#/components/schemas/Provider'
           description: Provider
+          example: OpenAI
       required:
         - connectorId
         - actionTypeId
@@ -1215,9 +1390,11 @@ components:
       properties:
         id:
           description: Id of the content reference
+          example: content123
           type: string
         type:
           description: Type of the content reference
+          example: SecurityAlert
           type: string
       required:
         - id
@@ -1354,6 +1531,7 @@ components:
       enum:
         - assistant
         - insights
+      example: assistant
       type: string
     ConversationConfidence:
       description: The conversation confidence.
@@ -1361,6 +1539,7 @@ components:
         - low
         - medium
         - high
+      example: high
       type: string
     ConversationCreateProps:
       type: object
@@ -1371,11 +1550,13 @@ components:
         category:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
+          example: assistant
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         id:
           description: The conversation id.
+          example: conversation123
           type: string
         messages:
           description: The conversation messages.
@@ -1386,6 +1567,7 @@ components:
           $ref: '#/components/schemas/Replacements'
         title:
           description: The conversation title.
+          example: Security AI Assistant Setup
           type: string
       required:
         - title
@@ -1398,11 +1580,13 @@ components:
         category:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
+          example: assistant
         createdAt:
           description: The time conversation was created.
+          example: '2025-04-30T14:00:00Z'
           type: string
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         id:
           $ref: '#/components/schemas/NonEmptyString'
@@ -1413,6 +1597,7 @@ components:
           type: array
         namespace:
           description: Kibana space
+          example: default
           type: string
         replacements:
           $ref: '#/components/schemas/Replacements'
@@ -1422,9 +1607,11 @@ components:
           $ref: '#/components/schemas/NonEmptyString'
         title:
           description: The conversation title.
+          example: Security AI Assistant Setup
           type: string
         updatedAt:
           description: The last time conversation was updated.
+          example: '2025-04-30T16:30:00Z'
           type: string
         users:
           items:
@@ -1445,15 +1632,21 @@ components:
           description: >-
             How confident you are about this being a correct and useful
             learning.
+          example: high
         content:
           description: Summary text of the conversation over time.
+          example: >-
+            This conversation covered how to configure the Security AI
+            Assistant.
           type: string
         public:
           description: Define if summary is marked as publicly available.
+          example: true
           type: boolean
         timestamp:
           $ref: '#/components/schemas/NonEmptyString'
           description: The timestamp summary was updated.
+          example: '2025-04-30T16:00:00Z'
     ConversationUpdateProps:
       type: object
       properties:
@@ -1463,8 +1656,9 @@ components:
         category:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
+          example: assistant
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         id:
           $ref: '#/components/schemas/NonEmptyString'
@@ -1479,6 +1673,7 @@ components:
           $ref: '#/components/schemas/ConversationSummary'
         title:
           description: The conversation title.
+          example: Updated Security AI Assistant Setup
           type: string
       required:
         - id
@@ -1605,17 +1800,21 @@ components:
           properties:
             label:
               description: Label of the query
+              example: High Severity Alerts
               type: string
             query:
               description: An ESQL query
+              example: SELECT * FROM alerts WHERE severity = "high"
               type: string
             timerange:
               description: Time range to select in the time picker.
               type: object
               properties:
                 from:
+                  example: '2025-04-01T00:00:00Z'
                   type: string
                 to:
+                  example: '2025-04-30T23:59:59Z'
                   type: string
               required:
                 - from
@@ -1623,6 +1822,7 @@ components:
             type:
               enum:
                 - EsqlQuery
+              example: EsqlQuery
               type: string
           required:
             - type
@@ -1638,10 +1838,14 @@ components:
         - updated_at
       type: string
     FindConversationsSortField:
+      description: >-
+        The field by which to sort the conversations. Possible values are
+        `created_at`, `title`, and `updated_at`.
       enum:
         - created_at
         - title
         - updated_at
+      example: created_at
       type: string
     FindKnowledgeBaseEntriesSortField:
       enum:
@@ -1890,13 +2094,16 @@ components:
           properties:
             knowledgeBaseEntryId:
               description: Id of the Knowledge Base Entry
+              example: kbentry456
               type: string
             knowledgeBaseEntryName:
               description: Name of the knowledge base entry
+              example: Network Security Best Practices
               type: string
             type:
               enum:
                 - KnowledgeBaseEntry
+              example: KnowledgeBaseEntry
               type: string
           required:
             - type
@@ -1971,25 +2178,29 @@ components:
       properties:
         content:
           description: Message content.
+          example: Hello, how can I assist you today?
           type: string
         isError:
           description: Is error message.
+          example: false
           type: boolean
         metadata:
           $ref: '#/components/schemas/MessageMetadata'
-          description: metadata
+          description: Metadata
         reader:
           $ref: '#/components/schemas/Reader'
           description: Message content.
         role:
           $ref: '#/components/schemas/MessageRole'
           description: Message role.
+          example: assistant
         timestamp:
           $ref: '#/components/schemas/NonEmptyString'
           description: The timestamp message was sent or received.
+          example: '2025-04-30T15:30:00Z'
         traceData:
           $ref: '#/components/schemas/TraceData'
-          description: trace Data
+          description: Trace data
       required:
         - timestamp
         - content
@@ -2007,13 +2218,14 @@ components:
       properties:
         contentReferences:
           $ref: '#/components/schemas/ContentReferences'
-          description: Data refered to by the message content.
+          description: Data referred to by the message content.
     MessageRole:
       description: Message role.
       enum:
         - system
         - user
         - assistant
+      example: assistant
       type: string
     NonEmptyString:
       description: A string that does not contain only whitespace characters
@@ -2082,13 +2294,16 @@ components:
           properties:
             title:
               description: Title of the documentation
+              example: Getting Started with Security AI Assistant
               type: string
             type:
               enum:
                 - ProductDocumentation
+              example: ProductDocumentation
               type: string
             url:
               description: URL to the documentation
+              example: https://docs.example.com/security-ai-assistant
               type: string
           required:
             - type
@@ -2274,6 +2489,7 @@ components:
         - OpenAI
         - Azure OpenAI
         - Other
+      example: OpenAI
       type: string
     Reader:
       additionalProperties: true
@@ -2281,7 +2497,7 @@ components:
     Replacements:
       additionalProperties:
         type: string
-      description: Replacements object used to anonymize/deanomymize messsages
+      description: Replacements object used to anonymize/deanonymize messages
       type: object
     ResponseFields:
       type: object
@@ -2313,10 +2529,12 @@ components:
           properties:
             alertId:
               description: ID of the Alert
+              example: alert789
               type: string
             type:
               enum:
                 - SecurityAlert
+              example: SecurityAlert
               type: string
           required:
             - type
@@ -2330,6 +2548,7 @@ components:
             type:
               enum:
                 - SecurityAlertsPage
+              example: SecurityAlertsPage
               type: string
           required:
             - type
@@ -2345,9 +2564,11 @@ components:
       properties:
         traceId:
           description: Could be any string, not necessarily a UUID
+          example: d9876543-f0a1-2345-6789-abcdef123456
           type: string
         transactionId:
           description: Could be any string, not necessarily a UUID
+          example: a1234567-bc89-0def-1234-56789abcdef0
           type: string
     User:
       description: Could be any string, not necessarily a UUID

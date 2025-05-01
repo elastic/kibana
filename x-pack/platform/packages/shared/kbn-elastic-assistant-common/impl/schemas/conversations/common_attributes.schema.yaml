@@ -14,9 +14,11 @@ components:
         transactionId:
           type: string
           description: Could be any string, not necessarily a UUID
+          example: 'a1234567-bc89-0def-1234-56789abcdef0'
         traceId:
           type: string
           description: Could be any string, not necessarily a UUID
+          example: 'd9876543-f0a1-2345-6789-abcdef123456'
 
     BaseContentReference:
       type: object
@@ -25,12 +27,14 @@ components:
         - 'id'
         - 'type'
       properties:
-        id: 
+        id:
           type: string
           description: Id of the content reference
-        type: 
+          example: 'content123'
+        type:
           type: string
           description: Type of the content reference
+          example: 'SecurityAlert'
 
     KnowledgeBaseEntryContentReference:
       description: References a knowledge base entry
@@ -42,15 +46,18 @@ components:
             - 'knowledgeBaseEntryId'
             - 'knowledgeBaseEntryName'
           properties:
-            type: 
+            type:
               type: string
               enum: [KnowledgeBaseEntry]
+              example: 'KnowledgeBaseEntry'
             knowledgeBaseEntryId:
               description: Id of the Knowledge Base Entry
               type: string
+              example: 'kbentry456'
             knowledgeBaseEntryName:
               description: Name of the knowledge base entry
               type: string
+              example: 'Network Security Best Practices'
 
     EsqlContentReference:
       description: References an ESQL query
@@ -62,26 +69,31 @@ components:
             - 'query'
             - 'label'
           properties:
-            type: 
+            type:
               type: string
               enum: [EsqlQuery]
+              example: 'EsqlQuery'
             query:
               description: An ESQL query
               type: string
+              example: 'SELECT * FROM alerts WHERE severity = "high"'
             label:
               description: Label of the query
               type: string
+              example: 'High Severity Alerts'
             timerange:
-                description: Time range to select in the time picker.
-                type: object
-                required:
-                  - 'from'
-                  - 'to'
-                properties:
-                  from:
-                    type: string
-                  to:
-                    type: string
+              description: Time range to select in the time picker.
+              type: object
+              required:
+                - 'from'
+                - 'to'
+              properties:
+                from:
+                  type: string
+                  example: '2025-04-01T00:00:00Z'
+                to:
+                  type: string
+                  example: '2025-04-30T23:59:59Z'
 
     SecurityAlertContentReference:
       description: References a security alert
@@ -92,12 +104,14 @@ components:
             - 'type'
             - 'alertId'
           properties:
-            type: 
+            type:
               type: string
               enum: [SecurityAlert]
+              example: 'SecurityAlert'
             alertId:
               description: ID of the Alert
               type: string
+              example: 'alert789'
 
     SecurityAlertsPageContentReference:
       description: References the security alerts page
@@ -107,13 +121,14 @@ components:
           required:
             - 'type'
           properties:
-            type: 
+            type:
               type: string
               enum: [SecurityAlertsPage]
+              example: 'SecurityAlertsPage'
 
     ProductDocumentationContentReference:
-        description: References the product documentation
-        allOf:
+      description: References the product documentation
+      allOf:
         - $ref: '#/components/schemas/BaseContentReference'
         - type: object
           required:
@@ -121,15 +136,18 @@ components:
             - 'title'
             - 'url'
           properties:
-            type: 
+            type:
               type: string
               enum: [ProductDocumentation]
+              example: 'ProductDocumentation'
             title:
               description: Title of the documentation
               type: string
+              example: 'Getting Started with Security AI Assistant'
             url:
               description: URL to the documentation
               type: string
+              example: 'https://docs.example.com/security-ai-assistant'
 
     ContentReference:
       description: A content reference
@@ -157,15 +175,15 @@ components:
       type: object
       description: Message metadata
       properties:
-        contentReferences: 
+        contentReferences:
           $ref: '#/components/schemas/ContentReferences'
-          description: Data refered to by the message content.
+          description: Data referred to by the message content.
 
     Replacements:
       type: object
       additionalProperties:
         type: string
-      description: Replacements object used to anonymize/deanomymize messsages
+      description: Replacements object used to anonymize/deanonymize messages
 
     Reader:
       type: object
@@ -178,6 +196,7 @@ components:
         - OpenAI
         - Azure OpenAI
         - Other
+      example: 'OpenAI'
 
     MessageRole:
       type: string
@@ -186,6 +205,7 @@ components:
         - system
         - user
         - assistant
+      example: 'assistant'
 
     ConversationCategory:
       type: string
@@ -193,6 +213,7 @@ components:
       enum:
         - assistant
         - insights
+      example: 'assistant'
 
     ConversationConfidence:
       type: string
@@ -201,6 +222,7 @@ components:
         - low
         - medium
         - high
+      example: 'high'
 
     Message:
       type: object
@@ -213,24 +235,28 @@ components:
         content:
           type: string
           description: Message content.
+          example: 'Hello, how can I assist you today?'
         reader:
           $ref: '#/components/schemas/Reader'
           description: Message content.
         role:
           $ref: '#/components/schemas/MessageRole'
           description: Message role.
+          example: 'assistant'
         timestamp:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           description: The timestamp message was sent or received.
+          example: '2025-04-30T15:30:00Z'
         isError:
           type: boolean
           description: Is error message.
+          example: false
         traceData:
           $ref: '#/components/schemas/TraceData'
-          description: trace Data
+          description: Trace data
         metadata:
           $ref: '#/components/schemas/MessageMetadata'
-          description: metadata
+          description: Metadata
 
     ApiConfig:
       type: object
@@ -240,19 +266,24 @@ components:
       properties:
         connectorId:
           type: string
-          description: connector id
+          description: Connector ID
+          example: 'connector123'
         actionTypeId:
           type: string
-          description: action type id
+          description: Action type ID
+          example: 'actionType456'
         defaultSystemPromptId:
           type: string
-          description: defaultSystemPromptId
+          description: Default system prompt ID
+          example: 'systemPrompt001'
         provider:
           $ref: '#/components/schemas/Provider'
           description: Provider
+          example: 'OpenAI'
         model:
           type: string
-          description: model
+          description: Model
+          example: 'gpt-4'
 
     ConversationSummary:
       type: object
@@ -260,15 +291,19 @@ components:
         content:
           type: string
           description: Summary text of the conversation over time.
+          example: 'This conversation covered how to configure the Security AI Assistant.'
         timestamp:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           description: The timestamp summary was updated.
+          example: '2025-04-30T16:00:00Z'
         public:
           type: boolean
           description: Define if summary is marked as publicly available.
+          example: true
         confidence:
           $ref: '#/components/schemas/ConversationConfidence'
           description: How confident you are about this being a correct and useful learning.
+          example: 'high'
 
     ErrorSchema:
       type: object
@@ -287,8 +322,10 @@ components:
             status_code:
               type: integer
               minimum: 400
+              example: 404
             message:
               type: string
+              example: 'Resource not found'
 
     ConversationResponse:
       type: object
@@ -305,19 +342,23 @@ components:
         title:
           type: string
           description: The conversation title.
+          example: 'Security AI Assistant Setup'
         category:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
+          example: 'assistant'
         summary:
           $ref: '#/components/schemas/ConversationSummary'
-        'timestamp':
+        timestamp:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         updatedAt:
           description: The last time conversation was updated.
           type: string
+          example: '2025-04-30T16:30:00Z'
         createdAt:
           description: The time conversation was created.
           type: string
+          example: '2025-04-30T14:00:00Z'
         replacements:
           $ref: '#/components/schemas/Replacements'
         users:
@@ -327,17 +368,18 @@ components:
         messages:
           type: array
           items:
-              $ref: '#/components/schemas/Message'
+            $ref: '#/components/schemas/Message'
           description: The conversation messages.
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         namespace:
           type: string
           description: Kibana space
+          example: 'default'
 
     ConversationUpdateProps:
       type: object
@@ -349,13 +391,15 @@ components:
         title:
           type: string
           description: The conversation title.
+          example: 'Updated Security AI Assistant Setup'
         category:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
+          example: 'assistant'
         messages:
           type: array
           items:
-              $ref: '#/components/schemas/Message'
+            $ref: '#/components/schemas/Message'
           description: The conversation messages.
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
@@ -363,7 +407,7 @@ components:
         summary:
           $ref: '#/components/schemas/ConversationSummary'
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         replacements:
           $ref: '#/components/schemas/Replacements'
@@ -376,22 +420,25 @@ components:
         id:
           type: string
           description: The conversation id.
+          example: 'conversation123'
         title:
           type: string
           description: The conversation title.
+          example: 'Security AI Assistant Setup'
         category:
           $ref: '#/components/schemas/ConversationCategory'
           description: The conversation category.
+          example: 'assistant'
         messages:
           type: array
           items:
-              $ref: '#/components/schemas/Message'
+            $ref: '#/components/schemas/Message'
           description: The conversation messages.
         apiConfig:
           $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
         excludeFromLastConversationStorage:
-          description: excludeFromLastConversationStorage.
+          description: Exclude from last conversation storage.
           type: boolean
         replacements:
           $ref: '#/components/schemas/Replacements'
@@ -404,6 +451,5 @@ components:
         messages:
           type: array
           items:
-              $ref: '#/components/schemas/Message'
+            $ref: '#/components/schemas/Message'
           description: The conversation messages.
-
