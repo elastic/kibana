@@ -35,7 +35,6 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
           type: 'keyword',
         },
       },
-      dynamic: false,
     },
     attempts: {
       type: 'integer',
