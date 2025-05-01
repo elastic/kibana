@@ -47,6 +47,7 @@ export const AnomalyThresholdSlider = ({
             tickInterval={25}
             min={0}
             max={100}
+            data-test-subj="anomalyThresholdRange"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

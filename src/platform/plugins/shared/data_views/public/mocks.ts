@@ -35,12 +35,22 @@ const createStartContract = (): Start => {
     },
     getDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     getDefaultId: jest.fn().mockReturnValue(Promise.resolve('')),
-    get: jest.fn().mockReturnValue(Promise.resolve({})),
+    get: jest.fn().mockReturnValue(
+      Promise.resolve({
+        title: '',
+        fields: [],
+      })
+    ),
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
-    getIdsWithTitle: jest.fn(),
+    getIdsWithTitle: jest.fn().mockResolvedValue([]),
     getFieldsForIndexPattern: jest.fn(),
-    create: jest.fn().mockReturnValue(Promise.resolve({})),
+    create: jest.fn().mockReturnValue(
+      Promise.resolve({
+        title: '',
+        fields: [],
+      })
+    ),
     toDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     toDataViewLazy: jest.fn().mockReturnValue(Promise.resolve({})),
     clearInstanceCache: jest.fn(),
