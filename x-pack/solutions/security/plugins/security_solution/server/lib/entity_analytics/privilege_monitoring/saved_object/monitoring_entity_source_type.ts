@@ -9,7 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
-export const privilegeMonitoringTypeName = 'monitoring-entity-source-status'; // does it need to be status?
+export const privilegeMonitoringTypeName = 'monitoring-entity-source';
 
 export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
@@ -25,6 +25,7 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     },
     indexPattern: {
       type: 'keyword',
+      index: false,
     },
     detectRemovals: {
       type: 'boolean',
@@ -37,15 +38,18 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
     },
     integrationName: {
       type: 'keyword',
+      index: false,
     },
     matchers: {
-      type: 'nested', // TODO: check doccos for this
+      type: 'object',
       properties: {
         field: {
           type: 'keyword',
+          index: false,
         },
         value: {
           type: 'keyword',
+          index: false,
         },
       },
     },
@@ -68,7 +72,7 @@ const version1: SavedObjectsModelVersion = {
 };
 export const privilegeMonitoringType: SavedObjectsType = {
   name: privilegeMonitoringTypeName,
-  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX, // TODO: check if this is correct, reference OG init api ticket against the engine saved object there.
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: monitoringEntitySourceTypeNameMappings,
