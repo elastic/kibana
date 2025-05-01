@@ -23,7 +23,7 @@ import { Command, END } from '@langchain/langgraph';
 import type { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
-import type { Operation } from '../../../utils/open_api_tool/utils';
+import { formatToolName, type Operation } from '../../../utils/open_api_tool/utils';
 
 export const kibanaServerlessOpenApiSpec = path.join(
   __dirname,
@@ -189,7 +189,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         }
       },
       {
-        name: operation.getOperationId(),
+        name: formatToolName(operation.getOperationId()),
         description:
           [
             operation.getDescription(),
