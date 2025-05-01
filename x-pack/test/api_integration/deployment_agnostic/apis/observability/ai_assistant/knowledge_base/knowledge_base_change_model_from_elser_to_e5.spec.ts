@@ -81,8 +81,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await waitForKnowledgeBaseIndex(getService, '.kibana-observability-ai-assistant-kb-000002');
       await waitForKnowledgeBaseReady(getService);
 
-      e5EntriesFromApi = (await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient }))
-        .body.entries;
+      e5EntriesFromApi = (
+        await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient })
+      ).body.entries;
 
       e5EntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
       e5InferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
