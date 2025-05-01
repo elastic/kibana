@@ -142,3 +142,18 @@ components:
           type: string
         integrationName:
           type: string
+        enabled:
+          type: boolean
+        matchers:
+          type: array
+          items:
+            type: object
+            properties:
+              fields:
+                type: array
+                items:
+                  type: string
+              values:
+                type: array
+                items:
+                  type: string

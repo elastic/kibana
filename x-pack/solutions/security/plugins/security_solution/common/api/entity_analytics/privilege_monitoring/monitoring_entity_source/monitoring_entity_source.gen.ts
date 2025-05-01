@@ -44,4 +44,13 @@ export const MonitoringEntitySourceResponse = z.object({
   type: z.string().optional(),
   indexPattern: z.string().optional(),
   integrationName: z.string().optional(),
+  enabled: z.boolean().optional(),
+  matchers: z
+    .array(
+      z.object({
+        fields: z.array(z.string()).optional(),
+        values: z.array(z.string()).optional(),
+      })
+    )
+    .optional(),
 });

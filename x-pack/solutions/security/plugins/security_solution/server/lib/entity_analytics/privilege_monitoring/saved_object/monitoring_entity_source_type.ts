@@ -27,9 +27,6 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
       type: 'keyword',
       index: false,
     },
-    detectRemovals: {
-      type: 'boolean',
-    },
     enabled: {
       type: 'boolean',
     },
@@ -61,21 +58,10 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
   },
 };
 
-const version1: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        status: { type: 'keyword' },
-      },
-    },
-  ],
-};
 export const monitoringEntitySourceType: SavedObjectsType = {
   name: monitoringEntitySourceTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: monitoringEntitySourceTypeNameMappings,
-  modelVersions: { 1: version1 },
 };

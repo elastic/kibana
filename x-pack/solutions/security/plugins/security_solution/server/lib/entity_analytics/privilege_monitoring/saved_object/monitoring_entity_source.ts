@@ -17,13 +17,12 @@ interface MonitoringEntitySourceDescriptor {
   name: string;
   managed?: boolean;
   indexPattern?: string;
-  detectRemovals?: boolean;
   enabled?: boolean;
   error?: string;
   integrationName?: string;
   matchers?: Array<{
-    field: string;
-    value: string;
+    fields: string[];
+    values: string[];
   }>;
   filter?: Record<string, unknown>;
 }
@@ -32,32 +31,31 @@ export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
   getSavedObjectId() {
-    return `monitoring-entity-source-${this.dependencies.namespace}`;
+    return `monitoring-entity-source-sync-${this.dependencies.namespace}`;
   }
 
-  async init() {
+  async create(attributes: MonitoringEntitySourceDescriptor) {
     const entitySourceDescriptor = await this.find();
+
     if (entitySourceDescriptor.total === 1) {
-      return this.resetToDefaultDescriptor(entitySourceDescriptor);
+      const { attributes: updated } =
+        await this.dependencies.soClient.update<MonitoringEntitySourceDescriptor>(
+          monitoringEntitySourceTypeName,
+          this.getSavedObjectId(),
+          attributes,
+          { refresh: 'wait_for' }
+        );
+      return updated;
     }
-    const { attributes } =
+
+    const { attributes: created } =
       await this.dependencies.soClient.create<MonitoringEntitySourceDescriptor>(
         monitoringEntitySourceTypeName,
-        {
-          type: 'default',
-          name: 'default',
-          managed: true,
-          indexPattern: '',
-          detectRemovals: false,
-          enabled: true,
-          error: undefined,
-          integrationName: '',
-          matchers: [],
-          filter: {},
-        },
+        attributes,
         { id: this.getSavedObjectId() }
       );
-    return attributes;
+
+    return created;
   }
 
   private async resetToDefaultDescriptor(
@@ -71,7 +69,6 @@ export class MonitoringEntitySourceDescriptorClient {
       name: 'default',
       managed: true,
       indexPattern: '',
-      detectRemovals: false,
       enabled: true,
       integrationName: '',
       matchers: [],
@@ -117,12 +114,5 @@ export class MonitoringEntitySourceDescriptorClient {
   async delete() {
     const id = this.getSavedObjectId();
     await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
-  }
-
-  async list() {
-    return this.dependencies.soClient.find<MonitoringEntitySourceDescriptor>({
-      type: monitoringEntitySourceTypeName,
-      namespaces: [this.dependencies.namespace],
-    });
   }
 }
