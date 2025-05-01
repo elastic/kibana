@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import { useLocation } from 'react-router-dom';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiAccordion,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { useNavigateTo } from '@kbn/security-solution-navigation';
-import { useIdsFromUrl } from '../../../../attack_discovery/pages/results/history/use_ids_from_url';
+import { AttackDiscoveryPanel } from './panel';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
-import { AttackDiscoveryDetails } from './attack_discovery_details';
 import * as i18n from './translations';
 
 interface Props {
@@ -32,66 +29,54 @@ interface Props {
 export const AttackDiscoveryWidget = memo(({ id }: Props) => {
   const { assistantAvailability, http } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
-  const { navigateTo } = useNavigateTo();
-  const { pathname } = useLocation();
-  const { setIdsUrl } = useIdsFromUrl();
-
+  const { to, from } = useGlobalTime();
   const { isLoading, data } = useFindAttackDiscoveries({
     alertIds: [id],
     http,
+    start: from,
+    end: to,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
   });
   const [attackDiscovery, setAttackDiscovery] = useState<AttackDiscoveryAlert | null>(null);
-  const handleNavigateToAttackDiscovery = useCallback(
-    (attackDiscoveryId: string) => {
-      if (pathname.includes('attack_discovery')) {
-        setIdsUrl([attackDiscoveryId]);
-      } else {
-        navigateTo({
-          path: `attack_discovery?id=${attackDiscoveryId}`,
-        });
-      }
-    },
-    [pathname, setIdsUrl, navigateTo]
-  );
+  const [additionalAttackDiscoveries, setAdditionalAttackDiscoveries] = useState<
+    AttackDiscoveryAlert[]
+  >([]);
+
   useEffect(() => {
     if (data != null && data.data.length > 0) {
-      setAttackDiscovery(data.data[0]);
+      const [firstItem, ...rest] = data.data;
+      setAttackDiscovery(firstItem);
+
+      if (rest.length > 0) {
+        setAdditionalAttackDiscoveries(rest);
+      }
     }
   }, [data]);
+
+  const attackDiscoveryAccordionId = useGeneratedHtmlId({
+    prefix: 'attackDiscoveryAccordion',
+  });
 
   return (
     <>
       {isLoading ? (
         <EuiLoadingSpinner />
       ) : attackDiscovery ? (
-        <EuiPanel
-          css={css`
-            margin: ${euiTheme.size.s} 0;
-          `}
-          paddingSize="m"
-          hasBorder
-        >
-          <EuiText color="subdued" size="s">
-            <p>{i18n.ALERT_PART}</p>
-          </EuiText>
-          <EuiTitle size="xs">
-            <h3>{attackDiscovery.title}</h3>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <AttackDiscoveryDetails attackDiscovery={attackDiscovery} />
-          <EuiButtonEmpty
-            iconSide="right"
-            iconType="popout"
-            data-test-subj="attackDiscoveryViewDetails"
-            onClick={() => handleNavigateToAttackDiscovery(attackDiscovery.id)}
-            css={css`
-              padding: 0;
-            `}
-          >
-            {i18n.VIEW_DETAILS}
-          </EuiButtonEmpty>
-        </EuiPanel>
+        <>
+          <AttackDiscoveryPanel attackDiscovery={attackDiscovery} start={from} end={to} />
+          {additionalAttackDiscoveries.length ? (
+            <EuiAccordion
+              data-test-subj="attackDiscoveryAccordion"
+              id={attackDiscoveryAccordionId}
+              arrowDisplay="right"
+              buttonContent={i18n.ADDITIONAL_DISCOVERIES}
+            >
+              {additionalAttackDiscoveries.map((ad, i) => (
+                <AttackDiscoveryPanel key={i} attackDiscovery={ad} start={from} end={to} />
+              ))}
+            </EuiAccordion>
+          ) : null}
+        </>
       ) : (
         <EuiPanel
           css={css`
