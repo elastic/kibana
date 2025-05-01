@@ -17,9 +17,23 @@ steps:
     key: api_test_ai4dsoc
     steps:
 
-      - label: Running ai4dsoc_cases:server:serverless
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_cases:server:serverless
-        key: ai4dsoc_cases:server:serverless
+      - label: Running ai4dsoc_cases:runner:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_cases:runner:serverless
+        key: ai4dsoc_cases:runner:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running ai4dsoc_nlp_cleanup_task:runner:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh ai4dsoc_nlp_cleanup_task:runner:serverless
+        key: ai4dsoc_nlp_cleanup_task:runner:serverless
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
