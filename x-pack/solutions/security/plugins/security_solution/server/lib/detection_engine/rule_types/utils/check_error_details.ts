@@ -6,7 +6,12 @@
  */
 import type { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 
-const USER_ERRORS_EXCEPTIONS = ['status_exception', 'verification_exception', 'parsing_exception'];
+const USER_ERRORS_EXCEPTIONS = [
+  'missing',
+  'status_exception',
+  'verification_exception',
+  'parsing_exception',
+];
 
 /**
  * if error can be qualified as user error(configurational), returns isUserError: true

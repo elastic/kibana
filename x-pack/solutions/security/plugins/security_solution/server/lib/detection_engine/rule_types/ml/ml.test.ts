@@ -128,9 +128,7 @@ describe('ml_executor', () => {
   });
 
   it('should report job missing errors as user errors', async () => {
-    (findMlSignals as jest.Mock).mockRejectedValue({
-      message: 'my_test_job_name missing',
-    });
+    (findMlSignals as jest.Mock).mockRejectedValue(new Error('my_test_job_name missing'));
 
     const { result } = await mlExecutor({
       sharedParams,

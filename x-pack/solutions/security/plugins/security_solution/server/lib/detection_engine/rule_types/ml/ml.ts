@@ -29,6 +29,7 @@ import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppres
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import { checkErrorDetails } from '../utils/check_error_details';
 
 interface MachineLearningRuleExecutorParams {
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
@@ -116,7 +117,10 @@ export const mlExecutor = async ({
       anomalyResults = searchResults.anomalyResults;
       loggedRequests.push(...(searchResults.loggedRequests ?? []));
     } catch (error) {
-      if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
+      // if (typeof error.message === 'string' && (error.message as string).endsWith('missing')) {
+      //   result.userError = true;
+      // }
+      if (checkErrorDetails(error).isUserError) {
         result.userError = true;
       }
       result.errors.push(error.message);
