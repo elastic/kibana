@@ -5,42 +5,40 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
 
 export const PrivilegedUserMonitoring = () => {
   return (
-    <>
-      <EuiFlexGroup
-        direction="row"
-        justifyContent="spaceBetween"
-        gutterSize="xl"
-        alignItems="center"
-      >
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} hasBorder={true}>
-            <span>{'Risk levels of privileged users'}</span>
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} hasBorder={true}>
-            <span>{'Top risky privileged users'}</span>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-      <EuiPanel hasShadow={false} hasBorder={true}>
-        <span>{'Top privileged access detections'}</span>
-      </EuiPanel>
-      <EuiSpacer size="m" />
-      <EuiPanel hasShadow={false} hasBorder={true}>
-        {'Privileged user activity'}
-      </EuiPanel>
-      <EuiSpacer size="m" />
-      <EuiPanel hasShadow={false} hasBorder={true}>
-        {'Privileged users'}
-      </EuiPanel>
-    </>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiFlexGroup responsive direction="row">
+          <EuiFlexItem>
+            <RiskLevelsPrivilegedUsersPanel />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel hasShadow={false} hasBorder={true}>
+              <span>{'Top risky privileged users'}</span>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel hasShadow={false} hasBorder={true}>
+          <span>{'Top privileged access detections'}</span>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel hasShadow={false} hasBorder={true}>
+          {'Privileged user activity'}
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel hasShadow={false} hasBorder={true}>
+          {'Privileged users'}
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

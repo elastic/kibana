@@ -22,6 +22,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 
 export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
+  // TODO Delete-me when the onboarding flow is implemented
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(true);
 
   const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
@@ -63,7 +64,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
               rightSideItems={[
                 <EuiButtonEmpty
                   onClick={() => {
-                    // TODO
+                    // TODO Implement the settings page
                   }}
                   iconType="gear"
                   color="primary"

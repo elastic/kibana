@@ -73,7 +73,7 @@ export const useRiskScore = <T extends EntityType>({
   riskEntity,
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
-  const defaultIndex = useGetDefaultRiskIndex(riskEntity, onlyLatest);
+  const defaultIndex = useGetDefaultRiskIndex(onlyLatest);
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,
