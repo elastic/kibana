@@ -7,18 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateQuery, type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
+import {
+  validateQuery,
+  type ESQLCallbacks,
+  suggest,
+  esqlFunctionNames,
+} from '@kbn/esql-validation-autocomplete';
+import { monarch } from '@elastic/monaco-esql';
+import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { monaco } from '../../monaco_imports';
-
 import { ESQL_LANG_ID } from './lib/constants';
-
-import type { CustomLangModuleType } from '../../types';
-
-import { buildESQLTheme } from './lib/esql_theme';
+import { buildEsqlTheme } from './lib/theme';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
 import { getHoverItem } from './lib/hover/hover';
 import { monacoPositionToOffset } from './lib/shared/utils';
+import type { CustomLangModuleType } from '../../types';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
@@ -27,11 +31,14 @@ const removeKeywordSuffix = (name: string) => {
 export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
-    const { ESQLTokensProvider } = await import('./lib');
+    const language = monarch.create({
+      ...monarchDefinitions,
+      functions: esqlFunctionNames,
+    });
 
-    monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
+    monaco.languages.setMonarchTokensProvider(ESQL_LANG_ID, language);
   },
-  languageThemeResolver: buildESQLTheme,
+  languageThemeResolver: buildEsqlTheme,
   languageConfiguration: {
     brackets: [
       ['(', ')'],
