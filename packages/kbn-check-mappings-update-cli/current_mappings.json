@@ -78,11 +78,9 @@
               "blob": {
                 "type": "text"
               }
-            },
-            "type": "object"
+            }
           }
-        },
-        "type": "object"
+        }
       },
       "consumer": {
         "type": "keyword"

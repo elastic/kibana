@@ -478,7 +478,11 @@ export const alertDelaySchema = schema.object(
 export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
 
 export const investigationGuideSchema = schema.object({
-  blob: schema.string(),
+  blob: schema.string({
+    meta: {
+      description: 'User-created content that describes alert causes and remdiation.',
+    },
+  }),
 });
 
 export const artifactsSchema = schema.object({
