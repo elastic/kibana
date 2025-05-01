@@ -1431,6 +1431,7 @@ const createCaseWithId = async ({
       total_alerts: 0,
       total_comments: 0,
       observables: [],
+      incremental_id: null,
     },
     overwrite: false,
   });
