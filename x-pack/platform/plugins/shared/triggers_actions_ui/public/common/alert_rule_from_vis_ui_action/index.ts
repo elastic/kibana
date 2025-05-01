@@ -12,6 +12,8 @@ import type {
 } from '@kbn/alerts-ui-shared';
 import { DimensionType } from '@kbn/visualization-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { parse, walk, type ESQLColumn, type ESQLFunction } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
 import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
@@ -83,28 +85,39 @@ export class AlertRuleFromVisAction implements Action<Context> {
     const { timeField = 'timestamp' } = firstLayer ?? { timeField: dataView?.timeFieldName };
 
     // Set up a helper function to rename fields that need to be escaped
+    const { root } = parse(query ?? '');
+    const columns: ESQLColumn[] = [];
+    const functions: ESQLFunction[] = [];
+
+    walk(root, {
+      visitColumn: (node) => columns.push(node),
+    });
+
+    walk(root, {
+      visitFunction: (node) => functions.push(node),
+    });
+
     let renameQuery = '';
     const escapeFieldName = (fieldName: string) => {
       if (!fieldName || fieldName === 'undefined') return missingSourceFieldPlaceholder;
+      const column = columns.find((col) => col.name === fieldName);
+      if (column) {
+        return column.name;
+      }
 
-      // Detect if the passed column name is actually an ES|QL function call instead of a field name, or if it has whitespace in it
-      const esqlFunctionRegex = /[A-Z]+\(.*?\)/;
-      if (esqlFunctionRegex.test(fieldName) || fieldName.includes(' ')) {
-        // If there are any backticks in the field name, change them to double backticks
-        const sanitizedFieldName = fieldName.replace('`', '``');
-
-        // Convert the function to a lowercase, snake_cased variable
-        // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
+      // Find all ESQL functions and rename them
+      const WHITESPACE_AFTER_COMMA_REGEX = /, +/g;
+      const esqlFunction = functions.find(
+        (func) => func.text === fieldName.replace(WHITESPACE_AFTER_COMMA_REGEX, ',')
+      );
+      if (esqlFunction) {
         const colName = `_${snakeCase(fieldName)}`;
+        const sanitizedFieldName = sanitazeESQLInput(esqlFunction.text);
         // Add this to the renameQuery as a side effect
-        if (fieldName.includes('*')) {
-          // Wildcards cannot be used in RENAME
-          renameQuery += `| EVAL ${colName} = \`${sanitizedFieldName}\``;
-        } else {
-          renameQuery += `| RENAME \`${sanitizedFieldName}\` as ${colName} `;
-        }
+        renameQuery += `| RENAME ${sanitizedFieldName} as ${colName} `;
         return colName;
       }
+
       return fieldName;
     };
 
@@ -240,7 +253,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
     : {};
 
   const xColumns = datatable?.columns.filter(
-    (col) => (col.meta.dimensionType = DimensionType.X_AXIS)
+    (col) => col.meta.dimensionType === DimensionType.X_AXIS
   );
   const isTimeViz = xColumns?.some(({ meta }) => meta.type === 'date');
   const splitValues =
