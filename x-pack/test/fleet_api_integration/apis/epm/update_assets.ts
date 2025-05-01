@@ -557,6 +557,11 @@ export default function (providerContext: FtrProviderContext) {
             type: 'epm-packages-assets',
           },
           {
+            id: '848d7b69-26d1-52c1-8afc-65e627b34812',
+            path: 'all_assets-0.2.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
+            type: 'epm-packages-assets',
+          },
+          {
             id: '8c665f28-a439-5f43-b5fd-8fda7b576735',
             path: 'all_assets-0.2.0/manifest.yml',
             type: 'epm-packages-assets',
