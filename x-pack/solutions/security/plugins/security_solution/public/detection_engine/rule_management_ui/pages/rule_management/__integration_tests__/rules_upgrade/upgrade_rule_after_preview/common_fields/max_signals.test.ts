@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../test_utils/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../test_utils/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../test_utils/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../test_utils/assert_rule_upgrade_after_review';
 
 describe('Upgrade diffable rule "max_signals" (query rule type) after preview in flyout', () => {
   const ruleType = 'query';

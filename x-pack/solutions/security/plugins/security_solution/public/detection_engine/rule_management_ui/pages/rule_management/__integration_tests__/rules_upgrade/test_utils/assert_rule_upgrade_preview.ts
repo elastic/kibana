@@ -9,12 +9,9 @@ import { within } from '@testing-library/react';
 import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
-} from '../../../../../../../../../common/api/detection_engine';
-import { toggleFieldAccordion } from '../../test_utils/rule_upgrade_helpers';
-import {
-  mockRuleUpgradeReviewData,
-  renderRuleUpgradeFlyout,
-} from '../../test_utils/rule_upgrade_flyout';
+} from '../../../../../../../../common/api/detection_engine';
+import { toggleFieldAccordion } from './rule_upgrade_helpers';
+import { mockRuleUpgradeReviewData, renderRuleUpgradeFlyout } from './rule_upgrade_flyout';
 
 interface AssertRuleUpgradePreviewParams {
   ruleType: string;

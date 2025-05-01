@@ -7,8 +7,8 @@
 
 import { of } from 'rxjs';
 import { KibanaServices } from '../../../../../../../../common/lib/kibana';
-import { assertRuleUpgradePreview } from '../test_utils/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../test_utils/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../test_utils/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../test_utils/assert_rule_upgrade_after_review';
 
 describe('Upgrade diffable rule "eql_query" (eql rule type) after preview in flyout', () => {
   beforeAll(() => {
