@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await addSampleDocsToInternalKb(getService, animalSampleDocs);
 
       elserEntriesFromApi = (
-        await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient)
+        await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient })
       ).body.entries;
 
       elserEntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);
@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await waitForKnowledgeBaseIndex(getService, '.kibana-observability-ai-assistant-kb-000002');
       await waitForKnowledgeBaseReady(getService);
 
-      e5EntriesFromApi = (await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient))
+      e5EntriesFromApi = (await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient }))
         .body.entries;
 
       e5EntriesFromEs = await getKnowledgeBaseEntriesFromEs(es);

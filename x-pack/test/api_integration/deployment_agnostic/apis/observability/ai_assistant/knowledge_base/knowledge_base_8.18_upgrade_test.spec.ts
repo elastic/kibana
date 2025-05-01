@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('can retrieve entries', async () => {
-      const res = await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient);
+      const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
       expect(res.status).to.be(200);
       expect(res.body.entries).to.have.length(1);
       expect(res.body.entries[0].text).to.be(

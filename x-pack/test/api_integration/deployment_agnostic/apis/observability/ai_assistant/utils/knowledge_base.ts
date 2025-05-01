@@ -221,12 +221,17 @@ export async function getKnowledgeBaseEntriesFromEs(es: Client) {
   return res.hits.hits;
 }
 
-export function getKnowledgeBaseEntriesFromApi(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
+export function getKnowledgeBaseEntriesFromApi({
+  observabilityAIAssistantAPIClient,
   query = '',
   sortBy = 'title',
-  sortDirection: 'asc' | 'desc' = 'asc'
-) {
+  sortDirection = 'asc',
+}: {
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+  query?: string;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}) {
   return observabilityAIAssistantAPIClient.editor({
     endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
     params: { query: { query, sortBy, sortDirection } },

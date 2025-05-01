@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('persists entry in knowledge base', async () => {
-      const res = await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient);
+      const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
 
       const { role, public: isPublic, text, type, user, title } = res.body.entries[0];
 

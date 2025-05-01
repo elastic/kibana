@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import { sortBy } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   getKnowledgeBaseEntriesFromEs,
@@ -101,28 +102,32 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .filter((hit) => omitLensEntry(hit._source))
               // @ts-expect-error
               .map((hit) => hit._source?.semantic_text.text)
+              .sort()
           ).to.eql(["The user's favourite color is blue.", 'To infinity and beyond!']);
         });
       });
 
       it('returns entries correctly via API', async () => {
-        const res = await getKnowledgeBaseEntriesFromApi(observabilityAIAssistantAPIClient);
+        const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
         expect(res.status).to.be(200);
 
         expect(
-          res.body.entries
-            .filter(omitLensEntry)
-            .map(({ title, text, type }) => ({ title, text, type }))
+          sortBy(
+            res.body.entries
+              .filter(omitLensEntry)
+              .map(({ title, text, type }) => ({ title, text, type })),
+            ({ title }) => title
+          )
         ).to.eql([
-          {
-            title: 'user_color',
-            type: 'contextual',
-            text: "The user's favourite color is blue.",
-          },
           {
             title: 'movie_quote',
             type: 'contextual',
             text: 'To infinity and beyond!',
+          },
+          {
+            title: 'user_color',
+            type: 'contextual',
+            text: "The user's favourite color is blue.",
           },
         ]);
       });
