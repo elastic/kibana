@@ -12,9 +12,8 @@ import { render, within, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
-import { ESQLControlState, EsqlControlType } from '../types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
