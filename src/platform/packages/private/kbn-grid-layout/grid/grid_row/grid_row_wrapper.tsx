@@ -14,24 +14,24 @@ import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export interface GridRowProps {
-  rowId: string;
+  sectionId: string;
 }
 
-export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
+export const GridRowWrapper = React.memo(({ sectionId }: GridRowProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const styles = useMemo(() => {
     return css({
       gridColumn: `1 / -1`,
-      gridRowStart: `gridRow-${rowId}`,
-      gridRowEnd: `end-${rowId}`,
+      gridRowStart: `gridRow-${sectionId}`,
+      gridRowEnd: `end-${sectionId}`,
     });
-  }, [rowId]);
+  }, [sectionId]);
 
   useEffect(() => {
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.rowRefs.current[rowId];
+      delete gridLayoutStateManager.rowRefs.current[sectionId];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -41,10 +41,10 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
       const interactionStyleSubscription = gridLayoutStateManager.activePanel$.subscribe(
         (activePanel) => {
-          const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
+          const rowRef = gridLayoutStateManager.rowRefs.current[sectionId];
           if (!rowRef) return;
           const targetRow = activePanel?.targetRow;
-          if (rowId === targetRow && activePanel) {
+          if (sectionId === targetRow && activePanel) {
             rowRef.classList.add('kbnGridRow--targeted');
           } else {
             rowRef.classList.remove('kbnGridRow--targeted');
@@ -57,14 +57,14 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rowId]
+    [sectionId]
   );
 
   return (
     <span
       css={styles}
       ref={(rowRef: HTMLDivElement | null) => {
-        gridLayoutStateManager.rowRefs.current[rowId] = rowRef;
+        gridLayoutStateManager.rowRefs.current[sectionId] = rowRef;
       }}
       className={'kbnGridRowBackground'}
     />

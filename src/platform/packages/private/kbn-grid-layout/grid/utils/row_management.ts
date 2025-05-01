@@ -39,8 +39,8 @@ export const movePanelsToRow = (layout: GridLayoutData, startingRow: string, new
  * @param rowIndex The row to be deleted
  * @returns Updated layout with the row at `rowIndex` deleted
  */
-export const deleteRow = (layout: GridLayoutData, rowId: string) => {
+export const deleteRow = (layout: GridLayoutData, sectionId: string) => {
   const newLayout = cloneDeep(layout);
-  delete newLayout[rowId];
+  delete newLayout[sectionId];
   return newLayout;
 };

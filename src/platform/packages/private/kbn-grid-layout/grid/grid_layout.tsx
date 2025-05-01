@@ -22,13 +22,11 @@ import {
   GridAccessMode,
   GridLayoutData,
   GridLayoutElementsInOrder,
-  GridRowData,
   GridSettings,
   UseCustomDragHandle,
 } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { useOrderedSections } from './use_ordered_grid_layout';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -69,8 +67,8 @@ export const GridLayout = ({
   //      * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
   //      * so, we need to loop through each row and ensure it is compacted
   //      */
-  //     Object.entries(newLayout).forEach(([rowId, row]) => {
-  //       newLayout[rowId] = resolveGridRow(row);
+  //     Object.entries(newLayout).forEach(([sectionId, row]) => {
+  //       newLayout[sectionId] = resolveGridRow(row);
   //     });
   //     gridLayoutStateManager.gridLayout$.next(newLayout);
   //   }
@@ -83,7 +81,7 @@ export const GridLayout = ({
   // useEffect(() => {
   //   /**
   //    * This subscription calls the passed `onLayoutChange` callback when the layout changes;
-  //    * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
+  //    * if the row IDs have changed, it also sets `sectionIdsInOrder` to trigger a re-render
   //    */
   //   const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
   //     .pipe(pairwise())
@@ -124,9 +122,9 @@ export const GridLayout = ({
           }
 
           /** Panels */
-          if (!section.isCollapsed) {
+          if (section.isMainSection || !section.isCollapsed) {
             let maxRow = -Infinity;
-            Object.values((section as unknown as GridRowData).panels).forEach((panel) => {
+            Object.values(section.panels).forEach((panel) => {
               maxRow = Math.max(maxRow, panel.row + panel.height);
               currentElementsInOrder.push({
                 type: 'panel',
@@ -148,7 +146,6 @@ export const GridLayout = ({
           gridRowTemplateString += `[end-${section.id}] `;
         });
       setElementsInOrder(currentElementsInOrder);
-      console.log({ currentElementsInOrder });
       gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
       if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
     });
@@ -213,13 +210,13 @@ export const GridLayout = ({
           {elementsInOrder.map((element) => {
             switch (element.type) {
               case 'header':
-                return <GridRowHeader key={element.id} rowId={element.id} />;
+                return <GridRowHeader key={element.id} sectionId={element.id} />;
               case 'panel':
                 return <GridPanel key={element.id} panelId={element.id} />;
               case 'wrapper':
-                return <GridRowWrapper key={`${element.id}--wrapper`} rowId={element.id} />;
+                return <GridRowWrapper key={`${element.id}--wrapper`} sectionId={element.id} />;
               case 'footer':
-                return <GridRowFooter key={`${element.id}--footer`} rowId={element.id} />;
+                return <GridRowFooter key={`${element.id}--footer`} sectionId={element.id} />;
             }
           })}
         </div>

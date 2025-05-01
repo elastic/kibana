@@ -18,14 +18,14 @@ import { getPanelKeysInOrder, resolveGridRow } from '../../utils/resolve_grid_ro
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
-  rowId: string
+  sectionId: string
 ) => {
-  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+  const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
   if (!headerRef) return;
 
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
   gridLayoutStateManager.activeRowEvent$.next({
-    id: rowId,
+    id: sectionId,
     startingPosition,
     sensorType: getSensorType(e),
     translate: {
@@ -54,7 +54,7 @@ export const moveAction = (
   const {
     runtimeSettings$: { value: runtimeSettings },
     headerRefs: { current: gridHeaderElements },
-    rowRefs: { current: gridRowElements },
+    rowRefs: { current: gridSectionElements },
   } = gridLayoutStateManager;
 
   const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
@@ -64,20 +64,20 @@ export const moveAction = (
     top: 0,
     bottom: 0,
   };
-  const targetRowId: string | undefined = (() => {
-    let currentTargetRow;
-    Object.entries(gridRowElements).forEach(([id, row]) => {
-      const { top, bottom } = row?.getBoundingClientRect() ?? { top: 0, bottom: 0 };
+  const targetSectionId: string | undefined = (() => {
+    let currentTargetSection;
+    Object.entries(gridSectionElements).forEach(([id, section]) => {
+      const { top, bottom } = section?.getBoundingClientRect() ?? { top: 0, bottom: 0 };
       if (activeRowRect.top >= top && activeRowRect.bottom <= bottom) {
-        currentTargetRow = id;
+        currentTargetSection = id;
       }
     });
-    return currentTargetRow;
+    return currentTargetSection;
   })();
 
-  if (!targetRowId || !currentLayout[targetRowId].isMainSection) {
+  if (!targetSectionId || !currentLayout[targetSectionId].isMainSection) {
     // when not targetting an existing main section, then simply re-order the columns based on their positions in the DOM
-    const sortedRows = Object.entries({ ...gridHeaderElements, ...gridRowElements })
+    const sortedRows = Object.entries({ ...gridHeaderElements, ...gridSectionElements })
       .map(([id, row]) => {
         // by spreading in this way, we use the grid wrapper elements for expanded sections and the headers for collapsed sections
         const { top, height } = row?.getBoundingClientRect() ?? { top: 0, height: 0 };
@@ -85,7 +85,9 @@ export const moveAction = (
       })
       .sort(({ middle: middleA }, { middle: middleB }) => middleA - middleB);
 
-    const ordersAreEqual = sortedRows.every((row, index) => currentLayout[row.id].order === index);
+    const ordersAreEqual = sortedRows.every(
+      (section, index) => currentLayout[section.id].order === index
+    );
     if (!ordersAreEqual) {
       const orderedLayout: OrderedLayout = {};
       sortedRows.forEach((row, index) => {
@@ -101,32 +103,32 @@ export const moveAction = (
     const { gutterSize, rowHeight } = runtimeSettings;
 
     const targetRow = (() => {
-      const targetedGridRow = gridRowElements[targetRowId];
+      const targetedGridRow = gridSectionElements[targetSectionId];
       const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
       const targetedGridTop = targetedGridRowRect?.top ?? 0;
       const localYCoordinate = activeRowRect.top - targetedGridTop;
       return Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
     })();
 
-    // rebuild layout by splittng the targetted rowId into 2
+    // rebuild layout by splittng the targetted sectionId into 2
     let order = 0;
     let mainSectionCount = 0;
-    const firstSectionOrder = currentLayout[targetRowId].order;
+    const firstSectionOrder = currentLayout[targetSectionId].order;
     const anotherLayout: OrderedLayout = {};
     Object.entries(currentLayout)
       .sort(([idA, { order: orderA }], [idB, { order: orderB }]) => orderA - orderB)
-      .forEach(([id, row]) => {
+      .forEach(([id, section]) => {
         if (id === currentActiveRowEvent.id) return;
 
-        if (row.order < firstSectionOrder) {
-          anotherLayout[id] = row;
-        } else if (row.order === firstSectionOrder) {
+        if (section.order < firstSectionOrder) {
+          anotherLayout[id] = section;
+        } else if (section.order === firstSectionOrder) {
           // split this section into 2 - one main section above the dragged section, and one below
           const topSectionPanels: GridRowData['panels'] = {};
           const bottomSectionPanels: GridRowData['panels'] = {};
           let startingRow: number;
-          getPanelKeysInOrder(row.panels).forEach((panelId) => {
-            const panel = row.panels[panelId];
+          getPanelKeysInOrder(section.panels).forEach((panelId) => {
+            const panel = section.panels[panelId];
             if (panel.row < targetRow) {
               topSectionPanels[panel.id] = panel;
             } else {
@@ -163,11 +165,11 @@ export const moveAction = (
           }
         } else {
           // push each other rows down
-          const rowId = row.isMainSection ? `main-${mainSectionCount}` : id;
-          anotherLayout[rowId] = { ...row, id: rowId, order };
+          const sectionId = section.isMainSection ? `main-${mainSectionCount}` : id;
+          anotherLayout[sectionId] = { ...section, id: sectionId, order };
         }
         order++;
-        if (row.isMainSection) mainSectionCount++;
+        if (section.isMainSection) mainSectionCount++;
       });
 
     // combine sequential main layouts to keep layout consistent + valid

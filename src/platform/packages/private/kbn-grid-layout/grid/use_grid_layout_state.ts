@@ -43,10 +43,10 @@ export const useGridLayoutState = ({
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
-  const rowRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
-  const headerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
+  const rowRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
+  const headerRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
   const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
-  const footerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
+  const footerRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
   const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(

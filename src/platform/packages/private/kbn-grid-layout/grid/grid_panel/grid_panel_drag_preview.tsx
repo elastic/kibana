@@ -8,12 +8,12 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { combineLatest, skip } from 'rxjs';
+import { skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) => {
+export const GridPanelDragPreview = React.memo(({ sectionId }: { sectionId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -27,10 +27,10 @@ export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) =>
         .subscribe(([activePanel, proposedGridLayout]) => {
           if (!dragPreviewRef.current) return;
 
-          if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
+          if (!activePanel || !proposedGridLayout?.[sectionId].panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = proposedGridLayout[rowId].panels[activePanel.id];
+            const panel = proposedGridLayout[sectionId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;

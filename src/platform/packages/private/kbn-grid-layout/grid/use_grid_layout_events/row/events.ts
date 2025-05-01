@@ -33,7 +33,7 @@ import { getNextKeyboardPosition } from './utils';
  * ensuring responsive updates to the panel's position and grid layout state.
  * The interaction behavior is dynamic and adapts to the input type (mouse, touch, or keyboard).
  */
-export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
+export const useGridLayoutRowEvents = ({ sectionId }: { sectionId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const startingPointer = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
@@ -47,7 +47,7 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
       const onStart = () => {
         startingPointer.current = getSensorPosition(e);
-        startAction(e, gridLayoutStateManager, rowId);
+        startAction(e, gridLayoutStateManager, sectionId);
       };
 
       const onMove = (ev: UserInteractionEvent) => {
@@ -61,7 +61,7 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
             ev,
             gridLayoutStateManager,
             getSensorPosition(e),
-            rowId
+            sectionId
           );
           moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel);
         }
@@ -94,7 +94,7 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
         });
       }
     },
-    [gridLayoutStateManager, rowId, onEnd, onCancel]
+    [gridLayoutStateManager, sectionId, onEnd, onCancel]
   );
 
   return { startDrag: startInteraction, onBlur: onEnd };

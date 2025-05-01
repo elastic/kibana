@@ -20,9 +20,9 @@ import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_con
 
 const toggleIsCollapsed = jest
   .fn()
-  .mockImplementation((rowId: string, gridLayoutStateManager: GridLayoutStateManager) => {
+  .mockImplementation((sectionId: string, gridLayoutStateManager: GridLayoutStateManager) => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    newLayout[rowId].isCollapsed = !newLayout[rowId].isCollapsed;
+    newLayout[sectionId].isCollapsed = !newLayout[sectionId].isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   });
 
@@ -44,7 +44,7 @@ describe('GridRowHeader', () => {
           }
         >
           <GridRowHeader
-            rowId={'first'}
+            sectionId={'first'}
             toggleIsCollapsed={() => toggleIsCollapsed('first', stateManagerMock)}
             collapseButtonRef={React.createRef()}
             {...propsOverrides}

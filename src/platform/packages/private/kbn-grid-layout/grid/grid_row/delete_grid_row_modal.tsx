@@ -23,10 +23,10 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { deleteRow, movePanelsToRow } from '../utils/row_management';
 
 export const DeleteGridRowModal = ({
-  rowId,
+  sectionId,
   setDeleteModalVisible,
 }: {
-  rowId: string;
+  sectionId: string;
   setDeleteModalVisible: (visible: boolean) => void;
 }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -64,10 +64,10 @@ export const DeleteGridRowModal = ({
           onClick={() => {
             setDeleteModalVisible(false);
             const layout = gridLayoutStateManager.gridLayout$.getValue();
-            const firstRowId = Object.values(layout).find(({ order }) => order === 0)?.id;
-            if (!firstRowId) return;
-            let newLayout = movePanelsToRow(layout, rowId, firstRowId);
-            newLayout = deleteRow(newLayout, rowId);
+            const firstSectionId = Object.values(layout).find(({ order }) => order === 0)?.id;
+            if (!firstSectionId) return;
+            let newLayout = movePanelsToRow(layout, sectionId, firstSectionId);
+            newLayout = deleteRow(newLayout, sectionId);
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
           color="danger"
@@ -79,7 +79,7 @@ export const DeleteGridRowModal = ({
         <EuiButton
           onClick={() => {
             setDeleteModalVisible(false);
-            const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowId);
+            const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), sectionId);
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
           fill
@@ -89,8 +89,9 @@ export const DeleteGridRowModal = ({
             defaultMessage:
               'Delete section and {panelCount} {panelCount, plural, one {panel} other {panels}}',
             values: {
-              panelCount: Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels)
-                .length,
+              panelCount: Object.keys(
+                gridLayoutStateManager.gridLayout$.getValue()[sectionId].panels
+              ).length,
             },
           })}
         </EuiButton>

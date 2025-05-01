@@ -22,7 +22,7 @@ export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   type: 'drag' | 'resize',
-  rowId: string,
+  sectionId: string,
   panelId: string
 ) => {
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
@@ -33,7 +33,7 @@ export const startAction = (
     type,
     id: panelId,
     panelDiv: panelRef,
-    targetRow: rowId,
+    targetRow: sectionId,
     sensorType: getSensorType(e),
     position: panelRect,
     sensorOffsets: getSensorOffsets(e, panelRect),
@@ -79,11 +79,11 @@ export const moveAction = (
   })();
 
   // find the grid that the preview rect is over
-  const lastRowId = activePanel.targetRow;
+  const lastSectionId = activePanel.targetRow;
   let previousSection;
-  const targetRowId = (() => {
+  const targetSectionId = (() => {
     // TODO: temporary blocking of moving with keyboard between sections till we can fix the bug with commiting the action
-    if (isResize || isKeyboardEvent(e)) return lastRowId;
+    if (isResize || isKeyboardEvent(e)) return lastSectionId;
 
     const previewBottom = previewRect.top + rowHeight;
     if (previewRect.top < (gridLayoutElement?.getBoundingClientRect().top ?? 0)) {
@@ -92,27 +92,27 @@ export const moveAction = (
 
     /** TODO: we can probably just use section headers + the top of the panel for this */
     let highestOverlap = -Infinity;
-    let highestOverlapRowId = '';
-    Object.keys(currentLayout).forEach((rowId) => {
-      const row = currentLayout[rowId].isCollapsed
-        ? gridHeaderElements[rowId]
-        : gridRowElements[rowId];
+    let highestOverlapSectionId = '';
+    Object.keys(currentLayout).forEach((sectionId) => {
+      const row = currentLayout[sectionId].isCollapsed
+        ? gridHeaderElements[sectionId]
+        : gridRowElements[sectionId];
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
       const overlap =
         Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
       if (overlap > highestOverlap) {
         highestOverlap = overlap;
-        highestOverlapRowId = rowId;
+        highestOverlapSectionId = sectionId;
       }
     });
-    if (currentLayout[highestOverlapRowId].isCollapsed) {
-      previousSection = highestOverlapRowId;
+    if (currentLayout[highestOverlapSectionId].isCollapsed) {
+      previousSection = highestOverlapSectionId;
       // skip past collapsed section into next "main" section
-      const previousOrder = currentLayout[highestOverlapRowId].order;
-      highestOverlapRowId = `main-${previousOrder}`;
+      const previousOrder = currentLayout[highestOverlapSectionId].order;
+      highestOverlapSectionId = `main-${previousOrder}`;
     }
-    return highestOverlapRowId;
+    return highestOverlapSectionId;
   })();
 
   // calculate the requested grid position
@@ -129,9 +129,9 @@ export const moveAction = (
     );
   })();
   const targetRow = (() => {
-    if (currentLayout[targetRowId]) {
+    if (currentLayout[targetSectionId]) {
       // this section already exists, so use the wrapper element to figure out target row
-      const targetedGridRow = gridRowElements[targetRowId];
+      const targetedGridRow = gridRowElements[targetSectionId];
       const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
       const targetedGridTop = targetedGridRowRect?.top ?? 0;
       const localYCoordinate = isResize
@@ -152,7 +152,7 @@ export const moveAction = (
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;
   }
-  const hasChangedGridRow = targetRowId !== lastRowId;
+  const hasChangedGridRow = targetSectionId !== lastSectionId;
 
   // resolve the new grid layout
   if (
@@ -162,20 +162,20 @@ export const moveAction = (
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
     const nextLayout = cloneDeep(currentLayout) ?? {};
-    if (!nextLayout[targetRowId]) {
+    if (!nextLayout[targetSectionId]) {
       // section doesn't exist, so add it
       const { order: nextOrder } =
-        targetRowId === 'main-0' ? { order: 0 } : nextLayout[previousSection!];
+        targetSectionId === 'main-0' ? { order: 0 } : nextLayout[previousSection!];
 
       // push other sections down
-      Object.keys(nextLayout).forEach((rowId) => {
-        if (nextLayout[rowId].order > nextOrder) {
-          nextLayout[rowId].order += 1;
+      Object.keys(nextLayout).forEach((sectionId) => {
+        if (nextLayout[sectionId].order > nextOrder) {
+          nextLayout[sectionId].order += 1;
         }
       });
       // add the new section
-      nextLayout[targetRowId] = {
-        id: targetRowId,
+      nextLayout[targetSectionId] = {
+        id: targetSectionId,
         isMainSection: true,
         panels: {},
         order: nextOrder + 1,
@@ -184,30 +184,30 @@ export const moveAction = (
     }
 
     // remove the panel from where it started so that we can apply the drag request
-    delete nextLayout[lastRowId].panels[activePanel.id];
+    delete nextLayout[lastSectionId].panels[activePanel.id];
 
     // resolve destination grid
-    const destinationGrid = nextLayout[targetRowId] as unknown as GridRowData;
+    const destinationGrid = nextLayout[targetSectionId] as unknown as GridRowData;
     const resolvedDestinationGrid = resolveGridRow(destinationGrid.panels, requestedPanelData);
-    (nextLayout[targetRowId] as unknown as GridRowData).panels = resolvedDestinationGrid;
+    (nextLayout[targetSectionId] as unknown as GridRowData).panels = resolvedDestinationGrid;
 
     // resolve origin grid
     if (hasChangedGridRow) {
-      const originGrid = nextLayout[lastRowId] as unknown as GridRowData;
+      const originGrid = nextLayout[lastSectionId] as unknown as GridRowData;
       const resolvedOriginGrid = resolveGridRow(originGrid.panels);
-      (nextLayout[lastRowId] as unknown as GridRowData).panels = resolvedOriginGrid;
+      (nextLayout[lastSectionId] as unknown as GridRowData).panels = resolvedOriginGrid;
 
       if (
-        nextLayout[lastRowId].isMainSection &&
-        !Object.keys(nextLayout[lastRowId].panels).length
+        nextLayout[lastSectionId].isMainSection &&
+        !Object.keys(nextLayout[lastSectionId].panels).length
       ) {
         // delete empty main section rows
-        const { order: prevOrder } = nextLayout[lastRowId];
-        delete nextLayout[lastRowId];
+        const { order: prevOrder } = nextLayout[lastSectionId];
+        delete nextLayout[lastSectionId];
         // push other sections up
-        Object.keys(nextLayout).forEach((rowId) => {
-          if (nextLayout[rowId].order > prevOrder) {
-            nextLayout[rowId].order -= 1;
+        Object.keys(nextLayout).forEach((sectionId) => {
+          if (nextLayout[sectionId].order > prevOrder) {
+            nextLayout[sectionId].order -= 1;
           }
         });
       }
@@ -224,7 +224,7 @@ export const moveAction = (
     ...activePanel,
     id: activePanel.id,
     position: previewRect,
-    targetRow: targetRowId,
+    targetRow: targetSectionId,
   });
 };
 

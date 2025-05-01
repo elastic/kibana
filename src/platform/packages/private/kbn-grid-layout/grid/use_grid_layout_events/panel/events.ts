@@ -34,11 +34,11 @@ import {
  */
 export const useGridLayoutPanelEvents = ({
   interactionType,
-  rowId,
+  sectionId,
   panelId,
 }: {
   interactionType: PanelactivePanel['type'];
-  rowId: string;
+  sectionId: string;
   panelId: string;
 }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -47,9 +47,9 @@ export const useGridLayoutPanelEvents = ({
 
   const onStart = useCallback(
     (ev: UseractivePanel) => {
-      startAction(ev, gridLayoutStateManager, interactionType, rowId, panelId);
+      startAction(ev, gridLayoutStateManager, interactionType, sectionId, panelId);
     },
-    [gridLayoutStateManager, interactionType, rowId, panelId]
+    [gridLayoutStateManager, interactionType, sectionId, panelId]
   );
 
   const onEnd = useCallback(() => {
@@ -61,10 +61,10 @@ export const useGridLayoutPanelEvents = ({
       activePanel$: { value: { id, type, targetRow } = {} },
     } = gridLayoutStateManager;
     // make sure the user hasn't started another interaction in the meantime
-    if (id === panelId && rowId === targetRow && type === interactionType) {
+    if (id === panelId && sectionId === targetRow && type === interactionType) {
       commitAction(gridLayoutStateManager);
     }
-  }, [gridLayoutStateManager, panelId, rowId, interactionType]);
+  }, [gridLayoutStateManager, panelId, sectionId, interactionType]);
 
   const onCancel = useCallback(() => {
     cancelAction(gridLayoutStateManager);

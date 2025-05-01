@@ -14,19 +14,19 @@ import { css } from '@emotion/react';
 import { UseEuiTheme } from '@elastic/eui';
 
 export interface GridRowProps {
-  rowId: string;
+  sectionId: string;
 }
 
-export const GridRowFooter = React.memo(({ rowId }: GridRowProps) => {
+export const GridRowFooter = React.memo(({ sectionId }: GridRowProps) => {
   return (
     <span
-      data-row-id={rowId}
+      data-row-id={sectionId}
       className={'kbnGridRowFooter'}
       css={({ euiTheme }: UseEuiTheme) => {
         return css`
           grid-column-start: 1;
           grid-column-end: -1;
-          grid-row-end: end-${rowId};
+          grid-row-end: end-${sectionId};
           grid-row-start: span 1;
           height: ${euiTheme.size.s};
           display: block;

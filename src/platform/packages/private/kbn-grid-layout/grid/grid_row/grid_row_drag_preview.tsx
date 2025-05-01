@@ -14,14 +14,14 @@ import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridRowDragPreview = React.memo(({ rowId }: { rowId: string }) => {
+export const GridRowDragPreview = React.memo(({ sectionId }: { sectionId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   useEffect(
     () => {
       return () => {
         // when drag preview unmounts, this means the header was dropped - so, scroll to it
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
         headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       };
     },

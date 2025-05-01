@@ -31,14 +31,14 @@ import { GridRowTitle } from './grid_row_title';
 import { GridRowData } from '../types';
 
 export interface GridRowHeaderProps {
-  rowId: string;
+  sectionId: string;
 }
 
-export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
+export const GridRowHeader = React.memo(({ sectionId }: GridRowHeaderProps) => {
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
-  const { startDrag, onBlur } = useGridLayoutRowEvents({ rowId });
+  const { startDrag, onBlur } = useGridLayoutRowEvents({ sectionId: sectionId });
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
@@ -48,22 +48,22 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
   );
   const [panelCount, setPanelCount] = useState<number>(
     Object.keys(
-      (gridLayoutStateManager.gridLayout$.getValue()[rowId] as unknown as GridRowData).panels
+      (gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridRowData).panels
     ).length
   );
 
   const initialClassNames = useMemo(() => {
     return classNames('kbnGridRowHeader', {
       'kbnGridRowHeader--collapsed': (
-        gridLayoutStateManager.gridLayout$.getValue()[rowId] as unknown as GridRowData
+        gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridRowData
       ).isCollapsed,
     });
-  }, [rowId, gridLayoutStateManager.gridLayout$]);
+  }, [sectionId, gridLayoutStateManager.gridLayout$]);
 
   useEffect(() => {
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.headerRefs.current[rowId];
+      delete gridLayoutStateManager.headerRefs.current[sectionId];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -84,7 +84,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
      */
     const panelCountSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
-        map((layout) => Object.keys((layout[rowId] as GridRowData)?.panels ?? {}).length),
+        map((layout) => Object.keys(layout[sectionId]?.panels ?? {}).length),
         distinctUntilChanged()
       )
       .subscribe((count) => {
@@ -109,8 +109,8 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
         })
       )
       .subscribe(({ type, activeRowEvent }) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        if (!headerRef || activeRowEvent?.id !== rowId) return;
+        const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
+        if (!headerRef || activeRowEvent?.id !== sectionId) return;
 
         if (type === 'init') {
           setIsActive(true);
@@ -134,12 +134,12 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
     const collapsedStateSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
         map((gridLayout) => {
-          const row = gridLayout[rowId];
+          const row = gridLayout[sectionId];
           return row && (row.isMainSection || row.isCollapsed);
         })
       )
       .subscribe((collapsed) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
         if (!headerRef) return;
 
         if (collapsed) {
@@ -155,27 +155,31 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
       dragRowStyleSubscription.unsubscribe();
       collapsedStateSubscription.unsubscribe();
     };
-  }, [gridLayoutStateManager, rowId]);
+  }, [gridLayoutStateManager, sectionId]);
 
   const confirmDeleteRow = useCallback(() => {
     /**
      * Memoization of this callback does not need to be dependant on the React panel count
      * state, so just grab the panel count via gridLayoutStateManager instead
      */
-    const count = Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels).length;
+    const count = Object.keys(
+      gridLayoutStateManager.gridLayout$.getValue()[sectionId].panels
+    ).length;
     if (!Boolean(count)) {
-      const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowId);
+      const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), sectionId);
       gridLayoutStateManager.gridLayout$.next(newLayout);
     } else {
       setDeleteModalVisible(true);
     }
-  }, [gridLayoutStateManager, rowId]);
+  }, [gridLayoutStateManager, sectionId]);
 
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    (newLayout[rowId] as GridRowData).isCollapsed = !(newLayout[rowId] as GridRowData).isCollapsed;
+    const section = newLayout[sectionId];
+
+    newLayout[sectionId].isCollapsed = !(newLayout[sectionId] as GridRowData).isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
-  }, [gridLayoutStateManager, rowId]);
+  }, [gridLayoutStateManager, sectionId]);
 
   return (
     <>
@@ -183,17 +187,17 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
         gutterSize="xs"
         responsive={false}
         alignItems="center"
-        css={(theme) => styles.headerStyles(theme, rowId)}
+        css={(theme) => styles.headerStyles(theme, sectionId)}
         className={classNames(initialClassNames, {
           'kbnGridRowHeader--active': isActive,
         })}
-        data-test-subj={`kbnGridRowHeader-${rowId}`}
+        data-test-subj={`kbnGridRowHeader-${sectionId}`}
         ref={(element: HTMLDivElement | null) =>
-          (gridLayoutStateManager.headerRefs.current[rowId] = element)
+          (gridLayoutStateManager.headerRefs.current[sectionId] = element)
         }
       >
         <GridRowTitle
-          rowId={rowId}
+          sectionId={sectionId}
           readOnly={readOnly || isActive}
           toggleIsCollapsed={toggleIsCollapsed}
           editTitleOpen={editTitleOpen}
@@ -211,7 +215,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
                 <EuiText
                   color="subdued"
                   size="s"
-                  data-test-subj={`kbnGridRowHeader-${rowId}--panelCount`}
+                  data-test-subj={`kbnGridRowHeader-${sectionId}--panelCount`}
                   className={'kbnGridLayout--panelCount'}
                 >
                   {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
@@ -253,7 +257,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
                       onTouchStart={startDrag}
                       onKeyDown={startDrag}
                       onBlur={onBlur}
-                      data-test-subj={`kbnGridRowHeader-${rowId}--dragHandle`}
+                      data-test-subj={`kbnGridRowHeader-${sectionId}--dragHandle`}
                     />
                   </EuiFlexItem>
                 </>
@@ -262,9 +266,9 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
           )
         }
       </EuiFlexGroup>
-      {isActive && <GridRowDragPreview rowId={rowId} />}
+      {isActive && <GridRowDragPreview sectionId={sectionId} />}
       {deleteModalVisible && (
-        <DeleteGridRowModal rowId={rowId} setDeleteModalVisible={setDeleteModalVisible} />
+        <DeleteGridRowModal sectionId={sectionId} setDeleteModalVisible={setDeleteModalVisible} />
       )}
     </>
   );
@@ -280,11 +284,11 @@ const styles = {
   floatToRight: css({
     marginLeft: 'auto',
   }),
-  headerStyles: ({ euiTheme }: UseEuiTheme, rowId: string) =>
+  headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string) =>
     css({
       gridColumnStart: 1,
       gridColumnEnd: -1,
-      gridRowStart: `start-${rowId}`,
+      gridRowStart: `start-${sectionId}`,
       gridRowEnd: `auto`,
       height: `${euiTheme.size.xl}`,
       // border: '1px solid transparent', // prevents layout shift

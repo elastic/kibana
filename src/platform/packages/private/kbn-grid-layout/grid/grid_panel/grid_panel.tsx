@@ -28,8 +28,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
     useGridLayoutContext();
   const panel$ = useGridPanelState({ panelId });
-  const [rowId, setRowId] = useState<string>(panel$.getValue().rowId);
-  const dragHandleApi = useDragHandleApi({ panelId, rowId });
+  const [sectionId, setSectionId] = useState<string>(panel$.getValue().sectionId);
+  const dragHandleApi = useDragHandleApi({ panelId, sectionId });
 
   const initialStyles = useMemo(() => {
     const initialPanel = panel$.getValue();
@@ -44,7 +44,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       );
       grid-column-start: ${initialPanel.column + 1};
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
-      grid-row-start: ${`gridRow-${initialPanel.rowId}`} ${initialPanel.row + 1};
+      grid-row-start: ${`gridRow-${initialPanel.sectionId}`} ${initialPanel.row + 1};
       grid-row-end: span ${initialPanel.height};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
@@ -94,7 +94,9 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
             // undo any "lock to grid" styles **except** for the top left corner, which stays locked
             ref.style.gridColumnStart = `${currentPanel.column + 1}`;
-            ref.style.gridRowStart = `${`gridRow-${currentPanel.rowId}`} ${currentPanel.row + 1}`;
+            ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${
+              currentPanel.row + 1
+            }`;
             ref.style.gridColumnEnd = `auto`;
             ref.style.gridRowEnd = `auto`;
           } else {
@@ -125,7 +127,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           // and render the panel locked to the grid
           ref.style.gridColumnStart = `${currentPanel.column + 1}`;
           ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
-          ref.style.gridRowStart = `${`gridRow-${currentPanel.rowId}`} ${currentPanel.row + 1}`;
+          ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${currentPanel.row + 1}`;
           ref.style.gridRowEnd = `span ${currentPanel.height}`;
         }
       });
@@ -146,20 +148,20 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       }
     );
 
-    const rowIdSubscription = panel$
+    const sectionIdSubscription = panel$
       .pipe(
         skip(1),
-        map((panel) => panel.rowId),
+        map((panel) => panel.sectionId),
         distinctUntilChanged()
       )
       .subscribe((currentRow) => {
-        setRowId(currentRow);
+        setSectionId(currentRow);
       });
 
     return () => {
       activePanelStyleSubscription.unsubscribe();
       expandedPanelSubscription.unsubscribe();
-      rowIdSubscription.unsubscribe();
+      sectionIdSubscription.unsubscribe();
     };
   }, [panel$, gridLayoutStateManager, euiTheme.levels.modal]);
 
@@ -180,7 +182,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
     >
       {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
       {panelContents}
-      <ResizeHandle panelId={panelId} rowId={rowId} />
+      <ResizeHandle panelId={panelId} sectionId={sectionId} />
     </div>
   );
 });

@@ -20,17 +20,17 @@ export interface DragHandleApi {
 
 export const useDragHandleApi = ({
   panelId,
-  rowId,
+  sectionId,
 }: {
   panelId: string;
-  rowId: string;
+  sectionId: string;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
   const { startDrag } = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
-    rowId,
+    sectionId,
   });
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);

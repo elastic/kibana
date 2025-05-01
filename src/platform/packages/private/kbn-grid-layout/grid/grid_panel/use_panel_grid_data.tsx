@@ -18,7 +18,7 @@ export const useGridPanelState = ({
   panelId,
 }: {
   panelId: string;
-}): BehaviorSubject<GridPanelData & { rowId: string }> => {
+}): BehaviorSubject<GridPanelData & { sectionId: string }> => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const cleanupCallback = useRef<null | (() => void)>();
 
@@ -31,7 +31,8 @@ export const useGridPanelState = ({
       .pipe(
         map((layout) => getPanelState(layout, panelId)),
         distinctUntilChanged(
-          (panelA, panelB) => isGridDataEqual(panelA, panelB) && panelA.rowId === panelB.rowId
+          (panelA, panelB) =>
+            isGridDataEqual(panelA, panelB) && panelA.sectionId === panelB.sectionId
         )
       )
       .subscribe((panel) => {
@@ -55,10 +56,10 @@ export const useGridPanelState = ({
 };
 
 const getPanelState = (layout: OrderedLayout, panelId: string) => {
-  const flattenedPanels: { [id: string]: GridPanelData & { rowId: string } } = {};
+  const flattenedPanels: { [id: string]: GridPanelData & { sectionId: string } } = {};
   Object.values(layout).forEach((section) => {
     Object.values((section as unknown as GridRowData).panels).forEach((panel) => {
-      flattenedPanels[panel.id] = { ...panel, rowId: section.id, row: panel.row };
+      flattenedPanels[panel.id] = { ...panel, sectionId: section.id, row: panel.row };
     });
   });
   // console.log({ flattenedPanels });
