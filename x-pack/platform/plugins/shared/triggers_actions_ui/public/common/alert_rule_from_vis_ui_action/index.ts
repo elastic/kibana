@@ -10,7 +10,7 @@ import type {
   AlertRuleFromVisUIActionData,
   RuleTypeRegistryContract,
 } from '@kbn/alerts-ui-shared';
-import { DimensionType } from '@kbn/visualization-utils';
+import { DimensionType } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { parse, walk, type ESQLColumn, type ESQLFunction } from '@kbn/esql-ast';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DimensionType } from '@kbn/visualization-utils';
+import { DimensionType } from '@kbn/expressions-plugin/common';
 import { prepareLogTable } from './prepare_log_table';
 
 describe('prepareLogTable', () => {

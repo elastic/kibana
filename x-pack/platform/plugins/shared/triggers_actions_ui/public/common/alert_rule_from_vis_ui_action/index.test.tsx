@@ -8,7 +8,7 @@
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
-import { DimensionType } from '@kbn/visualization-utils';
+import { DimensionType } from '@kbn/expressions-plugin/common';
 import { last } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from '.';
