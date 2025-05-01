@@ -248,6 +248,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               value: 'container-0',
             },
           ]);
+        expect(resp.hits.hits[0]._source).property('kibana.alert.grouping').eql({
+          'host.name': 'host-0',
+          'container.id': 'container-0',
+        });
         expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
