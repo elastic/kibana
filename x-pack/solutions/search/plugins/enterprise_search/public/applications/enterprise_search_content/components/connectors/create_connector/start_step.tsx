@@ -32,6 +32,7 @@ import { GeneratedConfigFields } from '../../connector_detail/components/generat
 
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
+import { KibanaLogic } from '../../../../shared/kibana';
 
 import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
@@ -70,6 +71,8 @@ export const StartStep: React.FC<StartStepProps> = ({
   const { setRawName, createConnector, generateConnectorName, setFormDirty } =
     useActions(NewConnectorLogic);
   const { connector } = useValues(ConnectorViewLogic);
+  const { config } = useValues(KibanaLogic);
+  const hasEnterpriseSearchNode = !!config.host;
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -210,7 +213,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                   )}
                   checked={selfManagePreference === 'native'}
                   disabled={
-                    selectedConnector?.isNative === false || isRunningLocally || isFormDirty
+                    selectedConnector?.isNative === false || 
+                    isRunningLocally || 
+                    isFormDirty || 
+                    !hasEnterpriseSearchNode
                   }
                   onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
