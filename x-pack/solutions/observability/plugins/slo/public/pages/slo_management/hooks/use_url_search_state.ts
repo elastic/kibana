@@ -12,7 +12,7 @@ import {
 import deepmerge from 'deepmerge';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { DEFAULT_SLO_PAGE_SIZE } from '../../../../../common/constants';
+import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
 
 export const SLO_MANAGEMENT_SEARCH_URL_STORAGE_KEY = 'search';
 export const SLO_MANAGEMENT_SEARCH_SESSION_STORAGE_KEY = 'slo.management_page_search_state';
