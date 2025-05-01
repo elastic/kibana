@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
 import { catchAndWrapError } from '../../../../utils';
 import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
@@ -786,22 +787,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
   > {
     const esClient = this.options.esClient;
-    const query: QueryDslQueryContainer = {
-      bool: {
-        must: {
-          // Only actions for this agent type
-          term: { 'EndpointActions.input_type': this.agentType },
-        },
-        must_not: {
-          // No action requests that have an `error` property defined
-          exists: { field: 'error' },
-        },
-        filter: [
-          // We only want actions requests whose expiration date is greater than now
-          { range: { 'EndpointActions.expiration': { gte: 'now' } } },
-        ],
-      },
-    };
+    const query: QueryDslQueryContainer = getUnExpiredActionsEsQuery(this.agentType);
 
     return createEsSearchIterable<LogsEndpointAction>({
       esClient,
