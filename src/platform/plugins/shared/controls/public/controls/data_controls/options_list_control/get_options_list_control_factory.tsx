@@ -321,6 +321,8 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         defaultState: {
           searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
           sort: OPTIONS_LIST_DEFAULT_SORT,
+          exclude: false,
+          existsSelected: false,
         },
         onReset: (lastSaved) => {
           dataControl.reinitializeState(lastSaved?.rawState);
