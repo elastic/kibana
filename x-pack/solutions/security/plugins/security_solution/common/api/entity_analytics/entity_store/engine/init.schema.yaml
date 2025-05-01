@@ -61,11 +61,11 @@ paths:
                   description: The delay before the transform will run.
                 docsPerSecond:
                   type: integer
-                  default: 1000
+                  default: 10000
                   description: The number of documents per second to process.
                 maxPageSearchSize:
                   type: integer
-                  default: 10000
+                  default: 20000
                   description: Defines the initial page size to use for the composite aggregation for each checkpoint
       responses:
         '200':

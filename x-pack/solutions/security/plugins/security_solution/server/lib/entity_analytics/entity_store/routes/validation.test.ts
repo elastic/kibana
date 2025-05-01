@@ -18,8 +18,8 @@ describe('entity store initialization request validation', () => {
     frequency: '1m',
     delay: '1m',
     enrichPolicyExecutionInterval: '1h',
-    docsPerSecond: 1000,
-    maxPageSearchSize: 10000,
+    docsPerSecond: 10000,
+    maxPageSearchSize: 20000,
   };
   it('should allow the default values (24 hour lookback period, 1 hour enrich policy interval)', () => {
     expect(validateInitializationRequestBody(defaultRequestBody)).toBeUndefined();
