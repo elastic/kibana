@@ -311,7 +311,7 @@ export function SloItemActions({
             {showRemoteLinkIcon}
           </EuiContextMenuItem>,
         ].concat(
-          !isDashboardContext ? (
+          !isDashboardContext && !!setDashboardAttachmentReady ? (
             <EuiContextMenuItem
               icon="dashboardApp"
               key="addToDashboard"

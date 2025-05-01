@@ -25,7 +25,7 @@ export function useBulkDeleteSlo() {
   return useMutation<
     BulkDeleteResponse,
     ServerError,
-    { items: Array<Pick<SLODefinitionResponse, 'id' | 'name'>> }
+    { items: Array<Pick<SLODefinitionResponse, 'id'>> }
   >(
     ['bulkDeleteSlo'],
     ({ items }) => {

@@ -96,6 +96,7 @@ export function SloListItem({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <BurnRateRuleFlyout
         slo={slo}
         isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}

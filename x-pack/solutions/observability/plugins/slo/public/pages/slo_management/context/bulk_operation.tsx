@@ -143,8 +143,10 @@ export function BulkOperationProvider({ children }: { children: React.ReactNode 
           );
 
           toasts.addSuccess({
-            title: `Bulk ${task.operation} succeeded`,
-            text: JSON.stringify(response),
+            title: `Bulk ${task.operation} completed`,
+            text: `Successfully deleted ${response.results?.filter((i) => i.success).length} on ${
+              response.results?.length
+            } SLOs`,
           });
 
           return response;

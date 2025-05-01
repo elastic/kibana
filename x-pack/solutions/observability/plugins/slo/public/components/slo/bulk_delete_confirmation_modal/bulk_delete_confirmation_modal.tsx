@@ -39,7 +39,7 @@ export function SloBulkDeleteConfirmationModal({ items, onCancel, onConfirm }: P
       )}
       onCancel={onCancel}
       onConfirm={() => {
-        bulkDelete({ items: items.map((item) => ({ id: item.id, name: item.name })) });
+        bulkDelete({ items: items.map((item) => ({ id: item.id })) });
         onConfirm();
       }}
     >
