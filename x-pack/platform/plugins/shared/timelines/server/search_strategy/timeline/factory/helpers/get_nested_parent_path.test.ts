@@ -9,6 +9,7 @@ import { getNestedParentPath } from './get_nested_parent_path';
 
 describe('getNestedParentPath', () => {
   let testFields: Fields | undefined;
+  let testFieldsKeys: string[];
   beforeAll(() => {
     testFields = {
       'not.nested': ['I am not nested'],
@@ -18,22 +19,23 @@ describe('getNestedParentPath', () => {
         },
       ],
     };
+    testFieldsKeys = Object.keys(testFields);
   });
 
   it('should ignore fields that are not nested', () => {
     const notNestedPath = 'not.nested';
-    const shouldBeUndefined = getNestedParentPath(notNestedPath, testFields);
+    const shouldBeUndefined = getNestedParentPath(notNestedPath, testFieldsKeys);
     expect(shouldBeUndefined).toBe(undefined);
   });
 
   it('should capture fields that are nested', () => {
     const nestedPath = 'is.nested.field';
-    const nestedParentPath = getNestedParentPath(nestedPath, testFields);
+    const nestedParentPath = getNestedParentPath(nestedPath, testFieldsKeys);
     expect(nestedParentPath).toEqual('is.nested');
   });
 
   it('should return undefined when the `fields` param is undefined', () => {
     const nestedPath = 'is.nested.field';
-    expect(getNestedParentPath(nestedPath, undefined)).toBe(undefined);
+    expect(getNestedParentPath(nestedPath, [])).toBe(undefined);
   });
 });
