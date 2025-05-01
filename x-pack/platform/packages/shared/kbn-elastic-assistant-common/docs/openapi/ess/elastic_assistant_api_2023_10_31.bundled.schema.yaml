@@ -159,7 +159,7 @@ paths:
       description: Create a model response for the given chat conversation.
       operationId: ChatComplete
       parameters:
-        - description: 'If true, the response will not include content references.'
+        - description: If true, the response will not include content references.
           in: query
           name: content_references_disabled
           required: false
@@ -426,7 +426,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversation API
-  '/api/security_ai_assistant/knowledge_base/{resource}':
+  /api/security_ai_assistant/knowledge_base/{resource}:
     get:
       description: Read a single KB
       operationId: ReadKnowledgeBase
@@ -683,7 +683,7 @@ paths:
       tags:
         - Security AI Assistant API
         - Knowledge Base Entries API
-  '/api/security_ai_assistant/knowledge_base/entries/{id}':
+  /api/security_ai_assistant/knowledge_base/entries/{id}:
     delete:
       description: Deletes a single Knowledge Base Entry using the `id` field
       operationId: DeleteKnowledgeBaseEntry
@@ -1302,13 +1302,13 @@ components:
         - type: object
           properties:
             global:
-              description: 'Whether this Knowledge Base Entry is global, defaults to false'
+              description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
             namespace:
-              description: 'Kibana Space, defaults to ''default'' space'
+              description: Kibana Space, defaults to 'default' space
               type: string
             users:
               description: >-
@@ -1329,13 +1329,13 @@ components:
         - type: object
           properties:
             global:
-              description: 'Whether this Knowledge Base Entry is global, defaults to false'
+              description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
             namespace:
-              description: 'Kibana Space, defaults to ''default'' space'
+              description: Kibana Space, defaults to 'default' space
               type: string
             users:
               description: >-
@@ -1352,7 +1352,7 @@ components:
       type: object
       properties:
         required:
-          description: 'Whether this resource should always be included, defaults to false'
+          description: Whether this resource should always be included, defaults to false
           type: boolean
         vector:
           $ref: '#/components/schemas/Vector'
@@ -1386,7 +1386,7 @@ components:
         - type: object
           properties:
             global:
-              description: 'Whether this Knowledge Base Entry is global, defaults to false'
+              description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
@@ -1394,7 +1394,7 @@ components:
               description: Name of the Knowledge Base Entry
               type: string
             namespace:
-              description: 'Kibana Space, defaults to ''default'' space'
+              description: Kibana Space, defaults to 'default' space
               type: string
             users:
               description: >-
@@ -1470,13 +1470,13 @@ components:
         - type: object
           properties:
             global:
-              description: 'Whether this Knowledge Base Entry is global, defaults to false'
+              description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
             namespace:
-              description: 'Kibana Space, defaults to ''default'' space'
+              description: Kibana Space, defaults to 'default' space
               type: string
             users:
               description: >-
@@ -1497,13 +1497,13 @@ components:
         - type: object
           properties:
             global:
-              description: 'Whether this Knowledge Base Entry is global, defaults to false'
+              description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
             namespace:
-              description: 'Kibana Space, defaults to ''default'' space'
+              description: Kibana Space, defaults to 'default' space
               type: string
             users:
               description: >-
@@ -1567,7 +1567,7 @@ components:
         - type: object
           properties:
             global:
-              description: 'Whether this Knowledge Base Entry is global, defaults to false'
+              description: Whether this Knowledge Base Entry is global, defaults to false
               type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
@@ -1575,7 +1575,7 @@ components:
               description: Name of the Knowledge Base Entry
               type: string
             namespace:
-              description: 'Kibana Space, defaults to ''default'' space'
+              description: Kibana Space, defaults to 'default' space
               type: string
             users:
               description: >-
