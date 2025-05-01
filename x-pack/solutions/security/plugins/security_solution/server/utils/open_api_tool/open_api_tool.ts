@@ -178,12 +178,15 @@ export abstract class OpenApiTool<T> {
             internalToolsAndOperations.map((toolAndOperation) => toolAndOperation.tool)
           ),
           name: formatToolName(`${tag}_agent`),
-          description: [...new Set(internalToolsAndOperations
-            .flatMap((toolAndOperation) => toolAndOperation.operation.getTags())
-            .filter((t) => t.name === tag)
-            .map((t) => t.description || t.name)
-            .filter((t) => !!t))]
-            .join('\n'),
+          description: [
+            ...new Set(
+              internalToolsAndOperations
+                .flatMap((toolAndOperation) => toolAndOperation.operation.getTags())
+                .filter((t) => t.name === tag)
+                .map((t) => t.description || t.name)
+                .filter((t) => !!t)
+            ),
+          ].join('\n'),
         });
         return internalNode;
       });
