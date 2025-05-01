@@ -13,7 +13,7 @@ import { pick } from 'lodash';
 import { GridLayoutStateManager, GridRowData, OrderedLayout } from '../../types';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { resolveGridRow } from '../../utils/resolve_grid_row';
+import { getPanelKeysInOrder, resolveGridRow } from '../../utils/resolve_grid_row';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -73,7 +73,6 @@ export const moveAction = (
       }
     });
     return currentTargetRow;
-    // console.log({ currentTargetRow, activeRowRect });
   })();
 
   if (!targetRowId || !currentLayout[targetRowId].isMainSection) {
@@ -125,11 +124,14 @@ export const moveAction = (
           const topSectionPanels: GridRowData['panels'] = {};
           const bottomSectionPanels: GridRowData['panels'] = {};
           let startingRow: number;
-          Object.values(row.panels).forEach((panel) => {
+          getPanelKeysInOrder(row.panels).forEach((panelId) => {
+            const panel = row.panels[panelId];
             if (panel.row < targetRow) {
               topSectionPanels[panel.id] = panel;
             } else {
-              if (!startingRow) startingRow = panel.row;
+              if (startingRow === undefined) {
+                startingRow = panel.row;
+              }
               bottomSectionPanels[panel.id] = { ...panel, row: panel.row - startingRow };
             }
           });
@@ -177,8 +179,9 @@ export const moveAction = (
       const firstSection = sortedSections[i];
       if (firstSection.isMainSection) {
         let combinedPanels = { ...firstSection.panels };
-        while (i + 1 < sortedSections.length && sortedSections[i + 1].isMainSection) {
+        while (i + 1 < sortedSections.length) {
           const secondSection = sortedSections[i + 1];
+          if (!secondSection.isMainSection) break;
           Object.values(secondSection.panels).forEach((panel) => {
             panel.row = panel.row + 100; // add row to enforce order
           });
@@ -194,16 +197,7 @@ export const moveAction = (
         };
         mainSectionCount++;
       } else {
-        if (firstSection.isMainSection) {
-          finalLayout[`main-${mainSectionCount}`] = {
-            ...firstSection,
-            id: `main-${mainSectionCount}`,
-            order: i,
-          };
-          mainSectionCount++;
-        } else {
-          finalLayout[firstSection.id] = { ...firstSection, order: i };
-        }
+        finalLayout[firstSection.id] = { ...firstSection, order: i };
       }
     }
 
