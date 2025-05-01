@@ -19,51 +19,93 @@ import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../common_attributes.gen';
 
+/**
+ * The operational context for the assistant.
+ */
 export type RootContext = z.infer<typeof RootContext>;
 export const RootContext = z.literal('security');
 
 /**
- * Message role.
+ * The role associated with the message in the chat.
  */
 export type ChatMessageRole = z.infer<typeof ChatMessageRole>;
 export const ChatMessageRole = z.enum(['system', 'user', 'assistant']);
 export type ChatMessageRoleEnum = typeof ChatMessageRole.enum;
 export const ChatMessageRoleEnum = ChatMessageRole.enum;
 
+/**
+ * Optional ECS-style metadata attached to the message.
+ */
 export type MessageData = z.infer<typeof MessageData>;
 export const MessageData = z.object({}).catchall(z.unknown());
 
 /**
- * AI assistant message.
+ * A message exchanged within the AI chat conversation.
  */
 export type ChatMessage = z.infer<typeof ChatMessage>;
 export const ChatMessage = z.object({
   /**
-   * Message content.
+   * The textual content of the message.
    */
   content: z.string().optional(),
   /**
-   * Message role.
+   * The sender role of the message.
    */
   role: ChatMessageRole,
   /**
-   * ECS object to attach to the context of the message.
+   * Optional metadata to attach to the context of the message.
    */
   data: MessageData.optional(),
+  /**
+   * List of field names within the data object that should be anonymized.
+   */
   fields_to_anonymize: z.array(z.string()).optional(),
 });
 
+/**
+ * The request payload for creating a chat completion.
+ */
 export type ChatCompleteProps = z.infer<typeof ChatCompleteProps>;
 export const ChatCompleteProps = z.object({
+  /**
+   * Optional existing conversation ID to continue.
+   */
   conversationId: NonEmptyString.optional(),
+  /**
+   * Optional prompt template identifier.
+   */
   promptId: z.string().optional(),
+  /**
+   * If true, the response will be streamed in chunks.
+   */
   isStream: z.boolean().optional(),
+  /**
+   * ISO language code for the assistant's response.
+   */
   responseLanguage: z.string().optional(),
+  /**
+   * Optional LangSmith project name for tracing.
+   */
   langSmithProject: z.string().optional(),
+  /**
+   * Optional API key for LangSmith integration.
+   */
   langSmithApiKey: z.string().optional(),
+  /**
+   * Required connector identifier to route the request.
+   */
   connectorId: z.string(),
+  /**
+   * Optional model ID or name to use for the response.
+   */
   model: z.string().optional(),
+  /**
+   * Whether to persist the chat and response to storage.
+   */
   persist: z.boolean(),
+  /**
+   * List of chat messages exchanged so far.
+   */
   messages: z.array(ChatMessage),
 });
 

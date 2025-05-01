@@ -260,6 +260,7 @@ paths:
       operationId: ChatComplete
       parameters:
         - description: If true, the response will not include content references.
+          example: false
           in: query
           name: content_references_disabled
           required: false
@@ -269,6 +270,24 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              connectorId: conn-001
+              conversationId: abc123
+              isStream: true
+              langSmithApiKey: sk-abc123
+              langSmithProject: security_ai_project
+              messages:
+                - content: What are some common phishing techniques?
+                  data:
+                    user_id: user_789
+                  fields_to_anonymize:
+                    - user.name
+                    - source.ip
+                  role: user
+              model: gpt-4
+              persist: true
+              promptId: prompt_456
+              responseLanguage: en
             schema:
               $ref: '#/components/schemas/ChatCompleteProps'
         required: true
@@ -279,7 +298,7 @@ paths:
               schema:
                 format: binary
                 type: string
-          description: Indicates a successful call.
+          description: Indicates a successful model response call.
         '400':
           content:
             application/json:
@@ -287,10 +306,16 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: Error type.
+                    example: Bad Request
                     type: string
                   message:
+                    description: Human-readable error message.
+                    example: Invalid request payload.
                     type: string
                   statusCode:
+                    description: HTTP status code.
+                    example: 400
                     type: number
           description: Generic Error
       summary: Create a model response
@@ -1214,59 +1239,104 @@ components:
         - succeeded
         - total
     ChatCompleteProps:
+      description: The request payload for creating a chat completion.
+      example:
+        connectorId: conn-001
+        conversationId: abc123
+        isStream: true
+        langSmithApiKey: sk-abc123
+        langSmithProject: security_ai_project
+        messages:
+          - content: How do I detect ransomware on my endpoints?
+            data:
+              device_id: device-567
+            fields_to_anonymize:
+              - device.name
+              - file.path
+            role: user
+        model: gpt-4
+        persist: true
+        promptId: prompt_456
+        responseLanguage: en
       type: object
       properties:
         connectorId:
+          description: Required connector identifier to route the request.
+          example: conn-001
           type: string
         conversationId:
           $ref: '#/components/schemas/NonEmptyString'
+          description: Optional existing conversation ID to continue.
         isStream:
+          description: If true, the response will be streamed in chunks.
+          example: true
           type: boolean
         langSmithApiKey:
+          description: Optional API key for LangSmith integration.
+          example: sk-abc123
           type: string
         langSmithProject:
+          description: Optional LangSmith project name for tracing.
+          example: security_ai_project
           type: string
         messages:
+          description: List of chat messages exchanged so far.
           items:
             $ref: '#/components/schemas/ChatMessage'
           type: array
         model:
+          description: Optional model ID or name to use for the response.
+          example: gpt-4
           type: string
         persist:
+          description: Whether to persist the chat and response to storage.
+          example: true
           type: boolean
         promptId:
+          description: Optional prompt template identifier.
+          example: prompt_001
           type: string
         responseLanguage:
+          description: ISO language code for the assistant's response.
+          example: en
           type: string
       required:
         - messages
         - persist
         - connectorId
     ChatMessage:
-      description: AI assistant message.
+      description: A message exchanged within the AI chat conversation.
       type: object
       properties:
         content:
-          description: Message content.
+          description: The textual content of the message.
+          example: What security incidents have been reported today?
           type: string
         data:
           $ref: '#/components/schemas/MessageData'
-          description: ECS object to attach to the context of the message.
+          description: Optional metadata to attach to the context of the message.
         fields_to_anonymize:
+          description: >-
+            List of field names within the data object that should be
+            anonymized.
+          example:
+            - user.name
+            - source.ip
           items:
             type: string
           type: array
         role:
           $ref: '#/components/schemas/ChatMessageRole'
-          description: Message role.
+          description: The sender role of the message.
       required:
         - role
     ChatMessageRole:
-      description: Message role.
+      description: The role associated with the message in the chat.
       enum:
         - system
         - user
         - assistant
+      example: user
       type: string
     ContentReferences:
       additionalProperties:
@@ -1926,6 +1996,10 @@ components:
         - role
     MessageData:
       additionalProperties: true
+      description: Optional ECS-style metadata attached to the message.
+      example:
+        alert_id: alert-456
+        user_id: abc123
       type: object
     MessageMetadata:
       description: Message metadata
