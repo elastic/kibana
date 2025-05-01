@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { ToolingLog } from '@kbn/tooling-log';
+import { safeDump } from 'js-yaml';
 import { writeTempfile } from './file_utils';
 import { generateCertificates } from './generate_certificate';
 import { getServiceConfigurationFromYaml } from './get_service_configuration';
 import { EisCredentials } from './get_eis_credentials';
-import { safeDump } from 'js-yaml';
 
 export interface EisGatewayConfig {
   image: string;
