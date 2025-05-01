@@ -12,16 +12,16 @@ import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/se
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  clearKnowledgeBase,
-  deleteTinyElserModelAndInferenceEndpoint,
-  deployTinyElserAndSetupKb,
-} from '../utils/knowledge_base';
+import { clearKnowledgeBase } from '../utils/knowledge_base';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../utils/model_and_inference';
 
 const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });

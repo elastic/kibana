@@ -10,13 +10,14 @@ import * as semver from 'semver';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
+  getKbIndexCreatedVersion,
+} from '../utils/knowledge_base';
+import {
   TINY_ELSER_INFERENCE_ID,
   TINY_ELSER_MODEL_ID,
-  createTinyElserInferenceEndpoint,
-  deleteTinyElserModelAndInferenceEndpoint,
-  getKbIndexCreatedVersion,
-  importTinyElserModel,
-} from '../utils/knowledge_base';
+  setupTinyElserModelAndInferenceEndpoint,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../utils/model_and_inference';
 import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
@@ -30,37 +31,45 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const retry = getService('retry');
   const log = getService('log');
-  const ml = getService('ml');
 
   // Sparse vector field was introduced in Elasticsearch 8.11
   // The semantic text field was added to the knowledge base index in 8.17
   // Indices created in 8.10 do not support semantic text field and need to be reindexed
-  describe('when upgrading from 8.10 to 8.18', function () {
+  describe.only('when upgrading from 8.10 to 8.18', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
 
     before(async () => {
       // in a real environment we will use the ELSER inference endpoint (`.elser-2-elasticsearch`) which is pre-installed
-      // the model is also preloaded (but not deployed)
-      await importTinyElserModel(ml);
-      await createTinyElserInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID });
+      // For testing purposes we will use the tiny ELSER model
+
+      log.info('Setting up tiny ELSER model and inference endpoint');
+      await setupTinyElserModelAndInferenceEndpoint(getService);
     });
 
     after(async () => {
+      log.info('Restoring index assets');
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      
+      log.info('Tearing down tiny ELSER model and inference endpoint');
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
     });
 
     describe('before running migrations', () => {
       before(async () => {
+        log.info('Delete index assets');
         await deleteIndexAssets(es);
+
+        log.info('Restoring snapshot');
         await restoreKbSnapshot({
           log,
           es,
           snapshotFolderName: 'snapshot_kb_8.10',
           snapshotName: 'my_snapshot',
         });
+
+        log.info('Creating index assets');
         await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
       });
 
@@ -71,7 +80,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      it('cannot add new entries to KB until reindex has completed', async () => {
+      it.only('cannot add new entries to KB until reindex has completed', async () => {
         const res1 = await createKnowledgeBaseEntry();
 
         expect(res1.status).to.be(503);

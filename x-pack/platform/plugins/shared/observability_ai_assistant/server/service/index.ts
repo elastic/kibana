@@ -19,7 +19,7 @@ import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
 import { createOrUpdateConversationIndexAssets } from './index_assets/create_or_update_conversation_index_assets';
 
-function getResourceName(resource: string) {
+export function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 

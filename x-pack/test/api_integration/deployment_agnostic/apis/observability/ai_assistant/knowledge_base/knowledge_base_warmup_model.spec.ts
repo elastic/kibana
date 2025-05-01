@@ -8,17 +8,12 @@
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  importTinyElserModel,
-  createTinyElserInferenceEndpoint,
-  deleteInferenceEndpoint,
-  deleteTinyElserModel,
   TINY_ELSER_INFERENCE_ID,
-} from '../utils/knowledge_base';
+  teardownTinyElserModelAndInferenceEndpoint,
+  setupTinyElserModelAndInferenceEndpoint,
+} from '../utils/model_and_inference';
 
 export default function WarmupModelApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const es = getService('es');
-  const log = getService('log');
-  const ml = getService('ml');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   function warmupKbAsAdmin(inferenceId: string) {
@@ -47,13 +42,11 @@ export default function WarmupModelApiTest({ getService }: DeploymentAgnosticFtr
     const inferenceId = TINY_ELSER_INFERENCE_ID;
 
     before(async () => {
-      await importTinyElserModel(ml);
-      await createTinyElserInferenceEndpoint({ es, log, inferenceId });
+      await setupTinyElserModelAndInferenceEndpoint(getService);
     });
 
     after(async () => {
-      await deleteTinyElserModel(getService);
-      await deleteInferenceEndpoint({ es, log, inferenceId });
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
     });
 
     it('returns 200 and triggers model warmup', async () => {

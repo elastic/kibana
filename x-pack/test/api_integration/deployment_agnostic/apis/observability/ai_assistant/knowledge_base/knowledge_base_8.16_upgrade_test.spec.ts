@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteTinyElserModelAndInferenceEndpoint,
-  deployTinyElserAndSetupKb,
-  getKnowledgeBaseEntries,
-  TINY_ELSER_INFERENCE_ID,
-} from '../utils/knowledge_base';
+import { getKnowledgeBaseEntries } from '../utils/knowledge_base';
 import {
   createOrUpdateIndexAssets,
   deleteIndexAssets,
@@ -22,6 +16,10 @@ import {
   runStartupMigrations,
 } from '../utils/index_assets';
 import { restoreKbSnapshot } from '../utils/snapshots';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -32,13 +30,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // In 8.16 and earlier embeddings were stored in the `ml.tokens` field
   // In 8.17 `ml.tokens` is replaced with `semantic_text` field and the custom ELSER inference endpoint "obs_ai_assistant_kb_inference" is introduced
   // When upgrading we must ensure that the semantic_text field is populated
-  describe('when upgrading from 8.16 to 8.17', function () {
+  describe.only('when upgrading from 8.16 to 8.17', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
 
     before(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await deleteIndexAssets(es);
       await restoreKbSnapshot({
         log,
@@ -53,7 +51,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 

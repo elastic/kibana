@@ -9,12 +9,11 @@ import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { orderBy, size, toPairs } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { clearKnowledgeBase, getKnowledgeBaseEntries } from '../utils/knowledge_base';
 import {
-  clearKnowledgeBase,
-  deleteTinyElserModelAndInferenceEndpoint,
+  teardownTinyElserModelAndInferenceEndpoint,
   deployTinyElserAndSetupKb,
-  getKnowledgeBaseEntries,
-} from '../utils/knowledge_base';
+} from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
@@ -51,7 +50,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 

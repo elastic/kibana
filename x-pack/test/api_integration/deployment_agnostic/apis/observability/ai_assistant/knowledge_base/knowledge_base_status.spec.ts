@@ -9,20 +9,20 @@ import expect from '@kbn/expect';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  deleteTinyElserModelAndInferenceEndpoint,
+  teardownTinyElserModelAndInferenceEndpoint,
   deleteInferenceEndpoint,
   deployTinyElserAndSetupKb,
   TINY_ELSER_MODEL_ID,
   TINY_ELSER_INFERENCE_ID,
-  deleteTinyElserModel,
-} from '../utils/knowledge_base';
+  deleteModel,
+} from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('/internal/observability_ai_assistant/kb/status', function () {
+  describe.only('/internal/observability_ai_assistant/kb/status', function () {
     // see details: https://github.com/elastic/kibana/issues/219217
     this.tags(['failsOnMKI']);
 
@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     afterEach(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
     });
 
     it('returns correct status after knowledge base is setup', async () => {
@@ -47,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns correct status after model is deleted', async () => {
-      await deleteTinyElserModel(getService);
+      await deleteModel(getService, { modelId: TINY_ELSER_MODEL_ID });
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',

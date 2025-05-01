@@ -14,10 +14,10 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
-  clearKnowledgeBase,
-  deleteTinyElserModelAndInferenceEndpoint,
   deployTinyElserAndSetupKb,
-} from '../../utils/knowledge_base';
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../utils/model_and_inference';
+import { clearKnowledgeBase } from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -66,7 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 

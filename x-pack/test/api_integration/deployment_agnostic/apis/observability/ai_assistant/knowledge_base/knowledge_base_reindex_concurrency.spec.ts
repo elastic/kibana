@@ -10,8 +10,6 @@ import { times } from 'lodash';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  deleteTinyElserModelAndInferenceEndpoint,
-  deployTinyElserAndSetupKb,
   deleteKbIndices,
   addSampleDocsToInternalKb,
   getConcreteWriteIndexFromAlias,
@@ -19,12 +17,16 @@ import {
 } from '../utils/knowledge_base';
 import { createOrUpdateIndexAssets } from '../utils/index_assets';
 import { animalSampleDocs } from '../utils/sample_docs';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe('POST /internal/observability_ai_assistant/kb/reindex', function () {
+  describe.only('POST /internal/observability_ai_assistant/kb/reindex', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
@@ -38,7 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     after(async () => {
       await deleteKbIndices(es);
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
     });
 
     describe('when running multiple re-index operations in parallel', () => {

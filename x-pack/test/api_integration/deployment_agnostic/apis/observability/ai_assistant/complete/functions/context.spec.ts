@@ -22,13 +22,12 @@ import {
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  addSampleDocsToInternalKb,
-  clearKnowledgeBase,
-  deleteTinyElserModelAndInferenceEndpoint,
-  deployTinyElserAndSetupKb,
-} from '../../utils/knowledge_base';
+import { addSampleDocsToInternalKb, clearKnowledgeBase } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../utils/model_and_inference';
 
 const screenContexts = [
   {
@@ -107,7 +106,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         actionId: connectorId,
       });
 
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 

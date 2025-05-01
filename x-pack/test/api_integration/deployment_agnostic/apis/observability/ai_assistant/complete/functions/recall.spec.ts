@@ -10,12 +10,14 @@ import { first, uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  deleteTinyElserModelAndInferenceEndpoint,
   addSampleDocsToInternalKb,
   addSampleDocsToCustomIndex,
-  deployTinyElserAndSetupKb,
 } from '../../utils/knowledge_base';
 import { animalSampleDocs, technicalSampleDocs } from '../../utils/sample_docs';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../utils/model_and_inference';
 
 const customSearchConnectorIndex = 'animals_kb';
 
@@ -31,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
       // clear custom index
       await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] });

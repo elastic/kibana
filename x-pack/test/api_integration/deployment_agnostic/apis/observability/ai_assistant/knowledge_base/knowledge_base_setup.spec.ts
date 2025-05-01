@@ -9,16 +9,15 @@ import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server/service/knowledge_base_service/get_inference_id_from_write_index';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { restoreIndexAssets } from '../utils/index_assets';
 import {
   TINY_ELSER_INFERENCE_ID,
-  deleteTinyElserModelAndInferenceEndpoint,
-  getConcreteWriteIndexFromAlias,
-  deployTinyElserAndSetupKb,
-  waitForKnowledgeBaseReady,
-  deleteInferenceEndpoint,
   createTinyElserInferenceEndpoint,
-} from '../utils/knowledge_base';
-import { restoreIndexAssets } from '../utils/index_assets';
+  deleteInferenceEndpoint,
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../utils/model_and_inference';
+import { getConcreteWriteIndexFromAlias, waitForKnowledgeBaseReady } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
@@ -26,14 +25,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('/internal/observability_ai_assistant/kb/setup', function () {
+  describe.only('/internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     afterEach(async () => {
-      await deleteTinyElserModelAndInferenceEndpoint(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 

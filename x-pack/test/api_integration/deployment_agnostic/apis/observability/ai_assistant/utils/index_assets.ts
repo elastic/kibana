@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
-import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
+import { getResourceName } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
-import { TINY_ELSER_INFERENCE_ID } from './knowledge_base';
+import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 
 export async function runStartupMigrations(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
@@ -36,23 +36,14 @@ export async function createOrUpdateIndexAssets(
 
 export async function deleteIndexAssets(es: Client) {
   // delete write indices
-  const response = await es.indices.get({ index: Object.values(resourceNames.indexPatterns) });
+  const response = await es.indices.get({ index: getResourceName('*') });
   const indicesToDelete = Object.keys(response);
   if (indicesToDelete.length > 0) {
     await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true });
   }
 
-  // delete index templates
-  await es.indices.deleteIndexTemplate(
-    { name: Object.values(resourceNames.indexTemplate) },
-    { ignore: [404] }
-  );
-
-  // delete component templates
-  await es.cluster.deleteComponentTemplate(
-    { name: Object.values(resourceNames.componentTemplate) },
-    { ignore: [404] }
-  );
+  await es.indices.deleteIndexTemplate({ name: getResourceName('*') }, { ignore: [404] });
+  await es.cluster.deleteComponentTemplate({ name: getResourceName('*') }, { ignore: [404] });
 }
 
 export async function restoreIndexAssets(
