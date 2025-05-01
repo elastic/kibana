@@ -11,7 +11,12 @@ import AdmZip from 'adm-zip';
 import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
+import {
+  deleteKbIndices,
+  deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+} from '../utils/knowledge_base';
+import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -25,22 +30,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
-      const zipFilePath = `${AI_ASSISTANT_SNAPSHOT_REPO_PATH}.zip`;
-      log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
-      new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
-
+      await unZipKbSnapshot();
       await setupKnowledgeBase(getService);
     });
 
     beforeEach(async () => {
-      await deleteKbIndex();
       await restoreKbSnapshot();
-      await createOrUpdateIndexAssets();
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
-      await deleteKbIndex();
-      await createOrUpdateIndexAssets();
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await deleteKnowledgeBaseModel(getService);
     });
 
@@ -68,14 +68,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // @ts-expect-error
       expect(body.message).to.eql(
-        'The knowledge base is currently being re-indexed. Please try again later'
+        'The index ".kibana-observability-ai-assistant-kb" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.'
       );
 
       expect(status).to.be(503);
     });
 
     it('can add new entries after re-indexing', async () => {
-      await runKbSemanticTextMigration();
+      await reIndexKnowledgeBase();
 
       await retry.try(async () => {
         const { status } = await createKnowledgeBaseEntry();
@@ -93,16 +93,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return parseInt(settings?.index?.version?.created ?? '', 10);
   }
 
-  async function deleteKbIndex() {
-    log.debug('Deleting KB index');
-
-    await es.indices.delete(
-      { index: resourceNames.concreteIndexName.kb, ignore_unavailable: true },
-      { ignore: [404] }
-    );
+  async function unZipKbSnapshot() {
+    const zipFilePath = `${AI_ASSISTANT_SNAPSHOT_REPO_PATH}.zip`;
+    log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
+    new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
   }
 
   async function restoreKbSnapshot() {
+    await deleteKbIndices(es);
+
     log.debug(
       `Restoring snapshot of ${resourceNames.concreteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
     );
@@ -128,16 +127,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     await es.snapshot.deleteRepository({ name: snapshotRepoName });
   }
 
-  async function createOrUpdateIndexAssets() {
+  async function reIndexKnowledgeBase() {
     const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/index_assets',
-    });
-    expect(status).to.be(200);
-  }
-
-  async function runKbSemanticTextMigration() {
-    const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
+      endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
     });
     expect(status).to.be(200);
   }
