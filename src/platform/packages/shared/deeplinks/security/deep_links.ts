@@ -10,7 +10,6 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  assets = 'assets',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
@@ -46,10 +45,8 @@ export enum SecurityPageName {
   hostsEvents = 'hosts-events',
   hostsSessions = 'hosts-sessions',
   hostsUncommonProcesses = 'hosts-uncommon_processes',
-  investigations = 'investigations',
   kubernetes = 'kubernetes',
   landing = 'get_started',
-  mlLanding = 'machine_learning-landing', // serverless only
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
@@ -65,6 +62,7 @@ export enum SecurityPageName {
   rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
+  rulesManagement = 'rules-management',
   siemMigrationsRules = 'siem_migrations-rules',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members

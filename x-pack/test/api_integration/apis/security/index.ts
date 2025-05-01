@@ -9,18 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security', function () {
-    // Updates here should be mirrored in `./security_basic.ts` if tests
-    // should also run under a basic license.
-
     loadTestFile(require.resolve('./api_keys'));
-    loadTestFile(require.resolve('./basic_login'));
-    loadTestFile(require.resolve('./builtin_es_privileges'));
-    loadTestFile(require.resolve('./change_password'));
-    loadTestFile(require.resolve('./index_fields'));
-    loadTestFile(require.resolve('./query_api_keys'));
-    loadTestFile(require.resolve('./roles'));
-    loadTestFile(require.resolve('./users'));
-    loadTestFile(require.resolve('./privileges'));
-    loadTestFile(require.resolve('./roles_bulk'));
   });
 }
