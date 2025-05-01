@@ -8,7 +8,7 @@
  */
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged, map, pairwise } from 'rxjs';
 
 import {
@@ -47,8 +47,19 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
     gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
   );
   const [panelCount, setPanelCount] = useState<number>(
-    Object.keys((gridLayoutStateManager.gridLayout$.getValue()[rowId] as GridRowData).panels).length
+    Object.keys(
+      (gridLayoutStateManager.gridLayout$.getValue()[rowId] as unknown as GridRowData).panels
+    ).length
   );
+
+  const initialClassNames = useMemo(() => {
+    console.log('initialClassNames');
+    return classNames('kbnGridRowHeader', {
+      'kbnGridRowHeader--collapsed': (
+        gridLayoutStateManager.gridLayout$.getValue()[rowId] as unknown as GridRowData
+      ).isCollapsed,
+    });
+  }, [rowId, gridLayoutStateManager.gridLayout$]);
 
   useEffect(() => {
     return () => {
@@ -174,7 +185,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
         responsive={false}
         alignItems="center"
         css={(theme) => styles.headerStyles(theme, rowId)}
-        className={classNames('kbnGridRowHeader', {
+        className={classNames(initialClassNames, {
           'kbnGridRowHeader--active': isActive,
         })}
         data-test-subj={`kbnGridRowHeader-${rowId}`}
