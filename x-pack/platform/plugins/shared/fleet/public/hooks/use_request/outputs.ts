@@ -39,6 +39,14 @@ export function useDefaultOutput() {
   return { output, refresh: outputsRequest.resendRequest };
 }
 
+export function sendGetOneOutput(outputId: string) {
+  return sendRequest({
+    method: 'get',
+    path: outputRoutesService.getInfoPath(outputId),
+    version: API_VERSIONS.public.v1,
+  });
+}
+
 export function sendPutOutput(outputId: string, body: PutOutputRequest['body']) {
   return sendRequest({
     method: 'put',
