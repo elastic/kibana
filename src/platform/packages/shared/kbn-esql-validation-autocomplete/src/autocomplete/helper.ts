@@ -16,6 +16,8 @@ import {
   type ESQLFunction,
   type ESQLLiteral,
   type ESQLSource,
+  ESQLAstQueryExpression,
+  BasicPrettyPrinter,
 } from '@kbn/esql-ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
@@ -60,7 +62,6 @@ import {
   getSuggestionsAfterNot,
 } from './factories';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
-import { buildQueryUntilPreviousCommand } from '../shared/resources_helpers';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -108,12 +109,39 @@ export function strictlyGetParamAtPosition(
   return params[position] ? params[position] : null;
 }
 
-export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
+/**
+ * This function is used to build the query that will be used to compute the
+ * available fields for the current cursor location.
+ *
+ * Generally, this is the user's query up to the end of the previous command.
+ *
+ * FORK branches are converted into equivalent vanilla queries so that they can be
+ * processed using the existing field computation/caching strategy
+ *
+ * @param queryString The original query string
+ * @param commands
+ * @returns
+ */
+export function getQueryForFields(queryString: string, root: ESQLAstQueryExpression): string {
+  const commands = root.commands;
+  const lastCommand = commands[commands.length - 1];
+  if (lastCommand.name === 'fork') {
+    const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
+    const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
+    return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+  }
+
   // If there is only one source command and it does not require fields, do not
   // fetch fields, hence return an empty string.
   return commands.length === 1 && ['row', 'show'].includes(commands[0].name)
     ? ''
     : buildQueryUntilPreviousCommand(queryString, commands);
+}
+
+// TODO consider replacing this with a pretty printer-based solution
+function buildQueryUntilPreviousCommand(queryString: string, commands: ESQLCommand[]) {
+  const prevCommand = commands[Math.max(commands.length - 2, 0)];
+  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {

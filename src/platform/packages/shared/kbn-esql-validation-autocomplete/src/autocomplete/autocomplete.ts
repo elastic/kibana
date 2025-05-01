@@ -96,7 +96,7 @@ export async function suggest(
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
   if (astContext.type === 'comment') {
@@ -104,7 +104,7 @@ export async function suggest(
   }
 
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(correctedQuery, ast);
+  const queryForFields = getQueryForFields(correctedQuery, root);
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),

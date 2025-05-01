@@ -7,23 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand, parse } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
-import {
-  removeLastPipe,
-  processPipes,
-  toSingleLine,
-  getFirstPipeValue,
-} from './query_string_utils';
+import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
-
-export function buildQueryUntilPreviousCommand(queryString: string, commands: ESQLCommand[]) {
-  const prevCommand = commands[Math.max(commands.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
-}
 
 const cache = new Map<string, ESQLRealField[]>();
 
@@ -47,7 +37,12 @@ function getValueInsensitive(keyToCheck: string) {
   return undefined;
 }
 
-async function setFieldsToCache(queryText: string) {
+/**
+ * Given a query, this function will compute the available fields and cache them
+ * for the next time the same query is used.
+ * @param queryText
+ */
+async function cacheFieldsForQuery(queryText: string) {
   const existsInCache = checkCacheInsensitive(queryText);
   if (existsInCache) {
     // this is already in the cache
@@ -55,13 +50,13 @@ async function setFieldsToCache(queryText: string) {
   }
   const queryTextWithoutLastPipe = removeLastPipe(queryText);
   // retrieve the user defined fields from the query without an extra call
-  const previousPipeFields = getValueInsensitive(queryTextWithoutLastPipe);
-  if (previousPipeFields && previousPipeFields?.length) {
+  const fieldsAvailableAfterPreviousCommand = getValueInsensitive(queryTextWithoutLastPipe);
+  if (fieldsAvailableAfterPreviousCommand && fieldsAvailableAfterPreviousCommand?.length) {
     const { root } = parse(queryText);
     const availableFields = await getCurrentQueryAvailableFields(
       queryText,
       root.commands,
-      previousPipeFields
+      fieldsAvailableAfterPreviousCommand
     );
     cache.set(queryText, availableFields);
   }
@@ -73,23 +68,19 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     if (!queryText) {
       return;
     }
-    // We will use the from clause to get the fields from the ES
-    const queryForIndexFields = getFirstPipeValue(queryText);
 
-    const output = processPipes(queryText);
-    for (const line of output) {
-      if (line === queryForIndexFields) {
-        const existsInCache = getValueInsensitive(line);
-        // retrieve the index fields from ES ONLY if the FROM clause is not in the cache
-        if (!existsInCache) {
-          const fieldsWithMetadata = await getFieldsFromES(line, resourceRetriever);
-          cache.set(line, fieldsWithMetadata);
-        }
-      } else {
-        // retrieve the fields by parsing the query
-        // and set them to the cache, no extra call to ES
-        await setFieldsToCache(line);
-      }
+    const [sourceCommand, ...partialQueries] = processPipes(queryText);
+
+    // retrieve the index fields from ES ONLY if the source command is not in the cache
+    const existsInCache = getValueInsensitive(sourceCommand);
+    if (!existsInCache) {
+      const fieldsWithMetadata = await getFieldsFromES(sourceCommand, resourceRetriever);
+      cache.set(sourceCommand, fieldsWithMetadata);
+    }
+
+    // build fields cache for every partial query
+    for (const query of partialQueries) {
+      await cacheFieldsForQuery(query);
     }
   };
 

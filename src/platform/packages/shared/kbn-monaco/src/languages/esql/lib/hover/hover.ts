@@ -33,10 +33,7 @@ import {
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
-import {
-  buildQueryUntilPreviousCommand,
-  getPolicyHelper,
-} from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
+import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '../../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
@@ -168,10 +165,7 @@ async function getHintForFunctionArg(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ) {
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(query, root.commands),
-    root.commands
-  );
+  const queryForFields = getQueryForFields(query, root);
   const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
 
   const fnDefinition = getFunctionDefinition(fnNode.name);
