@@ -133,7 +133,6 @@ export const basicESCaseFields: CasePersistedAttributes = {
   total_alerts: -1,
   total_comments: -1,
   category: null,
-  incremental_id: null,
 };
 
 export const basicCaseFields: CaseAttributes = {

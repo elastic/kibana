@@ -50,7 +50,7 @@ export interface CasePersistedAttributes {
   category?: string | null;
   customFields?: CasePersistedCustomFields;
   observables?: Observable[];
-  incremental_id: Case['incremental_id'];
+  incremental_id?: Case['incremental_id'];
 }
 
 type CasePersistedCustomFields = Array<{
