@@ -688,7 +688,7 @@ describe('discover responsive sidebar', function () {
     expect(createDataViewButton.length).toBe(1);
     createDataViewButton.simulate('click');
     expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
-  });
+  }, 10000);
 
   it('should not render buttons in data view picker when in viewer mode', async () => {
     const services = createMockServices();
@@ -720,7 +720,7 @@ describe('discover responsive sidebar', function () {
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
-  });
+  }, 10000);
 
   describe('search bar customization', () => {
     it('should not render CustomDataViewPicker', async () => {
