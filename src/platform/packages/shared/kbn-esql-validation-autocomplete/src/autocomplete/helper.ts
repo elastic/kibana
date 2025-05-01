@@ -47,11 +47,11 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { ESQLRealField, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import {
   TIME_SYSTEM_PARAMS,
-  buildVariablesDefinitions,
+  buildUserDefinedColumnsDefinitions,
   getCompatibleLiterals,
   getDateLiterals,
   getFunctionSuggestions,
@@ -269,7 +269,10 @@ export function isLiteralDateItem(nodeArg: ESQLAstItem): boolean {
 
 export function getValidSignaturesAndTypesToSuggestNext(
   node: ESQLFunction,
-  references: { fields: Map<string, ESQLRealField>; variables: Map<string, ESQLVariable[]> },
+  references: {
+    fields: Map<string, ESQLRealField>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  },
   fnDefinition: FunctionDefinition,
   fullText: string,
   offset: number
@@ -391,13 +394,13 @@ export async function getFieldsOrFunctionsSuggestions(
   {
     functions,
     fields,
-    variables,
+    userDefinedColumns,
     values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
-    variables?: Map<string, ESQLVariable[]>;
+    userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>;
     literals?: boolean;
     values?: boolean;
   },
@@ -420,25 +423,25 @@ export async function getFieldsOrFunctionsSuggestions(
     functions
   );
 
-  const filteredVariablesByType: string[] = [];
-  if (variables) {
-    for (const variable of variables.values()) {
+  const filteredColumnByType: string[] = [];
+  if (userDefinedColumns) {
+    for (const userDefinedColumn of userDefinedColumns.values()) {
       if (
-        (types.includes('any') || types.includes(variable[0].type)) &&
-        !ignoreColumns.includes(variable[0].name)
+        (types.includes('any') || types.includes(userDefinedColumn[0].type)) &&
+        !ignoreColumns.includes(userDefinedColumn[0].name)
       ) {
-        filteredVariablesByType.push(variable[0].name);
+        filteredColumnByType.push(userDefinedColumn[0].name);
       }
     }
-    // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+    // due to a bug on the ES|QL table side, filter out fields list with underscored userDefinedColumns names (??)
     // avg( numberField ) => avg_numberField_
     const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
     if (
-      filteredVariablesByType.length &&
-      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
+      filteredColumnByType.length &&
+      filteredColumnByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
-      for (const variable of filteredVariablesByType) {
-        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
+      for (const userDefinedColumn of filteredColumnByType) {
+        const underscoredName = userDefinedColumn.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
@@ -461,8 +464,8 @@ export async function getFieldsOrFunctionsSuggestions(
           ignored: ignoreFn,
         })
       : [],
-    variables
-      ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
+    userDefinedColumns
+      ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
       : [],
     literals ? getCompatibleLiterals(types) : []
   );
@@ -483,7 +486,7 @@ export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], should
 /** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
 export function extractTypeFromASTArg(
   arg: ESQLAstItem,
-  references: Pick<ReferenceMaps, 'fields' | 'variables'>
+  references: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
 ):
   | ESQLLiteral['literalType']
   | SupportedDataType
