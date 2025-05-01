@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import { orderBy } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   getKnowledgeBaseEntriesFromEs,
@@ -111,21 +112,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(res.status).to.be(200);
 
         expect(
-          res.body.entries
-            .filter(omitLensEntry)
-            .map(({ title, text, type }) => ({ title, text, type }))
-        ).to.eql([
-          {
-            title: 'movie_quote',
-            type: 'contextual',
-            text: 'To infinity and beyond!',
-          },
-          {
-            title: 'user_color',
-            type: 'contextual',
-            text: "The user's favourite color is blue.",
-          },
-        ]);
+          orderBy(
+            res.body.entries
+              .filter(omitLensEntry)
+              .map(({ title, text, type }) => ({ title, text, type })),
+            (entry) => entry.title
+          )
+        ).to.eql(
+          orderBy(
+            [
+              {
+                title: 'movie_quote',
+                type: 'contextual',
+                text: 'To infinity and beyond!',
+              },
+              {
+                title: 'user_color',
+                type: 'contextual',
+                text: "The user's favourite color is blue.",
+              },
+            ],
+            (entry) => entry.title
+          )
+        );
       });
     });
   });
