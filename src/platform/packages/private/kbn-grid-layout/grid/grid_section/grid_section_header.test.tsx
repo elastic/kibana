@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { GridLayoutStateManager } from '../types';
-import { GridRowHeader, GridRowHeaderProps } from './grid_row_header';
+import { GridRowHeader, GridRowHeaderProps } from './grid_section_header';
 import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
 
 const toggleIsCollapsed = jest

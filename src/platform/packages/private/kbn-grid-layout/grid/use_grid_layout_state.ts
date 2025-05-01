@@ -43,7 +43,7 @@ export const useGridLayoutState = ({
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
-  const rowRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
+  const sectionRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
   const headerRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
   const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
   const footerRefs = useRef<{ [sectionId: string]: HTMLDivElement | null }>({});
@@ -99,7 +99,7 @@ export const useGridLayoutState = ({
 
     return {
       layoutRef,
-      rowRefs,
+      sectionRefs,
       headerRefs,
       footerRefs,
       panelRefs,

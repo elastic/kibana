@@ -54,7 +54,7 @@ export const moveAction = (
   const {
     runtimeSettings$: { value: runtimeSettings },
     headerRefs: { current: gridHeaderElements },
-    rowRefs: { current: gridSectionElements },
+    sectionRefs: { current: gridSectionElements },
   } = gridLayoutStateManager;
 
   const currentLayout = gridLayoutStateManager.gridLayout$.getValue();

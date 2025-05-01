@@ -31,7 +31,7 @@ export const GridRowWrapper = React.memo(({ sectionId }: GridRowProps) => {
   useEffect(() => {
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.rowRefs.current[sectionId];
+      delete gridLayoutStateManager.sectionRefs.current[sectionId];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -41,7 +41,7 @@ export const GridRowWrapper = React.memo(({ sectionId }: GridRowProps) => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
       const interactionStyleSubscription = gridLayoutStateManager.activePanel$.subscribe(
         (activePanel) => {
-          const rowRef = gridLayoutStateManager.rowRefs.current[sectionId];
+          const rowRef = gridLayoutStateManager.sectionRefs.current[sectionId];
           if (!rowRef) return;
           const targetRow = activePanel?.targetRow;
           if (sectionId === targetRow && activePanel) {
@@ -64,7 +64,7 @@ export const GridRowWrapper = React.memo(({ sectionId }: GridRowProps) => {
     <span
       css={styles}
       ref={(rowRef: HTMLDivElement | null) => {
-        gridLayoutStateManager.rowRefs.current[sectionId] = rowRef;
+        gridLayoutStateManager.sectionRefs.current[sectionId] = rowRef;
       }}
       className={'kbnGridRowBackground'}
     />

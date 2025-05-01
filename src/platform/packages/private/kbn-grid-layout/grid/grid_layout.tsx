@@ -15,9 +15,9 @@ import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridPanel } from './grid_panel';
-import { GridRowFooter } from './grid_row/grid_row_footer';
-import { GridRowHeader } from './grid_row/grid_row_header';
-import { GridRowWrapper } from './grid_row/grid_row_wrapper';
+import { GridRowFooter } from './grid_section/grid_section_footer';
+import { GridRowHeader } from './grid_section/grid_section_header';
+import { GridRowWrapper } from './grid_section/grid_section_wrapper';
 import {
   GridAccessMode,
   GridLayoutData,

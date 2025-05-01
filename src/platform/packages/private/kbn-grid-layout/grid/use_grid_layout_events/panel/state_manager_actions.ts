@@ -52,11 +52,11 @@ export const moveAction = (
     gridLayout$,
     layoutRef: { current: gridLayoutElement },
     headerRefs: { current: gridHeaderElements },
-    rowRefs: { current: gridRowElements },
+    sectionRefs: { current: gridSectionElements },
   } = gridLayoutStateManager;
   const activePanel = activePanel$.value;
   const currentLayout = gridLayout$.value;
-  if (!activePanel || !runtimeSettings || !gridRowElements || !currentLayout) {
+  if (!activePanel || !runtimeSettings || !gridSectionElements || !currentLayout) {
     // if no interaction event return early
     return;
   }
@@ -96,7 +96,7 @@ export const moveAction = (
     Object.keys(currentLayout).forEach((sectionId) => {
       const row = currentLayout[sectionId].isCollapsed
         ? gridHeaderElements[sectionId]
-        : gridRowElements[sectionId];
+        : gridSectionElements[sectionId];
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
       const overlap =
@@ -131,7 +131,7 @@ export const moveAction = (
   const targetRow = (() => {
     if (currentLayout[targetSectionId]) {
       // this section already exists, so use the wrapper element to figure out target row
-      const targetedGridRow = gridRowElements[targetSectionId];
+      const targetedGridRow = gridSectionElements[targetSectionId];
       const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
       const targetedGridTop = targetedGridRowRect?.top ?? 0;
       const localYCoordinate = isResize

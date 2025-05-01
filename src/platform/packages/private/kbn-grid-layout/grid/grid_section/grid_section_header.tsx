@@ -25,9 +25,9 @@ import { i18n } from '@kbn/i18n';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutRowEvents } from '../use_grid_layout_events';
 import { deleteRow } from '../utils/row_management';
-import { DeleteGridRowModal } from './delete_grid_row_modal';
-import { GridRowDragPreview } from './grid_row_drag_preview';
-import { GridRowTitle } from './grid_row_title';
+import { DeleteGridRowModal } from './delete_grid_section_modal';
+import { GridRowDragPreview } from './grid_section_drag_preview';
+import { GridRowTitle } from './grid_section_title';
 import { GridRowData } from '../types';
 
 export interface GridRowHeaderProps {

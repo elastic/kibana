@@ -28,7 +28,7 @@ describe('row state manager actions', () => {
         },
         sensorType: 'mouse',
       });
-      gridLayoutStateManager.rowRefs.current = {
+      gridLayoutStateManager.sectionRefs.current = {
         first: {} as any as HTMLDivElement,
         second: {} as any as HTMLDivElement,
         third: {} as any as HTMLDivElement,
@@ -43,7 +43,7 @@ describe('row state manager actions', () => {
       const currentRowOrder = getRowKeysInOrder(gridLayoutStateManager.gridLayout$.getValue());
       expect(currentRowOrder).toEqual(['first', 'second', 'third']);
 
-      gridLayoutStateManager.rowRefs.current = {
+      gridLayoutStateManager.sectionRefs.current = {
         second: {
           getBoundingClientRect: jest.fn().mockReturnValue({ top: 100, height: 100 }),
         } as any as HTMLDivElement,
