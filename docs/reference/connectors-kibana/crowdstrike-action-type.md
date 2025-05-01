@@ -2,15 +2,11 @@
 navigation_title: "CrowdStrike"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/crowdstrike-action-type.html
+applies_to:
+  stack: ga 9.0
 ---
 
 # CrowdStrike connector [crowdstrike-action-type]
-
-
-::::{warning}
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-::::
-
 
 The CrowdStrike connector communicates with CrowdStrike Management Console via REST API.
 
@@ -21,9 +17,10 @@ To use this connector, you must have authority to run {{endpoint-sec}} connector
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
 
-% TO DO: Use `:class: screenshot`
-![CrowdStrike connector](../images/crowdstrike-connector.png)
-
+:::{image} ../images/crowdstrike-connector.png
+:screenshot:
+:alt: CrowdStrike connector
+:::
 
 ### Connector configuration [crowdstrike-connector-configuration]
 
@@ -39,7 +36,16 @@ Client secret
 :   The CrowdStrike API client secret to authenticate the client ID.
 
 
-## Test connectors [crowdstrike-action-parameters]
+## Test connectors [crowdstrike-action-configuration]
 
-At this time, you cannot test the CrowdStrike connector.
+You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
+:::{image} ../images/crowdstrike-connector-test.png
+:screenshot:
+:alt: CrowdStrike connector test
+:::
+
+The CrowdStrike action has the following configuration properties:
+
+Agent IDs
+:   Get details about one or more CrowdStrike agent IDs.
