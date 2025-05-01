@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ToolingLog } from '@kbn/tooling-log';
-import { dump } from 'js-yaml';
 import { writeTempfile } from './file_utils';
 import { generateCertificates } from './generate_certificate';
 import { getServiceConfigurationFromYaml } from './get_service_configuration';
