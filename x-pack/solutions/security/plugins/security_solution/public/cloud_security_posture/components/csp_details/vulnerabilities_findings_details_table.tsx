@@ -148,8 +148,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
       {
         'vulnerability.id': vulnerabilityId,
         'resource.id': resourceId,
-        'vulnerability.package.name': vulnerabilityPackageName,
-        'vulnerability.package.version': vulnerabilityPackageVersion,
+        'vulnerability.package.name': encodeURIComponent(vulnerabilityPackageName),
+        'vulnerability.package.version': encodeURIComponent(vulnerabilityPackageVersion),
       },
       'vulnerabilities'
     );
