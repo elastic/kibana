@@ -11,15 +11,22 @@ import {
   BulkActionEditTypeEnum,
   BulkActionEditPayload,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import { installMockPrebuiltRules } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllPrebuiltRuleAssets, installMockPrebuiltRules } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const securitySolutionApi = getService('securitySolutionApi');
+  const log = getService('log');
 
   describe('@ess @serverless @skipInServerless Customize via bulk editing', () => {
+    before(async () => {
+      await deleteAllRules(supertest, log);
+      await deleteAllPrebuiltRuleAssets(es, log);
+    });
+
     const bulkEditingCases = [
       {
         type: BulkActionEditTypeEnum.add_tags,
@@ -43,9 +50,9 @@ export default ({ getService }: FtrProviderContext): void => {
       },
       {
         type: BulkActionEditTypeEnum.delete_index_patterns,
-        // We have to make sure rule has non empty index patterns after this action
-        // otherwise API returns 500 error
-        value: ['unknown-*'],
+        // Prebuilt rules should have two index patterns
+        // Removing one of them should be successful
+        value: ['index-1'],
       },
       {
         type: BulkActionEditTypeEnum.set_timeline,
@@ -90,9 +97,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).toMatchObject({
           success: true,
           rules_count: 1,
-          succeeded: 1,
-          total: 1,
         });
+        expect(body.attributes.summary).toMatchObject({ succeeded: 1, total: 1 });
       });
     });
   });

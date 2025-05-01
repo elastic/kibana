@@ -8,12 +8,17 @@
 import expect from 'expect';
 import type SuperTest from 'supertest';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import {
   DEFAULT_TEST_RULE_ID,
   setUpRuleUpgrade,
 } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { performUpgradePrebuiltRules, getWebHookAction } from '../../../../utils';
+import {
+  deleteAllPrebuiltRuleAssets,
+  performUpgradePrebuiltRules,
+  getWebHookAction,
+} from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -27,6 +32,11 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless @skipInServerlessMKI Upgrade single prebuilt rule', () => {
+    beforeEach(async () => {
+      await deleteAllRules(supertest, log);
+      await deleteAllPrebuiltRuleAssets(es, log);
+    });
+
     const RULE_TYPES = [
       'query',
       'saved_query',

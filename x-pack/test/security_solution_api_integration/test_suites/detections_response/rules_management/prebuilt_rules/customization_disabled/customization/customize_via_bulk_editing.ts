@@ -11,7 +11,7 @@ import {
   BulkActionEditTypeEnum,
   BulkActionEditPayload,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
-import { installMockPrebuiltRules, getWebHookAction } from '../../../../utils';
+import { installMockPrebuiltRules } from '../../../../utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -33,15 +33,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
     return prebuiltRule;
   };
-  const createConnector = async (payload: Record<string, unknown>) =>
-    (
-      await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'true')
-        .send(payload)
-        .expect(200)
-    ).body;
-  const createWebHookConnector = () => createConnector(getWebHookAction());
 
   describe('@ess @serverless @skipInServerless Customize via bulk editing', () => {
     const bulkEditingCases = [
@@ -108,7 +99,10 @@ export default ({ getService }: FtrProviderContext): void => {
     // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
     // bulk edit request should return error
     it(`returns an error if one of edit action is not eligible for prebuilt rule`, async () => {
-      const webHookActionMock = {
+      const webHookAction = {
+        // Higher license level is required for creating connectors
+        // Using the pre-configured connector for testing
+        id: 'my-test-email',
         group: 'default',
         params: {
           body: '{"test":"action to be saved in a rule"}',
@@ -117,7 +111,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await installMockPrebuiltRules(supertest, es);
       const prebuiltRule = await fetchPrebuiltRule();
-      const webHookConnector = await createWebHookConnector();
 
       const { body } = await securitySolutionApi
         .performRulesBulkAction({
@@ -130,12 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: BulkActionEditTypeEnum.set_rule_actions,
                 value: {
                   throttle: '1h',
-                  actions: [
-                    {
-                      ...webHookActionMock,
-                      id: webHookConnector.id,
-                    },
-                  ],
+                  actions: [webHookAction],
                 },
               },
               {
