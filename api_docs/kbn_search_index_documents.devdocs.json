@@ -95,7 +95,7 @@
         "signature": [
           "(client: ",
           "ElasticsearchClient",
-          ", indexName: string, query?: string | undefined, from?: number, size?: number, trackTotalHits?: boolean) => Promise<",
+          ", indexName: string, query?: string | undefined, from?: number, size?: number, trackTotalHits?: boolean | undefined) => Promise<",
           {
             "pluginId": "@kbn/search-index-documents",
             "scope": "common",
@@ -189,17 +189,17 @@
           {
             "parentPluginId": "@kbn/search-index-documents",
             "id": "def-common.fetchSearchResults.$6",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "trackTotalHits",
             "description": [],
             "signature": [
-              "boolean"
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],

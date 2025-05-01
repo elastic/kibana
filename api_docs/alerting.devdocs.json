@@ -4805,7 +4805,9 @@
           },
           ">; getRuleExecutionKPI: (params: ",
           "GetRuleExecutionKPIParams",
-          ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; getActionErrorLog: (params: ",
+          ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; getGlobalExecutionSummaryWithAuth: (params: ",
+          "GetGlobalExecutionSummaryParams",
+          ") => Promise<{ executions: { total: number; success: number; }; latestExecutionSummary: { success: number; failure: number; warning: number; }; }>; getActionErrorLog: (params: ",
           "GetActionErrorLogByIdParams",
           ") => Promise<",
           {
@@ -4859,7 +4861,7 @@
           "UnsnoozeParams",
           ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<",
           "RegistryAlertTypeWithAuth",
-          "[]>; scheduleBackfill: (params: Readonly<{ end?: string | undefined; runActions?: boolean | undefined; } & { start: string; ruleId: string; }>[]) => Promise<(Readonly<{ end?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "[]>; scheduleBackfill: (params: Readonly<{ runActions?: boolean | undefined; } & { ruleId: string; ranges: Readonly<{} & { start: string; end: string; }>[]; }>[]) => Promise<(Readonly<{ end?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -10536,6 +10538,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/_global_execution_summary\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.INTERNAL_ALERTING_SNOOZE_RULE",
         "type": "string",
         "tags": [],
@@ -11384,7 +11401,7 @@
         "label": "RuleAlertingOutcome",
         "description": [],
         "signature": [
-          "\"unknown\" | \"warning\" | \"success\" | \"failure\""
+          "\"unknown\" | \"success\" | \"warning\" | \"failure\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
         "deprecated": false,
@@ -14134,6 +14151,101 @@
             "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT",
+        "type": "Object",
+        "tags": [],
+        "label": "EMPTY_EXECUTION_SUMMARY_RESULT",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.executions",
+            "type": "Object",
+            "tags": [],
+            "label": "executions",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.executions.total",
+                "type": "number",
+                "tags": [],
+                "label": "total",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.executions.success",
+                "type": "number",
+                "tags": [],
+                "label": "success",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary",
+            "type": "Object",
+            "tags": [],
+            "label": "latestExecutionSummary",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary.success",
+                "type": "number",
+                "tags": [],
+                "label": "success",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary.failure",
+                "type": "number",
+                "tags": [],
+                "label": "failure",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary.warning",
+                "type": "number",
+                "tags": [],
+                "label": "warning",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
