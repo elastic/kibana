@@ -97,7 +97,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC = () => {
         >
           <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.entityAnalytics}>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.insights.misconfigurations.tableTitle"
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.tableTitle"
               defaultMessage="View more in Risk Analytics"
             />
           </SecuritySolutionLinkAnchor>
@@ -106,9 +106,12 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC = () => {
           (isError ? (
             <div>
               <EuiCallOut
-                title={i18n.translate('xpack.securitySolution.genericDashboard.errorLoadingData', {
-                  defaultMessage: 'Error loading data',
-                })}
+                title={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.errorLoadingData',
+                  {
+                    defaultMessage: 'Error loading data',
+                  }
+                )}
                 color="danger"
                 iconType="error"
               />

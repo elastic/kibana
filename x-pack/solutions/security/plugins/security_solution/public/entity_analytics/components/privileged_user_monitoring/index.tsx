@@ -19,24 +19,24 @@ export const PrivilegedUserMonitoring = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder={true}>
-              <span>{'Top risky privileged users'}</span>
+              <span>{'TODO: Top risky privileged users'}</span>
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder={true}>
-          <span>{'Top privileged access detections'}</span>
+          <span>{'TODO: Top privileged access detections'}</span>
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder={true}>
-          {'Privileged user activity'}
+          {'TODO: Privileged user activity'}
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder={true}>
-          {'Privileged users'}
+          {'TODO: Privileged users'}
         </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -162,6 +162,24 @@ describe('Modal Inspect', () => {
         track_total_hits: false,
       });
     });
+
+    test('should request Tab content with esql query correctly', () => {
+      const esqlQuery = 'FROM tets-index* | WHERE field IS NOT NULL';
+      renderModal({
+        ...defaultProps,
+        request: JSON.stringify({ index: ['tets-index*'], body: esqlQuery }),
+      });
+
+      fireEvent.click(screen.getByTestId('modal-inspect-request-tab'));
+      expect(screen.getByTestId('modal-inspect-request-tab')).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      const requestTextContent = screen.getByRole('tabpanel').textContent ?? '';
+
+      expect(requestTextContent).toMatch(esqlQuery);
+    });
   });
 
   describe('events', () => {
