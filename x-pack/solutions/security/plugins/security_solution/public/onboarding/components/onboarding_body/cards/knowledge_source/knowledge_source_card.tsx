@@ -9,24 +9,24 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { KNOWLEDGE_BASE_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
-import { SecuritySolutionLinkButton } from '../../../../../../common/components/links';
-import { OnboardingCardId } from '../../../../../constants';
-import type { OnboardingCardComponent } from '../../../../../types';
-import { OnboardingCardContentAssetPanel } from '../../common/card_content_asset_panel';
-import { CardCallOut } from '../../common/card_callout';
+import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
+import { OnboardingCardId } from '../../../../constants';
+import type { OnboardingCardComponent } from '../../../../types';
+import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
+import { CardCallOut } from '../common/card_callout';
 
-import { CardSubduedText } from '../../common/card_subdued_text';
+import { CardSubduedText } from '../common/card_subdued_text';
 import * as i18n from './translations';
-import type { CardSelectorListItem } from '../../common/card_selector_list';
-import { CardSelectorList } from '../../common/card_selector_list';
-import { useOnboardingContext } from '../../../../onboarding_context';
+import type { CardSelectorListItem } from '../common/card_selector_list';
+import { CardSelectorList } from '../common/card_selector_list';
+import { useOnboardingContext } from '../../../onboarding_context';
 import {
   KNOWLEDGE_SOURCE_CARD_ITEMS_BY_ID,
   KNOWLEDGE_SOURCE_CARD_ITEMS,
 } from './knowledge_source_card_config';
 import { DEFAULT_KNOWLEDGE_SOURCE_CARD_ITEM_SELECTED } from './constants';
-import type { CardSelectorAssetListItem } from '../../types';
-import { useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
+import type { CardSelectorAssetListItem } from '../types';
+import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
 
 export const KnowledgeSourceCard: OnboardingCardComponent = ({
   isCardComplete,

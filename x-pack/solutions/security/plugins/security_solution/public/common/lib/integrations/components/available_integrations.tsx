@@ -6,25 +6,31 @@
  */
 
 import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
-import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
+import { useSelectedTab } from '../hooks/use_selected_tab';
 import type { IntegrationCardMetadata, RenderChildrenType, TopCalloutRenderer } from '../types';
 import { useFilterCards } from '../hooks/use_filter_cards';
+import { useIntegrationContext } from '../hooks/integration_context';
 
 export const AvailableIntegrationsComponent: React.FC<{
   useAvailablePackages: AvailablePackagesHookType;
   renderChildren: RenderChildrenType;
   prereleaseIntegrationsEnabled: boolean;
   checkCompleteMetadata?: IntegrationCardMetadata;
-  selectedTabResult: UseSelectedTabReturn;
   topCalloutRenderer?: TopCalloutRenderer;
 }> = ({
   useAvailablePackages,
   renderChildren,
   prereleaseIntegrationsEnabled,
   checkCompleteMetadata,
-  selectedTabResult,
   topCalloutRenderer,
 }) => {
+  const { spaceId, integrationTabs } = useIntegrationContext();
+
+  const selectedTabResult = useSelectedTab({
+    spaceId,
+    integrationTabs,
+  });
+
   const { availablePackagesResult, allowedIntegrations } = useFilterCards({
     featuredCardIds: selectedTabResult.selectedTab?.featuredCardIds,
     useAvailablePackages,
