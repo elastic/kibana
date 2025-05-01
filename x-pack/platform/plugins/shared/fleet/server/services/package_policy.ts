@@ -1889,7 +1889,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyPostUpdate') {
                   thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
                     updatedNewData as PackagePolicy,
@@ -1898,7 +1900,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else {
                   thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                     updatedNewData as NewPackagePolicy,
@@ -1910,7 +1914,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 }
 
                 if (externalCallbackType === 'packagePolicyCreate') {
-                  updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = NewPackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   const omitted = {
                     ...omit(thisCallbackResponse, [
