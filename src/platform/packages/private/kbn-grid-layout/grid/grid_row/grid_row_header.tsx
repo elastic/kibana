@@ -53,7 +53,6 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
   );
 
   const initialClassNames = useMemo(() => {
-    console.log('initialClassNames');
     return classNames('kbnGridRowHeader', {
       'kbnGridRowHeader--collapsed': (
         gridLayoutStateManager.gridLayout$.getValue()[rowId] as unknown as GridRowData

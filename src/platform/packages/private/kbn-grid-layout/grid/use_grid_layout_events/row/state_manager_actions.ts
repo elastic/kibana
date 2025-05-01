@@ -53,13 +53,13 @@ export const moveAction = (
 
   const {
     runtimeSettings$: { value: runtimeSettings },
-    layoutRef: { current: gridLayoutElement },
     headerRefs: { current: gridHeaderElements },
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
 
   const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
 
+  // check with section ID is being targetted
   const activeRowRect = gridHeaderElements[currentActiveRowEvent.id]?.getBoundingClientRect() ?? {
     top: 0,
     bottom: 0,
@@ -76,7 +76,7 @@ export const moveAction = (
   })();
 
   if (!targetRowId || !currentLayout[targetRowId].isMainSection) {
-    //  || !currentLayout[targetRowId].isMainSection
+    // when not targetting an existing main section, then simply re-order the columns based on their positions in the DOM
     const sortedRows = Object.entries({ ...gridHeaderElements, ...gridRowElements })
       .map(([id, row]) => {
         // by spreading in this way, we use the grid wrapper elements for expanded sections and the headers for collapsed sections
@@ -97,6 +97,7 @@ export const moveAction = (
       gridLayoutStateManager.gridLayout$.next(orderedLayout);
     }
   } else {
+    // when a main section is being targetted, allow the header to be dropped between panels
     const { gutterSize, rowHeight } = runtimeSettings;
 
     const targetRow = (() => {
@@ -169,7 +170,7 @@ export const moveAction = (
         if (row.isMainSection) mainSectionCount++;
       });
 
-    // combine sequential main layouts
+    // combine sequential main layouts to keep layout consistent + valid
     const sortedSections = Object.values(anotherLayout).sort(
       ({ order: orderA, order: orderB }) => orderA - orderB
     );
@@ -205,6 +206,7 @@ export const moveAction = (
       gridLayoutStateManager.gridLayout$.next(finalLayout);
   }
 
+  // update the dragged element
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
     translate: {
