@@ -30,11 +30,11 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { RuleUiAction } from './types';
+import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -84,6 +84,10 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
+import type { UntrackAlertsModalProps } from './application/sections/common/components/untrack_alerts_modal';
+import { isRuleSnoozed } from './application/lib';
+import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
+import { getUntrackModalLazy } from './common/get_untrack_modal';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -122,7 +126,17 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
+  getUntrackModal: (props: UntrackAlertsModalProps) => ReactElement<UntrackAlertsModalProps>;
   getRulesSettingsLink: () => ReactElement;
+  getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
+    isRuleSnoozed: boolean;
+    getNextRuleSnoozeSchedule: {
+      duration: number;
+      rRule: RRuleParams;
+      id?: string | undefined;
+      skipRecurrences?: string[] | undefined;
+    } | null;
+  };
   getGlobalRuleEventLogList: (
     props: GlobalRuleEventLogListProps
   ) => ReactElement<GlobalRuleEventLogListProps>;
@@ -495,8 +509,22 @@ export class Plugin
       getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
         return getRuleSnoozeModalLazy(props);
       },
+      getUntrackModal: (props: UntrackAlertsModalProps) => {
+        return getUntrackModalLazy(props);
+      },
       getRulesSettingsLink: () => {
         return getRulesSettingsLinkLazy();
+      },
+      getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
+        return {
+          isRuleSnoozed: isRuleSnoozed({
+            isSnoozedUntil: rule.isSnoozedUntil,
+            muteAll: rule.muteAll,
+          }),
+          getNextRuleSnoozeSchedule: getNextRuleSnoozeSchedule({
+            snoozeSchedule: rule.snoozeSchedule,
+          }),
+        };
       },
     };
   }
