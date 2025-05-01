@@ -38,6 +38,7 @@ import { MultiValueCellPopover, type CspClientPluginStartDeps } from '@kbn/cloud
 import { css } from '@emotion/css';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { TruncatedCopyableText } from './findings_right/header';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -47,7 +48,7 @@ const renderValue = (item: string) => (
     <EuiFlexItem>
       <EuiText
         size="s"
-        style={{
+        css={{
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -82,33 +83,9 @@ const renderTableField = (value: string) => {
   return Array.isArray(value) ? (
     <MultiValueCellPopover<unknown> items={value} field="" object={{}} renderItem={renderValue} />
   ) : (
-    <EuiFlexGroup direction="row" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiText
-          size="s"
-          css={{
-            paddingTop: `4px`,
-          }}
-        >
-          {value}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiCopy textToCopy={value}>
-          {(copy) => (
-            <EuiIcon
-              css={css`
-                :hover {
-                  cursor: pointer;
-                }
-              `}
-              onClick={copy}
-              type="copy"
-            />
-          )}
-        </EuiCopy>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <TruncatedCopyableText textToCopy={value} />
+    </>
   );
 };
 

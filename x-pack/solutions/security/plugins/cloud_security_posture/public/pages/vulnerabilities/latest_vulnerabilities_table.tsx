@@ -79,16 +79,6 @@ const CspVulnerabilityFindingRenderer = ({
   return children({ finding });
 };
 
-// const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-//   return (
-//     <CspVulnerabilityFindingRenderer row={row}>
-//       {({ finding }) => (
-//         <VulnerabilityFindingFlyout vulnerabilityRecord={finding} closeFlyout={onCloseFlyout} />
-//       )}
-//     </CspVulnerabilityFindingRenderer>
-//   );
-// };
-
 const onOpenFlyoutCallback = (): JSX.Element => {
   return <></>;
 };
