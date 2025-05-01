@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { constant, identity } from 'fp-ts/function';
+import { pipe } from 'fp-ts/pipeable';
 import * as rt from 'io-ts';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import {

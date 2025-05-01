@@ -212,6 +212,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
+
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 
@@ -346,6 +347,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
     const previewIlmPolicy = previewPolicy.policy;
 
+    const isServerless = this.pluginContext.env.packageInfo.buildFlavor === 'serverless';
+
     previewRuleDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
@@ -355,6 +358,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const securityRuleTypeOptions = {
       lists: plugins.lists,
+      docLinks: core.docLinks,
       actions: plugins.actions,
       logger: this.logger,
       config: this.config,
@@ -366,6 +370,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
       analytics: core.analytics,
+      isServerless,
       eventsTelemetry: this.telemetryEventsSender,
       licensing: plugins.licensing,
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
@@ -416,7 +421,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions,
       previewRuleDataClient,
       this.telemetryReceiver,
-      this.pluginContext.env.packageInfo.buildFlavor === 'serverless',
+      isServerless,
       core.docLinks,
       this.endpointContext
     );

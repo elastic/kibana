@@ -33,12 +33,6 @@
     "@kbn/share-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/expressions-plugin",
-    "@kbn/expression-error-plugin",
-    "@kbn/expression-image-plugin",
-    "@kbn/expression-metric-plugin",
-    "@kbn/expression-repeat-image-plugin",
-    "@kbn/expression-reveal-image-plugin",
-    "@kbn/expression-shape-plugin",
     "@kbn/home-plugin",
     "@kbn/inspector-plugin",
     "@kbn/kibana-react-plugin",
@@ -89,7 +83,9 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
     "@kbn/visualizations-plugin",
-    "@kbn/expression-utils"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/shared-ux-markdown"
   ],
   "exclude": ["target/**/*"]
 }
