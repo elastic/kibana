@@ -6,7 +6,7 @@
  */
 
 import { getKnowledgeBaseStatus } from '@kbn/elastic-assistant/impl/assistant/api/knowledge_base/api';
-import type { OnboardingCardCheckComplete } from '../../../../../types';
+import type { OnboardingCardCheckComplete } from '../../../../types';
 import { KNOWLEDGE_SOURCE_CARD_CHECK_COMPLETE_ERROR_MESSAGE } from './translations';
 
 export const checkKnowledgeSourceComplete: OnboardingCardCheckComplete = async ({
