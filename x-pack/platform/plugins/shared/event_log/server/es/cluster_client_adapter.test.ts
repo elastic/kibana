@@ -6,18 +6,21 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  ClusterClientAdapter,
+import type {
   IClusterClientAdapter,
-  EVENT_BUFFER_LENGTH,
-  getQueryBody,
   FindEventsOptionsBySavedObjectFilter,
   AggregateEventsOptionsBySavedObjectFilter,
   AggregateEventsWithAuthFilter,
-  getQueryBodyWithAuthFilter,
   Doc,
 } from './cluster_client_adapter';
-import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
+import {
+  ClusterClientAdapter,
+  EVENT_BUFFER_LENGTH,
+  getQueryBody,
+  getQueryBodyWithAuthFilter,
+} from './cluster_client_adapter';
+import type { AggregateOptionsType } from '../event_log_client';
+import { queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
@@ -376,13 +379,11 @@ describe('setLegacyIndexTemplateToHidden', () => {
     await clusterClientAdapter.setLegacyIndexTemplateToHidden('foo-bar-template', currentTemplate);
     expect(clusterClient.indices.putTemplate).toHaveBeenCalledWith({
       name: 'foo-bar-template',
-      body: {
-        order: 0,
-        index_patterns: ['foo-bar-*'],
-        settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
-        mappings: { dynamic: false, properties: {} },
-        aliases: {},
-      },
+      order: 0,
+      index_patterns: ['foo-bar-*'],
+      settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
+      mappings: { dynamic: false, properties: {} },
+      aliases: {},
     });
   });
 
@@ -656,7 +657,8 @@ describe('updateConcreteIndices', () => {
     });
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
   });
 
@@ -717,7 +719,8 @@ describe('updateConcreteIndices', () => {
 
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
     expect(logger.error).toHaveBeenCalledWith(
       `Error updating index mappings for foo: failed to put mappings`

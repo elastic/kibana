@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { AddConnector as Component } from '../add_connector';
 
@@ -16,6 +16,6 @@ export default {
   argTypes: {
     onAddConnector: { action: 'onAddConnector' },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const AddConnector: ComponentStory<typeof Component> = (args) => <Component {...args} />;
+export const AddConnector: StoryFn<typeof Component> = (args) => <Component {...args} />;

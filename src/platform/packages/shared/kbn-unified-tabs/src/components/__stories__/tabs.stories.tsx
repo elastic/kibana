@@ -8,23 +8,24 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { useNewTabProps } from '../../hooks/use_new_tab_props';
-import { STORYBOOK_TITLE } from './storybook_constants';
+import { servicesMock } from '../../../__mocks__/services';
+import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 
 export default {
-  title: `${STORYBOOK_TITLE}/Tabs`,
+  title: 'Unified Tabs/Tabs',
   parameters: {
     backgrounds: {
       default: 'white',
       values: [{ name: 'white', value: '#fff' }],
     },
   },
-};
+} as Meta;
 
-const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (args) => {
+const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
   const { getNewTabDefaultProps } = useNewTabProps({
     numberOfInitialItems: args.initialItems.length,
   });
@@ -33,6 +34,8 @@ const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (arg
     <TabbedContent
       {...args}
       createItem={getNewTabDefaultProps}
+      getPreviewData={getPreviewDataMock}
+      services={servicesMock}
       onChanged={action('onClosed')}
       renderContent={(item) => (
         <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
@@ -41,31 +44,37 @@ const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (arg
   );
 };
 
-export const Default = TabbedContentTemplate.bind({});
-Default.args = {
-  initialItems: [
-    {
-      id: '1',
-      label: 'Tab 1',
-    },
-  ],
+export const Default: StoryObj<TabbedContentProps> = {
+  render: TabbedContentTemplate,
+
+  args: {
+    initialItems: [
+      {
+        id: '1',
+        label: 'Tab 1',
+      },
+    ],
+  },
 };
 
-export const WithMultipleTabs = TabbedContentTemplate.bind({});
-WithMultipleTabs.args = {
-  initialItems: [
-    {
-      id: '1',
-      label: 'Tab 1',
-    },
-    {
-      id: '2',
-      label: 'Tab 2',
-    },
-    {
-      id: '3',
-      label: 'Tab 3',
-    },
-  ],
-  initialSelectedItemId: '3',
+export const WithMultipleTabs: StoryObj<TabbedContentProps> = {
+  render: TabbedContentTemplate,
+
+  args: {
+    initialItems: [
+      {
+        id: '1',
+        label: 'Tab 1',
+      },
+      {
+        id: '2',
+        label: 'Tab 2',
+      },
+      {
+        id: '3',
+        label: 'Tab 3',
+      },
+    ],
+    initialSelectedItemId: '3',
+  },
 };

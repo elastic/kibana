@@ -84,4 +84,5 @@ export type StatusRuleInspect = AlertOverviewStatus & {
     type: string;
   }>;
 };
+export type TLSRuleInspect = StatusRuleInspect;
 export type AlertStatusConfigs = Record<string, AlertStatusMetaData>;

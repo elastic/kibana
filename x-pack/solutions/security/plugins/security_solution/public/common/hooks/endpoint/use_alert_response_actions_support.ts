@@ -37,11 +37,6 @@ export const ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD = (
   );
 };
 
-export const RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS = i18n.translate(
-  'xpack.securitySolution.useAlertResponseActionsSupport.notAnAlert',
-  { defaultMessage: 'Response actions are only supported for Alerts (not events)' }
-);
-
 export interface AlertResponseActionsSupport {
   /** Does the host/agent for the given alert have support for response actions */
   isSupported: boolean;
@@ -135,8 +130,8 @@ export const useAlertResponseActionsSupport = (
   }, [agentType, eventData]);
 
   const doesHostSupportResponseActions = useMemo(() => {
-    return Boolean(isFeatureEnabled && isAlert && agentId && agentType);
-  }, [agentId, agentType, isAlert, isFeatureEnabled]);
+    return Boolean(isFeatureEnabled && agentId && agentType);
+  }, [agentId, agentType, isFeatureEnabled]);
 
   const supportedActions = useMemo(() => {
     return RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<AlertAgentActionsSupported>(
@@ -167,10 +162,6 @@ export const useAlertResponseActionsSupport = (
 
   const unsupportedReason = useMemo(() => {
     if (!doesHostSupportResponseActions) {
-      if (!isAlert) {
-        return RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS;
-      }
-
       if (!agentType) {
         // No message is provided for this condition because the
         // return from this hook will always default to `endpoint`
@@ -181,7 +172,7 @@ export const useAlertResponseActionsSupport = (
         return ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD(getAgentTypeName(agentType), agentIdField);
       }
     }
-  }, [agentId, agentIdField, agentType, doesHostSupportResponseActions, isAlert]);
+  }, [agentId, agentIdField, agentType, doesHostSupportResponseActions]);
 
   return useMemo<AlertResponseActionsSupport>(() => {
     return {

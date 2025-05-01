@@ -10,18 +10,25 @@ import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import { HeaderDataCards } from './header_data_cards';
+import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { ExpandableBadgeGroup } from './components/expandable_badge_group';
-import { HeaderDataCards } from './header_data_cards';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 const initialBadgeLimit = 3;
-const maxBadgeContainerHeight = 180;
+const maxBadgeContainerHeight = undefined;
 
-const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityEcs['labels'] }) => {
+const HeaderTags = ({
+  tags = [],
+  labels = {},
+}: {
+  tags: GenericEntityRecord['tags'];
+  labels: GenericEntityRecord['labels'];
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const tagBadges = useMemo(
@@ -42,7 +49,7 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
           <>
             <span
               css={css`
-                color: ${euiTheme.colors.disabledText};
+                color: ${euiTheme.colors.textDisabled};
                 border-right: ${euiTheme.border.thick};
                 padding-right: ${euiTheme.size.xs};
               `}
@@ -59,7 +66,7 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
           </>
         ),
       })),
-    [labels, euiTheme.colors.disabledText, euiTheme.border.thick, euiTheme.size.xs]
+    [labels, euiTheme.colors.textDisabled, euiTheme.border.thick, euiTheme.size.xs]
   );
 
   const allBadges = [...(tagBadges || []), ...(labelBadges || [])];
@@ -75,7 +82,7 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
 
 interface UniversalEntityFlyoutHeaderProps {
   entity: EntityEcs;
-  timestamp?: Date;
+  source: GenericEntityRecord;
 }
 
 // TODO: Asset Inventory - move this to a shared location, for now it's here as a mock since we dont have generic entities yet
@@ -88,11 +95,16 @@ export const UniversalEntityIconByType: Record<GenericEntityType | EntityType, I
   container: 'container',
 };
 
+const isDate = (value: unknown): value is Date => value instanceof Date;
+
 export const UniversalEntityFlyoutHeader = ({
   entity,
-  timestamp,
+  source,
 }: UniversalEntityFlyoutHeaderProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const docTimestamp = source?.['@timestamp'];
+  const timestamp = isDate(docTimestamp) ? docTimestamp : undefined;
 
   return (
     <>
@@ -114,25 +126,27 @@ export const UniversalEntityFlyoutHeader = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <>
+          <div
+            css={css`
+              margin-bottom: ${euiTheme.size.s};
+            `}
+          >
+            {(source.tags || source.labels) && (
+              <>
+                <EuiSpacer size="s" />
+                <HeaderTags tags={source.tags} labels={source.labels} />
+              </>
+            )}
+          </div>
+          <HeaderDataCards
+            id={entity.id}
+            type={entity.type}
+            subType={entity.sub_type}
+            criticality={source?.asset?.criticality}
+          />
+        </>
       </FlyoutHeader>
-      <div
-        css={css`
-          margin: ${euiTheme.size.s};
-        `}
-      >
-        <HeaderDataCards
-          id={entity.id}
-          type={entity.type}
-          category={entity.category}
-          criticality={entity.criticality}
-        />
-        {(entity.tags || entity.labels) && (
-          <>
-            <EuiSpacer size="s" />
-            <HeaderTags tags={entity.tags} labels={entity.labels} />
-          </>
-        )}
-      </div>
     </>
   );
 };

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
@@ -27,19 +28,34 @@ const DONUT_HEIGHT = 150;
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin: auto;
 `;
+
 export interface SeverityLevelProps {
+  /**
+   * Chart data
+   */
   data: SeverityData[];
+  /**
+   * If true, shows a EuiSpinner
+   */
   isLoading: boolean;
+  /**
+   * Callback to allow the charts to add filters to the SiemSearchBar
+   */
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  /**
+   * If true, render the last column for cell actions (like filter for, out, add to timeline, copy...)
+   */
+  showCellActions: boolean;
 }
 
 export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   data,
   isLoading,
   addFilter,
+  showCellActions,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const columns = useGetSeverityTableColumns();
+  const columns = useGetSeverityTableColumns(showCellActions);
 
   const count = useMemo(() => {
     return data

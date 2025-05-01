@@ -305,9 +305,10 @@ const getSuggestions = (
     endLineNumber: position.lineNumber,
     endColumn: model.getLineMaxColumn(position.lineNumber),
   });
-  // if the rest of the line is empty or there is only "
+  // if the rest of the line is empty or there is only " or ends with closing parentheses
   // then template can be inserted, otherwise only name
-  context.addTemplate = isEmptyOrDoubleQuote(lineContentAfterPosition);
+  context.addTemplate =
+    isEmptyOrDoubleQuote(lineContentAfterPosition) || /^}*$/.test(lineContentAfterPosition);
 
   // if there is " after the cursor, include it in the insert range
   let endColumn = position.column;
@@ -340,7 +341,7 @@ const getSuggestions = (
       })
   );
 };
-const getInsertText = (
+export const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
   bodyContent: string,
   context: AutoCompleteContext
@@ -349,10 +350,25 @@ const getInsertText = (
     return '';
   }
 
-  // Always create the insert text with the name first, check the end of the body content
-  // to decide if we need to add a double quote after the name.
-  // This is done to avoid adding a double quote if the user is typing a value after the name.
-  let insertText = bodyContent.trim().endsWith('"') ? `${name}"` : `"${name}"`;
+  let insertText = '';
+  if (typeof name === 'string') {
+    const bodyContentLines = bodyContent.split('\n');
+    const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
+    if (hasUnclosedQuote(currentContentLine)) {
+      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+      insertText = '';
+    } else {
+      // The cursor is at the beginning of a field so the insert text should start with a quote
+      insertText = '"';
+    }
+    if (insertValue && insertValue !== '{' && insertValue !== '[') {
+      insertText += `${insertValue}"`;
+    } else {
+      insertText += `${name}"`;
+    }
+  } else {
+    insertText = name + '';
+  }
 
   // check if there is template to add
   const conditionalTemplate = getConditionalTemplate(name, bodyContent, context.endpoint);
@@ -360,7 +376,7 @@ const getInsertText = (
     template = conditionalTemplate;
   }
 
-  if (template) {
+  if (template && context.addTemplate) {
     let templateLines;
     const { __raw, value: templateValue } = template;
     if (__raw && templateValue) {
@@ -370,14 +386,9 @@ const getInsertText = (
     }
     insertText += ': ' + templateLines.join('\n');
   } else if (value === '{') {
-    insertText += ': {$0}';
+    insertText += ': {}';
   } else if (value === '[') {
-    insertText += ': [$0]';
-  } else if (insertValue && insertValue !== '{' && insertValue !== '[') {
-    insertText = `"${insertValue}"`;
-    insertText += ': $0';
-  } else {
-    insertText += ': $0';
+    insertText += ': []';
   }
 
   // the string $0 is used to move the cursor between empty curly/square brackets
@@ -440,4 +451,38 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
 export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
   lineContent = lineContent.trim();
   return !lineContent || lineContent === '"';
+};
+
+export const hasUnclosedQuote = (lineContent: string): boolean => {
+  let insideString = false;
+  let prevChar = '';
+  for (let i = 0; i < lineContent.length; i++) {
+    const char = lineContent[i];
+
+    if (!insideString && char === '"') {
+      insideString = true;
+    } else if (insideString && char === '"' && prevChar !== '\\') {
+      insideString = false;
+    }
+
+    prevChar = char;
+  }
+
+  return insideString;
+};
+
+export const isInsideTripleQuotes = (text: string) => {
+  let insideTripleQuote = false;
+  let i = 0;
+
+  while (i < text.length) {
+    if (text.startsWith('"""', i)) {
+      insideTripleQuote = !insideTripleQuote;
+      i += 3; // Skip the triple quotes
+    } else {
+      i++;
+    }
+  }
+
+  return insideTripleQuote;
 };

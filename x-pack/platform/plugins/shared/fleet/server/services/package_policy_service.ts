@@ -26,10 +26,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type {
-  DeletePackagePoliciesResponse,
-  ExperimentalDataStreamFeature,
-} from '../../common/types';
+import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
 import type { ExternalCallback } from '..';
 
@@ -116,7 +113,13 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyUpdates: UpdatePackagePolicy[],
-    options?: { user?: AuthenticatedUser; force?: boolean; asyncDeploy?: boolean },
+    options?: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      asyncDeploy?: boolean;
+      fromBulkUpgrade?: boolean;
+      oldPackagePolicies?: PackagePolicy[];
+    },
     currentVersion?: string
   ): Promise<{
     updatedPolicies: PackagePolicy[] | null;
@@ -125,6 +128,14 @@ export interface PackagePolicyClient {
       error: Error | SavedObjectError;
     }>;
   }>;
+
+  bulkUpgrade(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    ids: string[],
+    options?: { user?: AuthenticatedUser; force?: boolean },
+    pkgVersion?: string
+  ): Promise<UpgradePackagePolicyResponse>;
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 
@@ -137,7 +148,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     ids: string[],
     options?: { ignoreMissing?: boolean }
-  ): Promise<PackagePolicy[] | null>;
+  ): Promise<PackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -175,7 +186,7 @@ export interface PackagePolicyClient {
   upgrade(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    ids: string[],
+    id: string,
     options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
@@ -223,15 +234,6 @@ export interface PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<void>;
-
-  getUpgradePackagePolicyInfo(
-    soClient: SavedObjectsClientContract,
-    id: string
-  ): Promise<{
-    packagePolicy: PackagePolicy;
-    packageInfo: PackageInfo;
-    experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
-  }>;
 
   /**
    * Remove an output from all package policies that are using it, and replace the output by the default ones.

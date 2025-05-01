@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
@@ -192,6 +193,72 @@ describe('mergeServiceStats', () => {
     ).toEqual([
       {
         agentName: 'java',
+        environments: ['staging', 'production'],
+        serviceName: 'opbeans-java',
+        latency: 1,
+        throughput: 2,
+        transactionErrorRate: 3,
+        transactionType: 'request',
+      },
+    ]);
+  });
+
+  it('shows services with agentName from the first object if it is null in the last object', () => {
+    expect(
+      mergeServiceStats({
+        serviceStats: [
+          stat({
+            serviceName: 'opbeans-java',
+            environments: ['staging'],
+            agentName: 'java',
+          }),
+        ],
+        servicesWithoutTransactions: [
+          {
+            environments: ['production'],
+            serviceName: 'opbeans-java',
+            agentName: null as unknown as AgentName, // agentName is null here
+          },
+        ],
+        healthStatuses: [],
+        alertCounts: [],
+      })
+    ).toEqual([
+      {
+        agentName: 'java',
+        environments: ['staging', 'production'],
+        serviceName: 'opbeans-java',
+        latency: 1,
+        throughput: 2,
+        transactionErrorRate: 3,
+        transactionType: 'request',
+      },
+    ]);
+  });
+
+  it('shows services with agentName from the last object if it is undefined in the first object', () => {
+    expect(
+      mergeServiceStats({
+        serviceStats: [
+          stat({
+            serviceName: 'opbeans-java',
+            environments: ['staging'],
+            agentName: undefined,
+          }),
+        ],
+        servicesWithoutTransactions: [
+          {
+            environments: ['production'],
+            serviceName: 'opbeans-java',
+            agentName: 'java',
+          },
+        ],
+        healthStatuses: [],
+        alertCounts: [],
+      })
+    ).toEqual([
+      {
+        agentName: 'java', // agentName from servicesWithoutTransactions
         environments: ['staging', 'production'],
         serviceName: 'opbeans-java',
         latency: 1,

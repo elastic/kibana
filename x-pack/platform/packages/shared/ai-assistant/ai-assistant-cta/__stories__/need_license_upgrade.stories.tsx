@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { NeedLicenseUpgrade as Component } from '../need_license_upgrade';
 
@@ -14,10 +14,8 @@ export default {
   title: 'Layout/Call to Action/Types',
   component: Component,
   argTypes: {
-    onManageSubscription: { action: 'onManageSubscription' },
+    onManageLicense: { action: 'onManageLicense' },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const NeedLicenseUpgrade: ComponentStory<typeof Component> = (args) => (
-  <Component {...args} />
-);
+export const NeedLicenseUpgrade: StoryFn<typeof Component> = (args) => <Component {...args} />;

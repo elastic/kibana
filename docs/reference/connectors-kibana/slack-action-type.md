@@ -9,22 +9,17 @@ mapped_pages:
 
 The Slack connector uses incoming webhooks or an API method to send Slack messages.
 
-
 ## Create connectors in {{kib}} [define-slack-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. You can choose to use a webhook URL that’s specific to a single channel. For example:
 
-:::{image} ../../images/slack-webhook-connector.png
-:alt: Slack connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Slack connector](../images/slack-webhook-connector.png)
 
 Alternatively, you can create a connector that supports multiple channels. For example:
 
-:::{image} ../../images/slack-api-connector.png
-:alt: Slack API connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Slack API connector](../images/slack-api-connector.png)
 
 If you use the latter method, you must provide a valid list of Slack channel IDs. When you create a rule, each action can communicate with one of these channels.
 
@@ -35,17 +30,13 @@ For Slack setup details, go to [Configure a Slack account](#configuring-slack).
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For the webhook type of connector, its message text cannot contain Markdown, images, or other advanced formatting:
 
-:::{image} ../../images/slack-webhook-params.png
-:alt: Slack webhook connector test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Slack webhook connector test](../images/slack-webhook-params.png)
 
 For the web API type of connector, you must choose one of the channel IDs. You can then test either plain text or block kit messages:
 
-:::{image} ../../images/slack-api-connector-test.png
-:alt: Slack web API connector test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Slack web API connector test](../images/slack-api-connector-test.png)
 
 After you add block kit messages you can click a link to preview them in the Slack block kit builder.
 

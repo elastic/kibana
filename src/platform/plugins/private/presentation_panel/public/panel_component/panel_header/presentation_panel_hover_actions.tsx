@@ -37,6 +37,7 @@ import { css } from '@emotion/react';
 import {
   apiCanLockHoverActions,
   EmbeddableApiContext,
+  PublishesTitle,
   useBatchedOptionalPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -79,7 +80,13 @@ const QUICK_ACTION_IDS = {
     'ACTION_OPEN_IN_DISCOVER',
     'ACTION_VIEW_SAVED_SEARCH',
   ],
-  view: ['ACTION_OPEN_IN_DISCOVER', 'ACTION_VIEW_SAVED_SEARCH', 'openInspector', 'togglePanel'],
+  view: [
+    'ACTION_SHOW_CONFIG_PANEL',
+    'ACTION_OPEN_IN_DISCOVER',
+    'ACTION_VIEW_SAVED_SEARCH',
+    'openInspector',
+    'togglePanel',
+  ],
 } as const;
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
@@ -141,7 +148,7 @@ export const PresentationPanelHoverActions = ({
       api?.description$,
       api?.hideTitle$,
       api?.hasLockedHoverActions$,
-      api?.parentApi?.hideTitle$
+      (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
     );
 
   const hideTitle = hidePanelTitle || parentHideTitle;

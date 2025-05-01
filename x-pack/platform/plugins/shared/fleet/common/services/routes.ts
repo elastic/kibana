@@ -25,6 +25,7 @@ import {
   FLEET_PROXY_API_ROUTES,
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
+  REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -86,6 +87,22 @@ export const epmRouteService = {
     return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
   },
 
+  getBulkUpgradePath: () => {
+    return EPM_API_ROUTES.BULK_UPGRADE_PATTERN;
+  },
+
+  getBulkUninstallPath: () => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_PATTERN;
+  },
+
+  getOneBulkUpgradePath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
+  getOneBulkUninstallPath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
@@ -125,6 +142,9 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+  getUpdateCustomIntegrationsPath: (pkgName: string) => {
+    return EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN.replace('{pkgName}', pkgName);
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -158,6 +178,10 @@ export const packagePolicyRouteService = {
 
   getOrphanedIntegrationPoliciesPath: () => {
     return PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES;
+  },
+
+  getBulkGetPath: (): string => {
+    return PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN;
   },
 };
 
@@ -293,6 +317,8 @@ export const outputRoutesService = {
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
   getOutputHealthPath: (outputId: string) =>
     OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN.replace('{outputId}', outputId),
+  getRemoteSyncedIntegrationsStatusPath: (outputId: string) =>
+    REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN.replace('{outputId}', outputId),
 };
 
 export const fleetProxiesRoutesService = {

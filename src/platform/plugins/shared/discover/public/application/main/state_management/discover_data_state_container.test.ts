@@ -47,7 +47,6 @@ describe('test getDataStateContainer', () => {
   test('refetch$ triggers a search', async () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     jest.spyOn(stateContainer.searchSessionManager, 'getNextSearchSessionId');
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).not.toHaveBeenCalled();
@@ -85,9 +84,6 @@ describe('test getDataStateContainer', () => {
     expect(
       stateContainer.searchSessionManager.getNextSearchSessionId as jest.Mock
     ).toHaveBeenCalled();
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
 
     unsubscribe();
   });
@@ -131,11 +127,6 @@ describe('test getDataStateContainer', () => {
       result: initialRecords,
     }) as DataDocuments$;
 
-    jest.spyOn(stateContainer.searchSessionManager, 'getCurrentSearchSessionId');
-    expect(
-      stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-    ).not.toHaveBeenCalled();
-
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
     const resolveDataSourceProfileSpy = jest.spyOn(
@@ -157,10 +148,6 @@ describe('test getDataStateContainer', () => {
       if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
         expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
         expect(value.result).toEqual([...initialRecords, ...moreRecords]);
-        // it uses the same current search session id
-        expect(
-          stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
-        ).toHaveBeenCalled();
         unsubscribe();
         done();
       }
@@ -178,10 +165,12 @@ describe('test getDataStateContainer', () => {
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+        },
       })
     );
 
@@ -194,9 +183,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -215,10 +202,12 @@ describe('test getDataStateContainer', () => {
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+        },
       })
     );
     dataState.data$.totalHits$.next({
@@ -229,9 +218,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { getDataStreams } from './bundle/get_data_streams';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';

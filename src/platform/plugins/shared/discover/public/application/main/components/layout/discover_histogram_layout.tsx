@@ -10,7 +10,6 @@
 import React, { useCallback } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -32,7 +31,6 @@ export const DiscoverHistogramLayout = ({
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
-  const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
   const hideChart = useAppStateSelector((state) => state.hideChart);
   const isEsqlMode = useIsEsqlMode();
   const unifiedHistogramProps = useDiscoverHistogram({
@@ -51,14 +49,13 @@ export const DiscoverHistogramLayout = ({
 
   // Initialized when the first search has been requested or
   // when in ES|QL mode since search sessions are not supported
-  if (!searchSessionId && !isEsqlMode) {
+  if (!unifiedHistogramProps.searchSessionId && !isEsqlMode) {
     return null;
   }
 
   return (
     <UnifiedHistogramContainer
       {...unifiedHistogramProps}
-      searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
       container={container}
       css={histogramLayoutCss}

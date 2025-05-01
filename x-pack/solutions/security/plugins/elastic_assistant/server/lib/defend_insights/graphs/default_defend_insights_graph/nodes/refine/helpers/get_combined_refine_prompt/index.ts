@@ -8,8 +8,6 @@
 import type { DefendInsight } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 
-import { getContinuePrompt } from '../../../helpers/get_continue_prompt';
-
 /**
  * Returns a prompt that combines the initial query, a refine prompt, and partial results
  */
@@ -18,10 +16,12 @@ export const getCombinedRefinePrompt = ({
   combinedRefinements,
   refinePrompt,
   unrefinedResults,
+  continuePrompt,
 }: {
   prompt: string;
   combinedRefinements: string;
   refinePrompt: string;
+  continuePrompt: string;
   unrefinedResults: DefendInsight[] | null;
 }): string => {
   const baseQuery = `${prompt}
@@ -38,7 +38,7 @@ ${JSON.stringify(unrefinedResults, null, 2)}
     ? baseQuery // no partial results yet
     : `${baseQuery}
 
-${getContinuePrompt()}
+${continuePrompt}
 
 """
 ${combinedRefinements}

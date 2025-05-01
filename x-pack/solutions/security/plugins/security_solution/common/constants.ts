@@ -74,7 +74,6 @@ export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
-export const DEFAULT_MAX_UNASSOCIATED_NOTES = 1000 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
@@ -96,11 +95,13 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
+export const RULES_MANAGEMENT_PATH = `${RULES_PATH}/management` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -129,6 +130,9 @@ export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
+export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
+export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
+  '/entity_analytics_privileged_user_monitoring' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -143,6 +147,9 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
+
+// AI SOC exclusive paths
+export const CONFIGURATIONS_PATH = '/configurations' as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -163,6 +170,9 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
+
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
@@ -205,9 +215,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
-/** This Kibana Advances setting allows users to define the maximum amount of unassociated notes (notes without a `timelineId`) */
-export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
@@ -248,12 +255,6 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
-export const DETECTION_ENGINE_RULES_BULK_DELETE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
-export const DETECTION_ENGINE_RULES_BULK_CREATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
-export const DETECTION_ENGINE_RULES_BULK_UPDATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
@@ -291,6 +292,12 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
+
+/**
+ * This limit exists to maintain some kind of a safety net for how many events we are fetching in total,
+ * even though in theory we are only allowing up to 100 notes per document.
+ */
+export const NOTES_PER_PAGE_HARD_LIMIT = 10000;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -499,6 +506,11 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
 export const MAX_COMMENT_LENGTH = 30000 as const;
 
 /**
+ * Max notes count per document in security solution
+ */
+export const MAX_NOTES_PER_DOCUMENT = 100;
+
+/**
  * Cases external attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
@@ -513,3 +525,16 @@ export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
  * Whether it is a Jest environment
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
+
+export const AI_FOR_SOC_INTEGRATIONS = [
+  'splunk',
+  'google_secops',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'crowdstrike',
+];
+
+/*
+ * The tag to mark promotion rules that are related to the AI for SOC integrations
+ */
+export const PROMOTION_RULE_TAG = 'Promotion';

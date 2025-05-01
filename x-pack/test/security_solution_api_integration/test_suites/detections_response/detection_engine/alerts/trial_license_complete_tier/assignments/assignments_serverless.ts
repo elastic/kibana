@@ -6,7 +6,7 @@
  */
 
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import TestAgent from 'supertest/lib/agent';
 
 import { setAlertAssignees } from '../../../../utils';
 import {
@@ -23,9 +23,8 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
-  const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const utils = getService('securitySolutionUtils');
   const log = getService('log');
   const es = getService('es');
   const config = getService('config');
@@ -33,11 +32,26 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // See https://github.com/elastic/kibana/issues/182878 for
-  // background on @skipInSrverlessMKI - action needed
-  describe('@serverless @skipInServerlessMKI Alert User Assignment - Serverless', () => {
+  let admin: TestAgent;
+  let t1Analyst: TestAgent;
+  let t2Analyst: TestAgent;
+  let t3Analyst: TestAgent;
+  let platformEngineer: TestAgent;
+  let ruleAuthor: TestAgent;
+  let socManager: TestAgent;
+  let detectionsAdmin: TestAgent;
+
+  describe('@serverless Alert User Assignment - Serverless', () => {
     before(async () => {
       await esArchiver.load(path);
+      admin = await utils.createSuperTest('admin');
+      t1Analyst = await utils.createSuperTest('t1_analyst');
+      t2Analyst = await utils.createSuperTest('t2_analyst');
+      t3Analyst = await utils.createSuperTest('t3_analyst');
+      platformEngineer = await utils.createSuperTest('platform_engineer');
+      ruleAuthor = await utils.createSuperTest('rule_author');
+      socManager = await utils.createSuperTest('soc_manager');
+      detectionsAdmin = await utils.createSuperTest('detections_admin');
     });
 
     after(async () => {
@@ -45,32 +59,32 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await deleteAllRules(supertest, log);
-      await createAlertsIndex(supertest, log);
+      await deleteAllRules(admin, log);
+      await createAlertsIndex(admin, log);
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
+      await deleteAllAlerts(admin, log, es);
     });
 
     describe('authorization / RBAC', () => {
-      const successfulAssignWithRole = async (userAndRole: ROLES) => {
+      const successfulAssignWithRole = async (userAndRole: TestAgent) => {
         const rule = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id });
-        await waitForAlertsToBePresent(supertest, log, 10, [id]);
-        const alerts = await getAlertsByIds(supertest, log, [id]);
+        const { id } = await createRule(admin, log, rule);
+        await waitForRuleSuccess({ supertest: admin, log, id });
+        await waitForAlertsToBePresent(admin, log, 10, [id]);
+        const alerts = await getAlertsByIds(admin, log, [id]);
         const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         // Try to set all of the alerts to the state of closed.
         // This should not be possible with the given user.
-        await supertestWithoutAuth
+        await userAndRole
           .post(DETECTION_ENGINE_ALERT_ASSIGNEES_URL)
           .set('kbn-xsrf', 'true')
-          .auth(userAndRole, 'changeme') // each user has the same password
+          .set('elastic-api-version', '2023-10-31')
           .send(
             setAlertAssignees({
               assigneesToAdd: ['user-1'],
@@ -82,31 +96,31 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       it('should allow `ROLES.t1_analyst` to assign alerts', async () => {
-        await successfulAssignWithRole(ROLES.t1_analyst);
+        await successfulAssignWithRole(t1Analyst);
       });
 
       it('should allow `ROLES.t2_analyst` to assign alerts', async () => {
-        await successfulAssignWithRole(ROLES.t2_analyst);
+        await successfulAssignWithRole(t2Analyst);
       });
 
       it('should allow `ROLES.t3_analyst` to assign alerts', async () => {
-        await successfulAssignWithRole(ROLES.t3_analyst);
+        await successfulAssignWithRole(t3Analyst);
       });
 
       it('should allow `ROLES.detections_admin` to assign alerts', async () => {
-        await successfulAssignWithRole(ROLES.detections_admin);
+        await successfulAssignWithRole(detectionsAdmin);
       });
 
       it('should allow `ROLES.platform_engineer` to assign alerts', async () => {
-        await successfulAssignWithRole(ROLES.platform_engineer);
+        await successfulAssignWithRole(platformEngineer);
       });
 
       it('should allow `ROLES.rule_author` to assign alerts', async () => {
-        await successfulAssignWithRole(ROLES.rule_author);
+        await successfulAssignWithRole(ruleAuthor);
       });
 
       it('should allow `ROLES.soc_manager` to assign alerts', async () => {
-        await successfulAssignWithRole(ROLES.soc_manager);
+        await successfulAssignWithRole(socManager);
       });
     });
   });

@@ -128,4 +128,3 @@ system_indices_superuser:
       privileges: ['*']
       resources: ['*']
   run_as: ['*']
-

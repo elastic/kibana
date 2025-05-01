@@ -9,7 +9,11 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
 import { getEcsGroups } from '@kbn/alerting-rule-utils';
-import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import {
+  isGroupAggregation,
+  isPerRowAggregation,
+  UngroupedGroupId,
+} from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -29,7 +33,7 @@ import type {
   OnlySearchSourceRuleParams,
   OnlyEsqlQueryRuleParams,
 } from './types';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
@@ -54,14 +58,14 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     throw new AlertsClientError();
   }
   const currentTimestamp = new Date().toISOString();
-  const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
-  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const spacePrefix = spaceId !== 'default' ? spaceId : '';
   const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
   }
-  const isGroupAgg = isGroupAggregation(params.termField);
+  const isGroupAgg =
+    isGroupAggregation(params.termField) || (esqlQueryRule && isPerRowAggregation(params.groupBy));
   // For ungrouped queries, we run the configured query during each rule run, get a hit count
   // and retrieve up to params.size hits. We evaluate the threshold condition using the
   // value of the hit count. If the threshold condition is met, the hits are counted
@@ -95,11 +99,11 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsqlQueryRuleParams,
         spacePrefix,
-        publicBaseUrl,
         services: {
           share,
           scopedClusterClient,
           logger,
+          ruleResultService,
         },
         dateStart,
         dateEnd,
@@ -110,9 +114,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsQueryRuleParams,
         timestamp: latestTimestamp,
-        publicBaseUrl,
         spacePrefix,
         services: {
+          share,
           scopedClusterClient,
           logger,
           ruleResultService,
@@ -183,6 +187,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
       const firstValidTimefieldSort = getValidTimefieldSort(
+        // @ts-expect-error `sort` now depends on `FieldValue` that is too broad
         result.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
       );
       if (firstValidTimefieldSort) {

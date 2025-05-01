@@ -73,7 +73,7 @@ export const useAllResults = ({
         )
       );
 
-      if (!responseData?.edges?.length && responseData.total) {
+      if (!responseData?.edges?.length && responseData?.total) {
         throw new Error('Empty edges while positive totalCount');
       }
 

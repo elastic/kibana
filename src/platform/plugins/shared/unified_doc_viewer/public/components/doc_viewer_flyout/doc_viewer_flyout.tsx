@@ -27,6 +27,7 @@ import {
   useEuiTheme,
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
+  isDOMNode,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -135,7 +136,7 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
-      if (ev.key === keys.ESCAPE) {
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
         ev.preventDefault();
         ev.stopPropagation();
         onClose();
@@ -143,6 +144,12 @@ export function UnifiedDocViewerFlyout({
 
       if (ev.target instanceof HTMLInputElement) {
         // ignore events triggered from the search input
+        return;
+      }
+
+      const isTabButton = (ev.target as HTMLElement).getAttribute('role') === 'tab';
+      if (isTabButton) {
+        // ignore events triggered when the tab buttons are focused
         return;
       }
 

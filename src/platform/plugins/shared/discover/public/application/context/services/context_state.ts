@@ -26,6 +26,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
+import { APP_STATE_URL_KEY } from '../../../../common';
 
 export interface AppState {
   /**
@@ -135,8 +136,8 @@ export interface GetStateReturn {
    */
   flushToUrl: (replace?: boolean) => void;
 }
+
 const GLOBAL_STATE_URL_KEY = '_g';
-const APP_STATE_URL_KEY = '_a';
 
 /**
  * Builds and returns appState and globalState containers

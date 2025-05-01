@@ -24,7 +24,7 @@ export const STATUS_FILTER_ARIAL_LABEL = i18n.translate(
 export const INSTALL_FILTER_OPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.filters.statusInstallOption',
   {
-    defaultMessage: 'Install',
+    defaultMessage: 'Installed',
   }
 );
 

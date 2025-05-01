@@ -13,7 +13,7 @@
 /** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
 export { AssistantProvider, useAssistantContext } from './impl/assistant_context';
 
-// Step 2: Add the `AssistantOverlay` component to your app. This component displays the assistant
+// Step 2.1: Add the `AssistantOverlay` component to your app. This component displays the assistant
 // overlay in a modal, bound to a shortcut key:
 
 /** modal overlay for Elastic Assistant conversations */
@@ -24,6 +24,15 @@ export { AssistantOverlay } from './impl/assistant/assistant_overlay';
 
 /** this component renders the Assistant without the modal overlay to, for example, render it in a Timeline tab */
 export { Assistant } from './impl/assistant';
+
+// Step 2.2: Provide spaceId to `AssistantSpaceIdProvider`
+// The spaceId here will be used to fetch the assistant data from localstorage.
+// So make sure not to provide null, undefined, or any fallback spaceId.
+// Only render the `AssistantSpaceIdProvider` component when the spaceId is available.
+export {
+  AssistantSpaceIdProvider,
+  useAssistantLastConversation,
+} from './impl/assistant/use_space_aware_context';
 
 // Step 3: Wherever you want to bring context into the assistant, use the any combination of the following
 // components and hooks:
@@ -88,6 +97,12 @@ export {
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies the maximum number of alerts to send as context */
   MAX_ALERTS_LOCAL_STORAGE_KEY,
+  /** The history view's end of the date range of attack discoveries */
+  HISTORY_END_LOCAL_STORAGE_KEY,
+  /** The history view's Search bar query that apply to the alerts sent as context to the LLM */
+  HISTORY_QUERY_LOCAL_STORAGE_KEY,
+  /** The history view's start date range of attack discoveries */
+  HISTORY_START_LOCAL_STORAGE_KEY,
   /** Search bar query that apply to the alerts sent as context to the LLM */
   QUERY_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies whether the settings tour should be shown */
@@ -96,6 +111,7 @@ export {
   START_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
+export type { AIConnector } from './impl/connectorland/connector_selector';
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
@@ -159,3 +175,11 @@ export {
   /** Your anonymization settings will apply to these alerts (label) */
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
+export { SearchAILakeConfigurationsSettingsManagement } from './impl/assistant/settings/search_ai_lake_configurations_settings_management';
+export { CONVERSATIONS_TAB } from './impl/assistant/settings/const';
+export type { ManagementSettingsTabs } from './impl/assistant/settings/types';
+
+export { getNewSelectedPromptContext } from './impl/data_anonymization/get_new_selected_prompt_context';
+export { getCombinedMessage } from './impl/assistant/prompt/helpers';
+export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_complete';
+export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';

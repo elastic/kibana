@@ -8,14 +8,18 @@
 import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
-import { AssistantCallToAction } from '../call_to_action';
+import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_to_action';
 
 import { translations } from './need_license_upgrade.translations';
+
+/** Data test subject for the manage license button. */
+export const DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON = 'aiCTAManageLicenseButton';
 
 /**
  * Props for the `NeedLicenseUpgrade` call to action.
  */
-export interface NeedLicenseUpgradeProps {
+export interface NeedLicenseUpgradeProps
+  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
   /** Callback to handle managing the license. */
   onManageLicense: () => void;
 }
@@ -23,9 +27,18 @@ export interface NeedLicenseUpgradeProps {
 /**
  * A pure component that renders a call to action to upgrade a license.
  */
-export const NeedLicenseUpgrade = ({ onManageLicense }: NeedLicenseUpgradeProps) => (
-  <AssistantCallToAction title={translations.title} description={translations.description}>
-    <EuiButton onClick={onManageLicense} iconType="gear" fill>
+export const NeedLicenseUpgrade = ({ onManageLicense, ...props }: NeedLicenseUpgradeProps) => (
+  <AssistantCallToAction
+    title={translations.title}
+    description={translations.description}
+    {...props}
+  >
+    <EuiButton
+      onClick={onManageLicense}
+      iconType="gear"
+      fill
+      data-test-subj={DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON}
+    >
       {translations.buttonLabel}
     </EuiButton>
   </AssistantCallToAction>

@@ -259,7 +259,7 @@ export class TrustedAppValidator extends BaseValidator {
       }
     }
 
-    await this.validateByPolicyItem(updatedItem);
+    await this.validateByPolicyItem(updatedItem, currentItem);
     await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
     await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 

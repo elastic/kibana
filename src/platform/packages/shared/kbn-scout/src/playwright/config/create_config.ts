@@ -27,31 +27,39 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     process.env.TEST_RUN_ID = runId;
   }
 
-  const scoutProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [
+  const scoutDefaultProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [
     {
       name: 'local',
       use: { ...devices['Desktop Chrome'], configName: 'local' },
     },
+    {
+      name: 'ech',
+      use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
+    },
+    {
+      name: 'mki',
+      use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
+    },
   ];
 
+  let scoutProjects: PlaywrightTestConfig<ScoutTestOptions>['projects'] = [];
+
   /**
-   * For parallel tests, we need to add a setup project that runs before the tests project.
+   * For parallel tests, we need to add a setup as a project dependency. While Playwright doesn't allow to read 'use'
+   * from the parent project, we have to create a setup project with the explicit 'use' object for each parent project.
+   * This is a workaround for https://github.com/microsoft/playwright/issues/32547
    */
-  if (options.workers && options.workers > 1) {
-    const parentProject = scoutProjects.find((p) => p.use?.configName);
-
-    scoutProjects.unshift({
-      name: 'setup',
-      use: parentProject?.use ? { ...parentProject.use } : {},
-      testMatch: /global.setup\.ts/,
-    });
-
-    scoutProjects.forEach((project) => {
-      if (project.name !== 'setup') {
-        project.dependencies = ['setup'];
-      }
-    });
-  }
+  scoutProjects =
+    options.workers && options.workers > 1
+      ? scoutDefaultProjects.flatMap((project) => [
+          {
+            name: `setup-${project?.name}`,
+            use: project?.use ? { ...project.use } : {},
+            testMatch: /global.setup\.ts/,
+          },
+          { ...project, dependencies: [`setup-${project?.name}`] },
+        ])
+      : scoutDefaultProjects;
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
@@ -72,6 +80,8 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      actionTimeout: 10000, // Shorten timeout for actions like `click()`
+      navigationTimeout: 20000, // Shorter timeout for page navigations
       // 'configName' is not defined by default to enforce using '--project' flag when running the tests
       testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,

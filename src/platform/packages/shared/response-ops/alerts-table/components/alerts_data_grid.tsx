@@ -79,7 +79,7 @@ export const AlertsDataGrid = typedMemo(
       onChangePageSize,
       onChangePageIndex,
       actionsColumnWidth = DEFAULT_ACTIONS_COLUMN_WIDTH,
-      getBulkActions,
+      additionalBulkActions,
       fieldsBrowserOptions,
       cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
@@ -114,7 +114,7 @@ export const AlertsDataGrid = typedMemo(
       query,
       alertsCount: alerts.length,
       casesConfig: casesConfiguration,
-      getBulkActions,
+      additionalBulkActions,
       refresh: refreshQueries,
       hideBulkActions,
       http,
@@ -358,7 +358,7 @@ export const AlertsDataGrid = typedMemo(
               ref={dataGridRef}
               css={rowStyles}
               aria-label="Alerts table"
-              data-test-subj="alertsTable"
+              data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
               height={height}
               columns={columnsWithCellActions}
               columnVisibility={columnVisibility}

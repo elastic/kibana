@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -14,6 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const solutionNavigation = getPageObject('solutionNavigation');
+  const console = getPageObject('console');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const header = getPageObject('header');
@@ -31,10 +33,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
 
-      // check side nav links
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
+      // Check landing page / global empty state
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
@@ -42,124 +44,97 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await testSubjects.existOrFail(`elasticsearchStartPage`);
 
-      // check Data
-      // > Index Management
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
+      // Check Side Nav Links
+      const sideNavCases: Array<{
+        deepLinkId: AppDeepLinkId;
+        breadcrumbs: string[];
+        pageTestSubject: string;
+        extraCheck?: () => Promise<void>;
+      }> = [
+        {
+          deepLinkId: 'elasticsearchIndexManagement',
+          breadcrumbs: ['Data', 'Index Management', 'Indices'],
+          pageTestSubject: 'elasticsearchIndexManagement',
+        },
+        {
+          deepLinkId: 'serverlessConnectors',
+          breadcrumbs: ['Data', 'Connectors'],
+          pageTestSubject: 'svlSearchConnectorsPage',
+        },
+        {
+          deepLinkId: 'serverlessWebCrawlers',
+          breadcrumbs: ['Data', 'Web Crawlers'],
+          pageTestSubject: 'serverlessSearchConnectorsTitle', // TODO: this page should have a different test subject
+        },
+        {
+          deepLinkId: 'dev_tools:console',
+          breadcrumbs: ['Build', 'Dev Tools'],
+          pageTestSubject: 'console',
+          extraCheck: async () => {
+            if (await console.isTourPopoverOpen()) {
+              // Skip the tour if it's open. This will prevent the tour popover from staying on the page
+              // and blocking breadcrumbs for other tests.
+              await console.clickSkipTour();
+            }
+          },
+        },
+        {
+          deepLinkId: 'searchPlayground',
+          breadcrumbs: ['Build', 'Playground'],
+          pageTestSubject: 'svlPlaygroundPage',
+        },
+        {
+          deepLinkId: 'searchInferenceEndpoints',
+          breadcrumbs: ['Relevance', 'Inference Endpoints'],
+          pageTestSubject: 'inferenceEndpointsPage',
+        },
+        {
+          deepLinkId: 'searchSynonyms',
+          breadcrumbs: ['Relevance', 'Synonyms'],
+          pageTestSubject: 'searchSynonymsOverviewPage',
+        },
+        {
+          deepLinkId: 'discover',
+          breadcrumbs: ['Analyze', 'Discover'],
+          pageTestSubject: 'queryInput',
+        },
+        {
+          deepLinkId: 'dashboards',
+          breadcrumbs: ['Analyze', 'Dashboards'],
+          pageTestSubject: 'dashboardLandingPage',
+        },
+        {
+          deepLinkId: 'serverlessElasticsearch',
+          breadcrumbs: ['Getting Started'],
+          pageTestSubject: 'svlSearchOverviewPage',
+        },
+      ];
 
-      // > Connectors
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'serverlessConnectors',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'serverlessConnectors',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Connectors' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'serverlessConnectors',
-      });
-      // check Build
-      // > Dev Tools
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'dev_tools:console',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'dev_tools:console',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dev Tools' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'dev_tools:console',
-      });
-      // > Playground
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'searchPlayground',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'searchPlayground',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'searchPlayground',
-      });
-      // check Relevance
-      // > Inference Endpoints
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'searchInferenceEndpoints',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'searchInferenceEndpoints',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inference Endpoints' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'searchInferenceEndpoints',
-      });
-
-      // check Analyze
-      // > Discover
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'discover',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'discover',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Analyze' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'discover',
-      });
-      // > Dashboards
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'dashboards',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'dashboards',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Analyze' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dashboards' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'dashboards',
-      });
-
-      // check Getting Started
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'serverlessElasticsearch',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'serverlessElasticsearch',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Getting Started' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Getting Started',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'serverlessElasticsearch',
-      });
+      for (const testCase of sideNavCases) {
+        await solutionNavigation.sidenav.clickLink({
+          deepLinkId: testCase.deepLinkId,
+        });
+        await solutionNavigation.sidenav.expectLinkActive({
+          deepLinkId: testCase.deepLinkId,
+        });
+        for (const breadcrumb of testCase.breadcrumbs) {
+          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
+        }
+        await testSubjects.existOrFail(testCase.pageTestSubject);
+        if (testCase.extraCheck !== undefined) {
+          await testCase.extraCheck();
+        }
+      }
 
       // Open Project Settings
       await solutionNavigation.sidenav.openSection('project_settings_project_nav');
       // check Project Settings
       // > Trained Models
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'ml:modelManagement',
+        deepLinkId: 'management:trained_models',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'ml:modelManagement',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Model Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Trained Models' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'ml:modelManagement',
+        deepLinkId: 'management:trained_models',
       });
       // > Management
       await solutionNavigation.sidenav.clickLink({ navId: 'management' });
@@ -170,7 +145,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Indices` });
       await testSubjects.existOrFail(`elasticsearchStartPage`);
@@ -188,7 +163,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'elasticsearchIndexManagement' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
         'Data',
         'Index Management',
@@ -242,6 +217,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Analyze' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
@@ -249,7 +225,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting Started' });
 
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained models' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
@@ -258,12 +234,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
         'data',
-        'management:index_management',
+        'elasticsearchIndexManagement',
         'serverlessConnectors',
         'serverlessWebCrawlers',
         'build',
         'dev_tools',
         'searchPlayground',
+        'searchSynonyms',
         'relevance',
         'searchInferenceEndpoints',
         'analyze',
@@ -273,7 +250,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'maps',
         'gettingStarted',
         'project_settings_project_nav',
-        'ml:modelManagement',
+        'management:trained_models',
         'management',
         'cloudLinkDeployment',
         'cloudLinkBilling',

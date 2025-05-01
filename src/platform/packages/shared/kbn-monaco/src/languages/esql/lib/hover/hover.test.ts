@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../../monaco_imports';
-import { getHoverItem } from './hover';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
-  ENRICH_MODES,
   ESQLRealField,
   getFunctionDefinition,
   getFunctionSignatures,
 } from '@kbn/esql-validation-autocomplete';
+import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
+import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { monaco } from '../../../../monaco_imports';
+import { getHoverItem } from './hover';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
@@ -113,11 +113,6 @@ describe('hover', () => {
     ],
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) => {
-    const token: monaco.CancellationToken = {
-      isCancellationRequested: false,
-      onCancellationRequested: () => ({ dispose: () => {} }),
-    };
-
     const { model, position } = createModelAndPosition(statement, triggerString);
     const testFn = only ? test.only : skip ? test.skip : test;
     const expected = contentFn(triggerString);
@@ -128,13 +123,7 @@ describe('hover', () => {
       })=> ["${expected.join('","')}"]`,
       async () => {
         const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
-        const { contents } = await getHoverItem(
-          model,
-          position,
-          token,
-          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-          callbackMocks
-        );
+        const { contents } = await getHoverItem(model, position, callbackMocks);
         expect(contents.map(({ value }) => value)).toEqual(expected);
       }
     );
@@ -187,12 +176,11 @@ describe('hover', () => {
     testSuggestions(`from a | enrich policy on b `, 'non-policy', createPolicyContent);
 
     describe('ccq mode', () => {
-      for (const mode of ENRICH_MODES.values) {
-        testSuggestions(
-          `from a | enrich ${ENRICH_MODES.prefix || ''}${mode.name}:policy`,
-          `${ENRICH_MODES.prefix || ''}${mode.name}`,
-          () => [ENRICH_MODES.description, `**${mode.name}**: ${mode.description}`]
-        );
+      for (const mode of ENRICH_MODES) {
+        testSuggestions(`from a | enrich _${mode.name}:policy`, `_${mode.name}`, () => [
+          modeDescription,
+          `**${mode.name}**: ${mode.description}`,
+        ]);
       }
     });
   });

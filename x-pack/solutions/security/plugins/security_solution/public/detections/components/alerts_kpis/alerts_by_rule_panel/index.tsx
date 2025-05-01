@@ -19,12 +19,17 @@ import * as i18n from './translations';
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
 
+/**
+ * Renders a table showing alerts grouped by rule names.
+ * The component is used in the alerts page as well as in the AI for SOC alert summary page.
+ */
 export const AlertsByRulePanel: React.FC<ChartsPanelProps> = ({
   filters,
   query,
   signalIndexName,
   runtimeMappings,
   skip,
+  showCellActions = true,
 }) => {
   const uniqueQueryId = useMemo(() => `${ALERTS_BY_TYPE_CHART_ID}-${uuid()}`, []);
 
@@ -50,7 +55,7 @@ export const AlertsByRulePanel: React.FC<ChartsPanelProps> = ({
           titleSize="xs"
           hideSubtitle
         />
-        <AlertsByRule data={data} isLoading={isLoading} />
+        <AlertsByRule data={data} isLoading={isLoading} showCellActions={showCellActions} />
       </EuiPanel>
     </InspectButtonContainer>
   );

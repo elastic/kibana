@@ -5,33 +5,24 @@
  * 2.0.
  */
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdBucket } from './types';
-import type { SecuritySharedParams } from '../types';
+import type { ThresholdCompositeBucket } from './types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import { bulkCreateWithSuppression } from '../utils/bulk_create_with_suppression';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
 import { transformBulkCreatedItemsToHits } from './utils';
-import type { ExperimentalFeatures } from '../../../../../common';
 
 interface BulkCreateSuppressedThresholdAlertsParams {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  buckets: ThresholdBucket[];
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  buckets: ThresholdCompositeBucket[];
+  services: SecurityRuleServices;
   startedAt: Date;
-  from: Date;
-  to: Date;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -44,24 +35,11 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
   buckets,
   services,
   startedAt,
-  from,
-  to,
-  experimentalFeatures,
 }: BulkCreateSuppressedThresholdAlertsParams): Promise<{
   bulkCreateResult: GenericBulkCreateResponse<BaseFieldsLatest & SuppressionFieldsLatest>;
   unsuppressedAlerts: Array<SearchHit<unknown>>;
 }> => {
-  const {
-    completeRule,
-    mergeStrategy,
-    inputIndex,
-    alertTimestampOverride,
-    ruleExecutionLogger,
-    publicBaseUrl,
-    intendedTimestamp,
-  } = sharedParams;
-  const ruleParams = completeRule.ruleParams;
-  const suppressionDuration = completeRule.ruleParams.alertSuppression?.duration;
+  const suppressionDuration = sharedParams.completeRule.ruleParams.alertSuppression?.duration;
   if (!suppressionDuration) {
     throw Error('Suppression duration can not be empty');
   }
@@ -69,22 +47,10 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
   const suppressionWindow = `now-${suppressionDuration.value}${suppressionDuration.unit}`;
 
   const wrappedAlerts = wrapSuppressedThresholdALerts({
+    sharedParams,
     buckets,
-    spaceId: sharedParams.spaceId,
-    completeRule,
-    mergeStrategy,
-    indicesToQuery: inputIndex,
     buildReasonMessage: buildReasonMessageForThresholdAlert,
-    alertTimestampOverride,
-    ruleExecutionLogger,
-    publicBaseUrl,
-    inputIndex: inputIndex.join(','),
     startedAt,
-    from,
-    to,
-    suppressionWindow,
-    threshold: ruleParams.threshold,
-    intendedTimestamp,
   });
 
   const bulkCreateResult = await bulkCreateWithSuppression({
@@ -92,7 +58,6 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     wrappedDocs: wrappedAlerts,
     services,
     suppressionWindow,
-    experimentalFeatures,
   });
 
   return {

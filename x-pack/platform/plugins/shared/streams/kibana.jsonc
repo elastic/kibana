@@ -19,6 +19,7 @@
       "taskManager",
       "alerting",
       "inference",
+      "features",
     ],
     "optionalPlugins": [
       "cloud",

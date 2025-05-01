@@ -6,16 +6,25 @@
  */
 
 import { IndexStorageSettings, types } from '@kbn/storage-adapter';
-import { ASSET_ASSET_ID, ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from './fields';
+import {
+  ASSET_ID,
+  ASSET_TYPE,
+  ASSET_UUID,
+  QUERY_KQL_BODY,
+  QUERY_TITLE,
+  STREAM_NAME,
+} from './fields';
 
 export const assetStorageSettings = {
   name: '.kibana_streams_assets',
   schema: {
     properties: {
-      [ASSET_ASSET_ID]: types.keyword(),
+      [ASSET_UUID]: types.keyword(),
+      [ASSET_ID]: types.keyword(),
       [ASSET_TYPE]: types.keyword(),
-      [ASSET_ENTITY_ID]: types.keyword(),
-      [ASSET_ENTITY_TYPE]: types.keyword(),
+      [STREAM_NAME]: types.keyword(),
+      [QUERY_KQL_BODY]: types.match_only_text(),
+      [QUERY_TITLE]: types.keyword(),
     },
   },
 } satisfies IndexStorageSettings;

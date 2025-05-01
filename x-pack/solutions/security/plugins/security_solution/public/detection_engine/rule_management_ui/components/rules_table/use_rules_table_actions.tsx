@@ -14,7 +14,7 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { canEditRuleWithActions } from '../../../../common/utils/privileges';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import type { Rule } from '../../../rule_management/logic';
 import { useBulkExport } from '../../../rule_management/logic/bulk_actions/use_bulk_export';
 import {

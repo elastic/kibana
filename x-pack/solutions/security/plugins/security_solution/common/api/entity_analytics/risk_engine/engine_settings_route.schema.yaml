@@ -21,3 +21,6 @@ paths:
                 properties:
                   range:
                     $ref: '../common/common.schema.yaml#/components/schemas/DateRange'
+                  includeClosedAlerts:
+                    type: boolean
+                    description: Include closed alerts in the risk score calculation

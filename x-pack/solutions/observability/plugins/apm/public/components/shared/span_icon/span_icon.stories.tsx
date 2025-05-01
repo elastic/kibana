@@ -6,7 +6,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
 import { SpanIcon } from '.';
@@ -18,7 +18,7 @@ export default {
   component: SpanIcon,
 };
 
-export const List: Story = () => {
+export const List: StoryFn = () => {
   return (
     <EuiFlexGroup gutterSize="l" wrap={true}>
       {spanTypes.map((type) => {

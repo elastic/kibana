@@ -29,12 +29,12 @@ const baseNavItems = [
     items: undefined,
   }),
   {
-    'data-test-subj': 'searchSideNav-Content',
-    id: 'content',
+    'data-test-subj': 'searchSideNav-Data',
+    id: 'data',
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
-        href: '/app/management/data/index_management/',
+        href: '/app/elasticsearch/index_management',
         id: 'search_indices',
         items: undefined,
         name: 'Index Management',
@@ -54,7 +54,7 @@ const baseNavItems = [
         name: 'Web Crawlers',
       },
     ],
-    name: 'Content',
+    name: 'Data',
   },
   {
     'data-test-subj': 'searchSideNav-Build',
@@ -134,9 +134,9 @@ const mockNavLinks = [
     url: '/app/elasticsearch/overview',
   },
   {
-    id: 'management:index_management',
+    id: 'elasticsearchIndexManagement',
     title: 'Index Management',
-    url: '/app/management/data/index_management/',
+    url: '/app/elasticsearch/index_management',
   },
   {
     id: 'enterpriseSearchContent:connectors',

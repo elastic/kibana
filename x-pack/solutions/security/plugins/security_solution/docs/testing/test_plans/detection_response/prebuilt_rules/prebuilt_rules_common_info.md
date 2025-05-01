@@ -102,8 +102,8 @@ Terminology related to prebuilt rule customization:
   - For a customized field, `current_version.field` != `base_version.field`.
 - **Non-customized field**: a prebuilt rule's field that has the original value from the originally installed prebuilt rule.
   - For a non-customized field, `current_version.field` == `base_version.field`.
-- **Customizable rule field**: a rule field that is able to be customized on a prebuilt rule. A comprehenseive list can be found [below](#customizable-rule-fields).
-- **Non-customizable rule field**: a rule field that is unable to be customized on a prebuilt rule. A comprehenseive list can be found [below](#non-customizable-rule-fields).
+- **Customizable rule field**: a rule field that is able to be customized on a prebuilt rule. A comprehensive list can be found [below](#customizable-rule-fields).
+- **Non-customizable rule field**: a rule field that is unable to be customized on a prebuilt rule. A comprehensive list can be found [below](#non-customizable-rule-fields).
 
 Terminology related to the "rule source" object:
 

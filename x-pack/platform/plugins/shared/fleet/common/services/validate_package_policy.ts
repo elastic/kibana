@@ -377,19 +377,42 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.secret === true && parsedValue && parsedValue.isSecretRef === true) {
-    if (
-      parsedValue.id === undefined ||
-      parsedValue.id === '' ||
-      typeof parsedValue.id !== 'string'
-    ) {
+    if (!parsedValue.id && (!parsedValue.ids || parsedValue.ids.length === 0)) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id or ids must be provided',
+        })
+      );
+      return errors;
+    }
+
+    if (parsedValue.id && parsedValue.ids) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, id or ids cannot both be provided',
+        })
+      );
+      return errors;
+    }
+
+    if (parsedValue.id && typeof parsedValue.id !== 'string') {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
           defaultMessage: 'Secret reference is invalid, id must be a string',
         })
       );
-
       return errors;
     }
+
+    if (parsedValue.ids && !parsedValue.ids.every((id: string) => typeof id === 'string')) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidSecretReference', {
+          defaultMessage: 'Secret reference is invalid, ids must be an array of strings',
+        })
+      );
+      return errors;
+    }
+
     return null;
   }
 

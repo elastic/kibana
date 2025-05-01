@@ -19,6 +19,10 @@ import {
   KibanaUrl,
   getLogger,
   ScoutLogger,
+  createElasticsearchCustomRole,
+  createCustomRole,
+  ElasticsearchRoleDescriptor,
+  KibanaRole,
 } from '../../../common/services';
 import type { ScoutTestOptions } from '../../types';
 import type { ScoutTestConfig } from '.';
@@ -29,6 +33,12 @@ export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../types';
 export type { ScoutLogger } from '../../../common/services/logger';
+
+export interface SamlAuth {
+  session: SamlSessionManager;
+  customRoleName: string;
+  setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
+}
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential
@@ -45,7 +55,7 @@ export const coreWorkerFixtures = base.extend<
     kbnUrl: KibanaUrl;
     esClient: Client;
     kbnClient: KbnClient;
-    samlAuth: SamlSessionManager;
+    samlAuth: SamlAuth;
   }
 >({
   // Provides a scoped logger instance for each worker to use in fixtures and tests.
@@ -114,14 +124,50 @@ export const coreWorkerFixtures = base.extend<
 
   /**
    * Creates a SAML session manager, that handles authentication tasks for tests involving
-   * SAML-based authentication.
+   * SAML-based authentication. Exposes a method to set a custom role for the session.
    *
    * Note: In order to speedup execution of tests, we cache the session cookies for each role
    * after first call.
    */
   samlAuth: [
-    ({ log, config }, use) => {
-      use(createSamlSessionManager(config, log));
+    ({ log, config, esClient, kbnClient }, use, workerInfo) => {
+      /**
+       * When running tests against Cloud, ensure the `.ftr/role_users.json` file is populated with the required roles
+       * and credentials. Each worker uses a unique custom role named `custom_role_worker_<index>`.
+       * If running tests in parallel, make sure the file contains enough entries to accommodate all workers.
+       * The file should be structured as follows:
+       * {
+       *   "custom_role_worker_1": { "username": ..., "password": ... },
+       *   "custom_role_worker_2": { "username": ..., "password": ... },
+       */
+      const customRoleName = `custom_role_worker_${workerInfo.parallelIndex + 1}`;
+      const session = createSamlSessionManager(config, log, customRoleName);
+      let customRoleHash = '';
+
+      const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
+
+      const isElasticsearchRole = (role: any): role is ElasticsearchRoleDescriptor => {
+        return 'applications' in role;
+      };
+
+      const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
+        const newRoleHash = JSON.stringify(role);
+
+        if (isCustomRoleSet(newRoleHash)) {
+          log.info(`Custom role is already set`);
+          return;
+        }
+
+        if (isElasticsearchRole(role)) {
+          await createElasticsearchCustomRole(esClient, customRoleName, role);
+        } else {
+          await createCustomRole(kbnClient, customRoleName, role);
+        }
+
+        customRoleHash = newRoleHash;
+      };
+
+      use({ session, customRoleName, setCustomRole });
     },
     { scope: 'worker' },
   ],

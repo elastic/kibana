@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { format as formatUrl } from 'url';
 
 import {
@@ -18,7 +18,6 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
-import path from 'path';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
@@ -76,7 +75,7 @@ export const defaultConfig: ScoutServerConfig = {
     license: 'trial',
     files: [
       // Passing the roles that are equivalent to the ones we have in serverless
-      path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
+      resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
     ],
     serverArgs: [
       'path.repo=/tmp/',
@@ -125,9 +124,9 @@ export const defaultConfig: ScoutServerConfig = {
       '--telemetry.sendUsageTo=staging',
       `--server.maxPayload=1679958`,
       // newsfeed mock service
-      `--plugin-path=${path.join(REPO_ROOT, 'test', 'common', 'plugins', 'newsfeed')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
       // otel mock service
-      `--plugin-path=${path.join(REPO_ROOT, 'test', 'common', 'plugins', 'otel_metrics')}`,
+      `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/otel_metrics')}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,
       `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       `--logging.appenders.deprecation=${JSON.stringify({

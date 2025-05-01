@@ -7,30 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { suggest } from './autocomplete';
+import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
-import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
-import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import {
-  policies,
-  getFunctionSignaturesByReturnType,
-  getFieldNamesByType,
-  createCustomCallbackMocks,
-  createCompletionContext,
-  getPolicyFields,
-  PartialSuggestionWithText,
-  TIME_PICKER_SUGGESTION,
-  setup,
-  attachTriggerCommand,
-  SuggestOptions,
-  fields,
-} from './__tests__/helpers';
+import { Location } from '../definitions/types';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_STRING_TYPES } from '../shared/esql_types';
-import { getRecommendedQueries } from './recommended_queries/templates';
+import {
+  attachTriggerCommand,
+  createCompletionContext,
+  createCustomCallbackMocks,
+  fields,
+  getFieldNamesByType,
+  getFunctionSignaturesByReturnType,
+  getPolicyFields,
+  PartialSuggestionWithText,
+  policies,
+  setup,
+  SuggestOptions,
+  TIME_PICKER_SUGGESTION,
+} from './__tests__/helpers';
+import { suggest } from './autocomplete';
 import { getDateHistogramCompletionItem } from './commands/stats/util';
+import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { getRecommendedQueries } from './recommended_queries/templates';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 
@@ -81,13 +81,13 @@ describe('autocomplete', () => {
     },
   });
 
-  // const sourceCommands = ['row', 'from', 'show', 'metrics']; Uncomment when metrics is being released
+  // const sourceCommands = ['row', 'from', 'show', 'ts']; Uncomment when ts is being released
   const sourceCommands = ['row', 'from', 'show'];
 
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     testSuggestions('/', [
-      ...sourceCommands.map((name) => name.toUpperCase() + ' $0'),
+      ...sourceCommands.map((name) => name.toUpperCase() + ' '),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = commandDefinitions
@@ -96,20 +96,20 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
 
     testSuggestions('from a | /', commands);
     testSuggestions('from a metadata _id | /', commands);
-    testSuggestions('from a | eval var0 = a | /', commands);
-    testSuggestions('from a metadata _id | eval var0 = a | /', commands);
+    testSuggestions('from a | eval col0 = a | /', commands);
+    testSuggestions('from a metadata _id | eval col0 = a | /', commands);
   });
 
   for (const command of ['keep', 'drop']) {
@@ -165,7 +165,7 @@ describe('autocomplete', () => {
         ]
       );
 
-      it('should not suggest already-used fields and variables', async () => {
+      it('should not suggest already-used fields and user defined columns', async () => {
         const { suggest: suggestTest } = await setup();
         const getSuggestions = async (query: string, opts?: SuggestOptions) =>
           (await suggestTest(query, opts)).map((value) => value.text);
@@ -207,35 +207,24 @@ describe('autocomplete', () => {
   });
 
   describe('callbacks', () => {
-    it('should send the columns query without the last command', async () => {
+    it('should send the columns query only for the from part', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
-      const statement = 'from a | drop keywordField | eval var0 = abs(doubleField) ';
+      const statement = 'from index_b | drop keywordField | eval col0 = abs(doubleField) ';
+
       const triggerOffset = statement.lastIndexOf(' ');
       const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(
-        statement,
-        triggerOffset + 1,
-        context,
-        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-        callbackMocks
-      );
+      await suggest(statement, triggerOffset + 1, context, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({
-        query: 'from a | drop keywordField',
+        query: 'from index_b',
       });
     });
     it('should send the fields query aware of the location', async () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
-      const statement = 'from a | drop | eval var0 = abs(doubleField) ';
+      const statement = 'from index_d | drop | eval col0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
       const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(
-        statement,
-        triggerOffset + 1,
-        context,
-        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-        callbackMocks
-      );
-      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from a' });
+      await suggest(statement, triggerOffset + 1, context, callbackMocks);
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from index_d' });
     });
   });
 
@@ -254,7 +243,7 @@ describe('autocomplete', () => {
     // source command
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     testSuggestions('f/', [
-      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} $0`),
+      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -264,12 +253,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -282,7 +271,7 @@ describe('autocomplete', () => {
       testSuggestions('FROM kibana_sample_data_logs | EVAL TRIM(e/)', [
         ...getFieldNamesByType(['text', 'keyword']),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ['text', 'keyword'],
           { scalar: true },
           undefined,
@@ -295,12 +284,12 @@ describe('autocomplete', () => {
         TIME_PICKER_SUGGESTION,
         ...TIME_SYSTEM_PARAMS.map((t) => `${t}, `),
         ...getFieldNamesByType(['date', 'date_nanos']).map((name) => `${name}, `),
-        ...getFunctionSignaturesByReturnType('eval', ['date', 'date_nanos'], { scalar: true }).map(
-          (s) => ({
-            ...s,
-            text: `${s.text},`,
-          })
-        ),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ['date', 'date_nanos'], {
+          scalar: true,
+        }).map((s) => ({
+          ...s,
+          text: `${s.text},`,
+        })),
       ];
       testSuggestions('FROM a | EVAL DATE_DIFF("day", /)', expectedDateDiff2ndArgSuggestions);
 
@@ -319,20 +308,21 @@ describe('autocomplete', () => {
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
-    testSuggestions('FROM index1 M/', ['METADATA $0']);
+    testSuggestions('FROM index1 M/', ['METADATA ']);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
 
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
-      'var0 = ',
-      ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      'col0 = ',
+      ...getFieldNamesByType('any').map((name) => `${name} `),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
 
-    testSuggestions('FROM index1 | EVAL var0 = f/', [
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+    testSuggestions('FROM index1 | EVAL col0 = f/', [
+      ...getFieldNamesByType('any').map((name) => `${name} `),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
 
     // DISSECT field
@@ -364,12 +354,12 @@ describe('autocomplete', () => {
 
     // ENRICH policy WITH policyfield
     testSuggestions('FROM index1 | ENRICH policy WITH v/', [
-      'var0 = ',
+      'col0 = ',
       ...getPolicyFields('policy'),
     ]);
 
     testSuggestions('FROM index1 | ENRICH policy WITH \tv/', [
-      'var0 = ',
+      'col0 = ',
       ...getPolicyFields('policy'),
     ]);
 
@@ -409,8 +399,8 @@ describe('autocomplete', () => {
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
-      'var0 = ',
-      ...getFunctionSignaturesByReturnType('stats', 'any', {
+      'col0 = ',
+      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
         scalar: true,
         agg: true,
         grouping: true,
@@ -418,27 +408,27 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['BY ', ', ', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['WHERE ', 'BY ', ', ', '| ']);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
-      'var0 = ',
+      'col0 = ',
       getDateHistogramCompletionItem(),
-      ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
     ]);
 
     // WHERE argument
     testSuggestions('FROM index1 | WHERE f/', [
       ...getFieldNamesByType('any').map((field) => `${field} `),
-      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
     ]);
 
     // WHERE argument comparison
     testSuggestions(
       'FROM index1 | WHERE keywordField i/',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'boolean',
         {
           operators: true,
@@ -452,7 +442,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM index1 | WHERE ABS(integerField) i/',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'any',
         {
           operators: true,
@@ -476,7 +466,7 @@ describe('autocomplete', () => {
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     // Source command
     testSuggestions('F/', [
-      ...['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
+      ...['FROM ', 'ROW ', 'SHOW '].map(attachTriggerCommand),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -486,12 +476,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -499,7 +489,7 @@ describe('autocomplete', () => {
     // Pipe command
     testSuggestions(
       'FROM a | E/',
-      commands.map((name) => attachTriggerCommand(name)).map(attachAsSnippet) // TODO consider making this check more fundamental
+      commands.map((name) => attachTriggerCommand(name))
     );
 
     describe('function arguments', () => {
@@ -519,7 +509,7 @@ describe('autocomplete', () => {
           .map((field) => `${field}, `)
           .map(attachTriggerCommand),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ESQL_STRING_TYPES,
           { scalar: true },
           undefined,
@@ -545,7 +535,7 @@ describe('autocomplete', () => {
           command: undefined,
         })),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ESQL_STRING_TYPES,
           { scalar: true },
           undefined,
@@ -569,13 +559,13 @@ describe('autocomplete', () => {
     testSuggestions('FROM a /', [
       attachTriggerCommand('| '),
       ',',
-      attachAsSnippet(attachTriggerCommand('METADATA $0')),
+      attachTriggerCommand('METADATA '),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
     // Assignment
     testSuggestions(`FROM a | ENRICH policy on b with /`, [
-      attachTriggerCommand('var0 = '),
+      attachTriggerCommand('col0 = '),
       ...getPolicyFields('policy'),
     ]);
 
@@ -663,20 +653,19 @@ describe('autocomplete', () => {
             text: 'foo$bar | ',
             filterText: 'foo$bar',
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
+            rangeToReplace: { start: 5, end: 12 },
           },
           {
             text: 'foo$bar, ',
             filterText: 'foo$bar',
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
+            rangeToReplace: { start: 5, end: 12 },
           },
           {
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
-            asSnippet: false, // important because the text includes "$"
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
+            rangeToReplace: { start: 5, end: 12 },
           },
           ...recommendedQuerySuggestions.map((q) => q.queryString),
         ],
@@ -707,7 +696,7 @@ describe('autocomplete', () => {
 
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [attachAsSnippet(attachTriggerCommand('METADATA $0'))]);
+    testSuggestions('FROM index1 M/', [attachTriggerCommand('METADATA ')]);
 
     describe('ENRICH', () => {
       testSuggestions(
@@ -735,12 +724,12 @@ describe('autocomplete', () => {
       );
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
-        'var0 = ',
+        'col0 = ',
         ...getPolicyFields('policy'),
       ]);
       describe('replacement range', () => {
         testSuggestions('FROM a | ENRICH policy ON @timestamp WITH othe/', [
-          'var0 = ',
+          'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
             command: undefined,
@@ -748,7 +737,7 @@ describe('autocomplete', () => {
           })),
         ]);
         testSuggestions(
-          'FROM a | ENRICH policy ON @timestamp WITH var0 = othe/',
+          'FROM a | ENRICH policy ON @timestamp WITH col0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
             command: undefined,
@@ -765,8 +754,8 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM a | STATS /',
       [
-        'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', {
+        'col0 = ',
+        ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
           scalar: true,
           agg: true,
           grouping: true,
@@ -777,13 +766,14 @@ describe('autocomplete', () => {
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(numberField) /', [
       ', ',
+      attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
       attachTriggerCommand('| '),
     ]);
 
     // STATS argument BY field
     const allByCompatibleFunctions = getFunctionSignaturesByReturnType(
-      'stats',
+      Location.STATS,
       'any',
       {
         scalar: true,
@@ -795,7 +785,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('FROM a | STATS AVG(numberField) BY /', [
       getDateHistogramCompletionItem(),
-      attachTriggerCommand('var0 = '),
+      attachTriggerCommand('col0 = '),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
@@ -803,7 +793,7 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY assignment (checking field suggestions)
-    testSuggestions('FROM a | STATS AVG(numberField) BY var0 = /', [
+    testSuggestions('FROM a | STATS AVG(numberField) BY col0 = /', [
       getDateHistogramCompletionItem(),
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
@@ -816,14 +806,16 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
-      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }).map(attachAsSnippet),
+      ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }).map(
+        attachAsSnippet
+      ),
     ]);
 
     // WHERE argument comparison
     testSuggestions(
       'FROM a | WHERE keywordField /',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'boolean',
         {
           operators: true,
@@ -878,7 +870,7 @@ describe('autocomplete', () => {
           getFieldNamesByType('any')
             .map<PartialSuggestionWithText>((text) => ({
               text,
-              rangeToReplace: { start: 15, end: 16 },
+              rangeToReplace: { start: 14, end: 15 },
             }))
             .map(attachTriggerCommand)
         );
@@ -892,20 +884,19 @@ describe('autocomplete', () => {
             .map((text) => ({
               text,
               filterText: 'doubleField',
-              rangeToReplace: { start: 15, end: 26 },
+              rangeToReplace: { start: 14, end: 25 },
             }))
             .map(attachTriggerCommand)
         );
         testSuggestions('FROM a | KEEP doubleField /', ['| ', ',']);
-
         // Let's get funky with the field names
         testSuggestions(
-          `FROM a | ${commandName} @timestamp/`,
+          `FROM b | ${commandName} @timestamp/`,
           ['@timestamp, ', '@timestamp | ']
             .map((text) => ({
               text,
               filterText: '@timestamp',
-              rangeToReplace: { start: 15, end: 25 },
+              rangeToReplace: { start: 14, end: 24 },
             }))
             .map(attachTriggerCommand),
           undefined,
@@ -917,12 +908,12 @@ describe('autocomplete', () => {
           ]
         );
         testSuggestions(
-          `FROM a | ${commandName} foo.bar/`,
+          `FROM c | ${commandName} foo.bar/`,
           ['foo.bar, ', 'foo.bar | ']
             .map((text) => ({
               text,
               filterText: 'foo.bar',
-              rangeToReplace: { start: 15, end: 22 },
+              rangeToReplace: { start: 14, end: 21 },
             }))
             .map(attachTriggerCommand),
           undefined,
@@ -936,7 +927,7 @@ describe('autocomplete', () => {
 
         describe('escaped field names', () => {
           testSuggestions(
-            `FROM a | ${commandName} \`foo.bar\`/`,
+            `FROM c | ${commandName} \`foo.bar\`/`,
             ['`foo.bar`, ', '`foo.bar` | '],
             undefined,
             [
@@ -947,7 +938,7 @@ describe('autocomplete', () => {
             ]
           );
           testSuggestions(
-            `FROM a | ${commandName} \`foo\`\`\`\`bar\`\`baz\`/`,
+            `FROM d | ${commandName} \`foo\`\`\`\`bar\`\`baz\`/`,
             ['`foo````bar``baz`, ', '`foo````bar``baz` | '],
             undefined,
             [
@@ -984,7 +975,7 @@ describe('autocomplete', () => {
 
         // out of fields
         testSuggestions(
-          `FROM a | ${commandName} doubleField, dateField/`,
+          `FROM e | ${commandName} doubleField, dateField/`,
           ['dateField | '],
           undefined,
           [
@@ -1000,35 +991,27 @@ describe('autocomplete', () => {
 
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
-      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: undefined },
       '!= $0',
       '== $0',
       'IN $0',
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
-      { text: 'IS NULL', rangeToReplace: { start: 28, end: 32 } },
-      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 31 } },
+      { text: 'IS NULL', rangeToReplace: { start: 27, end: 31 } },
+      { text: '!= $0', rangeToReplace: { start: 30, end: 31 } },
       '== $0',
       'IN $0',
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 26, end: 34 } },
       'IS NULL',
       '!= $0',
       '== $0',
@@ -1040,30 +1023,30 @@ describe('autocomplete', () => {
 
     describe('dot-separated field names', () => {
       testSuggestions(
-        'FROM a | KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
+        'FROM index_a | KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );
       // multi-line
       testSuggestions(
-        'FROM a\n| KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
+        'FROM index_a\n| KEEP field.nam/',
+        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );
       // triple separator
       testSuggestions(
-        'FROM a\n| KEEP field.name.f/',
-        [{ text: 'field.name.foo', rangeToReplace: { start: 15, end: 27 } }],
+        'FROM index_c\n| KEEP field.name.f/',
+        [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double' }]]
       );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(
       testSuggestions.skip(
-        'FROM a | KEEP field . n/',
-        [{ text: 'field . name', rangeToReplace: { start: 15, end: 23 } }],
+        'FROM index_a | KEEP field . n/',
+        [{ text: 'field . name', rangeToReplace: { start: 14, end: 22 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );

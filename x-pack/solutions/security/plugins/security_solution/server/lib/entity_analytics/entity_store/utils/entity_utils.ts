@@ -11,6 +11,7 @@ import {
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
 import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
+import { uniq } from 'lodash/fp';
 import type { AppClient } from '../../../../types';
 import { getRiskScoreLatestIndex } from '../../../../../common/entity_analytics/risk_engine';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
@@ -77,3 +78,6 @@ export const isPromiseFulfilled = <T>(
 export const isPromiseRejected = <T>(
   result: PromiseSettledResult<T>
 ): result is PromiseRejectedResult => result.status === 'rejected';
+
+export const mergeEntityStoreIndices = (indices: string[], indexPattern: string | undefined) =>
+  indexPattern ? uniq(indices.concat(indexPattern.split(','))) : indices;

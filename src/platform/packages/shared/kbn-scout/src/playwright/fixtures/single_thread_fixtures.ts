@@ -9,14 +9,15 @@
 
 import { mergeTests } from 'playwright/test';
 import {
-  ApiFixtures,
-  apiFixtures,
+  apiServicesFixture,
   coreWorkerFixtures,
   esArchiverFixture,
   uiSettingsFixture,
   synthtraceFixture,
+  lighthouseFixture,
 } from './worker';
 import type {
+  ApiServicesFixture,
   EsArchiverFixture,
   EsClient,
   KbnClient,
@@ -31,9 +32,12 @@ import {
   browserAuthFixture,
   pageObjectsFixture,
   validateTagsFixture,
+  persistentContext,
+  perfTrackerFixture,
 } from './test';
-import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
-export type { ScoutPage, PageObjects } from './test';
+import type { BrowserAuthFixture, ScoutPage, PageObjects, PerfTrackerFixture } from './test';
+export type { ScoutPage, PageObjects, BrowserAuthFixture } from './test';
+export type { ApiServicesFixture, LighthouseAuditOptions } from './worker';
 
 export const scoutFixtures = mergeTests(
   // worker scope fixtures
@@ -42,21 +46,24 @@ export const scoutFixtures = mergeTests(
   uiSettingsFixture,
   synthtraceFixture,
   // api fixtures
-  apiFixtures,
+  apiServicesFixture,
   // test scope fixtures
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
-  validateTagsFixture
+  validateTagsFixture,
+  // performance fixtures
+  perfTrackerFixture
 );
 
 export interface ScoutTestFixtures {
   browserAuth: BrowserAuthFixture;
   page: ScoutPage;
   pageObjects: PageObjects;
+  perfTracker: PerfTrackerFixture;
 }
 
-export interface ScoutWorkerFixtures extends ApiFixtures {
+export interface ScoutWorkerFixtures extends ApiServicesFixture {
   log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
@@ -64,7 +71,10 @@ export interface ScoutWorkerFixtures extends ApiFixtures {
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
   uiSettings: UiSettingsFixture;
+  apiServices: ApiServicesFixture;
   apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
   infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
   otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }
+
+export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);

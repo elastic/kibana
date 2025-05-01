@@ -14,31 +14,23 @@ The {{webhook-cm}} connector uses [axios](https://github.com/axios/axios) to sen
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. In the first step, you must provide a name for the connector and its authentication details. For example:
 
-:::{image} ../../images/cases-webhook-connector.png
-:alt: Set authentication details in the {{webhook-cm}} connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Set authentication details in the {{webhook-cm}} connector](../images/cases-webhook-connector.png)
 
 In the second step, you must provide the information necessary to create cases in the external system. For example:
 
-:::{image} ../../images/cases-webhook-connector-create-case.png
-:alt: Add case creation details in the {{webhook-cm}} connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Add case creation details in the {{webhook-cm}} connector](../images/cases-webhook-connector-create-case.png)
 
 In the third step, you must provide information related to retrieving case details from the external system. For example:
 
-:::{image} ../../images/cases-webhook-connector-get-case.png
-:alt: Add case retrieval details in the {{webhook-cm}} connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Add case retrieval details in the {{webhook-cm}} connector](../images/cases-webhook-connector-get-case.png)
 
 In the fourth step, you must provide information necessary to update cases in the external system. You can also optionally provide information to add comments to cases. For example:
 
-:::{image} ../../images/cases-webhook-connector-comments.png
-:alt: Add case update and comment details in the {{webhook-cm}} connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Add case update and comment details in the {{webhook-cm}} connector](../images/cases-webhook-connector-comments.png)
 
 
 ### Connector configuration [cases-webhook-connector-configuration]
@@ -168,10 +160,8 @@ Update case URL
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/cases-webhook-test.png
-:alt: {{webhook-cm}} params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{webhook-cm}} params test](../images/cases-webhook-test.png)
 
 {{webhook-cm}} actions have the following configuration properties:
 

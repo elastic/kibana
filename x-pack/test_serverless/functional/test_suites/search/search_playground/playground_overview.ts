@@ -12,7 +12,8 @@ import { RoleCredentials } from '../../../../shared/services';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 
-const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
+const esArchiveIndex =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
@@ -21,12 +22,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchPlayground',
     'embeddedConsole',
   ]);
+  const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const browser = getService('browser');
+  const retry = getService('retry');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
   let roleAuthc: RoleCredentials;
 
@@ -41,9 +44,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       proxy = await createLlmProxy(log);
       await pageObjects.svlCommonPage.loginWithRole('admin');
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'searchPlayground',
-      });
 
       const requestHeader = svlCommonApi.getInternalRequestHeader();
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -56,9 +56,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       };
     });
+    beforeEach(async () => {
+      await svlSearchNavigation.navigateToSearchPlayground();
+    });
 
     after(async () => {
-      // await removeOpenAIConnector?.();
+      try {
+        await removeOpenAIConnector?.();
+      } catch {
+        // we can ignore  if this fails
+      }
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
@@ -83,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.refresh();
         });
         it('show success llm button', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
@@ -194,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('show edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
             'basic_index',
-            ['baz']
+            ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
           );
         });
 
@@ -217,8 +224,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
           await pageObjects.searchPlayground.PlaygroundChatPage.updatePrompt("You're a doctor");
           await pageObjects.searchPlayground.PlaygroundChatPage.updateQuestion('i have back pain');
-          await pageObjects.searchPlayground.session.expectInSession('prompt', "You're a doctor");
-          await pageObjects.searchPlayground.session.expectInSession('question', undefined);
+          // wait for session debounce before trying to load new session state.
+          await retry.try(
+            async () => {
+              await pageObjects.searchPlayground.session.expectInSession(
+                'prompt',
+                "You're a doctor"
+              );
+              await pageObjects.searchPlayground.session.expectInSession('question', undefined);
+            },
+            undefined,
+            200
+          );
         });
 
         it('click on manage connector button', async () => {

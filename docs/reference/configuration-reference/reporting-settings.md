@@ -2,12 +2,16 @@
 navigation_title: "Reporting settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # Reporting settings in {{kib}} [reporting-settings-kb]
 
 
-You can configure `xpack.reporting` settings in your `kibana.yml` to:
+You can configure `xpack.reporting` settings to:
 
 * [Enable or disable the {{report-features}}](#general-reporting-settings)
 * [Configure an encryption key to protect sensitive authentication data](#encryption-keys)
@@ -16,6 +20,9 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 * [Control how screenshots are captured for PNG/PDF reports](#reporting-capture-settings)
 * [Control the limits and capabilities of CSV reports](#reporting-csv-settings)
 
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 ## Enable reporting [general-reporting-settings]
 
@@ -23,7 +30,7 @@ $$$xpack-enable-reporting$$$`xpack.reporting.enabled` ![logo cloud](https://doc-
 :   When `true`, enables the {{report-features}}. Set this to `false` to disable {{report-features}} entirely. The default is `true`.
 
 ::::{note}
-Disabling the {{report-features}} is discouraged. If you need to turn off the ability to generate reports, configure the roles and spaces in the [{{kib}} application privileges](docs-content://deploy-manage/deploy/kibana-reporting-configuration.md#grant-user-access).
+Disabling the {{report-features}} is discouraged. If you need to turn off the ability to generate reports, configure the roles and spaces in the [{{kib}} application privileges](docs-content://deploy-manage/kibana-reporting-configuration.md#grant-user-access).
 
 If needed, you can also prevent a {{kib}} instance from claiming reporting work by setting [`xpack.reporting.queue.pollEnabled: false`](#xpack-reportingQueue-pollEnabled).
 
@@ -80,7 +87,7 @@ $$$xpack-reporting-q-timeout$$$ `xpack.reporting.queue.timeout` ![logo cloud](ht
 ::::{note}
 We recommend using PNG/PDF reports to export moderate amounts of data only. The feature enables a high-level export capability, but it’s not intended for bulk export. If you need to export several pages of image data, consider using multiple report jobs to export a small number of pages at a time. If the screenshot of exported dashboard contains a large number of pixels, consider splitting the large dashboard into smaller artifacts to use less memory and CPU resources.
 
-For the most reliable configuration of PDF/PNG {{report-features}}, consider installing {{kib}} using [Docker](docs-content://deploy-manage/deploy/self-managed/install-with-docker.md) or using [Elastic Cloud](docs-content://deploy-manage/deploy/elastic-cloud.md).
+For the most reliable configuration of PDF/PNG {{report-features}}, consider installing {{kib}} using [Docker](docs-content://deploy-manage/deploy/self-managed/install-kibana-with-docker.md) or using [Elastic Cloud](docs-content://deploy-manage/deploy/elastic-cloud.md).
 
 ::::
 
@@ -112,7 +119,7 @@ If any timeouts from `xpack.screenshotting.capture.timeouts.*` settings occur wh
 For PDF and PNG reports, Reporting spawns a headless Chromium browser process on the server to load and capture a screenshot of the {{kib}} app. When installing {{kib}} on Linux and Windows platforms, the Chromium binary comes bundled with the {{kib}} download. For Mac platforms, the Chromium binary is downloaded the first time {{kib}} is started.
 
 `xpack.screenshotting.browser.chromium.disableSandbox`
-:   It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {{kib}} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to [Chromium sandbox](docs-content://deploy-manage/deploy/kibana-reporting-configuration.md#reporting-chromium-sandbox). Defaults to `false` for all operating systems except CentOS, Debian, and Red Hat Linux, which use `true`.
+:   It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {{kib}} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to [Chromium sandbox](docs-content://deploy-manage/kibana-reporting-configuration.md#reporting-chromium-sandbox). Defaults to `false` for all operating systems except CentOS, Debian, and Red Hat Linux, which use `true`.
 
 `xpack.screenshotting.browser.chromium.proxy.enabled`
 :   Enables the proxy for Chromium to use. When set to `true`, you must also specify the `xpack.screenshotting.browser.chromium.proxy.server` setting. Defaults to `false`.
@@ -224,6 +231,9 @@ Reporting parameters can be adjusted to overcome some of these limiting scenario
 
 ::::
 
+`xpack.reporting.csv.maxConcurrentShardRequests` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Sets the maximum number of concurrent shard requests that each sub-search request executes per node during Kibana CSV export. Defaults to `5`. This setting is available in 8.12.0 and later versions in {{ecloud}}.
+% TBD: Is this setting applicable only to Elastic Cloud?
 
 $$$xpack-reporting-csv$$$ `xpack.reporting.csv.maxSizeBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   The maximum [byte size](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#byte-units) of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.

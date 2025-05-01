@@ -1,0 +1,364 @@
+openapi: 3.0.3
+info:
+  title: Task manager health Serverless APIs
+  description: Kibana APIs for the task manager feature
+  version: 1.0.0
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: /
+tags:
+  - name: task manager
+    x-displayName: Task manager
+    externalDocs:
+      url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
+      description: Task manager
+paths:
+  /api/task_manager/_health:
+    get:
+      summary: Get the task manager health
+      description: |
+        Get the health status of the Kibana task manager.
+      operationId: task-manager-health
+      tags:
+        - task manager
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/health_response_serverless'
+              examples:
+                taskManagerHealthResponse1:
+                  $ref: '#/components/examples/health_200response_serverless'
+components:
+  schemas:
+    configuration:
+      type: object
+      description: |
+        This object summarizes the current configuration of Task Manager. This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
+    workload:
+      type: object
+      description: |
+        This object summarizes the work load across the cluster, including the tasks in the system, their types, and current status.
+    health_response_serverless:
+      title: Task health response properties
+      type: object
+      properties:
+        id:
+          type: string
+        last_update:
+          type: string
+        stats:
+          type: object
+          properties:
+            configuration:
+              $ref: '#/components/schemas/configuration'
+            workload:
+              $ref: '#/components/schemas/workload'
+        status:
+          type: string
+        timestamp:
+          type: string
+  examples:
+    health_200response_serverless:
+      description: A successful response from `GET api/task_manager/_health`.
+      value: |-
+        {
+          "id": "b44483e1-3ba2-4f28-93d0-1d96c69c32c1",
+          "timestamp": "2025-03-21T21:49:50.409Z",
+          "status": "OK",
+          "last_update": "2025-03-21T21:48:53.996Z",
+          "stats": {
+            "configuration": {
+              "timestamp": "2025-03-21T21:47:51.663Z",
+              "value": {
+                "request_capacity": 1000,
+                "monitored_aggregated_stats_refresh_rate": 60000,
+                "monitored_stats_running_average_window": 50,
+                "monitored_task_execution_thresholds": {
+                  "custom": {},
+                  "default": {
+                    "error_threshold": 90,
+                    "warn_threshold": 80
+                  }
+                },
+                "claim_strategy": "mget",
+                "poll_interval": 500,
+                "capacity": {
+                  "config": 10,
+                  "as_workers": 10,
+                  "as_cost": 20
+                }
+              },
+              "status": "OK"
+            },
+            "workload": {
+              "timestamp": "2025-03-21T21:48:53.996Z",
+              "value": {
+                "count": 21,
+                "cost": 42,
+                "task_types": {
+                  "Fleet-Metrics-Task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "Fleet-Usage-Logger": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "Fleet-Usage-Sender": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "ML:saved-objects-sync": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "actions:connector_usage_reporting": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "actions_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerting_health_check": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerting_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerts_invalidate_api_keys": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "cases-telemetry-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "dashboard_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:automatic-agent-upgrade-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:check-deleted-files-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:delete-unenrolled-agents-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:sync-integrations-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:unenroll-inactive-agents-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:upgrade-agentless-deployments-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "logs-data-telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "running": 1
+                    }
+                  },
+                  "session_cleanup": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "task_manager:delete_inactive_background_task_nodes": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "task_manager:mark_removed_tasks_as_unrecognized": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  }
+                },
+                "non_recurring": 1,
+                "non_recurring_cost": 2,
+                "schedule": [
+                  [
+                    "1m",
+                    2
+                  ],
+                  [
+                    "5m",
+                    2
+                  ],
+                  [
+                    "10m",
+                    1
+                  ],
+                  [
+                    "15m",
+                    1
+                  ],
+                  [
+                    "30m",
+                    1
+                  ],
+                  [
+                    "1h",
+                    5
+                  ],
+                  [
+                    "3600s",
+                    1
+                  ],
+                  [
+                    "60m",
+                    1
+                  ],
+                  [
+                    "720m",
+                    1
+                  ],
+                  [
+                    "1d",
+                    4
+                  ],
+                  [
+                    "1440m",
+                    1
+                  ]
+                ],
+                "overdue": 0,
+                "overdue_cost": 0,
+                "overdue_non_recurring": 0,
+                "estimated_schedule_density": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "capacity_requirements": {
+                  "per_minute": 2,
+                  "per_hour": 43,
+                  "per_day": 7
+                }
+              },
+              "status": "OK"
+            }
+          }
+        }

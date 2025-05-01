@@ -521,6 +521,23 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ExternalResourceLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "ExternalResourceLinks",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/external_resource_links/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.FeatureFeedbackButton",
         "type": "Function",
         "tags": [],
@@ -5472,7 +5489,7 @@
             "label": "getLocation",
             "description": [],
             "signature": [
-              "({ rangeFrom, rangeTo, traceId, }: ",
+              "({ rangeFrom, rangeTo, waterfallItemId, traceId, }: ",
               {
                 "pluginId": "@kbn/deeplinks-observability",
                 "scope": "common",
@@ -5491,7 +5508,7 @@
                 "id": "def-common.TransactionDetailsByTraceIdLocatorDefinition.getLocation.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rangeFrom,\n    rangeTo,\n    traceId,\n  }",
+                "label": "{\n    rangeFrom,\n    rangeTo,\n    waterfallItemId,\n    traceId,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -6672,6 +6689,20 @@
             "type": "string",
             "tags": [],
             "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/deeplinks/observability/locators/apm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.TransactionDetailsByTraceIdLocatorParams.waterfallItemId",
+            "type": "string",
+            "tags": [],
+            "label": "waterfallItemId",
             "description": [],
             "signature": [
               "string | undefined"

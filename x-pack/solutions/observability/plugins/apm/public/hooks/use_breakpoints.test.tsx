@@ -20,6 +20,7 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         xxxl: 2000,
       },
     }}
+    highContrastMode={false}
   >
     {children}
   </EuiProvider>

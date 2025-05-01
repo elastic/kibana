@@ -12,6 +12,7 @@ components:
         - user
         - host
         - service
+        - generic
 
     EngineDescriptor:
       type: object
@@ -31,7 +32,7 @@ components:
           type: string
         fieldHistoryLength:
           type: integer
-        lookbackPeriod: 
+        lookbackPeriod:
           type: string
           default: 24h
           pattern: '[smdh]$'
@@ -42,17 +43,27 @@ components:
           default: 180s
           pattern: '[smdh]$'
         frequency:
-          type: string 
+          type: string
           default: 1m
           pattern: '[smdh]$'
         delay:
           type: string
-          default: 1m 
-          pattern: '[smdh]$'               
+          default: 1m
+          pattern: '[smdh]$'
         docsPerSecond:
-          type: integer       
+          type: integer
         error:
           type: object
+          required:
+            - message
+            - action
+          properties:
+            message:
+              type: string
+            action:
+              type: string
+              enum:
+                - init
 
     EngineStatus:
       type: string
@@ -62,7 +73,7 @@ components:
         - stopped
         - updating
         - error
-    
+
     EngineComponentStatus:
       type: object
       required:
@@ -70,15 +81,15 @@ components:
           - installed
           - resource
       properties:
-        id: 
+        id:
           type: string
-        installed: 
+        installed:
           type: boolean
         metadata:
           $ref: '#/components/schemas/Metadata'
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
-        health: 
+        health:
           type: string
           enum:
             - green
@@ -194,6 +205,6 @@ components:
         - response
     Interval:
       type: string
-      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
       pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
       example: '1h'

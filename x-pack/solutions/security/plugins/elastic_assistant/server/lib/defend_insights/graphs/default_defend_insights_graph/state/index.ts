@@ -8,11 +8,10 @@
 import type { Document } from '@langchain/core/documents';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
-import type { DefendInsight, DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
+import type { DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
 
+import { DefendInsightsPrompts } from '../nodes/helpers/prompts/incompatible_antivirus';
 import type { GraphState } from '../types';
-import { getDefendInsightsPrompt } from '../nodes/helpers/prompts';
-import { getDefaultRefinePrompt } from '../nodes/refine/helpers/get_default_refine_prompt';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
@@ -20,15 +19,15 @@ import {
 } from '../constants';
 
 export interface Options {
-  insightType: DefendInsightType;
   start?: string;
   end?: string;
+  prompts: DefendInsightsPrompts;
 }
 
 export const getDefaultGraphState = ({
-  insightType,
   start,
   end,
+  prompts,
 }: Options): StateGraphArgs<GraphState>['channels'] => ({
   insights: {
     value: (current: DefendInsight[] | null, next?: DefendInsight[] | null) => next ?? current,
@@ -36,7 +35,15 @@ export const getDefaultGraphState = ({
   },
   prompt: {
     value: (current: string, next?: string) => next ?? current,
-    default: () => getDefendInsightsPrompt({ type: insightType }),
+    default: () => prompts.default,
+  },
+  refinePrompt: {
+    value: (current: string, next?: string) => next ?? current,
+    default: () => prompts.refine,
+  },
+  continuePrompt: {
+    value: (current: string, next?: string) => next ?? current,
+    default: () => prompts.continue,
   },
   anonymizedEvents: {
     value: (current: Document[], next?: Document[]) => next ?? current,
@@ -66,10 +73,7 @@ export const getDefaultGraphState = ({
     value: (current: number, next?: number) => next ?? current,
     default: () => 0,
   },
-  refinePrompt: {
-    value: (current: string, next?: string) => next ?? current,
-    default: () => getDefaultRefinePrompt(),
-  },
+
   maxGenerationAttempts: {
     value: (current: number, next?: number) => next ?? current,
     default: () => DEFAULT_MAX_GENERATION_ATTEMPTS,

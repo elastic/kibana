@@ -18,8 +18,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const testSubjects = getService('testSubjects');
   const owner = OBSERVABILITY_OWNER;
 
-  // Failing: See https://github.com/elastic/kibana/issues/189058
-  describe.skip('Observability case settings', function () {
+  describe('Observability case settings', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -53,7 +52,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         screenshotDirectories
       );
       await retry.waitFor('add-template exist', async () => {
-        return await testSubjects.exists('add-template');
+        return await testSubjects.isEnabled('add-template');
       });
       await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(

@@ -9,13 +9,32 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { differenceBy } from 'lodash';
-import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import {
+  internalStateSlice,
+  type TabActionPayload,
+  type InternalStateThunkActionCreator,
+} from '../internal_state';
+import { selectTabRuntimeState } from '../runtime_state';
+import { createInternalStateAsyncThunk } from '../utils';
 
-export const setDataView: InternalStateThunkActionCreator<[DataView]> =
-  (dataView) =>
+export const loadDataViewList = createInternalStateAsyncThunk(
+  'internalState/loadDataViewList',
+  async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
+);
+
+export const setDataView: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataView: DataView }>]
+> =
+  ({ tabId, dataView }) =>
   (dispatch, _, { runtimeStateManager }) => {
-    dispatch(internalStateSlice.actions.setDataViewId(dataView.id));
-    runtimeStateManager.currentDataView$.next(dataView);
+    dispatch(
+      internalStateSlice.actions.setDataViewId({
+        tabId,
+        dataViewId: dataView.id,
+      })
+    );
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    currentDataView$.next(dataView);
   };
 
 export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =

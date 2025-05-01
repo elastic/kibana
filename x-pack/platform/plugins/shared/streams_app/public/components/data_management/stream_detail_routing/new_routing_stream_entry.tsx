@@ -5,52 +5,55 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RoutingDefinition } from '@kbn/streams-schema';
-import React from 'react';
-import { ConditionEditor } from '../condition_editor';
+import { RoutingConditionEditor } from '../condition_editor';
+import { AddRoutingRuleControls } from './control_bars';
+import {
+  useStreamRoutingEvents,
+  useStreamsRoutingSelector,
+} from './state_management/stream_routing_state_machine';
+import { selectCurrentRule } from './state_management/stream_routing_state_machine';
 
-export function NewRoutingStreamEntry({
-  child,
-  onChildChange,
-}: {
-  child: RoutingDefinition;
-  onChildChange: (child?: RoutingDefinition) => void;
-}) {
+export function NewRoutingStreamEntry() {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const { changeRule } = useStreamRoutingEvents();
+  const currentRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
+
+  useEffect(() => {
+    if (panelRef.current) {
+      panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-      <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.streams.streamDetailRouting.name', {
-            defaultMessage: 'Stream name',
-          })}
-        >
-          <EuiFieldText
-            data-test-subj="streamsAppRoutingStreamEntryNameField"
-            value={child.destination}
+    <div ref={panelRef}>
+      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+        <EuiFlexGroup gutterSize="m" direction="column">
+          <EuiFormRow
             fullWidth
-            compressed
-            onChange={(e) => {
-              onChildChange({
-                ...child,
-                destination: e.target.value,
-              });
-            }}
+            label={i18n.translate('xpack.streams.streamDetailRouting.name', {
+              defaultMessage: 'Stream name',
+            })}
+          >
+            <EuiFieldText
+              data-test-subj="streamsAppRoutingStreamEntryNameField"
+              value={currentRule.destination}
+              fullWidth
+              autoFocus
+              compressed
+              onChange={(e) => changeRule({ destination: e.target.value })}
+            />
+          </EuiFormRow>
+          <RoutingConditionEditor
+            condition={currentRule.if}
+            onConditionChange={(condition) => changeRule({ if: condition })}
           />
-        </EuiFormRow>
-        <ConditionEditor
-          readonly={false}
-          condition={child.if}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              if: condition,
-            });
-          }}
-        />
-      </EuiFlexGroup>
-    </EuiPanel>
+          <AddRoutingRuleControls />
+        </EuiFlexGroup>
+      </EuiPanel>
+    </div>
   );
 }

@@ -14,6 +14,7 @@ import type {
 import {
   updateBodySchemaV1,
   updateParamsSchemaV1,
+  updateRuleParamsExamplesV1,
 } from '../../../../../common/routes/rule/apis/update';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
@@ -40,6 +41,7 @@ export const updateRuleRoute = (
         access: 'public',
         summary: `Update a rule`,
         tags: ['oas-tag:alerting'],
+        oasOperationObject: updateRuleParamsExamplesV1,
       },
       validate: {
         request: {

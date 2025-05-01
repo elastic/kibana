@@ -26,7 +26,7 @@ describe('getSearchParams', () => {
     expect(searchParams.preference).toBe('aaa');
   });
 
-  test('extracts track total hits', () => {
+  test('extracts track total hits from request', () => {
     const getConfig = getConfigStub({
       [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
       [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
@@ -42,6 +42,27 @@ describe('getSearchParams', () => {
     expect(searchParams.index).toBe('abc');
     expect(searchParams.track_total_hits).toBe(true);
     expect(searchParams.query).toStrictEqual([{ query: '123', language: 'kql' }]);
+  });
+
+  test('extracts track total hits from body', () => {
+    const getConfig = getConfigStub({
+      [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
+      [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
+    });
+    const searchParams = getSearchParamsFromRequest(
+      {
+        body: {
+          query: { bool: { filter: [] } },
+          track_total_hits: false,
+          size: 500,
+        },
+        index: 'abc',
+      },
+      { getConfig }
+    );
+    expect(searchParams.index).toBe('abc');
+    expect(searchParams.track_total_hits).toBe(false);
+    expect(searchParams.query).toMatchInlineSnapshot(`undefined`);
   });
 
   test('sets expand_wildcards=all if data view has allowHidden=true', () => {

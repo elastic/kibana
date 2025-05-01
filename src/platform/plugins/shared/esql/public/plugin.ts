@@ -10,6 +10,7 @@
 import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -41,6 +42,7 @@ interface EsqlPluginStartDependencies {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 
@@ -70,6 +72,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldsMetadata,
       usageCollection,
+      licensing,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
@@ -112,6 +115,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     const start = {
       getJoinIndicesAutocomplete,
       variablesService,
+      getLicense: async () => await licensing?.getLicense(),
     };
 
     setKibanaServices(

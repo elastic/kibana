@@ -26,6 +26,7 @@ import {
   pipePrecedesCurrentWord,
   getFunctionDefinition,
   isOptionItem,
+  within,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -81,7 +82,11 @@ function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
   }
 }
 
-export function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
+export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
+  if (Array.isArray(node)) {
+    return false;
+  }
+
   return Boolean(
     node &&
       (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
@@ -121,8 +126,16 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   if (!command) {
     return { command: undefined, node: undefined };
   }
+
+  const containingFunction = Walker.findAll(
+    command,
+    (node) =>
+      node.type === 'function' && node.subtype === 'variadic-call' && within(offset, node.location)
+  ).pop() as ESQLFunction | undefined;
+
   return {
     command: removeMarkerArgFromArgsList(command)!,
+    containingFunction: removeMarkerArgFromArgsList(containingFunction),
     option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
     node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))),
   };
@@ -151,7 +164,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   let inComment = false;
 
   Walker.visitComments(ast, (node) => {
-    if (node.location && node.location.min <= offset && node.location.max > offset) {
+    if (within(offset, node.location)) {
       inComment = true;
     }
   });
@@ -162,39 +175,51 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     };
   }
 
-  const { command, option, node } = findAstPosition(ast, offset);
+  let withinStatsWhereClause = false;
+  Walker.walk(ast, {
+    visitFunction: (fn) => {
+      if (fn.name === 'where' && within(offset, fn.location)) {
+        withinStatsWhereClause = true;
+      }
+    },
+  });
+
+  const { command, option, node, containingFunction } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'literal' && node.literalType === 'keyword') {
       // command ... "<here>"
-      return { type: 'value' as const, command, node, option };
+      return { type: 'value' as const, command, node, option, containingFunction };
     }
+
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
-        return { type: 'list' as const, command, node, option };
+        return { type: 'list' as const, command, node, option, containingFunction };
       }
       if (
         isNotEnrichClauseAssigment(node, command) &&
-        // Temporarily mangling the logic here to let operators
-        // be handled as functions for the stats command.
-        // I expect this to simplify once https://github.com/elastic/kibana/issues/195418
-        // is complete
-        !(isOperator(node) && command.name !== 'stats')
+        (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause))
       ) {
         // command ... fn( <here> )
-        return { type: 'function' as const, command, node, option };
+        return { type: 'function' as const, command, node, option, containingFunction };
       }
     }
   }
-  if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
+  if (
+    !command ||
+    (queryString.length <= offset &&
+      pipePrecedesCurrentWord(queryString) &&
+      command.location.max < queryString.length)
+  ) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node, option };
+    return { type: 'newCommand' as const, command: undefined, node, option, containingFunction };
   }
 
   // command a ... <here> OR command a = ... <here>
   return {
     type: 'expression' as const,
     command,
+    containingFunction,
     option,
     node,
   };

@@ -902,7 +902,7 @@
         "label": "getComponentTemplate",
         "description": [],
         "signature": [
-          "({ fieldMap, context, name, dynamic, includeSettings, }: GetComponentTemplateOpts) => ",
+          "({ fieldMap, context, name, dynamic, includeSettings, dynamicTemplates, }: GetComponentTemplateOpts) => ",
           "ClusterPutComponentTemplateRequest"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/alerts_service/resource_installer_utils.ts",
@@ -914,7 +914,7 @@
             "id": "def-server.getComponentTemplate.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  fieldMap,\n  context,\n  name,\n  dynamic,\n  includeSettings,\n}",
+            "label": "{\n  fieldMap,\n  context,\n  name,\n  dynamic,\n  includeSettings,\n  dynamicTemplates,\n}",
             "description": [],
             "signature": [
               "GetComponentTemplateOpts"
@@ -3158,6 +3158,20 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.Rule.artifacts",
+            "type": "Object",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              "Readonly<{ dashboards?: Readonly<{} & { id: string; }>[] | undefined; } & {}> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3412,6 +3426,20 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.ruleExecutionTimeout",
+            "type": "string",
+            "tags": [],
+            "label": "ruleExecutionTimeout",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3495,6 +3523,37 @@
                 "path": "x-pack/solutions/observability/plugins/slo/server/lib/rules/slo_burn_rate/executor.test.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.actionsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "actionsClient",
+            "description": [
+              "\nOnly available for Attack Discovery"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ActionsClient",
+                "text": "ActionsClient"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "alerting",
@@ -3955,6 +4014,20 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleType.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [],
+            "signature": [
+              "\"security\" | \"observability\" | \"stack\""
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleType.actionVariables",
             "type": "Object",
             "tags": [],
@@ -4143,20 +4216,6 @@
             "signature": [
               "GetViewInAppRelativeUrlFn",
               "<Params> | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleType.fieldsForAAD",
-            "type": "Array",
-            "tags": [],
-            "label": "fieldsForAAD",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,
@@ -4724,7 +4783,7 @@
           },
           "<Params>>; getAlertState: (params: ",
           "GetAlertStateParams",
-          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>>; getAlertSummary: (params: ",
+          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; trackedExecutions?: string[] | undefined; } & {}>>; getAlertSummary: (params: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -4746,7 +4805,9 @@
           },
           ">; getRuleExecutionKPI: (params: ",
           "GetRuleExecutionKPIParams",
-          ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; getActionErrorLog: (params: ",
+          ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; getGlobalExecutionSummaryWithAuth: (params: ",
+          "GetGlobalExecutionSummaryParams",
+          ") => Promise<{ executions: { total: number; success: number; }; latestExecutionSummary: { success: number; failure: number; warning: number; }; }>; getActionErrorLog: (params: ",
           "GetActionErrorLogByIdParams",
           ") => Promise<",
           {
@@ -4788,11 +4849,19 @@
           "BulkDisableRulesResult",
           "<Record<string, any>>>; updateRuleApiKey: (params: { id: string; }) => Promise<void>; disableRule: (params: Readonly<{ untrack?: boolean | undefined; } & { id: string; }>) => Promise<void>; enableRule: (params: Readonly<{} & { id: string; }>) => Promise<void>; snooze: (options: ",
           "SnoozeRuleOptions",
-          ") => Promise<void>; unsnooze: (options: ",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<never>>; unsnooze: (options: ",
           "UnsnoozeParams",
           ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<",
           "RegistryAlertTypeWithAuth",
-          "[]>; scheduleBackfill: (params: Readonly<{ end?: string | undefined; runActions?: boolean | undefined; } & { start: string; ruleId: string; }>[]) => Promise<(Readonly<{ end?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "[]>; scheduleBackfill: (params: Readonly<{ runActions?: boolean | undefined; } & { ruleId: string; ranges: Readonly<{} & { start: string; end: string; }>[]; }>[]) => Promise<(Readonly<{ end?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -5356,7 +5425,7 @@
         "label": "getComponentTemplateFromFieldMap",
         "description": [],
         "signature": [
-          "({ name, fieldMap, dynamic, includeSettings, }: ",
+          "({ name, fieldMap, dynamic, includeSettings, dynamicTemplates, }: ",
           "GetComponentTemplateFromFieldMapOpts",
           ") => ",
           "ClusterPutComponentTemplateRequest"
@@ -5370,7 +5439,7 @@
             "id": "def-common.getComponentTemplateFromFieldMap.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  name,\n  fieldMap,\n  dynamic,\n  includeSettings,\n}",
+            "label": "{\n  name,\n  fieldMap,\n  dynamic,\n  includeSettings,\n  dynamicTemplates,\n}",
             "description": [],
             "signature": [
               "GetComponentTemplateFromFieldMapOpts"
@@ -6727,6 +6796,41 @@
             "label": "revision",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/common/alert_summary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.Artifacts",
+        "type": "Interface",
+        "tags": [],
+        "label": "Artifacts",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Artifacts.dashboards",
+            "type": "Array",
+            "tags": [],
+            "label": "dashboards",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Dashboard",
+                "text": "Dashboard"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8188,6 +8292,27 @@
                 "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.Flapping",
                 "text": "Flapping"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Rule.artifacts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Artifacts",
+                "text": "Artifacts"
               },
               " | null | undefined"
             ],
@@ -10047,6 +10172,18 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.BASE_ALERTING_API_PATH",
         "type": "string",
         "tags": [],
@@ -10054,6 +10191,21 @@
         "description": [],
         "signature": [
           "\"/api/alerting\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BASE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/maintenance_window\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
@@ -10071,6 +10223,21 @@
           "\"RULE_NOT_MODIFIED\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/bulk_edit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.CREATE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/maintenance_window\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10152,14 +10319,11 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.ENABLE_MAINTENANCE_WINDOWS",
-        "type": "boolean",
+        "id": "def-common.DELETE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
         "tags": [],
-        "label": "ENABLE_MAINTENANCE_WINDOWS",
+        "label": "DELETE_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
-        "signature": [
-          "true"
-        ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10176,6 +10340,18 @@
           "\"timestamp\" | \"execution_duration\" | \"schedule_delay\" | \"total_search_duration\" | \"es_search_duration\" | \"num_triggered_actions\" | \"num_generated_actions\" | \"num_active_alerts\" | \"num_recovered_alerts\" | \"num_new_alerts\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.GET_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "GET_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10362,6 +10538,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/alerting/_global_execution_summary\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.INTERNAL_ALERTING_SNOOZE_RULE",
         "type": "string",
         "tags": [],
@@ -10473,7 +10664,7 @@
         "label": "LatestTaskStateSchema",
         "description": [],
         "signature": [
-          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
+          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; readonly trackedExecutions?: string[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -11210,7 +11401,7 @@
         "label": "RuleAlertingOutcome",
         "description": [],
         "signature": [
-          "\"unknown\" | \"warning\" | \"success\" | \"failure\""
+          "\"unknown\" | \"success\" | \"warning\" | \"failure\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts",
         "deprecated": false,
@@ -11630,6 +11821,30 @@
           "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }"
         ],
         "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/lifecycle_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.UNARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "UNARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.UPDATE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "UPDATE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13936,6 +14151,101 @@
             "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT",
+        "type": "Object",
+        "tags": [],
+        "label": "EMPTY_EXECUTION_SUMMARY_RESULT",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.executions",
+            "type": "Object",
+            "tags": [],
+            "label": "executions",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.executions.total",
+                "type": "number",
+                "tags": [],
+                "label": "total",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.executions.success",
+                "type": "number",
+                "tags": [],
+                "label": "success",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary",
+            "type": "Object",
+            "tags": [],
+            "label": "latestExecutionSummary",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary.success",
+                "type": "number",
+                "tags": [],
+                "label": "success",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary.failure",
+                "type": "number",
+                "tags": [],
+                "label": "failure",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.EMPTY_EXECUTION_SUMMARY_RESULT.latestExecutionSummary.warning",
+                "type": "number",
+                "tags": [],
+                "label": "warning",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false

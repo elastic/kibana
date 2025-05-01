@@ -24,6 +24,7 @@ import {
   getSignalValueMap,
   MANY_NESTED_CLAUSES_ERR,
 } from './utils';
+import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
 
 export const createEventSignal = async ({
   sharedParams,
@@ -42,7 +43,6 @@ export const createEventSignal = async ({
   threatIndexFields,
   sortOrder = 'desc',
   isAlertSuppressionActive,
-  experimentalFeatures,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const {
     ruleExecutionLogger,
@@ -154,12 +154,14 @@ export const createEventSignal = async ({
       trackTotalHits: false,
     };
 
-    if (isAlertSuppressionActive) {
+    if (
+      isAlertSuppressionActive &&
+      alertSuppressionTypeGuard(sharedParams.completeRule.ruleParams.alertSuppression)
+    ) {
       createResult = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,
         alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
-        experimentalFeatures,
       });
     } else {
       createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);

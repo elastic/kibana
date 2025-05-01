@@ -17,10 +17,10 @@ import {
   Settings,
   Tooltip,
   niceTimeFormatter,
-  LIGHT_THEME,
-  DARK_THEME,
+  DomainRange,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AbortableAsyncState } from '@kbn/react-hooks';
@@ -62,17 +62,19 @@ export function ControlledEsqlChart<T extends string>({
   metricNames,
   chartType = 'line',
   height,
+  xDomain: customXDomain,
 }: {
   id: string;
   result: AbortableAsyncState<UnparsedEsqlResponse>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
-  height: number;
+  height?: number;
+  xDomain?: DomainRange;
 }) {
   const {
     core: { uiSettings },
   } = useKibana();
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   const allTimeseries = useMemo(
     () =>
@@ -84,12 +86,14 @@ export function ControlledEsqlChart<T extends string>({
     [result, ...metricNames]
   );
 
+  const effectiveHeight = height ? `${height}px` : '100%';
+
   if (result.loading && !result.value?.values.length) {
     return (
       <LoadingPanel
         loading
         className={css`
-          height: ${height}px;
+          height: ${effectiveHeight};
         `}
       />
     );
@@ -97,14 +101,17 @@ export function ControlledEsqlChart<T extends string>({
 
   const xValues = allTimeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
-  const min = Math.min(...xValues);
-  const max = Math.max(...xValues);
+  // todo - pull in time range here
+  const min = customXDomain?.min ?? Math.min(...xValues);
+  const max = customXDomain?.max ?? Math.max(...xValues);
 
   const isEmpty = min === 0 && max === 0;
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
+  const xDomain: DomainRange = isEmpty
+    ? { min: 0, max: 1 }
+    : { min, max, minInterval: customXDomain?.minInterval };
 
   const yTickFormat = (value: number | null) => (value === null ? '' : String(value));
   const yLabelFormat = (label: string) => label;
@@ -115,7 +122,7 @@ export function ControlledEsqlChart<T extends string>({
     <Chart
       id={id}
       className={css`
-        height: ${height}px;
+        height: ${effectiveHeight};
       `}
     >
       <Tooltip
@@ -146,11 +153,11 @@ export function ControlledEsqlChart<T extends string>({
         }}
       />
       <Settings
-        showLegend
+        showLegend={false}
         legendPosition={Position.Bottom}
         xDomain={xDomain}
         locale={i18n.getLocale()}
-        baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME}
+        baseTheme={chartBaseTheme}
       />
       <Axis
         id="x-axis"
@@ -163,6 +170,7 @@ export function ControlledEsqlChart<T extends string>({
         id="y-axis"
         ticks={3}
         position={Position.Left}
+        hide
         tickFormat={yTickFormat}
         labelFormat={yLabelFormat}
       />
@@ -173,6 +181,7 @@ export function ControlledEsqlChart<T extends string>({
           <Series
             timeZone={timeZone}
             key={serie.id}
+            color="#61A2FF"
             id={serie.id}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}

@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { useState } from 'react';
 import type { UserMessage } from '../../types';
-import './info_badges.scss';
 import { getLongMessage } from '../../user_messages_utils';
 
 export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
@@ -65,7 +64,13 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                 gap: ${euiTheme.size.xs};
               }
               &:hover {
-                color: ${euiTheme.colors.text};
+                color: ${euiTheme.colors.textParagraph};
+              }
+              // Make the visualization modifiers icon appear only on panel hover
+              .embPanel__content:hover & {
+                background: ${euiTheme.colors.backgroundBasePlain};
+                transition: color ${euiTheme.animation.slow}, background ${euiTheme.animation.slow};
+                color: ${euiTheme.colors.textParagraph};
               }
             `}
             iconType="wrench"
@@ -101,7 +106,12 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                 <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
-                <ul className="lnsPanelFeatureList">
+                <ul
+                  className="eui-yScroll"
+                  css={css`
+                    max-height: 320px;
+                  `}
+                >
                   {messageGroup.map((message, i) => (
                     <Fragment key={`${uniqueId}-${i}`}>{getLongMessage(message)}</Fragment>
                   ))}

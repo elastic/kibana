@@ -452,6 +452,41 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
         description: 'Total number of services utilizing the ios/swift agent within the last day',
       },
     },
+    'opentelemetry/java/elastic': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/java/elastic agent within the last day',
+      },
+    },
+    'opentelemetry/dotnet/elastic': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/dotnet/elastic agent within the last day',
+      },
+    },
+    'opentelemetry/nodejs/elastic': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/nodejs/elastic agent within the last day',
+      },
+    },
+    'opentelemetry/php/elastic': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/php/elastic agent within the last day',
+      },
+    },
+    'opentelemetry/python/elastic': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/python/elastic agent within the last day',
+      },
+    },
   },
   agents: {
     'android/java': agentSchema,
@@ -494,6 +529,11 @@ const apmPerAgentSchema: Pick<MakeSchemaFrom<APMUsage, true>, 'services_per_agen
     'otlp/android': agentSchema,
     'otlp/webjs': agentSchema,
     'ios/swift': agentSchema,
+    'opentelemetry/java/elastic': agentSchema,
+    'opentelemetry/dotnet/elastic': agentSchema,
+    'opentelemetry/nodejs/elastic': agentSchema,
+    'opentelemetry/php/elastic': agentSchema,
+    'opentelemetry/python/elastic': agentSchema,
   },
 };
 

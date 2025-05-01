@@ -66,6 +66,7 @@
     "@kbn/cloud-security-posture",
     "@kbn/analytics",
     "@kbn/management-settings-ids",
+    "@kbn/expandable-flyout",
   ],
   "exclude": ["target/**/*"]
 }

@@ -25,6 +25,11 @@ import {
   generateMultipleCspFindings,
   rulesGetStatesHandler,
 } from './configurations.handlers.mock';
+import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
+
+jest.mock('../../common/hooks/use_expandable_flyout_csp', () => ({
+  useExpandableFlyoutCsp: jest.fn(),
+}));
 
 const server = setupMockServer();
 
@@ -39,6 +44,10 @@ const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
 
 describe('<Findings />', () => {
   startMockServer(server);
+
+  (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
+    onExpandDocClick: jest.fn(),
+  });
 
   beforeEach(() => {
     server.use(rulesGetStatesHandler);

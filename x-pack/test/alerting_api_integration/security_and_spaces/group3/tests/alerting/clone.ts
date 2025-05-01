@@ -7,18 +7,19 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
-import { RawRule } from '@kbn/alerting-plugin/server/types';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   checkAAD,
   getTestRuleData,
   getUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 interface RuleSpace {
   body: any;

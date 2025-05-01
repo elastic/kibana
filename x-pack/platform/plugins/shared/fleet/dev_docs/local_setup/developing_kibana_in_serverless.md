@@ -68,7 +68,7 @@ xpack.fleet.fleetServerHosts:
     is_default: true
     host_urls: ['http://localhost:8220']
     # If you want to run a Fleet Server containers via Docker, use this URL:
-    # host_urls: ['https://host.docker.internal:8220']
+    # host_urls: ['http://host.docker.internal:8220']
 xpack.fleet.outputs:
   - id: es-default-output
     name: Default output
@@ -90,7 +90,7 @@ Running a standalone Fleet Server:
 
 ```bash
 docker run -it --rm \
-  -e ELASTICSEARCH_HOSTS="http://host.docker.internal:9200" \
+  -e ELASTICSEARCH_HOSTS="https://host.docker.internal:9200" \
   -e ELASTICSEARCH_SERVICE_TOKEN="AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ" \
   -e ELASTICSEARCH_CA_TRUSTED_FINGERPRINT="F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84" \
   -p 8220:8220 \
@@ -122,3 +122,45 @@ rm -rf .es/stateless
 ## Release
 
 Serverless Kibana is periodically released from `main` following a deployment workflow composed of four environments (CI, QA, Staging, Production). It is therefore important to be aware of the release schedule and ensure timely communication with our QA team prior to merging.
+
+## Serverless local setup with agent VM
+
+To enroll an agent from a multipass VM with a local serverless stack, some changes are needed to the setup:
+
+Start ES with the `host` parameter:
+
+```bash
+# Start Elasticsearch in serverless mode as a security|oblt projectType
+yarn es serverless --projectType=security --kill --host=<local_ip>
+
+# Run Kibana as a security|oblt projectType
+yarn serverless-security
+```
+
+Add to `kibana.dev.yml` config:
+
+```yaml
+xpack.fleet.fleetServerHosts:
+  - id: default-fleet-server
+    name: Default Fleet server
+    is_default: true
+    host_urls: ['http://<local_ip>:8220']
+xpack.fleet.outputs:
+  - id: es-default-output
+    name: Default output
+    type: elasticsearch
+    is_default: true
+    is_default_monitoring: true
+    is_internal: false
+    hosts: ['https://<local_ip>:9200']
+    ca_trusted_fingerprint: F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84
+    config: 
+      ssl:
+        verification_mode: none
+```
+
+Enroll agent in a multipass VM with the `insecure` flag:
+
+```
+sudo ./elastic-agent install --url=http://<local_ip>:8220 --enrollment-token=<token> --insecure
+```

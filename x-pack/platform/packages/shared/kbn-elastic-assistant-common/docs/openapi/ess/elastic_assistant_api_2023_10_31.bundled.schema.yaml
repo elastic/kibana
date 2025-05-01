@@ -158,6 +158,14 @@ paths:
     post:
       description: Create a model response for the given chat conversation.
       operationId: ChatComplete
+      parameters:
+        - description: If true, the response will not include content references.
+          in: query
+          name: content_references_disabled
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:

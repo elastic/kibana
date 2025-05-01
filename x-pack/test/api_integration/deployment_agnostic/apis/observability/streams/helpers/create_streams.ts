@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { StreamUpsertRequest } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
-type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards'> & { name: string };
+type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'queries'> & {
+  name: string;
+};
 
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { dsl: {} },
         processing: [],
@@ -69,6 +72,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.test',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -86,6 +90,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.test2',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [
@@ -111,6 +116,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.deeply.nested.streamname',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -135,7 +141,8 @@ export async function createStreams(apiClient: StreamsSupertestRepositoryClient)
           body: {
             ...stream,
             dashboards: [],
-          } as StreamUpsertRequest,
+            queries: [],
+          },
           path: { name },
         },
       })

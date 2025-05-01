@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import type { ComponentStory } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
-import { STORYBOOK_TITLE } from './storybook_constants';
+import { servicesMock } from '../../../__mocks__/services';
+import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const asyncAction =
@@ -21,14 +22,14 @@ const asyncAction =
   };
 
 export default {
-  title: `${STORYBOOK_TITLE}/Tab`,
+  title: 'Unified Tabs/Tab',
   parameters: {
     backgrounds: {
       default: 'white',
       values: [{ name: 'white', value: '#fff' }],
     },
   },
-};
+} as Meta;
 
 const tabsSizeConfig = {
   isScrollable: false,
@@ -36,48 +37,64 @@ const tabsSizeConfig = {
   regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
-const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (
-  <Tab
-    {...args}
-    tabsSizeConfig={tabsSizeConfig}
-    onLabelEdited={asyncAction('onLabelEdited')}
-    onSelect={asyncAction('onSelect')}
-    onClose={asyncAction('onClose')}
-  />
+const TabTemplate: StoryFn<TabProps> = (args) => (
+  <div role="tablist">
+    <Tab
+      {...args}
+      tabsSizeConfig={tabsSizeConfig}
+      getPreviewData={getPreviewDataMock}
+      services={servicesMock}
+      onLabelEdited={asyncAction('onLabelEdited')}
+      onSelect={asyncAction('onSelect')}
+      onClose={asyncAction('onClose')}
+    />
+  </div>
 );
 
-export const Default = TabTemplate.bind({});
-Default.args = {
-  item: {
-    id: '1',
-    label: 'Tab 1',
+export const Default: StoryObj<TabProps> = {
+  render: TabTemplate,
+
+  args: {
+    item: {
+      id: '1',
+      label: 'Tab 1',
+    },
+    isSelected: false,
   },
-  isSelected: false,
 };
 
-export const Selected = TabTemplate.bind({});
-Selected.args = {
-  item: {
-    id: '1',
-    label: 'Tab 1',
+export const Selected: StoryObj<TabProps> = {
+  render: TabTemplate,
+
+  args: {
+    item: {
+      id: '1',
+      label: 'Tab 1',
+    },
+    isSelected: true,
   },
-  isSelected: true,
 };
 
-export const WithLongLabel = TabTemplate.bind({});
-WithLongLabel.args = {
-  item: {
-    id: '1',
-    label: 'Tab with a very long label that should be truncated',
+export const WithLongLabel: StoryObj<TabProps> = {
+  render: TabTemplate,
+
+  args: {
+    item: {
+      id: '1',
+      label: 'Tab with a very long label that should be truncated',
+    },
+    isSelected: false,
   },
-  isSelected: false,
 };
 
-export const WithLongLabelSelected = TabTemplate.bind({});
-WithLongLabelSelected.args = {
-  item: {
-    id: '1',
-    label: 'Tab with a very long label that should be truncated',
+export const WithLongLabelSelected: StoryObj<TabProps> = {
+  render: TabTemplate,
+
+  args: {
+    item: {
+      id: '1',
+      label: 'Tab with a very long label that should be truncated',
+    },
+    isSelected: true,
   },
-  isSelected: true,
 };

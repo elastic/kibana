@@ -7,38 +7,34 @@
 
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteKnowledgeBaseModel,
-  importTinyElserModel,
-  TINY_ELSER,
-  deleteInferenceEndpoint,
-  setupKnowledgeBase,
-} from './helpers';
+import { TINY_MODELS, deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
+import { restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
-      await deleteKnowledgeBaseModel(ml).catch(() => {});
-      await deleteInferenceEndpoint({ es }).catch(() => {});
+      await deleteKnowledgeBaseModel(getService);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+    });
+
+    afterEach(async () => {
+      await deleteKnowledgeBaseModel(getService);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     it('returns model info when successful', async () => {
-      await importTinyElserModel(ml);
-      const res = await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      const res = await setupKnowledgeBase(getService);
 
       expect(res.body.service_settings.model_id).to.be('pt_tiny_elser');
       expect(res.body.inference_id).to.be('obs_ai_assistant_kb_inference');
-
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
     });
 
     it('returns error message if model is not deployed', async () => {
-      const res = await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      const res = await setupKnowledgeBase(getService, { deployModel: false });
+
       expect(res.status).to.be(500);
 
       // @ts-expect-error
@@ -56,7 +52,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
           params: {
             query: {
-              model_id: TINY_ELSER.id,
+              model_id: TINY_MODELS.ELSER,
             },
           },
         });

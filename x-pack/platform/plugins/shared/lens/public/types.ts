@@ -480,7 +480,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     state: T,
     deps: {
       frame: FramePublicAPI;
-      setState: StateSetter<T>;
+      setState?: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
@@ -532,6 +532,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
 
 export interface DatasourceFixAction<T> {
   label: string;
+  isCompatible?: (frame: FramePublicAPI) => boolean;
   newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
@@ -1082,6 +1083,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
       references?: SavedObjectReference[]
     ): T;
   };
+
+  convertToRuntimeState?: (state: T, datasourceStates?: Record<string, unknown>) => T;
 
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**

@@ -43,8 +43,8 @@ import {
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
-  profilingFetchTopNFunctionsFromStacktraces,
   searchExcludedDataTiers,
+  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -121,10 +121,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmProgressiveLoadingDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+        'Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
     }),
-    value: ProgressiveLoadingQuality.off,
+    value: ProgressiveLoadingQuality.low,
     schema: schema.oneOf([
       schema.literal(ProgressiveLoadingQuality.off),
       schema.literal(ProgressiveLoadingQuality.low),
@@ -362,6 +361,23 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
+    type: 'boolean',
+    solution: 'oblt',
+  },
+  [apmEnableServiceMapApiV2]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceMapApiV2', {
+      defaultMessage: 'Service Map API v2',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableServiceMapApiV2Description', {
+      defaultMessage: '{technicalPreviewLabel} Enables the usage of the new Service Map API v2.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
     type: 'boolean',
     solution: 'oblt',
   },
@@ -630,22 +646,6 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [profilingFetchTopNFunctionsFromStacktraces]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.profilingFetchTopNFunctionsFromStacktraces', {
-      defaultMessage: 'Switch to fetch the TopN Functions from the Stacktraces API.',
-    }),
-    description: i18n.translate(
-      'xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription',
-      {
-        defaultMessage: `The topN functions pages use the topN/functions API, turn it on to switch to the stacktraces api`,
-      }
-    ),
-    value: false,
-    schema: schema.boolean(),
-    requiresPageReload: false,
     solution: 'oblt',
   },
   [searchExcludedDataTiers]: {

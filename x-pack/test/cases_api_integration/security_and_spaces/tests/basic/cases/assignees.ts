@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { createCase, updateCase, findCases, deleteAllCaseItems } from '../../../../common/lib/api';
 

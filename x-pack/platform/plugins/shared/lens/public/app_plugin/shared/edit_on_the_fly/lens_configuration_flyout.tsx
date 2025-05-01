@@ -57,12 +57,13 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
-  hideTimeFilterInfo,
+  isReadOnly,
   parentApi,
   panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
+
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
@@ -70,7 +71,7 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
-  // use the latest activeId, but fallback to attributes
+
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
@@ -82,9 +83,10 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
 
-  const attributesChanged: boolean = useMemo(() => {
-    const previousAttrs = previousAttributes.current;
+  const attributesChanged = useMemo<boolean>(() => {
+    if (isNewPanel) return true;
 
+    const previousAttrs = previousAttributes.current;
     const datasourceStatesAreSame =
       datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
         ? datasourceMap[datasourceId].isEqual(
@@ -94,6 +96,8 @@ export function LensEditConfigurationFlyout({
             attributes.references
           )
         : false;
+
+    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -113,11 +117,12 @@ export function LensEditConfigurationFlyout({
         })()
       : isEqual(visualizationState, previousAttrs.state.visualization);
 
-    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+    return !visualizationStateIsEqual;
   }, [
     attributes.references,
     datasourceId,
     datasourceMap,
+    isNewPanel,
     datasourceStates,
     visualizationMap,
     annotationGroups,
@@ -280,6 +285,7 @@ export function LensEditConfigurationFlyout({
           isScrollable
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
+          isReadOnly={isReadOnly}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -319,6 +325,7 @@ export function LensEditConfigurationFlyout({
         isScrollable={false}
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
+        isReadOnly={isReadOnly}
       >
         <EuiFlexGroup
           css={css`
@@ -381,7 +388,7 @@ export function LensEditConfigurationFlyout({
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
-                      defaultMessage: 'Visualization configuration',
+                      defaultMessage: 'Visualization parameters',
                     })}
                   </h5>
                 </EuiTitle>

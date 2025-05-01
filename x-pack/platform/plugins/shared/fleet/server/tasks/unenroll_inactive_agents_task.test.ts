@@ -57,6 +57,7 @@ describe('UnenrollInactiveAgentsTask', () => {
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
   const mockedUnenrollBatch = jest.mocked(unenrollBatch);
 
+  const unenrollBatchSize = 3;
   const agents = [
     {
       id: 'agent-1',
@@ -91,6 +92,7 @@ describe('UnenrollInactiveAgentsTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
+      unenrollBatchSize,
     });
   });
 

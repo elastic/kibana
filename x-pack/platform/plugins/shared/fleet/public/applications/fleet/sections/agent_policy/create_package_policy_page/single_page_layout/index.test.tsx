@@ -464,7 +464,7 @@ describe('When on the package policy create page', () => {
         await setupSaveNavigate(routeState, queryParamsPolicyId);
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+          path: '/save/url/here?openEnrollmentFlyout=true',
         });
       });
 
