@@ -51,6 +51,7 @@ export interface EntityEngineInstallationDescriptor {
     docsPerSecond?: number;
     lookbackPeriod: string;
     timestampField: string;
+    maxPageSearchSize?: number;
   };
 
   /**
