@@ -70,7 +70,9 @@ describe(
           );
 
           // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
+          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS)
+            .contains('Technical Preview')
+            .should('not.exist');
         });
 
         fillAboutRuleMinimumAndContinue(rule);
