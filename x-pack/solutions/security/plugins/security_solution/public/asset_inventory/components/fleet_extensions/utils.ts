@@ -266,7 +266,7 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
     name: i18n.translate(
       'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.nameTitle',
       {
-        defaultMessage: 'Cloud Asset Inventory',
+        defaultMessage: 'Cloud Asset Discovery',
       }
     ),
     shortName: i18n.translate(

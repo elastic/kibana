@@ -148,7 +148,7 @@ export const GcpAccountTypeSelect = ({
           <EuiText color="subdued" size="s">
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
-              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization-level, which automatically connects all projects (both current and future)."
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Discovery at the organization-level, which automatically connects all projects (both current and future)."
             />
           </EuiText>
         </>

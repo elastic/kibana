@@ -57,7 +57,7 @@ export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoConte
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy Cloud Asset Inventory for assessing your Azure environment's assets. Refer to our {gettingStartedLink} guide for details."
+          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy Cloud Asset Discovery for assessing your Azure environment's assets. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={documentationLink} target="_blank">

@@ -198,7 +198,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.assetInventory.fleetIntegration.editWarning.calloutDescription"
-                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where Cloud Asset Inventory is deployed (Organization vs Single Account), please add a new Cloud Asset Inventory integration."
+                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where Cloud Asset Discovery is deployed (Organization vs Single Account), please add a new Cloud Asset Discovery integration."
                   />
                 </p>
               </EuiCallOut>
