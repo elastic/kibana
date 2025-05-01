@@ -5,15 +5,23 @@
  * 2.0.
  */
 
+import type { RuleTypeParams, RuleTypeState } from '@kbn/alerting-plugin/common';
 import { z } from '@kbn/zod';
 
-export type EsqlRuleInstanceState = z.infer<typeof esqlRuleInstanceState>;
-export const esqlRuleInstanceState = z.object({
+export interface EsqlRuleInstanceState extends RuleTypeState {
+  previousOriginalDocumentIds?: string[];
+}
+
+export const esqlRuleInstanceState: z.Schema<EsqlRuleInstanceState> = z.object({
   previousOriginalDocumentIds: z.string().array().optional(),
 });
 
-export type EsqlRuleParams = z.infer<typeof esqlRuleParams>;
-export const esqlRuleParams = z.object({
+export interface EsqlRuleParams extends RuleTypeParams {
+  query: string;
+  timestampField: string;
+}
+
+export const esqlRuleParams: z.Schema<EsqlRuleParams> = z.object({
   query: z.string(),
   timestampField: z.string(),
 });
