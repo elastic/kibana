@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,7 @@ import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 import { useQueryIndices } from '../hooks/use_query_indices';
 import { handleSelectOptions } from '../utils/select_indices';
+import { AddDataFlyoutIndicesSelectable } from './styles';
 
 interface IndicesErrorCalloutProps {
   isFieldsLoading: boolean;
@@ -62,6 +64,7 @@ interface SelectIndicesFlyout {
 }
 
 export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) => {
+  const { euiTheme } = useEuiTheme();
   const [query, setQuery] = useState<string>('');
   const { indices, isLoading: isIndicesLoading } = useQueryIndices({ query });
   const { indices: selectedIndices, setIndices: setSelectedIndices } = useSourceIndicesFields();
@@ -136,6 +139,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         data-test-subj="indicesTable"
         searchable
         height="full"
+        css={AddDataFlyoutIndicesSelectable(euiTheme)}
         searchProps={{
           placeholder: i18n.translate(
             'xpack.searchPlayground.addDataSource.flyout.search.placeholder',
@@ -147,7 +151,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
         onChange={handleSelectOptions(selectedTempIndices, setSelectedTempIndices)}
         listProps={{
           showIcons: true,
-          bordered: false,
+          bordered: true,
           onFocusBadge: false,
         }}
         isLoading={isIndicesLoading}
