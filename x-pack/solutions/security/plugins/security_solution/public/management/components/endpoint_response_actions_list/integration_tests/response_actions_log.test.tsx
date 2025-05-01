@@ -944,7 +944,7 @@ describe('Response actions history', () => {
       it('should display pending output if action is not complete yet', async () => {
         action.isCompleted = false;
         const { getByTestId } = render();
-        await userEvent.click(getByTestId(`${testPrefix}-expand-button`));
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-details-tray-output`)).toHaveTextContent(
           OUTPUT_MESSAGES.isPending('upload')
@@ -953,7 +953,7 @@ describe('Response actions history', () => {
 
       it('should display output for single agent', async () => {
         const { getByTestId } = render();
-        await userEvent.click(getByTestId(`${testPrefix}-expand-button`));
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
           'upload completed successfully' +
@@ -984,7 +984,7 @@ describe('Response actions history', () => {
 
         const { getByTestId } = render();
 
-        await userEvent.click(getByTestId(`${testPrefix}-expand-button`));
+        await user.click(getByTestId(`${testPrefix}-expand-button`));
 
         expect(getByTestId(`${testPrefix}-uploadDetails`)).toHaveTextContent(
           'upload completed successfully' +
