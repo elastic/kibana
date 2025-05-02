@@ -62,12 +62,15 @@ import { Logger } from '@kbn/logging';
 function formatPEMContent(pemContent: string, logger: Logger): string {
   if (!pemContent) return pemContent;
 
-  // First, normalize any existing newlines to \n
-  let normalizedContent = pemContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  // First, normalize any existing newlines to \n and trim whitespace
+  let normalizedContent = pemContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
 
   // Extract the type from the header (CERTIFICATE or PRIVATE KEY)
   const headerMatch = normalizedContent.match(/-----BEGIN\s+(\w+)\s+-----/);
-  if (!headerMatch) return pemContent;
+  if (!headerMatch) {
+    logger.debug('No valid PEM header found in content');
+    return pemContent;
+  }
 
   const type = headerMatch[1];
   
@@ -91,6 +94,8 @@ function formatPEMContent(pemContent: string, logger: Logger): string {
   logger.debug('Final PEM content:');
   logger.debug(result);
   logger.debug(`PEM content has newlines: ${result.includes('\n')}, has spaces: ${result.includes(' ')}`);
+  logger.debug(`PEM content starts with header: ${result.startsWith(`-----BEGIN ${type}-----`)}`);
+  logger.debug(`PEM content ends with footer: ${result.endsWith(`-----END ${type}-----\n`)}`);
 
   return result;
 }
@@ -193,8 +198,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
         // Create the HTTPS agent with the PEM content as a Buffer
         const httpsAgent = new https.Agent({
-          cert: Buffer.from(certPEM.trim(), 'utf8'),
-          key: Buffer.from(keyPEM.trim(), 'utf8'),
+          cert: Buffer.from(certPEM, 'utf8'),
+          key: Buffer.from(keyPEM, 'utf8'),
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
             this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
