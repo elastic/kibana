@@ -123,8 +123,6 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/alerts-ui-shared",
-    "@kbn/timerange",
-    "@kbn/datemath",
     "@kbn/rule-data-utils",
     "@kbn/response-ops-rule-params"
   ],
