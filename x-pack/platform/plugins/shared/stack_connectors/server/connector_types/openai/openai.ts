@@ -162,7 +162,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           cert = fileContent;
         } else if (this.configAny.certificateData) {
           // Format the certificate data properly
-          cert = formatPEMContent(this.configAny.certificateData, this.logger);
+          cert = this.configAny.certificateData;
         }
 
         if (this.configAny.privateKeyFile) {
@@ -175,7 +175,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           key = fileContent;
         } else if (this.configAny.privateKeyData) {
           // Format the private key data properly
-          key = formatPEMContent(this.configAny.privateKeyData, this.logger);
+          key = this.configAny.privateKeyData;
         }
 
         // Log the final PEM content for cert and key
