@@ -13,3 +13,5 @@ export type {
   ServerWatchStatusModel,
   ClientWatchStatusModel,
 } from './status_types';
+
+export type { BaseWatch } from './watch_types';
