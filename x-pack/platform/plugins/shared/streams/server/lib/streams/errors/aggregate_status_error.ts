@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './api';
+export class AggregateStatusError extends AggregateError {
+  constructor(errors: Error[], message: string, public readonly statusCode: number) {
+    super(errors, message);
+  }
+}
