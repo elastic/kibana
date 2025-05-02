@@ -8,6 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
 import { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
@@ -289,6 +290,31 @@ export const getBodyCompletionItems = async (
     context,
     bodyContentBeforePosition
   );
+};
+
+/*
+ * This function returns an array of completion items for the esql suggestions
+ */
+export const getEsqlCompletionItems = (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  suggestions: SuggestionRawDefinition[]
+): monaco.languages.CompletionItem[] => {
+  const range = {
+    startLineNumber: position.lineNumber,
+    startColumn: position.column,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  };
+  return suggestions.map((sug) => {
+    return {
+      label: sug.label,
+      insertText: sug.text.trim(),
+      detail: sug.detail,
+      kind: monaco.languages.CompletionItemKind.Constant,
+      range,
+    };
+  });
 };
 
 const getSuggestions = (

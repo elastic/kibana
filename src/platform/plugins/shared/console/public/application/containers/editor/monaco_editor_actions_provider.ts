@@ -589,8 +589,7 @@ export class MonacoEditorActionsProvider {
   public async provideCompletionItems(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
-    context: monaco.languages.CompletionContext,
-    token: monaco.CancellationToken
+    context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
     return this.getSuggestions(model, position, context);
   }

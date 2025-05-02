@@ -11,16 +11,15 @@ import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ESQLCallbacks, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { useSetInputEditor } from '../../hooks';
-import { ContextMenu } from './components';
-import {
-  useServicesContext,
-  useEditorReadContext,
-  useRequestActionContext,
-  useEditorActionContext,
-} from '../../contexts';
+import { getESQLSources } from '@kbn/esql-editor/src/helpers';
+import memoize from 'lodash/memoize';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
+import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
+import type { EditorRequest } from './types';
 import {
   useSetInitialValue,
   useSetupAutocompletePolling,
@@ -28,9 +27,14 @@ import {
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
 } from './hooks';
-import type { EditorRequest } from './types';
-import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
-import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
+import {
+  useServicesContext,
+  useEditorReadContext,
+  useRequestActionContext,
+  useEditorActionContext,
+} from '../../contexts';
+import { ContextMenu } from './components';
+import { useSetInputEditor } from '../../hooks';
 
 export interface EditorProps {
   localStorageValue: string | undefined;
@@ -41,7 +45,15 @@ export interface EditorProps {
 export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
   const context = useServicesContext();
   const {
-    services: { notifications, settings: settingsService, autocompleteInfo },
+    services: {
+      http,
+      notifications,
+      settings: settingsService,
+      autocompleteInfo,
+      dataViews,
+      indexManagementApiService,
+      application,
+    },
     docLinkVersion,
     config: { isDevMode },
   } = context;
@@ -127,9 +139,42 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const suggestionProvider = useMemo(() => {
-    return getSuggestionProvider(actionsProvider);
+  const memoizedSources = useMemo(() => {
+    const fn = memoize(
+      (
+        ...args: [DataViewsPublicPluginStart, Pick<CoreStart, 'application' | 'http'>, boolean]
+      ) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      })
+    );
+
+    return fn;
   }, []);
+
+  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    const callbacks: ESQLCallbacks = {
+      getSources: async () => {
+        // TODO: Add logic for correct check
+        const areRemoteIndicesAvailable = false;
+        const sources = await memoizedSources(dataViews, { application, http }, areRemoteIndicesAvailable).result;
+        return getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
+      },
+      getPolicies: async () => {
+        const { data: policies, error } =
+          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
+        if (error || !policies) {
+          return [];
+        }
+        return policies.map(({ type, query, ...rest }) => rest);
+      },
+    };
+    return callbacks;
+  }, [application, http, memoizedSources, dataViews, indexManagementApiService]);
+
+  const suggestionProvider = useMemo(() => {
+    return getSuggestionProvider(actionsProvider, esqlCallbacks);
+  }, [esqlCallbacks]);
 
   useSetInitialValue({ localStorageValue, setValue, toasts });
 

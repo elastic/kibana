@@ -15,7 +15,8 @@
     ],
     "requiredPlugins": [
       "devTools",
-      "share"
+      "share",
+      "dataViews",
     ],
     "optionalPlugins": [
       "usageCollection",

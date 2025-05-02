@@ -128,7 +128,11 @@ export async function suggest(
         const visibleSources = sources.filter((source) => !source.hidden);
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
           fromCommand = 'FROM logs*';
-        } else fromCommand = `FROM ${visibleSources[0].name}`;
+        } else if (visibleSources.length) {
+          fromCommand = `FROM ${visibleSources[0].name}`;
+        } else {
+          fromCommand = `FROM`;
+        }
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,

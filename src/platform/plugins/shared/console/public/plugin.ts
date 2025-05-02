@@ -20,6 +20,7 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddedConsoleView,
+  PluginStartDependencies,
 } from './types';
 import {
   AutocompleteInfo,
@@ -31,7 +32,13 @@ import {
 } from './services';
 
 export class ConsoleUIPlugin
-  implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>
+  implements
+    Plugin<
+      ConsolePluginSetup,
+      ConsolePluginStart,
+      AppSetupUIPluginDependencies,
+      PluginStartDependencies
+    >
 {
   private readonly autocompleteInfo = new AutocompleteInfo();
   private _embeddableConsole: EmbeddableConsoleInfo;
@@ -46,8 +53,8 @@ export class ConsoleUIPlugin
   }
 
   public setup(
-    { notifications, getStartServices, http }: CoreSetup,
-    { devTools, home, share, usageCollection }: AppSetupUIPluginDependencies
+    { notifications, getStartServices, http }: CoreSetup<PluginStartDependencies>,
+    { devTools, home, share, usageCollection, indexManagement }: AppSetupUIPluginDependencies
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
@@ -82,12 +89,14 @@ export class ConsoleUIPlugin
         }),
         enableRouting: true,
         mount: async ({ element, history }) => {
-          const [core] = await getStartServices();
+          const [core, deps] = await getStartServices();
 
           const {
             docLinks: { DOC_LINK_VERSION, links },
+            application,
             ...startServices
           } = core;
+          const { dataViews } = deps;
 
           const { renderApp } = await import('./application');
 
@@ -96,8 +105,11 @@ export class ConsoleUIPlugin
             http,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
+            application,
+            dataViews,
             notifications,
             usageCollection,
+            indexManagementApiService: indexManagement?.apiService,
             element,
             history,
             autocompleteInfo: this.autocompleteInfo,

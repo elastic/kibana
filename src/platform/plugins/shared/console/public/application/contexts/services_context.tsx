@@ -11,6 +11,9 @@ import React, { createContext, useContext, useEffect } from 'react';
 import type { NotificationsSetup, DocLinksStart, HttpSetup } from '@kbn/core/public';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
+import { ApplicationStart } from '@kbn/core/public';
 import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { ConsoleStartServices, MetricsTracker } from '../../types';
@@ -27,6 +30,9 @@ interface ContextServices {
   esHostService: EsHostService;
   http: HttpSetup;
   autocompleteInfo: AutocompleteInfo;
+  dataViews: DataViewsPublicPluginStart;
+  application: ApplicationStart;
+  indexManagementApiService?: Pick<IndexManagementPluginSetup, 'apiService'>;
 }
 
 export interface ContextValue extends ConsoleStartServices {
