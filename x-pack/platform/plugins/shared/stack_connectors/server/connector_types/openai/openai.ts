@@ -72,8 +72,16 @@ function formatPEMContent(pemContent: string): string {
   if (headerIndex === -1 || footerIndex === -1) return pemContent;
   
   // Reconstruct header and footer properly
-  const header = parts.slice(headerIndex, headerIndex + 2).join(' ');
-  const footer = parts.slice(footerIndex, footerIndex + 2).join(' ');
+  let header = parts[headerIndex];
+  let footer = parts[footerIndex];
+  
+  // Handle multi-part headers/footers (e.g., "-----BEGIN PRIVATE KEY-----")
+  if (header === '-----BEGIN' && parts[headerIndex + 1]) {
+    header = `${header} ${parts[headerIndex + 1]}`;
+  }
+  if (footer === '-----END' && parts[footerIndex + 1]) {
+    footer = `${footer} ${parts[footerIndex + 1]}`;
+  }
   
   // Join all content parts between header and footer, remove any remaining spaces
   const content = parts.slice(headerIndex + 2, footerIndex).join('').replace(/\s+/g, '');
