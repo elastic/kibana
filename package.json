@@ -999,7 +999,7 @@
     "@kbn/unified-doc-viewer-plugin": "link:src/platform/plugins/shared/unified_doc_viewer",
     "@kbn/unified-field-list": "link:src/platform/packages/shared/kbn-unified-field-list",
     "@kbn/unified-field-list-examples-plugin": "link:examples/unified_field_list_examples",
-    "@kbn/unified-histogram-plugin": "link:src/platform/plugins/shared/unified_histogram",
+    "@kbn/unified-histogram": "link:src/platform/packages/shared/kbn-unified-histogram",
     "@kbn/unified-search-plugin": "link:src/platform/plugins/shared/unified_search",
     "@kbn/unified-tabs": "link:src/platform/packages/shared/kbn-unified-tabs",
     "@kbn/unified-tabs-examples-plugin": "link:examples/unified_tabs_examples",
