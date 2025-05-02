@@ -389,6 +389,7 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_createalert.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_fieldsbyissuetype.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getagentdetails.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getagents.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getchoices.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getfields.yaml'
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/run_getincident.yaml'
