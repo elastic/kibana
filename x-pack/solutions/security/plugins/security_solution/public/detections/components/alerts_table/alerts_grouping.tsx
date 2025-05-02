@@ -20,6 +20,7 @@ import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
+import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
@@ -71,12 +72,7 @@ export interface AlertsTableComponentProps {
    * Allows to customize the content of the Take actions button rendered at the group level.
    * If no value is provided, the Take actins button is not displayed.
    */
-  groupTakeActionItems?: (data: {
-    query?: string;
-    tableId: string;
-    groupNumber: number;
-    selectedGroup: string;
-  }) => JSX.Element[];
+  groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   runtimeMappings: RunTimeMappings;

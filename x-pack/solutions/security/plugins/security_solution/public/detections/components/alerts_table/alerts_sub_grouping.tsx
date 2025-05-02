@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import type { GroupTakeActionItems } from './types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -37,7 +38,6 @@ import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_f
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];
-const noopGroupTakeActionItems: () => JSX.Element[] = () => [];
 
 interface OwnProps {
   defaultFilters?: Filter[];
@@ -57,12 +57,7 @@ interface OwnProps {
    * Allows to customize the content of the Take actions button rendered at the group level.
    * If no value is provided, the Take actins button is not displayed.
    */
-  groupTakeActionItems?: (data: {
-    query?: string;
-    tableId: string;
-    groupNumber: number;
-    selectedGroup: string;
-  }) => JSX.Element[];
+  groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
   onGroupClose: () => void;
   pageIndex: number;
@@ -261,15 +256,16 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) =>
-      groupTakeActionItems
-        ? groupTakeActionItems({
-            groupNumber,
-            query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
-            selectedGroup,
-            tableId,
-          })
-        : noopGroupTakeActionItems(),
+    (groupFilters: Filter[], groupNumber: number) => {
+      const takeActionParams = {
+        groupNumber,
+        query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
+        selectedGroup,
+        tableId,
+      };
+
+      return groupTakeActionItems?.(takeActionParams) ?? [];
+    },
     [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
   );
 

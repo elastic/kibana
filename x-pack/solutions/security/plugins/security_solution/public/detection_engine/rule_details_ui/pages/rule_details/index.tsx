@@ -571,7 +571,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const groupTakeActionItems = useGroupTakeActionsItems({
     currentStatus: currentAlertStatusFilterValue,
-    showAlertStatusActions: (hasIndexWrite ?? false) && (hasIndexMaintenance ?? false),
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
   });
 
   const accordionExtraActionGroupStats = useMemo(

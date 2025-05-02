@@ -113,7 +113,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const defaultFilters = useMemo(() => [...inputFilters, ...filters], [filters, inputFilters]);
 
   const groupTakeActionItems = useGroupTakeActionsItems({
-    showAlertStatusActions: (hasIndexWrite ?? false) && (hasIndexMaintenance ?? false),
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
   });
 
   const accordionExtraActionGroupStats = useMemo(

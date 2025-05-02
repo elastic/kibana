@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { GroupTakeActionItems } from '../../components/alerts_table/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { inputsModel } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
@@ -55,28 +56,6 @@ export interface UseGroupTakeActionsItemsParams {
 }
 
 /**
- *
- */
-export type UseGroupTakeActionsItemsResult = (props: {
-  /**
-   * Query to run when an item is clicked (meaning when an alert status is updated)
-   */
-  query?: string;
-  /**
-   * Id of the table (used for telemetry)
-   */
-  tableId: string;
-  /**
-   * Group number to know which group to apply the logic to. This value is coming from the callback in the kbn-grouping package.
-   */
-  groupNumber: number;
-  /**
-   * Selected group to know which group is extended/visible. This is coming from the getLevel function in the detections alert grouping code.
-   */
-  selectedGroup: string;
-}) => JSX.Element[];
-
-/**
  * Hook returning a set of action items to be accessed when users click on the Take actions button displayed at the grouping alerts table group level.
  * Currently the action returned are: mark as opened, mark as acknowledged or mark as closed.
  * The hook is used in the alerts page, the rule details page and the entity analytics top risk score section.
@@ -84,7 +63,7 @@ export type UseGroupTakeActionsItemsResult = (props: {
 export const useGroupTakeActionsItems = ({
   currentStatus,
   showAlertStatusActions = true,
-}: UseGroupTakeActionsItemsParams): UseGroupTakeActionsItemsResult => {
+}: UseGroupTakeActionsItemsParams): GroupTakeActionItems => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -206,106 +185,100 @@ export const useGroupTakeActionsItems = ({
   );
 
   return useMemo(
-    () =>
-      ({
-        query,
-        tableId,
-        groupNumber,
-        selectedGroup,
-      }: {
-        query?: string;
-        tableId: string;
-        groupNumber: number;
-        selectedGroup: string;
-      }) => {
+    (): GroupTakeActionItems =>
+      ({ query, tableId, groupNumber, selectedGroup }) => {
         const actionItems: JSX.Element[] = [];
-        if (showAlertStatusActions) {
-          if (currentStatus && currentStatus.length === 1) {
-            const singleStatus = currentStatus[0];
-            if (singleStatus !== FILTER_OPEN) {
-              actionItems.push(
-                <EuiContextMenuItem
-                  key="open"
-                  data-test-subj="open-alert-status"
-                  onClick={() =>
-                    onClickUpdate({
-                      groupNumber,
-                      query,
-                      selectedGroup,
-                      status: FILTER_OPEN as AlertWorkflowStatus,
-                      tableId,
-                    })
-                  }
-                >
-                  {BULK_ACTION_OPEN_SELECTED}
-                </EuiContextMenuItem>
-              );
-            }
-            if (singleStatus !== FILTER_ACKNOWLEDGED) {
-              actionItems.push(
-                <EuiContextMenuItem
-                  key="acknowledge"
-                  data-test-subj="acknowledged-alert-status"
-                  onClick={() =>
-                    onClickUpdate({
-                      groupNumber,
-                      query,
-                      selectedGroup,
-                      status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
-                      tableId,
-                    })
-                  }
-                >
-                  {BULK_ACTION_ACKNOWLEDGED_SELECTED}
-                </EuiContextMenuItem>
-              );
-            }
-            if (singleStatus !== FILTER_CLOSED) {
-              actionItems.push(
-                <EuiContextMenuItem
-                  key="close"
-                  data-test-subj="close-alert-status"
-                  onClick={() =>
-                    onClickUpdate({
-                      groupNumber,
-                      query,
-                      selectedGroup,
-                      status: FILTER_CLOSED as AlertWorkflowStatus,
-                      tableId,
-                    })
-                  }
-                >
-                  {BULK_ACTION_CLOSE_SELECTED}
-                </EuiContextMenuItem>
-              );
-            }
-          } else {
-            const statusArr = {
-              [FILTER_OPEN]: BULK_ACTION_OPEN_SELECTED,
-              [FILTER_ACKNOWLEDGED]: BULK_ACTION_ACKNOWLEDGED_SELECTED,
-              [FILTER_CLOSED]: BULK_ACTION_CLOSE_SELECTED,
-            };
-            Object.keys(statusArr).forEach((workflowStatus) =>
-              actionItems.push(
-                <EuiContextMenuItem
-                  key={workflowStatus}
-                  data-test-subj={`${workflowStatus}-alert-status`}
-                  onClick={() =>
-                    onClickUpdate({
-                      groupNumber,
-                      query,
-                      selectedGroup,
-                      status: workflowStatus as AlertWorkflowStatus,
-                      tableId,
-                    })
-                  }
-                >
-                  {statusArr[workflowStatus]}
-                </EuiContextMenuItem>
-              )
+
+        if (!showAlertStatusActions) {
+          return actionItems;
+        }
+
+        if (currentStatus && currentStatus.length === 1) {
+          const singleStatus = currentStatus[0];
+          if (singleStatus !== FILTER_OPEN) {
+            actionItems.push(
+              <EuiContextMenuItem
+                key="open"
+                data-test-subj="open-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_OPEN as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_OPEN_SELECTED}
+              </EuiContextMenuItem>
             );
           }
+          if (singleStatus !== FILTER_ACKNOWLEDGED) {
+            actionItems.push(
+              <EuiContextMenuItem
+                key="acknowledge"
+                data-test-subj="acknowledged-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_ACKNOWLEDGED_SELECTED}
+              </EuiContextMenuItem>
+            );
+          }
+          if (singleStatus !== FILTER_CLOSED) {
+            actionItems.push(
+              <EuiContextMenuItem
+                key="close"
+                data-test-subj="close-alert-status"
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: FILTER_CLOSED as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {BULK_ACTION_CLOSE_SELECTED}
+              </EuiContextMenuItem>
+            );
+          }
+        } else {
+          const statusArr = {
+            [FILTER_OPEN]: BULK_ACTION_OPEN_SELECTED,
+            [FILTER_ACKNOWLEDGED]: BULK_ACTION_ACKNOWLEDGED_SELECTED,
+            [FILTER_CLOSED]: BULK_ACTION_CLOSE_SELECTED,
+          };
+          Object.keys(statusArr).forEach((workflowStatus) =>
+            actionItems.push(
+              <EuiContextMenuItem
+                key={workflowStatus}
+                data-test-subj={`${workflowStatus}-alert-status`}
+                onClick={() =>
+                  onClickUpdate({
+                    groupNumber,
+                    query,
+                    selectedGroup,
+                    status: workflowStatus as AlertWorkflowStatus,
+                    tableId,
+                  })
+                }
+              >
+                {statusArr[workflowStatus]}
+              </EuiContextMenuItem>
+            )
+          );
         }
+
         return actionItems;
       },
     [currentStatus, onClickUpdate, showAlertStatusActions]
