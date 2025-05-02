@@ -657,7 +657,6 @@ export async function installPackageWithStateMachine(options: {
     const allowlistPackages = getAllowedSearchAiLakeInstallPackagesIfEnabled();
     // This will only trigger if xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
     if (allowlistPackages && !allowlistPackages.includes(pkgName)) {
-      console.log('blocked');
       throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
     }
 
