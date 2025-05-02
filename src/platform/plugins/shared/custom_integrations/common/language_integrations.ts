@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 
 const ELASTIC_WEBSITE_URL = 'https://www.elastic.co';
-const ELASTICSEARCH_CLIENT_URL = `${ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/client`;
 
 /*
   - exportLanguageUiComponent: controls whether the integration should export a UI component for language clients to Fleet UI;
@@ -104,7 +103,7 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.PerlDescription', {
       defaultMessage: 'Index data to Elasticsearch with the Perl client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/perl-api/{branch}/index.html`,
+    docUrlTemplate: `${ELASTIC_WEBSITE_URL}/guide/en/elasticsearch/client/perl-api/current/index.html`,
     integrationsAppUrl: `/app/integrations/language_clients/perl/overview`,
     exportLanguageUiComponent: false,
   },
@@ -130,7 +129,7 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.RustDescription', {
       defaultMessage: 'Index data to Elasticsearch with the Rust client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/rust-api/{branch}/index.html`,
+    docUrlTemplate: `${ELASTIC_WEBSITE_URL}/docs/reference/elasticsearch/clients/rust`,
     integrationsAppUrl: `/app/integrations/language_clients/rust/overview`,
     exportLanguageUiComponent: false,
   },
