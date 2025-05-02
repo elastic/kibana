@@ -160,7 +160,7 @@ export const PerformBulkActionRequestBody = z.object({
   /**
    * Details of the bulk delete action to apply.
    */
-  delete: BulkActionBase,
+  delete: BulkActionBase.optional(),
   /**
    * List of conversations to create in bulk.
    */

@@ -31,8 +31,6 @@ paths:
                   items:
                     $ref: './common_attributes.schema.yaml#/components/schemas/ConversationUpdateProps'
                   description: List of conversations to update in bulk.
-              required:
-                - delete
               example:
                 delete:
                   query: "status: 'inactive'"
