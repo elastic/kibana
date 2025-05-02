@@ -10,7 +10,6 @@
 import { useCallback, useRef } from 'react';
 
 import { useGridLayoutContext } from '../../use_grid_layout_context';
-import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import {
   getSensorPosition,
   isKeyboardEvent,
@@ -20,11 +19,12 @@ import {
   startMouseInteraction,
   startTouchInteraction,
 } from '../sensors';
-import { PointerPosition, UserInteractionEvent } from '../types';
 import {
   hasRowInteractionStartedWithKeyboard,
   isLayoutInteractive,
 } from '../state_manager_selectors';
+import { PointerPosition, UserInteractionEvent } from '../types';
+import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { getNextKeyboardPosition } from './utils';
 
 /*

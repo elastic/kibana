@@ -8,11 +8,11 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { GridLayoutStateManager, PanelactivePanel } from '../../types';
-import type { UseractivePanel, PointerPosition } from '../types';
-import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
-import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
+import type { ActivePanelEvent, GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
+import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
+import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
+import type { PointerPosition, UserInteractionEvent } from '../types';
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
@@ -21,7 +21,7 @@ export const getResizePreviewRect = ({
   maxRight,
 }: {
   pointerPixel: PointerPosition;
-  activePanel: PanelactivePanel;
+  activePanel: ActivePanelEvent;
   maxRight: number;
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();
@@ -40,7 +40,7 @@ export const getDragPreviewRect = ({
   activePanel,
 }: {
   pointerPixel: PointerPosition;
-  activePanel: PanelactivePanel;
+  activePanel: ActivePanelEvent;
 }) => {
   return {
     left: pointerPixel.clientX - activePanel.sensorOffsets.left,
@@ -52,7 +52,7 @@ export const getDragPreviewRect = ({
 
 // Calculates the sensor's offset relative to the active panel's edges (top, left, right, bottom).
 // This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getSensorOffsets(e: UseractivePanel, { top, left, right, bottom }: DOMRect) {
+export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
   if (!isTouchEvent(e) && !isMouseEvent(e) && !isKeyboardEvent(e)) {
     throw new Error('Unsupported event type: only mouse, touch, or keyboard events are handled.');
   }

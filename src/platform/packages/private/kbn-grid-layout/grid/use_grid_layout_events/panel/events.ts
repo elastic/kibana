@@ -8,24 +8,25 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { GridPanelData, PanelactivePanel } from '../../types';
+
+import { ActivePanelEvent, GridPanelData } from '../../types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
-import { commitAction, moveAction, startAction, cancelAction } from './state_manager_actions';
 import {
   getSensorPosition,
+  isKeyboardEvent,
   isMouseEvent,
   isTouchEvent,
+  startKeyboardInteraction,
   startMouseInteraction,
   startTouchInteraction,
-  startKeyboardInteraction,
-  isKeyboardEvent,
 } from '../sensors';
-import { UseractivePanel } from '../types';
-import { getNextKeyboardPositionForPanel } from './utils';
 import {
   hasPanelInteractionStartedWithKeyboard,
   isLayoutInteractive,
 } from '../state_manager_selectors';
+import { UserInteractionEvent } from '../types';
+import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
+import { getNextKeyboardPositionForPanel } from './utils';
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
  * It initializes event handlers to start, move, and commit the interaction,
@@ -37,7 +38,7 @@ export const useGridLayoutPanelEvents = ({
   sectionId,
   panelId,
 }: {
-  interactionType: PanelactivePanel['type'];
+  interactionType: ActivePanelEvent['type'];
   sectionId: string;
   panelId: string;
 }) => {
@@ -46,7 +47,7 @@ export const useGridLayoutPanelEvents = ({
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
 
   const onStart = useCallback(
-    (ev: UseractivePanel) => {
+    (ev: UserInteractionEvent) => {
       startAction(ev, gridLayoutStateManager, interactionType, sectionId, panelId);
     },
     [gridLayoutStateManager, interactionType, sectionId, panelId]
@@ -71,7 +72,7 @@ export const useGridLayoutPanelEvents = ({
   }, [gridLayoutStateManager]);
 
   const onMove = useCallback(
-    (ev: UseractivePanel) => {
+    (ev: UserInteractionEvent) => {
       if (isMouseEvent(ev) || isTouchEvent(ev)) {
         return moveAction(
           ev,
@@ -95,7 +96,7 @@ export const useGridLayoutPanelEvents = ({
   );
 
   const startInteraction = useCallback(
-    (e: UseractivePanel) => {
+    (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
       if (isMouseEvent(e)) {
         startMouseInteraction({

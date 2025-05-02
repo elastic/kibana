@@ -8,13 +8,13 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { first, pick } from 'lodash';
+import { pick } from 'lodash';
 
 import { GridLayoutStateManager, GridSectionData, OrderedLayout } from '../../types';
+import { getPanelKeysInOrder } from '../../utils/resolve_grid_section';
+import { combinePanels } from '../../utils/section_management';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { getPanelKeysInOrder, resolveGridSection } from '../../utils/resolve_grid_section';
-import { combinePanels, movePanelsToSection } from '../../utils/section_management';
 
 export const startAction = (
   e: UserInteractionEvent,

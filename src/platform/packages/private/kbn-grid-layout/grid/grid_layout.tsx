@@ -19,10 +19,6 @@ import { GridSectionFooter, GridSectionHeader, GridSectionWrapper } from './grid
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { isLayoutEqual, isOrderedLayoutEqual } from './utils/equality_checks';
-import { getGridLayout, getOrderedLayout } from './utils/conversions';
-import { cloneDeep } from 'lodash';
-import { resolveGridSection } from './utils/resolve_grid_section';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -210,6 +206,7 @@ export const GridLayout = ({
                 return <GridSectionFooter key={`${element.id}--footer`} sectionId={element.id} />;
             }
           })}
+          {/* <GridPanelDragPreview /> */}
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>

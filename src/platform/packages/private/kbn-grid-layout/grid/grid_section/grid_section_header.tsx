@@ -8,7 +8,7 @@
  */
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map, pairwise } from 'rxjs';
 
 import {
@@ -22,13 +22,13 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+import { GridSectionData } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutRowEvents } from '../use_grid_layout_events';
 import { deleteRow } from '../utils/section_management';
 import { DeleteGridSectionModal } from './delete_grid_section_modal';
 import { GridSectionDragPreview } from './grid_section_drag_preview';
 import { GridSectionTitle } from './grid_section_title';
-import { GridSectionData } from '../types';
 
 export interface GridSectionHeaderProps {
   sectionId: string;

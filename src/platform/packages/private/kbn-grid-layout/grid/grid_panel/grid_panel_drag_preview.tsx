@@ -22,15 +22,15 @@ export const GridPanelDragPreview = React.memo(({ sectionId }: { sectionId: stri
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = gridLayoutStateManager.activePanel$
-
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
-        .subscribe(([activePanel, proposedGridLayout]) => {
+        .subscribe((activePanel) => {
           if (!dragPreviewRef.current) return;
 
-          if (!activePanel || !proposedGridLayout?.[sectionId].panels[activePanel.id]) {
+          const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+          if (!activePanel || !gridLayout?.[sectionId].panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = proposedGridLayout[sectionId].panels[activePanel.id];
+            const panel = gridLayout[sectionId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;

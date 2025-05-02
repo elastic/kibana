@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
 import { GridLayoutData, GridPanelData, OrderedLayout } from '../types';
 
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {

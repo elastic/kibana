@@ -8,6 +8,7 @@
  */
 
 import { cloneDeep, omit } from 'lodash';
+
 import { GridLayoutData, GridPanelData, GridSectionData, OrderedLayout } from '../types';
 import { getMainLayoutInOrder } from './resolve_grid_section';
 
@@ -78,7 +79,7 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
     } else {
       const sectionId = id;
       const section = layout[sectionId] as GridSectionData;
-      orderedLayout[sectionId] = { ...section, order };
+      orderedLayout[sectionId] = { ...section, order, isMainSection: false };
       mainRow++;
       order++;
       sectionCount++;
