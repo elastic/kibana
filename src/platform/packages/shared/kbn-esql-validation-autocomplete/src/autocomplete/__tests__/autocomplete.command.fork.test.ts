@@ -148,7 +148,7 @@ describe('autocomplete.suggest', () => {
           describe('eval', () => {
             it('suggests for empty expression', async () => {
               const emptyExpressionSuggestions = [
-                'var0 = ',
+                'col0 = ',
                 ...getFieldNamesByType('any').map((name) => `${name} `),
                 ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
               ];
@@ -207,21 +207,21 @@ describe('autocomplete.suggest', () => {
             const suggestions = await suggest(
               'FROM a | FORK (EVAL foo = 1 | EVAL bar = 2 | WHERE /)'
             );
-            expect(suggestions.map(({ text }) => text)).toContain('foo');
-            expect(suggestions.map(({ text }) => text)).toContain('bar');
+            expect(suggestions.map(({ label }) => label)).toContain('foo');
+            expect(suggestions.map(({ label }) => label)).toContain('bar');
           });
 
           it('does NOT suggest user-defined columns from another branch', async () => {
             const suggestions = await suggest('FROM a | FORK (EVAL foo = 1) (WHERE /)');
-            expect(suggestions.map(({ text }) => text)).not.toContain('foo');
+            expect(suggestions.map(({ label }) => label)).not.toContain('foo');
           });
 
           it('suggests user-defined columns from all branches after FORK', async () => {
             const suggestions = await suggest(
               'FROM a | FORK (EVAL foo = 1) (EVAL bar = 2) | WHERE /'
             );
-            expect(suggestions.map(({ text }) => text)).not.toContain('foo');
-            expect(suggestions.map(({ text }) => text)).not.toContain('bar');
+            expect(suggestions.map(({ label }) => label)).not.toContain('foo');
+            expect(suggestions.map(({ label }) => label)).not.toContain('bar');
           });
         });
       });

@@ -98,7 +98,8 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
           const ts = Array.isArray(type) ? type : [type];
           return (
             !ignored.includes(name) &&
-            ts.some((t) => types[0] === 'any' || types.includes(t)) &&
+            (types[0] === 'any' || // if the type is 'any' we don't need to check the type
+              ts.some((t) => types.includes(t))) &&
             !NOT_SUGGESTED_TYPES.includes(type)
           );
         }) || []

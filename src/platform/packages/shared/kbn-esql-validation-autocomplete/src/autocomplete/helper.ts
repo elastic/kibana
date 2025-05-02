@@ -122,7 +122,7 @@ export function strictlyGetParamAtPosition(
 export function getQueryForFields(queryString: string, root: ESQLAstQueryExpression): string {
   const commands = root.commands;
   const lastCommand = commands[commands.length - 1];
-  if (lastCommand.name === 'fork' && lastCommand.args.length > 0) {
+  if (lastCommand && lastCommand.name === 'fork' && lastCommand.args.length > 0) {
     /**
      * This translates the current fork command branch into a simpler but equivalent
      * query that is compatible with the existing field computation/caching strategy.

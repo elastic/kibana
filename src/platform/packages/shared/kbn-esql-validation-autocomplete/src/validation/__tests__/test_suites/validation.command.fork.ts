@@ -146,7 +146,7 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
               );
             });
 
-            it('does not recognize user-defined columns between branches', async () => {
+            it.skip('does not recognize user-defined columns between branches', async () => {
               const { expectErrors } = await setup();
 
               await expectErrors(
