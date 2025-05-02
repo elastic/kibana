@@ -644,6 +644,7 @@ paths:
                     - $ref: '#/components/schemas/run_closeincident'
                     - $ref: '#/components/schemas/run_createalert'
                     - $ref: '#/components/schemas/run_fieldsbyissuetype'
+                    - $ref: '#/components/schemas/run_getagentdetails'
                     - $ref: '#/components/schemas/run_getchoices'
                     - $ref: '#/components/schemas/run_getfields'
                     - $ref: '#/components/schemas/run_getincident'
@@ -70635,6 +70636,30 @@ components:
               type: string
               description: The Jira issue type identifier.
               example: 10024
+    run_getagentdetails:
+      title: The getAgentDetails subaction
+      type: object
+      required:
+        - subAction
+        - subActionParams
+      description: The `getAgentDetails` subaction for CrowdStrike connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - getAgentDetails
+        subActionParams:
+          type: object
+          description: The set of configuration properties for the action.
+          required:
+            - ids
+          properties:
+            ids:
+              type: array
+              description: An array of CrowdStrike agent identifiers.
+              items:
+                type: string
     run_getchoices:
       title: The getChoices subaction
       type: object
