@@ -7,27 +7,29 @@
 
 import React from 'react';
 
-import {
-  COLOR_MODES_STANDARD,
-  EuiCallOut,
-  EuiIcon,
-  EuiSpacer,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { COLOR_MODES_STANDARD, EuiCallOut, EuiSpacer, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 
-import classnames from 'classnames';
-
 import { installationStatuses } from '../../../../../../common/constants';
 import type { EpmPackageInstallStatus } from '../../../../../../common/types';
+
+import {
+  CompressedInstallationStatus,
+  type CompressedInstallationStylesProps,
+} from './compressed_installation_status';
 
 interface InstallationStatusProps {
   installStatus: EpmPackageInstallStatus | null | undefined;
   showInstallationStatus?: boolean;
   compressed?: boolean;
   hasDataStreams?: boolean;
+}
+
+export interface InstallationStatusStylesProps {
+  installationStatus: string;
+  installedCallout: string;
+  installedSpacer: string;
 }
 
 const installedLabel = i18n.translate('xpack.fleet.packageCard.installedLabel', {
@@ -38,9 +40,10 @@ const installedTooltip = i18n.translate('xpack.fleet.packageCard.installedToolti
   defaultMessage: 'This package is installed but no data streams exist.',
 });
 
-/**
- * "Active" here means that the package is installed AND their data streams Exist
- **/
+const installFailedTooltip = i18n.translate('xpack.fleet.packageCard.installFailedTooltip', {
+  defaultMessage: 'This package is installed but failed.',
+});
+
 const activeLabel = i18n.translate('xpack.fleet.packageCard.activeLabel', {
   defaultMessage: 'Active',
 });
@@ -52,13 +55,6 @@ const getCalloutText = ({
   installStatus: EpmPackageInstallStatus | null | undefined;
   isActive?: boolean;
 }) => {
-  if (installStatus === 'install_failed') {
-    return {
-      color: 'warning' as const,
-      iconType: 'warning' as const,
-      title: installedLabel,
-    };
-  }
   if (isActive) {
     return {
       color: 'success' as const,
@@ -66,12 +62,20 @@ const getCalloutText = ({
       title: activeLabel,
     };
   }
-  if (installStatus === 'installed') {
+
+  if (
+    installStatus === installationStatuses.Installed ||
+    installStatus === installationStatuses.InstallFailed
+  ) {
     return {
       color: 'warning' as const,
       iconType: 'warning',
       title: (
-        <EuiToolTip data-test-subj="installed-tooltip" position="bottom" content={installedTooltip}>
+        <EuiToolTip
+          data-test-subj="installed-tooltip"
+          position="bottom"
+          content={installationStatuses.Installed ? installedTooltip : installFailedTooltip}
+        >
           <>{installedLabel}</>
         </EuiToolTip>
       ),
@@ -80,55 +84,59 @@ const getCalloutText = ({
   return {};
 };
 
-const useInstallationStatusStyles = () => {
+const useInstallationStatusStyles = (): InstallationStatusStylesProps &
+  CompressedInstallationStylesProps => {
   const { euiTheme, colorMode } = useEuiTheme();
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
 
-  return {
-    installationStatus: css`
-      position: absolute;
-      border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      overflow: hidden;
-    `,
-    compressedInstallationStatus: css`
-      position: absolute;
-      border-radius: 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0;
-      bottom: 0;
-      right: 0;
-      width: 65px;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-    `,
-    compressedInstalledStatus: css`
-      background-color: ${isDarkMode
-        ? euiTheme.colors.warning
-        : euiTheme.colors.backgroundBaseWarning};
-    `,
-    compressedActiveStatus: css`
-      background-color: ${isDarkMode
-        ? euiTheme.colors.success
-        : euiTheme.colors.backgroundBaseSuccess};
-    `,
-    compressedInstalledStatusIcon: css`
-      color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textWarning};
-    `,
-    compressedActiveStatusIcon: css`
-      color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
-    `,
-    installedCallout: css`
-      padding: ${euiTheme.size.s} ${euiTheme.size.m};
-      text-align: center;
-    `,
-    installedSpacer: css`
-      background: ${euiTheme.colors.emptyShade};
-    `,
-  };
+  return React.useMemo(
+    () => ({
+      installationStatus: css`
+        position: absolute;
+        border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+      `,
+      compressedInstallationStatus: css`
+        position: absolute;
+        border-radius: 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0;
+        bottom: 0;
+        right: 0;
+        width: 65px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      `,
+      compressedInstalledStatus: css`
+        background-color: ${isDarkMode
+          ? euiTheme.colors.warning
+          : euiTheme.colors.backgroundBaseWarning};
+      `,
+      compressedActiveStatus: css`
+        background-color: ${isDarkMode
+          ? euiTheme.colors.success
+          : euiTheme.colors.backgroundBaseSuccess};
+      `,
+      compressedInstalledStatusIcon: css`
+        color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textWarning};
+      `,
+      compressedActiveStatusIcon: css`
+        color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
+      `,
+      installedCallout: css`
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        text-align: center;
+      `,
+      installedSpacer: css`
+        background: ${euiTheme.colors.emptyShade};
+      `,
+    }),
+    [euiTheme, isDarkMode]
+  );
 };
 
 export const getLineClampStyles = (lineClamp?: number) =>
@@ -156,54 +164,37 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
   ({ installStatus, showInstallationStatus, compressed, hasDataStreams: isActive }) => {
     const styles = useInstallationStatusStyles();
 
-    const cardPanelClassNames = classnames({
-      [styles.compressedInstallationStatus]: compressed,
-      [styles.compressedInstalledStatus]: compressed && !isActive,
-      [styles.compressedActiveStatus]: compressed && isActive,
-      [styles.installationStatus]: !compressed,
-    });
+    if (
+      !shouldShowInstallationStatus({
+        installStatus,
+        showInstallationStatus,
+        isActive,
+      })
+    ) {
+      return null;
+    }
 
-    return shouldShowInstallationStatus({
-      installStatus,
-      showInstallationStatus,
-      isActive,
-    }) ? (
-      compressed ? (
-        <div className={cardPanelClassNames}>
-          {isActive ? (
-            <EuiIcon
-              data-test-subj="compressed-active-icon"
-              type="checkInCircleFilled"
-              className={styles.compressedActiveStatusIcon}
-            />
-          ) : (
-            <EuiToolTip
-              data-test-subj="compressed-installed-tooltip"
-              position="bottom"
-              content={installedTooltip}
-            >
-              <EuiIcon
-                data-test-subj="compressed-installed-icon"
-                type="warningFilled"
-                className={styles.compressedInstalledStatusIcon}
-              />
-            </EuiToolTip>
-          )}
-        </div>
-      ) : (
-        <div className={cardPanelClassNames}>
-          <EuiSpacer
-            data-test-subj="installation-status-spacer"
-            size="m"
-            className={styles.installedSpacer}
-          />
-          <EuiCallOut
-            data-test-subj="installation-status-callout"
-            className={styles.installedCallout}
-            {...getCalloutText({ installStatus, isActive })}
-          />
-        </div>
-      )
-    ) : null;
+    return compressed ? (
+      <CompressedInstallationStatus
+        installStatus={installStatus}
+        isActive={isActive}
+        installedTooltip={installedTooltip}
+        installFailedTooltip={installFailedTooltip}
+        styles={styles}
+      />
+    ) : (
+      <div className={styles.installationStatus}>
+        <EuiSpacer
+          data-test-subj="installation-status-spacer"
+          size="m"
+          className={styles.installedSpacer}
+        />
+        <EuiCallOut
+          data-test-subj="installation-status-callout"
+          className={styles.installedCallout}
+          {...getCalloutText({ installStatus, isActive })}
+        />
+      </div>
+    );
   }
 );
