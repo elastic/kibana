@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import type { DropDownLabel, DropDownProps } from '../agg_select';
 import { AggSelect } from '../agg_select';
@@ -26,13 +25,11 @@ export const MetricSelector: FC<Props> = ({
   removeOptions,
 }) => {
   return (
-    <EuiFlexGroup>
-      <AggSelect
-        fields={fields}
-        changeHandler={detectorChangeHandler}
-        selectedOptions={selectedOptions}
-        removeOptions={removeOptions}
-      />
-    </EuiFlexGroup>
+    <AggSelect
+      fields={fields}
+      changeHandler={detectorChangeHandler}
+      selectedOptions={selectedOptions}
+      removeOptions={removeOptions}
+    />
   );
 };

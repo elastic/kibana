@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiDescribedFormGroup, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
@@ -95,16 +95,15 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   }, [jobValidatorUpdated]);
 
   return (
-    <EuiDescribedFormGroup
-      ratio="third"
-      title={
+    <>
+      <EuiTitle size="xs">
         <h3 id={aggregationSelectTitleId}>
           {i18n.translate('xpack.ml.newJob.wizard.aggSelect.title', {
             defaultMessage: 'Select an aggregation',
           })}
         </h3>
-      }
-    >
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiFormRow
         fullWidth
         error={validation.message}
@@ -121,7 +120,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
           titleId={aggregationSelectTitleId}
         />
       </EuiFormRow>
-    </EuiDescribedFormGroup>
+      <EuiSpacer size="s" />
+    </>
   );
 };
 
