@@ -389,6 +389,8 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="user"
           iconSide="left"
+          isToggle
+          isSelected={filters.type === 'rest'}
           hasActiveFilters={filters.type === 'rest'}
           onClick={() => {
             onFilterChange({ ...filters, type: filters.type === 'rest' ? undefined : 'rest' });
@@ -412,6 +414,8 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="cluster"
           iconSide="left"
+          isToggle
+          isSelected={filters.type === 'cross_cluster'}
           hasActiveFilters={filters.type === 'cross_cluster'}
           onClick={() => {
             onFilterChange({
@@ -438,6 +442,8 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
         <EuiFilterButton
           iconType="gear"
           iconSide="left"
+          isToggle
+          isSelected={filters.type === 'managed'}
           hasActiveFilters={filters.type === 'managed'}
           onClick={() => {
             onFilterChange({
@@ -476,6 +482,8 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
   return (
     <>
       <EuiFilterButton
+        isToggle
+        isSelected={filters.expired === false}
         hasActiveFilters={filters.expired === false}
         onClick={() => {
           if (filters.expired === false) {
@@ -493,6 +501,8 @@ export const ExpiredFilterButton: FunctionComponent<CustomComponentProps> = ({
         />
       </EuiFilterButton>
       <EuiFilterButton
+        isToggle
+        isSelected={filters.expired === true}
         hasActiveFilters={filters.expired === true}
         onClick={() => {
           if (filters.expired === true) {
