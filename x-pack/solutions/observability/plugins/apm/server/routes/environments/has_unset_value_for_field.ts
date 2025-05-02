@@ -39,19 +39,21 @@ export async function hasUnsetValueForField({
         ProcessorEvent.error,
       ],
     },
-    track_total_hits: true,
-    terminate_after: 1,
-    size: 0,
-    query: {
-      bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
-        must_not: [
-          {
-            exists: {
-              field: fieldName,
+    body: {
+      track_total_hits: true,
+      terminate_after: 1,
+      size: 0,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
+          must_not: [
+            {
+              exists: {
+                field: fieldName,
+              },
             },
-          },
-        ],
+          ],
+        },
       },
     },
   };
