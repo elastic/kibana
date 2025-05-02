@@ -6,17 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { parse, BasicPrettyPrinter } from '@kbn/esql-ast';
 
 export function removeLastPipe(inputString: string): string {
-  const lastPipeIndex = inputString.lastIndexOf('|');
+  const { root } = parse(inputString);
+  const queryNoComments = BasicPrettyPrinter.print(root);
+  const lastPipeIndex = queryNoComments.lastIndexOf('|');
   if (lastPipeIndex !== -1) {
-    return inputString.substring(0, lastPipeIndex).trimEnd();
+    return queryNoComments.substring(0, lastPipeIndex).trimEnd();
   }
-  return inputString.trimEnd();
+  return queryNoComments.trimEnd();
 }
 
 export function processPipes(inputString: string) {
-  const parts = inputString.split('|');
+  const { root } = parse(inputString);
+  const queryNoComments = BasicPrettyPrinter.print(root);
+  const parts = queryNoComments.split('|');
   const results = [];
   let currentString = '';
 
@@ -33,7 +38,9 @@ export function processPipes(inputString: string) {
 }
 
 export function toSingleLine(inputString: string): string {
-  return inputString
+  const { root } = parse(inputString);
+  const queryNoComments = BasicPrettyPrinter.print(root);
+  return queryNoComments
     .split('|')
     .map((line) => line.trim())
     .filter((line) => line !== '')
@@ -41,9 +48,7 @@ export function toSingleLine(inputString: string): string {
 }
 
 export function getFirstPipeValue(inputString: string): string {
-  const parts = inputString.split('|');
-  if (parts.length > 1) {
-    return parts[0].trim();
-  }
-  return inputString.trim();
+  const { root } = parse(inputString);
+  const firstCommand = root.commands[0];
+  return BasicPrettyPrinter.command(firstCommand);
 }
