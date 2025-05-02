@@ -207,8 +207,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(keyPEM);
 
         const httpsAgent = new https.Agent({
-          cert: certPEM,
-          key: keyPEM,
+          cert: Buffer.from(certPEM),
+          key: Buffer.from(keyPEM),
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
             this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
