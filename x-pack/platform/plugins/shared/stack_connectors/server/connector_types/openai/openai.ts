@@ -97,13 +97,13 @@ function formatPEMContent(pemContent: string): string {
   
   // Assemble the final PEM with strict formatting
   const lines = [
-    header,  // No newline after header
+    header + '\n',  // Ensure newline after header
     formattedContent,
-    footer   // No newline before footer
+    '\n' + footer   // Ensure newline before footer
   ];
   
   // Join with newlines and ensure strict PEM format
-  return lines.join('\n')
+  return lines.join('')
     .replace(/^-----BEGIN\s+(\w+)\s+-----\s*/, '-----BEGIN $1-----\n')  // Fix header format
     .replace(/\s*-----END\s+(\w+)\s+-----$/, '\n-----END $1-----')  // Fix footer format
     .replace(/\n+/g, '\n')  // Remove duplicate newlines
