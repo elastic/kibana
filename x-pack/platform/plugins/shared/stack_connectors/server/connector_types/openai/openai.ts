@@ -61,21 +61,21 @@ import https from 'https';
 // Add this function to properly format PEM content
 function formatPEMContent(pemContent: string): string {
   if (!pemContent) return pemContent;
-  
-  // Remove all whitespace and line breaks
+
+  // Remove all whitespace and split into lines
   const lines = pemContent.split(/[\r\n]+/).map(line => line.trim()).filter(Boolean);
-  
+
   if (lines.length < 2) return pemContent;
 
-  // Get the header and footer
   const header = lines[0];
   const footer = lines[lines.length - 1];
-  
-  // Get the content (everything between header and footer)
-  const content = lines.slice(1, -1).join('');
-  
-  // Reconstruct with proper formatting
-  return `${header}\n${content}\n${footer}`;
+  // Join all content lines, remove all whitespace
+  const content = lines.slice(1, -1).join('').replace(/\s+/g, '');
+
+  // Insert line breaks every 64 characters
+  const formattedContent = content.replace(/(.{1,64})/g, '$1\n').trim();
+
+  return `${header}\n${formattedContent}\n${footer}`;
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
