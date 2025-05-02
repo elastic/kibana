@@ -918,7 +918,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      safeLoad
+      load
     );
 
     expect(validationResults).toEqual(
@@ -972,7 +972,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      safeLoad
+      load
     );
 
     expect(validationResults).toEqual(
@@ -1026,7 +1026,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      safeLoad
+      load
     );
 
     expect(validationResults).toEqual(
@@ -1080,7 +1080,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      safeLoad
+      load
     );
 
     expect(validationResults).toEqual(
@@ -1219,7 +1219,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        safeLoad
+        load
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1238,7 +1238,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        safeLoad
+        load
       );
 
       expect(res).toEqual(['myvariable is required']);
@@ -1257,7 +1257,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
           required: true,
         },
         'myvariable',
-        safeLoad
+        load
       );
 
       expect(res).toBeNull();
