@@ -28,7 +28,10 @@ export const Fork = Symbol.for('Fork') as ServiceIdentifier<ScopeFactory>;
 
 export class PluginModule extends ContainerModule {
   private services = new WeakMap<Container, Map<ServiceIdentifier, number>>();
-  private activated = new WeakSet<Container>();
+  private activated = {
+    [OnSetup as symbol]: new WeakSet<Container>(),
+    [OnStart as symbol]: new WeakSet<Container>(),
+  };
   private bound = new WeakSet<Container>();
 
   constructor(root: Container, private readonly options?: Omit<ContainerOptions, 'parent'>) {
@@ -55,7 +58,7 @@ export class PluginModule extends ContainerModule {
     contract: T
   ): T {
     const container = get(Container);
-    if (this.activated.has(container)) {
+    if (this.activated[hook as symbol].has(container)) {
       return contract;
     }
 
@@ -69,7 +72,7 @@ export class PluginModule extends ContainerModule {
       }
     }
 
-    this.activated.add(container);
+    this.activated[hook as symbol].add(container);
 
     return contract;
   }
