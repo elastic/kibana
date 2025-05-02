@@ -93,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(res.status).to.be(200);
 
-        expect(res.body.kbState).to.not.be(KnowledgeBaseState.NOT_INSTALLED);
+        expect(res.body.kbState).to.be(KnowledgeBaseState.NOT_INSTALLED);
         expect(res.body.enabled).to.be(true);
         expect(res.body.errorMessage).to.include.string(
           'Inference endpoint not found [pt_tiny_elser_inference_id]'
