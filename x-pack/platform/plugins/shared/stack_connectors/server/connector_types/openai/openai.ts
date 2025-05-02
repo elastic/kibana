@@ -57,9 +57,9 @@ import {
 } from './lib/utils';
 import fs from 'fs';
 import https from 'https';
+import { Logger } from '@kbn/logging';
 
-// Add this function to properly format PEM content
-function formatPEMContent(pemContent: string): string {
+function formatPEMContent(pemContent: string, logger: Logger): string {
   if (!pemContent) return pemContent;
 
   // First, normalize any existing newlines to \n
@@ -84,14 +84,13 @@ function formatPEMContent(pemContent: string): string {
   const result = `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----\n`;
 
   // Debug log the exact content
-  console.log('Original PEM content:');
-  console.log(pemContent);
-  console.log('Normalized PEM content:');
-  console.log(normalizedContent);
-  console.log('Final PEM content:');
-  console.log(result);
-  console.log('Newlines in result:', result.includes('\n'));
-  console.log('Spaces in result:', result.includes(' '));
+  logger.debug('Original PEM content:');
+  logger.debug(pemContent);
+  logger.debug('Normalized PEM content:');
+  logger.debug(normalizedContent);
+  logger.debug('Final PEM content:');
+  logger.debug(result);
+  logger.debug(`PEM content has newlines: ${result.includes('\n')}, has spaces: ${result.includes(' ')}`);
 
   return result;
 }
@@ -158,7 +157,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           cert = fileContent;
         } else if (this.configAny.certificateData) {
           // Format the certificate data properly
-          cert = formatPEMContent(this.configAny.certificateData);
+          cert = formatPEMContent(this.configAny.certificateData, this.logger);
         }
 
         if (this.configAny.privateKeyFile) {
@@ -171,7 +170,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           key = fileContent;
         } else if (this.configAny.privateKeyData) {
           // Format the private key data properly
-          key = formatPEMContent(this.configAny.privateKeyData);
+          key = formatPEMContent(this.configAny.privateKeyData, this.logger);
         }
 
         // Log the final PEM content for cert and key
@@ -183,8 +182,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(`Private key format check - Header: ${key?.toString().startsWith('-----BEGIN PRIVATE KEY-----')}, Footer: ${key?.toString().endsWith('-----END PRIVATE KEY-----')}`);
 
         // Ensure PEM content is properly formatted
-        const certPEM = cert.toString().trim();
-        const keyPEM = key.toString().trim();
+        const certPEM = formatPEMContent(cert.toString(), this.logger);
+        const keyPEM = formatPEMContent(key.toString(), this.logger);
 
         // Debug log the exact content being passed to the HTTPS agent
         this.logger.debug('Certificate content being passed to HTTPS agent:');
