@@ -69,7 +69,7 @@ export const heatmapRenderer: (
   render: async (domNode, config, handlers) => {
     const performanceTracker = createPerformanceTracker({
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
-      instance: EXPRESSION_HEATMAP_NAME,
+      subType: EXPRESSION_HEATMAP_NAME,
     });
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);

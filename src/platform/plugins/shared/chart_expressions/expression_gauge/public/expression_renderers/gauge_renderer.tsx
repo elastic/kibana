@@ -45,7 +45,7 @@ export const gaugeRenderer: (
   render: async (domNode, config, handlers) => {
     const performanceTracker = createPerformanceTracker({
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
-      instance: EXPRESSION_GAUGE_NAME,
+      subType: EXPRESSION_GAUGE_NAME,
     });
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);

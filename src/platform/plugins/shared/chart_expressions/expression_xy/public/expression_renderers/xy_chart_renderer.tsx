@@ -211,7 +211,7 @@ export const getXyChartRenderer = ({
   render: async (domNode: Element, config: XYChartProps, handlers) => {
     const performanceTracker = createPerformanceTracker({
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
-      instance: 'xyVis',
+      subType: 'xyVis',
     });
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
