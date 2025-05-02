@@ -35,6 +35,7 @@ import {
   useFleetStatus,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import type { NewPackagePolicyInput } from '../../../../../../../../common';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -132,6 +133,45 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 
   return result;
 }
+
+export const updateAgentlessCloudConnectorConfig = (
+  packagePolicy: NewPackagePolicy,
+  newAgentPolicy: NewAgentPolicy,
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void
+) => {
+  const input = packagePolicy.inputs?.filter(
+    (pinput: NewPackagePolicyInput) => pinput.enabled === true
+  )[0];
+  const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
+  if (
+    newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
+    newAgentPolicy?.supports_agentless
+  ) {
+    let targetCsp;
+    if (input?.type.includes('aws')) {
+      targetCsp = 'aws';
+    }
+    if (input?.type.includes('gcp')) {
+      targetCsp = 'gcp';
+    }
+    if (input?.type.includes('azure')) {
+      targetCsp = 'azure';
+    }
+
+    if (newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled) {
+      setNewAgentPolicy({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled,
+            target_csp: targetCsp,
+          },
+        },
+      });
+    }
+  }
+};
 
 const DEFAULT_PACKAGE_POLICY = {
   name: '',
@@ -338,6 +378,8 @@ export function useOnSubmit({
       });
     }
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
+
+  updateAgentlessCloudConnectorConfig(packagePolicy, newAgentPolicy, setNewAgentPolicy);
 
   const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,

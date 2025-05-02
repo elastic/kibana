@@ -251,6 +251,11 @@ export const getDefaultAwsCredentialsType = (
       ? AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS
       : AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
   }
+  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+
+  if (hasCloudFormationTemplate) {
+    return AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
+  }
 
   return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
 };
@@ -275,7 +280,6 @@ export const getCloudDefaultAwsCredentialConfig = ({
   } else {
     credentialsType = DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
   }
-
   const config: {
     [key: string]: {
       value: string | boolean;

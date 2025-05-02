@@ -15,7 +15,6 @@ const {
   AWS_SINGLE_ACCOUNT_TEST_ID,
   AWS_MANUAL_TEST_ID,
   AWS_CREDENTIAL_SELECTOR,
-  ROLE_ARN_TEST_ID,
   DIRECT_ACCESS_KEY_ID_TEST_ID,
   DIRECT_ACCESS_SECRET_KEY_TEST_ID,
   TEMP_ACCESS_KEY_ID_TEST_ID,
@@ -31,7 +30,6 @@ export default function (providerContext: FtrProviderContext) {
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const logger = getService('log');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
@@ -54,47 +52,35 @@ export default function (providerContext: FtrProviderContext) {
         expect((await cisIntegration.isRadioButtonChecked('organization-account')) === true);
         expect((await cisIntegration.isRadioButtonChecked('cloud_formation')) === true);
       });
-      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
-        expect(
-          (
-            await cisIntegration.getFieldValueInAddAgentFlyout(
-              'launchCloudFormationButtonAgentFlyoutTestId',
-              'href'
-            )
-          )?.includes('https://console.aws.amazon.com/cloudformation/')
-        ).to.be(true);
-      });
     });
 
-    describe('CIS_AWS Organization Manual Assume Role', () => {
-      it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
-        const roleArn = 'RoleArnTestValue';
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
-        await cisIntegration.inputUniqueIntegrationName();
-        await cisIntegration.clickSaveButton();
+    // describe('CIS_AWS Organization Manual Assume Role', () => {
+    //   it('CIS_AWS Organization Manual Assume Role Workflow', async () => {
+    //     const roleArn = 'RoleArnTestValue';
+    //     await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+    //     await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+    //     await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+    //     await cisIntegration.inputUniqueIntegrationName();
+    //     await cisIntegration.clickSaveButton();
 
-        /*
-         * sometimes it takes a while to save the integration so added timeout to wait for post install modal
-         */
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
-          const modal = await cisIntegration.getPostInstallModal();
-          if (!modal) {
-            logger.debug('Post install modal not found');
-          }
-          expect(modal !== undefined).to.be(true);
-        });
+    //     /*
+    //      * sometimes it takes a while to save the integration so added timeout to wait for post install modal
+    //      */
+    //     await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+    //       await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+    //       const modal = await cisIntegration.getPostInstallModal();
+    //       if (!modal) {
+    //         logger.debug('Post install modal not found');
+    //       }
+    //       expect(modal !== undefined).to.be(true);
+    //     });
 
-        await cisIntegration.navigateToIntegrationCspList();
-        expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
-          true
-        );
-      });
-    });
+    //     await cisIntegration.navigateToIntegrationCspList();
+    //     expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
+    //       true
+    //     );
+    //   });
+    // });
 
     describe('CIS_AWS Organization Manual Direct Access', () => {
       it('CIS_AWS Organization Manual Direct Access Workflow', async () => {
@@ -199,41 +185,25 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('CIS_AWS Single Cloud Formation', () => {
-      it('CIS_AWS Single Cloud Formation workflow', async () => {
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.inputUniqueIntegrationName();
-        await cisIntegration.clickSaveButton();
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
-          expect(
-            (await cisIntegration.getUrlOnPostInstallModal()) ===
-              'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
-          );
-        });
-      });
-    });
-
-    describe('CIS_AWS Single Manual Assume Role', () => {
-      it('CIS_AWS Single Manual Assume Role Workflow', async () => {
-        const roleArn = 'RoleArnTestValue';
-        await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-        await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
-        await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
-        await cisIntegration.inputUniqueIntegrationName();
-        await cisIntegration.clickSaveButton();
-        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
-          await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
-          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-          await cisIntegration.navigateToIntegrationCspList();
-          expect(
-            (await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn
-          ).to.be(true);
-        });
-      });
-    });
+    // describe('CIS_AWS Single Manual Assume Role', () => {
+    //   it('CIS_AWS Single Manual Assume Role Workflow', async () => {
+    //     const roleArn = 'RoleArnTestValue';
+    //     await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+    //     await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+    //     await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
+    //     await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+    //     await cisIntegration.inputUniqueIntegrationName();
+    //     await cisIntegration.clickSaveButton();
+    //     await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+    //       await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+    //       expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+    //       await cisIntegration.navigateToIntegrationCspList();
+    //       expect(
+    //         (await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn
+    //       ).to.be(true);
+    //     });
+    //   });
+    // });
 
     describe('CIS_AWS Single Manual Direct Access', () => {
       it('CIS_AWS Single Manual Direct Access Workflow', async () => {

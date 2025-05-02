@@ -67,6 +67,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    it('CIS_AWS Single Cloud Formation workflow', async () => {
+      await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
+      );
+
+      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.inputUniqueIntegrationName();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.selectSetupTechnology('agent-based');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await cisIntegration.clickSaveButton();
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(
+          (await cisIntegration.getUrlOnPostInstallModal()) ===
+            'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+        );
+      });
+    });
+
+    it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {
+      await cisIntegration.navigateToIntegrationCspList();
+      await cisIntegration.clickFirstElementOnIntegrationTableAddAgent();
+      expect(
+        (
+          await cisIntegration.getFieldValueInAddAgentFlyout(
+            'launchCloudFormationButtonAgentFlyoutTestId',
+            'href'
+          )
+        )?.includes('https://console.aws.amazon.com/cloudformation/')
+      ).to.be(true);
+    });
+
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(

@@ -1622,17 +1622,7 @@ describe('<CspPolicyTemplateForm />', () => {
       mockedCSPMExperimentalFeaturesService.get.mockReturnValue({
         cloudConnectorsEnabled: false,
       } as any);
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
-        services: {
-          cloud: {
-            csp: 'aws',
-            cloudId: 'mock-cloud-id',
-            deploymentId: 'mock-deployment-id',
-            serverless: { projectId: '' },
-            isCloudEnabled: true,
-          },
-        },
-      } as any);
+
       const policy = getMockPolicyAWS();
       const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
         'aws.credentials.type': { value: 'direct_access_keys' },
@@ -1642,7 +1632,7 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
-          packageInfo={getAwsPackageInfoMock() as PackageInfo}
+          packageInfo={getPackageInfoMock() as PackageInfo}
         />
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
