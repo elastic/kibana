@@ -16,6 +16,7 @@ Connectors provide a central place to store connection information for services 
 * [{{ibm-r}}](/reference/connectors-kibana/resilient-action-type.md): Create an incident in {{ibm-r}}.
 * [Index](/reference/connectors-kibana/index-action-type.md): Index data into Elasticsearch.
 * [Jira](/reference/connectors-kibana/jira-action-type.md): Create an incident in Jira.
+* [Microsoft Defender for Endpoint](/reference/connectors-kibana/defender-action-type.md): TBD
 * [Microsoft Teams](/reference/connectors-kibana/teams-action-type.md): Send a message to a Microsoft Teams channel.
 * [Observability AI Assistant](/reference/connectors-kibana/obs-ai-assistant-action-type.md): Add AI-driven insights and custom actions to your workflow.
 * [OpenAI](/reference/connectors-kibana/openai-action-type.md): Send a request to OpenAI.

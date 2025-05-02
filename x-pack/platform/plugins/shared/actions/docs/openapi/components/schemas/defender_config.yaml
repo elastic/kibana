@@ -1,0 +1,22 @@
+title: Connector request properties for a Microsoft Defender for Endpoint connector
+required:
+  - apiUrl
+  - projectKey
+description: Defines properties for connectors when type is `.microsoft_defender_endpoint`.
+type: object
+properties:
+  apiUrl:
+    type: string
+    description: TBD
+  clientId:
+    type: string
+    description: TBD
+  oAuthScope:
+    type: string
+    description: TBD
+  oAuthServerUrl:
+    type: string
+    description: TBD
+  tenantId:
+    description: TBD
+    type: string
