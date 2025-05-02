@@ -31,16 +31,16 @@ paths:
                   field: field2
               delete:
                 ids:
-                  - field1
-                  - field2
+                  - field5
+                  - field6
                 query: 'field: field1'
               update:
                 - allowed: true
                   anonymized: false
-                  id: field1
+                  id: field8
                 - allowed: false
                   anonymized: true
-                  id: field2
+                  id: field9
             schema:
               type: object
               properties:
@@ -97,8 +97,8 @@ paths:
                         anonymized: false
                         createdAt: '2023-10-31T12:00:00Z'
                         createdBy: user1
-                        field: field1
-                        id: field1
+                        field: field8
+                        id: field8
                         namespace: default
                         timestamp: '2023-10-31T12:00:00Z'
                         updatedAt: '2023-10-31T12:00:00Z'

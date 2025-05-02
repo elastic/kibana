@@ -35,8 +35,8 @@ paths:
               delete:
                 query: 'field: field1'
                 ids:
-                  - 'field1'
-                  - 'field2'
+                  - 'field5'
+                  - 'field6'
               create:
                 - field: field1
                   allowed: true
@@ -45,10 +45,10 @@ paths:
                   allowed: false
                   anonymized: true
               update:
-                - id: field1
+                - id: field8
                   allowed: true
                   anonymized: false
-                - id: field2
+                - id: field9
                   allowed: false
                   anonymized: true
       responses:
@@ -66,8 +66,8 @@ paths:
                 attributes:
                   results:
                     updated:
-                      - id: field1
-                        field: field1
+                      - id: field8
+                        field: field8
                         allowed: true
                         anonymized: false
                         timestamp: '2023-10-31T12:00:00Z'
