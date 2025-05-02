@@ -66,6 +66,7 @@ export const fetchSpaceIdsWithMaybePendingActions = async (
         },
       },
     },
+    ignore_unavailable: true,
   };
 
   logger.debug(
