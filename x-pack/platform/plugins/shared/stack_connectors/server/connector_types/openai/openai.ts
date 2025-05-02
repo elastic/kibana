@@ -126,11 +126,20 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             'utf8'
           );
           const { cert: parsedCert } = parsePemContent(fileContent);
+          if (!parsedCert) {
+            throw new Error(`No certificate found in ${this.config.certificateFile}`);
+          }
           cert = parsedCert;
           this.logger.debug(`Loaded certificate from file: ${this.config.certificateFile}, cert: ${parsedCert.substring(0, 50)}...`);
         } else if (this.config.certificateData) {
-          cert = normalizePem(this.config.certificateData);
-          this.logger.debug(`Using certificate data: ${cert.substring(0, 50)}...`);
+          this.logger.debug(`Raw certificateData length: ${this.config.certificateData.length}`);
+          const normalizedData = normalizePem(this.config.certificateData);
+          const { cert: parsedCert } = parsePemContent(normalizedData);
+          if (!parsedCert) {
+            throw new Error('No certificate found in certificateData');
+          }
+          cert = parsedCert;
+          this.logger.debug(`Using certificate data: ${parsedCert.substring(0, 50)}..., normalized length: ${normalizedData.length}`);
         } else {
           throw new Error('No certificate file or data provided');
         }
@@ -143,31 +152,45 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             'utf8'
           );
           const { key: parsedKey } = parsePemContent(fileContent);
+          if (!parsedKey) {
+            throw new Error(`No private key found in ${this.config.privateKeyFile}`);
+          }
           key = parsedKey;
           this.logger.debug(`Loaded private key from file: ${this.config.privateKeyFile}, key: ${parsedKey.substring(0, 50)}...`);
         } else if (this.config.privateKeyData) {
-          key = normalizePem(this.config.privateKeyData);
-          this.logger.debug(`Using private key data: ${key.substring(0, 50)}...`);
+          this.logger.debug(`Raw privateKeyData length: ${this.config.privateKeyData.length}`);
+          const normalizedData = normalizePem(this.config.privateKeyData);
+          const { key: parsedKey } = parsePemContent(normalizedData);
+          if (!parsedKey) {
+            throw new Error('No private key found in privateKeyData');
+          }
+          key = parsedKey;
+          this.logger.debug(`Using private key data: ${parsedKey.substring(0, 50)}..., normalized length: ${normalizedData.length}`);
         } else {
           throw new Error('No private key file or data provided');
         }
 
-        const httpsAgent = new https.Agent({
-          cert,
-          key,
-          rejectUnauthorized: this.config.verificationMode === 'none',
-          checkServerIdentity:
-            this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
-              ? () => undefined
-              : undefined,
-        });
+        try {
+          const httpsAgent = new https.Agent({
+            cert,
+            key,
+            rejectUnauthorized: this.config.verificationMode !== 'none',
+            checkServerIdentity:
+              this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
+                ? () => undefined
+                : undefined,
+          });
 
-        this.openAI = new OpenAI({
-          apiKey: this.key,
-          baseURL: removeEndpointFromUrl(this.url),
-          defaultHeaders: this.headers,
-          httpAgent: httpsAgent,
-        });
+          this.openAI = new OpenAI({
+            apiKey: this.key,
+            baseURL: removeEndpointFromUrl(this.url),
+            defaultHeaders: this.headers,
+            httpAgent: httpsAgent,
+          });
+        } catch (agentError) {
+          this.logger.error(`Failed to initialize https.Agent: ${agentError.message}, stack: ${agentError.stack}`);
+          throw agentError;
+        }
       } else {
         this.openAI =
           this.config.apiProvider === OpenAiProviderType.AzureAi
@@ -187,14 +210,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
               });
       }
     } catch (error) {
-      this.logger.error(`Error initializing OpenAI client: ${error.message}`);
+      this.logger.error(`Error initializing OpenAI client: ${error.message}, stack: ${error.stack}`);
       throw error;
     }
 
     this.registerSubActions();
   }
 
-  // Rest of the file remains unchanged
   private registerSubActions() {
     this.registerSubAction({
       name: SUB_ACTION.RUN,
@@ -283,12 +305,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(`PKI OpenAI Response (runApi): ${JSON.stringify(response)}`);
         return response as RunActionResponse;
       } catch (error) {
+        this.logger.error(`runApi failed: ${error.message}, stack: ${error.stack}`);
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(
             `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`
           );
         }
-        throw error;
+        throw new Error(`Connection error: ${error.message}`);
       }
     } else {
       const sanitizedBody = sanitizeRequest(
@@ -347,12 +370,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(`PKI OpenAI Streaming Response (streamApi): ${JSON.stringify(response)}`);
         return stream ? (response as unknown as RunActionResponse) : (response as RunActionResponse);
       } catch (error) {
+        this.logger.error(`streamApi failed: ${error.message}, stack: ${error.stack}`);
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(
             `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`
           );
         }
-        throw error;
+        throw new Error(`Connection error: ${error.message}`);
       }
     } else {
       const executeBody = getRequestWithStreamOption(
