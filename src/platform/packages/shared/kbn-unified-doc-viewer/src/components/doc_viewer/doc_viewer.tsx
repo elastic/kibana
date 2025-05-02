@@ -59,8 +59,13 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
 
     useImperativeHandle(
       ref,
-      () => ({ setSelectedTabId: (tabId: string) => setSelectedTabId(getFullTabId(tabId)) }),
-      []
+      () => ({
+        setSelectedTabId: (tabId: string) => {
+          setSelectedTabId(getFullTabId(tabId));
+          setInitialTabId(getFullTabId(tabId)); // Persist the selected tab in localStorage
+        },
+      }),
+      [setInitialTabId]
     );
 
     const onTabClick = useCallback(

@@ -110,8 +110,8 @@ export function ContextAppContent({
   const setExpandedDocWithInitialTab = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       setExpandedDoc(doc);
-      setInitialTabId(options?.initialTabId);
       if (options?.initialTabId) {
+        setInitialTabId(options.initialTabId);
         docViewerRef.current?.setSelectedTabId(options.initialTabId);
       }
     },
