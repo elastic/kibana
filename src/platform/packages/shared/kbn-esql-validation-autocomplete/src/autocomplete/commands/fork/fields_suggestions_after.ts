@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { type ESQLAstCommand } from '@kbn/esql-ast';
-import type { ESQLRealField } from '../../../validation/types';
+import type { ESQLFieldWithMetadata } from '../../../validation/types';
 
 export const fieldsSuggestionsAfter = (
   command: ESQLAstCommand,
-  previousCommandFields: ESQLRealField[],
-  userDefinedColumns: ESQLRealField[]
+  previousCommandFields: ESQLFieldWithMetadata[],
+  userDefinedColumns: ESQLFieldWithMetadata[]
 ) => {
   return [
     ...previousCommandFields,

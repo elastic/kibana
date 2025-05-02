@@ -24,7 +24,7 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, ESQLRealField, validateQuery } from '@kbn/esql-validation-autocomplete';
+import { ESQLCallbacks, ESQLFieldWithMetadata, validateQuery } from '@kbn/esql-validation-autocomplete';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';
 
@@ -56,7 +56,7 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
             [
               { name: 'doubleField', type: 'double' },
               { name: 'keywordField', type: 'keyword' },
-            ] as ESQLRealField[]
+            ] as ESQLFieldWithMetadata[]
         : undefined,
       getPolicies: callbacksEnabled.policies
         ? async () => [
