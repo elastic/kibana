@@ -295,6 +295,14 @@ export function getWebpackConfig(
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
+        buffer: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+          require.resolve('buffer'),
+        ],
+        punycode: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+          require.resolve('punycode'),
+        ],
       },
     },
 
