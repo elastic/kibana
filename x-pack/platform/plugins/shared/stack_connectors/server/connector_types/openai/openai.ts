@@ -179,10 +179,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         // Debug log the agent configuration
         this.logger.debug('HTTPS Agent configuration:');
         this.logger.debug(JSON.stringify({
-          cert: certPEM.slice(0, 100) + '...',
-          key: keyPEM.slice(0, 100) + '...',
-          rejectUnauthorized: this.configAny.verificationMode === 'none',
-          checkServerIdentity: this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
+          cert: cert.slice(0, 100) + '...',
+          key: key.slice(0, 100) + '...',
+          rejectUnauthorized: this.config.verificationMode === 'none',
+          checkServerIdentity: this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
         }, null, 2));
 
         try {
