@@ -96,7 +96,11 @@ export const getChangePointChartEmbeddableFactory = (
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, timeRangeManager.anyStateChange$),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          timeRangeManager.anyStateChange$,
+          changePointManager.anyStateChange$
+        ),
         getComparators: () => {
           return {
             ...titleComparators,
