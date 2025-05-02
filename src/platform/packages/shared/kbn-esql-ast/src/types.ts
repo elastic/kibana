@@ -9,7 +9,12 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstTimeseriesCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand =
+  | ESQLCommand
+  | ESQLAstTimeseriesCommand
+  | ESQLAstJoinCommand
+  | ESQLAstChangePointCommand
+  | ESQLAstRerankCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -105,6 +110,14 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
     pvalue: ESQLColumn;
   };
 }
+
+export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
+  query: ESQLLiteral;
+  fields: ESQLAstField[];
+  inferenceId: ESQLIdentifierOrParam;
+}
+
+export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
