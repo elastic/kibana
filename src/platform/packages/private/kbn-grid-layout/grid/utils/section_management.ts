@@ -8,29 +8,28 @@
  */
 import { cloneDeep } from 'lodash';
 
-import { GridLayoutData, OrderedLayout } from '../types';
+import { GridSectionData, OrderedLayout } from '../types';
 import { resolveGridSection } from './resolve_grid_section';
 
 /**
- * Move the panels in the `startingRow` to the bottom of the `newRow` and resolve the resulting layout
- * @param layout Starting layout
- * @param startingRow The source row for the panels
- * @param newRow The destination row for the panels
- * @returns Updated layout with panels moved from `startingRow` to `newRow`
+ * Move the panels in the `startingSection` to the bottom of the `newSection` and resolve the resulting panels
+ * @param startingSectionPanels The source section for the panels
+ * @param newSectionPanels The destination section for the panels
+ * @returns Combined panel list
  */
-export const movePanelsToRow = (layout: GridLayoutData, startingRow: string, newRow: string) => {
-  const newLayout = cloneDeep(layout);
-  const panelsToMove = newLayout[startingRow].panels;
-  const startingPanels = Object.values(newLayout[newRow].panels);
+export const combinePanels = (
+  startingSectionPanels: GridSectionData['panels'],
+  newSectionPanels: GridSectionData['panels']
+): GridSectionData['panels'] => {
+  const panelsToMove = cloneDeep(startingSectionPanels);
+  const startingPanels = Object.values(newSectionPanels);
   const maxRow =
     startingPanels.length > 0
       ? Math.max(...startingPanels.map(({ row, height }) => row + height))
       : 0;
   Object.keys(panelsToMove).forEach((index) => (panelsToMove[index].row += maxRow));
-  newLayout[newRow].panels = { ...newLayout[newRow].panels, ...panelsToMove };
-  newLayout[newRow] = resolveGridSection(newLayout[newRow]);
-  newLayout[startingRow] = { ...newLayout[startingRow], panels: {} };
-  return newLayout;
+  const resolvedPanels = resolveGridSection({ ...newSectionPanels, ...panelsToMove });
+  return resolvedPanels;
 };
 
 /**

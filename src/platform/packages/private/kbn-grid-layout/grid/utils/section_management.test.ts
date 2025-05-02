@@ -10,7 +10,7 @@
 import { omit } from 'lodash';
 import { getSampleLayout } from '../test_utils/sample_layout';
 import { GridLayoutData } from '../types';
-import { deleteRow, movePanelsToRow } from './section_management';
+import { deleteRow, movePanelsToSection } from './section_management';
 
 describe('row management', () => {
   describe('move panels to row', () => {
@@ -31,7 +31,7 @@ describe('row management', () => {
 
     it('move panels from one row to another populated row', () => {
       const originalLayout = getSampleLayout();
-      const newLayout = movePanelsToRow(originalLayout, 'third', 'first');
+      const newLayout = movePanelsToSection(originalLayout, 'third', 'first');
       checkPanelCountsAfterMove(originalLayout, newLayout, 'third', 'first');
 
       // existing panels in new row do not move
@@ -61,7 +61,7 @@ describe('row management', () => {
           panels: getSampleLayout().first.panels,
         },
       };
-      const newLayout = movePanelsToRow(originalLayout, 'second', 'first');
+      const newLayout = movePanelsToSection(originalLayout, 'second', 'first');
       checkPanelCountsAfterMove(originalLayout, newLayout, 'second', 'first');
 
       // if no panels in new row, then just send all panels to new row with no changes

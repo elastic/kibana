@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteRow, movePanelsToRow } from '../utils/section_management';
+import { deleteRow, movePanelsToSection } from '../utils/section_management';
 
 export const DeleteGridSectionModal = ({
   sectionId,
@@ -66,7 +66,7 @@ export const DeleteGridSectionModal = ({
             const layout = gridLayoutStateManager.gridLayout$.getValue();
             const firstSectionId = Object.values(layout).find(({ order }) => order === 0)?.id;
             if (!firstSectionId) return;
-            let newLayout = movePanelsToRow(layout, sectionId, firstSectionId);
+            let newLayout = movePanelsToSection(layout, sectionId, firstSectionId);
             newLayout = deleteRow(newLayout, sectionId);
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}

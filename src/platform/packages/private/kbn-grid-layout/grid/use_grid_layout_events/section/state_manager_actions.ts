@@ -8,12 +8,13 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { pick } from 'lodash';
+import { first, pick } from 'lodash';
 
 import { GridLayoutStateManager, GridSectionData, OrderedLayout } from '../../types';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getPanelKeysInOrder, resolveGridSection } from '../../utils/resolve_grid_section';
+import { combinePanels, movePanelsToSection } from '../../utils/section_management';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -180,34 +181,18 @@ export const moveAction = (
     mainSectionCount = 0;
     for (let i = 0; i < sortedSections.length; i++) {
       const firstSection = sortedSections[i];
-      const firstSectionPanels = Object.values(firstSection.panels);
-      let rowSum =
-        firstSectionPanels.length > 0
-          ? Math.max(...firstSectionPanels.map(({ row, height }) => row + height))
-          : 0;
       if (firstSection.isMainSection) {
-        let combinedPanels = { ...firstSection.panels };
+        let combinedPanels: GridSectionData['panels'] = { ...firstSection.panels };
         while (i + 1 < sortedSections.length) {
           const secondSection = sortedSections[i + 1];
           if (!secondSection.isMainSection) break;
-
-          // add height of current combined sections to the panels so that they keep their order
-          const secondSectionPanels = Object.values(secondSection.panels);
-          const maxRow =
-            secondSectionPanels.length > 0
-              ? Math.max(...secondSectionPanels.map(({ row, height }) => row + height))
-              : 0;
-          secondSectionPanels.forEach((panel) => (panel.row += rowSum));
-          rowSum += maxRow;
-
-          combinedPanels = { ...combinedPanels, ...secondSection.panels };
+          combinedPanels = combinePanels(secondSection.panels, combinedPanels);
           i++;
         }
-        const resolvedCombinedPanels = resolveGridSection(combinedPanels);
         finalLayout[`main-${mainSectionCount}`] = {
           ...firstSection,
           order: i,
-          panels: resolvedCombinedPanels,
+          panels: combinedPanels,
           id: `main-${mainSectionCount}`,
         };
         mainSectionCount++;
