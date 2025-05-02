@@ -7,6 +7,7 @@
 
 import { Span } from '@opentelemetry/api';
 import { isPromise } from 'util/types';
+import { safeJsonStringify } from '@kbn/std';
 import { withInferenceSpan } from './with_inference_span';
 import { GenAISemanticConventions } from './types';
 
@@ -42,10 +43,9 @@ export function withExecuteToolSpan<T>(
       if (isPromise(res)) {
         res.then(
           (value) => {
-            try {
-              span?.setAttribute('output.value', JSON.stringify(value));
-            } catch (err) {
-              // oh well
+            const stringified = safeJsonStringify(value);
+            if (stringified) {
+              span.setAttribute('output.value', stringified);
             }
           },
           // if the promise fails, we catch it and noop

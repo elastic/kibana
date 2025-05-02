@@ -40,10 +40,13 @@ export const initTelemetry = (
 
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
 
-  const telemetryEnabled = telemetryConfig?.enabled === true;
+  // explicitly check for enabled == false, as the default in the schema
+  // is true, but it's not parsed through @kbn/config-schema, so the
+  // default value is not returned
+  const telemetryEnabled = telemetryConfig?.enabled !== false;
 
   // tracing is enabled only when telemetry is enabled and tracing is not disabled
-  const tracingEnabled = telemetryEnabled && telemetryConfig.tracing?.enabled;
+  const tracingEnabled = telemetryEnabled && telemetryConfig?.tracing?.enabled;
 
   if (!tracingEnabled) {
     return async () => {};
