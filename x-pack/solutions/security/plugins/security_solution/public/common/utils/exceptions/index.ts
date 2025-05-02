@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { IHttpFetchError } from '@kbn/core/public';
+
 export const isIndexNotFoundError = (error: unknown): boolean => {
   const castError = error as {
     attributes?: {
@@ -19,8 +21,5 @@ export const isIndexNotFoundError = (error: unknown): boolean => {
 };
 
 export const isAbortError = (error: unknown): boolean => {
-  const castError = error as {
-    name?: string;
-  };
-  return castError.name === 'AbortError';
+  return (error as IHttpFetchError)?.name === 'AbortError';
 };

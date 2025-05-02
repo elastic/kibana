@@ -96,7 +96,7 @@ export const useRiskScore = <T extends EntityType>({
   } = useSearchStrategy<EntityRiskQueries.list>({
     factoryQueryType,
     initialResult,
-    abort: skip || !hasEngineBeenInstalled || isStatusLoading || !isAuthorized,
+    abort: skip,
     showErrorToast: false,
   });
 
