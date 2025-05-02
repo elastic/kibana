@@ -153,7 +153,7 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
                 `FROM index 
   | FORK
       (EVAL foo = TO_UPPER(keywordField) | LIMIT 100)
-      (EVAL foo + 1)`,
+      (EVAL TO_LOWER(foo))`,
                 ['Unknown column [foo]']
               );
             });
