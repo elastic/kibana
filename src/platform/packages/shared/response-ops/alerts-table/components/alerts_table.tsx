@@ -394,13 +394,18 @@ const AlertsTableContent = typedForwardRef(
 
     const onSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
-        const newSort = _sort.map((sortItem) => {
-          return {
-            [sortItem.id]: {
-              order: sortItem.direction,
-            },
-          };
-        });
+        const newSort = _sort
+          .map((sortItem) => {
+            return {
+              [sortItem.id]: {
+                order: sortItem.direction,
+              },
+            };
+          })
+          .filter((entry) => {
+            const sortKey = Object.keys(entry)[0];
+            return visibleColumns.includes(sortKey);
+          });
 
         storageAlertsTable.current = {
           ...storageAlertsTable.current,
@@ -409,7 +414,7 @@ const AlertsTableContent = typedForwardRef(
         storage.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       },
-      [id]
+      [id, visibleColumns]
     );
 
     const CasesContext = useMemo(() => {
