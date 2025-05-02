@@ -59,56 +59,33 @@ import fs from 'fs';
 import https from 'https';
 import { Logger } from '@kbn/logging';
 
-function formatPEMContent(pemContent: string, logger: Logger): string {
+function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY', logger: Logger): string {
   if (!pemContent) return pemContent;
 
-  // First, normalize any existing newlines to \n and trim whitespace
-  let normalizedContent = pemContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+  // Normalize input by replacing all whitespace with a single space
+  const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
 
-  // Extract the type from the header (CERTIFICATE or PRIVATE KEY)
-  const headerMatch = normalizedContent.match(/-----BEGIN\s+(\w+)\s+-----/);
-  if (!headerMatch) {
-    logger.debug('No valid PEM header found in content');
+  // Define header and footer
+  const header = `-----BEGIN ${type}-----`;
+  const footer = `-----END ${type}-----`;
+
+  // Verify header and footer
+  if (!normalizedContent.startsWith(header) || !normalizedContent.endsWith(footer)) {
+    logger.debug(`Invalid PEM format for ${type}: Missing header or footer`);
     return pemContent;
   }
 
-  const type = headerMatch[1];
-  
-  // Extract just the base64 content, removing all whitespace
-  const base64Content = normalizedContent
-    .replace(/-----BEGIN\s+\w+\s+-----[\r\n\s]*/, '') // Remove header and any following whitespace
-    .replace(/[\r\n\s]*-----END\s+\w+\s+-----/, '')   // Remove footer and any preceding whitespace
-    .replace(/[\s\n\r]+/g, '');                    // Remove all whitespace and newlines
+  // Extract base64 content between header and footer
+  const base64Content = normalizedContent.slice(header.length, normalizedContent.length - footer.length).trim();
 
-  // Format the base64 content with exactly 64 characters per line
-  const lines = base64Content.match(/.{1,64}/g) || [];
-  const formattedContent = lines.join('\n');
+  // Remove all whitespace from base64 content
+  const cleanBase64 = base64Content.replace(/\s+/g, '');
 
-  // Build the final PEM with proper headers, newlines, and no trailing spaces
-  const result = `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----\n`;
+  // Split into 64-character lines
+  const formattedBase64 = cleanBase64.match(/.{1,64}/g)?.join('\n') || cleanBase64;
 
-  // Debug log the exact content
-  logger.debug('Original PEM content:');
-  logger.debug(pemContent);
-  logger.debug('Normalized PEM content:');
-  logger.debug(normalizedContent);
-  logger.debug('Base64 content:');
-  logger.debug(base64Content);
-  logger.debug('Formatted content:');
-  logger.debug(formattedContent);
-  logger.debug('Final PEM content:');
-  logger.debug(result);
-  logger.debug(`PEM content has newlines: ${result.includes('\n')}, has spaces: ${result.includes(' ')}`);
-  logger.debug(`PEM content starts with header: ${result.startsWith(`-----BEGIN ${type}-----`)}`);
-  logger.debug(`PEM content ends with footer: ${result.endsWith(`-----END ${type}-----\n`)}`);
-  logger.debug(`PEM content has newline after header: ${result.includes(`-----BEGIN ${type}-----\n`)}`);
-  logger.debug(`PEM content has newline before footer: ${result.includes(`\n-----END ${type}-----\n`)}`);
-  logger.debug(`PEM content line count: ${result.split('\n').length}`);
-  logger.debug(`PEM content first line: ${result.split('\n')[0]}`);
-  logger.debug(`PEM content last line: ${result.split('\n')[result.split('\n').length - 1]}`);
-  logger.debug(`PEM content base64 line length: ${formattedContent.split('\n')[0]?.length}`);
-
-  return result;
+  // Assemble formatted PEM with newlines
+  return `${header}\n${formattedBase64}\n${footer}`;
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
@@ -123,7 +100,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     super(params);
 
     // Top-level log to confirm constructor is called
-    this.logger.info('OpenAIConnector constructed');
+    this.logger.debug('OpenAIConnector constructed');
 
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
@@ -143,89 +120,58 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       if (
         this.provider === OpenAiProviderType.Other &&
-        (this.configAny.certificateFile ||
-          this.configAny.certificateData ||
-          this.configAny.privateKeyFile ||
-          this.configAny.privateKeyData)
+        (this.config.certificateFile ||
+          this.config.certificateData ||
+          this.config.privateKeyFile ||
+          this.config.privateKeyData)
       ) {
         // Validate PKI configuration
         if (
           !validatePKICertificates(
-            this.configAny.certificateFile,
-            this.configAny.certificateData,
-            this.configAny.privateKeyFile,
-            this.configAny.privateKeyData
+            this.config.certificateFile,
+            this.config.certificateData,
+            this.config.privateKeyFile,
+            this.config.privateKeyData
           )
         ) {
           throw new Error('Invalid or inaccessible PKI certificates');
         }
 
-        let cert: string | Buffer = '';
-        let key: string | Buffer = '';
+        let cert: string;
+        let key: string;
 
-        if (this.configAny.certificateFile) {
-          const fileContent = fs.readFileSync(
-            Array.isArray(this.configAny.certificateFile)
-              ? this.configAny.certificateFile[0]
-              : this.configAny.certificateFile,
+        if (this.config.certificateFile) {
+          cert = fs.readFileSync(
+            Array.isArray(this.config.certificateFile)
+              ? this.config.certificateFile[0]
+              : this.config.certificateFile,
             'utf8'
           );
-          cert = fileContent;
-        } else if (this.configAny.certificateData) {
-          // Format the certificate data properly
-          cert = formatPEMContent(this.configAny.certificateData, this.logger);
-          this.logger.debug('Certificate PEM content analysis:');
-          this.logger.debug(`Line count: ${cert.split('\n').length}`);
-          this.logger.debug(`First line: ${cert.split('\n')[0]}`);
-          this.logger.debug(`Last line: ${cert.split('\n')[cert.split('\n').length - 1]}`);
-          this.logger.debug(`Has newline after header: ${cert.includes('-----BEGIN CERTIFICATE-----\n')}`);
-          this.logger.debug(`Has newline before footer: ${cert.includes('\n-----END CERTIFICATE-----\n')}`);
+        } else if (this.config.certificateData) {
+          cert = formatPEMContent(this.config.certificateData, 'CERTIFICATE');
+        } else {
+          throw new Error('No certificate file or data provided');
         }
 
-        if (this.configAny.privateKeyFile) {
-          const fileContent = fs.readFileSync(
-            Array.isArray(this.configAny.privateKeyFile)
-              ? this.configAny.privateKeyFile[0]
-              : this.configAny.privateKeyFile,
+        if (this.config.privateKeyFile) {
+          key = fs.readFileSync(
+            Array.isArray(this.config.privateKeyFile)
+              ? this.config.privateKeyFile[0]
+              : this.config.privateKeyFile,
             'utf8'
           );
-          key = fileContent;
-        } else if (this.configAny.privateKeyData) {
-          // Format the private key data properly
-          key = formatPEMContent(this.configAny.privateKeyData, this.logger);
-          this.logger.debug('Private key PEM content analysis:');
-          this.logger.debug(`Line count: ${key.split('\n').length}`);
-          this.logger.debug(`First line: ${key.split('\n')[0]}`);
-          this.logger.debug(`Last line: ${key.split('\n')[key.split('\n').length - 1]}`);
-          this.logger.debug(`Has newline after header: ${key.includes('-----BEGIN PRIVATE KEY-----\n')}`);
-          this.logger.debug(`Has newline before footer: ${key.includes('\n-----END PRIVATE KEY-----\n')}`);
+        } else if (this.config.privateKeyData) {
+          key = formatPEMContent(this.config.privateKeyData, 'PRIVATE KEY');
+        } else {
+          throw new Error('No private key file or data provided');
         }
 
-        // Log the final PEM content for cert and key
-        this.logger.debug(`Final certificate PEM (first 200 chars):\n${cert?.toString().slice(0, 200)}`);
-        this.logger.debug(`Final private key PEM (first 200 chars):\n${key?.toString().slice(0, 200)}`);
-        this.logger.debug('Certificate PEM lines:\n' + cert?.toString().split('\n').join('\n'));
-        this.logger.debug('Private key PEM lines:\n' + key?.toString().split('\n').join('\n'));
-        this.logger.debug(`Certificate format check - Header: ${cert?.toString().startsWith('-----BEGIN CERTIFICATE-----')}, Footer: ${cert?.toString().endsWith('-----END CERTIFICATE-----')}`);
-        this.logger.debug(`Private key format check - Header: ${key?.toString().startsWith('-----BEGIN PRIVATE KEY-----')}, Footer: ${key?.toString().endsWith('-----END PRIVATE KEY-----')}`);
-
-        // Ensure PEM content is properly formatted
-        const certPEM = formatPEMContent(cert.toString(), this.logger);
-        const keyPEM = formatPEMContent(key.toString(), this.logger);
-
-        // Debug log the exact content being passed to the HTTPS agent
-        this.logger.debug('Certificate content being passed to HTTPS agent:');
-        this.logger.debug(certPEM);
-        this.logger.debug('Private key content being passed to HTTPS agent:');
-        this.logger.debug(keyPEM);
-
-        // Create the HTTPS agent with the PEM content as a Buffer
         const httpsAgent = new https.Agent({
-          cert: Buffer.from(certPEM, 'utf8'),
-          key: Buffer.from(keyPEM, 'utf8'),
-          rejectUnauthorized: this.configAny.verificationMode === 'none',
+          cert,
+          key,
+          rejectUnauthorized: this.config.verificationMode === 'none',
           checkServerIdentity:
-            this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
+            this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
