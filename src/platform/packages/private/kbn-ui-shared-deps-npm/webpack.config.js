@@ -39,6 +39,8 @@ module.exports = (_, argv) => {
         'buffer',
         'punycode',
         'util',
+        'url',
+        'qs',
 
         /**
          * babel runtime helpers referenced from entry chunks
@@ -144,6 +146,16 @@ module.exports = (_, argv) => {
           process.env.REACT_18 === 'true' ? 'react-dom-18/profiling' : 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
         react: process.env.REACT_18 === 'true' ? 'react-18' : 'react',
+        // NOTE: We use this to make sure that buffer and punycode bundled are the ones
+        // installed from node-stdlib-browser and are in sync in between shared deps and plugins bundles
+        buffer: [
+          Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+          require.resolve('buffer'),
+        ],
+        punycode: [
+          Path.resolve(REPO_ROOT, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+          require.resolve('punycode'),
+        ],
       },
       extensions: ['.js', '.ts'],
       mainFields: ['browser', 'module', 'main'],
