@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
-import useObservable from 'react-use/lib/useObservable';
-import useUnmount from 'react-use/lib/useUnmount';
-import { isEqual } from 'lodash';
+import {
+  UnifiedDocViewerLogsOverview,
+  type UnifiedDocViewerLogsOverviewApi,
+} from '@kbn/unified-doc-viewer-plugin/public';
+import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogDocumentProfileProvider } from '../profile';
 
@@ -38,29 +39,50 @@ export const createGetDocViewer =
           }),
           order: 0,
           component: function LogOverviewTab(props) {
-            const overviewContext = useObservable(
-              context.logOverviewContext$,
-              context.logOverviewContext$.getValue()
+            const [logsOverviewApi, setLogsOverviewApi] =
+              useState<UnifiedDocViewerLogsOverviewApi | null>(null);
+            const initialAccordionSection = useRef(
+              context.logOverviewContext$.getValue()?.initialAccordionSection
             );
 
-            useUnmount(() => {
-              const currentOverviewContext = context.logOverviewContext$.getValue();
-              if (isEqual(currentOverviewContext, overviewContext)) {
-                context.logOverviewContext$.next(undefined);
-              }
-            });
+            useEffect(() => {
+              context.logOverviewContext$.next(undefined);
 
-            const accordionState = React.useMemo(() => {
-              return overviewContext?.recordId === props.hit.id &&
-                overviewContext?.initialAccordionSection
-                ? { [overviewContext.initialAccordionSection]: true }
-                : {};
-            }, [overviewContext, props.hit.id]);
+              if (!logsOverviewApi) {
+                return;
+              }
+
+              if (initialAccordionSection.current) {
+                logsOverviewApi.openAndScrollToSection(initialAccordionSection.current);
+              }
+
+              initialAccordionSection.current = undefined;
+
+              const subscription = context.logOverviewContext$
+                .pipe(
+                  skip(1),
+                  filter((overviewContext) => {
+                    return (
+                      overviewContext !== undefined &&
+                      overviewContext.initialAccordionSection !== undefined &&
+                      overviewContext.recordId === props.hit.id
+                    );
+                  })
+                )
+                .subscribe((overviewContext) => {
+                  logsOverviewApi.openAndScrollToSection(overviewContext!.initialAccordionSection!);
+                  context.logOverviewContext$.next(undefined);
+                });
+
+              return () => {
+                subscription.unsubscribe();
+              };
+            }, [logsOverviewApi, props.hit.id]);
 
             return (
               <UnifiedDocViewerLogsOverview
                 {...props}
-                docViewerAccordionState={accordionState}
+                ref={setLogsOverviewApi}
                 renderAIAssistant={logsAIAssistantFeature?.render}
                 renderStreamsField={streamsFeature?.renderStreamsField}
               />

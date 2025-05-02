@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -48,6 +48,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -139,7 +140,6 @@ function DiscoverDocumentsComponent({
   });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
   const initialDocViewerTabId = useInternalStateSelector((state) => state.initialDocViewerTabId);
-  const resetDocTabId = useInternalStateSelector((state) => state.resetDocTabId);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -204,12 +204,17 @@ function DiscoverDocumentsComponent({
     [onRemoveColumn, ebtManager, fieldsMetadata]
   );
 
+  const docViewerRef = useRef<DocViewerApi>(null);
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
-      dispatch(internalStateActions.setExpandedDoc(doc));
+      dispatch(
+        internalStateActions.setExpandedDoc({
+          expandedDoc: doc,
+          initialDocViewerTabId: options?.initialTabId,
+        })
+      );
       if (options?.initialTabId) {
-        dispatch(internalStateActions.resetDocTab()); // Ugly hack required to handle remount of DocViewer component when opening it via LeadingControlActions
-        dispatch(internalStateActions.setInitialDocViewerTabId(options?.initialTabId));
+        docViewerRef.current?.setSelectedTabId(options.initialTabId);
       }
     },
     [dispatch]
@@ -307,7 +312,7 @@ function DiscoverDocumentsComponent({
         setExpandedDoc={setExpandedDoc}
         query={query}
         initialTabId={initialDocViewerTabId}
-        key={resetDocTabId} // Hack to remount the component when opening it in order to switch tabs when flyout is already open
+        docViewerRef={docViewerRef}
       />
     ),
     [
@@ -319,7 +324,6 @@ function DiscoverDocumentsComponent({
       setExpandedDoc,
       query,
       initialDocViewerTabId,
-      resetDocTabId,
     ]
   );
 
