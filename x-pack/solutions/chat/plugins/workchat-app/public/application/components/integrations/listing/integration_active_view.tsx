@@ -37,7 +37,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
 import { integrationTypeToLabel, getIntegrationIcon } from '../utils';
 import { useAgentList } from '../../../hooks/use_agent_list';
-import { integrationLabels } from '../i18n';
+import { toolLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
 import { useIntegrationList } from '../../../hooks/use_integration_list';
 export const IntegrationActiveView: React.FC = () => {
@@ -58,7 +58,7 @@ export const IntegrationActiveView: React.FC = () => {
     },
     {
       field: 'name',
-      name: i18n.translate('workchatApp.integrations.listView.integrationName', {
+      name: i18n.translate('workchatApp.tools.listView.toolName', {
         defaultMessage: 'Name',
       }),
       sortable: true,
@@ -66,21 +66,21 @@ export const IntegrationActiveView: React.FC = () => {
     },
     {
       field: 'type',
-      name: i18n.translate('workchatApp.integrations.listView.integrationType', {
+      name: i18n.translate('workchatApp.tools.listView.toolType', {
         defaultMessage: 'Type',
       }),
       render: (type: IntegrationType) => integrationTypeToLabel(type),
     },
     {
       field: 'status',
-      name: i18n.translate('workchatApp.integrations.listView.integrationStatus', {
+      name: i18n.translate('workchatApp.tools.listView.toolStatus', {
         defaultMessage: 'Status',
       }),
       render: () => <EuiHealth color="green">Healthy</EuiHealth>,
     },
     {
       field: 'used_in',
-      name: i18n.translate('workchatApp.integrations.listView.integrationAgents', {
+      name: i18n.translate('workchatApp.tools.listView.toolsAgents', {
         defaultMessage: 'Used in...',
       }),
       render: () => (
@@ -92,7 +92,7 @@ export const IntegrationActiveView: React.FC = () => {
       ),
     },
     {
-      name: i18n.translate('workchatApp.integrations.listView.actions', {
+      name: i18n.translate('workchatApp.tools.listView.actions', {
         defaultMessage: 'Actions',
       }),
       actions: [
@@ -103,7 +103,7 @@ export const IntegrationActiveView: React.FC = () => {
           icon: 'documentEdit',
           type: 'icon',
           onClick: ({ id }) => {
-            navigateToWorkchatUrl(appPaths.integrations.edit({ integrationId: id }));
+            navigateToWorkchatUrl(appPaths.tools.edit({ integrationId: id }));
           },
           'data-test-subj': 'integrationListTable-edit-btn',
         },
@@ -286,24 +286,24 @@ export const IntegrationActiveView: React.FC = () => {
               <EuiEmptyPrompt
                 title={
                   <h2>
-                    {i18n.translate('workchatApp.integrations.listView.noIntegrationTitle', {
+                    {i18n.translate('workchatApp.tools.listView.noIntegrationTitle', {
                       defaultMessage: "You haven't connected anything",
                     })}
                   </h2>
                 }
-                body={i18n.translate('workchatApp.integrations.listView.noIntegrationBody', {
+                body={i18n.translate('workchatApp.tools.listView.noIntegrationBody', {
                   defaultMessage:
                     "Your connected tools will show up here once you've set up an integration. Until then, nothing for me to work with!",
                 })}
                 actions={
                   <EuiButton
                     onClick={() => {
-                      navigateToWorkchatUrl(appPaths.integrations.catalog);
+                      navigateToWorkchatUrl(appPaths.tools.catalog);
                     }}
                     color="primary"
                     fill
                   >
-                    {integrationLabels.listView.browseIntegrationLabel}
+                    {toolLabels.listView.browseToolLabel}
                   </EuiButton>
                 }
               />

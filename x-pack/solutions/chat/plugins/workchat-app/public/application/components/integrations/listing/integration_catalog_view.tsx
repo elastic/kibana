@@ -36,93 +36,93 @@ interface IntegrationCardData {
 
 const integrationCards: Record<IntegrationType, IntegrationCardData> = {
   [IntegrationType.index_source]: {
-    title: i18n.translate('workchatApp.integrations.listView.importIndexCard', {
+    title: i18n.translate('workchatApp.tools.listView.importIndexCard', {
       defaultMessage: 'Import Index',
     }),
     icon: getIntegrationIcon(IntegrationType.index_source),
-    description: i18n.translate('workchatApp.integrations.listView.importIndexDescription', {
+    description: i18n.translate('workchatApp.tools.listView.importIndexDescription', {
       defaultMessage:
         'Choose an existing index to connect and start using it in your workflows without re-importing your data',
     }),
     disabled: false,
   },
   [IntegrationType.external_server]: {
-    title: i18n.translate('workchatApp.integrations.listView.externalServerCard', {
+    title: i18n.translate('workchatApp.tools.listView.externalServerCard', {
       defaultMessage: 'External Server',
     }),
     icon: getIntegrationIcon(IntegrationType.external_server) as IconType,
-    description: i18n.translate('workchatApp.integrations.listView.externalServerDescription', {
+    description: i18n.translate('workchatApp.tools.listView.externalServerDescription', {
       defaultMessage: 'Connect to external servers for data processing.',
     }),
     disabled: false,
   },
   [IntegrationType.salesforce]: {
-    title: i18n.translate('workchatApp.integrations.listView.salesforceCard', {
+    title: i18n.translate('workchatApp.tools.listView.salesforceCard', {
       defaultMessage: 'Salesforce',
     }),
     icon: getIntegrationIcon(IntegrationType.salesforce) as IconType,
-    description: i18n.translate('workchatApp.integrations.listView.salesforceDescription', {
+    description: i18n.translate('workchatApp.tools.listView.salesforceDescription', {
       defaultMessage:
         'Connect your Salesforce account to bring in customer records, case data, and account insights for use in workflows',
     }),
     disabled: false,
   },
   [IntegrationType.google_drive]: {
-    title: i18n.translate('workchatApp.integrations.listView.googleDriveCard', {
+    title: i18n.translate('workchatApp.tools.listView.googleDriveCard', {
       defaultMessage: 'Google Drive',
     }),
     icon: getIntegrationIcon(IntegrationType.google_drive),
-    description: i18n.translate('workchatApp.integrations.listView.googleDriveDescription', {
+    description: i18n.translate('workchatApp.tools.listView.googleDriveDescription', {
       defaultMessage: 'Search and summarize content from your Drive files',
     }),
     disabled: true,
   },
   [IntegrationType.sharepoint]: {
-    title: i18n.translate('workchatApp.integrations.listView.sharepointCard', {
+    title: i18n.translate('workchatApp.tools.listView.sharepointCard', {
       defaultMessage: 'Sharepoint',
     }),
     icon: getIntegrationIcon(IntegrationType.sharepoint),
-    description: i18n.translate('workchatApp.integrations.listView.sharepointDescription', {
+    description: i18n.translate('workchatApp.tools.listView.sharepointDescription', {
       defaultMessage: 'Connect internal documents and sites for enterprise-wide search.',
     }),
     disabled: true,
   },
   [IntegrationType.slack]: {
-    title: i18n.translate('workchatApp.integrations.listView.slackCard', {
+    title: i18n.translate('workchatApp.tools.listView.slackCard', {
       defaultMessage: 'Slack',
     }),
     icon: getIntegrationIcon(IntegrationType.slack),
-    description: i18n.translate('workchatApp.integrations.listView.slackDescription', {
+    description: i18n.translate('workchatApp.tools.listView.slackDescription', {
       defaultMessage: 'Search conversations and surface relevant team discussions.',
     }),
     disabled: true,
   },
   [IntegrationType.confluence]: {
-    title: i18n.translate('workchatApp.integrations.listView.confluenceCard', {
+    title: i18n.translate('workchatApp.tools.listView.confluenceCard', {
       defaultMessage: 'Confluence',
     }),
     icon: getIntegrationIcon(IntegrationType.confluence),
-    description: i18n.translate('workchatApp.integrations.listView.confluenceDescription', {
+    description: i18n.translate('workchatApp.tools.listView.confluenceDescription', {
       defaultMessage: 'Tap into your internal knowledge base for accurate answers.',
     }),
     disabled: true,
   },
   [IntegrationType.jira]: {
-    title: i18n.translate('workchatApp.integrations.listView.jiraCard', {
+    title: i18n.translate('workchatApp.tools.listView.jiraCard', {
       defaultMessage: 'Jira',
     }),
     icon: getIntegrationIcon(IntegrationType.jira),
-    description: i18n.translate('workchatApp.integrations.listView.jiraDescription', {
+    description: i18n.translate('workchatApp.tools.listView.jiraDescription', {
       defaultMessage: 'Bring in issue tracking, tickets, and project context.',
     }),
     disabled: true,
   },
   [IntegrationType.github]: {
-    title: i18n.translate('workchatApp.integrations.listView.githubCard', {
+    title: i18n.translate('workchatApp.tools.listView.githubCard', {
       defaultMessage: 'Github',
     }),
     icon: getIntegrationIcon(IntegrationType.github),
-    description: i18n.translate('workchatApp.integrations.listView.githubDescription', {
+    description: i18n.translate('workchatApp.tools.listView.githubDescription', {
       defaultMessage: 'Search repos, issues, and documentation for engineering insights.',
     }),
     disabled: true,
@@ -158,13 +158,13 @@ export const IntegrationCatalogView: React.FC = () => {
   `;
 
   return (
-    <KibanaPageTemplate data-test-subj="integrationsCatalogPage">
+    <KibanaPageTemplate data-test-subj="toolsCatalogPage">
       <IntegrationListView tab={'catalog'} />
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <KibanaPageTemplate.Section>
         <EuiText>
           <strong>
-            {i18n.translate('workchatApp.integrations.listView.available', {
+            {i18n.translate('workchatApp.tools.listView.available', {
               defaultMessage: 'Available',
             })}
           </strong>
@@ -192,7 +192,7 @@ export const IntegrationCatalogView: React.FC = () => {
                   description={cardData.description}
                   paddingSize="l"
                   onClick={() => {
-                    return navigateToWorkchatUrl(`${appPaths.integrations.create}?type=${type}`);
+                    return navigateToWorkchatUrl(`${appPaths.tools.create}?type=${type}`);
                   }}
                 />
               </EuiFlexItem>
@@ -202,7 +202,7 @@ export const IntegrationCatalogView: React.FC = () => {
       <KibanaPageTemplate.Section>
         <EuiText>
           <strong>
-            {i18n.translate('workchatApp.integrations.listView.comingsoon', {
+            {i18n.translate('workchatApp.tools.listView.comingsoon', {
               defaultMessage: 'Coming soon',
             })}
           </strong>

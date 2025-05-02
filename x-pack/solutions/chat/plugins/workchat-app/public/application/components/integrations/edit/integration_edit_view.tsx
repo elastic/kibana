@@ -30,7 +30,7 @@ import { IntegrationEditState, useIntegrationEdit } from '../../../hooks/use_int
 import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
 import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_configuration_form';
 import { appPaths } from '../../../app_paths';
-import { integrationLabels } from '../i18n';
+import { toolLabels } from '../i18n';
 import { integrationTypeToLabel } from '../utils';
 
 interface IntegrationEditViewProps {
@@ -46,26 +46,26 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const breadcrumb = useMemo(() => {
     return [
-      { text: integrationLabels.breadcrumb.integrationsPill, path: appPaths.integrations.list },
+      { text: 'Tools', path: appPaths.tools.list },
       integrationId
-        ? { text: integrationLabels.breadcrumb.editIntegrationPill }
-        : { text: integrationLabels.breadcrumb.createIntegrationPill },
+        ? { text: toolLabels.editView.editToolTitle }
+        : { text: toolLabels.editView.createToolTitle },
     ];
   }, [integrationId]);
 
   useBreadcrumb(breadcrumb);
 
   const handleCancel = useCallback(() => {
-    navigateToWorkchatUrl(appPaths.integrations.catalog);
+    navigateToWorkchatUrl(appPaths.tools.catalog);
   }, [navigateToWorkchatUrl]);
 
   const onSaveSuccess = useCallback(() => {
     notifications.toasts.addSuccess(
       integrationId
-        ? integrationLabels.notifications.integrationUpdatedToastText
-        : integrationLabels.notifications.integrationCreatedToastText
+        ? toolLabels.notifications.toolUpdatedToastText
+        : toolLabels.notifications.toolCreatedToastText
     );
-    navigateToWorkchatUrl(appPaths.integrations.list);
+    navigateToWorkchatUrl(appPaths.tools.list);
   }, [integrationId, navigateToWorkchatUrl, notifications]);
 
   const onSaveError = useCallback(
@@ -92,14 +92,14 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
   ];
 
   const onDeleteSuccess = useCallback(() => {
-    notifications.toasts.addSuccess(integrationLabels.notifications.integrationDeletedToastText);
-    navigateToWorkchatUrl(appPaths.integrations.list);
+    notifications.toasts.addSuccess(toolLabels.notifications.toolDeletedToastText);
+    navigateToWorkchatUrl(appPaths.tools.list);
   }, [navigateToWorkchatUrl, notifications]);
 
   const onDeleteError = useCallback(
     (err: Error) => {
       notifications.toasts.addError(err, {
-        title: 'Error deleting integration',
+        title: 'Error deleting tool',
       });
     },
     [notifications]
@@ -149,8 +149,8 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
       <KibanaPageTemplate.Header
         pageTitle={
           integrationId
-            ? integrationLabels.editView.editIntegrationTitle
-            : integrationLabels.editView.createIntegrationTitle
+            ? toolLabels.editView.editToolTitle
+            : toolLabels.editView.createToolTitle
         }
       />
 
@@ -161,7 +161,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
               <EuiDescribedFormGroup
                 ratio="third"
                 title={<h3>Base configuration</h3>}
-                description="Configure your integration"
+                description="Configure your tool"
               >
                 <EuiFormRow label="Name">
                   <Controller
@@ -222,7 +222,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                         color="warning"
                         onClick={handleCancel}
                       >
-                        {integrationLabels.editView.cancelButtonLabel}
+                        {toolLabels.editView.cancelButtonLabel}
                       </EuiButton>
                     </EuiFlexItem>
                     {integrationId && (
@@ -247,7 +247,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                     fill
                     disabled={isSubmitting}
                   >
-                    {integrationLabels.editView.saveButtonLabel}
+                    {toolLabels.editView.saveButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -255,7 +255,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
             {isDeleteModalVisible && (
               <EuiConfirmModal
-                title="Delete integration"
+                title="Delete tool"
                 onCancel={closeDeleteModal}
                 onConfirm={handleDelete}
                 cancelButtonText="Cancel"
@@ -264,7 +264,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 defaultFocusedButton="confirm"
               >
                 <p>
-                  Are you sure you want to delete this integration? This action cannot be undone.
+                  Are you sure you want to delete this tool? This action cannot be undone.
                 </p>
               </EuiConfirmModal>
             )}
