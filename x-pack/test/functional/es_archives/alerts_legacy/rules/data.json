@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "space1:action:17f38826-5a8d-4a76-975a-b496e7fffe0b",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": "test.index-record",
@@ -25,7 +25,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:6ee9630a-a20e-44af-9465-217a3717d2ab",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -87,7 +87,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:b384be60-ec53-4b26-857e-0253ee55b277",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -149,7 +149,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:5cc59319-74ee-4edc-8646-a79ea91067cd",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -211,7 +211,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:d41a6abb-b93b-46df-a80a-926221ea847c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -273,7 +273,7 @@
   "type": "doc",
   "value": {
     "id": "space1:alert:362e362b-a137-4aa2-9434-43e3d0d84a34",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [

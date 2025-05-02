@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -45,7 +45,7 @@
   "type": "doc",
   "value": {
     "id": "alert:99f3e6d7-b7bb-477d-ac28-92ee22726969",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [{
@@ -165,7 +165,7 @@
   "type": "doc",
   "value": {
     "id": "action:66a8ab7a-35cf-445e-ade3-215a029c6969",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".servicenow",
@@ -187,7 +187,7 @@
   "type": "doc",
   "value": {
     "id": "alert:74f3e6d7-b7bb-477d-ac28-fdf248d5f2a4",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -230,7 +230,7 @@
   "type": "doc",
   "value": {
     "id": "action:a6a8ab7a-35cf-445e-ade3-215a029c2ee3",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "action": {
         "actionTypeId": ".pagerduty",
@@ -252,7 +252,7 @@
   "type": "doc",
   "value": {
     "id": "alert:b6087f72-994f-46fb-8120-c6e5c50d0f8f",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -342,7 +342,7 @@
   "type": "doc",
   "value": {
     "id": "alert:38482620-ef1b-11eb-ad71-7de7959be71c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert" : {
         "name" : "test upgrade of exceptionsList",
@@ -398,7 +398,7 @@
   "type": "doc",
   "value": {
     "id": "alert:9c003b00-00ee-11ec-b067-2524946ba327",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [{
@@ -464,7 +464,7 @@
   "type": "doc",
   "value": {
     "id": "alert:d7a8c6a1-9394-48df-a634-d5457c35d747",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert" : {
         "name" : "test upgrade of ruleAlertId",
@@ -505,7 +505,7 @@
   "type": "doc",
   "value": {
     "id": "alert:ece1ece2-9394-48df-a634-d5457c351ece",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert" : {
         "name" : "test addition of default threat_indicator_path",
@@ -546,7 +546,7 @@
   "type": "doc",
   "value": {
     "id": "alert:fce1ece2-9394-48df-a634-d5457c351fce",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert" : {
         "name" : "test addition of default threat_indicator_path",
@@ -588,7 +588,7 @@
   "type": "doc",
   "value": {
     "id": "alert:1ce1ece2-9394-48df-a634-d5457c3511ce",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert" : {
         "name" : "test addition of default threat_indicator_path",
@@ -629,7 +629,7 @@
   "type": "doc",
   "value": {
     "id": "alert:92237b30-4e03-11ec-9ab9-d980518a2d28",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert" : {
         "alertTypeId" : "metrics.alert.inventory.threshold",
@@ -678,7 +678,7 @@
   "type":"doc",
   "value":{
      "id":"alert:1efdfa40-8ec7-11ec-a700-5524407a7653",
-     "index":".kibana_1",
+     "index":".kibana_alerting_cases",
      "source":{
         "alert":{
            "name":"enabled 7.16.1 query rule",
@@ -772,7 +772,7 @@
   "type":"doc",
   "value":{
      "id":"alert:13fdfa40-8ec7-11ec-a700-5524407a7667",
-     "index":".kibana_1",
+     "index":".kibana_alerting_cases",
      "source":{
         "alert":{
            "name":"disabled 7.16.1 query rule",
@@ -866,7 +866,7 @@
   "type": "doc",
   "value": {
     "id": "alert:66560b6f-5ca4-41e2-a1a1-dcfd7117e124",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert" : {
         "name" : "Test mapped params migration",
@@ -909,7 +909,7 @@
   "type": "doc",
   "value": {
     "id": "alert:776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "name": "123",
@@ -961,7 +961,7 @@
   "type":"doc",
   "value":{
      "id":"alert:8990af61-c09a-11ec-9164-4bfd6fc32c43",
-     "index":".kibana_1",
+     "index":".kibana_alerting_cases",
      "source":{
         "alert":{
            "name":"Test remove internal tags",
@@ -1067,7 +1067,7 @@
   "type": "doc",
   "value": {
     "id": "alert:c8b39c29-d860-43b6-8817-b8058d80ddbc",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "name": "Old ESQuery with Runtimefield",
@@ -1119,7 +1119,7 @@
   "type": "doc",
   "value": {
     "id": "alert:62c62b7f-8bf3-4104-a064-6247b7bda44f",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "name": "Old ESQuery without a Runtimefield but custom formatting",
@@ -1171,7 +1171,7 @@
   "type": "doc",
   "value": {
     "id": "alert:f0d13f4d-35ae-4554-897a-6392e97bb84c",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "name": "Old ESQuery with unparsable query",
@@ -1223,7 +1223,7 @@
   "type": "doc",
   "value": {
     "id": "alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
           "alertTypeId": "example.always-firing",
@@ -1262,7 +1262,7 @@
   "type": "doc",
   "value": {
     "id": "alert:8370ffd2-f2db-49dc-9741-92c657189b9b",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
           "alertTypeId": "example.always-firing",
@@ -1321,7 +1321,7 @@
   "type": "doc",
   "value": {
     "id": "alert:c87707ac-7328-47f7-b212-2cb40a4fc9b9",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
           "alertTypeId": "example.always-firing",
@@ -1384,7 +1384,7 @@
   "type": "doc",
   "value": {
     "id": "alert:8bd01ff0-9d84-11ed-994d-f1971f849da5",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "name": "Old Log threshold rule",
@@ -1436,7 +1436,7 @@
   "type":"doc",
   "value":{
      "id":"alert:88bc8c21-07ba-42eb-ad9c-06820275ac10",
-     "index":".kibana_1",
+     "index":".kibana_alerting_cases",
      "source":{
         "alert":{
            "name":"Test unmuting of a custom security rule",

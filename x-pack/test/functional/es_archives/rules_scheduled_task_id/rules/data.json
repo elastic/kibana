@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
@@ -45,7 +45,7 @@
   "type": "doc",
   "value": {
     "id": "alert:46be60d4-ae63-48ed-ab6f-f4d9b4defacf",
-    "index": ".kibana_1",
+    "index": ".kibana_alerting_cases",
     "source": {
       "alert": {
         "actions": [
