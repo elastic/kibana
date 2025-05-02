@@ -27569,6 +27569,16 @@ redux-thunks@^1.0.0:
   resolved "https://registry.yarnpkg.com/redux-thunks/-/redux-thunks-1.0.0.tgz#56e03b86d281a2664c884ab05c543d9ab1673658"
   integrity sha1-VuA7htKBomZMiEqwXFQ9mrFnNlg=
 
+"redux-toolkit-v1@npm:@reduxjs/toolkit@1.9.7":
+  version "1.9.7"
+  resolved "https://registry.yarnpkg.com/@reduxjs/toolkit/-/toolkit-1.9.7.tgz#7fc07c0b0ebec52043f8cb43510cf346405f78a6"
+  integrity sha512-t7v8ZPxhhKgOKtU+uyJT13lu4vL7az5aFi4IdoDs/eS548edn2M8Ik9h8fxgvMjGoAUVFSt6ZC1P5cWmQ014QQ==
+  dependencies:
+    immer "^9.0.21"
+    redux "^4.2.1"
+    redux-thunk "^2.4.2"
+    reselect "^4.1.8"
+
 redux@^4.0.0, redux@^4.2.1:
   version "4.2.1"
   resolved "https://registry.npmjs.org/redux/-/redux-4.2.1.tgz"
