@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Reducer, AnyAction } from 'redux';
+import type { Reducer, AnyAction } from 'redux-v4';
 import * as networkActions from './actions';
 import * as networkModel from './model';
 import * as networkSelectors from './selectors';

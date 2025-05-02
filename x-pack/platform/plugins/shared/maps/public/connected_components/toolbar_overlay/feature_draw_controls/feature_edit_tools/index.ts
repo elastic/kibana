@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction } from 'redux';
+import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import type { ReduxDispatchProps, ReduxStateProps, OwnProps } from './feature_edit_tools';

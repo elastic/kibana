@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers, applyMiddleware, createStore, compose } from 'redux';
+import { combineReducers, applyMiddleware, createStore, compose } from 'redux-v4';
 import thunk from 'redux-thunk';
 import { ui, DEFAULT_MAP_UI_STATE } from './ui';
 import { map, DEFAULT_MAP_STATE } from './map'; // eslint-disable-line import/named

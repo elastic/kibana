@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { AnyAction, Dispatch } from 'redux';
+import type { AnyAction, Dispatch } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';

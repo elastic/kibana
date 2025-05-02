@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { EuiFlyoutBody, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEndpointHostIsolated } from '../../../../../../common/utils/validators';

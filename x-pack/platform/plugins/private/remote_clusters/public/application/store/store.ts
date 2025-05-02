@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PreloadedState } from 'redux';
-import { createStore, applyMiddleware } from 'redux';
+import type { PreloadedState } from 'redux-v4';
+import { createStore, applyMiddleware } from 'redux-v4';
 import thunk from 'redux-thunk';
 
 import { remoteClusters } from './reducers';

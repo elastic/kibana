@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { connect } from 'react-redux';
 import { set } from '@kbn/safer-lodash-set';
 

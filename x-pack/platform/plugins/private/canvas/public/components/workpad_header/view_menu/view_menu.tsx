@@ -8,7 +8,7 @@ import type { FC } from 'react';
 import React, { useCallback, useContext } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { compose, withHandlers } from 'react-recompose';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
 import type { State, CanvasWorkpadBoundingBox } from '../../../../types';
 // @ts-expect-error untyped local

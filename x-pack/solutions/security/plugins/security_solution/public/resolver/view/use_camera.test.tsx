@@ -19,7 +19,7 @@ import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
 import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
 import { mock as mockResolverTree } from '../models/resolver_tree';
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers } from 'redux-v4';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { act } from 'react-dom/test-utils';

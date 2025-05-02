@@ -7,7 +7,7 @@
 
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { render, screen } from '@testing-library/react';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';

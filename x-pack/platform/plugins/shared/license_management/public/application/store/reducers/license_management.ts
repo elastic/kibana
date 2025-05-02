@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-v4';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { createSelector } from 'reselect';

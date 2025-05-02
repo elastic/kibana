@@ -7,7 +7,7 @@
 
 import { connect } from 'react-redux';
 import type { ThunkDispatch } from 'redux-thunk';
-import type { AnyAction } from 'redux';
+import type { AnyAction } from 'redux-v4';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';

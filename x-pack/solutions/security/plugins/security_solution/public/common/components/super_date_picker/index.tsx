@@ -19,7 +19,7 @@ import { getOr, isEmpty, take } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import deepEqual from 'fast-deep-equal';
 
 import { isQueryInput } from '../../store/inputs/helpers';

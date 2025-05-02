@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { connect } from 'react-redux';
 import { get } from 'lodash';
 import { encode } from '../../lib';

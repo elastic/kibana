@@ -9,7 +9,7 @@ import type { SyntheticEvent } from 'react';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineActions } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types/timeline';

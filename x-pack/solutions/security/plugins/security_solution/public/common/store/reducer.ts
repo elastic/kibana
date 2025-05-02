@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer } from 'redux';
-import { combineReducers } from 'redux';
+import type { AnyAction, Reducer } from 'redux-v4';
+import { combineReducers } from 'redux-v4';
 
 import type { DataTableState } from '@kbn/securitysolution-data-table';
 import { dataTableReducer } from '@kbn/securitysolution-data-table';

@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 
 import { of } from 'rxjs';
 
