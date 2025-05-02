@@ -10,7 +10,7 @@
 import React from 'react';
 import { render as rtlRender, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { InvestigationGuideEditor } from './rule_investigation_guide';
+import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { userEvent } from '@testing-library/user-event';
 
 const render = (toRender: any) => rtlRender(toRender, { wrapper: IntlProvider });
