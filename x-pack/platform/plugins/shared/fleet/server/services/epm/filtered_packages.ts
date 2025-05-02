@@ -42,7 +42,8 @@ export function getFilteredInstallPackages() {
 }
 
 export function getAllowedSearchAiLakeInstallPackagesIfEnabled() {
-  const enabled = appContextService.getConfig()?.internal?.registry?.searchAiLakePackageAllowlistEnabled;
+  const enabled =
+    appContextService.getConfig()?.internal?.registry?.searchAiLakePackageAllowlistEnabled;
   return enabled
     ? SEARCH_AI_LAKE_PACKAGES.concat(SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES)
     : undefined;
