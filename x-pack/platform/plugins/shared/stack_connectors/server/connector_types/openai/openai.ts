@@ -96,6 +96,8 @@ function formatPEMContent(pemContent: string, logger: Logger): string {
   logger.debug(`PEM content has newlines: ${result.includes('\n')}, has spaces: ${result.includes(' ')}`);
   logger.debug(`PEM content starts with header: ${result.startsWith(`-----BEGIN ${type}-----`)}`);
   logger.debug(`PEM content ends with footer: ${result.endsWith(`-----END ${type}-----\n`)}`);
+  logger.debug(`PEM content has newline after header: ${result.includes(`-----BEGIN ${type}-----\n`)}`);
+  logger.debug(`PEM content has newline before footer: ${result.includes(`\n-----END ${type}-----\n`)}`);
 
   return result;
 }
