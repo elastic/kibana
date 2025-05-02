@@ -58,7 +58,6 @@
     "@kbn/core-security-server",
     "@kbn/charts-theme",
     "@kbn/ebt-tools",
-    "@kbn/security-plugin-types-common"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
