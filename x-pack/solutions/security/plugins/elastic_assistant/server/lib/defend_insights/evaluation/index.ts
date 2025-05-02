@@ -91,6 +91,7 @@ export const evaluateDefendInsights = async ({
         temperature: 0, // zero temperature for defend insights, because we want structured JSON output
         timeout: connectorTimeout,
         traceOptions,
+        model: connector.config?.defaultModel,
       });
 
       const graph = getDefaultDefendInsightsGraph({

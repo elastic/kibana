@@ -126,6 +126,8 @@ export const streamGraph = async ({
   };
 
   pushStreamUpdate().catch((err) => {
+    // @TODO: remove
+    console.log(`--@@err`, JSON.stringify(err, null, 2));
     logger.error(`Error streaming graph: ${err}`);
     handleStreamEnd(err.message, true);
   });

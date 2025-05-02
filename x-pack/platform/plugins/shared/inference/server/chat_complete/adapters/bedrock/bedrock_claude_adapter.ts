@@ -12,6 +12,12 @@ import {
   createInferenceInternalError,
   ToolChoiceType,
 } from '@kbn/inference-common';
+import {
+  type Message as BedrockMessage,
+  type MessageRole as BedRockMessageRole,
+  ConverseCommand,
+  SystemContentBlock,
+} from '@aws-sdk/client-bedrock-runtime';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
@@ -33,27 +39,55 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     tools,
     temperature = 0,
     modelName,
+    modelId,
     abortSignal,
     metadata,
   }) => {
+    const model = modelName ?? modelId;
+    console.log(`--@@chatComplete modelId`, model);
+    // const model = modelName ??
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
-    const subActionParams = {
-      system: noToolUsage ? addNoToolUsageDirective(system) : system,
-      messages: messagesToBedrock(messages),
-      tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
-      toolChoice: toolChoiceToBedrock(toolChoice),
-      temperature,
-      model: modelName,
-      stopSequences: ['\n\nHuman:'],
+    const converseMessages = messagesToBedrock(messages).map((message) => ({
+      role: message.role,
+      content: message.rawContent,
+    })) as BedrockMessage[];
+    const systemMessage = noToolUsage
+      ? [{ text: addNoToolUsageDirective(system) }]
+      : [{ text: system }];
+    const command = new ConverseCommand({
+      modelId: model ?? 'anthropic.claude-3-5-sonnet-20240620-v1:0',
+      // system: noToolUsage ? addNoToolUsageDirective(system) : system,
+      messages: converseMessages,
+      system: systemMessage as SystemContentBlock[],
+    });
+    // @TODO: remove
+    console.log(`--@@command`, command);
+    console.log(`--@@command.input.system`, command.input.system);
+
+    console.log(`--@@command.input.messages`, JSON.stringify(command.input.messages, null, 2));
+
+    // const subActionParams = {
+    //   system: noToolUsage ? addNoToolUsageDirective(system) : system,
+    //   messages: messagesToBedrock(messages),
+    //   tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
+    //   toolChoice: toolChoiceToBedrock(toolChoice),
+    //   temperature,
+    //   model: modelName,
+    //   stopSequences: ['\n\nHuman:'],
+    //   signal: abortSignal,
+    //   ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
+    // };
+
+    const converseSubActionParams = {
+      command,
       signal: abortSignal,
       ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
     };
-
     return defer(() => {
       return executor.invoke({
-        subAction: 'invokeStream',
-        subActionParams,
+        subAction: 'bedrockClientSend',
+        subActionParams: converseSubActionParams,
       });
     }).pipe(
       handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
