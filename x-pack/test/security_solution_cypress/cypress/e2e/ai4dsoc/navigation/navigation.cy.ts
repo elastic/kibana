@@ -28,6 +28,10 @@ import {
   HOST_ISOLATION_EXCEPTIONS_URL,
   INVESTIGATIONS_URL,
   HOSTS_URL,
+  MACHINE_LEARNING_EXPLORER,
+  MACHINE_LEARNING_TIME_SERIES_EXPLORER,
+  MACHINE_LEARNING_DATA_FRAME_ANALYTICS_EXPLORATION,
+  MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP,
   NETWORK_URL,
   NOTES_URL,
   OVERVIEW_URL,
@@ -83,6 +87,12 @@ const privilegeRequiredLinks = [
   BLOCKLIST_URL,
   HOST_ISOLATION_EXCEPTIONS_URL,
   RESPONSE_ACTIONS_HISTORY,
+];
+const mlLinks = [
+  MACHINE_LEARNING_EXPLORER,
+  MACHINE_LEARNING_TIME_SERIES_EXPLORER,
+  MACHINE_LEARNING_DATA_FRAME_ANALYTICS_EXPLORATION,
+  MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP,
 ];
 
 describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
@@ -156,7 +166,7 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
 
   // TODO: Undecided if these pages should be redirected as well.
   describe('Non-redirected pages ', () => {
-    it('shows up-sell callout for a set of pages', () => {
+    it('shows `up-sell callout` for a set of pages', () => {
       upSellLinks.forEach((link) => {
         cy.visit(link);
         cy.url().should('include', link);
@@ -164,11 +174,19 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
       });
     });
 
-    it('shows privilege required callout for endpoint related pages', () => {
+    it('shows `privilege required` callout for `endpoint` related pages', () => {
       privilegeRequiredLinks.forEach((link) => {
         cy.visit(link);
         cy.url().should('include', link);
         cy.getByTestSubjContains('noPrivilegesPage');
+      });
+    });
+
+    it('shows access denied callout for a set of `ml` links', () => {
+      mlLinks.forEach((link) => {
+        cy.visit(link);
+        cy.url().should('include', link);
+        cy.getByTestSubjContains('mlAccessDenied');
       });
     });
   });

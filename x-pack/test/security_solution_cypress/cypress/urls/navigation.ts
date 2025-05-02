@@ -67,7 +67,11 @@ export const DISCOVER_WITH_PINNED_FILTER_URL =
 export const hostDetailsUrl = (hostName: string) =>
   `/app/security/hosts/${hostName}/authentications`;
 
-export const MACHINE_LEARNING_LANDING_URL = '/app/security/ml';
+export const MACHINE_LEARNING_EXPLORER = '/app/ml/explorer';
+export const MACHINE_LEARNING_TIME_SERIES_EXPLORER = '/app/ml/timeseriesexplorer';
+export const MACHINE_LEARNING_DATA_FRAME_ANALYTICS_EXPLORATION =
+  'app/ml/data_frame_analytics/exploration';
+export const MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP = 'app/ml/data_frame_analytics/map';
 
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
