@@ -9,7 +9,7 @@
 
 export interface AlertRuleFromVisUIActionData {
   query: string | null;
-  thresholdValues: Record<string, number>;
-  splitValues: Record<string, Array<string | number | null | undefined>>;
+  thresholdValues: Array<{ values: Record<string, number | string>; yField: string }>;
+  xValues: Record<string, string | number | null | undefined>;
   usesPlaceholderValues?: boolean;
 }

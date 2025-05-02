@@ -60,7 +60,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public shouldAutoExecute = async () => true;
 
   public async execute({ embeddable, data }: Context) {
-    const { query, thresholdValues, splitValues, usesPlaceholderValues } = data?.query
+    const { query, thresholdValues, xValues, usesPlaceholderValues } = data?.query
       ? data
       : data
       ? {
@@ -121,10 +121,48 @@ export class AlertRuleFromVisAction implements Action<Context> {
       return fieldName;
     };
 
+    const stringValueToESQLCondition = (
+      fieldName: string,
+      v: string | number | null | undefined
+    ) => {
+      try {
+        // If the value is a string, first attempt to parse it as a JSON-formatted array
+        if (typeof v === 'string') {
+          const parsed = JSON.parse(v);
+          if (Array.isArray(parsed)) {
+            return parsed
+              .map(
+                (multiVal) =>
+                  `MATCH(${escapeFieldName(fieldName)}, ${formatStringForESQL(multiVal)})`
+              )
+              .join(' AND ');
+          }
+        }
+      } catch {
+        // Do nothing, continue to return statement
+      }
+      return `${escapeFieldName(fieldName)} == ${
+        typeof v === 'number' ? v : formatStringForESQL(v ?? '')
+      }`;
+    };
+
     // Generate an addition to the query that sets an alert threshold
-    const thresholdQuery = Object.entries(thresholdValues)
-      .map(([sourceField, value]) => `${escapeFieldName(sourceField)} >= ${value}`)
-      .join(' AND ');
+    const thresholdQuery = thresholdValues
+      .map(({ values, yField }) => {
+        const conditions = Object.entries(values)
+          // Always move the Y axis value to the end of the query
+          .sort(([sourceField]) => (sourceField === yField ? 1 : -1))
+          .map(([sourceField, value]) =>
+            sourceField === yField
+              ? `${escapeFieldName(sourceField)} >= ${value}`
+              : stringValueToESQLCondition(sourceField, value)
+          )
+          .join(' AND ');
+        return thresholdValues.length > 1 && Object.keys(values).length > 1
+          ? `(${conditions})`
+          : conditions;
+      })
+      .join(' OR ');
     const thresholdQueryComment = usesPlaceholderValues
       ? i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.thresholdPlaceholderComment', {
           defaultMessage:
@@ -136,33 +174,14 @@ export class AlertRuleFromVisAction implements Action<Context> {
           values: { thresholdValues: Object.keys(thresholdValues).length },
         });
 
-    const splitValueQueries = Object.entries(splitValues).map(([fieldName, values]) => {
-      const queries = values
-        .map((v) => {
-          try {
-            // If the value is a string, first attempt to parse it as a JSON-formatted array
-            if (typeof v === 'string') {
-              const parsed = JSON.parse(v);
-              if (Array.isArray(parsed)) {
-                return parsed
-                  .map(
-                    (multiVal) =>
-                      `MATCH(${escapeFieldName(fieldName)}, ${formatStringForESQL(multiVal)})`
-                  )
-                  .join(' AND ');
-              }
-            }
-          } catch {
-            // Do nothing, continue to return statement
-          }
-          return `${escapeFieldName(fieldName)} == ${
-            typeof v === 'number' ? v : formatStringForESQL(v ?? '')
-          }`;
-        })
-        .join(' OR ');
-      return values.length === 1 ? queries : `(${queries})`;
-    });
-    const conditionsQuery = [...splitValueQueries, thresholdQuery].join(' AND ');
+    const xValueQueries = Object.entries(xValues).map(([fieldName, value]) =>
+      stringValueToESQLCondition(fieldName, value)
+    );
+
+    const conditionsQuery = [
+      ...xValueQueries,
+      xValueQueries.length && thresholdValues.length > 1 ? `(${thresholdQuery})` : thresholdQuery,
+    ].join(' AND ');
 
     // Generate ES|QL to escape function columns
     if (renameQuery.length)
@@ -241,25 +260,27 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
   const thresholdValues = datatable
     ? datatable.columns
         .filter((col) => col.meta.dimensionType === DimensionType.Y_AXIS)
-        .reduce((result, { meta }) => {
+        .map(({ meta }) => {
           const { sourceField = missingYFieldPlaceholder } = meta.sourceParams ?? {};
           return {
-            ...result,
-            [String(sourceField)]: i18n.translate(
-              'xpack.triggersActionsUI.alertRuleFromVis.thresholdPlaceholder',
-              {
-                defaultMessage: '[THRESHOLD]',
-              }
-            ),
+            values: {
+              [String(sourceField)]: i18n.translate(
+                'xpack.triggersActionsUI.alertRuleFromVis.thresholdPlaceholder',
+                {
+                  defaultMessage: '[THRESHOLD]',
+                }
+              ),
+            },
+            yField: String(sourceField),
           };
-        }, {})
-    : {};
+        })
+    : [];
 
   const xColumns = datatable?.columns.filter(
     (col) => col.meta.dimensionType === DimensionType.X_AXIS
   );
   const isTimeViz = xColumns?.some(({ meta }) => meta.type === 'date');
-  const splitValues =
+  const xValues =
     isTimeViz || !xColumns
       ? {}
       : xColumns.reduce((result, { meta }) => {
@@ -276,7 +297,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
 
   return {
     query,
-    splitValues,
+    xValues,
     thresholdValues,
     usesPlaceholderValues: true,
   };

@@ -60,8 +60,8 @@ describe('AlertRuleFromVisAction', () => {
       embeddable: embeddableMock,
       data: {
         query: 'FROM index | STATS count = COUNT(*)',
-        thresholdValues: { count: 210 },
-        splitValues: {},
+        thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
+        xValues: {},
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -80,13 +80,13 @@ describe('AlertRuleFromVisAction', () => {
     `);
   });
 
-  it('appends a single splitValue to the threshold line with an AND operator', () => {
+  it('appends a single xValue to the threshold line with an AND operator', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
         query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-        thresholdValues: { count: 210 },
-        splitValues: { 'uhhhhhhhh.field': ['zoop'] },
+        thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
+        xValues: { 'uhhhhhhhh.field': 'zoop' },
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -105,13 +105,13 @@ describe('AlertRuleFromVisAction', () => {
     `);
   });
 
-  it('appends multiple splitValues to the threshold line in parentheses separated by OR operators', () => {
+  it('appends multiple fields in the threshold value with an AND operator', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
         query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-        thresholdValues: { count: 210 },
-        splitValues: { 'uhhhhhhhh.field': ['zoop', 'boop'] },
+        thresholdValues: [{ values: { count: 210, 'uhhhhhhhh.field': 'zoop' }, yField: 'count' }],
+        xValues: {},
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -121,7 +121,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE (uhhhhhhhh.field == \\"zoop\\" OR uhhhhhhhh.field == \\"boop\\") AND count >= 210",
+      | WHERE uhhhhhhhh.field == \\"zoop\\" AND count >= 210",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
@@ -130,13 +130,71 @@ describe('AlertRuleFromVisAction', () => {
     `);
   });
 
-  it('converts an array splitValue to `field IN (val1, val2...)`', () => {
+  it('appends multiple thresholdValues threshold line in parentheses separated by OR operators', () => {
+    action.execute({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | KEEP geo.dest, bytes, memory, extension.keyword',
+        thresholdValues: [
+          { values: { bytes: 5000, 'extension.keyword': 'deb' }, yField: 'bytes' },
+          { values: { memory: 50000, 'extension.keyword': 'rpm' }, yField: 'memory' },
+        ],
+        xValues: { 'geo.dest': 'JP' },
+      },
+    });
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
+      Object {
+        "params": Object {
+          "esqlQuery": Object {
+            "esql": "// Original ES|QL query derived from the visualization:
+      FROM index | KEEP geo.dest, bytes, memory, extension.keyword
+      // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
+      | WHERE geo.dest == \\"JP\\" AND ((extension.keyword == \\"deb\\" AND bytes >= 5000) OR (extension.keyword == \\"rpm\\" AND memory >= 50000))",
+          },
+          "searchType": "esqlQuery",
+          "timeField": "@timestamp",
+        },
+      }
+    `);
+  });
+
+  it('converts an array xValue to MATCH queries', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
         query: 'FROM index | KEEP tags, something.else',
-        thresholdValues: { 'something.else': 3087 },
-        splitValues: { tags: ['["shibbity", "beep", "bop", "doowop"]'] },
+        thresholdValues: [{ values: { 'something.else': 3087 }, yField: 'something.else' }],
+        xValues: { tags: '["shibbity", "beep", "bop", "doowop"]' },
+      },
+    });
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
+      Object {
+        "params": Object {
+          "esqlQuery": Object {
+            "esql": "// Original ES|QL query derived from the visualization:
+      FROM index | KEEP tags, something.else
+      // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
+      | WHERE MATCH(tags, \\"shibbity\\") AND MATCH(tags, \\"beep\\") AND MATCH(tags, \\"bop\\") AND MATCH(tags, \\"doowop\\") AND something.else >= 3087",
+          },
+          "searchType": "esqlQuery",
+          "timeField": "@timestamp",
+        },
+      }
+    `);
+  });
+
+  it('converts an array in a threshold value to MATCH queries', () => {
+    action.execute({
+      embeddable: embeddableMock,
+      data: {
+        query: 'FROM index | KEEP tags, something.else',
+        thresholdValues: [
+          {
+            values: { 'something.else': 3087, tags: '["shibbity", "beep", "bop", "doowop"]' },
+            yField: 'something.else',
+          },
+        ],
+        xValues: {},
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -160,8 +218,13 @@ describe('AlertRuleFromVisAction', () => {
       embeddable: embeddableMock,
       data: {
         query: 'FROM index | KEEP tags, something.else',
-        thresholdValues: { 'something.else': 3087 },
-        splitValues: { tags: ['shibbity', ''] },
+        thresholdValues: [
+          {
+            values: { 'something.else': 3087, tags: '' },
+            yField: 'something.else',
+          },
+        ],
+        xValues: {},
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -171,32 +234,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | KEEP tags, something.else
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE (tags == \\"shibbity\\" OR tags == \\"\\") AND something.else >= 3087",
-          },
-          "searchType": "esqlQuery",
-          "timeField": "@timestamp",
-        },
-      }
-    `);
-  });
-
-  it('appends multiple thresholdValues separated by AND operators', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | STATS count = COUNT(*), p99 = PERCENTILE(owowo, 99)',
-        thresholdValues: { count: 210, p99: 42.6 },
-        splitValues: {},
-      },
-    });
-    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
-      Object {
-        "params": Object {
-          "esqlQuery": Object {
-            "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | STATS count = COUNT(*), p99 = PERCENTILE(owowo, 99)
-      // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE count >= 210 AND p99 >= 42.6",
+      | WHERE tags == \\"\\" AND something.else >= 3087",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
@@ -211,12 +249,15 @@ describe('AlertRuleFromVisAction', () => {
       data: {
         query:
           'FROM index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
-        thresholdValues: {
-          'COUNT(*)': 210,
-          'PERCENTILE(owowo, 99)': 42.6,
-          'COUNT(`meow bytes`)': 1312,
-        },
-        splitValues: {},
+        thresholdValues: [
+          {
+            values: { 'COUNT(*)': 210 },
+            yField: 'COUNT(*)',
+          },
+          { values: { 'PERCENTILE(owowo, 99)': 42.6 }, yField: 'PERCENTILE(owowo, 99)' },
+          { values: { 'COUNT(`meow bytes`)': 1312 }, yField: 'COUNT(`meow bytes`)' },
+        ],
+        xValues: {},
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -228,7 +269,7 @@ describe('AlertRuleFromVisAction', () => {
       // Rename the following columns so they can be used as part of the alerting threshold:
       | RENAME \`COUNT(*)\` as _count | RENAME \`PERCENTILE(owowo,99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE _count >= 210 AND _percentile_owowo_99 >= 42.6 AND _count_meow_bytes >= 1312",
+      | WHERE _count >= 210 OR _percentile_owowo_99 >= 42.6 OR _count_meow_bytes >= 1312",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
@@ -242,13 +283,15 @@ describe('AlertRuleFromVisAction', () => {
       embeddable: embeddableMock,
       data: {
         query: 'FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)',
-        thresholdValues: {
-          'COUNT(*)': 1,
-        },
-        splitValues: {
-          'CATEGORIZE(message)': [
+        thresholdValues: [
+          {
+            values: { 'COUNT(*)': 1 },
+            yField: 'COUNT(*)',
+          },
+        ],
+        xValues: {
+          'CATEGORIZE(message)':
             '.*?GET .+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a',
-          ],
         },
       },
     });
