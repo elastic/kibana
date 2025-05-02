@@ -7,14 +7,7 @@
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 import { apmEnableServiceMapApiV2 } from '@kbn/observability-plugin/common';
