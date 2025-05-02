@@ -9,7 +9,7 @@ import React from 'react';
 import { Store } from 'redux-v4';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { BehaviorSubject } from 'rxjs';
 
 import '@kbn/flot-charts';

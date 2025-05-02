@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { AppState } from '../../../../state';
 import { monitorDetailsLoadingSelector, monitorDetailsSelector } from '../../../../state/selectors';
 import { getMonitorDetailsAction } from '../../../../state/actions/monitor';

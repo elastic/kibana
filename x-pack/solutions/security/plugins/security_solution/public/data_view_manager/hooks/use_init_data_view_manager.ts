@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useEffect } from 'react';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import {

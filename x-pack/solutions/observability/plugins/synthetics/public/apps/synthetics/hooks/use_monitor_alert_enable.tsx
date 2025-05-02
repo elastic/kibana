@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { isStatusEnabled } from '../../../../common/runtime_types/monitor_management/alert_config';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../components/monitors_page/overview/types';

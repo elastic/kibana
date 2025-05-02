@@ -27,7 +27,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { findLast } from 'lodash';
 import { KbnPalettes } from '@kbn/palettes';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';

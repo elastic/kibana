@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { MouseCoordinatesControl } from './mouse_coordinates_control';
 import { getMouseCoordinates, getMapZoom } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';

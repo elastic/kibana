@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { waitFor, renderHook } from '@testing-library/react';
 import { ScreenshotRefImageData, ScreenshotBlockCache } from '../../../../common/runtime_types';
 import { fetchBlocksAction } from '../state';

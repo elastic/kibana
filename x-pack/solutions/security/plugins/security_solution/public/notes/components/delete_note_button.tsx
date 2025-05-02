@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';

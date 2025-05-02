@@ -7,7 +7,7 @@
 
 import { AnyAction } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { StyleSettings } from './style_settings';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 import { updateCustomIcons, updateLayerStyleForSelectedLayer } from '../../../actions';

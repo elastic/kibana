@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { clearOverviewStatusState } from '../../../state/overview_status';
 import {

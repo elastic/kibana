@@ -10,7 +10,7 @@
 import React from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { KbnPalettes } from '@kbn/palettes';
 import { changeAlpha } from '../../color/color_math';
 import { ColorMapping } from '../../config';

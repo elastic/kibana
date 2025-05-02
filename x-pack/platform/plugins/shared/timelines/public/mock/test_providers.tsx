@@ -9,7 +9,7 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import { Store } from 'redux-v4';
 import { ThemeProvider } from 'styled-components';
 

@@ -7,7 +7,7 @@
 
 import { useRef, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.

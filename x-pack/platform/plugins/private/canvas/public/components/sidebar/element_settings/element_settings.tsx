@@ -7,7 +7,7 @@
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
 import { ElementSettings as Component } from './element_settings.component';
 import { State } from '../../../../types';

@@ -13,7 +13,7 @@ import {
   EuiIconTip,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import * as selectors from '../../store/selectors';
 import { useColors } from '../use_colors';
 import { StyledDescriptionList } from '../panels/styles';

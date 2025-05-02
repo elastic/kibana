@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useCallback } from 'react';
 import type { DataViewManagerScopeName } from '../constants';
 import { selectDataViewAsync } from '../redux/actions';

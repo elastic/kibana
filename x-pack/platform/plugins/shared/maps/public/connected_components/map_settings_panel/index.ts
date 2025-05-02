@@ -6,7 +6,7 @@
  */
 
 import { AnyAction } from 'redux-v4';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { ThunkDispatch } from 'redux-thunk-v2';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapStoreState } from '../../reducers/store';

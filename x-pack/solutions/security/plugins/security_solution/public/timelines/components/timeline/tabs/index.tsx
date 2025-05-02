@@ -9,7 +9,7 @@ import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type { Ref, ReactElement, ComponentType } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from 'styled-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 

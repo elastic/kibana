@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';

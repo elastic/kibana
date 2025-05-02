@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useParams } from 'react-router-dom';
 import { usePreviousObjectMetrics } from './use_prev_object_metrics';
 import { MIME_FILTERS, MimeType, MimeTypesMap } from '../common/network_data/types';

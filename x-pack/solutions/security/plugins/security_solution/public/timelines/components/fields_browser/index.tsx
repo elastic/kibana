@@ -7,7 +7,7 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,

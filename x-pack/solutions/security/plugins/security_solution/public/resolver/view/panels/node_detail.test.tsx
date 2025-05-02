@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { NodeDetailView } from './node_detail';

@@ -8,7 +8,7 @@
 import React, { FC, PropsWithChildren, useEffect, useCallback } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { WorkpadApp } from '../../components/workpad_app';
 import { ExportApp } from '../../components/export_app';
 import { CanvasLoading } from '../../components/canvas_loading';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { OverviewStatusState } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
 

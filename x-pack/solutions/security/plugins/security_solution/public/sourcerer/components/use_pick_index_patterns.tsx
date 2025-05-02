@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { getScopePatternListSelection } from '../store/helpers';
 import { sourcererActions, sourcererModel } from '../store';

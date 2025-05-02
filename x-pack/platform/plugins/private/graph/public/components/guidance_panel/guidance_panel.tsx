@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';

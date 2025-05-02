@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { isRight } from 'fp-ts/Either';
 import { selectedFiltersSelector } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../monitor_status_alert/alert_monitor_status';

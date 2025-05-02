@@ -27,7 +27,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect-v4';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,

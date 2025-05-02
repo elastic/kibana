@@ -13,7 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import styled, { css } from 'styled-components';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import {

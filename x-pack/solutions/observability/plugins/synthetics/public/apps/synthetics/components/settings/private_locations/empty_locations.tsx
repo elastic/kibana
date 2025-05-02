@@ -9,7 +9,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';

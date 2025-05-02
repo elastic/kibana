@@ -9,7 +9,7 @@ import React from 'react';
 import { configureStore } from 'redux-toolkit-v1';
 import { merge } from 'lodash';
 import { Subject } from 'rxjs';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import type { CoreStart } from '@kbn/core/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';

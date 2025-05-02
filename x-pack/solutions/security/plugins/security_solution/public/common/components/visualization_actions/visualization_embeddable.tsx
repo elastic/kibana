@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { css } from '@emotion/react';
 
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';

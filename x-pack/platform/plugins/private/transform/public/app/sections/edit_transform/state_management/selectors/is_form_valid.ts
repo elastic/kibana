@@ -6,7 +6,7 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import type { FormFieldsState } from '../form_field';
 

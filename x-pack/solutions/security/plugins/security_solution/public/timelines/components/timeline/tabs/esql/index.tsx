@@ -16,7 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';

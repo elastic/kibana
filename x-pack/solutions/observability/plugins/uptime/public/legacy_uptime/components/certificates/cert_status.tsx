@@ -10,7 +10,7 @@ import moment from 'moment';
 import styled from 'styled-components';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { Cert } from '../../../../common/runtime_types';
 import { useCertStatus } from '../../hooks';
 import * as labels from './translations';

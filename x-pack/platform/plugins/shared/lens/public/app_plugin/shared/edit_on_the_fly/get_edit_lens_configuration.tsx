@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { MiddlewareAPI, Dispatch, Action } from 'redux-toolkit-v1';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';

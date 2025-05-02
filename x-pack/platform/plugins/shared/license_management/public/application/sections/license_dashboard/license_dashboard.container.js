@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { LicenseDashboard as PresentationComponent } from './license_dashboard';
 import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
 

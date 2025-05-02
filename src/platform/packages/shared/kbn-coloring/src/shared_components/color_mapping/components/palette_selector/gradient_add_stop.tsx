@@ -17,7 +17,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { IKbnPalette } from '@kbn/palettes';

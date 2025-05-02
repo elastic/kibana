@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect } from 'react-redux-v7';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';

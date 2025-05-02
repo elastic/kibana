@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowEqual, useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux-v7';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../../state/selectors/workpad';
 import { State } from '../../../../types';
 import { SidebarContent as Component } from './sidebar_content.component';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {

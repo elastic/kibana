@@ -15,7 +15,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
 } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { selectPingHistogram } from '../../../state/selectors';

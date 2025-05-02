@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, useMemo, type FC, type PropsWithChildren } from 'react';
 import { configureStore, createSlice } from 'redux-toolkit-v1';
-import { useDispatch, Provider } from 'react-redux';
+import { useDispatch, Provider } from 'react-redux-v7';
 import { bindActionCreators } from 'redux-v4';
 import useMount from 'react-use/lib/useMount';
 

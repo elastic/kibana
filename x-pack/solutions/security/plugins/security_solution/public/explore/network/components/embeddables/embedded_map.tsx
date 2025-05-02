@@ -9,7 +9,7 @@
 
 import { EuiAccordion, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import styled from '@emotion/styled';
 import { css } from '@emotion/react';

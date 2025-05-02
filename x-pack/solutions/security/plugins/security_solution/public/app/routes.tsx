@@ -9,7 +9,7 @@ import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';

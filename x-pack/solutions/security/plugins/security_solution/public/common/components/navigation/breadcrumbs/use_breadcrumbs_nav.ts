@@ -7,7 +7,7 @@
 
 import type { SyntheticEvent } from 'react';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { Dispatch } from 'redux-v4';
 import { SecurityPageName } from '../../../../app/types';

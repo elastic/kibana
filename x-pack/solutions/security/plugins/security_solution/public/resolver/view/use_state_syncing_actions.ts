@@ -7,7 +7,7 @@
 
 import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { appReceivedNewExternalProperties } from '../store/actions';
 /**
  * This is a hook that is meant to be used once at the top level of Resolver.

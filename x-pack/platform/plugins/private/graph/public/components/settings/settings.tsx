@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { bindActionCreators } from 'redux-v4';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';

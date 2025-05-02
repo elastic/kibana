@@ -11,7 +11,7 @@ import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Store } from 'redux-v4';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {

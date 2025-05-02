@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
 import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
 import type { Store } from 'redux-v4';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { SelectedDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import { useUserPrivileges } from '../common/components/user_privileges';
 import { useSetUrlParams } from '../management/components/artifact_list_page/hooks/use_set_url_params';

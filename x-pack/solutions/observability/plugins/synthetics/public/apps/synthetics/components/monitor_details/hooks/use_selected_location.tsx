@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { ServiceLocation } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from './use_selected_monitor';
 import { selectSelectedLocationId, setMonitorDetailsLocationAction } from '../../../state';

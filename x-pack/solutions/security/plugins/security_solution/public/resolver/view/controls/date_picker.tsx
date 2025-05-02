@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, memo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiPopoverTitle, EuiSuperDatePicker } from '@elastic/eui';
 import type { ShortDate, EuiSuperDatePickerProps } from '@elastic/eui';

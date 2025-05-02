@@ -12,7 +12,7 @@ import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
 import { Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from './status_bar';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../lib';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 

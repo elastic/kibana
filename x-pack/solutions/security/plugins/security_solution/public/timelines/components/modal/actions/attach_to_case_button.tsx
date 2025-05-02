@@ -7,7 +7,7 @@
 
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { CaseUI } from '@kbn/cases-plugin/common';
 import { UNTITLED_TIMELINE } from '../../timeline/properties/translations';
 import { selectTimelineById } from '../../../store/selectors';

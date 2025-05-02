@@ -9,7 +9,7 @@ import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/publi
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';

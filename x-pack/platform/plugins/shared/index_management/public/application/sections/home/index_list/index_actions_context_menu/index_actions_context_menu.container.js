@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 import {
   clearCacheIndices,

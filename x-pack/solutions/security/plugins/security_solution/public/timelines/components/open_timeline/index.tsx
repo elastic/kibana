@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { encode } from '@kbn/rison';
 
 import { useEnableExperimental } from '../../../common/hooks/use_experimental_features';

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {

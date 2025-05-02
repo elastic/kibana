@@ -11,7 +11,7 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
 import { useCamera } from './use_camera';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import * as selectors from '../store/selectors';
 import type { Matrix3, ResolverStore, SideEffectors, SideEffectSimulator } from '../types';
 import type { ResolverNode } from '../../../common/endpoint/types';

@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import type { Store } from 'redux-v4';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';

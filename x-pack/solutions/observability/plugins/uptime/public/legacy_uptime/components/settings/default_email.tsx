@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnFieldChangeType } from './certificate_form';

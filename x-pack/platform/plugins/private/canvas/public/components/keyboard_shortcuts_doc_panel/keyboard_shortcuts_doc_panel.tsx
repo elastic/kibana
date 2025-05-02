@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getKeyboardShortcutsDocVisibility } from '../../state/selectors/flyouts';
 import { KeyboardShortcutsDocPanel as Component } from './keyboard_shortcuts_doc_panel.component';
 import { State } from '../../../types';

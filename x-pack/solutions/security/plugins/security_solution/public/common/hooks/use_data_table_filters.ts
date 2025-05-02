@@ -12,7 +12,7 @@ import {
   dataTableActions,
 } from '@kbn/securitysolution-data-table';
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useShallowEqualSelector } from './use_selector';
 
 const { updateShowBuildingBlockAlertsFilter, updateShowThreatIndicatorAlertsFilter } =

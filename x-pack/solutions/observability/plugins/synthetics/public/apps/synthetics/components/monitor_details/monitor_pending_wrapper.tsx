@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useMemo, useRef, FC, PropsWithChildren } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner, EuiLoadingChart } from '@elastic/eui';
 import { PageLoader } from '../common/components/page_loader';

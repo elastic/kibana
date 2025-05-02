@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import * as selectors from '../../store/selectors';
 import { NodeEventsInCategory, type NodeEventOnClick } from './node_events_of_type';
 import { NodeEvents } from './node_events';

@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { memo, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions } from '../../../timelines/store';
 

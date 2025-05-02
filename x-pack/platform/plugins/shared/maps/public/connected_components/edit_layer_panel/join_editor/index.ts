@@ -7,7 +7,7 @@
 
 import { AnyAction } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { JoinEditor } from './join_editor';
 import { getSelectedLayerJoinDescriptors } from '../../../selectors/map_selectors';
 import { setJoinsForLayer } from '../../../actions';

@@ -7,8 +7,8 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { useDispatch, connect } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { useDispatch, connect } from 'react-redux-v7';
 import type { Dispatch } from 'redux-v4';
 import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';

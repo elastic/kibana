@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectServiceLocationsState, getServiceLocations } from '../state';
 

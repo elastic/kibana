@@ -17,7 +17,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { css } from '@emotion/react';
 import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';

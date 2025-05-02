@@ -9,7 +9,7 @@ import React from 'react';
 import { MLFlyoutView } from './ml_flyout';
 import { UptimeSettingsContext } from '../../../contexts';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { render, forNearestButton } from '../../../lib/helper/rtl_helpers';
 import * as labels from './translations';
 

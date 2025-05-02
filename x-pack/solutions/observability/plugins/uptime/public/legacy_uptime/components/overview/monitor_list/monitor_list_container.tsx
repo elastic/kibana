@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { usePageReady } from '@kbn/ebt-tools';
 import { getMonitorList } from '../../../state/actions';
 import { esKuerySelector, monitorListSelector } from '../../../state/selectors';

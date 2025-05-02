@@ -7,7 +7,7 @@
 
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';

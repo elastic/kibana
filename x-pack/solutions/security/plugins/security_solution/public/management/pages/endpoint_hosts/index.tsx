@@ -7,7 +7,7 @@
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import React, { memo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { EndpointAction } from './store/action';
 import { EndpointList } from './view';
 import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../common/constants';

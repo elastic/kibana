@@ -7,7 +7,7 @@
 
 import { AnyAction } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { ToolsControl } from './tools_control';
 import { setDrawMode, updateDrawState } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';

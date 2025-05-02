@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import { difference, isEmpty, pickBy } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import usePrevious from 'react-use/lib/usePrevious';
 import { encode } from '@kbn/rison';
 import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';

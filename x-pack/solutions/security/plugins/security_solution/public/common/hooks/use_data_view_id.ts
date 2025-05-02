@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { sourcererScopeSelectedDataViewId } from '../../sourcerer/store/selectors';
 import type { SourcererScopeName } from '../../sourcerer/store/model';
 import type { State } from '../store';

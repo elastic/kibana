@@ -8,7 +8,7 @@
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import { Subject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { CoreStart } from '@kbn/core/public';

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';

@@ -7,7 +7,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { UptimeSettingsContext } from '../../../contexts';
 import * as labels from './translations';
 import { getMLCapabilitiesAction } from '../../../state/actions';

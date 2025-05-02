@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { MapStoreState } from '../../../../../../reducers/store';
 import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../../../../reducers/non_serializable_instances';

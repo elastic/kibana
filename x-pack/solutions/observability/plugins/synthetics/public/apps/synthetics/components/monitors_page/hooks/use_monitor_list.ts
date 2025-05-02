@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 import {

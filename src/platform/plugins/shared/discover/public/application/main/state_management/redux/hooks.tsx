@@ -14,7 +14,7 @@ import {
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
-} from 'react-redux';
+} from 'react-redux-v7';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext } from 'react';
 import { useAdHocDataViews } from './runtime_state';

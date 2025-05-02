@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 
 import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';

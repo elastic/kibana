@@ -24,7 +24,7 @@ import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-li
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';

@@ -7,7 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React, { useCallback, useMemo, memo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import {
   dataTableActions,
   dataTableSelectors,

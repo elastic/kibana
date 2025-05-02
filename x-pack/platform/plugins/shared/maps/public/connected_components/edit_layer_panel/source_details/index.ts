@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { SourceDetails } from './source_details';
 import { getDataFilters } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';

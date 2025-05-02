@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { TimelineTabs } from '../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { appSelectors } from '../../../../common/store';

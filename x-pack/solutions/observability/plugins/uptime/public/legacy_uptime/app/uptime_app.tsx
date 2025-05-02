@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Provider, useStore } from 'react-redux';
+import { Provider, useStore } from 'react-redux-v7';
 import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';

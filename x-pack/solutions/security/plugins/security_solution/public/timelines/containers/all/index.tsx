@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { getTimelineQueryTypes } from '../helpers';
 import { InputsModelId } from '../../../common/store/inputs/constants';

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import styled from 'styled-components';
 import moment from 'moment';
 import type {

@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { fromExpression } from '@kbn/interpreter';
 import { ErrorStrings } from '../../../../i18n';
 import { CANVAS_APP } from '../../../../common/lib';

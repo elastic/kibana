@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { EuiLink, EuiText } from '@elastic/eui';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';

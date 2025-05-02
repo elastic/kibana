@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useCallback, useMemo } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import { InputsModelId } from '../../store/inputs/constants';

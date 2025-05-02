@@ -21,7 +21,7 @@ import {
   removeTemplate,
 } from '../../state_management';
 import { createMockGraphStore } from '../../state_management/mocks';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { UrlTemplate } from '../../types';
 
 jest.mock('@elastic/eui', () => {

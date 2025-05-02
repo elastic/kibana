@@ -7,7 +7,7 @@
 
 import { AnyAction } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { FlyoutFooter } from './flyout_footer';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';

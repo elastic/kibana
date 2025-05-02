@@ -7,8 +7,8 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';

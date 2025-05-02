@@ -6,7 +6,7 @@
  */
 
 import { rgba } from 'polished';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';

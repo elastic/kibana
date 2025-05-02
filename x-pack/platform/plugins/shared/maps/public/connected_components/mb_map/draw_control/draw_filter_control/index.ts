@@ -7,7 +7,7 @@
 
 import { AnyAction } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { DrawFilterControl } from './draw_filter_control';
 import { setDrawMode, updateDrawState } from '../../../../actions';
 import { getDrawState, getGeoFieldNames } from '../../../../selectors/map_selectors';

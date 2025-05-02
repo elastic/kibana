@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { Cluster, ClusterPayload } from '../../../../common/lib';
 import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edit';
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { type EnhancedStore, configureStore } from 'redux-toolkit-v1';
 import { isEqual } from 'lodash';
 import { KbnPalettes } from '@kbn/palettes';

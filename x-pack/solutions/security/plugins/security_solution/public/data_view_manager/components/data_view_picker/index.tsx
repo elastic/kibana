@@ -7,7 +7,7 @@
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useRef, useMemo, memo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewManagerScopeName } from '../../constants';

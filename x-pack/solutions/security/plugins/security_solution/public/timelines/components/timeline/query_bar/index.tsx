@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';

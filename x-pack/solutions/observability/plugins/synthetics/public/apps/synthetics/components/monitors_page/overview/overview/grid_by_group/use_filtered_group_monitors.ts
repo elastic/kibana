@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { selectServiceLocationsState } from '../../../../../state';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { getConfigStatusByLocation, useGetUrlParams } from '../../../../../hooks';
