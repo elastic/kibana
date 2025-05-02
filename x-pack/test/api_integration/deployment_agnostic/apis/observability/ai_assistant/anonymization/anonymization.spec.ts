@@ -7,11 +7,6 @@
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  setupKnowledgeBase,
-  deleteKnowledgeBaseModel,
-  clearKnowledgeBase,
-} from '../utils/knowledge_base';
-import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
@@ -31,12 +26,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('anonymization', function () {
     const userText1 = 'My name is Claudia and my email is claudia@example.com';
     const userText2 = 'my website is http://claudia.is';
+    // LLM proxy is not working on MKI
     this.tags(['failsOnMKI']);
 
     before(async () => {
       await clearConversations(es);
-      // Prepare the knowledge base
-      await setupKnowledgeBase(getService);
       proxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: proxy.getPort(),
@@ -47,9 +41,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       proxy.close();
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
       await clearConversations(es);
-      // Clean up the knowledge base
-      await clearKnowledgeBase(es);
-      await deleteKnowledgeBaseModel(getService);
     });
 
     it('does not send detected entities to the LLM via chat/complete', async () => {
