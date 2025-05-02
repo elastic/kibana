@@ -75,9 +75,8 @@ function formatPEMContent(pemContent: string): string {
 
   const header = headerMatch[0];
   const footer = footerMatch[0];
-  const type = headerMatch[1];
 
-  // Extract the base64 content between header and footer
+  // Extract the base64 content between header and footer, removing any spaces
   const content = normalizedContent
     .slice(header.length, normalizedContent.indexOf(footer))
     .trim()
@@ -86,7 +85,7 @@ function formatPEMContent(pemContent: string): string {
   // Format the content with 64 characters per line
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
 
-  // Assemble the final PEM with proper formatting
+  // Assemble the final PEM with proper formatting - no spaces after header or before footer
   return `${header}\n${formattedContent}\n${footer}`;
 }
 
