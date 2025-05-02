@@ -47,7 +47,7 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import { ESQLRealField, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
+import { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import {
   TIME_SYSTEM_PARAMS,
@@ -267,7 +267,7 @@ export function isLiteralDateItem(nodeArg: ESQLAstItem): boolean {
 export function getValidSignaturesAndTypesToSuggestNext(
   node: ESQLFunction,
   references: {
-    fields: Map<string, ESQLRealField>;
+    fields: Map<string, ESQLFieldWithMetadata>;
     userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
   },
   fnDefinition: FunctionDefinition,
