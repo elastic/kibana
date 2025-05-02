@@ -22044,14 +22044,13 @@ json-schema-merge-allof@^0.8.1:
     json-schema-compare "^0.2.2"
     lodash "^4.17.20"
 
-json-schema-to-ts@^2.9.1:
-  version "2.9.1"
-  resolved "https://registry.yarnpkg.com/json-schema-to-ts/-/json-schema-to-ts-2.9.1.tgz#0e055b787587477abdb7e880c874efad3dba7779"
-  integrity sha512-8MNpRGERlCUWYeJwsWkMrJ0MWzBz49dfqpG+n9viiIlP4othaahbiaNQZuBzmPxRLUhOv1QJMCzW5WE8nHFGIQ==
+json-schema-to-ts@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/json-schema-to-ts/-/json-schema-to-ts-3.1.1.tgz#81f3acaf5a34736492f6f5f51870ef9ece1ca853"
+  integrity sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==
   dependencies:
     "@babel/runtime" "^7.18.3"
-    "@types/json-schema" "^7.0.9"
-    ts-algebra "^1.2.0"
+    ts-algebra "^2.0.0"
 
 json-schema-to-typescript@^14.1.0:
   version "14.1.0"
@@ -30364,10 +30363,10 @@ trough@^1.0.0:
   resolved "https://registry.yarnpkg.com/trough/-/trough-1.0.1.tgz#a9fd8b0394b0ae8fff82e0633a0a36ccad5b5f86"
   integrity sha1-qf2LA5Swro//guBjOgo2zK1bX4Y=
 
-ts-algebra@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/ts-algebra/-/ts-algebra-1.2.0.tgz#f91c481207a770f0d14d055c376cbee040afdfc9"
-  integrity sha512-kMuJJd8B2N/swCvIvn1hIFcIOrLGbWl9m/J6O3kHx9VRaevh00nvgjPiEGaRee7DRaAczMYR2uwWvXU22VFltw==
+ts-algebra@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/ts-algebra/-/ts-algebra-2.0.0.tgz#4e3e0953878f26518fce7f6bb115064a65388b7a"
+  integrity sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==
 
 ts-debounce@^4.0.0:
   version "4.0.0"
