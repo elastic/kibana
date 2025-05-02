@@ -180,14 +180,26 @@ export const moveAction = (
     mainSectionCount = 0;
     for (let i = 0; i < sortedSections.length; i++) {
       const firstSection = sortedSections[i];
+      const firstSectionPanels = Object.values(firstSection.panels);
+      let rowSum =
+        firstSectionPanels.length > 0
+          ? Math.max(...firstSectionPanels.map(({ row, height }) => row + height))
+          : 0;
       if (firstSection.isMainSection) {
         let combinedPanels = { ...firstSection.panels };
         while (i + 1 < sortedSections.length) {
           const secondSection = sortedSections[i + 1];
           if (!secondSection.isMainSection) break;
-          Object.values(secondSection.panels).forEach((panel) => {
-            panel.row = panel.row + 100; // add row to enforce order
-          });
+
+          // add height of current combined sections to the panels so that they keep their order
+          const secondSectionPanels = Object.values(secondSection.panels);
+          const maxRow =
+            secondSectionPanels.length > 0
+              ? Math.max(...secondSectionPanels.map(({ row, height }) => row + height))
+              : 0;
+          secondSectionPanels.forEach((panel) => (panel.row += rowSum));
+          rowSum += maxRow;
+
           combinedPanels = { ...combinedPanels, ...secondSection.panels };
           i++;
         }

@@ -53,14 +53,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     ).length
   );
 
-  const initialClassNames = useMemo(() => {
-    return classNames('kbnGridSectionHeader', {
-      'kbnGridSectionHeader--collapsed': (
-        gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridSectionData
-      ).isCollapsed,
-    });
-  }, [sectionId, gridLayoutStateManager.gridLayout$]);
-
   useEffect(() => {
     return () => {
       // remove reference on unmount
@@ -177,10 +169,18 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
     const section = newLayout[sectionId];
+    if (section.isMainSection) return;
 
-    newLayout[sectionId].isCollapsed = !(newLayout[sectionId] as GridSectionData).isCollapsed;
+    section.isCollapsed = !section.isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [gridLayoutStateManager, sectionId]);
+
+  const setRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      gridLayoutStateManager.headerRefs.current[sectionId] = element;
+    },
+    [gridLayoutStateManager, sectionId]
+  );
 
   return (
     <>
@@ -189,13 +189,14 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         responsive={false}
         alignItems="center"
         css={(theme) => styles.headerStyles(theme, sectionId)}
-        className={classNames(initialClassNames, {
+        className={classNames('kbnGridSectionHeader', {
           'kbnGridSectionHeader--active': isActive,
+          'kbnGridSectionHeader--collapsed': (
+            gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridSectionData
+          ).isCollapsed,
         })}
         data-test-subj={`kbnGridSectionHeader-${sectionId}`}
-        ref={(element: HTMLDivElement | null) =>
-          (gridLayoutStateManager.headerRefs.current[sectionId] = element)
-        }
+        ref={setRef}
       >
         <GridSectionTitle
           sectionId={sectionId}

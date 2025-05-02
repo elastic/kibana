@@ -8,7 +8,7 @@
  */
 import { cloneDeep } from 'lodash';
 
-import { GridLayoutData } from '../types';
+import { GridLayoutData, OrderedLayout } from '../types';
 import { resolveGridSection } from './resolve_grid_section';
 
 /**
@@ -39,7 +39,7 @@ export const movePanelsToRow = (layout: GridLayoutData, startingRow: string, new
  * @param rowIndex The row to be deleted
  * @returns Updated layout with the row at `rowIndex` deleted
  */
-export const deleteRow = (layout: GridLayoutData, sectionId: string) => {
+export const deleteRow = (layout: OrderedLayout, sectionId: string) => {
   const newLayout = cloneDeep(layout);
   delete newLayout[sectionId];
   return newLayout;
