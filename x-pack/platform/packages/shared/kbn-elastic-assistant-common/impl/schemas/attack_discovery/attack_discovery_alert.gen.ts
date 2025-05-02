@@ -65,7 +65,7 @@ export const AttackDiscoveryAlert = z.object({
    */
   mitreAttackTactics: z.array(z.string()).optional(),
   /**
-   * Optional Key-value pairs that are used to replace placeholders in the markdown fields
+   * Key-value pairs that are used to replace placeholders in the markdown fields
    */
   replacements: Replacements.optional(),
   /**

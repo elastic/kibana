@@ -25,15 +25,15 @@ paths:
               create:
                 - allowed: true
                   anonymized: false
-                  field: field1
+                  field: host.name
                 - allowed: false
                   anonymized: true
-                  field: field2
+                  field: user.name
               delete:
                 ids:
                   - field5
                   - field6
-                query: 'field: field1'
+                query: 'field: host.name'
               update:
                 - allowed: true
                   anonymized: false
@@ -80,7 +80,7 @@ paths:
                         anonymized: true
                         createdAt: '2023-10-31T12:00:00Z'
                         createdBy: user1
-                        field: field2
+                        field: host.name
                         id: field2
                         namespace: default
                         timestamp: '2023-10-31T12:00:00Z'
@@ -90,14 +90,14 @@ paths:
                       - field3
                     skipped:
                       - id: field4
-                        name: field4
+                        name: user.name
                         skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
                     updated:
                       - allowed: true
                         anonymized: false
                         createdAt: '2023-10-31T12:00:00Z'
                         createdBy: user1
-                        field: field8
+                        field: url.domain
                         id: field8
                         namespace: default
                         timestamp: '2023-10-31T12:00:00Z'
@@ -125,7 +125,7 @@ paths:
                 type: object
                 properties:
                   error:
-                    description: error message
+                    description: Error message
                     type: string
                   message:
                     description: detailed error message
@@ -804,8 +804,8 @@ paths:
           schema:
             type: string
         - description: >-
-            Optional ELSER modelId to use when setting up the Knowledge Base. If
-            not provided, a default model will be used.
+            ELSER modelId to use when setting up the Knowledge Base. If not
+            provided, a default model will be used.
           example: elser-model-001
           in: query
           name: modelId
@@ -998,7 +998,7 @@ paths:
           schema:
             $ref: '#/components/schemas/FindKnowledgeBaseEntriesSortField'
             example: created_at
-        - description: Sort order for the results, either ascending or descending.
+        - description: Sort order for the results, either asc or desc.
           in: query
           name: sort_order
           required: false
@@ -1222,7 +1222,7 @@ paths:
         - Knowledge Base Entries API
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
-      description: >
+      description: >-
         Apply a bulk action to multiple prompts. The bulk action is applied to
         all prompts that match the filter or to the list of prompts by their
         IDs. This action allows for bulk create, update, or delete operations.
@@ -1366,7 +1366,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/FindPromptsSortField'
-        - description: Sort order, either ascending or descending.
+        - description: Sort order, either asc or desc.
           in: query
           name: sort_order
           required: false
@@ -1487,10 +1487,10 @@ components:
       type: object
       properties:
         id:
-          description: id of the anonymization field
+          description: The id of the anonymization field
           type: string
         name:
-          description: name of the anonymization field
+          description: Name of the anonymization field
           type: string
       required:
         - id
@@ -1514,7 +1514,7 @@ components:
           type: string
         id:
           $ref: '#/components/schemas/NonEmptyString'
-          description: id of the anonymization field
+          description: The id of the anonymization field
         namespace:
           description: Kibana space
           type: string
@@ -1539,14 +1539,14 @@ components:
       type: object
       properties:
         id:
-          description: id of the anonymization field that was not modified
+          description: The id of the anonymization field that was not modified
           type: string
         name:
-          description: name of the anonymization field that was not modified
+          description: Name of the anonymization field that was not modified
           type: string
         skip_reason:
           $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipReason'
-          description: reason why the anonymization field was not modified
+          description: Reason why the anonymization field was not modified
       required:
         - id
         - skip_reason
@@ -1702,17 +1702,17 @@ components:
           type: string
         conversationId:
           $ref: '#/components/schemas/NonEmptyString'
-          description: Optional existing conversation ID to continue.
+          description: Existing conversation ID to continue.
         isStream:
           description: If true, the response will be streamed in chunks.
           example: true
           type: boolean
         langSmithApiKey:
-          description: Optional API key for LangSmith integration.
+          description: API key for LangSmith integration.
           example: sk-abc123
           type: string
         langSmithProject:
-          description: Optional LangSmith project name for tracing.
+          description: LangSmith project name for tracing.
           example: security_ai_project
           type: string
         messages:
@@ -1721,7 +1721,7 @@ components:
             $ref: '#/components/schemas/ChatMessage'
           type: array
         model:
-          description: Optional model ID or name to use for the response.
+          description: Model ID or name to use for the response.
           example: gpt-4
           type: string
         persist:
@@ -1729,7 +1729,7 @@ components:
           example: true
           type: boolean
         promptId:
-          description: Optional prompt template identifier.
+          description: Prompt template identifier.
           example: prompt_001
           type: string
         responseLanguage:
@@ -1750,7 +1750,7 @@ components:
           type: string
         data:
           $ref: '#/components/schemas/MessageData'
-          description: Optional metadata to attach to the context of the message.
+          description: Metadata to attach to the context of the message.
         fields_to_anonymize:
           description: >-
             List of field names within the data object that should be
@@ -2570,7 +2570,7 @@ components:
         - role
     MessageData:
       additionalProperties: true
-      description: Optional ECS-style metadata attached to the message.
+      description: ECS-style metadata attached to the message.
       example:
         alert_id: alert-456
         user_id: abc123
@@ -2591,7 +2591,8 @@ components:
       example: assistant
       type: string
     NonEmptyString:
-      description: A string that does not contain only whitespace characters
+      description: A string that does not contain only whitespace characters.
+      example: I am a string
       format: nonempty
       minLength: 1
       type: string
@@ -2604,13 +2605,13 @@ components:
             $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
           type: array
         err_code:
-          description: error code
+          description: Error code
           type: string
         message:
-          description: error message
+          description: Error message
           type: string
         status_code:
-          description: status code of the response
+          description: Status code of the response
           type: integer
       required:
         - message
@@ -2997,12 +2998,14 @@ components:
             - type
       description: References the security alerts page
     SortOrder:
+      description: The order in which results are sorted.
       enum:
         - asc
         - desc
+      example: asc
       type: string
     TraceData:
-      description: trace Data
+      description: Trace Data
       type: object
       properties:
         traceId:
@@ -3014,14 +3017,16 @@ components:
           example: a1234567-bc89-0def-1234-56789abcdef0
           type: string
     User:
-      description: Could be any string, not necessarily a UUID
+      description: Could be any string, not necessarily a UUID.
       type: object
       properties:
         id:
-          description: User id
+          description: User id.
+          example: user123
           type: string
         name:
-          description: User name
+          description: User name.
+          example: John Doe
           type: string
     Vector:
       description: >-

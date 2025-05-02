@@ -21,7 +21,7 @@ paths:
           example: "kb12345"
         - name: modelId
           in: query
-          description: Optional ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+          description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
           required: false
           schema:
             type: string

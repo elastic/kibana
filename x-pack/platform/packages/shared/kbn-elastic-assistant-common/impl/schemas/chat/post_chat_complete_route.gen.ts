@@ -34,7 +34,7 @@ export type ChatMessageRoleEnum = typeof ChatMessageRole.enum;
 export const ChatMessageRoleEnum = ChatMessageRole.enum;
 
 /**
- * Optional ECS-style metadata attached to the message.
+ * ECS-style metadata attached to the message.
  */
 export type MessageData = z.infer<typeof MessageData>;
 export const MessageData = z.object({}).catchall(z.unknown());
@@ -53,7 +53,7 @@ export const ChatMessage = z.object({
    */
   role: ChatMessageRole,
   /**
-   * Optional metadata to attach to the context of the message.
+   * Metadata to attach to the context of the message.
    */
   data: MessageData.optional(),
   /**
@@ -68,11 +68,11 @@ export const ChatMessage = z.object({
 export type ChatCompleteProps = z.infer<typeof ChatCompleteProps>;
 export const ChatCompleteProps = z.object({
   /**
-   * Optional existing conversation ID to continue.
+   * Existing conversation ID to continue.
    */
   conversationId: NonEmptyString.optional(),
   /**
-   * Optional prompt template identifier.
+   * Prompt template identifier.
    */
   promptId: z.string().optional(),
   /**
@@ -84,11 +84,11 @@ export const ChatCompleteProps = z.object({
    */
   responseLanguage: z.string().optional(),
   /**
-   * Optional LangSmith project name for tracing.
+   * LangSmith project name for tracing.
    */
   langSmithProject: z.string().optional(),
   /**
-   * Optional API key for LangSmith integration.
+   * API key for LangSmith integration.
    */
   langSmithApiKey: z.string().optional(),
   /**
@@ -96,7 +96,7 @@ export const ChatCompleteProps = z.object({
    */
   connectorId: z.string(),
   /**
-   * Optional model ID or name to use for the response.
+   * Model ID or name to use for the response.
    */
   model: z.string().optional(),
   /**

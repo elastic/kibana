@@ -50,7 +50,7 @@ export const FindKnowledgeBaseEntriesRequestQuery = z.object({
    */
   sort_field: FindKnowledgeBaseEntriesSortField.optional(),
   /**
-   * Sort order for the results, either ascending or descending.
+   * Sort order for the results, either asc or desc.
    */
   sort_order: SortOrder.optional(),
   /**

@@ -55,7 +55,7 @@ components:
             type: string
           type: array
         replacements:
-          description: Optional Key-value pairs that are used to replace placeholders in the markdown fields
+          description: Key-value pairs that are used to replace placeholders in the markdown fields
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
         riskScore:
           description: The optional, (but typically populated after generation) risk score of the alert

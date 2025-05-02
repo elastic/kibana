@@ -38,7 +38,7 @@ paths:
             example: 'created_at'
         - name: 'sort_order'
           in: query
-          description: Sort order for the results, either ascending or descending.
+          description: Sort order for the results, either asc or desc.
           required: false
           schema:
             $ref: '../../common_attributes.schema.yaml#/components/schemas/SortOrder'

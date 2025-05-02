@@ -9,8 +9,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: PerformPromptsBulkAction
       summary: Apply a bulk action to prompts
-      description: >
-        Apply a bulk action to multiple prompts. The bulk action is applied to all prompts
+      description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts
         that match the filter or to the list of prompts by their IDs. This action allows
         for bulk create, update, or delete operations.
       tags:

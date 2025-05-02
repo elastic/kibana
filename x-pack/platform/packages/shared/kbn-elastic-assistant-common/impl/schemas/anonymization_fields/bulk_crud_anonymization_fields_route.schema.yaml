@@ -33,15 +33,15 @@ paths:
                   description: Array of objects with anonymization fields to update
             example:
               delete:
-                query: 'field: field1'
+                query: 'field: host.name'
                 ids:
                   - 'field5'
                   - 'field6'
               create:
-                - field: field1
+                - field: host.name
                   allowed: true
                   anonymized: false
-                - field: field2
+                - field: user.name
                   allowed: false
                   anonymized: true
               update:
@@ -67,7 +67,7 @@ paths:
                   results:
                     updated:
                       - id: field8
-                        field: field8
+                        field: "url.domain"
                         allowed: true
                         anonymized: false
                         timestamp: '2023-10-31T12:00:00Z'
@@ -78,7 +78,7 @@ paths:
                         namespace: default
                     created:
                       - id: field2
-                        field: field2
+                        field: "host.name"
                         allowed: false
                         anonymized: true
                         timestamp: '2023-10-31T12:00:00Z'
@@ -91,7 +91,7 @@ paths:
                       - field3
                     skipped:
                       - id: field4
-                        name: field4
+                        name: "user.name"
                         skip_reason: ANONYMIZATION_FIELD_NOT_MODIFIED
                   summary:
                     failed: 1
@@ -110,7 +110,7 @@ paths:
                     description: status code of the response
                   error:
                     type: string
-                    description: error message
+                    description: Error message
                   message:
                     type: string
                     description: detailed error message
@@ -132,13 +132,13 @@ components:
       properties:
         id:
           type: string
-          description: id of the anonymization field that was not modified
+          description: The id of the anonymization field that was not modified
         name:
           type: string
-          description: name of the anonymization field that was not modified
+          description: Name of the anonymization field that was not modified
         skip_reason:
           $ref: '#/components/schemas/AnonymizationFieldsBulkActionSkipReason'
-          description: reason why the anonymization field was not modified
+          description: Reason why the anonymization field was not modified
       required:
         - id
         - skip_reason
@@ -148,10 +148,10 @@ components:
       properties:
         id:
           type: string
-          description: id of the anonymization field
+          description: The id of the anonymization field
         name:
           type: string
-          description: name of the anonymization field
+          description: Name of the anonymization field
       required:
         - id
 
@@ -160,13 +160,13 @@ components:
       properties:
         message:
           type: string
-          description: error message
+          description: Error message
         status_code:
           type: integer
-          description: status code of the response
+          description: Status code of the response
         err_code:
           type: string
-          description: error code
+          description: Error code
         anonymization_fields:
           type: array
           items:
@@ -185,7 +185,7 @@ components:
       properties:
         id:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-          description: id of the anonymization field
+          description: The id of the anonymization field
         timestamp:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           description: Timestamp of the field creation

@@ -33,15 +33,15 @@ export type AnonymizationFieldsBulkActionSkipResult = z.infer<
 >;
 export const AnonymizationFieldsBulkActionSkipResult = z.object({
   /**
-   * id of the anonymization field that was not modified
+   * The id of the anonymization field that was not modified
    */
   id: z.string(),
   /**
-   * name of the anonymization field that was not modified
+   * Name of the anonymization field that was not modified
    */
   name: z.string().optional(),
   /**
-   * reason why the anonymization field was not modified
+   * Reason why the anonymization field was not modified
    */
   skip_reason: AnonymizationFieldsBulkActionSkipReason,
 });
@@ -49,11 +49,11 @@ export const AnonymizationFieldsBulkActionSkipResult = z.object({
 export type AnonymizationFieldDetailsInError = z.infer<typeof AnonymizationFieldDetailsInError>;
 export const AnonymizationFieldDetailsInError = z.object({
   /**
-   * id of the anonymization field
+   * The id of the anonymization field
    */
   id: z.string(),
   /**
-   * name of the anonymization field
+   * Name of the anonymization field
    */
   name: z.string().optional(),
 });
@@ -61,15 +61,15 @@ export const AnonymizationFieldDetailsInError = z.object({
 export type NormalizedAnonymizationFieldError = z.infer<typeof NormalizedAnonymizationFieldError>;
 export const NormalizedAnonymizationFieldError = z.object({
   /**
-   * error message
+   * Error message
    */
   message: z.string(),
   /**
-   * status code of the response
+   * Status code of the response
    */
   status_code: z.number().int(),
   /**
-   * error code
+   * Error code
    */
   err_code: z.string().optional(),
   /**
@@ -81,7 +81,7 @@ export const NormalizedAnonymizationFieldError = z.object({
 export type AnonymizationFieldResponse = z.infer<typeof AnonymizationFieldResponse>;
 export const AnonymizationFieldResponse = z.object({
   /**
-   * id of the anonymization field
+   * The id of the anonymization field
    */
   id: NonEmptyString,
   /**

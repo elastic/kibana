@@ -43,7 +43,7 @@ export const FindPromptsRequestQuery = z.object({
    */
   sort_field: FindPromptsSortField.optional(),
   /**
-   * Sort order, either ascending or descending.
+   * Sort order, either asc or desc.
    */
   sort_order: SortOrder.optional(),
   /**

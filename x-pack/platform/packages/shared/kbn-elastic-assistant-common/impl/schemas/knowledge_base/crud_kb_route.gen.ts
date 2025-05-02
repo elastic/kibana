@@ -31,7 +31,7 @@ export const KnowledgeBaseResponse = z.object({
 export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
 export const CreateKnowledgeBaseRequestQuery = z.object({
   /**
-   * Optional ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
    */
   modelId: z.string().optional(),
   /**

@@ -9,7 +9,7 @@ components:
 
     TraceData:
       type: object
-      description: trace Data
+      description: Trace Data
       properties:
         transactionId:
           type: string

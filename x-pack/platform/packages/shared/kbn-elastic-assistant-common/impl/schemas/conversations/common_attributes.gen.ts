@@ -19,7 +19,7 @@ import { z } from '@kbn/zod';
 import { NonEmptyString, User } from '../common_attributes.gen';
 
 /**
- * trace Data
+ * Trace Data
  */
 export type TraceData = z.infer<typeof TraceData>;
 export const TraceData = z.object({

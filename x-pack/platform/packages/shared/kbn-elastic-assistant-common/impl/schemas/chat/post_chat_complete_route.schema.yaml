@@ -94,7 +94,7 @@ components:
 
     MessageData:
       type: object
-      description: Optional ECS-style metadata attached to the message.
+      description: ECS-style metadata attached to the message.
       additionalProperties: true
       example:
         user_id: "abc123"
@@ -114,7 +114,7 @@ components:
           $ref: '#/components/schemas/ChatMessageRole'
           description: The sender role of the message.
         data:
-          description: Optional metadata to attach to the context of the message.
+          description: Metadata to attach to the context of the message.
           $ref: '#/components/schemas/MessageData'
         fields_to_anonymize:
           type: array
@@ -131,10 +131,10 @@ components:
       properties:
         conversationId:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
-          description: Optional existing conversation ID to continue.
+          description: Existing conversation ID to continue.
         promptId:
           type: string
-          description: Optional prompt template identifier.
+          description: Prompt template identifier.
           example: "prompt_001"
         isStream:
           type: boolean
@@ -146,11 +146,11 @@ components:
           example: "en"
         langSmithProject:
           type: string
-          description: Optional LangSmith project name for tracing.
+          description: LangSmith project name for tracing.
           example: "security_ai_project"
         langSmithApiKey:
           type: string
-          description: Optional API key for LangSmith integration.
+          description: API key for LangSmith integration.
           example: "sk-abc123"
         connectorId:
           type: string
@@ -158,7 +158,7 @@ components:
           example: "conn-001"
         model:
           type: string
-          description: Optional model ID or name to use for the response.
+          description: Model ID or name to use for the response.
           example: "gpt-4"
         persist:
           type: boolean
