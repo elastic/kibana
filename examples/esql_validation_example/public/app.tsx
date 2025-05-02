@@ -24,7 +24,11 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, ESQLFieldWithMetadata, validateQuery } from '@kbn/esql-validation-autocomplete';
+import {
+  ESQLCallbacks,
+  ESQLFieldWithMetadata,
+  validateQuery,
+} from '@kbn/esql-validation-autocomplete';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';
 
