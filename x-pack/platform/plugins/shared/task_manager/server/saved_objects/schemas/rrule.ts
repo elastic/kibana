@@ -37,17 +37,15 @@ const validateRecurrenceByWeekday = (array: string[]) => {
 };
 
 const rruleCommon = schema.object({
-  freq: schema.maybe(
-    schema.oneOf([
-      schema.literal(0),
-      schema.literal(1),
-      schema.literal(2),
-      schema.literal(3),
-      schema.literal(4),
-      schema.literal(5),
-      schema.literal(6),
-    ])
-  ),
+  freq: schema.oneOf([
+    schema.literal(0),
+    schema.literal(1),
+    schema.literal(2),
+    schema.literal(3),
+    schema.literal(4),
+    schema.literal(5),
+    schema.literal(6),
+  ]),
   interval: schema.number({
     validate: (interval: number) => {
       if (!Number.isInteger(interval)) {
