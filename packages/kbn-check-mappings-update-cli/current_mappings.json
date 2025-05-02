@@ -71,6 +71,17 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "consumer": {
         "type": "keyword"
       },
@@ -3036,7 +3047,11 @@
   },
   "scheduled_report": {
     "dynamic": false,
-    "properties": {}
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
+      }
+    }
   },
   "search": {
     "dynamic": false,
@@ -3770,31 +3785,6 @@
         "properties": {
           "interval": {
             "type": "keyword"
-          },
-          "rrule": {
-            "properties": {
-              "byhour": {
-                "type": "integer"
-              },
-              "byminute": {
-                "type": "integer"
-              },
-              "bymonthday": {
-                "type": "integer"
-              },
-              "byweekday": {
-                "type": "integer"
-              },
-              "freq": {
-                "type": "integer"
-              },
-              "interval": {
-                "type": "integer"
-              },
-              "tzid": {
-                "type": "keyword"
-              }
-            }
           }
         }
       },

@@ -427,11 +427,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   protected async fetchActionDetails<T extends ActionDetails = ActionDetails>(
     actionId: string
   ): Promise<T> {
-    return getActionDetailsById(
-      this.options.esClient,
-      this.options.endpointService.getEndpointMetadataService(),
-      actionId
-    );
+    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId);
   }
 
   /**
@@ -456,7 +452,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
 
     return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
-      this.options.esClient,
+      this.options.endpointService,
+      this.options.spaceId,
       actionId
     ).then((actionRequestDoc) => {
       this.cache.set(cacheKey, actionRequestDoc);
@@ -535,6 +532,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         isValid: false,
         error: new ResponseActionsNotSupportedError(actionRequest.command),
       };
+    }
+
+    // if space awareness is enabled, then validate that agents are valid for active space.
+    // We do this validation by just calling `fetchAgentPolicyInfo()` which will throw if agents
+    // are not found in active space
+    if (this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      try {
+        await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
+      } catch (err) {
+        return { isValid: false, error: err };
+      }
     }
 
     return { isValid: true, error: undefined };
