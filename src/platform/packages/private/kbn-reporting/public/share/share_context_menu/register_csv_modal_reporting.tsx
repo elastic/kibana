@@ -21,7 +21,6 @@ import { checkLicense } from '../..';
 
 export const reportingCsvExportProvider = ({
   apiClient,
-  application,
   license,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
@@ -127,7 +126,6 @@ export const reportingCsvExportProvider = ({
 
     return {
       name: panelTitle,
-      toolTipContent: licenseToolTipContent,
       exportType: reportType,
       label: 'CSV',
       generateAssetExport: generateReportingJobCSV,
@@ -155,12 +153,12 @@ export const reportingCsvExportProvider = ({
     id: 'csvReportsModal',
     groupId: 'export',
     config: getShareMenuItems,
-    prerequisiteCheck: () => {
+    prerequisiteCheck: ({ capabilities }) => {
       const licenseCheck = checkLicense(license.check('reporting', 'basic'));
 
       const licenseHasCsvReporting = licenseCheck.showLinks;
 
-      const capabilityHasCsvReporting = application.capabilities.discover_v2?.generateCsv === true;
+      const capabilityHasCsvReporting = capabilities.discover_v2?.generateCsv === true;
 
       if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
         return false;

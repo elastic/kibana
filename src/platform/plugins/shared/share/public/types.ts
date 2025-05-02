@@ -19,6 +19,7 @@ import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_c
 import { AnonymousAccessServiceContract } from '../common/anonymous_access';
 
 export interface ShareRegistryApiStart {
+  capabilities: Capabilities;
   urlService: BrowserUrlService;
   anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 }
@@ -62,7 +63,10 @@ type ShareImplementationFactory<
        * when provided, this method will be used to evaluate if this integration should be available,
        * given the current license and capabilities of kibana
        */
-      prerequisiteCheck?: (args: { objectType: ShareContext['objectType'] }) => boolean;
+      prerequisiteCheck?: (args: {
+        capabilities: Capabilities;
+        objectType: ShareContext['objectType'];
+      }) => boolean;
     }
   : {
       shareType: T;

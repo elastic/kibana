@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ApplicationStart } from '@kbn/core/public';
 import type {
   BrowserUrlService,
   ShareContext,
@@ -23,6 +24,8 @@ import type { AnonymousAccessServiceContract } from '../../common/anonymous_acce
 export class ShareRegistry implements ShareRegistryPublicApi {
   private urlService?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  private capabilities?: ApplicationStart['capabilities'];
+
   private readonly globalMarker: string = '*';
 
   constructor() {
@@ -48,9 +51,10 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     };
   }
 
-  start({ urlService, anonymousAccessServiceProvider }: ShareRegistryApiStart) {
+  start({ urlService, anonymousAccessServiceProvider, capabilities }: ShareRegistryApiStart) {
     this.urlService = urlService;
     this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
+    this.capabilities = capabilities;
 
     return {
       availableIntegrations: this.availableIntegrations.bind(this),
@@ -141,6 +145,10 @@ export class ShareRegistry implements ShareRegistryPublicApi {
    * Returns all share actions that are available for the given object type.
    */
   private availableIntegrations(objectType: string, groupId?: string): ShareActionIntents[] {
+    if (!this.capabilities) {
+      throw new Error('ShareOptionsManager#start was not invoked');
+    }
+
     return this.getShareConfigOptionsForObject(objectType).filter((share) => {
       if (
         groupId &&
@@ -152,6 +160,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
 
       if (share.shareType === 'integration' && share.prerequisiteCheck) {
         return share.prerequisiteCheck({
+          capabilities: this.capabilities!,
           objectType,
         });
       }

@@ -42,7 +42,6 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
 export const reportingPDFExportProvider = ({
   apiClient,
   license,
-  application,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
@@ -145,7 +144,7 @@ export const reportingPDFExportProvider = ({
     shareType: 'integration',
     groupId: 'export',
     config: getShareMenuItems,
-    prerequisiteCheck({ objectType }) {
+    prerequisiteCheck({ capabilities, objectType }) {
       let isSupportedType: boolean;
 
       if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {
@@ -157,9 +156,9 @@ export const reportingPDFExportProvider = ({
       );
 
       const capabilityHasDashboardScreenshotReporting =
-        application.capabilities.dashboard_v2?.generateScreenshot === true;
+        capabilities.dashboard_v2?.generateScreenshot === true;
       const capabilityHasVisualizeScreenshotReporting =
-        application.capabilities.visualize_v2?.generateScreenshot === true;
+        capabilities.visualize_v2?.generateScreenshot === true;
 
       if (!licenseHasScreenshotReporting) {
         return false;
@@ -185,7 +184,6 @@ export const reportingPDFExportProvider = ({
 export const reportingPNGExportProvider = ({
   apiClient,
   license,
-  application,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
@@ -286,7 +284,7 @@ export const reportingPNGExportProvider = ({
     groupId: 'export',
     id: 'imageReports',
     config: getShareMenuItems,
-    prerequisiteCheck({ objectType }) {
+    prerequisiteCheck({ capabilities, objectType }) {
       let isSupportedType: boolean;
 
       if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {
@@ -297,9 +295,9 @@ export const reportingPNGExportProvider = ({
       const licenseHasScreenshotReporting = showLinks;
 
       const capabilityHasDashboardScreenshotReporting =
-        application.capabilities.dashboard_v2?.generateScreenshot === true;
+        capabilities.dashboard_v2?.generateScreenshot === true;
       const capabilityHasVisualizeScreenshotReporting =
-        application.capabilities.visualize_v2?.generateScreenshot === true;
+        capabilities.visualize_v2?.generateScreenshot === true;
 
       if (!licenseHasScreenshotReporting) {
         return false;

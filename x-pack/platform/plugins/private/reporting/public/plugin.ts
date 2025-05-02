@@ -210,7 +210,7 @@ export class ReportingPublicPlugin
       })
     );
 
-    startServices$.subscribe(([{ application }, { licensing }]) => {
+    startServices$.subscribe(([, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.registerShareIntegration<ExportShare>(
           'search',
@@ -218,7 +218,6 @@ export class ReportingPublicPlugin
           reportingCsvExportProvider({
             apiClient,
             license,
-            application,
             startServices$,
           })
         );
@@ -229,7 +228,6 @@ export class ReportingPublicPlugin
             reportingPDFExportProvider({
               apiClient,
               license,
-              application,
               startServices$,
             })
           );
@@ -239,7 +237,6 @@ export class ReportingPublicPlugin
             reportingPNGExportProvider({
               apiClient,
               license,
-              application,
               startServices$,
             })
           );

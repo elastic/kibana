@@ -32,7 +32,6 @@ export type StartServices = [
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
   license: ILicense;
-  application: ApplicationStart;
   startServices$: Rx.Observable<StartServices>;
 }
 

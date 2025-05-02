@@ -145,6 +145,7 @@ export class SharePlugin
     const { resolveShareItemsForShareContext, availableIntegrations } = this.shareRegistry.start({
       urlService: this.url!,
       anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
+      capabilities: core.application.capabilities,
     });
 
     const sharingContextMenuStart = this.shareContextMenu.start({
