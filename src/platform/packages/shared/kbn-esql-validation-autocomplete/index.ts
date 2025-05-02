@@ -15,8 +15,6 @@ export type { ESQLCallbacks } from './src/shared/types';
  * High level functions
  */
 
-// Given an the query string, its AST and the cursor position, it returns the node and some context information
-export { getAstContext } from './src/shared/context';
 // Validation function
 export { validateQuery } from './src/validation/validation';
 // Autocomplete function
