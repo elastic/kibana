@@ -26,9 +26,6 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
             },
           },
         }}
-        pageHeader={{
-          tabs: [],
-        }}
       >
         {children}
       </ApmMainTemplate>
