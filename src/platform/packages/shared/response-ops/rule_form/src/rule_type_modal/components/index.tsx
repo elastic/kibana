@@ -11,7 +11,7 @@ import { countBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { RuleTypeModel, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 
@@ -19,7 +19,7 @@ export interface RuleTypeModalComponentProps {
   http: HttpStart;
   toasts: ToastsStart;
   filteredRuleTypes: string[];
-  registeredRuleTypes: Array<{ id: string; description: string }>;
+  registeredRuleTypes: RuleTypeModel[];
   onClose: RuleTypeModalProps['onClose'];
   onSelectRuleType: RuleTypeModalProps['onSelectRuleType'];
 }
@@ -36,13 +36,16 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   const [selectedProducer, setSelectedProducer] = useState<string | null>(null);
   const [searchString, setSearchString] = useState<string>('');
 
+  const registeredRuleTypesWithAppContext = registeredRuleTypes.filter(
+    ({ requiresAppContext }) => !requiresAppContext
+  );
   const {
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesLoading },
   } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes,
-    registeredRuleTypes,
+    registeredRuleTypes: registeredRuleTypesWithAppContext,
   });
 
   // Count producers before filtering. This is used to determine if we should show the categories,
