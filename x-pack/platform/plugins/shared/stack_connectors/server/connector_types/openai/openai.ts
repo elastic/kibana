@@ -91,6 +91,10 @@ function formatPEMContent(pemContent: string, logger: Logger): string {
   logger.debug(pemContent);
   logger.debug('Normalized PEM content:');
   logger.debug(normalizedContent);
+  logger.debug('Base64 content:');
+  logger.debug(base64Content);
+  logger.debug('Formatted content:');
+  logger.debug(formattedContent);
   logger.debug('Final PEM content:');
   logger.debug(result);
   logger.debug(`PEM content has newlines: ${result.includes('\n')}, has spaces: ${result.includes(' ')}`);
@@ -169,6 +173,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         } else if (this.configAny.certificateData) {
           // Format the certificate data properly
           cert = formatPEMContent(this.configAny.certificateData, this.logger);
+          this.logger.debug('Certificate PEM content analysis:');
+          this.logger.debug(`Line count: ${cert.split('\n').length}`);
+          this.logger.debug(`First line: ${cert.split('\n')[0]}`);
+          this.logger.debug(`Last line: ${cert.split('\n')[cert.split('\n').length - 1]}`);
+          this.logger.debug(`Has newline after header: ${cert.includes('-----BEGIN CERTIFICATE-----\n')}`);
+          this.logger.debug(`Has newline before footer: ${cert.includes('\n-----END CERTIFICATE-----\n')}`);
         }
 
         if (this.configAny.privateKeyFile) {
@@ -182,13 +192,19 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         } else if (this.configAny.privateKeyData) {
           // Format the private key data properly
           key = formatPEMContent(this.configAny.privateKeyData, this.logger);
+          this.logger.debug('Private key PEM content analysis:');
+          this.logger.debug(`Line count: ${key.split('\n').length}`);
+          this.logger.debug(`First line: ${key.split('\n')[0]}`);
+          this.logger.debug(`Last line: ${key.split('\n')[key.split('\n').length - 1]}`);
+          this.logger.debug(`Has newline after header: ${key.includes('-----BEGIN PRIVATE KEY-----\n')}`);
+          this.logger.debug(`Has newline before footer: ${key.includes('\n-----END PRIVATE KEY-----\n')}`);
         }
 
         // Log the final PEM content for cert and key
-        this.logger.info(`Final certificate PEM (first 200 chars):\n${cert?.toString().slice(0, 200)}`);
-        this.logger.info(`Final private key PEM (first 200 chars):\n${key?.toString().slice(0, 200)}`);
-        this.logger.info('Certificate PEM lines:\n' + cert?.toString().split('\n').join('\n'));
-        this.logger.info('Private key PEM lines:\n' + key?.toString().split('\n').join('\n'));
+        this.logger.debug(`Final certificate PEM (first 200 chars):\n${cert?.toString().slice(0, 200)}`);
+        this.logger.debug(`Final private key PEM (first 200 chars):\n${key?.toString().slice(0, 200)}`);
+        this.logger.debug('Certificate PEM lines:\n' + cert?.toString().split('\n').join('\n'));
+        this.logger.debug('Private key PEM lines:\n' + key?.toString().split('\n').join('\n'));
         this.logger.debug(`Certificate format check - Header: ${cert?.toString().startsWith('-----BEGIN CERTIFICATE-----')}, Footer: ${cert?.toString().endsWith('-----END CERTIFICATE-----')}`);
         this.logger.debug(`Private key format check - Header: ${key?.toString().startsWith('-----BEGIN PRIVATE KEY-----')}, Footer: ${key?.toString().endsWith('-----END PRIVATE KEY-----')}`);
 
