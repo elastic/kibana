@@ -139,20 +139,20 @@ function reportPerformanceMetrics({
   // Each group contains the performance markers for a single Lens embeddable.
   // We need to extract the start and end times of the preRender, renderStart
   // and renderComplete markers and calculate the duration of each phase.
-  const measurements = Object.values(groupedPerformanceMarkers).map((group) => {
+  const measurements = Object.values(groupedPerformanceMarkers).map((markers) => {
     // Get the marker name from the first group.
     const markerName =
-      Array.isArray(group) && group.length > 0
-        ? group[0].name.split(':').slice(0, -1).join(':')
+      Array.isArray(markers) && markers.length > 0
+        ? markers[0].name.split(':').slice(0, -1).join(':')
         : undefined;
 
-    const preRenderStart = group.find((marker) =>
+    const preRenderStart = markers.find((marker) =>
       marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.PRE_RENDER}`)
     )?.startTime;
-    const renderStart = group.find((marker) =>
+    const renderStart = markers.find((marker) =>
       marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_START}`)
     )?.startTime;
-    const renderComplete = group.find((marker) =>
+    const renderComplete = markers.find((marker) =>
       marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE}`)
     )?.startTime;
 
