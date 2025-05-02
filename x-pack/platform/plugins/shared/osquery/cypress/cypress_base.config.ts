@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import path from 'path';
-import { safeLoad as loadYaml } from 'js-yaml';
+import { load as loadYaml } from 'js-yaml';
 import { readFileSync } from 'fs';
 import type { YamlRoleDefinitions } from '@kbn/test-suites-serverless/shared/lib';
 import { samlAuthentication } from '@kbn/security-solution-plugin/public/management/cypress/support/saml_authentication';

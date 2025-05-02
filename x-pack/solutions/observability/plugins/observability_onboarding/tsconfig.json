@@ -7,7 +7,7 @@
     "../../../../../typings/**/*",
     "common/**/*",
     "public/**/*",
-    "typings/**/*",
+    "../../../../typings/**/*",
     "public/**/*.json",
     "server/**/*",
     "e2e/**/*"
