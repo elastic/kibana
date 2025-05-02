@@ -99,28 +99,57 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           throw new Error('Invalid or inaccessible PKI certificates');
         }
 
-        // Load certificate and key
+        // Parse certificate and key from file or content
         let cert: string | Buffer;
         let key: string | Buffer;
 
+        // Utility to parse PEM content (file or string)
+        const parsePemContent = (content: string): { cert: string, key: string } => {
+          const certMatch = content.match(/-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g);
+          const keyMatch = content.match(/-----BEGIN PRIVATE KEY-----[\s\S]*?-----END PRIVATE KEY-----/);
+          return {
+            cert: certMatch ? certMatch.join('\n') : '',
+            key: keyMatch ? keyMatch[0] : '',
+          };
+        };
+
+        // Normalize PEM strings to ensure consistent formatting
+        const normalizePem = (pem: string): string => {
+          return pem.replace(/\r\n|\r|\n/g, '\n').trim();
+        };
+
         if (this.config.certificateFile) {
-          cert = fs.readFileSync(
+          const fileContent = fs.readFileSync(
             Array.isArray(this.config.certificateFile)
               ? this.config.certificateFile[0]
-              : this.config.certificateFile
+              : this.config.certificateFile,
+            'utf8'
           );
+          const { cert: parsedCert } = parsePemContent(fileContent);
+          cert = parsedCert;
+          this.logger.debug(`Loaded certificate from file: ${this.config.certificateFile}, cert: ${parsedCert.substring(0, 50)}...`);
+        } else if (this.config.certificateData) {
+          cert = normalizePem(this.config.certificateData);
+          this.logger.debug(`Using certificate data: ${cert.substring(0, 50)}...`);
         } else {
-          cert = this.config.certificateData!;
+          throw new Error('No certificate file or data provided');
         }
 
         if (this.config.privateKeyFile) {
-          key = fs.readFileSync(
+          const fileContent = fs.readFileSync(
             Array.isArray(this.config.privateKeyFile)
               ? this.config.privateKeyFile[0]
-              : this.config.privateKeyFile
+              : this.config.privateKeyFile,
+            'utf8'
           );
+          const { key: parsedKey } = parsePemContent(fileContent);
+          key = parsedKey;
+          this.logger.debug(`Loaded private key from file: ${this.config.privateKeyFile}, key: ${parsedKey.substring(0, 50)}...`);
+        } else if (this.config.privateKeyData) {
+          key = normalizePem(this.config.privateKeyData);
+          this.logger.debug(`Using private key data: ${key.substring(0, 50)}...`);
         } else {
-          key = this.config.privateKeyData!;
+          throw new Error('No private key file or data provided');
         }
 
         const httpsAgent = new https.Agent({
@@ -165,6 +194,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubActions();
   }
 
+  // Rest of the file remains unchanged
   private registerSubActions() {
     this.registerSubAction({
       name: SUB_ACTION.RUN,
