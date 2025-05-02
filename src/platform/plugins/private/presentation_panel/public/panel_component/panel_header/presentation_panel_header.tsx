@@ -74,8 +74,7 @@ export const PresentationPanelHeader = <
         flex-wrap: nowrap;
         column-gap: ${euiTheme.size.s};
         align-items: center;
-        // All direct children of the parent will share the available space equally,
-        // even when their content is smaller.
+        // the width of all direct children should adjust to the width of the parent
         > * {
           min-width: 0;
         }
