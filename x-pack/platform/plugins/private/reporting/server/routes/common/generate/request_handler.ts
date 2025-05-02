@@ -113,7 +113,7 @@ export class RequestHandler {
     logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
     // 5. Schedule the report with Task Manager
-    const task = await reporting.scheduleTask(report.toReportTaskJSON());
+    const task = await reporting.scheduleTask(req, report.toReportTaskJSON());
     logger.info(
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );

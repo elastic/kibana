@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLControlVariable, EsqlControlType } from '@kbn/esql-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
@@ -35,7 +35,6 @@ import {
   EuiTextColor,
   EuiCode,
 } from '@elastic/eui';
-import { EsqlControlType } from '../types';
 import { checkVariableExistence } from './helpers';
 
 const controlTypeOptions = [

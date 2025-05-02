@@ -38,6 +38,6 @@ describe('Policy form RelatedDetectionRulesCallout component', () => {
     render();
     const anchor: HTMLAnchorElement = renderResult.getByTestId('test-link') as HTMLAnchorElement;
 
-    expect(anchor.href).toContain('detection-engine-overview.html');
+    expect(anchor.href).toContain('detect-and-alert');
   });
 });
