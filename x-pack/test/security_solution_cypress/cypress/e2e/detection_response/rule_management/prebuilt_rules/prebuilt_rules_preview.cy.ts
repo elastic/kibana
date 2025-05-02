@@ -19,6 +19,7 @@ import {
   INSTALL_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_PREVIEW,
   UPDATE_PREBUILT_RULE_BUTTON,
+  FIELD_UPGRADE_WRAPPER,
   PER_FIELD_DIFF_WRAPPER,
   PER_FIELD_DIFF_DEFINITION_SECTION,
 } from '../../../../screens/alerts_detection_rules';
@@ -1169,14 +1170,15 @@ describe(
           openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
           assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
 
-          cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 1);
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+          const nameFieldUpgradeWrapper = FIELD_UPGRADE_WRAPPER('name');
+          cy.get(nameFieldUpgradeWrapper).should('have.length', 1);
+          cy.get(nameFieldUpgradeWrapper).last().contains('Name').should('be.visible');
 
           // expand Name field section
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').click();
+          cy.get(nameFieldUpgradeWrapper).last().contains('Name').click();
 
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
+          cy.get(nameFieldUpgradeWrapper).last().contains('Outdated rule 1').should('be.visible');
+          cy.get(nameFieldUpgradeWrapper).last().contains('Updated rule 1').should('be.visible');
         });
 
         it('User can see changes when updated rule is a different rule type', () => {
