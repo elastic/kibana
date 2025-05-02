@@ -69,7 +69,7 @@ export const useArtifactCardPropsProvider = ({
 
       if (allowCardEditAction) {
         cardActions.push({
-          icon: 'controlsHorizontal',
+          icon: 'controls',
           onClick: () => {
             onAction({ type: 'edit', item: artifactItem });
           },

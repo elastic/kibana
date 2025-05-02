@@ -61,7 +61,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       <EuiButton
         onClick={() => setShowUploadModal(true)}
         isDisabled={isLoading || isDeletingFile}
-        iconType="exportAction"
+        iconType="export"
       >
         Upload image
       </EuiButton>,

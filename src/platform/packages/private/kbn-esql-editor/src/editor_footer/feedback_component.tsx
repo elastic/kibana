@@ -32,7 +32,7 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
               })}
             >
               <EuiIcon
-                type="editorComment"
+                type="comment"
                 color="primary"
                 size="m"
                 css={css`
@@ -56,7 +56,7 @@ export function SubmitFeedbackComponent({ isSpaceReduced }: { isSpaceReduced?: b
         >
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="editorComment" color="primary" size="s" />
+              <EuiIcon type="comment" color="primary" size="s" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {i18n.translate('esqlEditor.query.submitFeedback', {

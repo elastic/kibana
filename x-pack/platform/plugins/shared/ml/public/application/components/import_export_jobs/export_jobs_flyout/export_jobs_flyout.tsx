@@ -51,7 +51,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, ...rest }) => {
 const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled, onClick }) => {
   return (
     <EuiButtonEmpty
-      iconType="exportAction"
+      iconType="export"
       onClick={onClick}
       isDisabled={isDisabled}
       data-test-subj="mlJobsExportButton"

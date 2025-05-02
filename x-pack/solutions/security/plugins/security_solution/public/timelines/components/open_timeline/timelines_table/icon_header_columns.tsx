@@ -29,7 +29,7 @@ export const getIconHeaderColumns = ({
       field: 'eventIdToNoteIds',
       name: (
         <EuiToolTip content={i18n.NOTES}>
-          <EuiIcon data-test-subj="notes-count-header-icon" size="m" type="editorComment" />
+          <EuiIcon data-test-subj="notes-count-header-icon" size="m" type="comment" />
         </EuiToolTip>
       ),
       render: (

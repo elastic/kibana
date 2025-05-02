@@ -20,7 +20,7 @@ export const defaultNavigation: DevToolsNodeDefinition = {
     defaultMessage: 'Developer tools',
   }),
   id: 'rootNav:devtools',
-  icon: 'editorCodeBlock',
+  icon: 'code',
   renderAs: 'accordion',
   children: [
     {

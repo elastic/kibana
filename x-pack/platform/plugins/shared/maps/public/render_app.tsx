@@ -37,7 +37,7 @@ function setAppChrome() {
       tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save maps',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
 

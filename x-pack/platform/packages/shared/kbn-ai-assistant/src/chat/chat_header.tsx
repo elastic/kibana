@@ -255,7 +255,7 @@ export function ChatHeader({
                                 { defaultMessage: 'Navigate to conversations' }
                               )}
                               data-test-subj="observabilityAiAssistantChatHeaderButton"
-                              iconType="discuss"
+                              iconType="comment"
                               onClick={() => navigateToConversation(conversationId)}
                             />
                           </EuiToolTip>

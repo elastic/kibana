@@ -28,7 +28,7 @@ export const ExperimentalBadge = ({
         css={css`
           vertical-align: middle;
         `}
-        iconType="beaker"
+        iconType="flask"
         label={label}
         size={size}
         color={color}

@@ -130,7 +130,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           filter: (artifact as ExceptionListItemSchema).item_id,
         });
         const fullDetailsAction = {
-          icon: 'controlsHorizontal',
+          icon: 'controls',
           children: labels.listFullDetailsActionTitle,
           href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
           navigateAppId: APP_UI_ID,

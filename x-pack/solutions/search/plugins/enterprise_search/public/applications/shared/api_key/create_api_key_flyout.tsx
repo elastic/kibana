@@ -353,7 +353,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
               <div style={{ paddingRight: euiTheme.size.s }}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="visVega" />
+                    <EuiIcon type="code" />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiTitle size="xs">

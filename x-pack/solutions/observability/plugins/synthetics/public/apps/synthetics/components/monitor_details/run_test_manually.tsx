@@ -41,7 +41,7 @@ export const RunTestManually = () => {
       <EuiButton
         data-test-subj="syntheticsRunTestManuallyButton"
         color="success"
-        iconType="beaker"
+        iconType="flask"
         isLoading={!Boolean(monitor) || testInProgress}
         isDisabled={!canUsePublicLocations}
         onClick={() => {

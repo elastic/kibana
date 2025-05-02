@@ -96,7 +96,7 @@ export const GraphPreviewContainer: React.FC = () => {
         headerContent: (
           <EuiBetaBadge
             alignment="middle"
-            iconType="beaker"
+            iconType="flask"
             data-test-subj="graphPreviewBetaBadge"
             label={i18n.translate(
               'xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel',

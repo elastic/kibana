@@ -80,7 +80,7 @@ export const createNavigationTree = ({
                   link: 'streams' as const,
                   withBadge: true,
                   badgeOptions: {
-                    icon: 'beaker',
+                    icon: 'flask',
                     tooltip: i18n.translate(
                       'xpack.serverlessObservability.nav.streamsBadgeTooltip',
                       {
@@ -273,7 +273,7 @@ export const createNavigationTree = ({
           defaultMessage: 'Developer tools',
         }),
         link: 'dev_tools',
-        icon: 'editorCodeBlock',
+        icon: 'code',
       },
       {
         type: 'navGroup',

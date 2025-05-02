@@ -35,7 +35,7 @@ export function ControlsToolbarButton({
       label={getControlButtonTitle()}
       zIndex={Number(euiTheme.levels.header) - 1}
       size="s"
-      iconType="controlsHorizontal"
+      iconType="controls"
       data-test-subj="dashboard-controls-menu-button"
       isDisabled={isDisabled}
     >

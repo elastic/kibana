@@ -27,7 +27,7 @@ export const AvailableMetricIcons = {
   BELL: 'bell',
   BOLT: 'bolt',
   BUG: 'bug',
-  EDITOR_COMMENT: 'editorComment',
+  EDITOR_COMMENT: 'comment',
   FLAG: 'flag',
   HEART: 'heart',
   MAP_MARKER: 'mapMarker',

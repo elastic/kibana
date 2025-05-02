@@ -27,7 +27,7 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_EUI_MARKDOWN_ACTION_ID,
     grouping: [embeddableExamplesGrouping],
-    getIconType: () => 'editorCodeBlock',
+    getIconType: () => 'code',
     isCompatible: async ({ embeddable }) => {
       return apiCanAddNewPanel(embeddable);
     },

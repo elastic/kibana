@@ -12,5 +12,5 @@ import { EuiBadge } from '@elastic/eui';
 import { BETA_LABEL } from '../constants';
 
 export const BetaBadge: React.FC = () => {
-  return <EuiBadge iconType="beaker">{BETA_LABEL}</EuiBadge>;
+  return <EuiBadge iconType="flask">{BETA_LABEL}</EuiBadge>;
 };

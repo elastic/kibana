@@ -83,7 +83,7 @@ export const TableVisControls = memo(
       <EuiButtonEmpty
         aria-label={exportBtnAriaLabel}
         size="xs"
-        iconType="exportAction"
+        iconType="export"
         color="text"
         className="euiDataGrid__controlBtn"
         onClick={togglePopover}

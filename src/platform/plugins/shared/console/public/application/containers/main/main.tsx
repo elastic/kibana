@@ -229,7 +229,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                 <>
                   <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                     <EuiButtonEmpty
-                      iconType="exportAction"
+                      iconType="export"
                       disabled={inputEditorValue === ''}
                       onClick={() =>
                         downloadFileAs(EXPORT_FILE_NAME, {
@@ -332,7 +332,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         >
           <EuiButtonEmpty
             onClick={() => updateTab(CONFIG_TAB_ID)}
-            iconType="editorCodeBlock"
+            iconType="code"
             size="xs"
             color="text"
           >

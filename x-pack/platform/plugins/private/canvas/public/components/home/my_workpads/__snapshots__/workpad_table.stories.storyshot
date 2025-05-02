@@ -469,7 +469,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               aria-hidden="true"
                               className="euiButtonIcon__icon"
                               color="inherit"
-                              data-euiicon-type="exportAction"
+                              data-euiicon-type="export"
                               size="m"
                             >
                               
@@ -648,7 +648,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               aria-hidden="true"
                               className="euiButtonIcon__icon"
                               color="inherit"
-                              data-euiicon-type="exportAction"
+                              data-euiicon-type="export"
                               size="m"
                             >
                               
@@ -827,7 +827,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                               aria-hidden="true"
                               className="euiButtonIcon__icon"
                               color="inherit"
-                              data-euiicon-type="exportAction"
+                              data-euiicon-type="export"
                               size="m"
                             >
                               

@@ -220,7 +220,7 @@ export function ActionsPopover({
           {runTestManually}
         </NoPermissionsTooltip>
       ),
-      icon: 'beaker',
+      icon: 'flask',
       disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));

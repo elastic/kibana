@@ -185,7 +185,7 @@ export function TryItButton({
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <TechnicalPreviewBadge icon="beaker" />
+      <TechnicalPreviewBadge icon="flask" />
       {isFeatureEnabled ? null : <PromoLabel />}
       <Link />
       <Popover />

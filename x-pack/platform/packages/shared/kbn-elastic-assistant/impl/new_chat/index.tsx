@@ -84,7 +84,7 @@ const NewChatComponent: React.FC<Props> = ({
       return undefined;
     }
 
-    return iconType ?? 'discuss';
+    return iconType ?? 'comment';
   }, [iconType]);
 
   return useMemo(

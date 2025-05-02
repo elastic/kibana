@@ -109,7 +109,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
           <EuiBadge
             aria-label={TECH_PREVIEW_LABEL}
             key={key + '-preview'}
-            iconType="beaker"
+            iconType="flask"
             color="hollow"
           >
             {TECH_PREVIEW_LABEL}

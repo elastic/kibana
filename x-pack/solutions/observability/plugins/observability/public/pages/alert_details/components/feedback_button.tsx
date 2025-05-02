@@ -18,7 +18,7 @@ export function FeedbackButton() {
       href={LOGS_ALERT_DETAILS_FEEDBACK_LINK}
       target="_blank"
       color="warning"
-      iconType="editorComment"
+      iconType="comment"
     >
       {i18n.translate('xpack.observability.logs.alertDetails.feedbackButtonLabel', {
         defaultMessage: 'Tell us what you think!',

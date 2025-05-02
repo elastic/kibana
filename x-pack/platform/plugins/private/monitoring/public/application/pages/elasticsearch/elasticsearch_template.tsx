@@ -60,7 +60,7 @@ export const ElasticsearchTemplate: React.FC<
             defaultMessage: 'Ingest Pipeline monitoring is a beta feature',
           })}
         >
-          <EuiIcon type="beaker" />
+          <EuiIcon type="flask" />
         </EuiToolTip>
       ),
       onClick: () => ingestPipelineTabOnClick(services),

@@ -170,7 +170,7 @@ function ConfigureSDKInstructions({
           {
             id: 'otlp',
             label: 'Managed OTLP Endpoint',
-            iconType: 'beaker',
+            iconType: 'flask',
             iconSide: 'right',
             toolTipContent: (
               <FormattedMessage

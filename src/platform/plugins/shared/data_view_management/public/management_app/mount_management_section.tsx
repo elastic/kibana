@@ -38,7 +38,7 @@ const readOnlyBadge = {
   tooltip: i18n.translate('indexPatternManagement.dataViews.badge.readOnly.tooltip', {
     defaultMessage: 'Unable to save data views',
   }),
-  iconType: 'glasses',
+  iconType: 'readOnly',
 };
 
 export async function mountManagementSection(

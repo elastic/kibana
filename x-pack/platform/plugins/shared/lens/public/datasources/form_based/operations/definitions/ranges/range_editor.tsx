@@ -189,7 +189,7 @@ const BaseRangeEditor = ({
         </EuiFlexGroup>
       </EuiFormRow>
 
-      <EuiButtonEmpty size="xs" iconType="controlsHorizontal" onClick={() => onToggleEditor()}>
+      <EuiButtonEmpty size="xs" iconType="controls" onClick={() => onToggleEditor()}>
         {i18n.translate('xpack.lens.indexPattern.ranges.customIntervalsToggle', {
           defaultMessage: 'Create custom ranges',
         })}

@@ -33,7 +33,7 @@ export const useAssigneesAction = ({ onAction, onActionSuccess, isDisabled }: Us
       onClick: () => openFlyout(selectedCases),
       disabled: isActionDisabled,
       'data-test-subj': 'cases-bulk-action-assignees',
-      icon: <EuiIcon type="userAvatar" size="m" />,
+      icon: <EuiIcon type="user" size="m" />,
       key: 'cases-bulk-action-assignees',
     };
   };

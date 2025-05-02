@@ -39,7 +39,7 @@ export const Header = ({
     rightSideItems={[
       <EuiButtonEmpty
         size="s"
-        iconType="exportAction"
+        iconType="export"
         data-test-subj="exportAllObjects"
         onClick={onExportAll}
       >

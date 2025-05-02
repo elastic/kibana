@@ -101,7 +101,7 @@ export function LabsFlyout({ onClose }: Props) {
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="beaker" size="l" />
+            <EuiIcon type="flask" size="l" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle>
@@ -129,7 +129,7 @@ export function LabsFlyout({ onClose }: Props) {
               href="https://ela.st/feedback-apm-labs"
               target="_blank"
               color="warning"
-              iconType="editorComment"
+              iconType="comment"
             >
               {i18n.translate('xpack.apm.labs.feedbackButtonLabel', {
                 defaultMessage: 'Tell us what you think!',

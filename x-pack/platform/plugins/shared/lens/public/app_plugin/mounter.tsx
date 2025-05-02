@@ -177,7 +177,7 @@ export async function mountApp(
       tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save visualizations to the library',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   coreStart.chrome.docTitle.change(

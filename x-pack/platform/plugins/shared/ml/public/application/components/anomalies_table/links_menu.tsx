@@ -914,7 +914,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="create_rule"
-          icon="controlsHorizontal"
+          icon="controls"
           onClick={() => {
             closePopover();
             props.showRuleEditorFlyout(anomaly);

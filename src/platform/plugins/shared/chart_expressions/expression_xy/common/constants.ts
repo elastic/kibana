@@ -118,7 +118,7 @@ export const AvailableReferenceLineIcons = {
   BOLT: 'bolt',
   BUG: 'bug',
   CIRCLE: 'circle',
-  EDITOR_COMMENT: 'editorComment',
+  EDITOR_COMMENT: 'comment',
   FLAG: 'flag',
   HEART: 'heart',
   MAP_MARKER: 'mapMarker',

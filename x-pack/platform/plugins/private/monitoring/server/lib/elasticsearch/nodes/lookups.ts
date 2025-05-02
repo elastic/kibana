@@ -18,7 +18,7 @@ export const nodeTypeClass = {
   master: 'starFilled',
   master_only: 'starEmpty',
   data: 'database',
-  client: 'glasses',
+  client: 'readOnly',
 };
 
 export const nodeTypeLabel = {

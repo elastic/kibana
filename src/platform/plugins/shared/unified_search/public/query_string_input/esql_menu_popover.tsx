@@ -125,11 +125,11 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.feedback', {
               defaultMessage: 'Submit feedback',
             }),
-            icon: 'editorComment',
+            icon: 'comment',
             renderItem: () => (
               <EuiContextMenuItem
                 key="feedback"
-                icon="editorComment"
+                icon="comment"
                 data-test-subj="esql-feedback"
                 target="_blank"
                 href={FEEDBACK_LINK}

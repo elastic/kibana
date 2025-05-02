@@ -41,7 +41,7 @@ export class DataMappingPopover extends Component<Props, State> {
       <EuiButtonEmpty
         onClick={this._togglePopover}
         size="xs"
-        iconType="controlsHorizontal"
+        iconType="controls"
         iconSide="left"
       >
         <FormattedMessage

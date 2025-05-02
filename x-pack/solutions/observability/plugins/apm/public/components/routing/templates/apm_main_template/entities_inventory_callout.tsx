@@ -26,7 +26,7 @@ export function EntitiesInventoryCallout({ onDismiss }: EntitiesInventoryCallout
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
+        <TechnicalPreviewBadge icon="flask" style={{ verticalAlign: 'middle' }} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink

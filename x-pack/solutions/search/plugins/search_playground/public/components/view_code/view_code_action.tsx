@@ -25,7 +25,7 @@ export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> 
         <ViewCodeFlyout selectedPageMode={selectedPageMode} onClose={() => setShowFlyout(false)} />
       )}
       <EuiButton
-        iconType="editorCodeBlock"
+        iconType="code"
         color="primary"
         fill={selectedPageMode === PlaygroundPageMode.chat}
         onClick={() => setShowFlyout(true)}

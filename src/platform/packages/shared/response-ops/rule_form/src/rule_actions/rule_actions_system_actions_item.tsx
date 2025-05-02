@@ -306,7 +306,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
                     size="s"
                     alignment="middle"
                     data-test-subj="ruleActionsSystemActionsItemBetaBadge"
-                    iconType="beaker"
+                    iconType="flask"
                     label={TECH_PREVIEW_LABEL}
                     tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />

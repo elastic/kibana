@@ -68,7 +68,7 @@ export function ChatActionsMenu({
           <EuiButtonIcon
             data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
             disabled={disabled}
-            iconType="controlsHorizontal"
+            iconType="controls"
             onClick={toggleActionsMenu}
             aria-label={i18n.translate(
               'xpack.aiAssistant.chatActionsMenu.euiButtonIcon.menuLabel',

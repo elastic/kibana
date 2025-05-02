@@ -35,7 +35,7 @@ export const FileUploadCallout = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
-            iconType="exportAction"
+            iconType="export"
             data-test-subj="fileupload-callout-cta"
             onClick={() => navigateToUrl(http.basePath.prepend(FILE_UPLOAD_PATH))}
           >

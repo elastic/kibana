@@ -206,7 +206,7 @@ function TemplateDescription() {
     return (
       <EuiCallOut
         title="Displaying results from the uploaded diagnostics report"
-        iconType="exportAction"
+        iconType="export"
       >
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"

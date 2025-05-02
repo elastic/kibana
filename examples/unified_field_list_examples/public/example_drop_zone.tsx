@@ -50,7 +50,7 @@ export const ExampleDropZone: React.FC<ExampleDropZoneProps> = ({ onDropField })
       <DropOverlayWrapper isVisible={isDropAllowed}>
         <EuiPanel hasShadow={false} paddingSize="l" className="eui-fullHeight">
           <EuiEmptyPrompt
-            iconType="beaker"
+            iconType="flask"
             title={<h3>Example drop zone</h3>}
             body={
               <p>

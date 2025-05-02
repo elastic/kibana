@@ -61,7 +61,7 @@ export const WorkpadTable = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={strings.getExportToolTip()}>
               <EuiButtonIcon
-                iconType="exportAction"
+                iconType="export"
                 onClick={() => onExport(workpad.id)}
                 aria-label={strings.getExportToolTip()}
               />

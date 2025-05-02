@@ -38,7 +38,7 @@ export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, t
           size="s"
           target="_blank"
           color="warning"
-          iconType="editorComment"
+          iconType="comment"
         >
           {i18n.translate('xpack.observability_onboarding.header.feedback', {
             defaultMessage: 'Give feedback',

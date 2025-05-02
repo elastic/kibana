@@ -38,7 +38,7 @@ const Application = (props: SyntheticsAppProps) => {
             tooltip: i18n.translate('xpack.synthetics.badge.readOnly.tooltip', {
               defaultMessage: 'Unable to save',
             }),
-            iconType: 'glasses',
+            iconType: 'readOnly',
           }
         : undefined
     );

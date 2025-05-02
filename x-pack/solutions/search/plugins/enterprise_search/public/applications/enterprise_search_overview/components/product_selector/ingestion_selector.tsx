@@ -143,7 +143,7 @@ export const IngestionSelector: React.FC = () => {
                   'Explore all the language clients we support and how to use them with our API.',
               }
             )}
-            buttonIcon="visVega"
+            buttonIcon="code"
             buttonLabel={i18n.translate(
               'xpack.enterpriseSearch.ingestSelector.method.browseClientsLabel',
               {
@@ -166,7 +166,7 @@ export const IngestionSelector: React.FC = () => {
                   'Delimited text files, such as CSV and TSV, Newline-delimited JSON.',
               }
             )}
-            buttonIcon="exportAction"
+            buttonIcon="export"
             buttonLabel={i18n.translate(
               'xpack.enterpriseSearch.ingestSelector.method.fileUploadLabel',
               {

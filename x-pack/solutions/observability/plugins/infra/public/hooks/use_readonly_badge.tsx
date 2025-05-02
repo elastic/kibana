@@ -22,7 +22,7 @@ export const useReadOnlyBadge = (isReadOnly = false) => {
             tooltip: i18n.translate('xpack.infra.header.badge.readOnly.tooltip', {
               defaultMessage: 'Unable to change source configuration',
             }),
-            iconType: 'glasses',
+            iconType: 'readOnly',
           }
         : undefined
     );

@@ -113,7 +113,7 @@ export class SetViewForm extends Component<Props, State> {
           isOpen={this.state.isPopoverOpen}
           closePopover={this._closePopover}
           button={
-            <EuiButtonEmpty iconType="controlsHorizontal" size="xs" onClick={this._togglePopover}>
+            <EuiButtonEmpty iconType="controls" size="xs" onClick={this._togglePopover}>
               <FormattedMessage
                 id="xpack.maps.setViewControl.changeCoordinateSystemButtonLabel"
                 defaultMessage="Coordinate system"

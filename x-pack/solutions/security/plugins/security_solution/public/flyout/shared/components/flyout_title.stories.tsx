@@ -45,7 +45,7 @@ export const MultipleLines: StoryFn = () => {
     <FixWidthWrapper>
       <FlyoutTitle
         title={'Very long title should wrap to multiple lines'}
-        iconType={'discuss'}
+        iconType={'comment'}
         data-test-subj={'test-title'}
       />
     </FixWidthWrapper>
@@ -79,7 +79,7 @@ export const MultipleLinesInLink: StoryFn = () => {
     <FixWidthLinkWrapper>
       <FlyoutTitle
         title={'Very long title should wrap to multiple lines'}
-        iconType={'discuss'}
+        iconType={'comment'}
         data-test-subj={'test-title'}
         isLink
       />

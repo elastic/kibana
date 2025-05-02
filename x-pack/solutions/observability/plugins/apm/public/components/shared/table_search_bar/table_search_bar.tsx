@@ -31,7 +31,7 @@ export function TableSearchBar({
             justify-content: center;
           `}
         >
-          <TechnicalPreviewBadge icon="beaker" />
+          <TechnicalPreviewBadge icon="flask" />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem>

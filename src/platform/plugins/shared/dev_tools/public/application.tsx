@@ -160,7 +160,7 @@ function setBadge(application: ApplicationStart, chrome: ChromeStart) {
     tooltip: i18n.translate('devTools.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save',
     }),
-    iconType: 'glasses',
+    iconType: 'readOnly',
   });
 }
 

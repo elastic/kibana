@@ -71,7 +71,7 @@ export const buildColumns = (
               <EuiButtonIcon
                 aria-label={i18n.ACTION_EXPORT_DESCRIPTION}
                 data-test-subj="action-export-value-list"
-                iconType="exportAction"
+                iconType="export"
                 onClick={() => onExport(item)}
               />
             )}

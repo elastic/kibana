@@ -27,7 +27,7 @@ const NoMatchesComponent: React.FC = () => {
       data-test-subj="case-user-profiles-assignees-popover-no-matches"
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="userAvatar" size="xl" />
+        <EuiIcon type="user" size="xl" />
         <EuiSpacer size="xs" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
