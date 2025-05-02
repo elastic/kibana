@@ -112,7 +112,8 @@ update_step_progress() {
     --header "x-elastic-internal-origin: Kibana" \
     --data "$data" \
     --output /dev/null \
-    --no-progress-meter \
+    --silent \
+    --show-error \
     --fail
 }
 
@@ -288,7 +289,8 @@ install_integrations() {
     --header "kbn-xsrf: true" \
     --header "x-elastic-internal-origin: Kibana" \
     --data "$(echo -e "$install_integrations_api_body_string")" \
-    --no-progress-meter \
+    --silent \
+    --show-error \
     --fail \
     --output "$elastic_agent_tmp_config_path"
 
@@ -308,9 +310,14 @@ apply_elastic_agent_config() {
     # Remove existing config file including `inputs.d` directory
     rm -rf "$elastic_agent_config_path" "$(dirname "$elastic_agent_config_path")/inputs.d" &&
     # Extract new config files from downloaded archive
-    tar --extract --file "$elastic_agent_tmp_config_path" --directory "$(dirname "$elastic_agent_config_path")" &&
+    tar --extract --file "$elastic_agent_tmp_config_path" --directory "$(dirname "$elastic_agent_config_path")"
     # Replace placeholder with the Ingest API key
-    sed -i='' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    if [ "${OS}" == "Linux" ]; then
+      sed -i "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    else
+      # macOS requires an empty string for the backup extension
+      sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    fi
   if [ "$?" -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Config files written to:"
     while IFS= read -r file; do
@@ -544,6 +551,8 @@ function select_list() {
 
     IFS=', ' read -r -a custom_log_file_path_list_array <<<"$custom_log_file_path_list_string"
 
+    ensure_selection_is_not_empty
+
     echo -e "\nYou've selected these logs for ingestion:"
     for item in "${selected_known_integrations_array[@]}"; do
       printf "\e[32m•\e[0m %s\n" "$(known_integration_title "${item}")"
@@ -563,6 +572,15 @@ function select_list() {
   else
     selected_known_integrations_array=("${known_integrations_options[@]}")
     selected_unknown_log_file_pattern_array=("${unknown_logs_options[@]}")
+
+    ensure_selection_is_not_empty
+  fi
+}
+
+ensure_selection_is_not_empty() {
+  if [ ${#selected_known_integrations_array[@]} -eq 0 ] && [ ${#selected_unknown_log_file_pattern_array[@]} -eq 0 ] && [ ${#custom_log_file_path_list_array[@]} -eq 0 ]; then
+    update_step_progress "install-integrations" "danger" "No integrations or custom logs were selected for installation"
+    fail "No integrations or custom logs were selected for installation. You can run the script again if needed."
   fi
 }
 

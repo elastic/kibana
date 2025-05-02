@@ -7,35 +7,34 @@
 
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ISavedObjectsRepository,
-  KibanaRequest,
-  Logger,
-  SavedObject,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import {
-  ConcreteTaskInstance,
-  createTaskRunError,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
+import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
-import { CancellableTask, RunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
-import { AdHocRunStatus, adHocRunStatus } from '../../common/constants';
-import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
+import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import type { AdHocRunStatus } from '../../common/constants';
+import { adHocRunStatus } from '../../common/constants';
+import type {
+  RuleRunnerErrorStackTraceLog,
+  RuleTaskStateAndMetrics,
+  TaskRunnerContext,
+} from './types';
 import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
-  RuleExecutionStatusErrorReasons,
   RuleTypeParams,
   RuleTypeRegistry,
   RuleTypeState,
 } from '../types';
+import { RuleExecutionStatusErrorReasons } from '../types';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { AdHocRun, AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
+import type { AdHocRun, AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
@@ -44,14 +43,17 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { partiallyUpdateAdHocRun, processRunResults } from './lib';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   AlertingEventLogger,
   executionType,
 } from '../lib/alerting_event_logger/alerting_event_logger';
-import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import type { RuleRunMetrics } from '../lib/rule_run_metrics_store';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { getEsErrorMessage } from '../lib/errors';
-import { Result, isOk, asOk, asErr } from '../lib/result_type';
+import type { Result } from '../lib/result_type';
+import { isOk, asOk, asErr } from '../lib/result_type';
+import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { ActionScheduler } from './action_scheduler';
 import { transformAdHocRunToAdHocRunData } from '../application/backfill/transforms/transform_ad_hoc_run_to_backfill_result';
 
@@ -76,13 +78,14 @@ export class AdHocTaskRunner implements CancellableTask {
   private readonly taskInstance: ConcreteTaskInstance;
 
   private adHocRunSchedule: AdHocRunSchedule[] = [];
+  private adHocRange: { start: string; end: string | undefined } | null = null;
   private alertingEventLogger: AlertingEventLogger;
-  private cancelled: boolean = false;
+  private cancelled = false;
   private logger: Logger;
-  private ruleId: string = '';
+  private ruleId = '';
   private ruleMonitoring: RuleMonitoringService;
   private ruleResult: RuleResultService;
-  private ruleTypeId: string = '';
+  private ruleTypeId = '';
   private ruleTypeRunner: RuleTypeRunner<
     RuleTypeParams,
     RuleTypeParams,
@@ -94,12 +97,13 @@ export class AdHocTaskRunner implements CancellableTask {
     RuleAlertData
   >;
   private runDate = new Date();
-  private scheduleToRunIndex: number = -1;
+  private scheduleToRunIndex = -1;
   private searchAbortController: AbortController;
-  private shouldDeleteTask: boolean = false;
+  private shouldDeleteTask = false;
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null = null;
   private taskRunning: AdHocTaskRunningHandler;
   private timer: TaskRunnerTimer;
+  private apiKeyToUse: string | null = null;
 
   constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorParams) {
     this.context = context;
@@ -232,9 +236,13 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleTaskTimeout: ruleType.ruleTaskTimeout,
     });
 
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
+
     const { error, stackTrace } = await this.ruleTypeRunner.run({
       context: ruleTypeRunnerContext,
       alertsClient,
+      actionsClient:
+        ruleType.id === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ? actionsClient : undefined,
       executionId: this.executionId,
       executorServices,
       rule: {
@@ -276,14 +284,14 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleLabel,
       previousStartedAt: null,
       alertingEventLogger: this.alertingEventLogger,
-      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      actionsClient,
       alertsClient,
       priority: TaskPriority.Low,
     });
 
     await actionScheduler.run({
-      activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
-      recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
+      activeAlerts: alertsClient.getProcessedAlerts('active'),
+      recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
     });
 
     return ruleRunMetricsStore.getMetrics();
@@ -348,7 +356,8 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, schedule } = adHocRunData;
+      const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
+      this.apiKeyToUse = apiKeyToUse;
 
       let ruleType: UntypedNormalizedRuleType;
       try {
@@ -413,6 +422,7 @@ export class AdHocTaskRunner implements CancellableTask {
       // Determine which schedule entry we're going to run
       // Find the first index where the status is pending
       this.adHocRunSchedule = schedule;
+      this.adHocRange = { start, end };
       this.scheduleToRunIndex = (this.adHocRunSchedule ?? []).findIndex(
         (s: AdHocRunSchedule) => s.status === adHocRunStatus.PENDING
       );
@@ -521,6 +531,7 @@ export class AdHocTaskRunner implements CancellableTask {
           // Capture how long it took for the rule to run after being claimed
           this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
         }
+
         return { executionStatus, executionMetrics };
       });
     this.alertingEventLogger.done({
@@ -614,6 +625,8 @@ export class AdHocTaskRunner implements CancellableTask {
   async cleanup() {
     if (!this.shouldDeleteTask) return;
 
+    await this.updateGapsAfterBackfillComplete();
+
     try {
       await this.internalSavedObjectsRepository.delete(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
@@ -629,5 +642,32 @@ export class AdHocTaskRunner implements CancellableTask {
         `Failed to cleanup ${AD_HOC_RUN_SAVED_OBJECT_TYPE} object [id="${this.taskInstance.params.adHocRunParamsId}"]: ${e.message}`
       );
     }
+  }
+
+  private async updateGapsAfterBackfillComplete() {
+    if (!this.shouldDeleteTask) return;
+
+    if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
+
+    const fakeRequest = getFakeKibanaRequest(
+      this.context,
+      this.taskInstance.params.spaceId,
+      this.apiKeyToUse
+    );
+
+    const eventLogClient = await this.context.getEventLogClient(fakeRequest);
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
+    return updateGaps({
+      ruleId: this.ruleId,
+      start: new Date(this.adHocRange.start),
+      end: this.adHocRange.end ? new Date(this.adHocRange.end) : new Date(),
+      eventLogger: this.context.eventLogger,
+      eventLogClient,
+      logger: this.logger,
+      backfillSchedule: this.adHocRunSchedule,
+      savedObjectsRepository: this.internalSavedObjectsRepository,
+      backfillClient: this.context.backfillClient,
+      actionsClient,
+    });
   }
 }

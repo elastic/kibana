@@ -17,6 +17,7 @@ import {
   filter,
   map,
   skip,
+  Subject,
 } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
@@ -93,13 +94,17 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const totalCardinality$ = new BehaviorSubject<number>(0);
 
       const dataControl = initializeDataControl<
-        Pick<OptionsListControlState, 'searchTechnique' | 'singleSelect'>
+        Pick<OptionsListControlState, 'searchTechnique' | 'singleSelect' | 'runPastTimeout'>
       >(
         uuid,
         OPTIONS_LIST_CONTROL,
         'optionsListDataView',
         initialState,
-        { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
+        {
+          searchTechnique: searchTechnique$,
+          singleSelect: singleSelect$,
+          runPastTimeout: runPastTimeout$,
+        },
         controlGroupApi
       );
 
@@ -172,7 +177,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
 
       /** Fetch the suggestions and perform validation */
-      const loadMoreSubject = new BehaviorSubject<null>(null);
+      const loadMoreSubject = new Subject<void>();
       const fetchSubscription = fetchAndValidate$({
         api: {
           ...dataControl.api,
@@ -180,9 +185,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           loadingSuggestions$,
           debouncedSearchString,
           parentApi: controlGroupApi,
-          controlFetch$: controlGroupApi.controlFetch$(uuid),
         },
         stateManager,
+        controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
         // if there was an error during fetch, set blocking error and return early
         if (Object.hasOwn(result, 'error')) {
@@ -294,6 +299,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
           },
           hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
+          setSelectedOptions: (options: OptionsListSelection[] | undefined) => {
+            selections.setSelectedOptions(options);
+          },
         },
         {
           ...dataControl.comparators,

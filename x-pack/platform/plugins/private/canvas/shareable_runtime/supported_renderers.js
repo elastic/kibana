@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { getImageRenderer } from '@kbn/expression-image-plugin/public';
-import { getErrorRenderer, getDebugRenderer } from '@kbn/expression-error-plugin/public';
-import { getRevealImageRenderer } from '@kbn/expression-reveal-image-plugin/public';
-import { getRepeatImageRenderer } from '@kbn/expression-repeat-image-plugin/public';
-import { getShapeRenderer, getProgressRenderer } from '@kbn/expression-shape-plugin/public';
-import { getMetricRenderer } from '@kbn/expression-metric-plugin/public';
+import { getImageRenderer } from '../canvas_plugin_src/renderers/image';
+import { getErrorRenderer } from '../canvas_plugin_src/renderers/error';
+import { getDebugRenderer } from '../canvas_plugin_src/renderers/debug';
+import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
+import { getMetricRenderer } from '../canvas_plugin_src/renderers/metric';
+import { pie } from '../canvas_plugin_src/renderers/pie';
+import { plot } from '../canvas_plugin_src/renderers/plot';
+import { getProgressRenderer } from '../canvas_plugin_src/renderers/progress';
+import { getRepeatImageRenderer } from '../canvas_plugin_src/renderers/repeat_image';
+import { getRevealImageRenderer } from '../canvas_plugin_src/renderers/reveal_image';
+import { getShapeRenderer } from '../canvas_plugin_src/renderers/shape';
 import { getTextRenderer } from '../canvas_plugin_src/renderers/text';
 import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
-import { plot } from '../canvas_plugin_src/renderers/plot';
-import { pie } from '../canvas_plugin_src/renderers/pie';
-import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
 
 /**
  * FIXME: Render function factories require stateful dependencies to be
@@ -25,17 +27,17 @@ import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
 const unboxFactory = (factory) => factory();
 
 const renderFunctionsFactories = [
-  getMarkdownRenderer,
-  getTextRenderer,
-  getTableRenderer,
-  getErrorRenderer,
   getDebugRenderer,
+  getErrorRenderer,
   getImageRenderer,
-  getShapeRenderer,
+  getMarkdownRenderer,
+  getMetricRenderer,
   getProgressRenderer,
   getRevealImageRenderer,
   getRepeatImageRenderer,
-  getMetricRenderer,
+  getShapeRenderer,
+  getTextRenderer,
+  getTableRenderer,
 ];
 
 /**

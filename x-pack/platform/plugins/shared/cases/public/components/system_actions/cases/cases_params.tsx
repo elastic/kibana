@@ -18,6 +18,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import * as i18n from './translations';
@@ -31,6 +32,7 @@ import type { CasesConfigurationUITemplate } from '../../../containers/types';
 import { getOwnerFromRuleConsumerProducer } from '../../../../common/utils/owner';
 import { getConfigurationByOwner } from '../../../containers/configure/utils';
 import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
@@ -93,6 +95,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   const timeWindowUnit = Object.values(TIME_UNITS).includes(parsedTimeWindowUnit as TIME_UNITS)
     ? parsedTimeWindowUnit
     : DEFAULT_TIME_WINDOW[1];
+
+  const timeWindowSizeAsNumber = parseInt(timeWindowSize, 10);
+
+  const showTimeWindowWarning =
+    timeWindowUnit === 'm' && timeWindowSizeAsNumber >= 5 && timeWindowSizeAsNumber <= 20;
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -179,13 +186,12 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiFormRow fullWidth>
+          <EuiFormRow fullWidth label={i18n.GROUP_BY_ALERT} labelAppend={OptionalFieldLabel}>
             <EuiComboBox
               fullWidth
               isClearable={true}
               singleSelection
               data-test-subj="group-by-alert-field-combobox"
-              prepend={i18n.GROUP_BY_ALERT}
               isLoading={loadingAlertDataViews}
               isDisabled={loadingAlertDataViews}
               options={options}
@@ -232,6 +238,16 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+      <EuiSpacer size="s" />
+      {showTimeWindowWarning && (
+        <EuiCallOut
+          data-test-subj="show-time-window-warning"
+          title={i18n.TIME_WINDOW_WARNING}
+          color="warning"
+          iconType="alert"
+          size="s"
+        />
+      )}
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>

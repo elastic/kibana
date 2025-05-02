@@ -44,9 +44,9 @@ export class SiemRuleMigrationsService {
   private taskService: RuleMigrationsTaskService;
   private logger: Logger;
 
-  constructor(logger: LoggerFactory, kibanaVersion: string) {
+  constructor(logger: LoggerFactory, kibanaVersion: string, elserInferenceId?: string) {
     this.logger = logger.get('siemRuleMigrations');
-    this.dataService = new RuleMigrationsDataService(this.logger, kibanaVersion);
+    this.dataService = new RuleMigrationsDataService(this.logger, kibanaVersion, elserInferenceId);
     this.taskService = new RuleMigrationsTaskService(this.logger);
   }
 

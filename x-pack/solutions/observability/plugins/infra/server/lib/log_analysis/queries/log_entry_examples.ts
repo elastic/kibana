@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
 import { partitionField } from '../../../../common/log_analysis';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
@@ -23,61 +23,59 @@ export const createLogEntryExamplesQuery = (
   categoryQuery?: string
 ): estypes.SearchRequest => ({
   ...defaultRequestParameters,
-  body: {
-    size: exampleCount,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              [timestampField]: {
-                gte: startTime,
-                lte: endTime,
-                format: 'epoch_millis',
-              },
+  size: exampleCount,
+  query: {
+    bool: {
+      filter: [
+        {
+          range: {
+            [timestampField]: {
+              gte: startTime,
+              lte: endTime,
+              format: 'epoch_millis',
             },
           },
-          ...(dataset !== ''
-            ? [
-                {
-                  term: {
-                    [partitionField]: dataset,
-                  },
+        },
+        ...(dataset !== ''
+          ? [
+              {
+                term: {
+                  [partitionField]: dataset,
                 },
-              ]
-            : [
-                {
-                  bool: {
-                    must_not: [
-                      {
-                        exists: {
-                          field: partitionField,
-                        },
+              },
+            ]
+          : [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      exists: {
+                        field: partitionField,
                       },
-                    ],
-                  },
-                },
-              ]),
-          ...(categoryQuery
-            ? [
-                {
-                  match: {
-                    message: {
-                      query: categoryQuery,
-                      operator: 'and' as const,
                     },
+                  ],
+                },
+              },
+            ]),
+        ...(categoryQuery
+          ? [
+              {
+                match: {
+                  message: {
+                    query: categoryQuery,
+                    operator: 'and' as const,
                   },
                 },
-              ]
-            : []),
-        ],
-      },
+              },
+            ]
+          : []),
+      ],
     },
-    runtime_mappings: runtimeMappings,
-    sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
-    _source: false,
-    fields: ['event.dataset', 'message'],
   },
+  runtime_mappings: runtimeMappings,
+  sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
+  _source: false,
+  fields: ['event.dataset', 'message'],
   index: indices,
 });
 

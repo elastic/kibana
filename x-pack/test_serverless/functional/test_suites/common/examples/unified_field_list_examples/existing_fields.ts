@@ -60,10 +60,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   describe('Fields existence info', () => {
     before(async () => {
       await esArchiver.load(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('unifiedFieldListExamples');
@@ -83,10 +83,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
       await kibanaServer.savedObjects.cleanStandardList();

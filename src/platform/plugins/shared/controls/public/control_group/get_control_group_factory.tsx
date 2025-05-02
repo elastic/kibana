@@ -9,8 +9,8 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-variables-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { PublishesESQLVariable, apiPublishesESQLVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasSaveNotification,
@@ -135,7 +135,7 @@ export const getControlGroupEmbeddableFactory = () => {
         disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
-        controlFetch$: (controlUuid: string) =>
+        controlFetch$: (controlUuid: string, onReload?: () => void) =>
           controlFetch$(
             chaining$(
               controlUuid,
@@ -143,7 +143,7 @@ export const getControlGroupEmbeddableFactory = () => {
               controlsManager.controlsInOrder$,
               controlsManager.api.children$
             ),
-            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
+            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {}, onReload)
           ),
         ignoreParentSettings$,
         autoApplySelections$,

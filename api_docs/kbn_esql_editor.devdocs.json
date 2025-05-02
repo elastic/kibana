@@ -83,7 +83,15 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined) => Promise<",
+          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined, esqlVariables: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -193,6 +201,28 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.fetchFieldsFromESQL.$6",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
             "deprecated": false,
@@ -456,6 +486,22 @@
           },
           {
             "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorProps.hideRunQueryButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideRunQueryButton",
+            "description": [
+              "Hide the Run query button which appears when editor is inlined"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
             "id": "def-public.ESQLEditorProps.editorIsInline",
             "type": "CompoundType",
             "tags": [],
@@ -584,86 +630,20 @@
           },
           {
             "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.ESQLEditorProps.supportsControls",
-            "type": "CompoundType",
+            "id": "def-public.ESQLEditorProps.controlsContext",
+            "type": "Object",
             "tags": [],
-            "label": "supportsControls",
+            "label": "controlsContext",
             "description": [
-              "The editor supports the creation of controls,\nThis flag should be set to true to display the \"Create control\" suggestion"
+              "Enables the creation of controls from the editor"
             ],
             "signature": [
-              "boolean | undefined"
+              "ControlsContext",
+              " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.ESQLEditorProps.onSaveControl",
-            "type": "Function",
-            "tags": [],
-            "label": "onSaveControl",
-            "description": [
-              "Function to be called after the control creation"
-            ],
-            "signature": [
-              "((controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>) | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/esql-editor",
-                "id": "def-public.ESQLEditorProps.onSaveControl.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "controlState",
-                "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/esql-editor",
-                "id": "def-public.ESQLEditorProps.onSaveControl.$2",
-                "type": "string",
-                "tags": [],
-                "label": "updatedQuery",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.ESQLEditorProps.onCancelControl",
-            "type": "Function",
-            "tags": [],
-            "label": "onCancelControl",
-            "description": [
-              "Function to be called after cancelling the control creation"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/esql-editor",
@@ -676,9 +656,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },

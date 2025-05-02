@@ -11,6 +11,7 @@ import {
   UseUpdateKnowledgeBaseEntriesParams,
 } from './use_update_knowledge_base_entries';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 jest.mock('./use_knowledge_base_entries', () => ({
   useInvalidateKnowledgeBaseEntries: jest.fn(),
@@ -67,7 +68,7 @@ describe('useUpdateKnowledgeBaseEntries', () => {
       expect.any(String),
       expect.objectContaining({
         body: JSON.stringify({ update: defaultArgs }),
-        version: '1',
+        version: API_VERSIONS.public.v1,
       })
     );
     expect(invalidateKnowledgeBaseEntries).toHaveBeenCalled();

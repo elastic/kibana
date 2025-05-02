@@ -18,8 +18,8 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_HOME_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -51,15 +51,11 @@ import {
 import { WS_TELEMETRY_NAME } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
-import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
-import { EnterpriseSearchRequestHandler } from './lib/enterprise_search_request_handler';
-
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
-import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
@@ -104,15 +100,15 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       licensing,
       guidedOnboarding,
       cloud,
-      searchConnectors,
+      contentConnectors,
     }: PluginsSetup
   ) {
     this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
-      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
+      ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
       VECTOR_SEARCH_PLUGIN.ID,
@@ -121,7 +117,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       SEARCH_INDICES,
       SEARCH_INDICES_START,
     ];
-    const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(
@@ -130,11 +125,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
         http.staticAssets.getPluginAssetHref('images/crawler.svg')
       );
     }
-
-    /*
-     * Initialize config.ssl.certificateAuthorities file(s) - required for all API calls (+ access checks)
-     */
-    entSearchHttpAgent.initializeHttpAgent(config);
 
     /**
      * Register space/feature control
@@ -159,10 +149,12 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
           ui: [],
         },
         read: {
-          disabled: true,
+          app: ['kibana', ...PLUGIN_IDS],
+          api: [],
+          catalogue: PLUGIN_IDS,
           savedObject: {
             all: [],
-            read: [],
+            read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
           },
           ui: [],
         },
@@ -207,6 +199,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ANALYTICS_PLUGIN.ID],
       catalogue: [ANALYTICS_PLUGIN.ID],
+
       privileges: {
         all: {
           app: ['kibana', ANALYTICS_PLUGIN.ID],
@@ -238,10 +231,8 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Register routes
      */
     const router = http.createRouter();
-    const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
     const dependencies: RouteDependencies = {
       config,
-      enterpriseSearchRequestHandler,
       getStartServices,
       globalConfigService: this.globalConfigService,
       licensing,
@@ -254,7 +245,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     registerEnterpriseSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
-    if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
@@ -314,6 +304,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Register a config for the search guide
      */
     if (config.hasWebCrawler) {
+      // TODO: Do we remove this guide with the removal of native crawler?
       guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
     if (config.hasConnectors) {
@@ -326,7 +317,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [], isCloud)
+        getSearchResultProvider(config, contentConnectors?.getConnectorTypes() || [])
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));

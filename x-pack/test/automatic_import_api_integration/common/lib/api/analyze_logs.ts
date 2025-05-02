@@ -9,7 +9,7 @@ import {
   AnalyzeLogsRequestBody,
   ANALYZE_LOGS_PATH,
   AnalyzeLogsResponse,
-} from '@kbn/integration-assistant-plugin/common';
+} from '@kbn/automatic-import-plugin/common';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 

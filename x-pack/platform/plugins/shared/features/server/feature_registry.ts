@@ -123,6 +123,10 @@ export class FeatureRegistry {
         feature.name = featureOverride.name;
       }
 
+      if (typeof featureOverride.description !== 'undefined') {
+        feature.description = featureOverride.description;
+      }
+
       if (featureOverride.category) {
         feature.category = DEFAULT_APP_CATEGORIES[featureOverride.category];
       }
@@ -269,7 +273,8 @@ export class FeatureRegistry {
               );
             }
 
-            if (referencedPrivilege.disabled) {
+            // Enabled privileges cannot be replaced with disabled ones.
+            if (referencedPrivilege.disabled && !privilege.disabled) {
               throw new Error(
                 `Cannot replace privilege "${privilegeId}" of deprecated feature "${feature.id}" with disabled privilege "${privilegeReference}" of feature "${featureReference.feature}".`
               );

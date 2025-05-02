@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
+export const TelemtryMetadataSchema = schema.object({
+  pluginId: schema.maybe(schema.string()),
+  aggregateBy: schema.maybe(schema.string()),
+});
+
 // Connector schema
 export const ConfigSchema = schema.oneOf([
   schema.object({
@@ -18,6 +23,8 @@ export const ConfigSchema = schema.oneOf([
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
     apiUrl: schema.string(),
+    organizationId: schema.maybe(schema.string()),
+    projectId: schema.maybe(schema.string()),
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
@@ -37,6 +44,7 @@ export const RunActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 const AIMessage = schema.object({
@@ -142,9 +150,11 @@ export const InvokeAIActionParamsSchema = schema.object({
     schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
   ),
   temperature: schema.maybe(schema.number()),
+  response_format: schema.maybe(schema.any()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -166,6 +176,7 @@ export const StreamActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const StreamingResponseSchema = schema.any();

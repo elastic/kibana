@@ -29,7 +29,7 @@
           "\nComposes grouping query and aggregations"
         ],
         "signature": [
-          "({ additionalFilters, from, groupByField, pageNumber, rootAggregations, runtimeMappings, size, sort, statsAggregations, to, uniqueValue, }: ",
+          "({ additionalFilters, groupByField, pageNumber, rootAggregations, runtimeMappings, size, sort, statsAggregations, uniqueValue, timeRange, multiValueFieldsToFlatten, countByKeyForMultiValueFields, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
@@ -43,7 +43,7 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  from,\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  to,\n  uniqueValue,\n}",
+            "label": "{\n  additionalFilters = [],\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  uniqueValue,\n  timeRange,\n  multiValueFieldsToFlatten = [],\n  countByKeyForMultiValueFields,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"
@@ -108,7 +108,7 @@
           "\nHook to configure grouping component"
         ],
         "signature": [
-          "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, }: ",
+          "<T>({ componentProps, defaultGroupingOptions, initialGroupings, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, }: ",
           "GroupingArgs",
           "<T>) => ",
           "UseGrouping",
@@ -123,7 +123,7 @@
             "id": "def-common.useGrouping.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  onOptionsChange,\n  tracker,\n  title,\n}",
+            "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  initialGroupings,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  onOptionsChange,\n  tracker,\n  title,\n}",
             "description": [],
             "signature": [
               "GroupingArgs",

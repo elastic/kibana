@@ -66,17 +66,9 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     const isButtonDisabled = isDisabled || rulesToUpload.length === 0;
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow
-            helpText={
-              <EuiText color="danger" size="xs">
-                {error}
-              </EuiText>
-            }
-            isInvalid={error != null}
-            fullWidth
-          >
+          <EuiFormRow isInvalid={error != null} fullWidth error={error}>
             <EuiFilePicker
               id="rulesFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
@@ -125,6 +117,7 @@ const formatRuleRow = (row: SplunkRow<SplunkRulesResult>): OriginalRule => {
     query: row.result.search,
     query_language: 'spl',
     description: row.result['action.escu.eli5']?.trim() || row.result.description,
+    severity: row.result['alert.severity'] as OriginalRule['severity'],
   };
 
   if (row.result['action.correlationsearch.annotations']) {

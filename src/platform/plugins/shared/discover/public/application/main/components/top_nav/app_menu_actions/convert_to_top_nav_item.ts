@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuActionType, AppMenuItem } from '@kbn/discover-utils';
+import type { AppMenuItem } from '@kbn/discover-utils';
+import { AppMenuActionType } from '@kbn/discover-utils';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { runAppMenuAction, runAppMenuPopoverAction } from './run_app_menu_action';
-import { DiscoverServices } from '../../../../../build_services';
+import type { DiscoverServices } from '../../../../../build_services';
 
 export function convertAppMenuItemToTopNavItem({
   appMenuItem,
@@ -50,5 +51,6 @@ export function convertAppMenuItemToTopNavItem({
     ...(appMenuItem.type === AppMenuActionType.primary
       ? { iconType: appMenuItem.controlProps.iconType, iconOnly: true }
       : {}),
+    ...(appMenuItem.controlProps.href ? { href: appMenuItem.controlProps.href } : {}),
   };
 }

@@ -11,6 +11,7 @@ import type { RuleUpgradeState } from '../../../../rule_management/model/prebuil
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 
 interface UpgradePrebuiltRulesTableButtonsProps {
   selectedRules: RuleUpgradeState[];
@@ -20,16 +21,10 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: {
-      ruleUpgradeStates,
-      hasRulesToUpgrade,
-      loadingRules,
-      isRefetching,
-      isUpgradingSecurityPackages,
-      isPrebuiltRulesCustomizationEnabled,
-    },
+    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
   const canUserEditRules = canUserCRUD && !isUserDataLoading;
 
@@ -40,17 +35,15 @@ export const UpgradePrebuiltRulesTableButtons = ({
   const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
 
   const doAllSelectedRulesHaveConflicts =
-    isPrebuiltRulesCustomizationEnabled &&
-    selectedRules.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
-  const doAllRulesHaveConflicts =
-    isPrebuiltRulesCustomizationEnabled &&
-    ruleUpgradeStates.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
+    isRulesCustomizationEnabled &&
+    selectedRules.every(
+      ({ hasNonSolvableUnresolvedConflicts }) => hasNonSolvableUnresolvedConflicts
+    );
 
   const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
     canUserEditRules,
     doAllSelectedRulesHaveConflicts,
-    doAllRulesHaveConflicts,
-    isPrebuiltRulesCustomizationEnabled,
+    isPrebuiltRulesCustomizationEnabled: isRulesCustomizationEnabled,
   });
 
   const upgradeSelectedRules = useCallback(
@@ -82,12 +75,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
             fill
             iconType="plusInCircle"
             onClick={upgradeAllRules}
-            disabled={
-              !canUserEditRules ||
-              !hasRulesToUpgrade ||
-              isRequestInProgress ||
-              doAllRulesHaveConflicts
-            }
+            disabled={!canUserEditRules || !hasRulesToUpgrade || isRequestInProgress}
             data-test-subj="upgradeAllRulesButton"
           >
             {i18n.UPDATE_ALL}
@@ -102,12 +90,10 @@ export const UpgradePrebuiltRulesTableButtons = ({
 const useBulkUpdateButtonsTooltipContent = ({
   canUserEditRules,
   doAllSelectedRulesHaveConflicts,
-  doAllRulesHaveConflicts,
   isPrebuiltRulesCustomizationEnabled,
 }: {
   canUserEditRules: boolean | null;
   doAllSelectedRulesHaveConflicts: boolean;
-  doAllRulesHaveConflicts: boolean;
   isPrebuiltRulesCustomizationEnabled: boolean;
 }) => {
   if (!canUserEditRules) {
@@ -121,13 +107,6 @@ const useBulkUpdateButtonsTooltipContent = ({
     return {
       selectedRulesButtonTooltip: undefined,
       allRulesButtonTooltip: undefined,
-    };
-  }
-
-  if (doAllRulesHaveConflicts) {
-    return {
-      selectedRulesButtonTooltip: i18n.BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS,
-      allRulesButtonTooltip: i18n.BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS,
     };
   }
 

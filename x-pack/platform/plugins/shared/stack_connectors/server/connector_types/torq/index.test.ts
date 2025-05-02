@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import axios from 'axios';
-import { ActionTypeConfigType, getActionType, TorqActionType } from '.';
+import type { ActionTypeConfigType, TorqActionType } from '.';
+import { getActionType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { Services } from '@kbn/actions-plugin/server/types';
+import type { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -85,6 +86,15 @@ describe('config validation', () => {
       ...config,
     });
   });
+  test('config validation passes with the EU endpoint', () => {
+    const config: Record<string, string | boolean> = {
+      webhookIntegrationUrl: 'https://hooks.eu.torq.io/v1/test',
+    };
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+      ...defaultValues,
+      ...config,
+    });
+  });
 
   const errorCases: Array<{ name: string; url: string; errorMsg: string }> = [
     {
@@ -100,7 +110,12 @@ describe('config validation', () => {
     {
       name: 'fails when URL is not a Torq webhook endpoint',
       url: 'http://mylisteningserver:9200/endpoint',
-      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
+    },
+    {
+      name: 'fails when URL is an unsupported Torq webhook subdomain',
+      url: 'https://hooks.anothersubdomain.torq.io/v1/test',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io or https://hooks.eu.torq.io"`,
     },
   ];
   errorCases.forEach(({ name, url, errorMsg }) => {

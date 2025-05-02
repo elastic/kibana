@@ -18,16 +18,12 @@ import {
   EuiText,
   EuiToolTip,
   EuiHorizontalRule,
+  EuiLink,
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { WORKFLOW_INSIGHTS_SURVEY_URL } from '../../../../constants';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
-
-interface WorkflowInsightsResultsProps {
-  results?: SecurityWorkflowInsight[];
-  scanCompleted: boolean;
-  endpointId: string;
-}
 import type { WorkflowInsightRouteState } from '../../../../types';
 import { getEndpointDetailsPath } from '../../../../../../common/routing';
 import { useKibana } from '../../../../../../../common/lib/kibana';
@@ -36,6 +32,12 @@ import type {
   ExceptionListRemediationType,
   SecurityWorkflowInsight,
 } from '../../../../../../../../common/endpoint/types/workflow_insights';
+
+interface WorkflowInsightsResultsProps {
+  results?: SecurityWorkflowInsight[];
+  scanCompleted: boolean;
+  endpointId: string;
+}
 
 const CustomEuiCallOut = styled(EuiCallOut)`
   & .euiButtonIcon {
@@ -109,7 +111,11 @@ export const WorkflowInsightsResults = ({
   const insights = useMemo(() => {
     if (showEmptyResultsCallout) {
       return (
-        <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
+        <CustomEuiCallOut
+          onDismiss={hideEmptyStateCallout}
+          color={'success'}
+          data-test-subj={'workflowInsightsEmptyResultsCallout'}
+        >
           {WORKFLOW_INSIGHTS.issues.emptyResults}
         </CustomEuiCallOut>
       );
@@ -120,7 +126,13 @@ export const WorkflowInsightsResults = ({
             WORKFLOW_INSIGHTS.issues.remediationButton;
 
           return (
-            <EuiPanel paddingSize="m" hasShadow={false} hasBorder key={index}>
+            <EuiPanel
+              paddingSize="m"
+              hasShadow={false}
+              hasBorder
+              key={index}
+              data-test-subj={`workflowInsightsResult-${index}`}
+            >
               <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="warning" size="l" color="warning" />
@@ -142,12 +154,13 @@ export const WorkflowInsightsResults = ({
                   </EuiText>
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+                <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
                   <EuiToolTip
                     content={canWriteTrustedApplications ? tooltipContent : tooltipNoPermissions}
                     position={'top'}
                   >
                     <EuiButtonIcon
+                      data-test-subj={`workflowInsightsResult-${index}-remediation`}
                       isDisabled={!canWriteTrustedApplications}
                       aria-label={ariaLabel}
                       iconType="popout"
@@ -170,6 +183,33 @@ export const WorkflowInsightsResults = ({
     return null;
   }, [canWriteTrustedApplications, openArtifactCreationPage, results, showEmptyResultsCallout]);
 
+  const surveyLink = useMemo(() => {
+    if (!results?.length) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiSpacer size={'xs'} />
+        <EuiFlexGroup
+          gutterSize={'xs'}
+          alignItems={'center'}
+          data-test-subj={'workflowInsightsSurveySection'}
+        >
+          <EuiIcon type="discuss" size="m" />
+          <EuiText size={'xs'} data-test-subj={'workflowInsightsSurveyLink'}>
+            <p>
+              {WORKFLOW_INSIGHTS.issues.survey.description}
+              <EuiLink target="_blank" href={WORKFLOW_INSIGHTS_SURVEY_URL}>
+                {WORKFLOW_INSIGHTS.issues.survey.callToAction}
+              </EuiLink>
+            </p>
+          </EuiText>
+        </EuiFlexGroup>
+      </>
+    );
+  }, [results]);
+
   const showInsights = !!(showEmptyResultsCallout || results?.length);
 
   return (
@@ -179,6 +219,7 @@ export const WorkflowInsightsResults = ({
           <EuiText size={'s'}>
             <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
           </EuiText>
+          {surveyLink}
           <EuiSpacer size={'s'} />
         </>
       )}

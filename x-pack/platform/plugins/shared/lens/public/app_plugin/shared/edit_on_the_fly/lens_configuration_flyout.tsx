@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -21,40 +21,18 @@ import {
   keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import {
-  getAggregateQueryMode,
-  isOfAggregateQueryType,
-  getLanguageDisplayName,
-} from '@kbn/es-query';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { ESQLLangEditor } from '@kbn/esql/public';
-import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { getLanguageDisplayName, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
-import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
-import {
-  useLensSelector,
-  selectFramePublicAPI,
-  onActiveDataChange,
-  useLensDispatch,
-} from '../../../state_management';
-import {
-  EXPRESSION_BUILD_ERROR_ID,
-  extractReferencesFromState,
-  getAbsoluteDateRange,
-} from '../../../utils';
+import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
+import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
-import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
-import { useESQLVariables } from './use_esql_variables';
+import { useCurrentAttributes } from './use_current_attributes';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -79,41 +57,21 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
-  hideTimeFilterInfo,
+  isReadOnly,
   parentApi,
   panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
-  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
-  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
-  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
 
-  const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
-  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
-  const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
-  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
-  const datasourceState = attributes.state.datasourceStates[datasourceId];
-  const activeDatasource = datasourceMap[datasourceId];
-
-  const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : undefined
-  );
-
-  const { onSaveControl, onCancelControl } = useESQLVariables({
-    parentApi,
-    panelId,
-    attributes,
-    closeFlyout,
-  });
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
-  // use the latest activeId, but fallback to attributes
+
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
@@ -123,42 +81,12 @@ export function LensEditConfigurationFlyout({
     startDependencies.data.query.timefilter.timefilter
   );
 
-  const layers = useMemo(
-    () => activeDatasource.getLayers(datasourceState),
-    [activeDatasource, datasourceState]
-  );
-
-  // needed for text based languages mode which works ONLY with adHoc dataviews
-  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
-
   const dispatch = useLensDispatch();
-  useEffect(() => {
-    const s = dataLoading$?.subscribe((isDataLoading) => {
-      // go thru only when the loading is complete
-      if (isDataLoading) {
-        return;
-      }
-      const activeData: Record<string, Datatable> = {};
-      const adaptersTables = previousAdapters.current?.tables?.tables;
-      const [table] = Object.values(adaptersTables || {});
-      if (table) {
-        // there are cases where a query can return a big amount of columns
-        // at this case we don't suggest all columns in a table but the first
-        // MAX_NUM_OF_COLUMNS
-        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
-        layers.forEach((layer) => {
-          activeData[layer] = table;
-        });
 
-        dispatch(onActiveDataChange({ activeData }));
-      }
-    });
-    return () => s?.unsubscribe();
-  }, [dispatch, dataLoading$, layers]);
+  const attributesChanged = useMemo<boolean>(() => {
+    if (isNewPanel) return true;
 
-  const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
-
     const datasourceStatesAreSame =
       datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
         ? datasourceMap[datasourceId].isEqual(
@@ -168,6 +96,8 @@ export function LensEditConfigurationFlyout({
             attributes.references
           )
         : false;
+
+    if (!datasourceStatesAreSame) return true;
 
     const visualizationState = visualization.state;
     const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
@@ -187,11 +117,12 @@ export function LensEditConfigurationFlyout({
         })()
       : isEqual(visualizationState, previousAttrs.state.visualization);
 
-    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+    return !visualizationStateIsEqual;
   }, [
     attributes.references,
     datasourceId,
     datasourceMap,
+    isNewPanel,
     datasourceStates,
     visualizationMap,
     annotationGroups,
@@ -231,48 +162,21 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
-  const textBasedMode = useMemo(
-    () => (isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined),
-    [query]
-  );
+  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
+
+  const currentAttributes = useCurrentAttributes({
+    textBasedMode,
+    initialAttributes: attributes,
+    datasourceMap,
+    visualizationMap,
+  });
 
   const onApply = useCallback(() => {
-    if (visualization.activeId == null) {
+    if (visualization.activeId == null || !currentAttributes) {
       return;
     }
-    const dsStates = Object.fromEntries(
-      Object.entries(datasourceStates).map(([id, ds]) => {
-        const dsState = ds.state;
-        return [id, dsState];
-      })
-    );
-    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = !textBasedMode
-      ? extractReferencesFromState({
-          activeDatasources: Object.keys(datasourceStates).reduce(
-            (acc, id) => ({
-              ...acc,
-              [id]: datasourceMap[id],
-            }),
-            {}
-          ),
-          datasourceStates,
-          visualizationState: visualization.state,
-          activeVisualization,
-        })
-      : [];
-    const attrs: TypedLensSerializedState['attributes'] = {
-      ...attributes,
-      state: {
-        ...attributes.state,
-        visualization: visualization.state,
-        datasourceStates: dsStates,
-      },
-      references,
-      visualizationType: visualization.activeId,
-    };
     if (savedObjectId) {
-      saveByRef?.(attrs);
+      saveByRef?.(currentAttributes);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -289,19 +193,16 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(attrs);
+    onApplyCallback?.(currentAttributes);
     closeFlyout?.();
   }, [
     visualization.activeId,
     savedObjectId,
     closeFlyout,
     onApplyCallback,
-    datasourceStates,
-    textBasedMode,
     visualization.state,
     activeVisualization,
-    attributes,
-    datasourceMap,
+    currentAttributes,
     saveByRef,
     updateByRefInput,
   ]);
@@ -318,61 +219,7 @@ export function LensEditConfigurationFlyout({
     visualizationState: visualization,
   });
 
-  const runQuery = useCallback(
-    async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
-      const attrs = await getSuggestions(
-        q,
-        startDependencies,
-        datasourceMap,
-        visualizationMap,
-        adHocDataViews,
-        setErrors,
-        abortController,
-        setDataGridAttrs,
-        esqlVariables,
-        shouldUpdateAttrs
-      );
-      if (attrs) {
-        setCurrentAttributes?.(attrs);
-        setErrors([]);
-        updateSuggestion?.(attrs);
-      }
-      prevQuery.current = q;
-      setIsVisualizationLoading(false);
-    },
-    [
-      startDependencies,
-      datasourceMap,
-      visualizationMap,
-      adHocDataViews,
-      setCurrentAttributes,
-      updateSuggestion,
-      esqlVariables,
-    ]
-  );
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    const initializeChart = async () => {
-      if (isOfAggregateQueryType(query) && !dataGridAttrs) {
-        try {
-          await runQuery(query, abortController, Boolean(attributes.state.needsRefresh));
-        } catch (e) {
-          setErrors([e]);
-          prevQuery.current = query;
-        }
-      }
-    };
-    initializeChart();
-  }, [
-    adHocDataViews,
-    runQuery,
-    esqlVariables,
-    query,
-    startDependencies,
-    dataGridAttrs,
-    attributes.state.needsRefresh,
-  ]);
+  const editorContainer = useRef(null);
 
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
@@ -438,6 +285,7 @@ export function LensEditConfigurationFlyout({
           isScrollable
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
+          isReadOnly={isReadOnly}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -452,6 +300,12 @@ export function LensEditConfigurationFlyout({
             hasPadding
             framePublicAPI={framePublicAPI}
             setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+            updateSuggestion={updateSuggestion}
+            setCurrentAttributes={setCurrentAttributes}
+            closeFlyout={closeFlyout}
+            parentApi={parentApi}
+            panelId={panelId}
+            canEditTextBasedQuery={canEditTextBasedQuery}
           />
         </FlyoutWrapper>
       </>
@@ -467,10 +321,11 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
         isSaveable={isSaveable}
         isScrollable={false}
+        language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
+        isReadOnly={isReadOnly}
       >
         <EuiFlexGroup
           css={css`
@@ -511,60 +366,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
-            <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
-              <ESQLLangEditor
-                query={query}
-                onTextLangQueryChange={(q) => {
-                  setQuery(q);
-                }}
-                detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
-                hideTimeFilterInfo={hideTimeFilterInfo}
-                errors={errors}
-                warning={
-                  suggestsLimitedColumns
-                    ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                        defaultMessage:
-                          'Displaying a limited portion of the available fields. Add more from the configuration panel.',
-                      })
-                    : undefined
-                }
-                editorIsInline
-                supportsControls
-                hideRunQueryText
-                onTextLangQuerySubmit={async (q, a) => {
-                  // do not run the suggestions if the query is the same as the previous one
-                  if (q && !isEqual(q, prevQuery.current)) {
-                    setIsVisualizationLoading(true);
-                    await runQuery(q, a);
-                  }
-                }}
-                isDisabled={false}
-                allowQueryCancellation
-                isLoading={isVisualizationLoading}
-                onSaveControl={onSaveControl}
-                onCancelControl={onCancelControl}
-                esqlVariables={esqlVariables}
-              />
-            </EuiFlexItem>
-          )}
-          {isOfAggregateQueryType(query) && canEditTextBasedQuery && dataGridAttrs && (
-            <ESQLDataGridAccordion
-              dataGridAttrs={dataGridAttrs}
-              isAccordionOpen={isESQLResultsAccordionOpen}
-              setIsAccordionOpen={setIsESQLResultsAccordionOpen}
-              query={query}
-              isTableView={attributes.visualizationType !== 'lnsDatatable'}
-              onAccordionToggleCb={(status) => {
-                if (status && isSuggestionsAccordionOpen) {
-                  setIsSuggestionsAccordionOpen(!status);
-                }
-                if (status && isLayerAccordionOpen) {
-                  setIsLayerAccordionOpen(!status);
-                }
-              }}
-            />
-          )}
+          <div ref={editorContainer} />
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
@@ -580,12 +382,13 @@ export function LensEditConfigurationFlyout({
                 <EuiTitle
                   size="xxs"
                   css={css`
-                    padding: 2px;
-                  `}
+                padding: 2px;
+              }
+            `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
-                      defaultMessage: 'Visualization configuration',
+                      defaultMessage: 'Visualization parameters',
                     })}
                   </h5>
                 </EuiTitle>
@@ -608,6 +411,8 @@ export function LensEditConfigurationFlyout({
               <>
                 <LayerConfiguration
                   attributes={attributes}
+                  dataLoading$={dataLoading$}
+                  lensAdapters={lensAdapters}
                   getUserMessages={getUserMessages}
                   coreStart={coreStart}
                   startDependencies={startDependencies}
@@ -616,6 +421,13 @@ export function LensEditConfigurationFlyout({
                   datasourceId={datasourceId}
                   framePublicAPI={framePublicAPI}
                   setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+                  updateSuggestion={updateSuggestion}
+                  setCurrentAttributes={setCurrentAttributes}
+                  closeFlyout={closeFlyout}
+                  parentApi={parentApi}
+                  panelId={panelId}
+                  canEditTextBasedQuery={canEditTextBasedQuery}
+                  editorContainer={editorContainer.current || undefined}
                 />
                 <EuiSpacer />
               </>

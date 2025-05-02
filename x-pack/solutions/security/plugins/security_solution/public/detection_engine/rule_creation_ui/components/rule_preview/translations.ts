@@ -86,6 +86,20 @@ export const QUERY_PREVIEW_INVOCATION_COUNT_WARNING_MESSAGE = i18n.translate(
   }
 );
 
+export const QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewRuleDefinitionInvalidWarningTitle',
+  {
+    defaultMessage: 'Rule definition is invalid',
+  }
+);
+
+export const QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewRuleDefinitionInvalidWarningMessage',
+  {
+    defaultMessage: `One or more rule definition fields have validation errors that must be fixed before previewing this rule. To learn more, check the error messages for the invalid rule definition fields.`,
+  }
+);
+
 export const QUERY_GRAPH_COUNT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphCountLabel',
   {
@@ -204,5 +218,12 @@ export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
+  }
+);
+
+export const REQUESTS_SAMPLE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewRequestSampleWarningText',
+  {
+    defaultMessage: 'Sample search queries logged only for first 2 requests of each type.',
   }
 );

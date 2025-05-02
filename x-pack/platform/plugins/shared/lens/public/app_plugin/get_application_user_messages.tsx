@@ -44,7 +44,7 @@ export interface UserMessageGetterProps {
   visualization: Visualization | undefined;
   visualizationState: VisualizationState | undefined;
   activeDatasource: Datasource | null | undefined;
-  activeDatasourceState: { isLoading: boolean; state: unknown } | null;
+  activeDatasourceState: DatasourceState | null;
   dataViews: DataViewsState;
   core: CoreStart;
 }
@@ -141,7 +141,7 @@ function getMissingIndexPatternsErrors(
   // Check for access to both Management app && specific indexPattern section
   const { management: isManagementEnabled } = core.application.capabilities.navLinks;
   const isIndexPatternManagementEnabled =
-    core.application.capabilities.management.kibana.indexPatterns;
+    core.application.capabilities.management?.kibana?.indexPatterns;
   const canFix = isManagementEnabled && isIndexPatternManagementEnabled;
   return [
     {

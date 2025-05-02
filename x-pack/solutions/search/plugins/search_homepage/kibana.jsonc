@@ -10,8 +10,7 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "search",
-      "homepage"
+      "searchHomepage"
     ],
     "requiredPlugins": [
       "share",

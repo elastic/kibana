@@ -9,14 +9,14 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import {
+import type {
   GroupingProps,
   GroupOption,
   GroupPanelRenderer,
   GetGroupStats,
   NamedAggregation,
 } from '@kbn/grouping/src';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 export interface GroupModel {
   activeGroups: string[];
@@ -99,6 +99,14 @@ export interface AlertsGroupingProps<
     dataViews: DataViewsServicePublic;
     http: HttpSetup;
   };
+  /**
+   * Initial groupings configuration
+   */
+  initialGroupings?: string[];
+  /**
+   * Callback for when the groupings change
+   */
+  onGroupingsChange?: (groupings: GroupModel) => void;
 }
 
 export interface AlertsGroupAggregationBucket {

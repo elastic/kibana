@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should allow the user to open up the rules settings modal', async () => {
       await testSubjects.click('rulesSettingsLink');
-      await testSubjects.existOrFail('rulesSettingsModal');
+      await testSubjects.existOrFail('rulesSettingsFlyout');
       await testSubjects.waitForDeleted('centerJustifiedSpinner');
 
       // Flapping enabled by default
@@ -135,9 +135,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
 
       // Save
-      await testSubjects.click('rulesSettingsModalSaveButton');
+      await testSubjects.click('rulesSettingsFlyoutSaveButton');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('rulesSettingsModal');
+      await testSubjects.missingOrFail('rulesSettingsFlyout');
 
       // Open up the modal again
       await testSubjects.click('rulesSettingsLink');

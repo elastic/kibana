@@ -28,14 +28,6 @@ export const SUGGESTED_BM25_FIELDS = [
 
 export const SUGGESTED_DENSE_VECTOR_FIELDS = ['content_vector.tokens'];
 
-const SUGGESTED_SOURCE_FIELDS = [
-  'body_content',
-  'content',
-  'text',
-  'page_content_text',
-  'text_field',
-];
-
 const SEMANTIC_FIELD_TYPE = 'semantic';
 
 interface Matches {
@@ -313,14 +305,6 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
     (acc: IndexFields, index: string) => {
       const indexFieldDescriptors = fieldDescriptors[index];
 
-      // semantic_text fields are prioritized
-      if (indexFieldDescriptors.semantic_fields.length > 0) {
-        return {
-          ...acc,
-          [index]: indexFieldDescriptors.semantic_fields.map((x) => x.field),
-        };
-      }
-
       // if there are no source fields, we don't need to suggest anything
       if (indexFieldDescriptors.source_fields.length === 0) {
         return {
@@ -329,15 +313,9 @@ export function getDefaultSourceFields(fieldDescriptors: IndicesQuerySourceField
         };
       }
 
-      const suggested = indexFieldDescriptors.source_fields.filter((x) =>
-        SUGGESTED_SOURCE_FIELDS.includes(x)
-      );
-
-      const fields = suggested.length === 0 ? [indexFieldDescriptors.source_fields[0]] : suggested;
-
       return {
         ...acc,
-        [index]: fields,
+        [index]: indexFieldDescriptors.source_fields,
       };
     },
     {}

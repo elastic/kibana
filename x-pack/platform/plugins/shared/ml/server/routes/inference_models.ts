@@ -5,71 +5,14 @@
  * 2.0.
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { schema } from '@kbn/config-schema';
-import type {
-  InferenceInferenceEndpoint,
-  InferenceTaskType,
-} from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { RouteInitialization } from '../types';
-import { createInferenceSchema } from './schemas/inference_schema';
-import { modelsProvider } from '../models/model_management';
 import { wrapError } from '../client/error_wrapper';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { syncSavedObjectsFactory } from '../saved_objects';
 
 export function inferenceModelRoutes(
   { router, routeGuard, getEnabledFeatures }: RouteInitialization,
   cloud: CloudSetup
 ) {
-  router.versioned
-    .put({
-      path: `${ML_INTERNAL_BASE_PATH}/_inference/{taskType}/{inferenceId}`,
-      access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: ['ml:canCreateInferenceEndpoint'],
-        },
-      },
-      summary: 'Create an inference endpoint',
-      description: 'Create an inference endpoint',
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            params: createInferenceSchema,
-            body: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-          },
-        },
-      },
-      routeGuard.fullLicenseAPIGuard(
-        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
-          try {
-            const { inferenceId, taskType } = request.params;
-            const body = await modelsProvider(
-              client,
-              mlClient,
-              cloud,
-              getEnabledFeatures()
-            ).createInferenceEndpoint(
-              inferenceId,
-              taskType as InferenceTaskType,
-              request.body as InferenceInferenceEndpoint
-            );
-            const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
-            await syncSavedObjects(false);
-            return response.ok({
-              body,
-            });
-          } catch (e) {
-            return response.customError(wrapError(e));
-          }
-        }
-      )
-    );
-
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
@@ -85,15 +28,12 @@ export function inferenceModelRoutes(
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: false,
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, response }) => {
         try {
-          const body = await client.asCurrentUser.transport.request<{
-            models: InferenceAPIConfigResponse[];
-          }>({
-            method: 'GET',
-            path: `/_inference/_all`,
+          const body = await client.asCurrentUser.inference.get({
+            inference_id: '_all',
           });
           return response.ok({
             body,

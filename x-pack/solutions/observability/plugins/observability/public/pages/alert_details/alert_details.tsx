@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -31,11 +31,11 @@ import {
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
-import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
+import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
-import { RelatedAlerts } from './components/related_alerts';
+import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
 import { StatusBar } from './components/status_bar';
@@ -54,6 +54,7 @@ import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
+import StaleAlert from './components/stale_alert';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -107,12 +108,11 @@ export function AlertDetails() {
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
-  const { rule } = useFetchRule({
+  const { rule, refetch } = useFetchRule({
     ruleId,
   });
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
-
   const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -179,9 +179,9 @@ export function AlertDetails() {
     { serverless }
   );
 
-  const onUntrackAlert = () => {
+  const onUntrackAlert = useCallback(() => {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
-  };
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !!alertDetail && activeTabId === OVERVIEW_TAB_ID) {
@@ -227,6 +227,15 @@ export function AlertDetails() {
     */
     isAlertDetailsEnabledPerApp(alertDetail.formatted, config) ? (
       <>
+        <EuiSpacer size="m" />
+        <StaleAlert
+          alert={alertDetail.formatted}
+          alertStatus={alertStatus}
+          rule={rule}
+          onUntrackAlert={onUntrackAlert}
+          refetchRule={refetch}
+        />
+
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
@@ -296,7 +305,7 @@ export function AlertDetails() {
         </>
       ),
       'data-test-subj': 'relatedAlertsTab',
-      content: <RelatedAlerts alert={alertDetail?.formatted} />,
+      content: <RelatedAlerts alertData={alertDetail} />,
     },
   ];
 
@@ -333,15 +342,21 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
-      <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
-      <EuiSpacer size="l" />
-      <HeaderMenu />
-      <EuiTabbedContent
-        data-test-subj="alertDetailsTabbedContent"
-        tabs={tabs}
-        selectedTab={tabs.find((tab) => tab.id === activeTabId)}
-        onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
-      />
+      <CasesContext
+        owner={[observabilityFeatureId]}
+        permissions={userCasesPermissions}
+        features={{ alerts: { sync: false } }}
+      >
+        <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
+        <EuiSpacer size="l" />
+        <HeaderMenu />
+        <EuiTabbedContent
+          data-test-subj="alertDetailsTabbedContent"
+          tabs={tabs}
+          selectedTab={tabs.find((tab) => tab.id === activeTabId)}
+          onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
+        />
+      </CasesContext>
     </ObservabilityPageTemplate>
   );
 }

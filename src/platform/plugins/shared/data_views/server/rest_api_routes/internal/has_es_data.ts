@@ -129,16 +129,16 @@ export const registerHasEsDataRoute = (
     .get({
       path: '/internal/data_views/has_es_data',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization provided by Elasticsearch',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'Authorization provided by Elasticsearch',
-          },
-        },
         validate: {
           response: {
             200: {

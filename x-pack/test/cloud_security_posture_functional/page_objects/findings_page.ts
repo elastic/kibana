@@ -324,7 +324,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
-  const misconfigurationsFlyout = createFlyoutObject('findings_flyout');
+  const misconfigurationsFlyout = createFlyoutObject('rightSection');
 
   const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {

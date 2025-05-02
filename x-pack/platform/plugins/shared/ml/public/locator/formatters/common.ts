@@ -22,7 +22,7 @@ export function extractParams<UrlState>(urlState: UrlState) {
  */
 export function formatGenericMlUrl(
   appBasePath: string,
-  page: MlGenericUrlState['page'],
+  page: MlGenericUrlState['page'] | string,
   pageState: MlGenericUrlState['pageState']
 ): string {
   let url = `${appBasePath}/${page}`;

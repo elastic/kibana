@@ -13,7 +13,7 @@ import type {
   IngestGetPipelineResponse,
   SecurityHasPrivilegesPrivileges,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';

@@ -42,8 +42,10 @@ export const getCaseRoute = () =>
           includeComments: false,
         });
 
+        const { comments, ...caseWithoutComments } = res;
+
         return response.ok({
-          body: res,
+          body: caseWithoutComments,
         });
       } catch (error) {
         throw createCaseError({
@@ -57,10 +59,19 @@ export const getCaseRoute = () =>
 export const resolveCaseRoute = createCasesRoute({
   method: 'get',
   path: `${CASE_DETAILS_URL}/resolve`,
+  security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'internal',
   },
-  params,
+  params: {
+    ...params,
+    query: schema.object({
+      /**
+       * @deprecated since version 8.1.0
+       */
+      includeComments: schema.boolean({ defaultValue: true, meta: { deprecated: true } }),
+    }),
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
@@ -69,7 +80,7 @@ export const resolveCaseRoute = createCasesRoute({
 
       const res: caseApiV1.CaseResolveResponse = await casesClient.cases.resolve({
         id,
-        includeComments: false,
+        includeComments: request.query.includeComments,
       });
 
       return response.ok({
@@ -77,7 +88,7 @@ export const resolveCaseRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve case in resolve route case id: ${request.params.case_id} \n${error}`,
+        message: `Failed to retrieve case in resolve route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments}: ${error}`,
         error,
       });
     }

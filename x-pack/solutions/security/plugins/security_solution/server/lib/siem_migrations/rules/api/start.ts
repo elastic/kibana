@@ -6,11 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { Callbacks } from '@langchain/core/callbacks/manager';
-import type { LangSmithOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   StartRuleMigrationRequestBody,
@@ -18,8 +14,11 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from './util/with_license';
+import { SiemMigrationAuditLogger } from './util/audit';
+import { authz } from './util/authz';
 import { getRetryFilter } from './util/retry';
+import { withLicense } from './util/with_license';
+import { createTracersCallbacks } from './util/tracing';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -29,7 +28,7 @@ export const registerSiemRuleMigrationsStartRoute = (
     .put({
       path: SIEM_RULE_MIGRATION_START_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -50,11 +49,17 @@ export const registerSiemRuleMigrationsStartRoute = (
             retry,
           } = req.body;
 
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            // Check if the connector exists and user has permissions to read it
+            const connector = await ctx.actions.getActionsClient().get({ id: connectorId });
+            if (!connector) {
+              return res.badRequest({ body: `Connector with id ${connectorId} not found` });
+            }
 
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
             if (retry) {
               const { updated } = await ruleMigrationsClient.task.updateToRetry(
                 migrationId,
@@ -65,7 +70,7 @@ export const registerSiemRuleMigrationsStartRoute = (
               }
             }
 
-            const callbacks = createInvocationCallbacks(langsmithOptions, logger);
+            const callbacks = createTracersCallbacks(langsmithOptions, logger);
 
             const { exists, started } = await ruleMigrationsClient.task.start({
               migrationId,
@@ -74,26 +79,18 @@ export const registerSiemRuleMigrationsStartRoute = (
             });
 
             if (!exists) {
-              return res.noContent();
+              return res.notFound();
             }
+
+            await siemMigrationAuditLogger.logStart({ migrationId });
+
             return res.ok({ body: { started } });
-          } catch (err) {
-            logger.error(err);
-            return res.badRequest({ body: err.message });
+          } catch (error) {
+            logger.error(error);
+            await siemMigrationAuditLogger.logStart({ migrationId, error });
+            return res.badRequest({ body: error.message });
           }
         }
       )
     );
 };
-
-function createInvocationCallbacks(
-  langsmithOptions: LangSmithOptions | undefined,
-  logger: Logger
-): Callbacks {
-  const { api_key: apiKey, project_name: projectName = 'default' } = langsmithOptions ?? {};
-  const callbacks: Callbacks = [new APMTracer({ projectName }, logger)];
-  if (langsmithOptions) {
-    callbacks.push(...getLangSmithTracer({ apiKey, projectName, logger }));
-  }
-  return callbacks;
-}

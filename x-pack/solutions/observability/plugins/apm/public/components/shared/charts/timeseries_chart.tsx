@@ -33,7 +33,6 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
@@ -240,7 +239,7 @@ export function TimeseriesChart({
               stackAccessors={serie.stackAccessors ?? undefined}
               markSizeAccessor={serie.markSizeAccessor}
               data={isEmpty ? [] : serie.data}
-              color={getVizColorForIndex(index, euiTheme)}
+              color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
               hideInLegend={serie.hideLegend}
               fit={serie.fit ?? undefined}

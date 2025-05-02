@@ -2777,5 +2777,76 @@ export default ({ getService }: FtrProviderContext) => {
         expect(get(previewAlerts[0]?._source, 'event.dataset')).toEqual('network_traffic.tls');
       });
     });
+
+    describe('preview logged requests', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      const rule: QueryRuleCreateProps = getRuleForAlertTesting(['ecs_compliant']);
+      const ruleWithSuppression: QueryRuleCreateProps = {
+        ...rule,
+        alert_suppression: {
+          group_by: ['agent.name'],
+          duration: {
+            value: 500,
+            unit: 'm',
+          },
+        },
+      };
+
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).toHaveLength(1);
+        expect(requests![0].description).toBe('Find events');
+        expect(requests![0].request_type).toBe('findDocuments');
+        expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
+      });
+
+      it('should not return requests property when not enabled and suppression configured', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: ruleWithSuppression,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+
+      it('should return requests property when enable_logged_requests set to true and suppression configured', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule: ruleWithSuppression,
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).toHaveLength(1);
+        expect(requests![0].description).toBe('Find events');
+        expect(requests![0].request_type).toBe('findDocuments');
+        expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
+      });
+    });
   });
 };

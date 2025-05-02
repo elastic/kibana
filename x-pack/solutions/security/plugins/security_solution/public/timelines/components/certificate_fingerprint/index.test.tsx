@@ -19,6 +19,7 @@ describe('CertificateFingerprint', () => {
     render(
       <TestProviders>
         <CertificateFingerprint
+          scopeId="some_scope"
           eventId="Tgwnt2kBqd-n62SwPZDP"
           certificateType="client"
           contextId="test"
@@ -34,6 +35,7 @@ describe('CertificateFingerprint', () => {
     render(
       <TestProviders>
         <CertificateFingerprint
+          scopeId="some_scope"
           eventId="Tgwnt2kBqd-n62SwPZDP"
           certificateType="client"
           contextId="test"
@@ -49,6 +51,7 @@ describe('CertificateFingerprint', () => {
     render(
       <TestProviders>
         <CertificateFingerprint
+          scopeId="some_scope"
           eventId="Tgwnt2kBqd-n62SwPZDP"
           certificateType="client"
           contextId="test"

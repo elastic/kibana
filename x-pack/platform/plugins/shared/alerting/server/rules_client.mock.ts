@@ -6,7 +6,7 @@
  */
 
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { RulesClientApi } from './types';
+import type { RulesClientApi } from './types';
 
 type Schema = RulesClientApi;
 export type RulesClientMock = jest.Mocked<Schema>;
@@ -38,6 +38,7 @@ const createRulesClientMock = () => {
     getExecutionLogForRule: jest.fn(),
     getRuleExecutionKPI: jest.fn(),
     getGlobalExecutionKpiWithAuth: jest.fn(),
+    getGlobalExecutionSummaryWithAuth: jest.fn(),
     getGlobalExecutionLogWithAuth: jest.fn(),
     getActionErrorLog: jest.fn(),
     getActionErrorLogWithAuth: jest.fn(),
@@ -56,6 +57,10 @@ const createRulesClientMock = () => {
     clone: jest.fn(),
     getScheduleFrequency: jest.fn(),
     bulkUntrackAlerts: jest.fn(),
+    findGaps: jest.fn(),
+    fillGapById: jest.fn(),
+    getRuleIdsWithGaps: jest.fn(),
+    getGapsSummaryByRuleIds: jest.fn(),
   };
   return mocked;
 };

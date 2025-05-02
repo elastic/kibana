@@ -13,6 +13,7 @@ exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
     <MatchDetails
       contextId="contextId"
       eventId="eventId"
+      scopeId="some_scope"
       sourceField="host.name"
       sourceValue="http://elastic.co"
     />
@@ -26,6 +27,7 @@ exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
       feedName="feedName"
       indicatorReference="http://example.com"
       indicatorType="domain"
+      scopeId="some_scope"
     />
   </EuiFlexItem>
 </EuiFlexGroup>

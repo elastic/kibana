@@ -14,10 +14,19 @@ export const DOUBLE_TICKS_REGEX = /``/g;
 export const SINGLE_TICK_REGEX = /`/g;
 export const DOUBLE_BACKTICK = '``';
 export const SINGLE_BACKTICK = '`';
+export const ESQL_VARIABLES_PREFIX = '?';
 
-export const METADATA_FIELDS = ['_version', '_id', '_index', '_source', '_ignored', '_index_mode'];
+export const METADATA_FIELDS = [
+  '_version',
+  '_id',
+  '_index',
+  '_source',
+  '_ignored',
+  '_index_mode',
+  '_score',
+];
 
-export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'qstr', 'kql'];
+export const FULL_TEXT_SEARCH_FUNCTIONS = ['match', 'match_operator', 'qstr', 'kql'];
 export const UNSUPPORTED_COMMANDS_BEFORE_QSTR = new Set([
   'show',
   'row',

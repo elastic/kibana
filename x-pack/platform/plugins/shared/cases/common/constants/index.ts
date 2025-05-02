@@ -128,6 +128,8 @@ export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
  */
 
 export const MAX_TITLE_LENGTH = 160 as const;
+export const MAX_RULE_NAME_LENGTH = 100 as const;
+export const MAX_SUFFIX_LENGTH = 60 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
 export const MAX_DESCRIPTION_LENGTH = 30000 as const;
 export const MAX_COMMENT_LENGTH = 30000 as const;
@@ -185,6 +187,7 @@ export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
+export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
 
 /**
  * Cases API Tags
@@ -241,7 +244,7 @@ export const NONE_CONNECTOR_ID: string = 'none';
 export const CASES_CONNECTOR_ID = '.cases';
 export const CASES_CONNECTOR_TITLE = 'Cases';
 
-export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w]$';
+export const CASES_CONNECTOR_TIME_WINDOW_REGEX = '^[1-9][0-9]*[d,w,h,m]$';
 
 /**
  * This field is used for authorization of the entities within the cases plugin. Each entity within Cases will have the owner field

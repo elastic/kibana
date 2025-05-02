@@ -8,23 +8,32 @@
  */
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
-import './context_app.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import {
+  EuiText,
+  EuiPage,
+  EuiPageBody,
+  EuiSpacer,
+  useEuiPaddingSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { UseColumnsProps } from '@kbn/unified-data-table';
+import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { kibanaFullBodyHeightCss } from '@kbn/core/public';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
-import { AppState, GlobalState, isEqualFilters } from './services/context_state';
+import type { AppState, GlobalState } from './services/context_state';
+import { isEqualFilters } from './services/context_state';
 import { useContextAppState } from './hooks/use_context_app_state';
 import { useContextAppFetch } from './hooks/use_context_app_fetch';
 import { ContextAppContent } from './context_app_content';
@@ -41,6 +50,7 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
+  const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const {
     analytics,
@@ -230,7 +240,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       showSearchBar: true,
       showQueryInput: false,
       showFilterBar: true,
-      saveQueryMenuVisibility: 'hidden' as const,
       showDatePicker: false,
       indexPatterns: [dataView],
       useDefaultBehaviors: true,
@@ -256,26 +265,37 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage className="dscDocsPage">
+          <EuiPage css={dscDocsPageCss}>
             <EuiPageBody
               panelled
               paddingSize="none"
-              className="dscDocsContent"
+              css={dscDocsContentCss}
               panelProps={{ role: 'main' }}
             >
               <EuiText
                 data-test-subj="contextDocumentSurroundingHeader"
                 css={css`
                   padding: ${titlePadding} ${titlePadding} 0;
+                  font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                <strong>
-                  <FormattedMessage
-                    id="discover.context.contextOfTitle"
-                    defaultMessage="Documents surrounding #{anchorId}"
-                    values={{ anchorId }}
-                  />
-                </strong>
+                <FormattedMessage
+                  id="discover.context.contextOfTitle"
+                  defaultMessage="Documents surrounding {anchorId}"
+                  values={{
+                    anchorId: (
+                      <span
+                        css={css`
+                          background-color: ${euiTheme.colors.backgroundBaseWarning};
+                          color: ${euiTheme.colors.textWarning};
+                          padding: 0 ${euiTheme.size.xs};
+                        `}
+                      >
+                        #{anchorId}
+                      </span>
+                    ),
+                  }}
+                />
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
@@ -304,3 +324,13 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     </Fragment>
   );
 };
+
+const dscDocsPageCss = css`
+  ${kibanaFullBodyHeightCss(54)}; // 54px is the action bar height
+`;
+
+const dscDocsContentCss = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;

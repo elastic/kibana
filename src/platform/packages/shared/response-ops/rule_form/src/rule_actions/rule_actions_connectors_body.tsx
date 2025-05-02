@@ -30,7 +30,12 @@ import {
   EuiSelectableProps,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
-import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import { css } from '@emotion/react';
+import {
+  ActionConnector,
+  type ActionTypeModel,
+  checkActionFormActionTypeEnabled,
+} from '@kbn/alerts-ui-shared';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleFormParamsErrors } from '../common/types';
@@ -64,6 +69,32 @@ export const RuleActionsConnectorsBody = ({
   const { euiTheme } = useEuiTheme();
 
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
+
+  const containerCss = css`
+    .showForContainer--s,
+    showForContainer--xs {
+      display: none;
+    }
+
+    @container (max-width: 767px) and (min-width: 575px) {
+      .hideForContainer--s {
+        display: none;
+      }
+
+      .showForContainer--s {
+        display: initial !important;
+      }
+    }
+    @container (max-width: 574px) {
+      .hideForContainer--xs {
+        display: none;
+      }
+
+      .showForContainer--xs {
+        display: initial !important;
+      }
+    }
+  `;
 
   const {
     plugins: { actionTypeRegistry },
@@ -126,13 +157,18 @@ export const RuleActionsConnectorsBody = ({
   const availableConnectors = useMemo(() => {
     return connectors.filter(({ actionTypeId }) => {
       const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
+
+      if (!actionTypeRegistry.has(actionTypeId)) {
+        return false;
+      }
+
       const actionTypeModel = actionTypeRegistry.get(actionTypeId);
 
       if (!actionType) {
         return false;
       }
 
-      if (!actionTypeModel.actionParamsFields) {
+      if (!actionTypeModel?.actionParamsFields) {
         return false;
       }
 
@@ -343,7 +379,13 @@ export const RuleActionsConnectorsBody = ({
       <EuiFlexGroup direction="column">
         {filteredConnectors.map((connector) => {
           const { id, actionTypeId, name } = connector;
-          const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+          let actionTypeModel: ActionTypeModel;
+          try {
+            actionTypeModel = actionTypeRegistry.get(actionTypeId);
+            if (!actionTypeModel) return null;
+          } catch (e) {
+            return null;
+          }
           const actionType = connectorTypes.find((item) => item.id === actionTypeId);
 
           if (!actionType) {
@@ -365,6 +407,7 @@ export const RuleActionsConnectorsBody = ({
           const connectorCard = (
             <EuiCard
               data-test-subj="ruleActionsConnectorsModalCard"
+              data-action-type-id={actionTypeId}
               hasBorder
               isDisabled={isDisabled}
               titleSize="xs"
@@ -415,7 +458,11 @@ export const RuleActionsConnectorsBody = ({
 
   return (
     <>
-      <EuiFlexGroup direction="column" style={{ overflow: responsiveOverflow, height: '100%' }}>
+      <EuiFlexGroup
+        direction="column"
+        style={{ overflow: responsiveOverflow, height: '100%' }}
+        css={containerCss}
+      >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column">
             <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>

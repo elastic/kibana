@@ -105,7 +105,7 @@ function startEluMeasurement<T>(
           active
         )}ms out of ${Math.round(duration)}ms) and ${eluThreshold * 100}% (${Math.round(
           utilization * 100
-        )}%) `,
+        )}%). Run \`node scripts/profile.js\` to find out why.`,
         {
           labels: {
             request_path: path,
@@ -141,6 +141,7 @@ export interface HttpServerSetup {
   staticAssets: InternalStaticAssets;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
+  prototypeHardening: boolean;
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -307,6 +308,7 @@ export class HttpServer {
         ),
       basePath: basePathService,
       csp: config.csp,
+      prototypeHardening: config.prototypeHardening,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,

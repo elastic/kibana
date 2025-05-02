@@ -161,7 +161,15 @@ paths:
               properties:
                 records:
                   items:
-                    $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+                    allOf:
+                      - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
+                      - type: object
+                        properties:
+                          criticality_level:
+                            $ref: >-
+                              #/components/schemas/AssetCriticalityLevelsForBulkUpload
+                        required:
+                          - criticality_level
                   maxItems: 1000
                   minItems: 1
                   type: array
@@ -298,6 +306,35 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/init:
+    post:
+      operationId: InitMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      operationId: PrivMonHealth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+          description: Successful response
+      summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -307,6 +344,14 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
                 enrichPolicyExecutionInterval:
                   $ref: '#/components/schemas/Interval'
                 entityTypes:
@@ -319,12 +364,28 @@ paths:
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
                   default: 24h
-                  description: The lookback period for the entity store
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
                   pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp.
                   type: string
         description: Schema for the entity store initialization
         required: true
@@ -342,6 +403,8 @@ paths:
                   succeeded:
                     type: boolean
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize the Entity Store
       tags:
         - Security Entity Analytics API
@@ -429,6 +492,14 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
                 enrichPolicyExecutionInterval:
                   $ref: '#/components/schemas/Interval'
                 fieldHistoryLength:
@@ -437,8 +508,29 @@ paths:
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: >-
+                    The amount of time the transform looks back to calculate the
+                    aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp for the entity type.
+                  type: string
         description: Schema for the engine initialization
         required: true
       responses:
@@ -448,6 +540,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize an Entity Engine
       tags:
         - Security Entity Analytics API
@@ -455,7 +549,7 @@ paths:
     post:
       operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine
           in: path
           name: entityType
           required: true
@@ -807,6 +901,18 @@ components:
         - high_impact
         - extreme_impact
       type: string
+    AssetCriticalityLevelsForBulkUpload:
+      description: >-
+        The criticality level of the asset for bulk upload. The value
+        `unassigned` is used to indicate that the criticality level is not
+        assigned and is only used for bulk upload.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+        - unassigned
+      type: string
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
@@ -984,6 +1090,8 @@ components:
           type: string
         installed:
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Metadata'
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
       required:
@@ -1007,11 +1115,31 @@ components:
     EngineDescriptor:
       type: object
       properties:
+        delay:
+          default: 1m
+          pattern: '[smdh]$'
+          type: string
+        docsPerSecond:
+          type: integer
         error:
           type: object
+          properties:
+            action:
+              enum:
+                - init
+              type: string
+            message:
+              type: string
+          required:
+            - message
+            - action
         fieldHistoryLength:
           type: integer
         filter:
+          type: string
+        frequency:
+          default: 1m
+          pattern: '[smdh]$'
           type: string
         indexPattern:
           $ref: '#/components/schemas/IndexPattern'
@@ -1021,6 +1149,12 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/EngineStatus'
+        timeout:
+          default: 180s
+          pattern: '[smdh]$'
+          type: string
+        timestampField:
+          type: string
         type:
           $ref: '#/components/schemas/EntityType'
       required:
@@ -1028,6 +1162,13 @@ components:
         - indexPattern
         - status
         - fieldHistoryLength
+    EngineMetadata:
+      type: object
+      properties:
+        Type:
+          type: string
+      required:
+        - Type
     EngineStatus:
       enum:
         - installing
@@ -1041,6 +1182,7 @@ components:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
+        - $ref: '#/components/schemas/GenericEntity'
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1135,8 +1277,42 @@ components:
         - user
         - host
         - service
-        - universal
+        - generic
       type: string
+    GenericEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            category:
+              type: string
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - id
+            - name
+            - type
+      required:
+        - entity
     HostEntity:
       type: object
       properties:
@@ -1153,13 +1329,24 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         host:
           type: object
           properties:
@@ -1198,7 +1385,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - host
         - entity
     IdField:
@@ -1206,7 +1392,7 @@ components:
         - host.name
         - user.name
         - service.name
-        - related.entity
+        - entity.id
       type: string
     IndexPattern:
       type: string
@@ -1227,10 +1413,21 @@ components:
     Interval:
       description: >-
         Interval in which enrich policy runs. For example, `"1h"` means the rule
-        runs every hour.
+        runs every hour. Must be less than or equal to half the duration of the
+        lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
+    Metadata:
+      $ref: '#/components/schemas/TransformStatsMetadata'
+    MonitoringEngineDescriptor:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/EngineStatus'
+      required:
+        - type
+        - status
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -1300,13 +1497,24 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         service:
           type: object
           properties:
@@ -1317,7 +1525,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - service
         - entity
     StoreStatus:
@@ -1340,6 +1547,59 @@ components:
       required:
         - status_code
         - message
+    TransformStatsMetadata:
+      type: object
+      properties:
+        delete_time_in_ms:
+          type: integer
+        documents_deleted:
+          type: integer
+        documents_indexed:
+          type: integer
+        documents_processed:
+          type: integer
+        exponential_avg_checkpoint_duration_ms:
+          type: integer
+        exponential_avg_documents_indexed:
+          type: integer
+        exponential_avg_documents_processed:
+          type: integer
+        index_failures:
+          type: integer
+        index_time_in_ms:
+          type: integer
+        index_total:
+          type: integer
+        pages_processed:
+          type: integer
+        processing_time_in_ms:
+          type: integer
+        processing_total:
+          type: integer
+        search_failures:
+          type: integer
+        search_time_in_ms:
+          type: integer
+        search_total:
+          type: integer
+        trigger_count:
+          type: integer
+      required:
+        - pages_processed
+        - documents_processed
+        - documents_indexed
+        - trigger_count
+        - index_time_in_ms
+        - index_total
+        - index_failures
+        - search_time_in_ms
+        - search_total
+        - search_failures
+        - processing_time_in_ms
+        - processing_total
+        - exponential_avg_checkpoint_duration_ms
+        - exponential_avg_documents_indexed
+        - exponential_avg_documents_processed
     UserEntity:
       type: object
       properties:
@@ -1356,13 +1616,24 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         user:
           type: object
           properties:
@@ -1397,7 +1668,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - user
         - entity
   securitySchemes:

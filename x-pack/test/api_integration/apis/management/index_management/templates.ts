@@ -246,22 +246,31 @@ export default function ({ getService }: FtrProviderContext) {
           await deleteTemplates([{ name: logsdbTemplateName }]);
         });
 
-        const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
-          { enabled: true, indexMode: 'logsdb' },
-          { enabled: false, indexMode: 'standard' },
-          { enabled: null, indexMode: 'standard' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
+        const logsdbSettings: Array<{
+          enabled: boolean | null;
+          prior_logs_usage: boolean;
+          indexMode: string;
+        }> = [
+          { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
+          { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
+          // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
+          { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+          // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+          { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
         ];
 
-        logsdbSettings.forEach(({ enabled, indexMode }) => {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
           it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
             await es.cluster.putSettings({
-              body: {
-                persistent: {
-                  cluster: {
-                    logsdb: {
-                      enabled,
-                    },
+              persistent: {
+                cluster: {
+                  logsdb: {
+                    enabled,
                   },
+                },
+                logsdb: {
+                  prior_logs_usage,
                 },
               },
             });
@@ -509,6 +518,23 @@ export default function ({ getService }: FtrProviderContext) {
 
         // cleanup
         await deleteTemplates([{ name: templateName }]);
+      });
+
+      it('should simulate an index template by name with a related data stream', async () => {
+        const dataStreamName = `test-foo`;
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName);
+
+        await createTemplate({ ...payload, dataStream: {} }).expect(200);
+
+        // Matches index template
+        await es.indices.createDataStream({ name: dataStreamName });
+
+        await simulateTemplateByName(templateName).expect(200);
+
+        // cleanup
+        await deleteTemplates([{ name: templateName }]);
+        await es.indices.deleteDataStream({ name: dataStreamName });
       });
     });
   });

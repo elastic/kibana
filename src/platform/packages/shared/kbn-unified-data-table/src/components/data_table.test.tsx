@@ -10,6 +10,13 @@
 import React, { useCallback, useState } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
+  BUTTON_NEXT_TEST_SUBJ,
+  BUTTON_TEST_SUBJ,
+  COUNTER_TEST_SUBJ,
+  HIGHLIGHT_CLASS_NAME,
+  INPUT_TEST_SUBJ,
+} from '@kbn/data-grid-in-table-search';
+import {
   EuiButton,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -38,7 +45,7 @@ import {
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
@@ -577,16 +584,16 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
-        Object {
-          "columns": Array [
-            Object {
-              "direction": "desc",
-              "id": "message",
-            },
-          ],
-          "onSort": [Function],
-        }
-      `);
+                  Object {
+                    "columns": Array [
+                      Object {
+                        "direction": "desc",
+                        "id": "message",
+                      },
+                    ],
+                    "onSort": [Function],
+                  }
+              `);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -605,20 +612,20 @@ describe('UnifiedDataTable', () => {
         });
 
         expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
-        Object {
-          "columns": Array [
-            Object {
-              "direction": "desc",
-              "id": "bytes",
-            },
-            Object {
-              "direction": "desc",
-              "id": "message",
-            },
-          ],
-          "onSort": [Function],
-        }
-      `);
+                  Object {
+                    "columns": Array [
+                      Object {
+                        "direction": "desc",
+                        "id": "bytes",
+                      },
+                      Object {
+                        "direction": "desc",
+                        "id": "message",
+                      },
+                    ],
+                    "onSort": [Function],
+                  }
+              `);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -626,81 +633,117 @@ describe('UnifiedDataTable', () => {
 
   describe('display settings', () => {
     it(
-      'should include additional display settings if onUpdateSampleSize is provided',
+      'should set allowRowHeight to true if onUpdateRowHeight is provided',
       async () => {
         const component = await getComponent({
           ...getProps(),
-          sampleSizeState: 150,
-          onUpdateSampleSize: jest.fn(),
           onUpdateRowHeight: jest.fn(),
         });
 
         expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
           .toMatchInlineSnapshot(`
-        Object {
-          "additionalControls": null,
-          "showColumnSelector": false,
-          "showDisplaySelector": Object {
-            "additionalDisplaySettings": <React.Fragment>
-              <UnifiedDataTableAdditionalDisplaySettings
-                headerRowHeight="custom"
-                headerRowHeightLines={1}
-                onChangeRowHeight={[Function]}
-                onChangeRowHeightLines={[Function]}
-                onChangeSampleSize={[MockFunction]}
-                rowHeight="custom"
-                rowHeightLines={3}
-                sampleSize={150}
-              />
-            </React.Fragment>,
-            "allowDensity": false,
-            "allowResetButton": false,
-            "allowRowHeight": false,
-          },
-          "showFullScreenSelector": true,
-          "showKeyboardShortcuts": true,
-          "showSortSelector": true,
-        }
-      `);
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "allowDensity": false,
+              "allowResetButton": false,
+              "allowRowHeight": true,
+              "customRender": [Function],
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
       },
       EXTENDED_JEST_TIMEOUT
     );
 
     it(
-      'should not include additional display settings if onUpdateSampleSize is not provided',
+      'should set allowRowHeight to false if onUpdateRowHeight is not provided',
       async () => {
         const component = await getComponent({
           ...getProps(),
-          sampleSizeState: 200,
-          onUpdateRowHeight: jest.fn(),
+          onUpdateSampleSize: jest.fn(),
+          onUpdateRowHeight: undefined,
         });
 
         expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
           .toMatchInlineSnapshot(`
-        Object {
-          "additionalControls": null,
-          "showColumnSelector": false,
-          "showDisplaySelector": Object {
-            "additionalDisplaySettings": <React.Fragment>
-              <UnifiedDataTableAdditionalDisplaySettings
-                headerRowHeight="custom"
-                headerRowHeightLines={1}
-                onChangeRowHeight={[Function]}
-                onChangeRowHeightLines={[Function]}
-                rowHeight="custom"
-                rowHeightLines={3}
-                sampleSize={200}
-              />
-            </React.Fragment>,
-            "allowDensity": false,
-            "allowResetButton": false,
-            "allowRowHeight": false,
-          },
-          "showFullScreenSelector": true,
-          "showKeyboardShortcuts": true,
-          "showSortSelector": true,
-        }
-      `);
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "allowDensity": false,
+              "allowResetButton": false,
+              "allowRowHeight": false,
+              "customRender": [Function],
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should set allowDensity to true if onUpdateDataGridDensity is provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateDataGridDensity: jest.fn(),
+        });
+
+        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
+          .toMatchInlineSnapshot(`
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "allowDensity": true,
+              "allowResetButton": false,
+              "allowRowHeight": true,
+              "customRender": [Function],
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should set allowDensity to false if onUpdateDataGridDensity is not provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          onUpdateSampleSize: jest.fn(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateDataGridDensity: undefined,
+        });
+
+        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
+          .toMatchInlineSnapshot(`
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "allowDensity": false,
+              "allowResetButton": false,
+              "allowRowHeight": true,
+              "customRender": [Function],
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -716,15 +759,15 @@ describe('UnifiedDataTable', () => {
 
         expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
           .toMatchInlineSnapshot(`
-        Object {
-          "additionalControls": null,
-          "showColumnSelector": false,
-          "showDisplaySelector": undefined,
-          "showFullScreenSelector": true,
-          "showKeyboardShortcuts": true,
-          "showSortSelector": true,
-        }
-      `);
+                  Object {
+                    "additionalControls": null,
+                    "showColumnSelector": false,
+                    "showDisplaySelector": undefined,
+                    "showFullScreenSelector": true,
+                    "showKeyboardShortcuts": true,
+                    "showSortSelector": true,
+                  }
+              `);
       },
       EXTENDED_JEST_TIMEOUT
     );
@@ -1459,5 +1502,102 @@ describe('UnifiedDataTable', () => {
 
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
     });
+  });
+
+  describe('enableInTableSearch', () => {
+    it(
+      'should render find-button if enableInTableSearch is true and no custom toolbar specified',
+      async () => {
+        await renderDataTable({ enableInTableSearch: true, columns: ['bytes'] });
+
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should render find-button if enableInTableSearch is true and renderCustomToolbar is provided',
+      async () => {
+        const renderCustomToolbarMock = jest.fn((props) => {
+          return (
+            <div data-test-subj="custom-toolbar">
+              Custom layout {props.gridProps.inTableSearchControl}
+            </div>
+          );
+        });
+
+        await renderDataTable({
+          enableInTableSearch: true,
+          columns: ['bytes'],
+          renderCustomToolbar: renderCustomToolbarMock,
+        });
+
+        expect(screen.getByTestId('custom-toolbar')).toBeInTheDocument();
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should not render find-button if enableInTableSearch is false',
+      async () => {
+        await renderDataTable({ enableInTableSearch: false, columns: ['bytes'] });
+
+        expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should find the search term in the table',
+      async () => {
+        await renderDataTable({ enableInTableSearch: true, columns: ['bytes'] });
+
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+
+        screen.getByTestId(BUTTON_TEST_SUBJ).click();
+
+        expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeInTheDocument();
+
+        const searchTerm = '50';
+        const input = screen.getByTestId(INPUT_TEST_SUBJ);
+        fireEvent.change(input, { target: { value: searchTerm } });
+        expect(input).toHaveValue(searchTerm);
+
+        await waitFor(() => {
+          // 3 results for `bytes` column with value `50`
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
+        });
+
+        await waitFor(() => {
+          const highlights = screen.getAllByText(searchTerm);
+          expect(highlights.length).toBeGreaterThan(0);
+          expect(
+            highlights.every(
+              (highlight) =>
+                highlight.tagName === 'MARK' && highlight.classList.contains(HIGHLIGHT_CLASS_NAME)
+            )
+          ).toBe(true);
+        });
+
+        screen.getByTestId(BUTTON_NEXT_TEST_SUBJ).click();
+
+        await waitFor(() => {
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('2/3');
+        });
+
+        const anotherSearchTerm = 'random';
+        fireEvent.change(screen.getByTestId(INPUT_TEST_SUBJ), {
+          target: { value: anotherSearchTerm },
+        });
+        expect(screen.getByTestId(INPUT_TEST_SUBJ)).toHaveValue(anotherSearchTerm);
+
+        await waitFor(() => {
+          // no results
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('0/0');
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 });

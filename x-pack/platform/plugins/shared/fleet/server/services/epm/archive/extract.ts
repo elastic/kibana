@@ -16,13 +16,19 @@ import type { ArchiveEntry } from '../../../../common/types';
 export async function untarBuffer(
   buffer: Buffer,
   filter = (entry: ArchiveEntry): boolean => true,
-  onEntry = async (entry: ArchiveEntry): Promise<void> => {}
+  onEntry = async (entry: ArchiveEntry): Promise<void> => {},
+  shouldReadBuffer?: (path: string) => boolean
 ) {
   const deflatedStream = bufferToStream(buffer);
   // use tar.list vs .extract to avoid writing to disk
   const inflateStream = tar.list().on('entry', (entry) => {
     const path = entry.path || '';
     if (!filter({ path })) return;
+
+    if (shouldReadBuffer && !shouldReadBuffer(path)) {
+      return onEntry({ path }).catch(() => {});
+    }
+
     streamToBuffer(entry as unknown as NodeJS.ReadableStream)
       .then((entryBuffer) => onEntry({ buffer: entryBuffer, path }))
       .catch(() => {});
@@ -36,7 +42,8 @@ export async function untarBuffer(
 export async function unzipBuffer(
   buffer: Buffer,
   filter = (entry: ArchiveEntry): boolean => true,
-  onEntry = async (entry: ArchiveEntry): Promise<void> => {}
+  onEntry = async (entry: ArchiveEntry): Promise<void> => {},
+  shouldReadBuffer?: (path: string) => boolean
 ): Promise<unknown> {
   const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
@@ -45,6 +52,9 @@ export async function unzipBuffer(
     if (!filter({ path })) return zipfile.readEntry();
 
     try {
+      if (shouldReadBuffer && !shouldReadBuffer(path)) {
+        return onEntry({ path });
+      }
       const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
       await onEntry({ buffer: entryBuffer, path });
     } finally {

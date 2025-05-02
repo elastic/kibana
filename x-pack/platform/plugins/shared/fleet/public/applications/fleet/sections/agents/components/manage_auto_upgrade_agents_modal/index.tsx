@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -30,10 +29,12 @@ import { useGetAgentsAvailableVersionsQuery, useStartServices } from '../../../.
 import { checkTargetVersionsValidity } from '../../../../../../../common/services';
 import { sendUpdateAgentPolicyForRq } from '../../../../../../hooks/use_request/agent_policy';
 
+import { StatusColumn } from './status_column';
+
 export interface ManageAutoUpgradeAgentsModalProps {
   onClose: (refreshPolicy: boolean) => void;
   agentPolicy: AgentPolicy;
-  agentCount: number;
+  agentCount?: number;
 }
 
 export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
@@ -56,6 +57,8 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
         name: agentPolicy.name,
         namespace: agentPolicy.namespace,
         required_versions: targetVersions,
+        // required_versions are not sent to agents, so no need to bump revision
+        bumpRevision: false,
       });
       notifications.toasts.addSuccess(
         i18n.translate('xpack.fleet.manageAutoUpgradeAgents.successNotificationTitle', {
@@ -114,21 +117,6 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          {agentCount > 0 ? (
-            <>
-              <EuiCallOut
-                iconType="iInCircle"
-                title={i18n.translate('xpack.fleet.manageAutoUpgradeAgents.calloutTitle', {
-                  defaultMessage:
-                    'This action will update {agentCount, plural, one {# agent} other {# agents}}',
-                  values: {
-                    agentCount,
-                  },
-                })}
-              />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
           <FormattedMessage
             id="xpack.fleet.manageAutoUpgradeAgents.descriptionText"
             defaultMessage="Add the target agent version for automatic upgrades."
@@ -152,6 +140,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
                       )
                     );
                   }}
+                  agentPolicyId={agentPolicy.id}
                 />
                 <EuiSpacer size="s" />
               </>
@@ -189,7 +178,8 @@ const TargetVersionsRow: React.FunctionComponent<{
   requiredVersion: AgentTargetVersion;
   onRemove: () => void;
   onUpdate: (version: string, percentage: number) => void;
-}> = ({ agentsAvailableVersions, requiredVersion, onRemove, onUpdate }) => {
+  agentPolicyId: string;
+}> = ({ agentsAvailableVersions, requiredVersion, onRemove, onUpdate, agentPolicyId }) => {
   const options = agentsAvailableVersions.map((version) => ({
     value: version,
     inputDisplay: version,
@@ -208,8 +198,8 @@ const TargetVersionsRow: React.FunctionComponent<{
   };
 
   return (
-    <EuiFlexGroup direction="row" alignItems="flexEnd">
-      <EuiFlexItem>
+    <EuiFlexGroup direction="row" alignItems="stretch">
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           label={
             <>
@@ -240,7 +230,7 @@ const TargetVersionsRow: React.FunctionComponent<{
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           label={
             <>
@@ -250,11 +240,12 @@ const TargetVersionsRow: React.FunctionComponent<{
               />
               <EuiIconTip
                 type="iInCircle"
+                title={'Rounding Applied'}
                 content={
                   <FormattedMessage
                     data-test-subj="percentageTooltip"
                     id="xpack.fleet.manageAutoUpgradeAgents.percentageTooltip"
-                    defaultMessage="Set 100 to upgrade all agents in the policy."
+                    defaultMessage="The actual percentage of agents upgraded may vary slightly due to rounding. For example, selecting 30% of 25 agents may result in 8 agents being upgraded (32%)."
                   />
                 }
               />
@@ -276,6 +267,18 @@ const TargetVersionsRow: React.FunctionComponent<{
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.fleet.manageAutoUpgradeAgents.statusTitle"
+              defaultMessage="Status"
+            />
+          }
+        >
+          <StatusColumn agentPolicyId={agentPolicyId} version={version} percentage={percentage} />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem style={{ 'align-self': 'end' }}>
         <EuiFormRow label="">
           <EuiButton onClick={onRemove} color="text">
             <FormattedMessage

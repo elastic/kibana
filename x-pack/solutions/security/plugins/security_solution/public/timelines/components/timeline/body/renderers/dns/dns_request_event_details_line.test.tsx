@@ -10,6 +10,7 @@ import React from 'react';
 import { TestProviders } from '../../../../../../common/mock';
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -21,13 +22,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('DnsRequestEventDetailsLine', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   const mount = useMountAppended();
 
   test('it renders the expected text when all properties are provided', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -54,6 +69,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName={undefined}
           dnsQuestionType="[dnsQuestionType]"
@@ -80,6 +96,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType={undefined}
@@ -106,6 +123,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -132,6 +150,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -158,6 +177,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -184,6 +204,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -210,6 +231,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -236,6 +258,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -262,6 +285,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -288,6 +312,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -314,6 +339,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -340,6 +366,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -366,6 +393,7 @@ describe('DnsRequestEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           dnsQuestionName="[dnsQuestionName]"
           dnsQuestionType="[dnsQuestionType]"
@@ -385,6 +413,37 @@ describe('DnsRequestEventDetailsLine', () => {
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)'
+    );
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <DnsRequestEventDetailsLine
+          scopeId="some_scope"
+          contextId="test"
+          dnsQuestionName="[dnsQuestionName]"
+          dnsQuestionType="[dnsQuestionType]"
+          dnsResolvedIp="[dnsResolvedIp]"
+          dnsResponseCode="[dnsResponseCode]"
+          eventCode={null}
+          hostName="[hostName]"
+          id="1"
+          processExecutable="[processExecutable]"
+          processName="[processName]"
+          processPid={123}
+          userDomain="[userDomain]"
+          userName="[userName]"
+          winlogEventId={undefined}
+        />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
     );
   });
 });

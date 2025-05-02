@@ -13,7 +13,6 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
 import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
@@ -27,6 +26,7 @@ import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_mo
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
+import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -34,12 +34,11 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
-  useInitSourcerer(getScopeFromPath(pathname));
+  const { browserFields } = useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
-
-  const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
+  useInitDataViewManager();
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between

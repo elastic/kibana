@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './app.scss';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
@@ -13,6 +12,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { css } from '@emotion/react';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
 import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
@@ -201,7 +201,7 @@ export function App({
   useEffect(() => {
     onAppLeave((actions) => {
       if (
-        application.capabilities.visualize.save &&
+        application.capabilities.visualize_v2.save &&
         !isLensEqualWrapper(persistedDoc) &&
         (isSaveable || persistedDoc)
       ) {
@@ -227,7 +227,7 @@ export function App({
     lastKnownDoc,
     isSaveable,
     persistedDoc,
-    application.capabilities.visualize.save,
+    application.capabilities.visualize_v2.save,
     data.query.filterManager,
     datasourceMap,
     visualizationMap,
@@ -437,7 +437,18 @@ export function App({
 
   return (
     <>
-      <div className="lnsApp" data-test-subj="lnsApp" role="main">
+      <div
+        data-test-subj="lnsApp"
+        className="lnsApp"
+        role="main"
+        css={css`
+          flex: 1 1 auto;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          overflow: hidden;
+        `}
+      >
         <LensTopNavMenu
           initialInput={initialInput}
           redirectToOrigin={redirectToOrigin}

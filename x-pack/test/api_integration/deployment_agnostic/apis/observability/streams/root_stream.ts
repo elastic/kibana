@@ -6,21 +6,23 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import { get } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { disableStreams, enableStreams, putStream } from './helpers/requests';
+import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 
-const rootStreamDefinition: WiredStreamDefinition = {
+const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
+  description: '',
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
-    routing: [],
     wired: {
+      routing: [],
       fields: {
         '@timestamp': {
           type: 'date',
@@ -34,6 +36,9 @@ const rootStreamDefinition: WiredStreamDefinition = {
         'log.level': {
           type: 'keyword',
         },
+        'stream.name': {
+          type: 'system',
+        },
       },
     },
   },
@@ -42,6 +47,7 @@ const rootStreamDefinition: WiredStreamDefinition = {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
+  const esClient = getService('es');
 
   describe('Root stream', () => {
     before(async () => {
@@ -54,9 +60,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Should not allow processing changes', async () => {
-      const body: IngestStreamUpsertRequest = {
+      const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             processing: [
@@ -74,19 +82,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property(
-        'message',
+      expect(response).to.have.property('message', 'Desired stream state is invalid');
+
+      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
         'Root stream processing rules cannot be changed'
       );
     });
 
     it('Should not allow fields changes', async () => {
-      const body: IngestStreamUpsertRequest = {
+      const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
+              ...rootStreamDefinition.ingest.wired,
               fields: {
                 ...rootStreamDefinition.ingest.wired.fields,
                 'log.level': {
@@ -98,30 +110,55 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property('message', 'Root stream fields cannot be changed');
+
+      expect(response).to.have.property('message', 'Desired stream state is invalid');
+
+      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
+        'Root stream fields cannot be changed'
+      );
     });
 
     it('Should allow routing changes', async () => {
-      const body: IngestStreamUpsertRequest = {
+      const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
-            routing: [
-              {
-                destination: 'logs.gcpcloud',
-                if: {
-                  field: 'cloud.provider',
-                  operator: 'eq',
-                  value: 'gcp',
+            wired: {
+              ...rootStreamDefinition.ingest.wired,
+              routing: [
+                {
+                  destination: 'logs.gcpcloud',
+                  if: {
+                    field: 'cloud.provider',
+                    operator: 'eq',
+                    value: 'gcp',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       };
       const response = await putStream(apiClient, 'logs', body);
       expect(response).to.have.property('acknowledged', true);
+    });
+
+    it('Should not allow sending data directly to a child stream', async () => {
+      const doc = {
+        '@timestamp': '2024-01-01T00:00:20.000Z',
+        message: 'test',
+      };
+      let threw = false;
+      try {
+        await indexDocument(esClient, 'logs.gcpcloud', doc);
+      } catch (e) {
+        threw = true;
+        expect(e.message).to.contain('stream.name is not set properly');
+      }
+      expect(threw).to.be(true);
     });
   });
 }

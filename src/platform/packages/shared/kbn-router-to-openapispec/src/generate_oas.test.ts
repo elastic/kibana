@@ -8,6 +8,7 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
+import { get } from 'lodash';
 import { generateOpenApiDocument } from './generate_oas';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 import {
@@ -23,7 +24,7 @@ interface RecursiveType {
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
-    it('generates the expected OpenAPI document for the shared schema', () => {
+    it('generates the expected OpenAPI document for the shared schema', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter: {
@@ -34,7 +35,7 @@ describe('generateOpenApiDocument', () => {
         bodySchema: createSharedConfigSchema(),
       });
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers,
             versionedRouters,
@@ -48,7 +49,7 @@ describe('generateOpenApiDocument', () => {
       ).toEqual(sharedOas);
     });
 
-    it('generates the expected OpenAPI document', () => {
+    it('generates the expected OpenAPI document', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter: {
@@ -73,14 +74,22 @@ describe('generateOpenApiDocument', () => {
               {
                 method: 'post',
                 path: '/no-xsrf/{id}/{path*}',
-                options: { access: 'public', options: { xsrfRequired: false } },
+                options: {
+                  access: 'public',
+                  options: { xsrfRequired: false },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
               },
             ],
           },
         },
       });
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers,
             versionedRouters,
@@ -94,7 +103,7 @@ describe('generateOpenApiDocument', () => {
       ).toMatchSnapshot();
     });
 
-    it('generates references in the expected format', () => {
+    it('generates references in the expected format', async () => {
       const sharedIdSchema = schema.string({ minLength: 1, meta: { description: 'test' } });
       const sharedNameSchema = schema.string({ minLength: 1 });
       const otherSchema = schema.object(
@@ -102,7 +111,7 @@ describe('generateOpenApiDocument', () => {
         { meta: { id: 'foo' } }
       );
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers: [
               createRouter({
@@ -139,7 +148,7 @@ describe('generateOpenApiDocument', () => {
       ).toMatchSnapshot();
     });
 
-    it('handles recursive schemas', () => {
+    it('handles recursive schemas', async () => {
       const id = 'recursive';
       const recursiveSchema: Type<RecursiveType> = schema.object(
         {
@@ -149,7 +158,7 @@ describe('generateOpenApiDocument', () => {
         { meta: { id } }
       );
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers: [
               createRouter({
@@ -187,7 +196,7 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('Zod', () => {
-    it('generates the expected OpenAPI document for the shared schema', () => {
+    it('generates the expected OpenAPI document for the shared schema', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
@@ -195,7 +204,7 @@ describe('generateOpenApiDocument', () => {
       });
 
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers,
             versionedRouters,
@@ -211,9 +220,9 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('unknown schema/validation', () => {
-    it('produces the expected output', () => {
+    it('produces the expected output', async () => {
       expect(
-        generateOpenApiDocument(
+        await generateOpenApiDocument(
           {
             routers: [
               createRouter({
@@ -246,7 +255,14 @@ describe('generateOpenApiDocument', () => {
                     method: 'get',
                     path: '/test',
                     isVersioned: true,
-                    options: { access: 'public' },
+                    options: {
+                      access: 'public',
+                      security: {
+                        authz: {
+                          requiredPrivileges: ['foo'],
+                        },
+                      },
+                    },
                     handlers: [
                       {
                         fn: jest.fn(),
@@ -275,7 +291,7 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('tags', () => {
-    it('handles tags as expected', () => {
+    it('handles tags as expected', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter1: {
@@ -297,24 +313,51 @@ describe('generateOpenApiDocument', () => {
         versionedRouters: {
           testVersionedRouter1: {
             routes: [
-              { path: '/v1-1', options: { access: 'public', options: { tags: ['oas-tag:v1'] } } },
+              {
+                path: '/v1-1',
+                options: {
+                  access: 'public',
+                  options: { tags: ['oas-tag:v1'] },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
               {
                 path: '/v1-2',
                 options: {
                   access: 'public',
                   options: { tags: ['foo', 'bar', 'oas-tag:v2', 'oas-tag:v3'] },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
             ],
           },
           testVersionedRouter2: {
             routes: [
-              { path: '/v2-1', options: { access: 'public', options: { tags: undefined } } },
+              {
+                path: '/v2-1',
+                options: {
+                  access: 'public',
+                  options: { tags: undefined },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
       });
-      const result = generateOpenApiDocument(
+      const result = await generateOpenApiDocument(
         {
           routers,
           versionedRouters,
@@ -337,7 +380,7 @@ describe('generateOpenApiDocument', () => {
   });
 
   describe('availability', () => {
-    it('creates the expected availability entries', () => {
+    it('creates the expected availability entries', async () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: {
           testRouter1: {
@@ -368,6 +411,11 @@ describe('generateOpenApiDocument', () => {
                 options: {
                   access: 'public',
                   options: { availability: { stability: 'experimental' } },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
               {
@@ -375,6 +423,11 @@ describe('generateOpenApiDocument', () => {
                 options: {
                   access: 'public',
                   options: { availability: { stability: 'beta' } },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
               {
@@ -382,16 +435,33 @@ describe('generateOpenApiDocument', () => {
                 options: {
                   access: 'public',
                   options: { availability: { stability: 'stable' } },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
             ],
           },
           testVersionedRouter2: {
-            routes: [{ path: '/v2-1', options: { access: 'public' } }],
+            routes: [
+              {
+                path: '/v2-1',
+                options: {
+                  access: 'public',
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
+            ],
           },
         },
       });
-      const result = generateOpenApiDocument(
+      const result = await generateOpenApiDocument(
         {
           routers,
           versionedRouters,
@@ -432,6 +502,91 @@ describe('generateOpenApiDocument', () => {
       expect(result.paths['/v2-1']!.get).not.toMatchObject({
         'x-state': expect.any(String),
       });
+    });
+  });
+
+  it('merges operation objects', async () => {
+    const oasOperationObject = () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              fooExample: {
+                value: 999,
+              },
+            },
+          },
+        },
+      },
+    });
+    const [routers, versionedRouters] = createTestRouters({
+      routers: {
+        testRouter: {
+          routes: [
+            {
+              method: 'get',
+              options: {
+                access: 'public',
+                oasOperationObject,
+              },
+            },
+            { method: 'post' },
+          ],
+        },
+      },
+      versionedRouters: {
+        testVersionedRouter: {
+          routes: [
+            {
+              options: {
+                access: 'public',
+                security: {
+                  authz: {
+                    requiredPrivileges: ['foo'],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      bodySchema: createSharedConfigSchema(),
+    });
+
+    versionedRouters[0].getRoutes()[0].handlers[0].options!.options!.oasOperationObject =
+      oasOperationObject;
+
+    const oas = await generateOpenApiDocument(
+      { routers, versionedRouters },
+      {
+        title: 'test',
+        baseUrl: 'https://test.oas',
+        version: '99.99.99',
+      }
+    );
+
+    expect(
+      get(oas, [
+        'paths',
+        '/foo/{id}/{path}',
+        'get',
+        'requestBody',
+        'content',
+        'application/json',
+        'examples',
+      ])
+    ).toEqual({
+      fooExample: {
+        value: 999,
+      },
+    });
+
+    expect(
+      get(oas, ['paths', '/bar', 'get', 'requestBody', 'content', 'application/json', 'examples'])
+    ).toEqual({
+      fooExample: {
+        value: 999,
+      },
     });
   });
 });

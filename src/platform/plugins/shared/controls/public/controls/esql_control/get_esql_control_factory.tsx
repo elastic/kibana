@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
-import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { ESQLControlState } from '@kbn/esql/public';
+import { apiPublishesESQLVariables, type ESQLControlState } from '@kbn/esql-types';
+import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlApi } from './types';
 import { ControlFactory } from '../types';
@@ -36,11 +36,17 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const defaultControl = initializeDefaultControlApi(initialState);
       const selections = initializeESQLControlSelections(initialState);
 
+      const closeOverlay = () => {
+        if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
+          controlGroupApi.parentApi.clearOverlays();
+        }
+      };
       const onSaveControl = (updatedState: ESQLControlState) => {
         controlGroupApi?.replacePanel(uuid, {
           panelType: 'esqlControl',
           initialState: updatedState,
         });
+        closeOverlay();
       };
 
       const api = buildApi(
@@ -65,6 +71,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 controlType: initialState.controlType,
                 esqlVariables: variablesInParent,
                 onSaveControl,
+                onCancelControl: closeOverlay,
                 initialState: state,
               });
             } catch (e) {
@@ -87,9 +94,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               },
               references: [],
             };
-          },
-          clearSelections: () => {
-            // do nothing, not allowed for now;
           },
         },
         {

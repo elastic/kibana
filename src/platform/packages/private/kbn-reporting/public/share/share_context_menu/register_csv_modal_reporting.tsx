@@ -11,29 +11,35 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-
-import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
-
-import type { SearchSourceFields } from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
-import { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
+import { ShareContext, type ExportShare } from '@kbn/share-plugin/public';
+import { LocatorParams } from '@kbn/reporting-common/types';
+import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 
-export const reportingCsvShareProvider = ({
+export const reportingCsvExportProvider = ({
   apiClient,
   application,
   license,
   startServices$,
-}: ExportModalShareOpts) => {
-  const getShareMenuItems = ({ objectType, sharingData, toasts }: ShareContext) => {
-    if ('search' !== objectType) {
-      return [];
-    }
+}: ExportModalShareOpts): ExportShare => {
+  const getShareMenuItems = ({
+    objectType,
+    sharingData,
+    toasts,
+  }: ShareContext): ReturnType<ExportShare['config']> => {
+    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
+    const licenseToolTipContent = licenseCheck.message;
+    const licenseHasCsvReporting = licenseCheck.showLinks;
+    const licenseDisabled = !licenseCheck.enableLinks;
 
-    // only csv v2 supports esql (isTextBased) reports
-    // TODO: whole csv reporting should move to v2 https://github.com/elastic/kibana/issues/151190
-    const reportType = sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE;
+    const capabilityHasCsvReporting = application.capabilities.discover_v2?.generateCsv === true;
+
+    if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
+      return null;
+    }
 
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
@@ -41,25 +47,20 @@ export const reportingCsvShareProvider = ({
     }: {
       addGlobalTimeFilter?: boolean;
       absoluteTime?: boolean;
-    }) => SearchSourceFields;
+    }) => SerializedSearchSourceFields;
 
-    const jobParams = {
-      title: sharingData.title as string,
-      objectType,
-    };
-
-    const getJobParams = (forShareUrl?: boolean) => {
-      if (reportType === CSV_JOB_TYPE_V2) {
+    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams => {
+      if (sharingData.isTextBased) {
         // csv v2 uses locator params
         return {
-          ...jobParams,
-          locatorParams: sharingData.locatorParams as [Record<string, unknown>],
+          isEsqlMode: true,
+          locatorParams: sharingData.locatorParams as LocatorParams[],
         };
       }
 
       // csv v1 uses search source and columns
       return {
-        ...jobParams,
+        isEsqlMode: false,
         columns: sharingData.columns as string[] | undefined,
         searchSource: getSearchSource({
           addGlobalTimeFilter: true,
@@ -68,17 +69,13 @@ export const reportingCsvShareProvider = ({
       };
     };
 
-    const shareActions: ShareMenuItemV2[] = [];
-
-    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-    const licenseToolTipContent = licenseCheck.message;
-    const licenseHasCsvReporting = licenseCheck.showLinks;
-    const licenseDisabled = !licenseCheck.enableLinks;
-
-    const capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
-
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
-      const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
+      const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+        apiClient,
+        searchModeParams: getSearchModeParams(false),
+        title: sharingData.title as string,
+      });
+
       return apiClient
         .createReportingShareJob(reportType, decoratedJobParams)
         .then(() => firstValueFrom(startServices$))
@@ -125,63 +122,50 @@ export const reportingCsvShareProvider = ({
         });
     };
 
-    if (licenseHasCsvReporting && capabilityHasCsvReporting) {
-      const panelTitle = i18n.translate(
-        'reporting.share.contextMenu.export.csvReportsButtonLabel',
-        {
-          defaultMessage: 'Export',
-        }
-      );
+    const panelTitle = i18n.translate('reporting.share.contextMenu.export.csvReportsButtonLabel', {
+      defaultMessage: 'Export',
+    });
 
-      const reportingUrl = new URL(window.location.origin);
+    const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+      apiClient,
+      searchModeParams: getSearchModeParams(true),
+      title: sharingData.title as string,
+    });
 
-      const relativePath = apiClient.getReportingPublicJobPath(
-        reportType,
-        apiClient.getDecoratedJobParams(getJobParams(true))
-      );
+    const relativePath = apiClient.getReportingPublicJobPath(reportType, decoratedJobParams);
 
-      const absoluteUrl = new URL(relativePath, window.location.href).toString();
+    const absoluteUrl = new URL(relativePath, window.location.href).toString();
 
-      shareActions.push({
-        shareMenuItem: {
-          name: panelTitle,
-          toolTipContent: licenseToolTipContent,
-          disabled: licenseDisabled,
-          ['data-test-subj']: 'Export',
-        },
-        helpText: (
-          <FormattedMessage
-            id="reporting.share.csv.reporting.helpTextCSV"
-            defaultMessage="Export a CSV of this {objectType}."
-            values={{ objectType }}
-          />
-        ),
-        reportType,
-        label: 'CSV',
-        copyURLButton: {
-          id: 'reporting.share.modalContent.csv.copyUrlButtonLabel',
-          dataTestSubj: 'shareReportingCopyURL',
-          label: 'Post URL',
-        },
-        generateExportButton: (
-          <FormattedMessage
-            id="reporting.share.generateButtonLabelCSV"
-            data-test-subj="generateReportButton"
-            defaultMessage="Generate CSV"
-          />
-        ),
-        generateExport: generateReportingJobCSV,
-        generateExportUrl: () => absoluteUrl,
-        generateCopyUrl: reportingUrl,
-        renderCopyURLButton: true,
-      });
-    }
-
-    return shareActions;
+    return {
+      name: panelTitle,
+      toolTipContent: licenseToolTipContent,
+      exportType: reportType,
+      label: 'CSV',
+      disabled: licenseDisabled,
+      generateAssetExport: generateReportingJobCSV,
+      generateAssetURIValue: () => absoluteUrl,
+      helpText: (
+        <FormattedMessage
+          id="reporting.share.csv.reporting.helpTextCSV"
+          defaultMessage="Export a CSV of this {objectType}."
+          values={{ objectType }}
+        />
+      ),
+      generateExportButton: (
+        <FormattedMessage
+          id="reporting.share.generateButtonLabelCSV"
+          data-test-subj="generateReportButton"
+          defaultMessage="Generate CSV"
+        />
+      ),
+      renderCopyURIButton: true,
+    };
   };
 
   return {
+    shareType: 'integration',
     id: 'csvReportsModal',
-    getShareMenuItems,
+    groupId: 'export',
+    config: getShareMenuItems,
   };
 };

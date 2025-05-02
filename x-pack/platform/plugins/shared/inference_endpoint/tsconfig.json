@@ -17,5 +17,7 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/config-schema",
+    "@kbn/safer-lodash-set",
   ]
 }

@@ -7,8 +7,9 @@
 
 import { useMemo } from 'react';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import moment from 'moment';
+import { withAttrs } from '../../../utils/theme_utils/with_attrs';
 import { TextScale } from '../../../../common/log_text_scale';
 import {
   LogColumnRenderConfiguration,
@@ -30,24 +31,30 @@ export interface LogEntryColumnProps {
   shrinkWeight: number;
 }
 
-export const LogEntryColumn = euiStyled.div.attrs((props) => ({
-  role: props.role ?? 'cell',
-}))<LogEntryColumnProps>`
-  align-items: stretch;
-  display: flex;
-  flex-basis: ${(props) => props.baseWidth || '0%'};
-  flex-direction: row;
-  flex-grow: ${(props) => props.growWeight || 0};
-  flex-shrink: ${(props) => props.shrinkWeight || 0};
-  overflow: hidden;
-`;
+export const LogEntryColumn = withAttrs(
+  styled.div<LogEntryColumnProps>`
+    align-items: stretch;
+    display: flex;
+    flex-basis: ${(props) => props.baseWidth || '0%'};
+    flex-direction: row;
+    flex-grow: ${(props) => props.growWeight || 0};
+    flex-shrink: ${(props) => props.shrinkWeight || 0};
+    overflow: hidden;
+  `,
+  (props) => ({
+    role: props.props.role ?? 'cell',
+  })
+);
 
-export const LogEntryColumnContent = euiStyled.div.attrs({
-  'data-test-subj': 'LogEntryColumnContent',
-})`
-  flex: 1 0 0%;
-  padding: 2px ${COLUMN_PADDING}px;
-`;
+export const LogEntryColumnContent = withAttrs(
+  styled.div`
+    flex: 1 0 0%;
+    padding: 2px ${COLUMN_PADDING}px;
+  `,
+  () => ({
+    'data-test-subj': 'LogEntryColumnContent',
+  })
+);
 
 export type LogEntryColumnWidth = Pick<
   LogEntryColumnProps,

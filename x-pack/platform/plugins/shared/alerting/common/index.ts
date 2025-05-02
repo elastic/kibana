@@ -45,6 +45,7 @@ export type {
   RuleSystemActionKey,
   SanitizedRuleConfig,
   RuleMonitoringLastRunMetrics,
+  Artifacts,
 } from './rule';
 export {
   RuleExecutionStatusValues,
@@ -149,6 +150,7 @@ export {
   executionLogSortableColumns,
   actionErrorLogSortableColumns,
   EMPTY_EXECUTION_KPI_RESULT,
+  EMPTY_EXECUTION_SUMMARY_RESULT,
 } from './execution_log_types';
 export type { RuleSnoozeSchedule, RuleSnooze } from './rule_snooze_type';
 export type { RRuleParams, RRuleRecord } from './rrule_type';
@@ -173,6 +175,7 @@ export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
+export { gapStatus } from './constants';
 
 export type {
   MaintenanceWindowModificationMetadata,
@@ -208,6 +211,9 @@ export {
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
+export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
+
+// Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
 export const INTERNAL_ALERTING_SNOOZE_RULE =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze` as const;
@@ -226,6 +232,31 @@ export const INTERNAL_ALERTING_BACKFILL_FIND_API_PATH =
 export const INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH =
   `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule` as const;
 
+export const INTERNAL_ALERTING_GAPS_API_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/gaps` as const;
+
+export const INTERNAL_ALERTING_GAPS_FIND_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_find` as const;
+
+export const INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_get_rules` as const;
+
+export const INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_get_gaps_summary_by_rule_ids` as const;
+
+export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
+
+export const INTERNAL_ALERTING_GET_GLOBAL_RULE_EXECUTION_SUMMARY_API_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_summary` as const;
+
+// External
+export const ARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_archive`;
+export const UNARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_unarchive`;
+export const CREATE_MAINTENANCE_WINDOW_API_PATH = BASE_MAINTENANCE_WINDOW_API_PATH;
+export const GET_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
+export const UPDATE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
+export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
+
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;
-export const ENABLE_MAINTENANCE_WINDOWS = true;

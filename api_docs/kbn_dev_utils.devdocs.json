@@ -31,7 +31,7 @@
         "signature": [
           "(expected: string, received: string) => string | undefined"
         ],
-        "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/diff_strings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,7 +60,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-dev-utils/src/diff_strings.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -81,7 +81,7 @@
         "signature": [
           "({\n  archivePath,\n  targetDir,\n  stripComponents = 0,\n  setModifiedTimes,\n}: Options) => Promise<void>"
         ],
-        "path": "packages/kbn-dev-utils/src/extract.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/extract.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,7 +95,7 @@
             "signature": [
               "Options"
             ],
-            "path": "packages/kbn-dev-utils/src/extract.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/extract.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,7 +121,7 @@
             "text": "AxiosRequestError"
           }
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,7 +135,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -162,7 +162,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -176,7 +176,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -195,7 +195,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-dev-utils/src/plugin_list/run_plugin_list_cli.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/plugin_list/run_plugin_list_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -218,7 +218,7 @@
           "ChildProcess",
           "; }"
         ],
-        "path": "packages/kbn-dev-utils/src/worker/index.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/worker/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,7 +232,7 @@
             "signature": [
               "StartTSWorkerArgs"
             ],
-            "path": "packages/kbn-dev-utils/src/worker/index.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/worker/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -258,7 +258,7 @@
           " | null> | null) => ",
           "Transform"
         ],
-        "path": "packages/kbn-dev-utils/src/streams.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/streams.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -276,7 +276,7 @@
               "node_modules/@types/vinyl/index",
               " | null> | null"
             ],
-            "path": "packages/kbn-dev-utils/src/streams.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/streams.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -306,7 +306,7 @@
           "AxiosError",
           "<unknown, any>"
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -320,7 +320,7 @@
             "signature": [
               "undefined"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -346,7 +346,7 @@
           "AxiosError",
           "<unknown, any>"
         ],
-        "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -361,7 +361,7 @@
               "AxiosResponse",
               "<T, any>"
             ],
-            "path": "packages/kbn-dev-utils/src/axios/errors.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -378,7 +378,7 @@
         "tags": [],
         "label": "CA_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -393,7 +393,7 @@
         "signature": [
           "\"F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -405,7 +405,7 @@
         "tags": [],
         "label": "ES_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -417,7 +417,7 @@
         "tags": [],
         "label": "ES_EMPTYPASSWORD_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -429,7 +429,7 @@
         "tags": [],
         "label": "ES_KEY_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -441,7 +441,7 @@
         "tags": [],
         "label": "ES_NOPASSWORD_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -456,7 +456,7 @@
         "signature": [
           "\"storepass\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -468,7 +468,7 @@
         "tags": [],
         "label": "ES_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -480,7 +480,7 @@
         "tags": [],
         "label": "FLEET_SERVER_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -492,7 +492,7 @@
         "tags": [],
         "label": "FLEET_SERVER_KEY_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -507,7 +507,7 @@
         "signature": [
           "\"storepass\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -519,7 +519,7 @@
         "tags": [],
         "label": "FLEET_SERVER_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -531,7 +531,7 @@
         "tags": [],
         "label": "KBN_CERT_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -543,7 +543,7 @@
         "tags": [],
         "label": "KBN_KEY_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -558,7 +558,7 @@
         "signature": [
           "\"storepass\""
         ],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -570,7 +570,7 @@
         "tags": [],
         "label": "KBN_P12_PATH",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/certs.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -584,7 +584,7 @@
         "tags": [],
         "label": "fleetServerDevServiceAccount",
         "description": [],
-        "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -595,7 +595,7 @@
             "tags": [],
             "label": "token",
             "description": [],
-            "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -609,9 +609,9 @@
         "tags": [],
         "label": "kibanaDevServiceAccount",
         "description": [
-          "\n`kibana-dev` service account token for connecting to ESS\nSee packages/kbn-es/src/serverless_resources/README.md"
+          "\n`kibana-dev` service account token for connecting to ESS\nSee src/platform/packages/shared/kbn-es/src/serverless_resources/README.md"
         ],
-        "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+        "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -622,7 +622,7 @@
             "tags": [],
             "label": "token",
             "description": [],
-            "path": "packages/kbn-dev-utils/src/dev_service_account.ts",
+            "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -44,40 +44,38 @@ export const buildHostsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggregations: {
-        ...agg,
-        host_data: {
-          terms: { size: querySize, field: 'host.name', order: getQueryOrder(sort) },
-          aggs: {
-            lastSeen: { max: { field: '@timestamp' } },
-            os: {
-              top_hits: {
-                size: 1,
-                sort: [
-                  {
-                    '@timestamp': {
-                      order: 'desc' as const,
-                    },
+    aggregations: {
+      ...agg,
+      host_data: {
+        terms: { size: querySize, field: 'host.name', order: getQueryOrder(sort) },
+        aggs: {
+          lastSeen: { max: { field: '@timestamp' } },
+          os: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc' as const,
                   },
-                ],
-                _source: false,
-              },
+                },
+              ],
+              _source: false,
             },
           },
         },
       },
-      query: { bool: { filter } },
-      _source: false,
-      fields: [
-        ...esFields,
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      size: 0,
     },
+    query: { bool: { filter } },
+    _source: false,
+    fields: [
+      ...esFields,
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    size: 0,
   };
 
   return dslQuery;

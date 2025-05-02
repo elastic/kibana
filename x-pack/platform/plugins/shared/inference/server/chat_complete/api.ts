@@ -6,7 +6,7 @@
  */
 
 import { last, omit } from 'lodash';
-import { defer, switchMap, throwError, identity } from 'rxjs';
+import { defer, switchMap, throwError, identity, share } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
@@ -23,6 +23,8 @@ import {
   chunksIntoMessage,
   streamToResponse,
   handleCancellation,
+  retryWithExponentialBackoff,
+  getRetryFilter,
 } from './utils';
 
 interface CreateChatCompleteApiOptions {
@@ -44,6 +46,9 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     modelName,
     stream,
     abortSignal,
+    metadata,
+    maxRetries = 3,
+    retryConfiguration = {},
   }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
     ToolOptions,
     boolean
@@ -55,13 +60,13 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
         const connectorType = executor.getConnector().type;
         const inferenceAdapter = getInferenceAdapter(connectorType);
 
-        const messagesWithoutData = messages.map((message) => omit(message, 'data'));
-
         if (!inferenceAdapter) {
           return throwError(() =>
             createInferenceRequestError(`Adapter for type ${connectorType} not implemented`, 400)
           );
         }
+
+        const messagesWithoutData = messages.map((message) => omit(message, 'data'));
 
         logger.debug(
           () => `Sending request, last message is: ${JSON.stringify(last(messagesWithoutData))}`
@@ -87,17 +92,24 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           functionCalling,
           modelName,
           abortSignal,
+          metadata,
         });
       }),
       chunksIntoMessage({
         toolOptions: { toolChoice, tools },
         logger,
       }),
+      retryWithExponentialBackoff({
+        maxRetry: maxRetries,
+        backoffMultiplier: retryConfiguration.backoffMultiplier,
+        initialDelay: retryConfiguration.initialDelay,
+        errorFilter: getRetryFilter(retryConfiguration.retryOn),
+      }),
       abortSignal ? handleCancellation(abortSignal) : identity
     );
 
     if (stream) {
-      return inference$;
+      return inference$.pipe(share());
     } else {
       return streamToResponse(inference$);
     }

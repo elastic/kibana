@@ -2,7 +2,8 @@
   "type": "plugin",
   "id": "@kbn/transform-plugin",
   "owner": [
-    "@elastic/ml-ui"
+    "@elastic/ml-ui",
+    "@elastic/kibana-management"
   ],
   "group": "platform",
   "visibility": "private",
@@ -30,7 +31,8 @@
       "charts",
       "savedObjectsFinder",
       "savedObjectsManagement",
-      "contentManagement"
+      "contentManagement",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "dataViewEditor",

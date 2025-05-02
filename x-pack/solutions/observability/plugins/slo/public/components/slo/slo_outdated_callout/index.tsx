@@ -8,6 +8,7 @@ import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { encode } from '@kbn/rison';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { paths } from '../../../../common/locators/paths';
@@ -19,7 +20,11 @@ export function SloOutdatedCallout() {
   } = useKibana().services;
 
   const handleClick = () => {
-    navigateToUrl(basePath.prepend(paths.slosOutdatedDefinitions));
+    navigateToUrl(
+      `${basePath.prepend(paths.slosManagement)}?search=${encode({
+        includeOutdatedOnly: true,
+      })}`
+    );
   };
 
   const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: true });

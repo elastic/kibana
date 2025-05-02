@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { StackConnectorsPlugin } from './plugin';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -26,7 +26,6 @@ describe('Stack Connectors Plugin', () => {
       context = coreMock.createPluginInitializerContext();
       mockParseExperimentalConfigValue.mockReturnValue({
         ...experimentalFeaturesMock,
-        inferenceConnectorOn: true,
       });
 
       plugin = new StackConnectorsPlugin(context);

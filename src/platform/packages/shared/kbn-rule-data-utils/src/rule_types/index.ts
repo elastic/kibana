@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AlertConsumers } from '../alerts_as_data_rbac';
-import { STACK_ALERTS_FEATURE_ID } from './stack_rules';
+import type { AlertConsumers } from '../alerts_as_data_rbac';
+import type { STACK_ALERTS_FEATURE_ID } from './stack_rules';
 
 export * from './stack_rules';
 export * from './o11y_rules';

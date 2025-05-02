@@ -14,7 +14,7 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
-import merge from 'lodash/merge';
+import { merge } from 'lodash';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
@@ -43,7 +43,7 @@ import {
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/get_aws_credentials_form_options';
-import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from './gcp_credentials_form/gcp_credential_form';
+import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 
 // Posture policies only support the default namespace
@@ -257,10 +257,6 @@ export const getDefaultGcpHiddenVars = (
         value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
         type: 'text',
       },
-      setup_access: {
-        value: GCP_SETUP_ACCESS.MANUAL,
-        type: 'text',
-      },
     };
   }
 
@@ -271,20 +267,12 @@ export const getDefaultGcpHiddenVars = (
         value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
         type: 'text',
       },
-      setup_access: {
-        value: GCP_SETUP_ACCESS.CLOUD_SHELL,
-        type: 'text',
-      },
     };
   }
 
   return {
     'gcp.credentials.type': {
       value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
-      type: 'text',
-    },
-    setup_access: {
-      value: GCP_SETUP_ACCESS.MANUAL,
       type: 'text',
     },
   };

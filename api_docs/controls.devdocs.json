@@ -707,7 +707,7 @@
                 "section": "def-common.DefaultControlState",
                 "text": "DefaultControlState"
               },
-              " & { type: string; order: number; } & { id?: string | undefined; })[]"
+              " & { type: string; order: number; } & { id?: string | undefined; controlConfig?: object | undefined; })[]"
             ],
             "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -1177,10 +1177,10 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/esql-variables-types",
-            "scope": "public",
-            "docId": "kibKbnEsqlVariablesTypesPluginApi",
-            "section": "def-public.PublishesESQLVariables",
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.PublishesESQLVariables",
             "text": "PublishesESQLVariables"
           },
           " & ",
@@ -1335,7 +1335,7 @@
             "section": "def-common.ControlLabelPosition",
             "text": "ControlLabelPosition"
           },
-          ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string) => ",
+          ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string, onReload?: (() => void) | undefined) => ",
           "Observable",
           "<",
           "ControlFetchContext",
@@ -1443,10 +1443,10 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/esql-variables-types",
-            "scope": "public",
-            "docId": "kibKbnEsqlVariablesTypesPluginApi",
-            "section": "def-public.PublishesESQLVariables",
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.PublishesESQLVariables",
             "text": "PublishesESQLVariables"
           },
           " & ",
@@ -1601,7 +1601,7 @@
             "section": "def-common.ControlLabelPosition",
             "text": "ControlLabelPosition"
           },
-          ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string) => ",
+          ">; asyncResetUnsavedChanges: () => Promise<void>; controlFetch$: (controlUuid: string, onReload?: (() => void) | undefined) => ",
           "Observable",
           "<",
           "ControlFetchContext",
@@ -1876,9 +1876,9 @@
           },
           " & ",
           "HasCustomPrepend",
-          "> & ",
+          "> & Partial<",
           "CanClearSelections",
-          " & ",
+          "> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1993,6 +1993,136 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-public.DefaultControlApi",
+        "type": "Type",
+        "tags": [],
+        "label": "DefaultControlApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesBlockingError",
+            "text": "PublishesBlockingError"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<object> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          "HasCustomPrepend",
+          "> & Partial<",
+          "CanClearSelections",
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasType",
+            "text": "HasType"
+          },
+          "<string> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasUniqueId",
+            "text": "HasUniqueId"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSerializableState",
+            "text": "HasSerializableState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupApi",
+            "text": "ControlGroupApi"
+          },
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; width: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlWidth",
+            "text": "ControlWidth"
+          },
+          " | undefined>; }"
+        ],
+        "path": "src/platform/plugins/shared/controls/public/controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.ESQL_CONTROL",
         "type": "string",
         "tags": [],
@@ -2002,6 +2132,160 @@
           "\"esqlControl\""
         ],
         "path": "src/platform/plugins/shared/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ESQLControlApi",
+        "type": "Type",
+        "tags": [],
+        "label": "ESQLControlApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesBlockingError",
+            "text": "PublishesBlockingError"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<object> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          "HasCustomPrepend",
+          "> & Partial<",
+          "CanClearSelections",
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasType",
+            "text": "HasType"
+          },
+          "<string> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasUniqueId",
+            "text": "HasUniqueId"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSerializableState",
+            "text": "HasSerializableState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupApi",
+            "text": "ControlGroupApi"
+          },
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; width: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlWidth",
+            "text": "ControlWidth"
+          },
+          " | undefined>; } & ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.PublishesESQLVariable",
+            "text": "PublishesESQLVariable"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasEditCapabilities",
+            "text": "HasEditCapabilities"
+          },
+          " & Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          ", \"defaultTitle$\">"
+        ],
+        "path": "src/platform/plugins/shared/controls/public/controls/esql_control/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2023,6 +2307,172 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-public.OptionsListControlApi",
+        "type": "Type",
+        "tags": [],
+        "label": "OptionsListControlApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesBlockingError",
+            "text": "PublishesBlockingError"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<object> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          "HasCustomPrepend",
+          "> & Partial<",
+          "CanClearSelections",
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasType",
+            "text": "HasType"
+          },
+          "<string> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasUniqueId",
+            "text": "HasUniqueId"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSerializableState",
+            "text": "HasSerializableState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupApi",
+            "text": "ControlGroupApi"
+          },
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; width: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlWidth",
+            "text": "ControlWidth"
+          },
+          " | undefined>; } & Omit<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          ", \"hideTitle$\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasEditCapabilities",
+            "text": "HasEditCapabilities"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & ",
+          "PublishesField",
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesFilters",
+            "text": "PublishesFilters"
+          },
+          " & { untilFiltersReady: () => Promise<void>; } & { setSelectedOptions: (options: ",
+          "OptionsListSelection",
+          "[] | undefined) => void; }"
+        ],
+        "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.RANGE_SLIDER_CONTROL",
         "type": "string",
         "tags": [],
@@ -2038,6 +2488,170 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-public.RangesliderControlApi",
+        "type": "Type",
+        "tags": [],
+        "label": "RangesliderControlApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesBlockingError",
+            "text": "PublishesBlockingError"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<object> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          "HasCustomPrepend",
+          "> & Partial<",
+          "CanClearSelections",
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasType",
+            "text": "HasType"
+          },
+          "<string> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasUniqueId",
+            "text": "HasUniqueId"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSerializableState",
+            "text": "HasSerializableState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupApi",
+            "text": "ControlGroupApi"
+          },
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; width: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlWidth",
+            "text": "ControlWidth"
+          },
+          " | undefined>; } & Omit<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          ", \"hideTitle$\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasEditCapabilities",
+            "text": "HasEditCapabilities"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & ",
+          "PublishesField",
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesFilters",
+            "text": "PublishesFilters"
+          },
+          " & { untilFiltersReady: () => Promise<void>; }"
+        ],
+        "path": "src/platform/plugins/shared/controls/public/controls/data_controls/range_slider/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.TIME_SLIDER_CONTROL",
         "type": "string",
         "tags": [],
@@ -2047,6 +2661,151 @@
           "\"timeSlider\""
         ],
         "path": "src/platform/plugins/shared/controls/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.TimesliderControlApi",
+        "type": "Type",
+        "tags": [],
+        "label": "TimesliderControlApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesBlockingError",
+            "text": "PublishesBlockingError"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          "<object> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          "HasCustomPrepend",
+          "> & Partial<",
+          "CanClearSelections",
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasType",
+            "text": "HasType"
+          },
+          "<string> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasUniqueId",
+            "text": "HasUniqueId"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasSerializableState",
+            "text": "HasSerializableState"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.DefaultControlState",
+            "text": "DefaultControlState"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "public",
+            "docId": "kibControlsPluginApi",
+            "section": "def-public.ControlGroupApi",
+            "text": "ControlGroupApi"
+          },
+          "> & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; grow: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean | undefined>; width: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlWidth",
+            "text": "ControlWidth"
+          },
+          " | undefined>; } & Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
+          },
+          ", \"defaultTitle$\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesTimeslice",
+            "text": "PublishesTimeslice"
+          }
+        ],
+        "path": "src/platform/plugins/shared/controls/public/controls/timeslider_control/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2919,7 +3678,7 @@
                 "section": "def-common.DefaultControlState",
                 "text": "DefaultControlState"
               },
-              " & { type: string; order: number; } & { id?: string | undefined; })[]"
+              " & { type: string; order: number; } & { id?: string | undefined; controlConfig?: object | undefined; })[]"
             ],
             "path": "src/platform/plugins/shared/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -3221,12 +3980,12 @@
           {
             "parentPluginId": "controls",
             "id": "def-common.SerializedControlState.explicitInput",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "explicitInput",
             "description": [],
             "signature": [
-              "{ id: string; } & ControlStateType"
+              "ControlStateType"
             ],
             "path": "src/platform/plugins/shared/controls/common/types.ts",
             "deprecated": false,

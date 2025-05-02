@@ -8,14 +8,14 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   TermsEnumRequest,
   MsearchMultisearchBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import supertest from 'supertest';
 import { APMEventClient, type APMEventESSearchRequest, type APMEventFieldCapsRequest } from '.';
-import type { APMIndices } from '../../../..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 import * as cancelEsRequestOnAbortModule from '../cancel_es_request_on_abort';
 import * as observabilityPluginModule from '@kbn/observability-plugin/server';
@@ -81,7 +81,8 @@ describe('APMEventClient', () => {
             apm: {
               events: [],
             },
-            body: { size: 0, track_total_hits: false },
+            size: 0,
+            track_total_hits: false,
           });
 
           return res.ok({ body: 'ok' });
@@ -173,16 +174,14 @@ describe('APMEventClient', () => {
 
       await apmEventClient.search('testOperation', {
         apm: { events: [] },
-        body: {
-          size: 0,
-          track_total_hits: false,
-          query: { bool: { filter: [{ match_all: {} }] } },
-        },
+        size: 0,
+        track_total_hits: false,
+        query: { bool: { filter: [{ match_all: {} }] } },
       });
 
       const searchParams = esClientMock.search.mock.calls[0][0] as APMEventESSearchRequest;
 
-      expect(searchParams.body.query?.bool).toEqual({
+      expect(searchParams.query?.bool).toEqual({
         filter: [
           { terms: { 'processor.event': [] } },
           { bool: { must_not: [{ terms: { _tier: ['data_warm', 'data_cold'] } }] } },
@@ -196,11 +195,9 @@ describe('APMEventClient', () => {
 
       await apmEventClient.msearch('testOperation', {
         apm: { events: [] },
-        body: {
-          size: 0,
-          track_total_hits: false,
-          query: { bool: { filter: [{ match_all: {} }] } },
-        },
+        size: 0,
+        track_total_hits: false,
+        query: { bool: { filter: [{ match_all: {} }] } },
       });
 
       const msearchParams = esClientMock.msearch.mock.calls[0][0] as {

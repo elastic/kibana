@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiText } from '@elastic/eui';
 import { DefaultPageLayout } from './layout';
 import { StoryProvidersComponent } from '../mocks/story_providers';
@@ -16,7 +16,7 @@ export default {
   component: DefaultPageLayout,
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   const title = 'Title with border below';
   const children = <EuiText>Content with border above</EuiText>;
 
@@ -27,7 +27,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const NoBorder: Story<void> = () => {
+export const NoBorder: StoryFn = () => {
   const title = 'Title without border';
   const border = false;
   const children = <EuiText>Content without border</EuiText>;

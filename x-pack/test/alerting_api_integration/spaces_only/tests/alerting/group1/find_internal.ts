@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 async function createAlert(
   objectRemover: ObjectRemover,
@@ -119,6 +119,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           params: {},
           created_by: null,
           api_key_owner: null,
+          artifacts: {
+            dashboards: [],
+            investigation_guide: { blob: '' },
+          },
           api_key_created_by_user: null,
           scheduled_task_id: match.scheduled_task_id,
           updated_by: null,

@@ -9,14 +9,8 @@
 
 import moment, { type Moment } from 'moment-timezone';
 
-import {
-  Frequency,
-  Weekday,
-  type WeekdayStr,
-  type Options,
-  type IterOptions,
-  ConstructorOptions,
-} from './types';
+import type { ConstructorOptions } from './types';
+import { Frequency, Weekday, type WeekdayStr, type Options, type IterOptions } from './types';
 import { sanitizeOptions } from './sanitize';
 import { validateOptions } from './validate';
 

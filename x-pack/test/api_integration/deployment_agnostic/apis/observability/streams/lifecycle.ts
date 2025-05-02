@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import rawExpect from 'expect';
 import expect from '@kbn/expect';
 import {
-  IngestStreamUpsertRequest,
-  InheritedIngestStreamLifecycle,
-  WiredReadStreamDefinition,
-  WiredStreamGetResponse,
+  IngestStreamEffectiveLifecycle,
+  IngestStreamLifecycle,
+  Streams,
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
-import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  putStream,
+  getStream,
+  getIlmStats,
+} from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -30,11 +36,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   async function expectLifecycle(
     streams: string[],
-    expectedLifecycle: InheritedIngestStreamLifecycle
+    expectedLifecycle: IngestStreamEffectiveLifecycle
   ) {
     const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
     for (const definition of definitions) {
-      expect(definition.effective_lifecycle).to.eql(expectedLifecycle);
+      expect(Streams.ingest.all.GetResponse.parse(definition).effective_lifecycle).to.eql(
+        expectedLifecycle
+      );
     }
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
@@ -46,14 +54,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'backing indices should not specify an ilm_policy'
         );
         if (!isServerless) {
-          expect(dataStream.prefer_ilm).to.eql(false, 'data stream should not specify prefer_ilm');
+          expect(dataStream.prefer_ilm).to.eql(
+            false,
+            `data stream ${dataStream.name} should not specify prefer_ilm`
+          );
           expect(dataStream.indices.every((index) => !index.prefer_ilm)).to.eql(
             true,
             'backing indices should not specify prefer_ilm'
           );
         }
       } else if (isIlmLifecycle(expectedLifecycle)) {
-        expect(dataStream.prefer_ilm).to.eql(true, 'data stream should specify prefer_ilm');
+        expect(dataStream.prefer_ilm).to.eql(
+          true,
+          `data stream ${dataStream.name} should specify prefer_ilm`
+        );
         expect(dataStream.ilm_policy).to.eql(expectedLifecycle.ilm.policy);
         expect(
           dataStream.indices.every(
@@ -65,12 +79,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   describe('Lifecycle', () => {
-    const wiredPutBody: IngestStreamUpsertRequest = {
-      stream: {
-        ingest: { lifecycle: { inherit: {} }, routing: [], processing: [], wired: { fields: {} } },
-      },
-      dashboards: [],
-    };
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -80,248 +88,519 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    it('updates lifecycle', async () => {
-      const rootDefinition = await getStream(apiClient, 'logs');
-
-      const response = await putStream(apiClient, 'logs', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
-            lifecycle: { dsl: { data_retention: '999d' } },
-          },
+    const wiredPutBody: Streams.WiredStream.UpsertRequest = {
+      stream: {
+        description: '',
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: [],
+          wired: { fields: {}, routing: [] },
         },
-      });
-      expect(response).to.have.property('acknowledged', true);
+      },
+      dashboards: [],
+      queries: [],
+    };
 
-      const updatedRootDefinition = await getStream(apiClient, 'logs');
-      expect((updatedRootDefinition as WiredReadStreamDefinition).stream.ingest.lifecycle).to.eql({
-        dsl: { data_retention: '999d' },
-      });
-      expect(updatedRootDefinition.effective_lifecycle).to.eql({
-        dsl: { data_retention: '999d' },
-        from: 'logs',
-      });
-    });
+    describe('Wired streams update', () => {
+      it('updates lifecycle', async () => {
+        const rootDefinition = await getStream(apiClient, 'logs');
 
-    it('does not allow inherit lifecycle on root', async () => {
-      const rootDefinition = await getStream(apiClient, 'logs');
-
-      await putStream(
-        apiClient,
-        'logs',
-        {
+        const response = await putStream(apiClient, 'logs', {
           dashboards: [],
+          queries: [],
           stream: {
+            description: '',
             ingest: {
-              ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
-              lifecycle: { inherit: {} },
+              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              lifecycle: { dsl: { data_retention: '999d' } },
             },
           },
-        },
-        400
-      );
-    });
+        });
+        expect(response).to.have.property('acknowledged', true);
 
-    it('inherits dlm', async () => {
-      // create two branches, one that inherits from root and
-      // another one that overrides the root lifecycle
-      await putStream(apiClient, 'logs.inherits.lifecycle', wiredPutBody);
-      await putStream(apiClient, 'logs.overrides.lifecycle', wiredPutBody);
-
-      const rootDefinition = await getStream(apiClient, 'logs');
-      await putStream(apiClient, 'logs', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
-            lifecycle: { dsl: { data_retention: '10m' } },
-          },
-        },
-      });
-      await putStream(apiClient, 'logs.overrides', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...wiredPutBody.stream.ingest,
-            routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
-            lifecycle: { dsl: { data_retention: '1d' } },
-          },
-        },
+        const updatedRootDefinition = await getStream(apiClient, 'logs');
+        expect(
+          (updatedRootDefinition as Streams.WiredStream.GetResponse).stream.ingest.lifecycle
+        ).to.eql({
+          dsl: { data_retention: '999d' },
+        });
+        expect(
+          (updatedRootDefinition as Streams.WiredStream.GetResponse).effective_lifecycle
+        ).to.eql({
+          dsl: { data_retention: '999d' },
+          from: 'logs',
+        });
       });
 
-      await expectLifecycle(['logs.inherits', 'logs.inherits.lifecycle'], {
-        dsl: { data_retention: '10m' },
-        from: 'logs',
-      });
+      it('does not allow inherit lifecycle on root', async () => {
+        const rootDefinition = await getStream(apiClient, 'logs');
 
-      await expectLifecycle(['logs.overrides', 'logs.overrides.lifecycle'], {
-        dsl: { data_retention: '1d' },
-        from: 'logs.overrides',
-      });
-    });
-
-    it('applies the nearest parent lifecycle when deleted', async () => {
-      await putStream(apiClient, 'logs.10d', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...wiredPutBody.stream.ingest,
-            lifecycle: { dsl: { data_retention: '10d' } },
-          },
-        },
-      });
-      await putStream(apiClient, 'logs.10d.20d', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...wiredPutBody.stream.ingest,
-            lifecycle: { dsl: { data_retention: '20d' } },
-          },
-        },
-      });
-      await putStream(apiClient, 'logs.10d.20d.inherits', wiredPutBody);
-
-      // delete lifecycle of the 20d override
-      await putStream(apiClient, 'logs.10d.20d', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...wiredPutBody.stream.ingest,
-            routing: [{ destination: 'logs.10d.20d.inherits', if: { never: {} } }],
-          },
-        },
-      });
-
-      await expectLifecycle(['logs.10d', 'logs.10d.20d', 'logs.10d.20d.inherits'], {
-        dsl: { data_retention: '10d' },
-        from: 'logs.10d',
-      });
-    });
-
-    it('handles no retention dsl', async () => {
-      await putStream(apiClient, 'logs.no', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...wiredPutBody.stream.ingest,
-            lifecycle: { dsl: { data_retention: '2d' } },
-          },
-        },
-      });
-
-      await putStream(apiClient, 'logs.no.retention', {
-        dashboards: [],
-        stream: {
-          ingest: {
-            ...wiredPutBody.stream.ingest,
-            lifecycle: { dsl: {} },
-          },
-        },
-      });
-
-      await expectLifecycle(['logs.no.retention'], {
-        dsl: {},
-        from: 'logs.no.retention',
-      });
-    });
-
-    if (isServerless) {
-      it('does not support ilm', async () => {
         await putStream(
           apiClient,
-          'logs.ilm',
+          'logs',
           {
             dashboards: [],
+            queries: [],
             stream: {
+              description: '',
               ingest: {
-                ...wiredPutBody.stream.ingest,
-                lifecycle: { ilm: { policy: 'my-policy' } },
+                ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+                lifecycle: { inherit: {} },
               },
             },
           },
           400
         );
       });
-    } else {
-      it('inherits ilm', async () => {
-        await putStream(apiClient, 'logs.ilm.stream', wiredPutBody);
-        await putStream(apiClient, 'logs.ilm', {
+
+      it('inherits dlm', async () => {
+        // create two branches, one that inherits from root and
+        // another one that overrides the root lifecycle
+        await putStream(apiClient, 'logs.inherits.lifecycle', wiredPutBody);
+        await putStream(apiClient, 'logs.overrides.lifecycle', wiredPutBody);
+
+        const rootDefinition = await getStream(apiClient, 'logs');
+        await putStream(apiClient, 'logs', {
           dashboards: [],
+          queries: [],
           stream: {
+            description: '',
+            ingest: {
+              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              lifecycle: { dsl: { data_retention: '10m' } },
+            },
+          },
+        });
+        await putStream(apiClient, 'logs.overrides', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
-              routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
-              lifecycle: { ilm: { policy: 'my-policy' } },
+              wired: {
+                fields: {},
+                routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
+              },
+              lifecycle: { dsl: { data_retention: '1d' } },
             },
           },
         });
 
-        await expectLifecycle(['logs.ilm', 'logs.ilm.stream'], {
-          ilm: { policy: 'my-policy' },
-          from: 'logs.ilm',
+        await expectLifecycle(['logs.inherits', 'logs.inherits.lifecycle'], {
+          dsl: { data_retention: '10m' },
+          from: 'logs',
+        });
+
+        await expectLifecycle(['logs.overrides', 'logs.overrides.lifecycle'], {
+          dsl: { data_retention: '1d' },
+          from: 'logs.overrides',
         });
       });
 
-      it('updates when transitioning from ilm to dlm', async () => {
-        const name = 'logs.ilm-with-backing-indices';
-        await putStream(apiClient, name, {
+      it('applies the nearest parent lifecycle when deleted', async () => {
+        await putStream(apiClient, 'logs.10d', {
           dashboards: [],
+          queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
-              routing: [],
-              lifecycle: { ilm: { policy: 'my-policy' } },
+              lifecycle: { dsl: { data_retention: '10d' } },
+            },
+          },
+        });
+        await putStream(apiClient, 'logs.10d.20d', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              ...wiredPutBody.stream.ingest,
+              lifecycle: { dsl: { data_retention: '20d' } },
+            },
+          },
+        });
+        await putStream(apiClient, 'logs.10d.20d.inherits', wiredPutBody);
+
+        // delete lifecycle of the 20d override
+        await putStream(apiClient, 'logs.10d.20d', {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              ...wiredPutBody.stream.ingest,
+              wired: {
+                fields: {},
+                routing: [{ destination: 'logs.10d.20d.inherits', if: { never: {} } }],
+              },
             },
           },
         });
 
-        await esClient.indices.rollover({ alias: name });
-        await esClient.indices.rollover({ alias: name });
-
-        await putStream(apiClient, name, {
-          dashboards: [],
-          stream: {
-            ingest: {
-              ...wiredPutBody.stream.ingest,
-              routing: [],
-              lifecycle: { dsl: { data_retention: '7d' } },
-            },
-          },
+        await expectLifecycle(['logs.10d', 'logs.10d.20d', 'logs.10d.20d.inherits'], {
+          dsl: { data_retention: '10d' },
+          from: 'logs.10d',
         });
-
-        await expectLifecycle([name], { dsl: { data_retention: '7d' }, from: name });
       });
 
-      it('updates when transitioning from dlm to ilm', async () => {
-        const name = 'logs.dlm-with-backing-indices';
-        await putStream(apiClient, name, {
+      it('handles no retention dsl', async () => {
+        await putStream(apiClient, 'logs.no', {
           dashboards: [],
+          queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
-              routing: [],
-              lifecycle: { dsl: { data_retention: '7d' } },
+              lifecycle: { dsl: { data_retention: '2d' } },
             },
           },
         });
 
-        await esClient.indices.rollover({ alias: name });
-        await esClient.indices.rollover({ alias: name });
-
-        await putStream(apiClient, name, {
+        await putStream(apiClient, 'logs.no.retention', {
           dashboards: [],
+          queries: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
-              routing: [],
-              lifecycle: { ilm: { policy: 'my-policy' } },
+              lifecycle: { dsl: {} },
             },
           },
         });
 
-        await expectLifecycle([name], { ilm: { policy: 'my-policy' }, from: name });
+        await expectLifecycle(['logs.no.retention'], {
+          dsl: {},
+          from: 'logs.no.retention',
+        });
       });
-    }
+
+      if (isServerless) {
+        it('does not support ilm', async () => {
+          await putStream(
+            apiClient,
+            'logs.ilm',
+            {
+              dashboards: [],
+              queries: [],
+              stream: {
+                description: '',
+                ingest: {
+                  ...wiredPutBody.stream.ingest,
+                  lifecycle: { ilm: { policy: 'my-policy' } },
+                },
+              },
+            },
+            400
+          );
+        });
+      } else {
+        it('inherits ilm', async () => {
+          await putStream(apiClient, 'logs.ilm.stream', wiredPutBody);
+          await putStream(apiClient, 'logs.ilm', {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  fields: {},
+                  routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
+                },
+                lifecycle: { ilm: { policy: 'my-policy' } },
+              },
+            },
+          });
+
+          await expectLifecycle(['logs.ilm', 'logs.ilm.stream'], {
+            ilm: { policy: 'my-policy' },
+            from: 'logs.ilm',
+          });
+        });
+
+        it('updates when transitioning from ilm to dlm', async () => {
+          const name = 'logs.ilm-with-backing-indices';
+          await putStream(apiClient, name, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                lifecycle: { ilm: { policy: 'my-policy' } },
+              },
+            },
+          });
+
+          await esClient.indices.rollover({ alias: name });
+          await esClient.indices.rollover({ alias: name });
+
+          await putStream(apiClient, name, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+                lifecycle: { dsl: { data_retention: '7d' } },
+              },
+            },
+          });
+
+          await expectLifecycle([name], { dsl: { data_retention: '7d' }, from: name });
+        });
+
+        it('updates when transitioning from dlm to ilm', async () => {
+          const name = 'logs.dlm-with-backing-indices';
+          await putStream(apiClient, name, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+                lifecycle: { dsl: { data_retention: '7d' } },
+              },
+            },
+          });
+
+          await esClient.indices.rollover({ alias: name });
+          await esClient.indices.rollover({ alias: name });
+
+          await putStream(apiClient, name, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  routing: [],
+                  fields: {},
+                },
+                lifecycle: { ilm: { policy: 'my-policy' } },
+              },
+            },
+          });
+
+          await expectLifecycle([name], { ilm: { policy: 'my-policy' }, from: name });
+        });
+      }
+    });
+
+    describe('Unwired streams update', () => {
+      const unwiredPutBody: Streams.UnwiredStream.UpsertRequest = {
+        stream: {
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: [],
+            unwired: {},
+          },
+        },
+        dashboards: [],
+        queries: [],
+      };
+
+      const createDataStream = async (name: string, lifecycle: IngestStreamLifecycle) => {
+        await esClient.indices.putIndexTemplate({
+          name,
+          index_patterns: [name],
+          data_stream: {},
+          template: isDslLifecycle(lifecycle)
+            ? {
+                lifecycle: { data_retention: lifecycle.dsl.data_retention },
+                settings: {
+                  'index.lifecycle.prefer_ilm': false,
+                  'index.default_pipeline': 'logs@default-pipeline',
+                },
+              }
+            : isIlmLifecycle(lifecycle)
+            ? {
+                settings: {
+                  'index.default_pipeline': 'logs@default-pipeline',
+                  'index.lifecycle.prefer_ilm': true,
+                  'index.lifecycle.name': lifecycle.ilm.policy,
+                },
+              }
+            : undefined,
+        });
+        await esClient.indices.createDataStream({ name });
+
+        return async () => {
+          await esClient.indices.deleteDataStream({ name });
+          await esClient.indices.deleteIndexTemplate({ name });
+        };
+      };
+
+      it('noop when inherit lifecycle', async () => {
+        const indexName = 'unwired-stream-inherit';
+        const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
+
+        try {
+          await putStream(apiClient, indexName, unwiredPutBody);
+          await expectLifecycle([indexName], { dsl: { data_retention: '77d' } });
+        } finally {
+          await clean();
+        }
+      });
+
+      it('overrides dsl retention', async () => {
+        const indexName = 'unwired-stream-override-dsl';
+        const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
+
+        try {
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { dsl: { data_retention: '11d' } },
+              },
+            },
+          });
+
+          await expectLifecycle([indexName], { dsl: { data_retention: '11d' } });
+        } finally {
+          await clean();
+        }
+      });
+
+      if (!isServerless) {
+        it('does not allow dsl lifecycle if the data stream is managed by ilm', async () => {
+          const indexName = 'unwired-stream-ilm-to-dsl';
+          const clean = await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
+
+          try {
+            await putStream(
+              apiClient,
+              indexName,
+              {
+                dashboards: [],
+                queries: [],
+                stream: {
+                  description: '',
+                  ingest: {
+                    ...unwiredPutBody.stream.ingest,
+                    lifecycle: { dsl: { data_retention: '1d' } },
+                  },
+                },
+              },
+              400
+            );
+          } finally {
+            await clean();
+          }
+        });
+      }
+    });
+
+    describe('ilm stats', () => {
+      it('is not enabled for streams with dsl', async () => {
+        const indexName = 'logs.dslnostats';
+        await putStream(apiClient, indexName, {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              ...wiredPutBody.stream.ingest,
+              wired: {
+                fields: {},
+                routing: [],
+              },
+              lifecycle: { dsl: { data_retention: '1d' } },
+            },
+          },
+        });
+        await getIlmStats(apiClient, indexName, 400);
+      });
+
+      if (!isServerless) {
+        it('returns not found when the policy does not exist', async () => {
+          const indexName = 'logs.ilmpolicydontexists';
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+                lifecycle: { ilm: { policy: 'this-stream-policy-does-not-exist' } },
+              },
+            },
+          });
+          await getIlmStats(apiClient, indexName, 404);
+        });
+
+        it('returns the effective ilm phases', async () => {
+          const indexName = 'logs.ilmwithphases';
+          const policyName = 'streams_ilm_hotwarmdelete';
+          await esClient.ilm.putLifecycle({
+            name: policyName,
+            policy: {
+              phases: {
+                hot: { actions: { rollover: { max_age: '30m' } } },
+                warm: { min_age: '5d', actions: {} },
+                delete: { min_age: '10d', actions: {} },
+              },
+            },
+          });
+
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            queries: [],
+            stream: {
+              description: '',
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                wired: {
+                  fields: {},
+                  routing: [],
+                },
+                lifecycle: { ilm: { policy: policyName } },
+              },
+            },
+          });
+
+          const stats = await getIlmStats(apiClient, indexName, 200);
+          rawExpect(stats).toEqual({
+            phases: {
+              hot: {
+                name: 'hot',
+                size_in_bytes: rawExpect.any(Number),
+                rollover: { max_age: '30m' },
+                min_age: '0ms',
+              },
+              warm: {
+                name: 'warm',
+                min_age: '5d',
+                size_in_bytes: rawExpect.any(Number),
+              },
+              delete: {
+                name: 'delete',
+                min_age: '10d',
+              },
+            },
+          });
+        });
+      }
+    });
   });
 }

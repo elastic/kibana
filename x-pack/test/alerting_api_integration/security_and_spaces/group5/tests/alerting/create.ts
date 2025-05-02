@@ -13,15 +13,15 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   checkAAD,
   getTestRuleData,
   getUnauthorizedErrorMessage,
   getUrlPrefix,
   ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {

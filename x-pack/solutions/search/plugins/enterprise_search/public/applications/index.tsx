@@ -70,6 +70,7 @@ export const renderApp = (
     share,
     ml,
     fleet,
+    uiActions,
   } = plugins;
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
@@ -81,7 +82,7 @@ export const renderApp = (
   const store = getContext().store;
   const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
 
-  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
+  const connectorTypes = plugins.contentConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,
@@ -115,6 +116,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    uiActions,
     uiSettings,
     updateSideNavDefinition,
   });

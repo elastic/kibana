@@ -224,7 +224,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"success\" | \"default\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
@@ -279,7 +279,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+                  "\"success\" | \"default\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -1358,7 +1358,7 @@
         "label": "NewBucketButton",
         "description": [],
         "signature": [
-          "({ label, onClick, isDisabled, className, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => React.JSX.Element"
+          "({ label, onClick, isDisabled, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
         "deprecated": false,
@@ -1369,7 +1369,7 @@
             "id": "def-public.NewBucketButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  label,\n  onClick,\n  isDisabled,\n  className,\n  'data-test-subj': dataTestSubj = 'lns-newBucket-add',\n}",
+            "label": "{\n  label,\n  onClick,\n  isDisabled,\n  'data-test-subj': dataTestSubj = 'lns-newBucket-add',\n}",
             "description": [],
             "signature": [
               "NewBucketButtonProps"

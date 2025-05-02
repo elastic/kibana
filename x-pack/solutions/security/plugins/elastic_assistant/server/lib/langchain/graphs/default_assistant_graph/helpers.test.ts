@@ -56,6 +56,9 @@ describe('streamGraph', () => {
       input: 'input',
       responseLanguage: 'English',
       llmType: 'openai',
+      provider: 'openai',
+      connectorId: '123',
+      isOssModel: false,
     },
     logger: mockLogger,
     onLlmResponse: mockOnLlmResponse,
@@ -224,7 +227,7 @@ describe('streamGraph', () => {
     });
   });
 
-  describe('Tool Calling Agent and Structured Chat Agent streaming', () => {
+  describe('Tool Calling Agent streaming', () => {
     const mockAsyncIterator = {
       async *[Symbol.asyncIterator]() {
         yield {
@@ -266,13 +269,16 @@ describe('streamGraph', () => {
       },
     };
 
-    const expectConditions = async (response: unknown) => {
+    const expectConditions = async (response: unknown, isOssModel: boolean = false) => {
       expect(response).toBe(mockResponseWithHeaders);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: 'Look at these' });
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' rare IP' });
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' addresses.' });
+        if (!isOssModel) {
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: 'Look at these' });
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' rare IP' });
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' addresses.' });
+        }
+
         expect(mockOnLlmResponse).toHaveBeenCalledWith(
           'Look at these rare IP addresses.',
           { transactionId: 'transactionId', traceId: 'traceId' },
@@ -290,6 +296,7 @@ describe('streamGraph', () => {
         inputs: {
           ...requestArgs.inputs,
           llmType: 'gemini',
+          provider: 'gemini',
         },
       });
 
@@ -305,6 +312,7 @@ describe('streamGraph', () => {
         inputs: {
           ...requestArgs.inputs,
           llmType: 'bedrock',
+          provider: 'bedrock',
         },
       });
 
@@ -322,7 +330,7 @@ describe('streamGraph', () => {
           isOssModel: true,
         },
       });
-      await expectConditions(response);
+      await expectConditions(response, true);
     });
   });
 });

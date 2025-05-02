@@ -1,66 +1,83 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderSection it renders 1`] = `
-<Header
-  $hideSubtitle={false}
-  className="toggle-expand siemHeaderSection"
+.c0 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media only screen and (min-width:575px) {
+  .c0 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
+  }
+
+  .c0 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+<header
+  class="toggle-expand siemHeaderSection css-125xqyz-header"
   data-test-subj="header-section"
 >
-  <EuiFlexGroup
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
     data-test-subj="headerSectionOuterFlexGroup"
-    direction="column"
-    gutterSize="xs"
-    responsive={false}
   >
-    <EuiFlexItem
-      grow={true}
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
-      <EuiFlexGroup
-        alignItems="center"
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
         data-test-subj="headerSectionInnerFlexGroup"
-        direction="row"
-        gutterSize="s"
       >
-        <EuiFlexItem
-          grow={true}
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            responsive={false}
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
           >
-            <EuiFlexItem>
-              <EuiFlexGroup
-                className="header-section-titles"
-                gutterSize="none"
-                responsive={false}
+            <div
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
+            >
+              <div
+                class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
               >
-                <EuiFlexItem>
-                  <EuiTitle
-                    size="l"
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-grow-1"
+                >
+                  <h2
+                    class="euiTitle emotion-euiTitle-l"
+                    data-test-subj="header-section-title"
                   >
-                    <h2
-                      data-test-subj="header-section-title"
+                    <span
+                      class="eui-textBreakNormal"
                     >
-                      <span
-                        className="eui-textBreakNormal"
-                      >
-                        Test title
-                      </span>
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <Subtitle
+                      Test title
+                    </span>
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="c0 siemSubtitle"
         data-test-subj="header-section-subtitle"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</Header>
+      >
+        <div
+          class="siemSubtitle__item siemSubtitle__item--node"
+          data-test-subj="header-panel-subtitle"
+        />
+      </div>
+    </div>
+  </div>
+</header>
 `;

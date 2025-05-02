@@ -8,9 +8,13 @@
 import * as http from 'http';
 import expect from '@kbn/expect';
 import equals from 'fast-deep-equal';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
+import { testSubjectIds } from '../constants/test_subject_ids';
+
+const { CIS_AWS_OPTION_TEST_ID, AWS_SINGLE_ACCOUNT_TEST_ID } = testSubjectIds;
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
@@ -24,12 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-
-  const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-
-  // Failing: See https://github.com/elastic/kibana/issues/208495
-  describe.skip('Agentless cloud', function () {
+  describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let mockApiServer: http.Server;
@@ -48,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -57,8 +56,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
-      await cisIntegration.selectAwsCredentials('direct');
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
+      await cisIntegration.selectAwsCredentials('direct');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.fillInTextField('awsDirectAccessKeyId', 'access_key_id');
@@ -66,8 +66,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
-
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      });
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -88,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should show setup technology selector in edit mode`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -97,17 +99,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
-      await cisIntegration.selectAwsCredentials('direct');
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
+      await cisIntegration.selectAwsCredentials('direct');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.fillInTextField('awsDirectAccessKeyId', 'access_key_id');
       await cisIntegration.fillInTextField('passwordInput-secret-access-key', 'secret_access_key');
 
       await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      });
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -121,20 +126,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should hide setup technology selector in edit mode`, async () => {
       const integrationPolicyName = `cloud_security_posture1-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
       await cisIntegration.selectSetupTechnology('agent-based');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
+      // add timeout to give extra time for the modal to show up
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        const resStatus = await cisIntegrationAws.showPostInstallCloudFormationModal();
+        expect(resStatus).to.be(true);
+      });
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -148,18 +159,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
-
-      await cisIntegration.clickSaveButton();
+      await cisIntegration.selectSetupTechnology('agent-based');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
+      await cisIntegration.clickSaveButton();
+
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
+      });
 
       const agentPolicyName = await cisIntegration.getAgentBasedPolicyValue();
 

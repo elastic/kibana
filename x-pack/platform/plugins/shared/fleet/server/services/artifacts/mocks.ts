@@ -175,7 +175,9 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
           body: undefined,
           querystring: '',
         },
-        options: {},
+        options: {
+          requestTimeout: 30_000,
+        },
         id: 7160,
       },
       name: 'elasticsearch-js',

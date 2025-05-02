@@ -25,14 +25,14 @@ export const useDiscoverRedirect = (entity: InventoryEntity) => {
         })
       : '';
 
-    return application.capabilities.discover?.show
+    return application.capabilities.discover_v2?.show
       ? discoverLocator?.getRedirectUrl({
           dataViewSpec: dataView?.toMinimalSpec?.(),
           query: { query: entityKqlFilter, language: 'kuery' },
         })
       : undefined;
   }, [
-    application.capabilities.discover?.show,
+    application.capabilities.discover_v2?.show,
     dataView,
     discoverLocator,
     entity,

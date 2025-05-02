@@ -6,8 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { DashboardSavedObjectAttributes } from '@kbn/dashboard-plugin/server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { getDashboard } from './gen_ai_dashboard';
 
 export interface OutputError {
@@ -30,7 +29,7 @@ export const initDashboard = async ({
   error?: OutputError;
 }> => {
   try {
-    await savedObjectsClient.get<DashboardSavedObjectAttributes>('dashboard', dashboardId);
+    await savedObjectsClient.get('dashboard', dashboardId);
     return {
       success: true,
     };
@@ -50,7 +49,7 @@ export const initDashboard = async ({
   }
 
   try {
-    await savedObjectsClient.create<DashboardSavedObjectAttributes>(
+    await savedObjectsClient.create(
       'dashboard',
       getDashboard(genAIProvider, dashboardId).attributes,
       {

@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
+import {
+  uiMetricService,
+  GRAPH_PREVIEW,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { TestProviders } from '../../../../common/mock';
-import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { GraphPreviewContainer } from './graph_preview_container';
@@ -22,6 +27,14 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
+jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
+  uiMetricService: {
+    trackUiMetric: jest.fn(),
+  },
+}));
+
+const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
 const mockUseUiSetting = jest.fn().mockReturnValue([true]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -173,6 +186,10 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+    expect(uiMetricServiceMock.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.LOADED,
+      GRAPH_PREVIEW
+    );
   });
 
   it('should render component for event', async () => {
@@ -224,6 +241,10 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+    expect(uiMetricServiceMock.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.LOADED,
+      GRAPH_PREVIEW
+    );
   });
 
   it('should render component and without link in header in preview panel', async () => {
@@ -437,5 +458,7 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+
+    expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
   });
 });

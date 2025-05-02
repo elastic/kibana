@@ -60,6 +60,7 @@ export const registerFullStoryRoute = ({
       options: {
         authRequired: false,
       },
+      security: { authz: { enabled: false, reason: 'This route serves as a js endpoint' } },
     },
     async (context, req, res) => {
       try {
