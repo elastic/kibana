@@ -92,19 +92,6 @@ export const PresentationPanelTitle = ({
     if (!panelDescription) {
       return panelTitleElement;
     }
-
-    const innerTitleBoxStyles = css`
-      display: flex;
-      flex-wrap: nowrap;
-      column-gap: ${euiTheme.size.xs};
-      align-items: center;
-    `;
-
-    // Styles necessary for applying ellipsis on the h2 and showing the info icon if description is present
-    const innerTitleStyles = css`
-      overflow: hidden;
-    `;
-
     return (
       <EuiToolTip
         title={panelTitle}
