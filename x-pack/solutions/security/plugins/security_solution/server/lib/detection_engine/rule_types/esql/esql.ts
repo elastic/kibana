@@ -181,8 +181,7 @@ export const esqlExecutor = async ({
           const { _id, _version, _index, ...esqlResult } = document;
 
           const sourceDocument = _id ? sourceDocuments[_id] : undefined;
-          // when mv_expand command present we must clone source, since the reference will be used multiple times
-          const source = hasMvExpand ? cloneDeep(sourceDocument?._source) : sourceDocument?._source;
+          const source = cloneDeep(sourceDocument?._source);
 
           return {
             _source: mergeEsqlResultInSource(source, esqlResult),
@@ -226,7 +225,7 @@ export const esqlExecutor = async ({
             excludedDocuments,
             hasMvExpand,
             sourceDocuments,
-            results: response,
+            results,
             isRuleAggregating,
           });
 
@@ -256,7 +255,7 @@ export const esqlExecutor = async ({
             excludedDocuments,
             hasMvExpand,
             sourceDocuments,
-            results: response,
+            results,
             isRuleAggregating,
           });
 

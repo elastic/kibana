@@ -699,6 +699,65 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponse.hits.hits.length).toBe(120);
           });
 
+          it('should create alerts from all events(2 x max_signals)', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)}`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: new Date().toISOString(),
+              max_signals: 100,
+              enabled: true,
+            };
+
+            const docs = Array.from({ length: 200 }, (_, i) => ({
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: `test_${i}`,
+                type: 'auditbeat',
+              },
+            }));
+
+            await indexListOfDocuments(docs);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              enabled: false,
+            });
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              to: new Date().toISOString(),
+              enabled: true,
+            });
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(200);
+          });
+
           it('should not create more than max_signals alerts from single document when paginate through results', async () => {
             const id = uuidv4();
             const rule: EsqlRuleCreateProps = {

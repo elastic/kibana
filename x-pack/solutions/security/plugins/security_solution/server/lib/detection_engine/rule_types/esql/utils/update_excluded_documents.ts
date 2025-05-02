@@ -6,26 +6,22 @@
  */
 
 import type { FetchedDocument } from '../fetch_source_documents';
-import type { EsqlTable } from '../esql_request';
 import type { ExcludedDocument } from '../types';
 
 /**
  * Updates the list of excluded documents
- * If mv_expand not used, we update excludedDocuments with all source document ids.
- * When the `mv_expand` command is used, the last document ID in the multiple results is not excluded.
+ * The last document ID in the multiple results is not excluded to avoid missing alerts in case of mv_expand usage or reaching max_signals limit
  * It is to ensure that in the next page we will be able to catch the rest of expanded values
  */
 export const updateExcludedDocuments = ({
   excludedDocuments,
-  hasMvExpand,
   sourceDocuments,
   results,
   isRuleAggregating,
 }: {
   excludedDocuments: ExcludedDocument[];
-  hasMvExpand: boolean;
   sourceDocuments: Record<string, FetchedDocument>;
-  results: EsqlTable;
+  results: Array<Record<string, string>>;
   isRuleAggregating: boolean;
 }): ExcludedDocument[] => {
   // aggregating queries do not have event _id, so we will not exclude any documents
@@ -33,19 +29,12 @@ export const updateExcludedDocuments = ({
     return excludedDocuments;
   }
   const documentIds = Object.keys(sourceDocuments);
-
-  if (!hasMvExpand || documentIds.length === 1) {
-    addToExcludedDocuments(excludedDocuments, sourceDocuments, documentIds);
-    return excludedDocuments;
-  }
-
-  const idColumnIndex = results.columns.findIndex((column) => column.name === '_id');
-  const lastId = results.values[results.values.length - 1][idColumnIndex];
+  const lastId = results.at(-1)?._id;
 
   addToExcludedDocuments(
     excludedDocuments,
     sourceDocuments,
-    documentIds.filter((id) => id !== lastId)
+    documentIds.length === 1 ? documentIds : documentIds.filter((id) => id !== lastId)
   );
 
   return excludedDocuments;
