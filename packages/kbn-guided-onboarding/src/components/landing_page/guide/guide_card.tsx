@@ -10,10 +10,8 @@ import React, { useCallback, useState } from 'react';
 
 import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { css } from '@emotion/react';
-import { DeploymentDetailsModal, DeploymentDetailsProvider } from '@kbn/cloud/deployment_details';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { GuideState } from '../../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
@@ -43,13 +41,6 @@ export const GuideCard = ({
   activateGuide,
   navigateToApp,
   activeFilter,
-  openModal,
-  i18nStart,
-  theme,
-  url,
-  cloud,
-  docLinks,
-  navigateToUrl,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -57,35 +48,6 @@ export const GuideCard = ({
   if (card.guideId) {
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
-
-  const managementUrl = url.locators
-    .get('MANAGEMENT_APP_LOCATOR')
-    ?.useUrl({ sectionId: 'security', appId: 'api_keys' });
-
-  const openESApiModal = useCallback(() => {
-    const modal = openModal(
-      toMountPoint(
-        <DeploymentDetailsProvider
-          cloudId={cloud.isCloudEnabled ? cloud.cloudId : ''}
-          elasticsearchUrl={cloud.elasticsearchUrl}
-          managementUrl={managementUrl}
-          apiKeysLearnMoreUrl={docLinks.links.fleet.apiKeysLearnMore}
-          cloudIdLearnMoreUrl={docLinks.links.cloud.beatsAndLogstashConfiguration}
-          navigateToUrl={navigateToUrl}
-        >
-          <DeploymentDetailsModal closeModal={() => modal.close()} />
-        </DeploymentDetailsProvider>,
-        {
-          theme,
-          i18n: i18nStart,
-        }
-      ),
-      {
-        maxWidth: 400,
-        'data-test-subj': 'guideModalESApi',
-      }
-    );
-  }, [openModal, i18nStart, theme, cloud, docLinks, managementUrl, navigateToUrl]);
 
   const onClick = useCallback(async () => {
     setIsLoading(true);
@@ -96,7 +58,7 @@ export const GuideCard = ({
         path: card.navigateTo.path,
       });
     } else if (card.openEndpointModal) {
-      openESApiModal();
+      openWiredConnectionDetails();
     }
     setIsLoading(false);
   }, [
@@ -106,7 +68,6 @@ export const GuideCard = ({
     guideState,
     navigateToApp,
     card.openEndpointModal,
-    openESApiModal,
   ]);
 
   const isHighlighted = activeFilter === card.solution;
