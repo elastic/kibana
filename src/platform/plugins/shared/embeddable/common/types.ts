@@ -13,6 +13,9 @@ import type {
   PersistableState,
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
+import type { ObjectTransform } from '@kbn/object-versioning';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { Type } from '@kbn/config-schema';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
@@ -26,6 +29,28 @@ export interface EmbeddableRegistryDefinition<
 }
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
+
+export type VersionableEmbeddableObject<
+  SOAttributes = unknown,
+  Item = unknown,
+  PrevItem = unknown
+> = {
+  up?: ObjectTransform<PrevItem, Item>;
+  down?: ObjectTransform<Item, PrevItem>;
+  itemSchema?: Type<Item>;
+  savedObjectToItem?: (savedObject: SOAttributes) => MaybePromise<Item>;
+  itemToSavedObject?: (item: Item) => MaybePromise<SOAttributes>;
+};
+
+export type EmbeddableContentManagementDefinition = {
+  id: string;
+  versions: Record<number, VersionableEmbeddableObject<any, any, any>>;
+  latestVersion: number;
+};
+
+export type EmbeddableContentManagementService = {
+  getEmbeddableMigrationDefinition: (id: string) => EmbeddableContentManagementDefinition;
+};
 
 export interface CommonEmbeddableStartContract {
   getEmbeddableFactory?: (

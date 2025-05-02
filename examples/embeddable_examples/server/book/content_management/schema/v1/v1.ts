@@ -7,11 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  CommonEmbeddableStartContract,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-  EmbeddableContentManagementDefinition,
-  VersionableEmbeddableObject,
-} from './types';
+import { savedBookAttributesSchema } from '../../../saved_object/schema/v1';
+
+export const bookAttributesSchema = savedBookAttributesSchema;
