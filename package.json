@@ -1111,7 +1111,7 @@
     "@xstate5/react": "npm:@xstate/react@^5.0.3",
     "@xyflow/react": "^12.4.1",
     "adm-zip": "^0.5.9",
-    "ai": "^4.0.18",
+    "ai": "^4.3.9",
     "ajv": "^8.17.1",
     "ansi-regex": "^6.1.0",
     "antlr4": "^4.13.1-patch-1",
