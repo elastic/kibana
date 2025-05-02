@@ -69,11 +69,11 @@ function formatPEMContent(pemContent: string): string {
 
   const header = lines[0];
   const footer = lines[lines.length - 1];
-  // Join all content lines, remove all whitespace
+  // Join all content lines, remove all whitespace (including spaces)
   const content = lines.slice(1, -1).join('').replace(/\s+/g, '');
 
   // Insert line breaks every 64 characters
-  const formattedContent = content.replace(/(.{1,64})/g, '$1\n').trim();
+  const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
 
   return `${header}\n${formattedContent}\n${footer}`;
 }
