@@ -49,7 +49,7 @@ describe('Performance Tracker', () => {
     it('creates a tracker with the correct mark method', () => {
       const tracker = createPerformanceTracker({
         type: PERFORMANCE_TRACKER_TYPES.PANEL,
-        instance: 'testInstance',
+        subType: 'testSubType',
       });
 
       expect(tracker).toHaveProperty('mark');
@@ -60,12 +60,12 @@ describe('Performance Tracker', () => {
     it('generates mark names with the correct format', () => {
       const tracker = createPerformanceTracker({
         type: PERFORMANCE_TRACKER_TYPES.PANEL,
-        instance: 'testInstance',
+        subType: 'testSubType',
       });
 
       tracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
-      expect(mockMark).toHaveBeenCalledWith('Panel:testInstance:preRender', {
+      expect(mockMark).toHaveBeenCalledWith('Panel:testSubType:preRender', {
         detail: { id: 'test-uuid' },
       });
     });

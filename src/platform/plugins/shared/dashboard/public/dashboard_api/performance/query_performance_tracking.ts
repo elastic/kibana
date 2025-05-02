@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { round, meanBy } from 'lodash';
 import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -15,9 +14,8 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import {
   clearPerformanceTrackersByType,
-  getPerformanceTrackersGroupedById,
+  getMeanFromMeasures,
   PERFORMANCE_TRACKER_MARKS,
-  PERFORMANCE_TRACKER_MEASURES,
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
 
@@ -131,49 +129,17 @@ function reportPerformanceMetrics({
 }) {
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
-  const groupedPerformanceMarkers = getPerformanceTrackersGroupedById(
-    PERFORMANCE_TRACKER_TYPES.PANEL
-  );
 
-  // `groupedPerformanceMarkers` is a map of performance markers grouped by id.
-  // Each group contains the performance markers for a single Lens embeddable.
-  // We need to extract the start and end times of the preRender, renderStart
-  // and renderComplete markers and calculate the duration of each phase.
-  const measurements = Object.values(groupedPerformanceMarkers).map((markers) => {
-    // Get the marker name from the first group.
-    const markerName =
-      Array.isArray(markers) && markers.length > 0
-        ? markers[0].name.split(':').slice(0, -1).join(':')
-        : undefined;
+  const meanPanelPrerender = getMeanFromMeasures({
+    type: PERFORMANCE_TRACKER_TYPES.PANEL,
+    startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
+    endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+  });
 
-    const preRenderStart = markers.find((marker) =>
-      marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.PRE_RENDER}`)
-    )?.startTime;
-    const renderStart = markers.find((marker) =>
-      marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_START}`)
-    )?.startTime;
-    const renderComplete = markers.find((marker) =>
-      marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE}`)
-    )?.startTime;
-
-    if (markerName && preRenderStart && renderStart) {
-      performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION}`, {
-        start: preRenderStart,
-        end: renderStart,
-      });
-    }
-
-    if (markerName && renderComplete && renderStart) {
-      performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION}`, {
-        start: renderStart,
-        end: renderComplete,
-      });
-    }
-
-    return {
-      preRenderDuration: preRenderStart && renderStart ? renderStart - preRenderStart : 0,
-      renderDuration: renderComplete && renderStart ? renderComplete - renderStart : 0,
-    };
+  const meanPanelRenderComplete = getMeanFromMeasures({
+    type: PERFORMANCE_TRACKER_TYPES.PANEL,
+    startMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+    endMark: PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE,
   });
 
   const performanceMetricEvent = {
@@ -186,9 +152,9 @@ function reportPerformanceMetrics({
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
     key8: 'mean_panel_prerender',
-    value8: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION), 2),
+    value8: meanPanelPrerender,
     key9: 'mean_panel_rendering',
-    value9: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION), 2),
+    value9: meanPanelRenderComplete,
   };
 
   reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);

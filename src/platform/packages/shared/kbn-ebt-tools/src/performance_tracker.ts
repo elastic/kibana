@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { groupBy } from 'lodash';
+import { groupBy, mean, round } from 'lodash';
 
 import type { Logger } from '@kbn/logging';
 
@@ -62,10 +62,10 @@ interface PerformanceTrackerOptions {
    */
   type: PerformanceTrackerTypes;
   /**
-   * Instance of the performance tracker type, for example "xyVis".
-   * This is used to group marks and measures by instance.
+   * Lower-level type of the performance tracker type, for example "xyVis".
+   * This is used to group marks and measures by sub type.
    */
-  instance: string;
+  subType: string;
   /**
    * Optional logger.
    */
@@ -75,12 +75,12 @@ interface PerformanceTrackerOptions {
 /**
  * Creates a performance tracker to mark and measure performance events.
  * @param options.type - High-level type of the performance tracker, for example "Panel".
- * @param options.instance - Instance of the performance tracker type, for example "xyVis".
+ * @param options.subType - Lower-level type of the performance tracker type, for example "xyVis".
  * @returns A performance tracker object with a mark method.
  */
-export const createPerformanceTracker = ({ type, instance, logger }: PerformanceTrackerOptions) => {
+export const createPerformanceTracker = ({ type, subType, logger }: PerformanceTrackerOptions) => {
   const id = uuidv4();
-  const createMarkName = (name: string) => `${type}:${instance}:${name}`;
+  const createMarkName = (name: string) => `${type}:${subType}:${name}`;
 
   return {
     /**
@@ -99,8 +99,20 @@ export const createPerformanceTracker = ({ type, instance, logger }: Performance
 };
 
 /**
+ * Finds a performance marker by its name postfix.
+ * @param markers
+ * @param namePostfix
+ * @returns The found performance marker or undefined if not found.
+ */
+export const findMarkerByNamePostfix = (
+  markers: PerformanceMark[],
+  namePostfix: PerformanceTrackerMarks
+) => markers.find((marker) => marker.name.endsWith(`:${namePostfix}`));
+
+/**
  * Get all performance trackers by type.
  * @param type - High-level type of the performance tracker, for example "Panel".
+ * @returns An array of performance trackers.
  */
 export const getPerformanceTrackersByType = (type: PerformanceTrackerTypes) => {
   try {
@@ -137,4 +149,53 @@ export const clearPerformanceTrackersByType = (type: PerformanceTrackerTypes) =>
   } catch (e) {
     // Fail silently if performance API is not supported.
   }
+};
+
+interface GetMeanFromMeasuresOptions {
+  type: PerformanceTrackerTypes;
+  startMark: PerformanceTrackerMarks;
+  endMark: PerformanceTrackerMarks;
+  createPerformanceMeasures?: boolean;
+}
+
+/**
+ * Get the mean duration of performance measures between two marks.
+ * @param type
+ * @param startMark
+ * @param endMark
+ * @param createPerformanceMeasures - Whether to create performance measures.
+ * @returns The mean duration of the performance measures between the two marks.
+ */
+export const getMeanFromMeasures = ({
+  type,
+  startMark,
+  endMark,
+  createPerformanceMeasures = true,
+}: GetMeanFromMeasuresOptions) => {
+  const groupedMarkers = getPerformanceTrackersGroupedById(type);
+
+  // `groupedMarkers` is a map of performance markers grouped by id.
+  // Each group contains the performance markers for a single panel.
+  // We need to extract the start and end times of the preRender, renderStart
+  // and renderComplete markers and calculate the duration of each phase.
+  const measurements = Object.values(groupedMarkers).map((markers) => {
+    const markerName =
+      Array.isArray(markers) && markers.length > 0
+        ? markers[0].name.split(':').slice(0, -1).join(':')
+        : undefined;
+
+    const startTime = findMarkerByNamePostfix(markers, startMark)?.startTime;
+    const endTime = findMarkerByNamePostfix(markers, endMark)?.startTime;
+
+    if (createPerformanceMeasures && markerName && startTime && endTime) {
+      performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION}`, {
+        start: startTime,
+        end: endTime,
+      });
+    }
+
+    return startTime && endTime ? endTime - startTime : 0;
+  });
+
+  return round(mean(measurements), 2);
 };
