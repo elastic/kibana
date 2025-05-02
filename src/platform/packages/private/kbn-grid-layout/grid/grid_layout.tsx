@@ -14,8 +14,13 @@ import { combineLatest } from 'rxjs';
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridPanel } from './grid_panel';
-import { GridSectionFooter, GridSectionHeader, GridSectionWrapper } from './grid_section';
+import { GridPanel, GridPanelDragPreview } from './grid_panel';
+import {
+  GridSectionDragPreview,
+  GridSectionFooter,
+  GridSectionHeader,
+  GridSectionWrapper,
+} from './grid_section';
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
@@ -206,7 +211,8 @@ export const GridLayout = ({
                 return <GridSectionFooter key={`${element.id}--footer`} sectionId={element.id} />;
             }
           })}
-          {/* <GridPanelDragPreview /> */}
+          <GridPanelDragPreview />
+          <GridSectionDragPreview />
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>

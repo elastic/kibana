@@ -60,7 +60,7 @@ export const useGridLayoutRowEvents = ({ sectionId }: { sectionId: string }) => 
           const pointerPixel = getNextKeyboardPosition(
             ev,
             gridLayoutStateManager,
-            getSensorPosition(e),
+            getSensorPosition(ev),
             sectionId
           );
           moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel);

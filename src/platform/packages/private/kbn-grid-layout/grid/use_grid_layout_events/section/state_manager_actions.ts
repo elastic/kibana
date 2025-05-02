@@ -16,6 +16,8 @@ import { combinePanels } from '../../utils/section_management';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 
+let startingLayout: OrderedLayout | undefined;
+
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
@@ -24,6 +26,7 @@ export const startAction = (
   const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
   if (!headerRef) return;
 
+  startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
   gridLayoutStateManager.activeRowEvent$.next({
     id: sectionId,
@@ -36,12 +39,24 @@ export const startAction = (
   });
 };
 
-export const commitAction = ({ activeRowEvent$ }: GridLayoutStateManager) => {
+export const commitAction = ({ activeRowEvent$, headerRefs }: GridLayoutStateManager) => {
+  const event = activeRowEvent$.getValue();
   activeRowEvent$.next(undefined);
+  startingLayout = undefined;
+
+  if (!event) return;
+  headerRefs.current[event.id]?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
 };
 
-export const cancelAction = ({ activeRowEvent$ }: GridLayoutStateManager) => {
+export const cancelAction = ({ activeRowEvent$, gridLayout$ }: GridLayoutStateManager) => {
   activeRowEvent$.next(undefined);
+  if (startingLayout) {
+    gridLayout$.next(startingLayout);
+    startingLayout = undefined;
+  }
 };
 
 export const moveAction = (
@@ -204,7 +219,7 @@ export const moveAction = (
     if (!deepEqual(currentLayout, finalLayout))
       gridLayoutStateManager.gridLayout$.next(finalLayout);
   }
-
+  console.log(currentPointer.clientX, startingPointer.clientX);
   // update the dragged element
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,

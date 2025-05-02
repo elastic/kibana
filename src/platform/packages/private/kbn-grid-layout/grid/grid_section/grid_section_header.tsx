@@ -27,7 +27,6 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutRowEvents } from '../use_grid_layout_events';
 import { deleteRow } from '../utils/section_management';
 import { DeleteGridSectionModal } from './delete_grid_section_modal';
-import { GridSectionDragPreview } from './grid_section_drag_preview';
 import { GridSectionTitle } from './grid_section_title';
 
 export interface GridSectionHeaderProps {
@@ -175,13 +174,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [gridLayoutStateManager, sectionId]);
 
-  const setRef = useCallback(
-    (element: HTMLDivElement | null) => {
-      gridLayoutStateManager.headerRefs.current[sectionId] = element;
-    },
-    [gridLayoutStateManager, sectionId]
-  );
-
   return (
     <>
       <EuiFlexGroup
@@ -196,7 +188,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           ).isCollapsed,
         })}
         data-test-subj={`kbnGridSectionHeader-${sectionId}`}
-        ref={setRef}
+        ref={(element: HTMLDivElement | null) => {
+          gridLayoutStateManager.headerRefs.current[sectionId] = element;
+        }}
       >
         <GridSectionTitle
           sectionId={sectionId}
@@ -268,7 +262,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           )
         }
       </EuiFlexGroup>
-      {isActive && <GridSectionDragPreview sectionId={sectionId} />}
       {deleteModalVisible && (
         <DeleteGridSectionModal
           sectionId={sectionId}

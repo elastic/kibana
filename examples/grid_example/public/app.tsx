@@ -339,7 +339,7 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
     // styling for what the grid row header looks like when being dragged
     '.kbnGridSectionHeader--active': {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-      border: `1px solid ${euiTheme.border.color}`,
+      outline: `1px solid ${euiTheme.border.color}`,
       borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
       paddingLeft: '8px',
       // hide accordian arrow + panel count text when row is being dragged
@@ -348,7 +348,7 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
       },
     },
     // styles for the area where the row will be dropped
-    '.kbnGridPanel--rowDragPreview': {
+    '.kbnGridSection--dragPreview': {
       backgroundColor: euiTheme.components.dragDropDraggingBackground,
     },
   });

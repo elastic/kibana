@@ -13,7 +13,7 @@ import { skip } from 'rxjs';
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridPanelDragPreview = React.memo(({ sectionId }: { sectionId: string }) => {
+export const GridPanelDragPreview = () => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -25,17 +25,19 @@ export const GridPanelDragPreview = React.memo(({ sectionId }: { sectionId: stri
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe((activePanel) => {
           if (!dragPreviewRef.current) return;
-
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          if (!activePanel || !gridLayout?.[sectionId].panels[activePanel.id]) {
+          const sectionId = activePanel?.targetRow;
+          if (!activePanel || !sectionId || !gridLayout?.[sectionId].panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
             const panel = gridLayout[sectionId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
-            dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            dragPreviewRef.current.style.gridRowStart = `${`gridRow-${sectionId}`} ${
+              panel.row + 1
+            }`;
+            dragPreviewRef.current.style.gridRowEnd = `span ${panel.height}`;
           }
         });
 
@@ -48,7 +50,7 @@ export const GridPanelDragPreview = React.memo(({ sectionId }: { sectionId: stri
   );
 
   return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
-});
+};
 
 const styles = css({ display: 'none', pointerEvents: 'none' });
 
