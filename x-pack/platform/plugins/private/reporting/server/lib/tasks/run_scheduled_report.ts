@@ -12,10 +12,10 @@ import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugi
 import { SCHEDULED_REPORTING_EXECUTE_TYPE, ScheduledReportTaskParams } from '.';
 import type { SavedReport } from '../store';
 import { errorLogger } from './error_logger';
-import { RawScheduledReport } from '../../saved_objects/scheduled_report/schemas/latest';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { PrepareJobResults, RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
+import { ScheduledReport as ScheduledReportType } from '../../types';
 
 type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;
@@ -41,7 +41,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       }
 
       const internalSoClient = await this.opts.reporting.getSoClient();
-      const reportSO = await internalSoClient.get<RawScheduledReport>(
+      const reportSO = await internalSoClient.get<ScheduledReportType>(
         SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
         reportSoId
       );

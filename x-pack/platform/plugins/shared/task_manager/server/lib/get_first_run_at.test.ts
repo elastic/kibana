@@ -159,7 +159,7 @@ describe('getFirstRunAt', () => {
           freq: 2, // Weekly
           interval: 1,
           tzid: 'UTC',
-          byweekday: [1], // Monday
+          byweekday: ['MO'], // Monday
         },
       },
     };
@@ -182,7 +182,7 @@ describe('getFirstRunAt', () => {
           freq: 2, // Weekly
           interval: 1,
           tzid: 'UTC',
-          byweekday: [1], // Monday
+          byweekday: ['MO'], // Monday
           byhour: [12],
           byminute: [15],
         },
@@ -257,7 +257,7 @@ describe('getFirstRunAt', () => {
           freq: 1, // Monthly
           interval: 1,
           tzid: 'UTC',
-          byweekday: [3], // Wednesday
+          byweekday: ['WE'], // Wednesday
           byhour: [12],
           byminute: [17],
         },

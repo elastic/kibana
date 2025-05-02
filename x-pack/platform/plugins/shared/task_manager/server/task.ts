@@ -11,7 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { Frequency, Weekday } from '@kbn/rrule';
+import type { Frequency } from '@kbn/rrule';
 import { isErr, tryAsResult } from './lib/result_type';
 import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -266,29 +266,29 @@ export interface RruleSchedule {
 }
 
 interface RruleCommon {
-  freq: Frequency;
+  freq?: Frequency;
   interval: number;
   tzid: string;
 }
 interface RruleMonthly extends RruleCommon {
   freq: Frequency.MONTHLY;
-  bymonthday?: number[];
   byhour?: number[];
   byminute?: number[];
-  byweekday?: Weekday[];
+  byweekday?: string[];
+  bymonthday?: number[];
 }
 interface RruleWeekly extends RruleCommon {
   freq: Frequency.WEEKLY;
-  byweekday?: Weekday[];
   byhour?: number[];
   byminute?: number[];
+  byweekday?: string[];
   bymonthday?: never;
 }
 interface RruleDaily extends RruleCommon {
   freq: Frequency.DAILY;
   byhour?: number[];
   byminute?: number[];
-  byweekday?: Weekday[];
+  byweekday?: string[];
   bymonthday?: never;
 }
 

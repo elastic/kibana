@@ -24,6 +24,7 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
+  RruleSchedule,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
@@ -32,6 +33,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { RawScheduledReport } from './saved_objects/scheduled_report/schemas/latest';
 
 /**
  * Plugin Setup Contract
@@ -97,6 +99,10 @@ export interface ScheduledReportingJobResponse {
    */
   job: ScheduledReportApiJSON;
 }
+
+export type ScheduledReport = Omit<RawScheduledReport, 'schedule'> & {
+  schedule: RruleSchedule;
+};
 
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];

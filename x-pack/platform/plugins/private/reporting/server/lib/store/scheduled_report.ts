@@ -11,14 +11,14 @@ import { JOB_STATUS } from '@kbn/reporting-common';
 import { SavedObject } from '@kbn/core/server';
 import { BasePayload } from '@kbn/reporting-common/types';
 import { Report } from './report';
-import { RawScheduledReport } from '../../saved_objects/scheduled_report/schemas/latest';
+import { ScheduledReport as ScheduledReportType } from '../../types';
 
 interface ConstructorOpts {
   runAt: Date;
   kibanaId: string;
   kibanaName: string;
   queueTimeout: number;
-  reportSO: SavedObject<RawScheduledReport>;
+  reportSO: SavedObject<ScheduledReportType>;
 }
 
 export class ScheduledReport extends Report {
