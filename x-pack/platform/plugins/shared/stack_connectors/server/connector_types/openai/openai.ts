@@ -88,7 +88,12 @@ function formatPEMContent(pemContent: string): string {
 
   // Assemble the final PEM with proper formatting
   // Ensure newline after header and before footer
-  return `${header}\n${formattedContent}\n${footer}`;
+  const result = `${header}\n${formattedContent}\n${footer}`;
+  
+  // Log the formatted result for debugging
+  console.log('Formatted PEM content:', result);
+  
+  return result;
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
