@@ -2167,10 +2167,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.2.0.tgz#0f32724e394f3bfa35d18ef8fa2e79da47191779"
   integrity sha512-EDp5FP8nbzGXwAMWM2xo6SL2LdsUwEVrt6idE8AoW45KybuJZ9Dr8IB8z6+wCr7Jxrg+nwdst039LpaslDur+g==
 
-"@elastic/eui-theme-borealis@1.0.0":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_1.0.0_button_updates_final_04.tgz":
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-1.0.0.tgz#f85679d2d72dfc43a620241cbf4161d4e4e81841"
-  integrity sha512-Zf3ZX5siUhF+TNOdP0FZ3PNEpVmfe3DDXFm5biAKFlGp4e5yrR1FKPYOzkOdJtPWlOoNaedawnALXNVjp1UH8w==
+  resolved "file:./elastic_eui_theme_borealis_1.0.0_button_updates_final_04.tgz#a4e6bfeedd7cc71e5fb39bdec90366ba502fa609"
 
 "@elastic/eui-theme-common@1.0.0":
   version "1.0.0"
@@ -2181,12 +2180,18 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@102.0.0":
-  version "102.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.0.0.tgz#dda965d92eb46bf061aac8d0219218779aea28bb"
-  integrity sha512-o4BuXdyGLTAJOBMIUVovDaDmmW+RJgKG6XdIDds7aJyQFlcqIOHgM59yCorzEHhpPAuaYparShJE/vug2dJAIQ==
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_1.0.0_button_updates_final_04.tgz":
+  version "1.0.0"
+  resolved "file:./elastic_eui_theme_common_1.0.0_button_updates_final_04.tgz#07cf830c9a9cf05f0d22e9df45e980802139b1b8"
   dependencies:
-    "@elastic/eui-theme-common" "1.0.0"
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./elastic_eui_102.0.0_button_updates_final_04.tgz":
+  version "102.0.0"
+  resolved "file:./elastic_eui_102.0.0_button_updates_final_04.tgz#7198517f4daf2bba4d511558dc0b5739102b2c3a"
+  dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
