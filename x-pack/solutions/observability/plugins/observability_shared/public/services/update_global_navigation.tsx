@@ -19,12 +19,13 @@ export function updateGlobalNavigation({
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
 }) {
-  const { apm, logs, metrics, uptime, slo } = capabilities.navLinks;
+  const { apm, logs, metrics, uptime, synthetics, slo } = capabilities.navLinks;
   const someVisible = Object.values({
     apm,
     logs,
     metrics,
     uptime,
+    synthetics,
     slo,
   }).some((visible) => visible);
 
