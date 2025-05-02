@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ToolingLog } from '@kbn/tooling-log';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 import { writeTempfile } from './file_utils';
 import { generateCertificates } from './generate_certificate';
 import { getServiceConfigurationFromYaml } from './get_service_configuration';
@@ -75,7 +75,7 @@ export async function getEisGatewayConfig({
     },
   };
 
-  const aclFilePath = await writeTempfile('acl.yaml', safeDump(aclContents));
+  const aclFilePath = await writeTempfile('acl.yaml', dump(aclContents));
 
   log.debug(`Wrote ACL file to ${aclFilePath}`);
 
