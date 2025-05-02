@@ -6,7 +6,7 @@
  */
 
 import type { AnyAction } from 'redux-v4';
-import type { ThunkDispatch } from 'redux-thunk';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import { connect } from 'react-redux';
 import type { OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
 import { TOCEntry } from './toc_entry';

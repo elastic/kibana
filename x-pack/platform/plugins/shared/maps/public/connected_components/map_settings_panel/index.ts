@@ -7,7 +7,7 @@
 
 import type { AnyAction } from 'redux-v4';
 import { connect } from 'react-redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import type { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';

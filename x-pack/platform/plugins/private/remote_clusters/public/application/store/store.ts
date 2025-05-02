@@ -7,7 +7,7 @@
 
 import type { PreloadedState } from 'redux-v4';
 import { createStore, applyMiddleware } from 'redux-v4';
-import thunk from 'redux-thunk';
+import thunk from 'redux-thunk-v2';
 
 import { remoteClusters } from './reducers';
 import { detailPanel } from './middleware';
