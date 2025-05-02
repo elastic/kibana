@@ -42,7 +42,12 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
   });
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s" aria-label="Statistics flyout">
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      size="s"
+      aria-label={i18nTexts.diagnosticsFlyoutAriaLabel}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{i18nTexts.diagnosticsFlyoutTitle}</h2>

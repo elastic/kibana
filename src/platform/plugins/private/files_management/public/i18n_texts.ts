@@ -37,6 +37,9 @@ export const i18nTexts = {
   diagnosticsFlyoutTitle: i18n.translate('filesManagement.diagnostics.flyoutTitle', {
     defaultMessage: 'Statistics',
   }),
+  diagnosticsFlyoutAriaLabel: i18n.translate('filesManagement.diagnostics.flyoutAriaLabel', {
+    defaultMessage: 'Statistics flyout',
+  }),
   diagnosticsFlyoutSummarySectionTitle: i18n.translate(
     'filesManagement.diagnostics.summarySectionTitle',
     {
