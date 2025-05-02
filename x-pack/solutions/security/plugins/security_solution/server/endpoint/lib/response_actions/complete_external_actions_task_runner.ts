@@ -139,6 +139,10 @@ export class CompleteExternalActionsTaskRunner
           agentType
         );
 
+        if (this.abortController.signal.aborted) {
+          break;
+        }
+
         for (const spaceId of spaceIds) {
           this.log.debug(
             () => `Processing pending actions for [${agentType}] in space [${spaceId}]`
