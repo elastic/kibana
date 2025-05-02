@@ -83,6 +83,7 @@ const getTestUtils = (
                   ? {
                       artifacts: {
                         dashboards: [],
+                        investigation_guide: { blob: '' },
                       },
                     }
                   : {}),
@@ -399,6 +400,7 @@ const getTestUtils = (
                         id: 'dashboard-2',
                       },
                     ],
+                    investigation_guide: { blob: '# Summary' },
                   },
                 }
               : {}),
@@ -428,6 +430,7 @@ const getTestUtils = (
               id: 'dashboard-2',
             },
           ],
+          investigation_guide: { blob: '# Summary' },
         });
       }
     });

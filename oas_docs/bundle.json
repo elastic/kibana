@@ -1111,6 +1111,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -2210,7 +2223,21 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 10,
                         "type": "array"
+                      },
+                      "investigation_guide": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "blob": {
+                            "maxLength": 1000,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "blob"
+                        ],
+                        "type": "object"
                       }
                     },
                     "type": "object"
@@ -2879,6 +2906,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -3821,7 +3861,21 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 10,
                         "type": "array"
+                      },
+                      "investigation_guide": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "blob": {
+                            "maxLength": 1000,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "blob"
+                        ],
+                        "type": "object"
                       }
                     },
                     "type": "object"
@@ -4221,6 +4275,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -6158,6 +6225,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
