@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/dashboard
 title: "dashboard"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the dashboard plugin
-date: 2025-04-23
+date: 2025-05-01
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'dashboard']
 ---
 import dashboardObj from './dashboard.devdocs.json';
@@ -21,7 +21,7 @@ Contact [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kib
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 96 | 0 | 92 | 11 |
+| 88 | 0 | 82 | 10 |
 
 ## Client
 
@@ -30,6 +30,9 @@ Contact [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kib
 
 ### Functions
 <DocDefinitionList data={dashboardObj.client.functions}/>
+
+### Classes
+<DocDefinitionList data={dashboardObj.client.classes}/>
 
 ### Interfaces
 <DocDefinitionList data={dashboardObj.client.interfaces}/>
@@ -53,12 +56,9 @@ Contact [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kib
 
 ## Common
 
-### Objects
-<DocDefinitionList data={dashboardObj.common.objects}/>
-
-### Functions
-<DocDefinitionList data={dashboardObj.common.functions}/>
-
 ### Interfaces
 <DocDefinitionList data={dashboardObj.common.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={dashboardObj.common.misc}/>
 

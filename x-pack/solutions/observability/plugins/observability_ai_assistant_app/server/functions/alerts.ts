@@ -195,7 +195,9 @@ export function registerAlertsFunction({
               filter: [
                 {
                   range: {
-                    '@timestamp': {
+                    // Note: The @timestamp field is the value for when the alert was last updated
+                    // and not when the alert was created
+                    'kibana.alert.start': {
                       gte: start,
                       lte: end,
                     },

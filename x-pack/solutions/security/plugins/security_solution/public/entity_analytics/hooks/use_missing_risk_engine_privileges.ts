@@ -40,13 +40,6 @@ export const useMissingRiskEnginePrivileges = (
       };
     }
 
-    if (privilegesResponse.has_all_required) {
-      return {
-        isLoading: false,
-        hasAllRequiredPrivileges: true,
-      };
-    }
-
     const requiredIndexPrivileges: NonEmptyArray<RiskEngineIndexPrivilege> = readonly
       ? ['read']
       : ['read', 'write'];
@@ -60,7 +53,7 @@ export const useMissingRiskEnginePrivileges = (
     // Here we check if there are no missing privileges of the provided set of required privileges
     if (
       indexPrivileges.every(([_, missingPrivileges]) => missingPrivileges.length === 0) &&
-      (readonly || clusterPrivileges.length === 0) // cluster privileges check is required for write operations
+      (readonly || (clusterPrivileges.run.length === 0 && clusterPrivileges.enable.length === 0)) // cluster privileges check is required for write operations
     ) {
       return {
         isLoading: false,
@@ -73,7 +66,7 @@ export const useMissingRiskEnginePrivileges = (
       hasAllRequiredPrivileges: false,
       missingPrivileges: {
         indexPrivileges,
-        clusterPrivileges: readonly ? [] : clusterPrivileges, // cluster privileges are not required for readonly
+        clusterPrivileges: readonly ? { enable: [], run: [] } : clusterPrivileges, // cluster privileges are not required for readonly
       },
     };
   }, [isLoading, privilegesResponse, readonly]);
