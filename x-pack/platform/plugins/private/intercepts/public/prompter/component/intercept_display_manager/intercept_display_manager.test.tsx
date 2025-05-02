@@ -88,6 +88,7 @@ describe('InterceptDisplayManager', () => {
     expect(ackProductIntercept).toHaveBeenCalledWith({
       ackType: 'dismissed',
       interceptId: '1',
+      runId: 1,
     });
 
     expect(screen.queryByRole('dialog')).toBeNull();
@@ -169,6 +170,12 @@ describe('InterceptDisplayManager', () => {
 
     await user.click(screen.getByText('Submit'));
 
-    await waitFor(() => expect(productIntercept.onProgress).toHaveBeenCalledWith('hello', 'louie'));
+    await waitFor(() =>
+      expect(productIntercept.onProgress).toHaveBeenCalledWith({
+        runId: 1,
+        stepId: 'hello',
+        stepResponse: 'louie',
+      })
+    );
   });
 });
