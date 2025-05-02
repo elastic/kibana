@@ -73,12 +73,18 @@ describe('Global HTTP API options', () => {
       .expect(200)
       .send({ foo: true, bar: { baz: 1 }, doNotReturn: 1 });
     expect(result).toEqual({ foo: true, bar: { baz: 1 } });
+  });
+
+  it('filters plain objects, using comma separated string inputs', async () => {
     const { body: result2 } = await supertest(server.listener)
       .post('/echo')
       .query({ filter_path: 'foo,bar.baz' })
       .expect(200)
       .send({ foo: true, bar: { baz: 1 }, doNotReturn: 1 });
     expect(result2).toEqual({ foo: true, bar: { baz: 1 } });
+  });
+
+  it('filters plain objects, excluding elements from arrays that do not match', async () => {
     const { body: result3 } = await supertest(server.listener)
       .post('/echo')
       .query({ filter_path: 'foo,bar.baz' })
@@ -89,6 +95,9 @@ describe('Global HTTP API options', () => {
         doNotReturn: 1,
       });
     expect(result3).toEqual({ foo: true, bar: [{ baz: 1 }, { baz: 2 }] });
+  });
+
+  it('filters plain arrays', async () => {
     const { body: result4 } = await supertest(server.listener)
       .post('/echo')
       .query({ filter_path: ['test.foo'] })
