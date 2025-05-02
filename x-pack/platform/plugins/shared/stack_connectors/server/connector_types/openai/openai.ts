@@ -115,7 +115,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
         // Normalize PEM strings to ensure consistent formatting
         const normalizePem = (pem: string): string => {
-          return pem.replace(/\r\n|\r|\n/g, '\n').trim();
+          // Remove extra whitespace, normalize newlines, ensure single newline between lines
+          return pem
+            .replace(/\r\n|\r|\n+/g, '\n') // Normalize newlines to \n
+            .replace(/\n\s*\n/g, '\n') // Remove empty lines
+            .trim(); // Remove leading/trailing whitespace
         };
 
         if (this.config.certificateFile) {
@@ -126,11 +130,19 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             'utf8'
           );
           const { cert: parsedCert } = parsePemContent(fileContent);
+          if (!parsedCert) {
+            throw new Error(`No certificate found in ${this.config.certificateFile}`);
+          }
           cert = parsedCert;
           this.logger.debug(`Loaded certificate from file: ${this.config.certificateFile}, cert: ${parsedCert.substring(0, 50)}...`);
         } else if (this.config.certificateData) {
-          cert = normalizePem(this.config.certificateData);
-          this.logger.debug(`Using certificate data: ${cert.substring(0, 50)}...`);
+          const normalizedData = normalizePem(this.config.certificateData);
+          const { cert: parsedCert } = parsePemContent(normalizedData);
+          if (!parsedCert) {
+            throw new Error('No certificate found in certificateData');
+          }
+          cert = parsedCert;
+          this.logger.debug(`Using certificate data: ${parsedCert.substring(0, 50)}..., normalized length: ${normalizedData.length}`);
         } else {
           throw new Error('No certificate file or data provided');
         }
@@ -143,11 +155,19 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             'utf8'
           );
           const { key: parsedKey } = parsePemContent(fileContent);
+          if (!parsedKey) {
+            throw new Error(`No private key found in ${this.config.privateKeyFile}`);
+          }
           key = parsedKey;
           this.logger.debug(`Loaded private key from file: ${this.config.privateKeyFile}, key: ${parsedKey.substring(0, 50)}...`);
         } else if (this.config.privateKeyData) {
-          key = normalizePem(this.config.privateKeyData);
-          this.logger.debug(`Using private key data: ${key.substring(0, 50)}...`);
+          const normalizedData = normalizePem(this.config.privateKeyData);
+          const { key: parsedKey } = parsePemContent(normalizedData);
+          if (!parsedKey) {
+            throw new Error('No private key found in privateKeyData');
+          }
+          key = parsedKey;
+          this.logger.debug(`Using private key data: ${parsedKey.substring(0, 50)}..., normalized length: ${normalizedData.length}`);
         } else {
           throw new Error('No private key file or data provided');
         }
@@ -155,7 +175,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: this.config.verificationMode === 'none',
+          rejectUnauthorized: this.config.verificationMode !== 'none',
           checkServerIdentity:
             this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
               ? () => undefined
@@ -194,7 +214,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubActions();
   }
 
-  // Rest of the file remains unchanged
   private registerSubActions() {
     this.registerSubAction({
       name: SUB_ACTION.RUN,
