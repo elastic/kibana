@@ -16,12 +16,15 @@ import {
   getPerformanceTrackersByType,
   getPerformanceTrackersGroupedById,
   clearPerformanceTrackersByType,
+  getMeanFromMeasures,
+  findMarkerByNamePostfix,
 } from './performance_tracker';
 
 // Mock the performance API
 const mockMark = jest.fn();
 const mockGetEntriesByType = jest.fn();
 const mockClearMarks = jest.fn();
+const mockMeasure = jest.fn();
 
 // Mock uuid to return predictable values
 jest.mock('uuid', () => ({
@@ -36,6 +39,7 @@ describe('Performance Tracker', () => {
         mark: mockMark,
         getEntriesByType: mockGetEntriesByType,
         clearMarks: mockClearMarks,
+        measure: mockMeasure,
       },
       writable: true,
     });
@@ -154,6 +158,145 @@ describe('Performance Tracker', () => {
       clearPerformanceTrackersByType('Panel');
 
       expect(mockClearMarks).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findMarkerByNamePostfix', () => {
+    it('finds a marker by name postfix', () => {
+      const markers = [
+        { name: 'Panel:test1:preRender', startTime: 100 },
+        { name: 'Panel:test1:renderStart', startTime: 200 },
+        { name: 'Panel:test1:renderComplete', startTime: 300 },
+      ] as PerformanceMark[];
+
+      const result = findMarkerByNamePostfix(markers, PERFORMANCE_TRACKER_MARKS.RENDER_START);
+
+      expect(result).toBeDefined();
+      expect(result!.name).toBe('Panel:test1:renderStart');
+      expect(result!.startTime).toBe(200);
+    });
+
+    it('returns undefined when no marker matches', () => {
+      const markers = [
+        { name: 'Panel:test1:preRender', startTime: 100 },
+        { name: 'Panel:test1:renderComplete', startTime: 300 },
+      ] as PerformanceMark[];
+
+      const result = findMarkerByNamePostfix(markers, PERFORMANCE_TRACKER_MARKS.RENDER_START);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getMeanFromMeasures', () => {
+    it('calculates the mean duration between start and end marks', () => {
+      const mockMarks = [
+        { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
+        { name: 'Panel:test1:renderStart', startTime: 200, detail: { id: 'id1' } },
+        { name: 'Panel:test2:preRender', startTime: 300, detail: { id: 'id2' } },
+        { name: 'Panel:test2:renderStart', startTime: 450, detail: { id: 'id2' } },
+      ];
+
+      mockGetEntriesByType.mockReturnValue(mockMarks);
+
+      const result = getMeanFromMeasures({
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
+        startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
+        endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+      });
+
+      // Mean of (200-100) and (450-300) = (100+150)/2 = 125
+      expect(result).toBe(125);
+
+      // Verify performance measures were created
+      expect(mockMeasure).toHaveBeenCalledTimes(2);
+      expect(mockMeasure).toHaveBeenCalledWith('Panel:test1:preRenderDuration', {
+        start: 100,
+        end: 200,
+      });
+      expect(mockMeasure).toHaveBeenCalledWith('Panel:test2:preRenderDuration', {
+        start: 300,
+        end: 450,
+      });
+    });
+
+    it('skips creating performance measures when createPerformanceMeasures is false', () => {
+      const mockMarks = [
+        { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
+        { name: 'Panel:test1:renderStart', startTime: 200, detail: { id: 'id1' } },
+      ];
+
+      mockGetEntriesByType.mockReturnValue(mockMarks);
+
+      const result = getMeanFromMeasures({
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
+        startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
+        endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+        createPerformanceMeasures: false,
+      });
+
+      expect(result).toBe(100);
+      expect(mockMeasure).not.toHaveBeenCalled();
+    });
+
+    it('handles missing markers correctly', () => {
+      const mockMarks = [
+        { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
+        // Missing renderStart for id1
+        { name: 'Panel:test2:preRender', startTime: 300, detail: { id: 'id2' } },
+        { name: 'Panel:test2:renderStart', startTime: 450, detail: { id: 'id2' } },
+      ];
+
+      mockGetEntriesByType.mockReturnValue(mockMarks);
+
+      const result = getMeanFromMeasures({
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
+        startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
+        endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+      });
+
+      // Only one valid measurement (450-300 = 150)
+      expect(result).toBe(75);
+
+      // Only one performance measure should be created
+      expect(mockMeasure).toHaveBeenCalledTimes(1);
+      expect(mockMeasure).toHaveBeenCalledWith('Panel:test2:preRenderDuration', {
+        start: 300,
+        end: 450,
+      });
+    });
+
+    it('returns 0 when no valid measurements are found', () => {
+      mockGetEntriesByType.mockReturnValue([]);
+
+      const result = getMeanFromMeasures({
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
+        startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
+        endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+      });
+
+      expect(result).toBe(0);
+      expect(mockMeasure).not.toHaveBeenCalled();
+    });
+
+    it('extracts the marker name correctly to create the measure name', () => {
+      const mockMarks = [
+        { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
+        { name: 'Panel:test1:renderStart', startTime: 200, detail: { id: 'id1' } },
+      ];
+
+      mockGetEntriesByType.mockReturnValue(mockMarks);
+
+      getMeanFromMeasures({
+        type: PERFORMANCE_TRACKER_TYPES.PANEL,
+        startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
+        endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
+      });
+
+      expect(mockMeasure).toHaveBeenCalledWith('Panel:test1:preRenderDuration', {
+        start: 100,
+        end: 200,
+      });
     });
   });
 });

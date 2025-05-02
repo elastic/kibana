@@ -174,6 +174,10 @@ export const getMeanFromMeasures = ({
 }: GetMeanFromMeasuresOptions) => {
   const groupedMarkers = getPerformanceTrackersGroupedById(type);
 
+  if (Object.keys(groupedMarkers).length === 0) {
+    return 0;
+  }
+
   // `groupedMarkers` is a map of performance markers grouped by id.
   // Each group contains the performance markers for a single panel.
   // We need to extract the start and end times of the preRender, renderStart
