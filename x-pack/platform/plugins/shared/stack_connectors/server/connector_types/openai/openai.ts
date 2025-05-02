@@ -192,15 +192,34 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(`Certificate format check - Header: ${cert?.toString().startsWith('-----BEGIN CERTIFICATE-----')}, Footer: ${cert?.toString().endsWith('-----END CERTIFICATE-----')}`);
         this.logger.debug(`Private key format check - Header: ${key?.toString().startsWith('-----BEGIN PRIVATE KEY-----')}, Footer: ${key?.toString().endsWith('-----END PRIVATE KEY-----')}`);
 
+        // Ensure PEM content is properly formatted
+        const certPEM = cert.toString().trim();
+        const keyPEM = key.toString().trim();
+
+        // Debug log the exact content being passed to the HTTPS agent
+        this.logger.debug('Certificate content being passed to HTTPS agent:');
+        this.logger.debug(certPEM);
+        this.logger.debug('Private key content being passed to HTTPS agent:');
+        this.logger.debug(keyPEM);
+
         const httpsAgent = new https.Agent({
-          cert: cert.toString(),
-          key: key.toString(),
+          cert: certPEM,
+          key: keyPEM,
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
             this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
+
+        // Debug log the agent configuration
+        this.logger.debug('HTTPS Agent configuration:');
+        this.logger.debug(JSON.stringify({
+          cert: certPEM.slice(0, 100) + '...',
+          key: keyPEM.slice(0, 100) + '...',
+          rejectUnauthorized: this.configAny.verificationMode === 'none',
+          checkServerIdentity: this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
+        }, null, 2));
 
         this.openAI = new OpenAI({
           apiKey: this.key,
