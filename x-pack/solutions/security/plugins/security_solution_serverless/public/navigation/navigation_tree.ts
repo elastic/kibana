@@ -82,17 +82,21 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
   ],
   footer: [
     {
-      type: 'navItem',
-      id: SecurityPageName.landing,
-      link: securityLink(SecurityPageName.landing),
-      icon: 'launch',
+      id: 'security_solution_nav_footer',
+      type: 'navGroup',
+      children: [
+        {
+          id: SecurityPageName.landing,
+          link: securityLink(SecurityPageName.landing),
+          icon: 'launch',
+        },
+        {
+          link: 'dev_tools',
+          title: i18nStrings.devTools,
+          icon: 'editorCodeBlock',
+        },
+        createStackManagementNavigationTree(),
+      ],
     },
-    {
-      type: 'navItem',
-      link: 'dev_tools',
-      title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
-    },
-    createStackManagementNavigationTree(),
   ],
 });
