@@ -126,7 +126,12 @@ export const PresentationPanelTitle = ({
           `}
         >
           {!hideTitle ? (
-            <h2 css={innerTitleStyles}>
+            <h2
+              // styles necessary for applying ellipsis and showing the info icon if description is present
+              css={css`
+                overflow: hidden;
+              `}
+            >
               <EuiScreenReaderOnly>
                 <span id={headerId}>
                   {panelTitle
