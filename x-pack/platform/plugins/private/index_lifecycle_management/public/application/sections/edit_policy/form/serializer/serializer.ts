@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import { merge, cloneDeep } from 'lodash';
 
 import { SerializedPolicy } from '../../../../../../common/types';

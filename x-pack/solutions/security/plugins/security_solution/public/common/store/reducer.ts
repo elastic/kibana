@@ -10,7 +10,7 @@ import { combineReducers } from 'redux';
 
 import type { DataTableState } from '@kbn/securitysolution-data-table';
 import { dataTableReducer } from '@kbn/securitysolution-data-table';
-import { enableMapSet } from 'immer';
+import { enableMapSet } from 'immer-v9';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';

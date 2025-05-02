@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 import type { Store, AnyAction } from 'redux';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { enableMapSet } from 'immer';
+import { enableMapSet } from 'immer-v9';
 import type { SideEffectSimulator, ResolverProps } from '../../types';
 import { ResolverWithoutProviders } from '../../view/resolver_without_providers';
 import { SideEffectContext } from '../../view/side_effect_context';

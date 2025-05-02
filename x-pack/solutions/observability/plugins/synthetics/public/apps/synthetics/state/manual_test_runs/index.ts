@@ -7,7 +7,7 @@
 
 import { createReducer, PayloadAction } from 'redux-toolkit-v1';
 
-import { WritableDraft } from 'immer/dist/types/types-external';
+import { WritableDraft } from 'immer-v9/dist/types/types-external';
 import { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { ActionPayload } from '../utils/actions';

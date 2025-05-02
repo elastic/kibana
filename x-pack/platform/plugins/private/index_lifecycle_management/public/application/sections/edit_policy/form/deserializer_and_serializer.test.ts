@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setAutoFreeze } from 'immer';
+import { setAutoFreeze } from 'immer-v9';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
 import { defaultRolloverAction } from '../../../constants';
