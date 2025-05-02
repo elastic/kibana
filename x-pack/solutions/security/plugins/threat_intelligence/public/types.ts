@@ -14,7 +14,7 @@ import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
-import { Store } from 'redux';
+import { Store } from 'redux-v4';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';

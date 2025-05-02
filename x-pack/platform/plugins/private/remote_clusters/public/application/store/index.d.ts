@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Store } from 'redux';
+import { Store } from 'redux-v4';
 
 export declare const remoteClustersStore: Store;
 export declare const createRemoteClustersStore: () => Store;

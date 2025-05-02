@@ -8,7 +8,7 @@
 import React, { FC, useContext } from 'react';
 import { connect } from 'react-redux';
 import { compose, withHandlers, withProps } from 'react-recompose';
-import { Dispatch } from 'redux';
+import { Dispatch } from 'redux-v4';
 import { State, PositionedElement } from '../../../../types';
 import { getClipboardData } from '../../../lib/clipboard';
 // @ts-expect-error untyped local

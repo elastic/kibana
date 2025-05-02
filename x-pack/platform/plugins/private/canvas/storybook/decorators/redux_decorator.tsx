@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { Provider as ReduxProvider } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';

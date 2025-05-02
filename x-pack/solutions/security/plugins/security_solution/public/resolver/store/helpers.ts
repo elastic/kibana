@@ -7,7 +7,7 @@
 
 import type { Draft } from 'immer-v9';
 import produce from 'immer-v9';
-import type { Reducer, AnyAction } from 'redux';
+import type { Reducer, AnyAction } from 'redux-v4';
 import type { ActionCreator } from 'typescript-fsa';
 import type { ReducerBuilder } from 'typescript-fsa-reducers';
 import type { ResolverState, AnalyzerById } from '../types';

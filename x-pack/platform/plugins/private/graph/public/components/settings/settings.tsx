@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlyoutHeader, EuiTitle, EuiTabs, EuiFlyoutBody, EuiTab } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators } from 'redux-v4';
 import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';

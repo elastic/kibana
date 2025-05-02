@@ -9,7 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
-import type { Store, AnyAction } from 'redux';
+import type { Store, AnyAction } from 'redux-v4';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { enableMapSet } from 'immer-v9';

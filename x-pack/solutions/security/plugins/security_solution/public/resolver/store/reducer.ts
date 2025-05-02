@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Reducer, AnyAction } from 'redux';
+import type { Reducer, AnyAction } from 'redux-v4';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import reduceReducers from 'reduce-reducers';
 import { immerCase, EMPTY_RESOLVER } from './helpers';

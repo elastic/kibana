@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 

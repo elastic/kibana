@@ -8,7 +8,7 @@
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { Store, Action } from 'redux';
+import type { Store, Action } from 'redux-v4';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

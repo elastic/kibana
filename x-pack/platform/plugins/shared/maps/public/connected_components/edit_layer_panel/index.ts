@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
+import { AnyAction } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { StyleDescriptor } from '../../../common/descriptor_types';

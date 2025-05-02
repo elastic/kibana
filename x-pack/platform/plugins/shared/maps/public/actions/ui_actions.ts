@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
+import { AnyAction } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk';
 import { MapStoreState } from '../reducers/store';
 import { getFlyoutDisplay, getOpenTOCDetails } from '../selectors/ui_selectors';

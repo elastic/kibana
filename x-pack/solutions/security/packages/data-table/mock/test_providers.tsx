@@ -12,10 +12,10 @@ import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createStore as createReduxStore } from 'redux';
+import { createStore as createReduxStore } from 'redux-v4';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';

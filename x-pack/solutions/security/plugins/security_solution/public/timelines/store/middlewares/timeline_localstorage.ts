@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action, Middleware } from 'redux';
+import type { Action, Middleware } from 'redux-v4';
 import { z } from '@kbn/zod';
 
 import { selectTimelineById } from '../selectors';

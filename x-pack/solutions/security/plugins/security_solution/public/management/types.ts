@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CombinedState } from 'redux';
+import type { CombinedState } from 'redux-v4';
 import type { SecurityPageName } from '../app/types';
 import type { PolicyDetailsState } from './pages/policy/types';
 import type { EndpointState } from './pages/endpoint_hosts/types';

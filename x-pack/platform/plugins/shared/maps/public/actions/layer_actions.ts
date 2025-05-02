@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction, Dispatch } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk';
 import type { Query } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';

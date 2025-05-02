@@ -11,7 +11,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Subject } from 'rxjs';
-import { Store } from 'redux';
+import { Store } from 'redux-v4';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
 import { SyntheticsAppProps } from './synthetics_settings_context';

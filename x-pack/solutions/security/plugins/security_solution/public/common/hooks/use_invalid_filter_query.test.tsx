@@ -11,7 +11,7 @@
 
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 
 import { createMockStore, kibanaMock, mockGlobalState, TestProviders } from '../mock';
 import { genHash, useInvalidFilterQuery } from './use_invalid_filter_query';

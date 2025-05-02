@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import { getContext, resetContext } from 'kea';
-import { Store } from 'redux';
+import { Store } from 'redux-v4';
 
 import { of } from 'rxjs';
 

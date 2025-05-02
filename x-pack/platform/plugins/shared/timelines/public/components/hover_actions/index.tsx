@@ -8,7 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import React, { ReactElement } from 'react';
 import { Provider } from 'react-redux';
-import { Store } from 'redux';
+import { Store } from 'redux-v4';
 import type { AddToTimelineButtonProps } from './actions/add_to_timeline';
 import type { CopyProps } from './actions/copy';
 import type { FilterValueFnArgs, HoverActionComponentProps } from './actions/types';

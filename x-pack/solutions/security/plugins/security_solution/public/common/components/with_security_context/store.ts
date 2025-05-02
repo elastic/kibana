@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Dispatch, Middleware, PreloadedState, ReducersMapObject } from 'redux';
-import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
+import type { Dispatch, Middleware, PreloadedState, ReducersMapObject } from 'redux-v4';
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux-v4';
 import type { CoreStart } from '@kbn/core/public';
 import { managementReducer } from '../../../management/store/reducer';
 import { appReducer } from '../../store/app';

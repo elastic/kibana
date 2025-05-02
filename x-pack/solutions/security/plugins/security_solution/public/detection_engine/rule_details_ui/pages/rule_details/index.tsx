@@ -28,7 +28,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { isTab } from '@kbn/timelines-plugin/public';
 
 import {

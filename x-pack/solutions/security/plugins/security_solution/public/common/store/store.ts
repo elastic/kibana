@@ -14,8 +14,8 @@ import type {
   PreloadedState,
   AnyAction,
   Reducer,
-} from 'redux';
-import { applyMiddleware, createStore as createReduxStore } from 'redux';
+} from 'redux-v4';
+import { applyMiddleware, createStore as createReduxStore } from 'redux-v4';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';

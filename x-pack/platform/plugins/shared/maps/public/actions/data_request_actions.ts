@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction, Dispatch } from 'redux-v4';
 import { ThunkDispatch } from 'redux-thunk';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';

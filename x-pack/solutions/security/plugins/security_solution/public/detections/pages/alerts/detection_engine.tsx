@@ -21,7 +21,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';

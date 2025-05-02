@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI } from 'redux';
+import type { Dispatch, MiddlewareAPI } from 'redux-v4';
 import type {
   ResolverEntityIndex,
   ResolverNode,

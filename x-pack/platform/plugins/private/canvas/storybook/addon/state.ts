@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applyMiddleware, Dispatch, Store } from 'redux';
+import { applyMiddleware, Dispatch, Store } from 'redux-v4';
 import thunkMiddleware from 'redux-thunk';
 import { addons } from '@storybook/manager-api';
 import { diff } from 'jsondiffpatch';

@@ -6,8 +6,8 @@
  */
 
 import type { AnalyzerById } from '../types';
-import type { Reducer, AnyAction } from 'redux';
-import { createStore } from 'redux';
+import type { Reducer, AnyAction } from 'redux-v4';
+import { createStore } from 'redux-v4';
 import { analyzerReducer } from './reducer';
 import * as selectors from './selectors';
 import {

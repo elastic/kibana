@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI, AnyAction } from 'redux';
+import type { Dispatch, MiddlewareAPI, AnyAction } from 'redux-v4';
 import type { DataAccessLayer } from '../../types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
 import type { State } from '../../../common/store/types';

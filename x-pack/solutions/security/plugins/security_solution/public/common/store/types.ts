@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
+import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux-v4';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { DataTableState } from '@kbn/securitysolution-data-table';

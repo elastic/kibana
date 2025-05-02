@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import createSagaMiddleware from 'redux-saga';
-import { createStore as createReduxStore, applyMiddleware } from 'redux';
+import { createStore as createReduxStore, applyMiddleware } from 'redux-v4';
 
 import { rootReducer } from '../reducers';
 import { fetchJourneyStepsEffect } from './journey';

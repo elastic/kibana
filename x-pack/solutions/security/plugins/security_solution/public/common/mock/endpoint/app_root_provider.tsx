@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import useObservable from 'react-use/lib/useObservable';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

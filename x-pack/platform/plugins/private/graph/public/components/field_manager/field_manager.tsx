@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators } from 'redux-v4';
 import { connect } from 'react-redux';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';

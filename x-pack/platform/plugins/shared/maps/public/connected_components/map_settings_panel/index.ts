@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
+import { AnyAction } from 'redux-v4';
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { FLYOUT_STATE } from '../../reducers/ui';

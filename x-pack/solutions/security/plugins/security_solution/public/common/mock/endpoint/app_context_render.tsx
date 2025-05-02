@@ -20,7 +20,7 @@ import {
   waitFor,
   renderHook as reactRenderHook,
 } from '@testing-library/react';
-import type { Action, Reducer, Store } from 'redux';
+import type { Action, Reducer, Store } from 'redux-v4';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '@kbn/fleet-plugin/common';
