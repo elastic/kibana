@@ -97,13 +97,13 @@ function formatPEMContent(pemContent: string): string {
   
   // Assemble the final PEM with explicit line breaks
   const lines = [
-    header,
+    header + '\n',  // Ensure newline after header
     formattedContent,
-    footer
+    '\n' + footer   // Ensure newline before footer
   ];
   
   // Join with newlines and ensure no extra spaces
-  return lines.join('\n')
+  return lines.join('')
     .replace(/^-----BEGIN\s+(\w+)\s+-----(\s+)/, '-----BEGIN $1-----\n')  // Fix header format
     .replace(/(\s+)-----END\s+(\w+)\s+-----$/, '\n-----END $2-----')  // Fix footer format
     .replace(/\n+/g, '\n')  // Remove duplicate newlines
@@ -207,8 +207,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(keyPEM);
 
         const httpsAgent = new https.Agent({
-          cert: Buffer.from(certPEM),
-          key: Buffer.from(keyPEM),
+          cert: certPEM,
+          key: keyPEM,
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
             this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
