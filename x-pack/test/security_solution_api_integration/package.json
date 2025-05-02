@@ -33,6 +33,9 @@
     "initialize-server:de:basic_essentials": "node ./scripts/index.js server detections_response/detection_engine basic_license_essentials_tier",
     "run-tests:de:basic_essentials": "node ./scripts/index.js runner detections_response/detection_engine basic_license_essentials_tier",
 
+    "initialize-server:de:essentials_only": "node ./scripts/index.js server detections_response/detection_engine essentials_tier",
+    "run-tests:de:essentials_only": "node ./scripts/index.js runner detections_response/detection_engine essentials_tier",
+
     "initialize-server:rm": "node ./scripts/index.js server detections_response/rules_management trial_license_complete_tier ",
     "run-tests:rm": "node ./scripts/index.js runner detections_response/rules_management trial_license_complete_tier",
 
@@ -293,6 +296,11 @@
     "alerts:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials alerts serverless qaEnv",
     "alerts:basic:server:ess": "npm run initialize-server:de:basic_essentials alerts ess",
     "alerts:basic:runner:ess": "npm run run-tests:de:basic_essentials alerts ess essEnv",
+
+    "rule_execution_logic:auth:server:serverless": "npm run initialize-server:de:essentials_only rule_execution_logic/authorization/rule_execution serverless",
+    "rule_execution_logic:auth:runner:serverless": "npm run run-tests:de:essentials_only rule_execution_logic/authorization/rule_execution serverless serverlessEnv",
+    "rule_execution_logic:auth:qa:serverless": "npm run run-tests:de:essentials_only rule_execution_logic/authorization/rule_execution serverless qaPeriodicEnv",
+    "rule_execution_logic:auth:qa:serverless:release": "npm run run-tests:de:essentials_only rule_execution_logic/authorization/rule_execution serverless qaEnv",
 
     "rule_execution_logic:eql:server:serverless": "npm run initialize-server:de rule_execution_logic/eql serverless",
     "rule_execution_logic:eql:runner:serverless": "npm run run-tests:de rule_execution_logic/eql serverless serverlessEnv",
