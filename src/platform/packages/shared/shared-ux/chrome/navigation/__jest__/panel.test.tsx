@@ -465,7 +465,9 @@ describe('Panel', () => {
 
       queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
-      expect(queryByTestId(/panelGroupId-foo/)).toBeVisible(); // no crash
+      expect(queryByTestId(/sideNavPanelError/)).toHaveTextContent(
+        'Side navigation parsing error[Chrome navigation] Error in node [group1]. Children must either all be "groups" or all "items" but not a mix of both.'
+      );
     });
 
     test('allows panel items to use custom rendering', () => {
