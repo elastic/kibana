@@ -9,47 +9,91 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import {
+  getCombinedMessage,
+  getNewSelectedPromptContext,
   type PromptContext,
   useChatComplete,
   useFetchAnonymizationFields,
-  getNewSelectedPromptContext,
-  getCombinedMessage,
 } from '@kbn/elastic-assistant';
+import { i18n } from '@kbn/i18n';
 import { useFetchAlertSummary } from './use_fetch_alert_summary';
 import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
-import * as i18n from '../constants/translations';
 
-interface Props {
+const NO_SUMMARY_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.alertSummary.noSummaryAvailable',
+  {
+    defaultMessage: 'No summary available',
+  }
+);
+
+export interface UseAlertSummaryParams {
+  /**
+   * If of the alert we want to generate the summary for
+   */
   alertId: string;
+  /**
+   * Value of securitySolution:defaultAIConnector
+   */
   defaultConnectorId: string;
-  isContextReady: boolean;
+  /**
+   * The context for the prompt
+   */
   promptContext: PromptContext;
+  /**
+   * If true we'll show anonymized values
+   */
   showAnonymizedValues?: boolean;
 }
-interface UseAlertSummary {
+
+export interface UseAlertSummaryResult {
+  /**
+   * Generated summary for the alert
+   */
   alertSummary: string;
+  /**
+   * Returns true if the alert has a summary
+   */
   hasAlertSummary: boolean;
+  /**
+   * Callback that fetches the AI summary
+   */
   fetchAISummary: () => void;
+  /**
+   * Returns true if no connector has been setup
+   */
   isConnectorMissing: boolean;
+  /**
+   * Returns true while the fetch call is happening
+   */
   isLoading: boolean;
+  /**
+   * Potenial user or prompt message replacements
+   */
   messageAndReplacements: { message: string; replacements: Replacements } | null;
+  /**
+   * Recommended actions return when fetching the alert summary
+   */
   recommendedActions: string | undefined;
 }
 
+/**
+ * Hook that generates the alert AI summary along side other related items
+ */
 export const useAlertSummary = ({
   alertId,
   defaultConnectorId,
-  isContextReady,
   promptContext,
   showAnonymizedValues = false,
-}: Props): UseAlertSummary => {
+}: UseAlertSummaryParams): UseAlertSummaryResult => {
   const { abortStream, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
   });
+
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
     useFetchAnonymizationFields();
+
   const [isConnectorMissing, setIsConnectorMissing] = useState<boolean>(false);
-  const [alertSummary, setAlertSummary] = useState<string>(i18n.NO_SUMMARY_AVAILABLE);
+  const [alertSummary, setAlertSummary] = useState<string>(NO_SUMMARY_AVAILABLE);
   const [recommendedActions, setRecommendedActions] = useState<string | undefined>();
   const [messageAndReplacements, setMessageAndReplacements] = useState<{
     message: string;
@@ -119,11 +163,10 @@ export const useAlertSummary = ({
       setMessageAndReplacements({ message: userMessage.content ?? '', replacements });
     };
 
-    if (isFetchedAnonymizationFields && isContextReady && isAlertSummaryFetched) fetchContext();
+    if (isFetchedAnonymizationFields && isAlertSummaryFetched) fetchContext();
   }, [
     anonymizationFields,
     isFetchedAnonymizationFields,
-    isContextReady,
     isAlertSummaryFetched,
     fetchedAlertSummary.prompt,
     promptContext,
