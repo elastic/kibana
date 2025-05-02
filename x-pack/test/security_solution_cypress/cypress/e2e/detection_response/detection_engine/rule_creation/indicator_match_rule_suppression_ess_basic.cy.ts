@@ -51,7 +51,7 @@ describe(
             duration: { value: 360, unit: 's' },
             missing_fields_strategy: 'doNotSuppress',
           },
-        }).then((createdRule) => {
+        }).then(createdRule => {
           visit(ruleDetailsUrl(createdRule.body.id));
 
           cy.get(DEFINITION_DETAILS).within(() => {
@@ -64,7 +64,9 @@ describe(
           });
 
           // Platinum license is required for configuration to apply
-          cy.get(ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON).eq(2).trigger('mouseover');
+          cy.get(ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON)
+            .eq(2)
+            .trigger('mouseover');
           cy.get(TOOLTIP).contains(
             'Alert suppression is configured but will not be applied due to insufficient licensing'
           );
