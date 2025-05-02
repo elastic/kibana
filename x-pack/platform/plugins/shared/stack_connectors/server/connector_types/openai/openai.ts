@@ -221,12 +221,21 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           checkServerIdentity: this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
         }, null, 2));
 
-        this.openAI = new OpenAI({
-          apiKey: this.key,
-          baseURL: removeEndpointFromUrl(this.url),
-          defaultHeaders: this.headers,
-          httpAgent: httpsAgent,
-        });
+        try {
+          this.openAI = new OpenAI({
+            apiKey: this.key,
+            baseURL: removeEndpointFromUrl(this.url),
+            defaultHeaders: this.headers,
+            httpAgent: httpsAgent,
+          });
+        } catch (error) {
+          this.logger.error(`Error initializing OpenAI client: ${error.message}`);
+          this.logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
+          if (error.cause) {
+            this.logger.error(`Error cause: ${JSON.stringify(error.cause, null, 2)}`);
+          }
+          throw error;
+        }
       } else {
         this.openAI =
           this.config.apiProvider === OpenAiProviderType.AzureAi
