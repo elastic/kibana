@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   BulkDeleteStatusResponse,
   bulkDeleteParamsSchema,
@@ -54,7 +53,7 @@ export const getBulkDeleteStatusRoute = createSloServerRoute({
     },
   },
   params: bulkDeleteStatusParamsSchema,
-  handler: async ({ params, plugins }) => {
+  handler: async ({ params, plugins }): Promise<BulkDeleteStatusResponse> => {
     await assertPlatinumLicense(plugins);
 
     const taskManager = await plugins.taskManager.start();
@@ -63,7 +62,6 @@ export const getBulkDeleteStatusRoute = createSloServerRoute({
     if (!task) {
       return {
         isDone: true,
-        results: [],
         error: 'Task not found',
       } satisfies BulkDeleteStatusResponse;
     }

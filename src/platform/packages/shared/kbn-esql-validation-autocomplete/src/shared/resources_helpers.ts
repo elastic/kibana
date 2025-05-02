@@ -9,13 +9,13 @@
 
 import { parse } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
-import type { ESQLRealField } from '../validation/types';
+import type { ESQLFieldWithMetadata } from '../validation/types';
 import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
 import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
-const cache = new Map<string, ESQLRealField[]>();
+const cache = new Map<string, ESQLFieldWithMetadata[]>();
 
 // Function to check if a key exists in the cache, ignoring case
 function checkCacheInsensitive(keyToCheck: string) {
@@ -88,7 +88,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
       ignored: string[] = []
-    ): Promise<ESQLRealField[]> => {
+    ): Promise<ESQLFieldWithMetadata[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
       await getFields();
       const queryTextForCacheSearch = toSingleLine(queryText);
@@ -108,7 +108,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
       await getFields();
       const queryTextForCacheSearch = toSingleLine(queryText);
       const cachedFields = getValueInsensitive(queryTextForCacheSearch);
-      const cacheCopy = new Map<string, ESQLRealField>();
+      const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
       cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
       return cacheCopy;
     },
