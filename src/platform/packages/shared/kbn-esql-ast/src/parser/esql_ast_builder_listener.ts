@@ -9,7 +9,6 @@
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
-  IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
   type ChangePointCommandContext,
@@ -34,14 +33,8 @@ import {
   type WhereCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
-import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
-import {
-  createAstBaseItem,
-  createCommand,
-  createFunction,
-  textExistsAndIsValid,
-  visitSource,
-} from './factories';
+import type { ESQLAst } from '../types';
+import { createCommand, createFunction, textExistsAndIsValid } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
 import { createForkCommand } from './factories/fork';
@@ -64,6 +57,7 @@ import {
   visitByOption,
   visitRenameClauses,
 } from './walkers';
+import { createTimeseriesCommand } from './factories/timeseries';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -138,17 +132,8 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
-    const node: ESQLAstTimeseriesCommand = {
-      ...createAstBaseItem('ts', ctx),
-      type: 'command',
-      args: [],
-      sources: ctx
-        .indexPatternAndMetadataFields()
-        .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => visitSource(sourceCtx)),
-    };
-    this.ast.push(node);
-    node.args.push(...node.sources);
+    const command = createTimeseriesCommand(ctx);
+    this.ast.push(command);
   }
 
   /**

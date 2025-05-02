@@ -46,11 +46,14 @@ import {
   isFunctionItem,
   isLiteralItem,
   isTimeIntervalItem,
+  sourceExists,
 } from '../shared/helpers';
 import { ESQLRealField, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
-import { listCompleteItem } from './complete_items';
+import type { ESQLSourceResult } from '../shared/types';
+import { listCompleteItem, commaCompleteItem, pipeCompleteItem } from './complete_items';
 import {
   TIME_SYSTEM_PARAMS,
+  TRIGGER_SUGGESTION_COMMAND,
   buildUserDefinedColumnsDefinitions,
   getCompatibleLiterals,
   getDateLiterals,
@@ -58,7 +61,10 @@ import {
   getOperatorSuggestion,
   getOperatorSuggestions,
   getSuggestionsAfterNot,
+  buildSourcesDefinitions,
 } from './factories';
+import { metadataSuggestion } from './commands/metadata';
+
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
@@ -114,8 +120,8 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
 }
 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
-  const fromCommand = commands.find(({ name }) => name === 'from');
-  const args = (fromCommand?.args ?? []) as ESQLSource[];
+  const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
   // the marker gets added in queries like "FROM "
   return args.filter(
     (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
@@ -999,4 +1005,76 @@ export function isExpressionComplete(
     // for the reason we need this string check.
     !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
   );
+}
+
+export function getSourceSuggestions(sources: ESQLSourceResult[]) {
+  // hide indexes that start with .
+  return buildSourcesDefinitions(
+    sources
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, dataStreams, title, type }) => {
+        return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
+      })
+  );
+}
+
+export async function additionalSourcesSuggestions(
+  queryText: string,
+  sources: ESQLSourceResult[],
+  recommendedQuerySuggestions: SuggestionRawDefinition[]
+) {
+  const canRemoveQuote = queryText.includes('"');
+  const suggestionsToAdd = await handleFragment(
+    queryText,
+    (fragment) =>
+      sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
+    (_fragment, rangeToReplace) => {
+      return getSourceSuggestions(sources).map((suggestion) => ({
+        ...suggestion,
+        rangeToReplace,
+      }));
+    },
+    (fragment, rangeToReplace) => {
+      const exactMatch = sources.find(({ name: _name }) => _name === fragment);
+      if (exactMatch?.dataStreams) {
+        // this is an integration name, suggest the datastreams
+        const definitions = buildSourcesDefinitions(
+          exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
+        );
+
+        return canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions;
+      } else {
+        const _suggestions: SuggestionRawDefinition[] = [
+          {
+            ...pipeCompleteItem,
+            filterText: fragment,
+            text: fragment + ' | ',
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          },
+          {
+            ...commaCompleteItem,
+            filterText: fragment,
+            text: fragment + ', ',
+            command: TRIGGER_SUGGESTION_COMMAND,
+            rangeToReplace,
+          },
+          {
+            ...metadataSuggestion,
+            filterText: fragment,
+            text: fragment + ' METADATA ',
+            rangeToReplace,
+          },
+          ...recommendedQuerySuggestions.map((suggestion) => ({
+            ...suggestion,
+            rangeToReplace,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+          })),
+        ];
+        return _suggestions;
+      }
+    }
+  );
+  return suggestionsToAdd;
 }
