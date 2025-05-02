@@ -4,6 +4,9 @@ mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/crowdstrike-action-type.html
 applies_to:
   stack: ga 9.0
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # CrowdStrike connector [crowdstrike-action-type]
