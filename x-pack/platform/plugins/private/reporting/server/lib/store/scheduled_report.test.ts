@@ -16,25 +16,106 @@ const payload = {
   version: '8.0.0',
 };
 
-// test('SavedReport should succeed if report has ES document fields present', () => {
-//   const createInstance = () => {
-//     return new SavedReport({
-//       _id: '290357209345723095',
-//       _index: '.reporting-fantastic',
-//       _seq_no: 23,
-//       _primary_term: 354000,
-//       jobtype: 'cool-report',
-//       payload: {
-//         headers: '',
-//         title: '',
-//         browserTimezone: '',
-//         objectType: '',
-//         version: '',
-//       },
-//     });
-//   };
-//   expect(createInstance).not.toThrow();
-// });
+test('ScheduledReport should return correctly formatted outputs', () => {
+  const scheduledReport = new ScheduledReport({
+    runAt: new Date('2023-10-01T00:00:00Z'),
+    kibanaId: 'instance-uuid',
+    kibanaName: 'kibana',
+    queueTimeout: 120000,
+    reportSO: {
+      id: 'report-so-id-111',
+      attributes: {
+        createdAt: new Date().toISOString(),
+        createdBy: 'test-user',
+        enabled: true,
+        jobType: 'test1',
+        meta: { objectType: 'test' },
+        migrationVersion: '8.0.0',
+        payload: JSON.stringify(payload),
+        schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
+        title: 'Test Report',
+      },
+      references: [],
+      type: 'scheduled-report',
+    },
+  });
+  expect(scheduledReport.toReportTaskJSON()).toEqual({
+    attempts: 1,
+    created_at: '2023-10-01T00:00:00.000Z',
+    created_by: 'test-user',
+    id: expect.any(String),
+    index: '.kibana-reporting',
+    jobtype: 'test1',
+    meta: {
+      objectType: 'test',
+    },
+    payload: {
+      browserTimezone: '',
+      forceNow: '2023-10-01T00:00:00.000Z',
+      headers: '',
+      objectType: 'test',
+      title: 'Test Report [2023-10-01T00:00:00.000Z]',
+      version: '8.0.0',
+    },
+  });
+
+  expect(scheduledReport.toReportSource()).toEqual({
+    attempts: 1,
+    max_attempts: 1,
+    created_at: '2023-10-01T00:00:00.000Z',
+    created_by: 'test-user',
+    jobtype: 'test1',
+    meta: {
+      objectType: 'test',
+    },
+    migration_version: '7.14.0',
+    kibana_id: 'instance-uuid',
+    kibana_name: 'kibana',
+    output: null,
+    payload: {
+      browserTimezone: '',
+      forceNow: '2023-10-01T00:00:00.000Z',
+      headers: '',
+      objectType: 'test',
+      title: 'Test Report [2023-10-01T00:00:00.000Z]',
+      version: '8.0.0',
+    },
+    scheduled_report_id: 'report-so-id-111',
+    status: 'processing',
+    started_at: expect.any(String),
+    process_expiration: expect.any(String),
+    timeout: 120000,
+  });
+
+  expect(scheduledReport.toApiJSON()).toEqual({
+    id: expect.any(String),
+    index: '.kibana-reporting',
+    kibana_id: 'instance-uuid',
+    kibana_name: 'kibana',
+    jobtype: 'test1',
+    created_at: '2023-10-01T00:00:00.000Z',
+    created_by: 'test-user',
+    meta: {
+      objectType: 'test',
+    },
+    timeout: 120000,
+    max_attempts: 1,
+    status: 'processing',
+    attempts: 1,
+    started_at: expect.any(String),
+    migration_version: '7.14.0',
+    output: {},
+    queue_time_ms: expect.any(Number),
+    payload: {
+      browserTimezone: '',
+      forceNow: '2023-10-01T00:00:00.000Z',
+      objectType: 'test',
+      title: 'Test Report [2023-10-01T00:00:00.000Z]',
+      version: '8.0.0',
+    },
+    scheduled_report_id: 'report-so-id-111',
+  });
+});
 
 test('ScheduledReport should throw an error if report payload is malformed', () => {
   const createInstance = () => {
