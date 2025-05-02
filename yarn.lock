@@ -8661,10 +8661,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@^1.7.2":
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.7.2.tgz#b2663f7beb93310dfeef003509cb140e33790fb7"
-  integrity sha512-pbpREdO/8D6ocFYWIzAJ24iJ1td04Anl+TehUzx9r1xR8vKJab+O4TlC/XP7s9JuD5hRPBfmo5gDha/KWVSG4A==
+"@openfeature/core@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.8.0.tgz#2cec01af993f1c298afb4bbd4492b71ed04ef893"
+  integrity sha512-FX/B6yMD2s4BlMKtB0PqSMl94eLaTwh0VK9URcMvjww0hqMOeGZnGv4uv9O5E58krAan7yCOCm4NBCoh2IATqw==
 
 "@openfeature/launchdarkly-client-provider@^0.3.2":
   version "0.3.2"
