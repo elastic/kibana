@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { OAuth2Fields, jsonValidator } from './oauth2_fields';
 import * as i18n from './translations';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
