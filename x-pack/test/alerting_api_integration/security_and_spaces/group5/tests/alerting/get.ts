@@ -79,6 +79,14 @@ const getTestUtils = (
                 notify_when: 'onThrottleInterval',
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
+                ...(describeType === 'internal'
+                  ? {
+                      artifacts: {
+                        dashboards: [],
+                        investigation_guide: { blob: '' },
+                      },
+                    }
+                  : {}),
                 api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
@@ -368,6 +376,63 @@ const getTestUtils = (
         },
         ,
       ]);
+    });
+  });
+
+  describe('Artifacts', () => {
+    it('should return the artifacts correctly', async () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            ...(describeType === 'internal'
+              ? {
+                  artifacts: {
+                    dashboards: [
+                      {
+                        id: 'dashboard-1',
+                      },
+                      {
+                        id: 'dashboard-2',
+                      },
+                    ],
+                    investigation_guide: { blob: '# Summary' },
+                  },
+                }
+              : {}),
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+      const response = await supertestWithoutAuth
+        .get(
+          `${getUrlPrefix(space.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rule/${createdAlert.id}`
+        )
+        .auth(user.username, user.password);
+
+      if (describeType === 'public') {
+        expect(response.body.artifacts).to.be(undefined);
+      } else if (describeType === 'internal') {
+        expect(response.body.artifacts).to.eql({
+          dashboards: [
+            {
+              id: 'dashboard-1',
+            },
+            {
+              id: 'dashboard-2',
+            },
+          ],
+          investigation_guide: { blob: '# Summary' },
+        });
+      }
     });
   });
 };

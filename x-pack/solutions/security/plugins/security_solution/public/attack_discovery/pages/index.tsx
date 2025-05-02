@@ -44,6 +44,8 @@ import { SettingsFlyout } from './settings_flyout';
 import { parseFilterQuery } from './settings_flyout/parse_filter_query';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { useKibanaFeatureFlags } from './use_kibana_feature_flags';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
@@ -189,7 +191,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
-  const { sourcererDataView } = useSourcererDataView();
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec();
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
 
   // filterQuery is the combined search bar query and filters in ES format:
   const [filterQuery, kqlError] = useMemo(
@@ -220,7 +227,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     const filter = parseFilterQuery({ filterQuery, kqlError });
 
     try {
-      return fetchAttackDiscoveries({
+      return await fetchAttackDiscoveries({
         end,
         filter, // <-- combined search bar query and filters
         size,
