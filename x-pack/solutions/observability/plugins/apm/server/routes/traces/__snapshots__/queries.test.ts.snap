@@ -2,6 +2,12 @@
 
 exports[`trace queries fetches a trace 1`] = `
 Object {
+  "_source": Array [
+    "error.log.message",
+    "error.exception.message",
+    "error.exception.handled",
+    "error.exception.type",
+  ],
   "apm": Object {
     "sources": Array [
       Object {
@@ -43,24 +49,15 @@ Object {
               "lte": 50000,
             },
           },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 0,
-                "lte": 50000,
-              },
-            },
-          },
-        ],
-        "must_not": Object {
-          "terms": Object {
-            "error.log.level": Array [
-              "debug",
-              "info",
-              "warning",
-            ],
-          },
+        },
+      ],
+      "must_not": Object {
+        "terms": Object {
+          "error.log.level": Array [
+            "debug",
+            "info",
+            "warning",
+          ],
         },
       },
     },
