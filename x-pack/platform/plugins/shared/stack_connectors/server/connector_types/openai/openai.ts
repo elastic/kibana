@@ -78,13 +78,19 @@ function formatPEMContent(pemContent: string): string {
   // Handle multi-part headers/footers (e.g., "-----BEGIN PRIVATE KEY-----")
   if (header === '-----BEGIN' && parts[headerIndex + 1]) {
     header = `${header} ${parts[headerIndex + 1]}`;
+    if (parts[headerIndex + 2] && parts[headerIndex + 2] !== '-----') {
+      header = `${header} ${parts[headerIndex + 2]}`;
+    }
   }
   if (footer === '-----END' && parts[footerIndex + 1]) {
     footer = `${footer} ${parts[footerIndex + 1]}`;
+    if (parts[footerIndex + 2] && parts[footerIndex + 2] !== '-----') {
+      footer = `${footer} ${parts[footerIndex + 2]}`;
+    }
   }
   
   // Join all content parts between header and footer, remove any remaining spaces
-  const content = parts.slice(headerIndex + 2, footerIndex).join('').replace(/\s+/g, '');
+  const content = parts.slice(headerIndex + 3, footerIndex).join('').replace(/\s+/g, '');
   
   // Insert line breaks every 64 characters
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
