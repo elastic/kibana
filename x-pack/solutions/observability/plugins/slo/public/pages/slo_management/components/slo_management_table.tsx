@@ -57,6 +57,7 @@ export function SloManagementTable() {
   const { tasks } = useBulkOperation();
 
   const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
+
   const onSelectionChange = (items: SLODefinitionResponse[]) => {
     setSelectedItems(items);
   };
@@ -68,7 +69,6 @@ export function SloManagementTable() {
       );
     },
     onSelectionChange,
-    initialSelected: [],
   };
 
   const actions: Array<DefaultItemAction<SLODefinitionResponse>> = [
@@ -266,7 +266,7 @@ export function SloManagementTable() {
           })}
         </EuiText>
       ) : (
-        <SloManagementBulkActions items={selectedItems} />
+        <SloManagementBulkActions items={selectedItems} setSelectedItems={onSelectionChange} />
       )}
 
       <EuiSpacer size="s" />

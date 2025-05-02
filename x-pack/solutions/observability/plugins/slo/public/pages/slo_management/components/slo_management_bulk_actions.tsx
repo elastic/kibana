@@ -5,31 +5,93 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useActionModal } from '../../../context/action_modal';
 
-export function SloManagementBulkActions({ items }: { items: SLODefinitionResponse[] }) {
+export function SloManagementBulkActions({
+  items,
+  setSelectedItems,
+}: {
+  items: SLODefinitionResponse[];
+  setSelectedItems: Function;
+}) {
   const { triggerAction } = useActionModal();
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const resetSelectedItems = () => {
+    setSelectedItems([]);
+  };
+
+  const panels = [
+    {
+      id: 0,
+      hasFocus: false,
+      items: [
+        {
+          'data-test-subj': 'sloSloManagementTableBulkDeleteButton',
+          onClick: () => {
+            triggerAction({ items, type: 'bulk_delete' });
+            setIsOpen(false);
+          },
+          name: i18n.translate(
+            'xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel',
+            {
+              defaultMessage: 'Delete',
+            }
+          ),
+        },
+        {
+          'data-test-subj': 'sloSloManagementTableBulkPurgeButton',
+          onClick: () => {
+            triggerAction({ items, type: 'bulk_purge', callback: resetSelectedItems });
+            setIsOpen(false);
+          },
+          name: i18n.translate(
+            'xpack.slo.sloManagementTable.sloSloManagementTableBulkPurgeButtonLabel',
+            {
+              defaultMessage: 'Purge Rollup Data',
+            }
+          ),
+        },
+      ],
+    },
+  ];
 
   return (
-    <EuiButtonEmpty
-      data-test-subj="sloSloManagementTableBulkDeleteButton"
-      disabled={items.length === 0}
-      onClick={() => {
-        triggerAction({ items, type: 'bulk_delete' });
-      }}
-      size="xs"
-      css={{ blockSize: '0px' }}
+    <EuiPopover
+      id={`popover-slo-management-bulk-actions`}
+      panelPaddingSize="none"
+      button={
+        <EuiButtonEmpty
+          data-test-subj="sloManagementTableBulkMenuButton"
+          css={{ blockSize: '0px', marginBottom: '5px' }}
+          size="xs"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {i18n.translate('xpack.slo.sloManagementTable.sloSloManagementTableBulkMenuLabel', {
+            defaultMessage: 'Perform bulk action on {count} SLOs',
+            values: {
+              count: items.length,
+            },
+          })}{' '}
+          <EuiIcon type="arrowDown" size="s" />
+        </EuiButtonEmpty>
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="downLeft"
     >
-      {i18n.translate('xpack.slo.sloManagementTable.sloSloManagementTableBulkDeleteButtonLabel', {
-        defaultMessage: 'Delete {count} SLOs',
-        values: {
-          count: items.length,
-        },
-      })}
-    </EuiButtonEmpty>
+      <EuiContextMenu
+        initialPanelId={0}
+        size="s"
+        panels={panels}
+        className="actDetailsCollapsedItemActions"
+        data-test-subj="detailsCollapsedActionPanel"
+        data-testid="detailsCollapsedActionPanel"
+      />
+    </EuiPopover>
   );
 }
