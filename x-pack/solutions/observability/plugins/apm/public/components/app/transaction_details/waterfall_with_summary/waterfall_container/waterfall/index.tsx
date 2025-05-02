@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import { useTheme } from '../../../../../../hooks/use_theme';
 import {
   TimelineAxisContainer,
   VerticalLinesContainer,
@@ -78,6 +79,7 @@ export function Waterfall({
   displayLimit,
   isEmbeddable,
 }: Props) {
+  const theme = useTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   const { duration } = waterfall;
