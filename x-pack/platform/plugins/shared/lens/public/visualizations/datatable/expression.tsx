@@ -107,7 +107,7 @@ export const getDatatableRenderer = (dependencies: {
   ) => {
     const performanceTracker = createPerformanceTracker({
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
-      instance: 'lens_datatable_renderer',
+      subType: 'lens_datatable_renderer',
     });
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
