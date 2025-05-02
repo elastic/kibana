@@ -73,9 +73,10 @@ export const taskSchemaV4 = taskSchemaV3.extends({
       apiKeyCreatedByUser: schema.boolean(),
     })
   ),
+});
+
+export const taskSchemaV5 = taskSchemaV4.extends({
   schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchema])),
 });
 
-type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
-
-export type RruleSchedule = Mutable<TypeOf<typeof scheduleRruleSchema>>;
+export type RruleSchedule = TypeOf<typeof scheduleRruleSchema>;
