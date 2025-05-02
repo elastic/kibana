@@ -6,11 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse, BasicPrettyPrinter } from '@kbn/esql-ast';
+export function removeComments(text: string): string {
+  // Remove single-line comments
+  const withoutSingleLineComments = text.replace(/\/\/.*$/gm, '');
+  // Remove multi-line comments
+  const withoutMultiLineComments = withoutSingleLineComments.replace(/\/\*[\s\S]*?\*\//g, '');
+  return withoutMultiLineComments.trim();
+}
 
 export function removeLastPipe(inputString: string): string {
-  const { root } = parse(inputString);
-  const queryNoComments = BasicPrettyPrinter.print(root);
+  const queryNoComments = removeComments(inputString);
   const lastPipeIndex = queryNoComments.lastIndexOf('|');
   if (lastPipeIndex !== -1) {
     return queryNoComments.substring(0, lastPipeIndex).trimEnd();
@@ -19,8 +24,7 @@ export function removeLastPipe(inputString: string): string {
 }
 
 export function processPipes(inputString: string) {
-  const { root } = parse(inputString);
-  const queryNoComments = BasicPrettyPrinter.print(root);
+  const queryNoComments = removeComments(inputString);
   const parts = queryNoComments.split('|');
   const results = [];
   let currentString = '';
@@ -38,8 +42,7 @@ export function processPipes(inputString: string) {
 }
 
 export function toSingleLine(inputString: string): string {
-  const { root } = parse(inputString);
-  const queryNoComments = BasicPrettyPrinter.print(root);
+  const queryNoComments = removeComments(inputString);
   return queryNoComments
     .split('|')
     .map((line) => line.trim())
@@ -48,7 +51,10 @@ export function toSingleLine(inputString: string): string {
 }
 
 export function getFirstPipeValue(inputString: string): string {
-  const { root } = parse(inputString);
-  const firstCommand = root.commands[0];
-  return BasicPrettyPrinter.command(firstCommand);
+  const queryNoComments = removeComments(inputString);
+  const parts = queryNoComments.split('|');
+  if (parts.length > 1) {
+    return parts[0].trim();
+  }
+  return queryNoComments.trim();
 }
