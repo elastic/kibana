@@ -54,8 +54,8 @@ export const DiscoverRedirect = ({
   const parsedState = normalizeUrlState(rawPageState);
   if (parsedState) {
     const dataViewSpec = parsedState.dataSourceSelection
-      ? hydrateDataSourceSelection(parsedState.dataSourceSelection, DEFAULT_ALL_SELECTION)
-      : hydrateDataSourceSelection(DEFAULT_ALL_SELECTION, DEFAULT_ALL_SELECTION);
+      ? hydrateDataSourceSelection(parsedState.dataSourceSelection)
+      : hydrateDataSourceSelection(DEFAULT_ALL_SELECTION);
 
     const discoverParams: DiscoverAppLocatorParams = {
       indexPatternId: dataViewSpec.id,

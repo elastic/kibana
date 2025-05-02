@@ -11,6 +11,7 @@ import { SMART_FALLBACK_FIELDS } from '@kbn/discover-utils';
 import { ExistsFilter, Filter, PhrasesFilter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
+import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src/data_types/logs/utils';
 import type {
   Column,
   DataSourceSelectionPlain,
@@ -46,16 +47,12 @@ export interface LogsExplorerPublicState {
 }
 
 export const hydrateDataSourceSelection = (
-  dataSourceSelection: DataSourceSelectionPlain,
-  allSelection: { selectionType: 'all' }
+  dataSourceSelection: DataSourceSelectionPlain
 ): DataViewSpecWithId => {
   if (dataSourceSelection.selectionType === 'all') {
-    return {
-      id: 'discover-observability-solution-all-logs',
-      name: 'All logs',
-      title: 'logs-*,dataset-logs-*-*',
-      timeFieldName: '@timestamp',
-    };
+    return getAllLogsDataViewSpec({
+      allLogsIndexPattern: 'logs-*,dataset-logs-*-*',
+    });
   } else if (dataSourceSelection.selectionType === 'single' && dataSourceSelection.selection) {
     const selection = dataSourceSelection.selection as SingleDatasetSelectionPayload;
     return {

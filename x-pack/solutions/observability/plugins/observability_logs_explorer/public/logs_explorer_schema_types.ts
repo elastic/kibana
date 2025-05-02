@@ -9,12 +9,12 @@ import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 
-interface Column {
+export interface Column {
   field: string;
   type: string;
 }
 
-interface DataSourceSelectionPlain {
+export interface DataSourceSelectionPlain {
   selectionType: 'all' | 'single' | 'dataView' | 'unresolved';
   selection?:
     | SingleDatasetSelectionPayload
@@ -22,7 +22,7 @@ interface DataSourceSelectionPlain {
     | UnresolvedDatasetSelectionPayload;
 }
 
-interface DataViewSelectionPayload {
+export interface DataViewSelectionPayload {
   dataView: {
     id: string;
     title: string;
@@ -30,7 +30,7 @@ interface DataViewSelectionPayload {
   };
 }
 
-interface SingleDatasetSelectionPayload {
+export interface SingleDatasetSelectionPayload {
   name?: string;
   title?: string;
   version?: string;
@@ -40,7 +40,7 @@ interface SingleDatasetSelectionPayload {
   };
 }
 
-interface UnresolvedDatasetSelectionPayload {
+export interface UnresolvedDatasetSelectionPayload {
   name?: string;
   dataset: {
     name: string;
@@ -48,11 +48,11 @@ interface UnresolvedDatasetSelectionPayload {
   };
 }
 
-interface DataViewSpecWithId extends DataViewSpec {
+export interface DataViewSpecWithId extends DataViewSpec {
   id: string;
 }
 
-interface BaseUrlSchema {
+export interface BaseUrlSchema {
   breakdownField?: string | null;
   columns?: Column[];
   filters?: Filter[];
@@ -64,35 +64,35 @@ interface BaseUrlSchema {
   controls?: ControlsState;
 }
 
-interface UrlSchemaV1 extends BaseUrlSchema {
+export interface UrlSchemaV1 extends BaseUrlSchema {
   v?: 1;
   datasetSelection?: DataSourceSelectionPlain;
 }
 
-interface UrlSchemaV2 extends BaseUrlSchema {
+export interface UrlSchemaV2 extends BaseUrlSchema {
   v?: 2;
   dataSourceSelection?: DataSourceSelectionPlain;
 }
 
-interface ControlsState {
+export interface ControlsState {
   namespace?: {
     mode: 'exclude' | 'include';
     selection: FilterSelection;
   };
 }
 
-type FilterSelection = { type: 'exists' } | { type: 'options'; selectedOptions: string[] };
+export type FilterSelection = { type: 'exists' } | { type: 'options'; selectedOptions: string[] };
 
-interface ChartDisplayOptions {
+export interface ChartDisplayOptions {
   breakdownField: string | null;
 }
 
-interface GridDisplayOptions {
+export interface GridDisplayOptions {
   columns: GridColumnDisplayOptions[];
   rows: GridRowsDisplayOptions;
 }
 
-interface GridColumnDisplayOptions {
+export interface GridColumnDisplayOptions {
   type: 'document-field' | 'smart-field';
   field?: string;
   smartField?: 'content' | 'resource';
@@ -100,53 +100,30 @@ interface GridColumnDisplayOptions {
   width?: number;
 }
 
-interface GridRowsDisplayOptions {
+export interface GridRowsDisplayOptions {
   rowHeight: number;
   rowsPerPage: number;
 }
 
-interface DisplayOptions {
+export interface DisplayOptions {
   grid: GridDisplayOptions;
   chart: ChartDisplayOptions;
 }
 
-interface OptionsListControlOption {
+export interface OptionsListControlOption {
   type: 'options';
   selectedOptions: string[];
 }
 
-interface OptionsListControlExists {
+export interface OptionsListControlExists {
   type: 'exists';
 }
 
-interface OptionsListControl {
+export interface OptionsListControl {
   mode: 'include' | 'exclude';
   selection: OptionsListControlOption | OptionsListControlExists;
 }
 
-interface ControlOptions {
+export interface ControlOptions {
   ['data_stream.namespace']?: OptionsListControl;
 }
-
-export type {
-  Column,
-  DataSourceSelectionPlain,
-  DataViewSelectionPayload,
-  SingleDatasetSelectionPayload,
-  UnresolvedDatasetSelectionPayload,
-  DataViewSpecWithId,
-  BaseUrlSchema,
-  UrlSchemaV1,
-  UrlSchemaV2,
-  ControlsState,
-  FilterSelection,
-  ChartDisplayOptions,
-  GridDisplayOptions,
-  GridColumnDisplayOptions,
-  GridRowsDisplayOptions,
-  DisplayOptions,
-  OptionsListControlOption,
-  OptionsListControlExists,
-  OptionsListControl,
-  ControlOptions,
-};
