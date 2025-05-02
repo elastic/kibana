@@ -7,7 +7,7 @@
 
 import { Pager, EuiSearchBar } from '@elastic/eui';
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
 import { extensionsService } from './extension_service';

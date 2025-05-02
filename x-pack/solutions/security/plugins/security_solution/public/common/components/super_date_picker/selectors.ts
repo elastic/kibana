@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import type {

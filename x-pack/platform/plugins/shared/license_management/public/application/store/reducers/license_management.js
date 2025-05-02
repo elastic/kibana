@@ -8,7 +8,7 @@
 import { combineReducers } from 'redux-v4';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 
 import { license } from './license';
 import { uploadStatus } from './upload_status';

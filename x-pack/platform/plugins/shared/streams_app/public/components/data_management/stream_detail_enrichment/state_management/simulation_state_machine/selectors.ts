@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 
 import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';

@@ -7,7 +7,7 @@
 
 import { keys, values } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { Note } from '../../lib/note';
 import type { ErrorModel, NotesById } from './model';
 import type { State } from '../types';

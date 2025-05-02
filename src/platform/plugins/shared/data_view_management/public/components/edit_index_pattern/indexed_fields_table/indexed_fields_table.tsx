@@ -8,7 +8,7 @@
  */
 
 import React, { Component } from 'react';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { OverlayStart } from '@kbn/core/public';
 import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';

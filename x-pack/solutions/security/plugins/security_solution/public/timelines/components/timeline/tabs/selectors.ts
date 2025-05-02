@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { selectNotesById } from '../../../../common/store/app/selectors';
 import { selectTimeline } from '../../../store/selectors';

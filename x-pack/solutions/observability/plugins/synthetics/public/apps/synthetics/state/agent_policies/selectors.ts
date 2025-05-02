@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { AppState } from '..';
 
 const getState = (appState: AppState) => appState.agentPolicies;

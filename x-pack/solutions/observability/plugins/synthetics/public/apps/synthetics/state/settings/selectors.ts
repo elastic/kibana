@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { SyntheticsAppState } from '../root_reducer';
 import { AppState } from '..';
 

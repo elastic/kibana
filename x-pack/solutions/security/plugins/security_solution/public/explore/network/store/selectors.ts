@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { get } from 'lodash/fp';
 
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
