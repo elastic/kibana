@@ -650,17 +650,6 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.fflate",
-            "type": "string",
-            "tags": [],
-            "label": "fflate",
-            "description": [],
-            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.tslib",
             "type": "string",
             "tags": [],
