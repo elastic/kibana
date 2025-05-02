@@ -7,18 +7,15 @@
 
 import { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { unitsMap } from '@kbn/datemath';
-import { AggregateQuery, TimeRange } from '@kbn/es-query';
+import { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { getDateRange } from '@kbn/timerange';
 import React from 'react';
 import type {
   LensAlertRulesApi,
@@ -56,25 +53,11 @@ export function initializeAlertRules(
           );
         }
 
-        const { timeRange$ } = apiPublishesUnifiedSearch(parentApi)
-          ? parentApi
-          : { timeRange$: undefined };
-        const timeRange = timeRange$?.getValue();
-
         const [esqlVariables$] = buildObservableVariable(
           apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
         );
 
         let initialValues = { ...passedInitialValues };
-
-        if (timeRange) {
-          initialValues = {
-            params: {
-              ...initialValues.params,
-              ...timeRangeToNearestTimeWindow(timeRange),
-            },
-          };
-        }
 
         const esqlVariables = esqlVariables$.getValue();
         if (esqlVariables.length) {
@@ -133,23 +116,6 @@ export function initializeAlertRules(
     },
   };
 }
-
-function timeRangeToNearestTimeWindow(timeRange: TimeRange) {
-  const { startDate, endDate } = getDateRange(timeRange);
-  const timeWindow = endDate - startDate;
-  const timeWindowUnit =
-    timeWindow >= unitsMap.d.base
-      ? 'd'
-      : timeWindow >= unitsMap.h.base
-      ? 'h'
-      : timeWindow >= unitsMap.m.base
-      ? 'm'
-      : 's';
-  const timeWindowSize = Math.round(timeWindow / unitsMap[timeWindowUnit].base);
-
-  return { timeWindowUnit, timeWindowSize };
-}
-
 function parseEsqlVariables(query: AggregateQuery | undefined, variables: ESQLControlVariable[]) {
   if (!query) return query;
   let parsedQuery = query.esql;

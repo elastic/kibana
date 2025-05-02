@@ -11,7 +11,7 @@ import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { createUnifiedSearchApi, createEsqlVariablesApi, makeEmbeddableServices } from '../mocks';
+import { createEsqlVariablesApi, makeEmbeddableServices } from '../mocks';
 import { initializeAlertRules } from './initialize_alert_rules';
 import { ESQLVariableType } from '@kbn/esql-types';
 
@@ -37,7 +37,6 @@ const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
   list: jest.fn(),
 };
 const parentApiMock = {
-  ...createUnifiedSearchApi(),
   ...createEsqlVariablesApi(),
 };
 
@@ -76,8 +75,6 @@ describe('Alert rules API', () => {
               "esql": "FROM index | STATS \`number of documents\` = COUNT(*)",
             },
             "searchType": "esqlQuery",
-            "timeWindowSize": 7,
-            "timeWindowUnit": "d",
           },
         }
       `);
@@ -109,64 +106,7 @@ describe('Alert rules API', () => {
               "esql": "FROM index | STATS aggregatedFields = field.zero, field.one",
             },
             "searchType": "esqlQuery",
-            "timeWindowSize": 7,
-            "timeWindowUnit": "d",
           },
-        }
-      `);
-    });
-
-    it('should convert the timeRange to a time window', () => {
-      parentApiMock.timeRange$.next({
-        from: 'now-3w',
-        to: 'now',
-      });
-      api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
-      expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
-        Object {
-          "esqlQuery": undefined,
-          "timeWindowSize": 21,
-          "timeWindowUnit": "d",
-        }
-      `);
-
-      parentApiMock.timeRange$.next({
-        from: new Date('2025-01-01T00:00:00.000Z').toISOString(),
-        to: new Date('2025-01-01T08:00:00.000Z').toISOString(),
-      });
-      api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
-      expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
-        Object {
-          "esqlQuery": undefined,
-          "timeWindowSize": 8,
-          "timeWindowUnit": "h",
-        }
-      `);
-    });
-    it('should round timeRange to the nearest unit when converting to a time window', () => {
-      parentApiMock.timeRange$.next({
-        from: new Date('2025-01-01T00:00:00.000Z').toISOString(),
-        to: new Date('2025-01-01T00:08:10.000Z').toISOString(),
-      });
-      api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
-      expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
-        Object {
-          "esqlQuery": undefined,
-          "timeWindowSize": 8,
-          "timeWindowUnit": "m",
-        }
-      `);
-
-      parentApiMock.timeRange$.next({
-        from: new Date('2025-01-01T00:00:00.000Z').toISOString(),
-        to: new Date('2025-01-01T00:00:08.900Z').toISOString(),
-      });
-      api.createAlertRule({}, ruleTypeRegistry, actionTypeRegistry);
-      expect(getLastCalledInitialValues().params).toMatchInlineSnapshot(`
-        Object {
-          "esqlQuery": undefined,
-          "timeWindowSize": 9,
-          "timeWindowUnit": "s",
         }
       `);
     });
