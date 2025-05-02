@@ -16,6 +16,13 @@ main () {
 
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
+  cd "$PARENT_DIR/elasticsearch"
+
+  echo "FETCHING 8.19 branch"
+  git fetch origin 8.19
+
+  echo "CHECKING OUT 8.19 branch"
+  git checkout FETCH_HEAD -b 8.19
 
   report_main_step "Bootstrapping Kibana"
 
@@ -56,18 +63,18 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE='[ES|QL] Update function metadata'
+  PR_TITLE='[ES|QL] Update function metadata for 8.19'
   PR_BODY='This PR updates the function definitions and inline docs based on the latest metadata from Elasticsearch.'
 
-  # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
+  # # Check if a PR already exists
+  # pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
 
-  if [ "$pr_search_result" == "$PR_TITLE" ]; then
-    echo "PR already exists. Exiting."
-    exit
-  fi
+  # if [ "$pr_search_result" == "$PR_TITLE" ]; then
+  #   echo "PR already exists. Exiting."
+  #   exit
+  # fi
 
-  echo "No existing PR found. Committing changes."
+  # echo "No existing PR found. Committing changes."
 
   # Make a commit
   BRANCH_NAME="esql_generate_function_metadata_$(date +%s)"
@@ -82,7 +89,7 @@ main () {
   git push origin "$BRANCH_NAME"
 
   # Create a PR
-  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base main --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' 
+  gh pr create --title "$PR_TITLE" --body "$PR_BODY" --base 8.19 --head "${BRANCH_NAME}" --label 'release_note:skip' --label 'Team:ESQL' --label 'backport:skip'
 }
 
 main
