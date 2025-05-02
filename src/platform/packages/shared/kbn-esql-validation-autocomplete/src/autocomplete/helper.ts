@@ -115,9 +115,6 @@ export function strictlyGetParamAtPosition(
  *
  * Generally, this is the user's query up to the end of the previous command.
  *
- * FORK branches are converted into equivalent vanilla queries so that they can be
- * processed using the existing field computation/caching strategy
- *
  * @param queryString The original query string
  * @param commands
  * @returns
@@ -125,7 +122,7 @@ export function strictlyGetParamAtPosition(
 export function getQueryForFields(queryString: string, root: ESQLAstQueryExpression): string {
   const commands = root.commands;
   const lastCommand = commands[commands.length - 1];
-  if (lastCommand.name === 'fork') {
+  if (lastCommand.name === 'fork' && lastCommand.args.length > 0) {
     /**
      * This translates the current fork command branch into a simpler but equivalent
      * query that is compatible with the existing field computation/caching strategy.

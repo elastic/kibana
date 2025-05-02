@@ -16,6 +16,7 @@ export const fieldsSuggestionsAfter = (
 ) => {
   return [
     ...previousCommandFields,
+    ...userDefinedColumns,
     {
       name: '_fork',
       type: 'keyword' as const,
