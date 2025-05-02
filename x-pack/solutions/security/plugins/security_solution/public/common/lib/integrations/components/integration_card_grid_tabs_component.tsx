@@ -68,7 +68,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
   }) => {
     const {
       spaceId,
-      telemetry: { trackLinkClick },
+      telemetry: { reportLinkClick },
     } = useIntegrationContext();
     const scrollElement = useRef<HTMLDivElement>(null);
     const { colorMode } = useEuiTheme();
@@ -82,9 +82,9 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
         const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
         setSelectedTabIdToStorage(id);
-        trackLinkClick?.(trackId);
+        reportLinkClick?.(trackId);
       },
-      [setSelectedTabIdToStorage, trackLinkClick]
+      [setSelectedTabIdToStorage, reportLinkClick]
     );
 
     const { isLoading, searchTerm, setCategory, setSearchTerm, setSelectedSubCategory } =

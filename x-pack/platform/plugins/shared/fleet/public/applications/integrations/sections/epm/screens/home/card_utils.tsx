@@ -56,6 +56,7 @@ export interface IntegrationCardItem {
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
   maxCardHeight?: number;
+  minCardHeight?: number;
   name: string;
   onCardClick?: () => void;
   release?: IntegrationCardReleaseLabel;

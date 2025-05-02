@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useIntegrationCardList } from './use_integration_card_list';
-import { mockTrackLinkClick } from './__mocks__/mocks';
+import { mockReportLinkClick } from './__mocks__/mocks';
 
 jest.mock('./integration_context');
 
@@ -109,6 +109,6 @@ describe('useIntegrationCardList', () => {
     const card = result.current[0];
     card.onCardClick?.();
 
-    expect(mockTrackLinkClick).toHaveBeenCalledWith('card_epr:endpoint');
+    expect(mockReportLinkClick).toHaveBeenCalledWith('card_epr:endpoint');
   });
 });

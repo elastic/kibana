@@ -19,10 +19,10 @@ import {
   TELEMETRY_INTEGRATION_CARD,
 } from '../constants';
 import type { GetAppUrl, NavigateTo } from '../../kibana';
-import type { TrackLinkClick } from './integration_context';
+import type { ReportLinkClick } from './integration_context';
+import { useIntegrationContext } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../utils/integrations';
-import { useIntegrationContext } from './integration_context';
 
 const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCardIds: string[]) => {
   return filteredCards.reduce<IntegrationCardItem[]>((acc, card) => {
@@ -39,14 +39,14 @@ const getFilteredCards = ({
   getAppUrl,
   integrationsList,
   navigateTo,
-  trackLinkClick,
+  reportLinkClick,
 }: {
   activeIntegrations: GetInstalledPackagesResponse['items'];
   featuredCardIds?: string[];
   getAppUrl: GetAppUrl;
   integrationsList: IntegrationCardItem[];
   navigateTo: NavigateTo;
-  trackLinkClick?: TrackLinkClick;
+  reportLinkClick?: ReportLinkClick;
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
     addSecuritySpecificProps({
@@ -54,7 +54,7 @@ const getFilteredCards = ({
       navigateTo,
       getAppUrl,
       card,
-      trackLinkClick,
+      reportLinkClick,
     })
   );
   if (!featuredCardIds) {
@@ -72,13 +72,13 @@ export const addSecuritySpecificProps = ({
   navigateTo,
   getAppUrl,
   card,
-  trackLinkClick,
+  reportLinkClick,
 }: {
   activeIntegrations: GetInstalledPackagesResponse['items'];
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
-  trackLinkClick?: TrackLinkClick;
+  reportLinkClick?: ReportLinkClick;
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
   const integrationRootUrl = getAppUrl({ appId: INTEGRATION_APP_ID });
@@ -98,7 +98,7 @@ export const addSecuritySpecificProps = ({
     hasDataStreams: isActive,
     onCardClick: () => {
       const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
-      trackLinkClick?.(trackId);
+      reportLinkClick?.(trackId);
       if (url.startsWith(APP_INTEGRATIONS_PATH)) {
         navigateTo({
           appId: INTEGRATION_APP_ID,
@@ -126,7 +126,7 @@ export const useIntegrationCardList = ({
   const { navigateTo, getAppUrl } = useNavigation();
 
   const {
-    telemetry: { trackLinkClick },
+    telemetry: { reportLinkClick },
   } = useIntegrationContext();
   const { featuredCards, integrationCards } = useMemo(
     () =>
@@ -136,9 +136,9 @@ export const useIntegrationCardList = ({
         getAppUrl,
         integrationsList,
         featuredCardIds,
-        trackLinkClick,
+        reportLinkClick,
       }),
-    [activeIntegrations, navigateTo, getAppUrl, integrationsList, featuredCardIds, trackLinkClick]
+    [activeIntegrations, navigateTo, getAppUrl, integrationsList, featuredCardIds, reportLinkClick]
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {

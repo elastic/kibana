@@ -69,6 +69,7 @@ export function PackageCard({
   titleLineClamp,
   descriptionLineClamp,
   maxCardHeight,
+  minCardHeight,
   showDescription = true,
   showReleaseBadge = true,
   hasDataStreams,
@@ -227,7 +228,7 @@ export function PackageCard({
               ${getLineClampStyles(titleLineClamp)}
             }
 
-            min-height: ${showDescription ? '127px' : null};
+            min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
             border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
             max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
             overflow: ${maxCardHeight ? 'hidden' : null};

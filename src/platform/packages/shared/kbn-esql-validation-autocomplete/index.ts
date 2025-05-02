@@ -15,8 +15,6 @@ export type { ESQLCallbacks } from './src/shared/types';
  * High level functions
  */
 
-// Given an the query string, its AST and the cursor position, it returns the node and some context information
-export { getAstContext } from './src/shared/context';
 // Validation function
 export { validateQuery } from './src/validation/validation';
 // Autocomplete function
@@ -27,12 +25,12 @@ export { suggest } from './src/autocomplete/autocomplete';
  */
 export type {
   ValidationErrors,
-  ESQLVariable,
+  ESQLUserDefinedColumn,
   ESQLRealField,
   ESQLPolicy,
   ErrorTypes as ESQLValidationErrorTypes,
 } from './src/validation/types';
-export { collectVariables } from './src/shared/variables';
+export { collectUserDefinedColumns } from './src/shared/user_defined_columns';
 export {
   getAllFunctions,
   isSupportedFunction,
@@ -64,3 +62,5 @@ export {
 } from './src/shared/resources_helpers';
 
 export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';
+
+export { esqlFunctionNames } from './src/definitions/generated/function_names';

@@ -28,7 +28,7 @@ export const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:sentinel_one',
   'epr:crowdstrike',
 ];
-const INTEGRATION_CARD_MAX_HEIGHT_PX = 88;
+const INTEGRATION_CARD_MIN_HEIGHT_PX = 88;
 
 const addPathParamToUrl = (url: string, path: string) => {
   const encodedPath = encodeURIComponent(path);
@@ -59,6 +59,7 @@ export const applyCategoryBadgeAndStyling = (
     showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
     showReleaseBadge: false,
+    isUnverified: false, // temporarily hiding the 'unverified' badge from the integration card
     extraLabelsBadges: categoryBadge
       ? ([
           <EuiFlexItem grow={false}>
@@ -69,7 +70,7 @@ export const applyCategoryBadgeAndStyling = (
           </EuiFlexItem>,
         ] as React.ReactNode[])
       : [],
-    maxCardHeight: INTEGRATION_CARD_MAX_HEIGHT_PX,
+    minCardHeight: INTEGRATION_CARD_MIN_HEIGHT_PX,
     hasDataStreams: options?.hasDataStreams,
   };
 };
