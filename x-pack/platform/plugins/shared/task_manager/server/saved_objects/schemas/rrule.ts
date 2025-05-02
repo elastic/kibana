@@ -84,7 +84,7 @@ const rruleWeekly = rruleCommon.extends({
   byhour,
   byminute,
   byweekday,
-  bymonthday: schema.maybe(schema.never()),
+  bymonthday: schema.never(),
 });
 
 const rruleDaily = rruleCommon.extends({
@@ -92,7 +92,7 @@ const rruleDaily = rruleCommon.extends({
   byhour,
   byminute,
   byweekday,
-  bymonthday: schema.maybe(schema.never()),
+  bymonthday: schema.never(),
 });
 
 export const rruleSchedule = schema.oneOf([rruleMonthly, rruleWeekly, rruleDaily]);
