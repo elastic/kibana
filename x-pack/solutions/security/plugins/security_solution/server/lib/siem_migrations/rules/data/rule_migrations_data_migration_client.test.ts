@@ -98,7 +98,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
       });
     });
 
-    test('should retrurn undefined if the migration is not found', async () => {
+    test('should return undefined if the migration is not found', async () => {
       const id = 'testId';
       const response = {
         _index: '.kibana-siem-rule-migrations',

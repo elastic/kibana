@@ -37,6 +37,11 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     return migrationId;
   }
 
+  /**
+   *
+   * Gets the migration document by id or returns undefined if it does not exist.
+   *
+   * */
   async get({ id }: { id: string }): Promise<StoredSiemMigration | undefined> {
     const index = await this.getIndexName();
     return this.esClient
@@ -52,6 +57,9 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
           const message = JSON.parse(error.message);
           if (Object.hasOwn(message, 'found') && message.found === false) {
             return undefined;
+          } else {
+            this.logger.error(`Error getting migration ${id}: ${error}`);
+            throw error;
           }
         }
         this.logger.error(`Error getting migration ${id}: ${error}`);
@@ -97,16 +105,18 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
       },
     }));
 
+    const migrationDeleteOperation = {
+      delete: {
+        _index: index,
+        _id: id,
+      },
+    };
+
     return this.esClient
       .bulk({
         refresh: 'wait_for',
         operations: [
-          {
-            delete: {
-              _index: index,
-              _id: id,
-            },
-          },
+          migrationDeleteOperation,
           ...rulesDeleteOperations,
           ...resourcesDeleteOperations,
         ],
