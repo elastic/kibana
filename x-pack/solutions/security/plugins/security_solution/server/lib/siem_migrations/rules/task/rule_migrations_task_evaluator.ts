@@ -115,6 +115,9 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
       const expectedQuery = (example?.outputs as MigrateRuleState)?.elastic_rule?.query;
 
       if (!expectedQuery) {
+        if (runQuery) {
+          return { score: 0, comment: 'No custom translation expected, but received' };
+        }
         return { comment: 'No custom translation expected' };
       }
       if (!runQuery) {
@@ -141,6 +144,9 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
         ?.prebuilt_rule_id;
 
       if (!expectedPrebuiltRuleId) {
+        if (runPrebuiltRuleId) {
+          return { score: false, comment: 'No prebuilt rule expected, but received' };
+        }
         return { comment: 'No prebuilt rule expected' };
       }
       if (!runPrebuiltRuleId) {
