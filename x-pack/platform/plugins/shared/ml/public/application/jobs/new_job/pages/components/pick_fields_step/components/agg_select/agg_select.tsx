@@ -126,5 +126,5 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
 };
 
 export function createLabel(pair: AggFieldPair): string {
-  return `${pair.agg.title}(${pair.field.name}) here`;
+  return `${pair.agg.title}(${pair.field.name})`;
 }
