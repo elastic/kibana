@@ -103,7 +103,7 @@ function formatPEMContent(pemContent: string): string {
   ];
   
   // Join with newlines and ensure no extra spaces
-  return lines.join('\n').replace(/\s+\n/g, '\n').replace(/\n\s+/g, '\n').replace(/\s+/g, '\n');
+  return lines.join('\n').replace(/\s+\n/g, '\n').replace(/\n\s+/g, '\n');
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
