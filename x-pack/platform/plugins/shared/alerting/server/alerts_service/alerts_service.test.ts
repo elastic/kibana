@@ -735,6 +735,7 @@ describe('Alerts Service', () => {
           );
 
           const componentTemplate = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+          // @ts-ignore
           expect(componentTemplate.template.mappings?.dynamic_templates).toEqual(dynamicTemplates);
         });
 
