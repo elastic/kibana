@@ -242,7 +242,10 @@ export const createMockEndpointAppContextServiceStartContract =
 export function createRouteHandlerContext(
   dataClient: ScopedClusterClientMock,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
-  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
+  overrides: {
+    endpointAuthz?: Partial<EndpointAuthz>;
+    endpointAppServices?: EndpointAppContextService;
+  } = {}
 ): SecuritySolutionRequestHandlerContextMock {
   const context = requestContextMock.create(createMockClients(), overrides);
 
@@ -288,10 +291,22 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
   const routerMock = httpServiceMock.createRouter();
   const endpointAppContextMock = createMockEndpointAppContext();
   const scopedEsClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
-  const savedObjectClientMock = savedObjectsClientMock.create();
+  const savedObjectClientMock =
+    endpointAppContextMock.service.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
   const endpointAuthz = getEndpointAuthzInitialStateMock();
+
+  (endpointAppContextMock.service.getEndpointAuthz as jest.Mock).mockImplementation(async () => {
+    return endpointAuthz;
+  });
+
+  scopedEsClusterClientMock.asInternalUser =
+    endpointAppContextMock.service.getInternalEsClient() as ElasticsearchClientMock;
+
   const httpHandlerContextMock = requestContextMock.convertContext(
-    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock, { endpointAuthz })
+    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock, {
+      endpointAuthz,
+      endpointAppServices: endpointAppContextMock.service,
+    })
   );
   const httpResponseMock = httpServerMock.createResponseFactory();
   const getRegisteredRouteHandler: HttpApiTestSetupMock['getRegisteredRouteHandler'] = (
@@ -327,8 +342,6 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
   const setEndpointAuthz = (overrides: Partial<EndpointAuthz>) => {
     Object.assign(endpointAuthz, overrides);
   };
-
-  (endpointAppContextMock.service.getEndpointAuthz as jest.Mock).mockResolvedValue(endpointAuthz);
 
   return {
     routerMock,
