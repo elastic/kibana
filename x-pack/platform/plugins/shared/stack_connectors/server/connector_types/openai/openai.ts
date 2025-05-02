@@ -101,6 +101,7 @@ function formatPEMContent(pemContent: string, logger: Logger): string {
   logger.debug(`PEM content line count: ${result.split('\n').length}`);
   logger.debug(`PEM content first line: ${result.split('\n')[0]}`);
   logger.debug(`PEM content last line: ${result.split('\n')[result.split('\n').length - 1]}`);
+  logger.debug(`PEM content base64 line length: ${formattedContent.split('\n')[0]?.length}`);
 
   return result;
 }
