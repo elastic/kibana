@@ -12,7 +12,7 @@ import {
   coreMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,

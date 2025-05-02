@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Draft } from 'immer';
+import type { Draft } from 'immer-v9';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import type { DataState } from '../../types';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';

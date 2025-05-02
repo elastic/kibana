@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Draft } from 'immer';
-import produce from 'immer';
+import type { Draft } from 'immer-v9';
+import produce from 'immer-v9';
 import type { Reducer, AnyAction } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
 import type { ReducerBuilder } from 'typescript-fsa-reducers';
