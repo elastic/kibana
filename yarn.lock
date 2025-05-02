@@ -2171,15 +2171,6 @@
   version "1.0.0"
   resolved "file:./elastic_eui_theme_borealis_1.0.0_button_updates_final_04.tgz#a4e6bfeedd7cc71e5fb39bdec90366ba502fa609"
 
-"@elastic/eui-theme-common@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.0.0.tgz#c5e7b7597c4ebe71fc533b18458415a14a93794d"
-  integrity sha512-9+P21npVm05OmFr0OPkA5DSdts9teOo/OEotbJFAVkqBLkNf+Eevv6q89B8eQ6r383RnVwTl7vBzb6M9PnULJg==
-  dependencies:
-    "@types/lodash" "^4.14.202"
-    chroma-js "^2.4.2"
-    lodash "^4.17.21"
-
 "@elastic/eui-theme-common@file:./elastic_eui_theme_common_1.0.0_button_updates_final_04.tgz":
   version "1.0.0"
   resolved "file:./elastic_eui_theme_common_1.0.0_button_updates_final_04.tgz#07cf830c9a9cf05f0d22e9df45e980802139b1b8"
