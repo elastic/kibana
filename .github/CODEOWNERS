@@ -1975,8 +1975,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
+/.github/workflows/enforce-dependency-review.yml @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
-/.github/workflows/auto-approve-renovate-updates.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
 /src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
@@ -2758,9 +2758,6 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
-
-# Root package.json file
-/package.json @elastic/kibana-security @kibanamachine
 
 # OpenAPI spec files
 oas_docs/.spectral.yaml                       @elastic/platform-docs
