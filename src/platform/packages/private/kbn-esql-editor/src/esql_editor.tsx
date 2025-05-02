@@ -34,7 +34,7 @@ import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { type ESQLFieldWithMetadata } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
@@ -472,7 +472,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               undefined,
               variablesService?.esqlVariables
             ).result;
-            const columns: ESQLRealField[] =
+            const columns: ESQLFieldWithMetadata[] =
               table?.columns.map((c) => {
                 return {
                   name: c.name,

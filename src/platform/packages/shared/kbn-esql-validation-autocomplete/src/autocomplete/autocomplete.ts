@@ -40,7 +40,7 @@ import {
   collectUserDefinedColumns,
   excludeUserDefinedColumnsFromCurrentCommand,
 } from '../shared/user_defined_columns';
-import type { ESQLRealField, ESQLUserDefinedColumn } from '../validation/types';
+import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../validation/types';
 import {
   allStarConstant,
   commaCompleteItem,
@@ -84,7 +84,7 @@ import {
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
-type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
+type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 
 export async function suggest(
@@ -279,7 +279,7 @@ async function getSuggestionsWithinCommandExpression(
   const commandDef = getCommandDefinition(astContext.command.name);
 
   // collect all fields + userDefinedColumns to suggest
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
   const references = { fields: fieldsMap, userDefinedColumns: anyUserDefinedColumns };
@@ -366,7 +366,7 @@ async function getFunctionArgsSuggestions(
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
   const references = {
@@ -604,7 +604,7 @@ async function getListArgsSuggestions(
   // node is supposed to be the function who support a list argument (like the "in" operator)
   // so extract the type of the first argument and suggest fields of that type
   if (node && isFunctionItem(node)) {
-    const fieldsMap: Map<string, ESQLRealField> = await getFieldsMaps();
+    const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMaps();
     const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
     // extract the current node from the userDefinedColumns inferred
     anyUserDefinedColumns.forEach((values, key) => {

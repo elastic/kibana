@@ -15,7 +15,7 @@ import {
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
-  ESQLRealField,
+  ESQLFieldWithMetadata,
   collectUserDefinedColumns,
   getFunctionDefinition,
   getFunctionSignatures,
@@ -179,7 +179,7 @@ async function getHintForFunctionArg(
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, fieldsMap, query);
 
   const references = {

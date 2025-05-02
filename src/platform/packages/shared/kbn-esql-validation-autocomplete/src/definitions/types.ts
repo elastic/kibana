@@ -16,7 +16,7 @@ import type {
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy, ReferenceMaps, ESQLRealField } from '../validation/types';
+import type { ESQLPolicy, ReferenceMaps, ESQLFieldWithMetadata } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -427,9 +427,9 @@ export interface CommandDefinition<CommandName extends string> {
    */
   fieldsSuggestionsAfter?: (
     lastCommand: ESQLAstCommand,
-    previousCommandFields: ESQLRealField[],
-    userDefinedColumns: ESQLRealField[]
-  ) => ESQLRealField[];
+    previousCommandFields: ESQLFieldWithMetadata[],
+    userDefinedColumns: ESQLFieldWithMetadata[]
+  ) => ESQLFieldWithMetadata[];
 }
 
 export interface CommandTypeDefinition {

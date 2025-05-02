@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLRealField, JoinIndexAutocompleteItem } from '../validation/types';
+import type { ESQLFieldWithMetadata, JoinIndexAutocompleteItem } from '../validation/types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -39,7 +39,7 @@ export interface ESQLSourceResult {
 
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
-  getColumnsFor?: CallbackFn<{ query: string }, ESQLRealField>;
+  getColumnsFor?: CallbackFn<{ query: string }, ESQLFieldWithMetadata>;
   getPolicies?: CallbackFn<
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
