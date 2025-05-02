@@ -76,14 +76,15 @@ function formatPEMContent(pemContent: string, logger: Logger): string {
   
   // Extract just the base64 content, removing all whitespace
   const base64Content = normalizedContent
-    .replace(/-----BEGIN\s+\w+\s+-----/, '') // Remove header
-    .replace(/-----END\s+\w+\s+-----/, '')   // Remove footer
-    .replace(/\s+/g, '');                    // Remove all whitespace
+    .replace(/-----BEGIN\s+\w+\s+-----[\r\n\s]*/, '') // Remove header and any following whitespace
+    .replace(/[\r\n\s]*-----END\s+\w+\s+-----/, '')   // Remove footer and any preceding whitespace
+    .replace(/[\s\n\r]+/g, '');                    // Remove all whitespace and newlines
 
-  // Format the base64 content with 64 characters per line
-  const formattedContent = base64Content.replace(/(.{64})/g, '$1\n').trim();
+  // Format the base64 content with exactly 64 characters per line
+  const lines = base64Content.match(/.{1,64}/g) || [];
+  const formattedContent = lines.join('\n');
 
-  // Build the final PEM with proper headers and newlines
+  // Build the final PEM with proper headers, newlines, and no trailing spaces
   const result = `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----\n`;
 
   // Debug log the exact content
