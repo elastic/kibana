@@ -113,7 +113,7 @@ Dashboards and Visualizations::
 * Correctly formats keywords in metric visualizations ({kibana-pull}218233[#218233]).
 * When exploring a dashboard, the request inspector now shows the correct request and response in any successful scenario ({kibana-pull}216519[#216519]).
 Discover::
-* Fixes incorrect behavior for requests on fields where the Allow hidden and system indices (`allow_hidden`) option of the data view could be ignored
+* Fixes incorrect behavior for requests on fields where the Allow hidden and system indices (`allow_hidden`) option of the data view could be ignored ({kibana-pull}217628[#217628]).
 * Fixes the result of the *Generate CSV report* action for ES|QL panels ({kibana-pull}216325[#216325]).
 Elastic Observability Solution::
 * Prevents unnecessary suggestion requests when interacting with inputs on the APM *Custom Links* page ({kibana-pull}218927[#218927]).
