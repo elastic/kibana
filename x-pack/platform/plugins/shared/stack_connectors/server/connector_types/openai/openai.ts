@@ -159,8 +159,14 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         // Log the final PEM content for cert and key
         this.logger.info(`Final certificate PEM (first 200 chars):\n${cert?.toString().slice(0, 200)}`);
         this.logger.info(`Final private key PEM (first 200 chars):\n${key?.toString().slice(0, 200)}`);
+        this.logger.info('Certificate PEM lines:\n' + cert?.toString().split('\n').join('\n'));
+        this.logger.info('Private key PEM lines:\n' + key?.toString().split('\n').join('\n'));
         this.logger.debug(`Certificate format check - Header: ${cert?.toString().startsWith('-----BEGIN CERTIFICATE-----')}, Footer: ${cert?.toString().endsWith('-----END CERTIFICATE-----')}`);
         this.logger.debug(`Private key format check - Header: ${key?.toString().startsWith('-----BEGIN PRIVATE KEY-----')}, Footer: ${key?.toString().endsWith('-----END PRIVATE KEY-----')}`);
+
+        // Pass PEM as Buffer
+        cert = Buffer.from(cert.toString(), 'utf-8');
+        key = Buffer.from(key.toString(), 'utf-8');
 
         const httpsAgent = new https.Agent({
           cert,
