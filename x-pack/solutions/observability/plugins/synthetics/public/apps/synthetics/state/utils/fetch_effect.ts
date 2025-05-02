@@ -6,7 +6,7 @@
  */
 
 import { call, put } from 'redux-saga/effects';
-import { PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction } from 'redux-toolkit-v1';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 import { toastTitle } from '../monitor_list/toast_title';

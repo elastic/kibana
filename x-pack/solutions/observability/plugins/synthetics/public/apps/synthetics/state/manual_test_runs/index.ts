@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReducer, PayloadAction } from '@reduxjs/toolkit';
+import { createReducer, PayloadAction } from 'redux-toolkit-v1';
 
 import { WritableDraft } from 'immer/dist/types/types-external';
 import { IHttpFetchError } from '@kbn/core-http-browser';

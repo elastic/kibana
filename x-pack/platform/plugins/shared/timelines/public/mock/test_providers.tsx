@@ -13,7 +13,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { ThemeProvider } from 'styled-components';
 
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import { createKibanaContextProviderMock } from './kibana_react.mock';
 import { timelineReducer } from '../store/timeline/reducer';
 

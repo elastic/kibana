@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 import { ServiceLocations, ThrottlingOptions } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '../utils/http_error';
 

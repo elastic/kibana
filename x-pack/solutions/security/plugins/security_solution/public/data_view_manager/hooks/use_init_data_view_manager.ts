@@ -7,11 +7,11 @@
 
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
-} from '@reduxjs/toolkit';
+} from 'redux-toolkit-v1';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';

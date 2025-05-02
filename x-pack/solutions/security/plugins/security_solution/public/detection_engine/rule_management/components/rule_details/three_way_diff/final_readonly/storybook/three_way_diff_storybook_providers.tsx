@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import { merge } from 'lodash';
 import { Subject } from 'rxjs';
 import { Provider as ReduxStoreProvider } from 'react-redux';

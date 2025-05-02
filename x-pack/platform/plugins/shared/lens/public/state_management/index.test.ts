@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
+import { Action, Dispatch, MiddlewareAPI } from 'redux-toolkit-v1';
 import { makeConfigureStore, onActiveDataChange, setExecutionContext } from '.';
 import { mockStoreDeps } from '../mocks';
 import { TableInspectorAdapter } from '../editor_frame_service/types';

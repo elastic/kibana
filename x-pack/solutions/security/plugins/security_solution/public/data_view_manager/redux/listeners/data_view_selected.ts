@@ -6,7 +6,7 @@
  */
 
 import type { DataView, DataViewLazy, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import { isEmpty } from 'lodash';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import { Dispatch } from '@reduxjs/toolkit';
+import { Dispatch } from 'redux-toolkit-v1';
 import { partition } from 'lodash';
 import {
   updateDatasourceState,

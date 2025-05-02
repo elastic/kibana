@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 import { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
 import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';

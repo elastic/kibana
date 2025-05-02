@@ -10,7 +10,7 @@
 import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from 'redux-toolkit-v1';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
   InternalStateDispatch,

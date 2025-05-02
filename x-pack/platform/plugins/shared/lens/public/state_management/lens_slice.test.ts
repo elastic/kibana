@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EnhancedStore } from '@reduxjs/toolkit';
+import { EnhancedStore } from 'redux-toolkit-v1';
 import type { Query } from '@kbn/es-query';
 import {
   switchDatasource,

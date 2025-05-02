@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnyAction, PayloadAction } from '@reduxjs/toolkit';
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import type { AnyAction, PayloadAction } from 'redux-toolkit-v1';
+import { createAsyncThunk, createSlice } from 'redux-toolkit-v1';
 import { batch } from 'react-redux';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';

@@ -15,7 +15,7 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
-} from '@reduxjs/toolkit';
+} from 'redux-toolkit-v1';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';

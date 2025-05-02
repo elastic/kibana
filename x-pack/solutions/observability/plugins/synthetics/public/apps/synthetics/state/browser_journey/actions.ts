@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 import { FetchJourneyStepsParams } from '..';
 import { SyntheticsJourneyApiResponse } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';

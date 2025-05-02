@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction } from 'redux-toolkit-v1';
 import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
 import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';

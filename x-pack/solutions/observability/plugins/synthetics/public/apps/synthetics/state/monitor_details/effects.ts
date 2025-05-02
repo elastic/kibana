@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction } from 'redux-toolkit-v1';
 import { takeLeading, takeEvery, select, put } from 'redux-saga/effects';
 
 import { ConfigKey, Ping, PingsResponse } from '../../../../../common/runtime_types';

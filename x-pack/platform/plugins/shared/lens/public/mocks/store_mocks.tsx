@@ -8,7 +8,7 @@
 import React, { PropsWithChildren, ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { Provider } from 'react-redux';
-import { PreloadedState } from '@reduxjs/toolkit';
+import { PreloadedState } from 'redux-toolkit-v1';
 import { RenderOptions } from '@testing-library/react';
 import { LensAppServices } from '../app_plugin/types';
 import { mountWithProviders, renderWithProviders } from '../test_utils/test_utils';

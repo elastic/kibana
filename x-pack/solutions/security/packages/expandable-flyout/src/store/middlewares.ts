@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action, Dispatch } from '@reduxjs/toolkit';
+import type { Action, Dispatch } from 'redux-toolkit-v1';
 import {
   changeUserCollapsedWidthAction,
   changeUserExpandedWidthAction,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from '@reduxjs/toolkit';
+import { combineReducers } from 'redux-toolkit-v1';
 
 import { certsListReducer, CertsListState } from './certs';
 import { certificatesReducer, CertificatesState } from './certificates/certificates';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 import { MostRecentPingsRequest } from './api';
 import { Ping, PingsResponse, SyntheticsMonitorWithId } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';

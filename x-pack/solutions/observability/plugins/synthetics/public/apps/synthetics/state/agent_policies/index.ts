@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import { AgentPolicyInfo } from '../../../../../common/types';
 import { IHttpSerializedFetchError } from '..';
 import { getAgentPoliciesAction } from './actions';

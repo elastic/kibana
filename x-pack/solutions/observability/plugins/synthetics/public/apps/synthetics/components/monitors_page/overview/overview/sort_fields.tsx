@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
