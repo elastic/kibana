@@ -33,7 +33,7 @@ export const validateURL =
       const hostname = url.hostname;
 
       const isValid = hostname && !hostname.endsWith('.') && safeURL.test(hostname);
-      if (isValid) return undefined;
+      if (isValid) return;
     } catch {
       return error;
     }
