@@ -70,67 +70,68 @@ async function fetchExitSpanIdsFromTraceIds({
     apm: {
       events: [ProcessorEvent.span],
     },
-
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(start, end),
-          ...termsQuery(TRACE_ID, ...traceIds),
-          ...existsQuery(SPAN_DESTINATION_SERVICE_RESOURCE),
-        ],
-      },
-    },
-    aggs: {
-      exitSpans: {
-        composite: {
-          sources: asMutableArray([
-            { serviceName: { terms: { field: SERVICE_NAME } } },
-            {
-              spanDestinationServiceResource: {
-                terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-              },
-            },
-          ] as const),
-          size: 10000,
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...termsQuery(TRACE_ID, ...traceIds),
+            ...existsQuery(SPAN_DESTINATION_SERVICE_RESOURCE),
+          ],
         },
-        aggs: {
-          eventOutcomeGroup: {
-            filters: {
-              filters: {
-                success: {
-                  term: {
-                    [EVENT_OUTCOME]: EventOutcome.success as const,
-                  },
+      },
+      aggs: {
+        exitSpans: {
+          composite: {
+            sources: asMutableArray([
+              { serviceName: { terms: { field: SERVICE_NAME } } },
+              {
+                spanDestinationServiceResource: {
+                  terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
                 },
-                others: {
-                  bool: {
-                    must_not: {
-                      term: {
-                        [EVENT_OUTCOME]: EventOutcome.success as const,
+              },
+            ] as const),
+            size: 10000,
+          },
+          aggs: {
+            eventOutcomeGroup: {
+              filters: {
+                filters: {
+                  success: {
+                    term: {
+                      [EVENT_OUTCOME]: EventOutcome.success as const,
+                    },
+                  },
+                  others: {
+                    bool: {
+                      must_not: {
+                        term: {
+                          [EVENT_OUTCOME]: EventOutcome.success as const,
+                        },
                       },
                     },
                   },
                 },
               },
-            },
-            aggs: {
-              sample: {
-                top_metrics: {
-                  size: 1,
-                  sort: {
-                    [AT_TIMESTAMP]: 'asc' as const,
+              aggs: {
+                sample: {
+                  top_metrics: {
+                    size: 1,
+                    sort: {
+                      [AT_TIMESTAMP]: 'asc' as const,
+                    },
+                    metrics: asMutableArray([
+                      { field: SPAN_ID },
+                      { field: SPAN_TYPE },
+                      { field: SPAN_SUBTYPE },
+                      { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                      { field: SERVICE_NAME },
+                      { field: SERVICE_ENVIRONMENT },
+                      { field: AGENT_NAME },
+                    ] as const),
                   },
-                  metrics: asMutableArray([
-                    { field: SPAN_ID },
-                    { field: SPAN_TYPE },
-                    { field: SPAN_SUBTYPE },
-                    { field: SPAN_DESTINATION_SERVICE_RESOURCE },
-                    { field: SERVICE_NAME },
-                    { field: SERVICE_ENVIRONMENT },
-                    { field: AGENT_NAME },
-                  ] as const),
                 },
               },
             },
@@ -186,14 +187,16 @@ async function fetchTransactionsFromExitSpans({
     apm: {
       events: [ProcessorEvent.transaction],
     },
-    track_total_hits: false,
-    query: {
-      bool: {
-        filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
+    body: {
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
+        },
       },
+      size: exitSpansSample.size,
+      fields: [...requiredFields, ...optionalFields],
     },
-    size: exitSpansSample.size,
-    fields: [...requiredFields, ...optionalFields],
   });
 
   const destinationsBySpanId = new Map(exitSpansSample);
