@@ -123,6 +123,11 @@ const basicCase: Case = {
       type: CustomFieldTypes.NUMBER,
       value: 3,
     },
+    {
+      key: 'fifth_custom_field_key',
+      type: CustomFieldTypes.LIST,
+      value: { key: 'label' },
+    },
   ],
   observables: [
     {
@@ -168,6 +173,11 @@ describe('CasePostRequestRt', () => {
         key: 'third_custom_field_key',
         type: CustomFieldTypes.NUMBER,
         value: 3,
+      },
+      {
+        key: 'fourth_custom_field_key',
+        type: CustomFieldTypes.LIST,
+        value: { key: 'label' },
       },
     ],
   };

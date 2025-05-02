@@ -9,6 +9,7 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
   validateTemplatesCustomFieldsInRequest,
+  validateCustomFieldDefaultValuesInRequest,
 } from './validators';
 
 describe('validators', () => {
@@ -401,6 +402,247 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Invalid duplicated templates[0]'s customFields keys in request: first_key"`
       );
+    });
+  });
+
+  describe('validateCustomFieldDefaultValuesInRequest', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    it('throws an error when custom list fields contain default values not in their options', () => {
+      expect(() =>
+        validateCustomFieldDefaultValuesInRequest({
+          requestCustomFields: [
+            {
+              key: '1',
+              type: CustomFieldTypes.LIST,
+              label: 'label 1',
+              required: false,
+              defaultValue: 'invalid',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+            {
+              key: '2',
+              type: CustomFieldTypes.LIST,
+              label: 'label 2',
+              required: false,
+              defaultValue: 'invalid',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Default value is not present in options for the following fields: \\"label 1\\", \\"label 2\\""`
+      );
+    });
+
+    it('throws an error when not all custom fields are invalid', () => {
+      expect(() =>
+        validateCustomFieldDefaultValuesInRequest({
+          requestCustomFields: [
+            {
+              key: '1',
+              type: CustomFieldTypes.LIST,
+              label: 'label 1',
+              required: false,
+              defaultValue: 'invalid',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+            {
+              key: '2',
+              type: CustomFieldTypes.LIST,
+              label: 'label 2',
+              required: false,
+              defaultValue: 'valid',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Default value is not present in options for the following fields: \\"label 1\\""`
+      );
+    });
+
+    it('throws an error when not all custom fields have default values', () => {
+      expect(() =>
+        validateCustomFieldDefaultValuesInRequest({
+          requestCustomFields: [
+            {
+              key: '1',
+              type: CustomFieldTypes.LIST,
+              label: 'label 1',
+              required: false,
+              defaultValue: 'invalid',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+            {
+              key: '2',
+              type: CustomFieldTypes.LIST,
+              label: 'label 2',
+              required: false,
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Default value is not present in options for the following fields: \\"label 1\\""`
+      );
+    });
+
+    it('throws an error when not all custom fields are lists', () => {
+      expect(() =>
+        validateCustomFieldDefaultValuesInRequest({
+          requestCustomFields: [
+            {
+              key: '1',
+              type: CustomFieldTypes.LIST,
+              label: 'label 1',
+              required: false,
+              defaultValue: 'invalid',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+            {
+              key: '2',
+              type: CustomFieldTypes.TEXT,
+              label: 'label 2',
+              required: false,
+              defaultValue: 'valid',
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Default value is not present in options for the following fields: \\"label 1\\""`
+      );
+    });
+
+    it('does not throw if the request has no customFields', () => {
+      expect(() =>
+        validateCustomFieldDefaultValuesInRequest({
+          requestCustomFields: [],
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw if all list fields are valid', () => {
+      expect(() =>
+        validateCustomFieldDefaultValuesInRequest({
+          requestCustomFields: [
+            {
+              key: '1',
+              type: CustomFieldTypes.LIST,
+              label: 'label 1',
+              required: false,
+              defaultValue: 'valid',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+            {
+              key: '2',
+              type: CustomFieldTypes.LIST,
+              label: 'label 2',
+              required: false,
+              defaultValue: 'valid2',
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+            {
+              key: '3',
+              type: CustomFieldTypes.LIST,
+              label: 'label 3',
+              required: false,
+              options: [
+                {
+                  key: 'valid',
+                  label: 'valid',
+                },
+                {
+                  key: 'valid2',
+                  label: 'valid2',
+                },
+              ],
+            },
+          ],
+        })
+      ).not.toThrow();
     });
   });
 });

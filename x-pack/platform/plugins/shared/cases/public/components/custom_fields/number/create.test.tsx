@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
+import type { NumberCustomFieldConfiguration } from '../../../../common/types/domain';
 
 describe('Create ', () => {
   const onSubmit = jest.fn();
@@ -20,7 +21,8 @@ describe('Create ', () => {
   });
 
   // required number custom field with a default value
-  const customFieldConfiguration = customFieldsConfigurationMock[4];
+  const customFieldConfiguration =
+    customFieldsConfigurationMock[4] as NumberCustomFieldConfiguration;
 
   it('renders correctly with default value and required', async () => {
     render(

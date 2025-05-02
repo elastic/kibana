@@ -27,9 +27,10 @@ import type {
   CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
   TemplatesConfiguration,
-  CustomFieldTypes,
+  ListCustomFieldConfiguration,
 } from '../../common/types/domain';
 import {
+  CustomFieldTypes,
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   AttachmentType,
@@ -65,7 +66,7 @@ import {
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
-import { casesCustomFields } from '../custom_fields';
+import { CasesCustomFieldMappingType, casesCustomFields } from '../custom_fields';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
@@ -409,6 +410,14 @@ export const buildCustomFieldsFilter = ({
           );
         }
 
+        if (
+          customFieldMapping[key].savedObjectMappingType === CasesCustomFieldMappingType.LIST_OPTION
+        ) {
+          return fromKueryExpression(
+            `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key}.${filterValue}}`
+          );
+        }
+
         return fromKueryExpression(
           `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and value.${customFieldMapping[key].savedObjectMappingType}: ${filterValue}}`
         );
@@ -636,9 +645,29 @@ export const transformTemplateCustomFields = ({
     }
 
     // remove deleted custom field from template
-    const transformedTemplateCustomFields = templateCustomFields.filter((templateCustomField) =>
-      customFields?.find((customField) => customField.key === templateCustomField.key)
-    );
+    const transformedTemplateCustomFields = templateCustomFields
+      .filter((templateCustomField) =>
+        customFields?.find((customField) => customField.key === templateCustomField.key)
+      )
+      // From list fields, remove deleted options
+      .map((templateCustomField) => {
+        if (templateCustomField.type === CustomFieldTypes.LIST && templateCustomField.value) {
+          const configuration = customFields.find(
+            (customField) => customField.key === templateCustomField.key
+          ) as ListCustomFieldConfiguration;
+          const valueExistsInConfig = !!configuration.options.find(
+            ({ key }) =>
+              templateCustomField.value && Object.keys(templateCustomField.value)[0] === key
+          );
+          if (!valueExistsInConfig) {
+            return {
+              ...templateCustomField,
+              value: null,
+            };
+          }
+        }
+        return templateCustomField;
+      });
 
     // add new custom fields to template
     if (customFields.length >= transformedTemplateCustomFields.length) {

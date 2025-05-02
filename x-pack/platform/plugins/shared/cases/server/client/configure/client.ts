@@ -54,6 +54,7 @@ import {
   validateDuplicatedObservableTypesInRequest,
 } from '../validators';
 import {
+  validateCustomFieldDefaultValuesInRequest,
   validateCustomFieldTypesInRequest,
   validateTemplatesCustomFieldsInRequest,
 } from './validators';
@@ -325,6 +326,10 @@ export async function update(
     validateCustomFieldTypesInRequest({
       requestCustomFields: request.customFields,
       originalCustomFields: configuration.attributes.customFields,
+    });
+
+    validateCustomFieldDefaultValuesInRequest({
+      requestCustomFields: request.customFields,
     });
 
     const updatedTemplates = transformTemplateCustomFields({

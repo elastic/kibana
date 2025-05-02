@@ -8,27 +8,28 @@
 import type React from 'react';
 import type { EuiTableComputedColumnType } from '@elastic/eui';
 
-import type { CaseCustomField, CustomFieldTypes } from '../../../common/types/domain';
+import type { CustomFieldTypes } from '../../../common/types/domain';
 import type {
   CasesConfigurationUICustomField,
   CaseUI,
   CaseUICustomField,
 } from '../../containers/types';
 
-export interface CustomFieldType<T extends CaseUICustomField> {
+export interface CustomFieldType<T extends CaseUICustomField, I = CasesConfigurationUICustomField> {
   Configure: React.FC;
   View: React.FC<{
     customField?: T;
+    configuration?: I;
   }>;
   Edit: React.FC<{
     customField?: T;
-    customFieldConfiguration: CasesConfigurationUICustomField;
+    customFieldConfiguration: I;
     onSubmit: (customField: T) => void;
     isLoading: boolean;
     canUpdate: boolean;
   }>;
   Create: React.FC<{
-    customFieldConfiguration: CasesConfigurationUICustomField;
+    customFieldConfiguration: I;
     isLoading: boolean;
     setAsOptional?: boolean;
     setDefaultValue?: boolean;
@@ -38,24 +39,29 @@ export interface CustomFieldType<T extends CaseUICustomField> {
 export interface CustomFieldFactoryFilterOption {
   key: string;
   label: string;
-  value: boolean | null;
+  value: string | boolean | null;
 }
 
-export type CustomFieldEuiTableColumn = Pick<
+export type CustomFieldEuiTableColumn<T> = Pick<
   EuiTableComputedColumnType<CaseUI>,
   'name' | 'width' | 'data-test-subj'
 > & {
-  render: (customField: CaseCustomField) => React.ReactNode;
+  render: (customField: T) => React.ReactNode;
 };
 
-export type CustomFieldFactory<T extends CaseUICustomField> = () => {
+export type CustomFieldFactory<
+  T extends CaseUICustomField,
+  I = CasesConfigurationUICustomField
+> = () => {
   id: string;
   label: string;
-  getEuiTableColumn: (params: { label: string }) => CustomFieldEuiTableColumn;
-  build: () => CustomFieldType<T>;
-  filterOptions?: CustomFieldFactoryFilterOption[];
-  getDefaultValue?: () => string | boolean | null;
-  convertNullToEmpty?: (value: string | number | boolean | null) => string;
+  getEuiTableColumn: (params: I) => CustomFieldEuiTableColumn<T>;
+  build: () => CustomFieldType<T, I>;
+  getFilterOptions?: (configuration: I) => CustomFieldFactoryFilterOption[];
+  getDefaultValue?: () => T['value'];
+  convertNullToEmpty?: (value: T['value']) => string;
+  sanitizeTemplateValue?: (value: T['value'], configuration?: I) => T['value'];
+  convertValueToDisplayText?: (value: T['value'], configuration?: I) => string;
 };
 
 export type CustomFieldBuilderMap = {

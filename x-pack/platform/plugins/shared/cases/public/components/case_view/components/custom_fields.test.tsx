@@ -83,7 +83,7 @@ describe('Case View Page files tab', () => {
       exact: false,
     });
 
-    expect(customFields.length).toBe(6);
+    expect(customFields.length).toBe(8);
 
     expect(await within(customFields[0]).findByRole('heading')).toHaveTextContent(
       'My test label 1'

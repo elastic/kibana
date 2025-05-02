@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { NIL as UUID_NIL } from 'uuid';
 import { CustomFieldTypes } from '../../../common/types/domain';
 
 export const MAX_CONCURRENT_ES_REQUEST = 5;
@@ -19,4 +19,5 @@ export const VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS: Record<
   [CustomFieldTypes.TEXT]: 'N/A',
   [CustomFieldTypes.TOGGLE]: false,
   [CustomFieldTypes.NUMBER]: 0,
+  [CustomFieldTypes.LIST]: UUID_NIL,
 };

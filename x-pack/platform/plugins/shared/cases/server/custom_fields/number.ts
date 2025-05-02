@@ -6,12 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
+import type { CustomFieldValue } from '../../common/types/domain';
+import { CasesCustomFieldMappingType } from './types';
 
 export const getCasesNumberCustomField = () => ({
   isFilterable: false,
   isSortable: false,
-  savedObjectMappingType: 'long',
-  validateFilteringValues: (values: Array<string | number | boolean | null>) => {
+  savedObjectMappingType: CasesCustomFieldMappingType.LONG,
+  validateFilteringValues: (values: CustomFieldValue[]) => {
     values.forEach((value) => {
       if (value !== null && !Number.isSafeInteger(value)) {
         throw Boom.badRequest('Unsupported filtering value for custom field of type number.');

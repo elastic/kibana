@@ -63,7 +63,7 @@ describe('CustomFields', () => {
     expect(screen.queryAllByTestId('create-custom-field', { exact: false }).length).toEqual(0);
   });
 
-  it('should render as optional fields for text custom fields', async () => {
+  it('should render as optional fields for text and list custom fields', async () => {
     renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <CustomFields
@@ -73,7 +73,7 @@ describe('CustomFields', () => {
         />
       </FormTestComponent>
     );
-    expect(await screen.findAllByTestId('form-optional-field-label')).toHaveLength(4);
+    expect(await screen.findAllByTestId('form-optional-field-label')).toHaveLength(6);
   });
 
   it('should not set default value when in edit mode', async () => {
@@ -129,6 +129,7 @@ describe('CustomFields', () => {
     const textField = customFieldsConfigurationMock[2];
     const toggleField = customFieldsConfigurationMock[3];
     const numberField = customFieldsConfigurationMock[5];
+    const listField = customFieldsConfigurationMock[6];
 
     await userEvent.type(
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
@@ -153,6 +154,7 @@ describe('CustomFields', () => {
             [customFieldsConfigurationMock[1].key]: customFieldsConfigurationMock[1].defaultValue,
             [textField.key]: 'hello',
             [toggleField.key]: true,
+            [listField.key]: 'option_1',
             [customFieldsConfigurationMock[4].key]: customFieldsConfigurationMock[4].defaultValue,
             [numberField.key]: '4',
           },

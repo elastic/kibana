@@ -19,7 +19,10 @@ import {
   OBSERVABLE_TYPE_IPV4,
 } from '../../../common/constants';
 import { ConnectorTypes } from '../../../common';
-import type { TemplatesConfiguration } from '../../../common/types/domain';
+import type {
+  CustomFieldsConfiguration,
+  TemplatesConfiguration,
+} from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { ConfigurationRequest } from '../../../common/types/api';
 
@@ -1345,7 +1348,7 @@ describe('client', () => {
 
       describe('customFields', () => {
         it('does not throw error when creating template with correct custom fields', async () => {
-          const customFields = [
+          const customFields: CustomFieldsConfiguration = [
             {
               key: 'custom_field_key_1',
               type: CustomFieldTypes.TEXT,

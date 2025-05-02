@@ -7,13 +7,17 @@
 
 import React from 'react';
 
-import type { CaseCustomField } from '../../../../common/types/domain';
+import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldEuiTableColumn } from '../types';
 
-export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({
+export const getEuiTableColumn = ({
+  label,
+}: {
+  label: string;
+}): CustomFieldEuiTableColumn<CaseCustomFieldText> => ({
   name: label,
   width: '250px',
-  render: (customField: CaseCustomField) => (
+  render: (customField) => (
     <p
       className="eui-textTruncate"
       data-test-subj={`text-custom-field-column-view-${customField.key}`}

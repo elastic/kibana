@@ -17,6 +17,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
+jest.mock('./configure/use_get_case_configuration', () => ({
+  useGetCaseConfiguration: jest.fn().mockReturnValue({ data: { customFields: [] } }),
+}));
 
 // Failing: See https://github.com/elastic/kibana/issues/207955
 describe('useGetCases', () => {
@@ -42,6 +45,7 @@ describe('useGetCases', () => {
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['securitySolution'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
+      customFieldsConfiguration: [],
     });
   });
 
@@ -86,6 +90,7 @@ describe('useGetCases', () => {
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [...OWNERS] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
+      customFieldsConfiguration: [],
     });
   });
 
@@ -111,6 +116,7 @@ describe('useGetCases', () => {
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['cases'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
+      customFieldsConfiguration: [],
     });
   });
 
@@ -129,6 +135,7 @@ describe('useGetCases', () => {
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['observability'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
+      customFieldsConfiguration: [],
     });
   });
 
@@ -147,6 +154,7 @@ describe('useGetCases', () => {
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['my-owner'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
+      customFieldsConfiguration: [],
     });
   });
 });

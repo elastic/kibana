@@ -6,8 +6,13 @@
  */
 
 import { isPlainObject, partition, toString } from 'lodash';
+import { processCustomFieldListValue } from '../../custom_fields/list';
 import type { CaseRequestCustomField, CaseRequestCustomFields } from '../../../common/types/api';
-import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+import {
+  CustomFieldTypes,
+  type CaseCustomFields,
+  type CustomFieldsConfiguration,
+} from '../../../common/types/domain';
 import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from './constants';
 import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
@@ -71,6 +76,12 @@ export const buildCustomFieldsForRequest = (
             customFieldValue === null
           ) {
             customFieldValue = VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[customFieldConfig.type];
+            if (customFieldConfig.type === CustomFieldTypes.LIST) {
+              customFieldValue = processCustomFieldListValue(
+                customFieldConfig,
+                customFieldValue as string
+              );
+            }
           }
 
           return {
@@ -95,6 +106,10 @@ export const buildCustomFieldsForRequest = (
               customFieldConfig?.defaultValue === null
                 ? VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[customFieldConfig.type]
                 : customFieldConfig?.defaultValue;
+
+            if (customFieldConfig.type === CustomFieldTypes.LIST) {
+              value = processCustomFieldListValue(customFieldConfig, value as string);
+            }
           }
 
           return {

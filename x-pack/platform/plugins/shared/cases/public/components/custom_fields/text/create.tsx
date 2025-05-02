@@ -8,17 +8,18 @@
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { CaseCustomFieldText } from '../../../../common/types/domain';
+import type {
+  CaseCustomFieldText,
+  TextCustomFieldConfiguration,
+} from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
 import { OptionalFieldLabel } from '../../optional_field_label';
 
-const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
-  customFieldConfiguration,
-  isLoading,
-  setAsOptional,
-  setDefaultValue = true,
-}) => {
+const CreateComponent: CustomFieldType<
+  CaseCustomFieldText,
+  TextCustomFieldConfiguration
+>['Create'] = ({ customFieldConfiguration, isLoading, setAsOptional, setDefaultValue = true }) => {
   const { key, label, required, defaultValue } = customFieldConfiguration;
   const config = getTextFieldConfig({
     required: setAsOptional ? false : required,

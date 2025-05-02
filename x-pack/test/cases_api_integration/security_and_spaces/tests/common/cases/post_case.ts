@@ -199,6 +199,17 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: 123,
                   required: true,
                 },
+                {
+                  key: 'valid_key_4',
+                  label: 'list',
+                  type: CustomFieldTypes.LIST,
+                  required: true,
+                  options: [
+                    { key: '0', label: 'A' },
+                    { key: '1', label: 'B' },
+                  ],
+                  defaultValue: '1',
+                },
               ],
             },
           })
@@ -223,6 +234,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: CustomFieldTypes.NUMBER,
                 value: 123456,
               },
+              {
+                key: 'valid_key_4',
+                type: CustomFieldTypes.LIST,
+                value: { '1': 'B' },
+              },
             ],
           })
         );
@@ -242,6 +258,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'valid_key_3',
             type: CustomFieldTypes.NUMBER,
             value: 123456,
+          },
+          {
+            key: 'valid_key_4',
+            type: CustomFieldTypes.LIST,
+            value: { '1': 'B' },
           },
         ]);
       });

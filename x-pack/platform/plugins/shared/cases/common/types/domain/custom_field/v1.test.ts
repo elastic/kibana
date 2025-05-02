@@ -58,6 +58,22 @@ describe('CaseCustomFieldRt', () => {
         value: null,
       },
     ],
+    [
+      'type list value keyval pair',
+      {
+        key: 'list_custom_field_1',
+        type: 'list',
+        value: { foo: 'bar' },
+      },
+    ],
+    [
+      'type list value value null',
+      {
+        key: 'list_custom_field_2',
+        type: 'list',
+        value: null,
+      },
+    ],
   ])(`has expected attributes for customField with %s`, (_, customField) => {
     const query = CaseCustomFieldRt.decode(customField);
 
@@ -79,7 +95,7 @@ describe('CaseCustomFieldRt', () => {
 
   it('fails if toggle type and value do not match expected attributes in request', () => {
     const query = CaseCustomFieldRt.decode({
-      key: 'list_custom_field_1',
+      key: 'toggle_custom_field_1',
       type: 'toggle',
       value: 'hello',
     });
@@ -89,8 +105,18 @@ describe('CaseCustomFieldRt', () => {
 
   it('fails if number type but value is a string', () => {
     const query = CaseCustomFieldRt.decode({
-      key: 'list_custom_field_1',
+      key: 'number_custom_field_1',
       type: 'number',
+      value: 'hi',
+    });
+
+    expect(PathReporter.report(query)[0]).toContain('Invalid value "hi" supplied');
+  });
+
+  it('fails if list type but value is a string', () => {
+    const query = CaseCustomFieldRt.decode({
+      key: 'list_custom_field_1',
+      type: 'list',
       value: 'hi',
     });
 

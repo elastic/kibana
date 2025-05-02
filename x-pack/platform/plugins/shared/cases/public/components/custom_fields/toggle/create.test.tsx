@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
+import type { ToggleCustomFieldConfiguration } from '../../../../common/types/domain';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
@@ -20,7 +21,8 @@ describe('Create ', () => {
     jest.clearAllMocks();
   });
 
-  const customFieldConfiguration = customFieldsConfigurationMock[1];
+  const customFieldConfiguration =
+    customFieldsConfigurationMock[1] as ToggleCustomFieldConfiguration;
 
   it('renders correctly with required and defaultValue', async () => {
     render(

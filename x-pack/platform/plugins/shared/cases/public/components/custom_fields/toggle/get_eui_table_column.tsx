@@ -9,13 +9,17 @@ import React from 'react';
 
 import { EuiIcon } from '@elastic/eui';
 
-import type { CaseCustomField } from '../../../../common/types/domain';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldEuiTableColumn } from '../types';
 
-export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiTableColumn => ({
+export const getEuiTableColumn = ({
+  label,
+}: {
+  label: string;
+}): CustomFieldEuiTableColumn<CaseCustomFieldToggle> => ({
   name: label,
   width: '100px',
-  render: (customField: CaseCustomField) => (
+  render: (customField) => (
     <EuiIcon
       data-test-subj={`toggle-custom-field-column-view-${customField.key}-${
         customField?.value ? 'check' : 'cross'

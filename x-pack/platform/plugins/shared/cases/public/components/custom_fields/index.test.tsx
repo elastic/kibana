@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
 
 import { customFieldsConfigurationMock } from '../../containers/mock';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CustomFieldTypes, type CustomFieldsConfiguration } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import { CustomFields } from '.';
 import * as i18n from './translations';
@@ -83,7 +83,7 @@ describe('CustomFields', () => {
   });
 
   it('shows error when custom fields reaches the limit', async () => {
-    const generatedMockCustomFields = [];
+    const generatedMockCustomFields: CustomFieldsConfiguration = [];
 
     for (let i = 0; i < 6; i++) {
       generatedMockCustomFields.push({

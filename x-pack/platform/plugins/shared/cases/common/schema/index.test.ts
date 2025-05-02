@@ -15,6 +15,7 @@ import {
   NonEmptyString,
   paginationSchema,
   limitedNumberAsIntegerSchema,
+  customFieldListValueSchema,
 } from '.';
 import { MAX_DOCS_PER_PAGE } from '../constants';
 
@@ -384,6 +385,43 @@ describe('schema', () => {
             "The foo field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.",
           ]
         `);
+    });
+  });
+
+  describe('customFieldListValueSchema', () => {
+    it('should decode list correctly', () => {
+      const query = customFieldListValueSchema.decode({
+        '1': 'foo',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          '1': 'foo',
+        },
+      });
+    });
+
+    it('should not be empty', () => {
+      expect(PathReporter.report(customFieldListValueSchema.decode({}))[0]).toContain(
+        'Value cannot be an empty object.'
+      );
+    });
+
+    it('should only be one key/value pair', () => {
+      expect(
+        PathReporter.report(customFieldListValueSchema.decode({ '1': 'foo', '2': 'bar' }))[0]
+      ).toContain('Value must be a single key/value pair.');
+    });
+
+    it(`limits the length of label to 50`, () => {
+      expect(
+        PathReporter.report(
+          customFieldListValueSchema.decode({
+            '1': '#'.repeat(51),
+          })
+        )[0]
+      ).toContain(`The length of the label is too long. The maximum length is 50.`);
     });
   });
 });

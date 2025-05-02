@@ -144,6 +144,7 @@ export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
 export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
+export const MAX_CUSTOM_FIELD_OPTION_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
 export const MAX_TEMPLATE_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;

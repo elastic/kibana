@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import type { TextCustomFieldConfiguration } from '../../../../common/types/domain';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Create } from './create';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
@@ -22,7 +23,7 @@ describe('Create ', () => {
   });
 
   // required text custom field with a default value
-  const customFieldConfiguration = customFieldsConfigurationMock[0];
+  const customFieldConfiguration = customFieldsConfigurationMock[0] as TextCustomFieldConfiguration;
 
   it('renders correctly with default values', async () => {
     render(
@@ -39,7 +40,7 @@ describe('Create ', () => {
   });
 
   it('renders correctly with optional fields', async () => {
-    const optionalField = customFieldsConfigurationMock[2]; // optional text custom field
+    const optionalField = customFieldsConfigurationMock[2] as TextCustomFieldConfiguration; // optional text custom field
 
     render(
       <FormTestComponent onSubmit={onSubmit}>
