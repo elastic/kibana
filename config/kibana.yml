@@ -3,12 +3,12 @@
 
 # =================== System: Kibana Server ===================
 # Kibana is served by a back end server. This setting specifies the port to use.
-#server.port: 5601
+server.port: 5601
 
 # Specifies the address to which the Kibana server will bind. IP addresses and host names are both valid values.
 # The default is 'localhost', which usually means remote machines will not be able to connect.
 # To allow connections from remote users, set this parameter to a non-loopback address.
-#server.host: "localhost"
+server.host: "localhost"
 
 # Enables you to specify a path to mount Kibana at if you are running behind a proxy.
 # Use the `server.rewriteBasePath` setting to tell Kibana if it should remove the basePath
@@ -40,14 +40,14 @@
 
 # =================== System: Elasticsearch ===================
 # The URLs of the Elasticsearch instances to use for all your queries.
-#elasticsearch.hosts: ["http://localhost:9200"]
+elasticsearch.hosts: ["http://localhost:9200"]
 
 # If your Elasticsearch is protected with basic authentication, these settings provide
 # the username and password that the Kibana server uses to perform maintenance on the Kibana
 # index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
 # is proxied through the Kibana server.
-#elasticsearch.username: "kibana_system"
-#elasticsearch.password: "pass"
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "fuckyou"
 
 # Kibana can also authenticate to Elasticsearch via "service account tokens".
 # Service account tokens are Bearer style tokens that replace the traditional username/password based configuration.

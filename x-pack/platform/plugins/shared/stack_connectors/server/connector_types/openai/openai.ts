@@ -58,6 +58,26 @@ import {
 import fs from 'fs';
 import https from 'https';
 
+// Add this function to properly format PEM content
+function formatPEMContent(pemContent: string): string {
+  if (!pemContent) return pemContent;
+  
+  // Remove all whitespace and line breaks
+  const lines = pemContent.split(/[\r\n]+/).map(line => line.trim()).filter(Boolean);
+  
+  if (lines.length < 2) return pemContent;
+
+  // Get the header and footer
+  const header = lines[0];
+  const footer = lines[lines.length - 1];
+  
+  // Get the content (everything between header and footer)
+  const content = lines.slice(1, -1).join('');
+  
+  // Reconstruct with proper formatting
+  return `${header}\n${content}\n${footer}`;
+}
+
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url: string;
   private provider: OpenAiProviderType;
@@ -99,24 +119,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           throw new Error('Invalid or inaccessible PKI certificates');
         }
 
-        // Parse certificate and key from file or content
         let cert: string | Buffer;
         let key: string | Buffer;
-
-        // Utility to parse PEM content (file or string)
-        const parsePemContent = (content: string): { cert: string, key: string } => {
-          const certMatch = content.match(/-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g);
-          const keyMatch = content.match(/-----BEGIN PRIVATE KEY-----[\s\S]*?-----END PRIVATE KEY-----/);
-          return {
-            cert: certMatch ? certMatch.join('\n') : '',
-            key: keyMatch ? keyMatch[0] : '',
-          };
-        };
-
-        // Normalize PEM strings to ensure consistent formatting
-        const normalizePem = (pem: string): string => {
-          return pem.replace(/\r\n|\r|\n/g, '\n').trim();
-        };
 
         if (this.config.certificateFile) {
           const fileContent = fs.readFileSync(
@@ -125,14 +129,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
               : this.config.certificateFile,
             'utf8'
           );
-          const { cert: parsedCert } = parsePemContent(fileContent);
-          cert = parsedCert;
-          this.logger.debug(`Loaded certificate from file: ${this.config.certificateFile}, cert: ${parsedCert.substring(0, 50)}...`);
+          cert = fileContent;
         } else if (this.config.certificateData) {
-          cert = normalizePem(this.config.certificateData);
-          this.logger.debug(`Using certificate data: ${cert.substring(0, 50)}...`);
-        } else {
-          throw new Error('No certificate file or data provided');
+          // Format the certificate data properly
+          cert = formatPEMContent(this.config.certificateData);
         }
 
         if (this.config.privateKeyFile) {
@@ -142,15 +142,21 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
               : this.config.privateKeyFile,
             'utf8'
           );
-          const { key: parsedKey } = parsePemContent(fileContent);
-          key = parsedKey;
-          this.logger.debug(`Loaded private key from file: ${this.config.privateKeyFile}, key: ${parsedKey.substring(0, 50)}...`);
+          key = fileContent;
         } else if (this.config.privateKeyData) {
-          key = normalizePem(this.config.privateKeyData);
-          this.logger.debug(`Using private key data: ${key.substring(0, 50)}...`);
-        } else {
-          throw new Error('No private key file or data provided');
+          // Format the private key data properly
+          key = formatPEMContent(this.config.privateKeyData);
         }
+
+        // Add debug logging to help troubleshoot
+        this.logger.debug(
+          `Certificate format check - Header: ${cert.toString().startsWith('-----BEGIN CERTIFICATE-----')}, ` +
+          `Footer: ${cert.toString().endsWith('-----END CERTIFICATE-----')}`
+        );
+        this.logger.debug(
+          `Private key format check - Header: ${key.toString().startsWith('-----BEGIN PRIVATE KEY-----')}, ` +
+          `Footer: ${key.toString().endsWith('-----END PRIVATE KEY-----')}`
+        );
 
         const httpsAgent = new https.Agent({
           cert,
