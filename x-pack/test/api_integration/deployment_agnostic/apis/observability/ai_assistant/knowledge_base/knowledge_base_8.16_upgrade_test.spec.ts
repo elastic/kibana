@@ -78,6 +78,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await retry.try(async () => {
           const hits = await getKnowledgeBaseEntriesFromEs(es);
           const hasSemanticTextField = hits.every((hit) => hit._source?.semantic_text);
+
+          expect(hits.length).to.be(10);
           expect(hasSemanticTextField).to.be(true);
         });
       });
@@ -90,6 +92,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               // @ts-expect-error
               Object.keys(hit._source?.semantic_text.inference.chunks[0].embeddings).length > 0
           );
+          expect(hits.length).to.be(10);
           expect(hasEmbeddings).to.be(true);
         });
       });
