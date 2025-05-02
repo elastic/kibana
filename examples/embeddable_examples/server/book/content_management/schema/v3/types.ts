@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  CommonEmbeddableStartContract,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-  EmbeddableContentManagementDefinition,
-  VersionableEmbeddableObject,
-} from './types';
+import { TypeOf } from '@kbn/config-schema';
+import { bookAttributesSchema } from './v3';
+
+export type BookAttributes = TypeOf<typeof bookAttributesSchema>;

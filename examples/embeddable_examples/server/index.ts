@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  CommonEmbeddableStartContract,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-  EmbeddableRegistryDefinition,
-  EmbeddableContentManagementDefinition,
-  VersionableEmbeddableObject,
-} from './types';
+import { PluginInitializerContext } from '@kbn/core/server';
+
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { EmbeddableExamplesPlugin } = await import('./plugin');
+  return new EmbeddableExamplesPlugin(initializerContext);
+}

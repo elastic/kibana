@@ -17,7 +17,7 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStart, ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getPageApi } from '../page_api';
 import { AddButton } from './add_button';
@@ -25,10 +25,16 @@ import { TopNav } from './top_nav';
 import { lastSavedStateSessionStorage } from '../session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from '../session_storage/unsaved_changes';
 
-export const PresentationContainerExample = ({ uiActions }: { uiActions: UiActionsStart }) => {
+export const PresentationContainerExample = ({
+  embeddable,
+  uiActions,
+}: {
+  embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
+}) => {
   const { cleanUp, componentApi, pageApi } = useMemo(() => {
-    return getPageApi();
-  }, []);
+    return getPageApi(embeddable);
+  }, [embeddable]);
 
   useEffect(() => {
     return () => {

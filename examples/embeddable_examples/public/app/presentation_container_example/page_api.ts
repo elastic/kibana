@@ -24,13 +24,14 @@ import {
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { DEFAULT_STATE, lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
 import { LastSavedState, PageApi, UnsavedChanges } from './types';
 
-export function getPageApi() {
+export function getPageApi(embeddable: EmbeddableStart) {
   const initialUnsavedChanges = unsavedChangesSessionStorage.load();
-  const initialSavedState = lastSavedStateSessionStorage.load();
+  const initialSavedState = lastSavedStateSessionStorage.load(embeddable);
   let newPanels: Record<string, object> = {};
   const lastSavedState$ = new BehaviorSubject<
     LastSavedState & { panels: Array<{ id: string; type: string }> }
@@ -170,7 +171,7 @@ export function getPageApi() {
             return { id, type };
           }),
         });
-        lastSavedStateSessionStorage.save(savedState);
+        lastSavedStateSessionStorage.save(savedState, embeddable);
         saveNotification$.next();
       },
       panels$,

@@ -31,19 +31,29 @@ import {
   EmbeddableStateWithType,
   CommonEmbeddableStartContract,
   EmbeddableRegistryDefinition,
+  EmbeddableContentManagementDefinition,
 } from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
+import { EmbeddableContentManagementRegistry } from '../common/embeddable_content_management/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
+  registerEmbeddableContentManagementDefinition: (
+    definition: EmbeddableContentManagementDefinition
+  ) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
-export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
+export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
+  getEmbeddableContentManagementDefinition: (
+    id: string
+  ) => EmbeddableContentManagementDefinition | undefined;
+};
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
+  private readonly embeddableContentManagementRegistry = new EmbeddableContentManagementRegistry();
   private readonly enhancements: EnhancementsRegistry = new Map();
   private migrateFn: PersistableStateMigrateFn | undefined;
 
@@ -57,6 +67,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.migrateFn = getMigrateFunction(commonContract);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
+      registerEmbeddableContentManagementDefinition:
+        this.embeddableContentManagementRegistry.registerContentManagementDefinition,
       registerEnhancement: this.registerEnhancement,
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
@@ -87,6 +99,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
           Array.from(this.enhancements.values()),
           this.migrateFn!
         ),
+      getEmbeddableContentManagementDefinition:
+        this.embeddableContentManagementRegistry.getContentManagementDefinition,
     };
   }
 
