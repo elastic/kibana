@@ -223,7 +223,6 @@ export const esqlExecutor = async ({
 
           updateExcludedDocuments({
             excludedDocuments,
-            hasMvExpand,
             sourceDocuments,
             results,
             isRuleAggregating,
@@ -253,7 +252,6 @@ export const esqlExecutor = async ({
 
           updateExcludedDocuments({
             excludedDocuments,
-            hasMvExpand,
             sourceDocuments,
             results,
             isRuleAggregating,
