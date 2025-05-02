@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '@kbn/esql-ast';
-import type { ESQLRealField } from '../../../validation/types';
+import type { ESQLFieldWithMetadata } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
 describe('STATS', () => {
@@ -15,9 +15,9 @@ describe('STATS', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
-    ] as ESQLRealField[];
+    ] as ESQLFieldWithMetadata[];
 
-    const userDefinedColumns = [{ name: 'var0', type: 'double' }] as ESQLRealField[];
+    const userDefinedColumns = [{ name: 'var0', type: 'double' }] as ESQLFieldWithMetadata[];
 
     const result = fieldsSuggestionsAfter(
       synth.cmd`STATS var0=AVG(field2)`,
@@ -32,9 +32,9 @@ describe('STATS', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
-    ] as ESQLRealField[];
+    ] as ESQLFieldWithMetadata[];
 
-    const userDefinedColumns = [{ name: 'AVG(field2)', type: 'double' }] as ESQLRealField[];
+    const userDefinedColumns = [{ name: 'AVG(field2)', type: 'double' }] as ESQLFieldWithMetadata[];
 
     const result = fieldsSuggestionsAfter(
       synth.cmd`STATS AVG(field2)`,
@@ -49,9 +49,9 @@ describe('STATS', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
-    ] as ESQLRealField[];
+    ] as ESQLFieldWithMetadata[];
 
-    const userDefinedColumns = [{ name: 'AVG(field2)', type: 'double' }] as ESQLRealField[];
+    const userDefinedColumns = [{ name: 'AVG(field2)', type: 'double' }] as ESQLFieldWithMetadata[];
 
     const result = fieldsSuggestionsAfter(
       synth.cmd`STATS AVG(field2) BY field1`,
@@ -70,12 +70,12 @@ describe('STATS', () => {
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'double' },
       { name: '@timestamp', type: 'date' },
-    ] as ESQLRealField[];
+    ] as ESQLFieldWithMetadata[];
 
     const userDefinedColumns = [
       { name: 'AVG(field2)', type: 'double' },
       { name: 'buckets', type: 'unknown' },
-    ] as ESQLRealField[];
+    ] as ESQLFieldWithMetadata[];
 
     const result = fieldsSuggestionsAfter(
       synth.cmd`STATS AVG(field2) BY buckets=BUCKET(@timestamp,50,?_tstart,?_tend)`,
