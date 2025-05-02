@@ -192,13 +192,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(`Certificate format check - Header: ${cert?.toString().startsWith('-----BEGIN CERTIFICATE-----')}, Footer: ${cert?.toString().endsWith('-----END CERTIFICATE-----')}`);
         this.logger.debug(`Private key format check - Header: ${key?.toString().startsWith('-----BEGIN PRIVATE KEY-----')}, Footer: ${key?.toString().endsWith('-----END PRIVATE KEY-----')}`);
 
-        // Pass PEM as Buffer
-        cert = Buffer.from(cert.toString(), 'utf-8');
-        key = Buffer.from(key.toString(), 'utf-8');
-
         const httpsAgent = new https.Agent({
-          cert,
-          key,
+          cert: cert.toString(),
+          key: key.toString(),
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
             this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
