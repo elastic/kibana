@@ -2,15 +2,14 @@
 navigation_title: "SentinelOne"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/sentinelone-action-type.html
+applies_to:
+  stack: all
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # SentinelOne connector [sentinelone-action-type]
-
-
-::::{warning}
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-::::
-
 
 The SentinelOne connector communicates with SentinelOne Management Console via REST API.
 
@@ -21,9 +20,10 @@ To use this connector, you must have authority to run {{endpoint-sec}} connector
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
 
-% TO DO: Use `:class: screenshot`
-![SentinelOne connector](../images/sentinelone-connector.png)
-
+:::{image} ../images/sentinelone-connector.png
+:alt: SentinelOne connector
+:screenshot:
+:::
 
 ### Connector configuration [sentinelone-connector-configuration]
 
@@ -38,5 +38,10 @@ URL
 
 ## Test connectors [sentinelone-action-parameters]
 
-At this time, you cannot test the SentinelOne connector.
+You can test connectors as you're creating or editing the connector in {{kib}}.
+For example:
 
+:::{image} ../images/sentinelone-connector-test.png
+:alt: SentinelOne connector test
+:screenshot:
+:::
