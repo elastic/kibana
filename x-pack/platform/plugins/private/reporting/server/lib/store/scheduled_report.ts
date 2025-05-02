@@ -39,6 +39,7 @@ export class ScheduledReport extends Report {
     }
 
     payload.forceNow = runAt.toISOString();
+    payload.title = `${reportSO.attributes.title} [${runAt.toISOString()}]`;
 
     if (!reportSO.id) {
       throw new Error(`Invalid scheduled report saved object - no id`);
