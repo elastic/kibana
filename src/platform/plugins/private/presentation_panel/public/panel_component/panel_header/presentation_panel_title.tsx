@@ -118,7 +118,12 @@ export const PresentationPanelTitle = ({
         <div
           data-test-subj="embeddablePanelTitleInner"
           className="embPanel__titleInner"
-          css={innerTitleBoxStyles}
+          css={css`
+            display: flex;
+            flex-wrap: nowrap;
+            column-gap: ${euiTheme.size.xs};
+            align-items: center;
+          `}
         >
           {!hideTitle ? (
             <h2 css={innerTitleStyles}>
