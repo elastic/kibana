@@ -27,6 +27,10 @@ export const getShareAppMenuItem = ({
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
 }): AppMenuActionPrimary[] => {
+  if (!services.share) {
+    return [];
+  }
+
   const shareExecutor = async ({
     anchorElement,
     asExport,
@@ -35,10 +39,6 @@ export const getShareAppMenuItem = ({
     asExport?: boolean;
   }) => {
     const { dataView, isEsqlMode } = discoverParams;
-
-    if (!services.share) {
-      return;
-    }
 
     const savedSearch = stateContainer.savedSearchState.getState();
     const searchSourceSharingData = await getSharingData(
@@ -87,7 +87,7 @@ export const getShareAppMenuItem = ({
     // so instead we add an empty object for the '_g' parameter to the URL.
     shareableUrlForSavedObject = setStateToKbnUrl('_g', {}, undefined, shareableUrlForSavedObject);
 
-    services.share.toggleShareContextMenu({
+    services.share?.toggleShareContextMenu({
       asExport,
       anchorElement,
       allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
@@ -136,22 +136,7 @@ export const getShareAppMenuItem = ({
     });
   };
 
-  return [
-    {
-      id: AppMenuActionId.export,
-      type: AppMenuActionType.primary,
-      controlProps: {
-        label: i18n.translate('discover.localMenu.exportTitle', {
-          defaultMessage: 'Export',
-        }),
-        description: i18n.translate('discover.localMenu.shareSearchDescription', {
-          defaultMessage: 'Export Discover session',
-        }),
-        iconType: 'download',
-        testId: 'exportTopNavButton',
-        onClick: ({ anchorElement }) => shareExecutor({ anchorElement, asExport: true }),
-      },
-    },
+  const menuItems: AppMenuActionPrimary[] = [
     {
       id: AppMenuActionId.share,
       type: AppMenuActionType.primary,
@@ -168,4 +153,24 @@ export const getShareAppMenuItem = ({
       },
     },
   ];
+
+  if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
+    menuItems.unshift({
+      id: AppMenuActionId.export,
+      type: AppMenuActionType.primary,
+      controlProps: {
+        label: i18n.translate('discover.localMenu.exportTitle', {
+          defaultMessage: 'Export',
+        }),
+        description: i18n.translate('discover.localMenu.shareSearchDescription', {
+          defaultMessage: 'Export Discover session',
+        }),
+        iconType: 'download',
+        testId: 'exportTopNavButton',
+        onClick: ({ anchorElement }) => shareExecutor({ anchorElement, asExport: true }),
+      },
+    });
+  }
+
+  return menuItems;
 };

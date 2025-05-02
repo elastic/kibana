@@ -23,7 +23,6 @@ import type { AnonymousAccessServiceContract } from '../../common/anonymous_acce
 export class ShareRegistry implements ShareRegistryPublicApi {
   private urlService?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
-
   private readonly globalMarker: string = '*';
 
   constructor() {
@@ -54,6 +53,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
 
     return {
+      availableIntegrations: this.availableIntegrations.bind(this),
       resolveShareItemsForShareContext: this.resolveShareItemsForShareContext.bind(this),
     };
   }
@@ -137,6 +137,30 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     return globalOptions.concat(Array.from(shareContextMap.values()));
   }
 
+  /**
+   * Returns all share actions that are available for the given object type.
+   */
+  private availableIntegrations(objectType: string, groupId?: string): ShareActionIntents[] {
+    return this.getShareConfigOptionsForObject(objectType).filter((share) => {
+      if (
+        groupId &&
+        (share.shareType !== 'integration' ||
+          (share?.groupId !== groupId && share.shareType === 'integration'))
+      ) {
+        return false;
+      }
+
+      if (share.shareType === 'integration' && share.prerequisiteCheck) {
+        return share.prerequisiteCheck({
+          objectType,
+        });
+      }
+
+      // if no activation requirement is provided, assume that the share action is always available
+      return true;
+    });
+  }
+
   private resolveShareItemsForShareContext({
     objectType,
     isServerless,
@@ -146,7 +170,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
 
-    return this.getShareConfigOptionsForObject(objectType)
+    return this.availableIntegrations(objectType)
       .map((shareAction) => {
         let config: ShareConfigs['config'] | null;
 

@@ -726,7 +726,8 @@ export const LensTopNavMenu = ({
       actions: {
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
         export: {
-          visible: true,
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          visible: Boolean(share?.availableIntegrations('lens', 'export')?.length),
           enabled: showShareMenu,
           tooltip: () => {
             if (!showShareMenu) {

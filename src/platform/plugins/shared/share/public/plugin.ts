@@ -55,6 +55,11 @@ export type SharePublicStart = ShareMenuManagerStart & {
    * the locator, then using the locator to navigate.
    */
   navigate(options: RedirectOptions): void;
+
+  /**
+   * method to get all available integrations
+   */
+  availableIntegrations: ShareRegistry['availableIntegrations'];
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -137,7 +142,7 @@ export class SharePlugin
   public start(core: CoreStart): SharePublicStart {
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    const { resolveShareItemsForShareContext } = this.shareRegistry.start({
+    const { resolveShareItemsForShareContext, availableIntegrations } = this.shareRegistry.start({
       urlService: this.url!,
       anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
     });
@@ -152,6 +157,7 @@ export class SharePlugin
       ...sharingContextMenuStart,
       url: this.url!,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
+      availableIntegrations,
     };
   }
 }

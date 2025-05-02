@@ -424,21 +424,29 @@ export const getTopNavConfig = (
         }
       },
     },
-    {
-      id: 'export',
-      iconType: 'download',
-      iconOnly: true,
-      label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
-        defaultMessage: 'export',
-      }),
-      description: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonAriaLabel', {
-        defaultMessage: 'Export Visualization',
-      }),
-      testId: 'exportTopNavButton',
-      run: (anchorElement) => showShareOptions(anchorElement, true),
-      // disable the Share button if no action specified and fot byValue visualizations
-      disableButton: !share || Boolean(!savedVis.id && originatingApp),
-    },
+    // Only show the export button if the current user meets the requirements for at least one registered export integration
+    ...(Boolean(share?.availableIntegrations('visualization', 'export')?.length)
+      ? ([
+          {
+            id: 'export',
+            iconType: 'download',
+            iconOnly: true,
+            label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
+              defaultMessage: 'export',
+            }),
+            description: i18n.translate(
+              'visualizations.topNavMenu.shareVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Export Visualization',
+              }
+            ),
+            testId: 'exportTopNavButton',
+            run: (anchorElement) => showShareOptions(anchorElement, true),
+            // disable the Share button if no action specified and fot byValue visualizations
+            disableButton: !share || Boolean(!savedVis.id && originatingApp),
+          },
+        ] as TopNavMenuData[])
+      : []),
     {
       id: 'share',
       iconType: 'share',

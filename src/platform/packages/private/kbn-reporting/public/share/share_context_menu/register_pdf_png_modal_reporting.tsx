@@ -45,6 +45,8 @@ export const reportingPDFExportProvider = ({
   application,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
+  const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
+
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -55,39 +57,6 @@ export const reportingPDFExportProvider = ({
     toasts,
     ...shareOpts
   }: ShareContext): ReturnType<ExportShare['config']> => {
-    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
-    const licenseToolTipContent = message;
-    const licenseHasScreenshotReporting = showLinks;
-    const licenseDisabled = !enableLinks;
-
-    const capabilityHasDashboardScreenshotReporting =
-      application.capabilities.dashboard_v2?.generateScreenshot === true;
-    const capabilityHasVisualizeScreenshotReporting =
-      application.capabilities.visualize_v2?.generateScreenshot === true;
-
-    if (!licenseHasScreenshotReporting) {
-      return null;
-    }
-
-    // for lens png pdf and csv are combined into one modal
-    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
-
-    if (!isSupportedType) {
-      return null;
-    }
-
-    if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
-      return null;
-    }
-
-    if (
-      isSupportedType &&
-      !capabilityHasVisualizeScreenshotReporting &&
-      !capabilityHasDashboardScreenshotReporting
-    ) {
-      return null;
-    }
-
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
 
     const jobProviderOptions: JobParamsProviderOptions = {
@@ -160,8 +129,7 @@ export const reportingPDFExportProvider = ({
         defaultMessage: 'PDF',
       }),
       icon: 'document',
-      toolTipContent: licenseToolTipContent,
-      disabled: licenseDisabled || sharingData.reportingDisabled,
+      disabled: sharingData.reportingDisabled,
       label: 'PDF' as const,
       generateAssetExport: generateReportPDF,
       generateAssetURIValue: generateExportUrlPDF,
@@ -177,6 +145,40 @@ export const reportingPDFExportProvider = ({
     shareType: 'integration',
     groupId: 'export',
     config: getShareMenuItems,
+    prerequisiteCheck({ objectType }) {
+      let isSupportedType: boolean;
+
+      if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {
+        return false;
+      }
+
+      const { showLinks: licenseHasScreenshotReporting } = checkLicense(
+        license.check('reporting', 'gold')
+      );
+
+      const capabilityHasDashboardScreenshotReporting =
+        application.capabilities.dashboard_v2?.generateScreenshot === true;
+      const capabilityHasVisualizeScreenshotReporting =
+        application.capabilities.visualize_v2?.generateScreenshot === true;
+
+      if (!licenseHasScreenshotReporting) {
+        return false;
+      }
+
+      if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+        return false;
+      }
+
+      if (
+        isSupportedType &&
+        !capabilityHasVisualizeScreenshotReporting &&
+        !capabilityHasDashboardScreenshotReporting
+      ) {
+        return false;
+      }
+
+      return true;
+    },
   };
 };
 
@@ -186,6 +188,8 @@ export const reportingPNGExportProvider = ({
   application,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
+  const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
+
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -195,39 +199,7 @@ export const reportingPNGExportProvider = ({
     shareableUrlForSavedObject,
     toasts,
     ...shareOpts
-  }: ShareContext): ReturnType<ExportShare['config']> | null => {
-    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
-    const licenseToolTipContent = message;
-    const licenseHasScreenshotReporting = showLinks;
-    const licenseDisabled = !enableLinks;
-
-    const capabilityHasDashboardScreenshotReporting =
-      application.capabilities.dashboard_v2?.generateScreenshot === true;
-    const capabilityHasVisualizeScreenshotReporting =
-      application.capabilities.visualize_v2?.generateScreenshot === true;
-
-    if (!licenseHasScreenshotReporting) {
-      return null;
-    }
-    // for lens png pdf and csv are combined into one modal
-    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
-
-    if (!isSupportedType) {
-      return null;
-    }
-
-    if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
-      return null;
-    }
-
-    if (
-      isSupportedType &&
-      !capabilityHasVisualizeScreenshotReporting &&
-      !capabilityHasDashboardScreenshotReporting
-    ) {
-      return null;
-    }
-
+  }: ShareContext): ReturnType<ExportShare['config']> => {
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
 
     const jobProviderOptions: JobParamsProviderOptions = {
@@ -299,8 +271,7 @@ export const reportingPNGExportProvider = ({
         defaultMessage: 'PNG export',
       }),
       icon: 'image',
-      toolTipContent: licenseToolTipContent,
-      disabled: licenseDisabled || sharingData.reportingDisabled,
+      disabled: sharingData.reportingDisabled,
       label: 'PNG' as const,
       generateAssetExport: generateReportPNG,
       generateAssetURIValue: generateExportUrlPNG,
@@ -315,5 +286,38 @@ export const reportingPNGExportProvider = ({
     groupId: 'export',
     id: 'imageReports',
     config: getShareMenuItems,
+    prerequisiteCheck({ objectType }) {
+      let isSupportedType: boolean;
+
+      if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {
+        return false;
+      }
+
+      const { showLinks } = checkLicense(license.check('reporting', 'gold'));
+      const licenseHasScreenshotReporting = showLinks;
+
+      const capabilityHasDashboardScreenshotReporting =
+        application.capabilities.dashboard_v2?.generateScreenshot === true;
+      const capabilityHasVisualizeScreenshotReporting =
+        application.capabilities.visualize_v2?.generateScreenshot === true;
+
+      if (!licenseHasScreenshotReporting) {
+        return false;
+      }
+
+      if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+        return false;
+      }
+
+      if (
+        isSupportedType &&
+        !capabilityHasVisualizeScreenshotReporting &&
+        !capabilityHasDashboardScreenshotReporting
+      ) {
+        return false;
+      }
+
+      return true;
+    },
   };
 };

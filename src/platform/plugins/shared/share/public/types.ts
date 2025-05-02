@@ -10,8 +10,8 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Capabilities, ToastsSetup } from '@kbn/core/public';
+import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { EuiIconProps } from '@elastic/eui';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
@@ -22,6 +22,9 @@ export interface ShareRegistryApiStart {
   urlService: BrowserUrlService;
   anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 }
+
+type ShareActionConfigArgs = ShareContext &
+  Pick<ShareRegistryApiStart, 'anonymousAccessServiceProvider' | 'urlService'>;
 
 export type ShareTypes = 'link' | 'embed' | 'legacy' | 'integration';
 
@@ -54,11 +57,16 @@ type ShareImplementationFactory<
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
+      config: (ctx: ShareActionConfigArgs) => C;
+      /**
+       * when provided, this method will be used to evaluate if this integration should be available,
+       * given the current license and capabilities of kibana
+       */
+      prerequisiteCheck?: (args: { objectType: ShareContext['objectType'] }) => boolean;
     }
   : {
       shareType: T;
-      config: (ctx: ShareContext & ShareRegistryApiStart) => C | null;
+      config: (ctx: ShareActionConfigArgs) => C | null;
     };
 
 // New type definition to extract the config return type

@@ -203,7 +203,7 @@ export const useDashboardMenuItems = ({
         iconType: 'download',
         iconOnly: true,
         testId: 'exportTopNavButton',
-        disableButton: disableTopNav, // TODO: add logic to disable this button if the user doesn't have export capabilities
+        disableButton: disableTopNav,
         run: (anchorElement) => showShare(anchorElement, true),
       } as TopNavMenuData,
 
@@ -259,11 +259,21 @@ export const useDashboardMenuItems = ({
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
 
+  const hasExportIntegration = Boolean(
+    shareService?.availableIntegrations('dashboard', 'export')?.length
+  );
+
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.export, menuItems.share] : [];
+    const shareMenuItem = shareService
+      ? [
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          hasExportIntegration ? menuItems.export : null,
+          menuItems.share,
+        ].filter(Boolean)
+      : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
@@ -276,11 +286,29 @@ export const useDashboardMenuItems = ({
       ...shareMenuItem,
       ...editMenuItem,
     ];
-  }, [isLabsEnabled, menuItems, dashboardApi.isManaged, showResetChange, resetChangesMenuItem]);
+  }, [
+    isLabsEnabled,
+    menuItems.labs,
+    menuItems.export,
+    menuItems.share,
+    menuItems.interactiveSave,
+    menuItems.edit,
+    menuItems.fullScreen,
+    hasExportIntegration,
+    dashboardApi.isManaged,
+    showResetChange,
+    resetChangesMenuItem,
+  ]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.export, menuItems.share] : [];
+    const shareMenuItem = shareService
+      ? [
+          // Only show the export button if the current user meets the requirements for at least one registered export integration
+          hasExportIntegration ? menuItems.export : null,
+          menuItems.share,
+        ].filter(Boolean)
+      : [];
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
@@ -301,7 +329,20 @@ export const useDashboardMenuItems = ({
     editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
-  }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
+  }, [
+    isLabsEnabled,
+    menuItems.labs,
+    menuItems.export,
+    menuItems.share,
+    menuItems.settings,
+    menuItems.interactiveSave,
+    menuItems.switchToViewMode,
+    menuItems.quickSave,
+    hasExportIntegration,
+    lastSavedId,
+    showResetChange,
+    resetChangesMenuItem,
+  ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };

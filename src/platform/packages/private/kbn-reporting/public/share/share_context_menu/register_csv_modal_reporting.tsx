@@ -30,17 +30,6 @@ export const reportingCsvExportProvider = ({
     sharingData,
     toasts,
   }: ShareContext): ReturnType<ExportShare['config']> => {
-    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-    const licenseToolTipContent = licenseCheck.message;
-    const licenseHasCsvReporting = licenseCheck.showLinks;
-    const licenseDisabled = !licenseCheck.enableLinks;
-
-    const capabilityHasCsvReporting = application.capabilities.discover_v2?.generateCsv === true;
-
-    if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
-      return null;
-    }
-
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
       absoluteTime,
@@ -141,7 +130,6 @@ export const reportingCsvExportProvider = ({
       toolTipContent: licenseToolTipContent,
       exportType: reportType,
       label: 'CSV',
-      disabled: licenseDisabled,
       generateAssetExport: generateReportingJobCSV,
       generateAssetURIValue: () => absoluteUrl,
       helpText: (
@@ -167,5 +155,18 @@ export const reportingCsvExportProvider = ({
     id: 'csvReportsModal',
     groupId: 'export',
     config: getShareMenuItems,
+    prerequisiteCheck: () => {
+      const licenseCheck = checkLicense(license.check('reporting', 'basic'));
+
+      const licenseHasCsvReporting = licenseCheck.showLinks;
+
+      const capabilityHasCsvReporting = application.capabilities.discover_v2?.generateCsv === true;
+
+      if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
+        return false;
+      }
+
+      return true;
+    },
   };
 };
