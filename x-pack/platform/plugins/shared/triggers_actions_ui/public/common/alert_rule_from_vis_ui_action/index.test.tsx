@@ -146,7 +146,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | KEEP tags, something.else
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE tags IN (\\"shibbity\\",\\"beep\\",\\"bop\\",\\"doowop\\") AND something.else >= 3087",
+      | WHERE MATCH(tags, \\"shibbity\\") AND MATCH(tags, \\"beep\\") AND MATCH(tags, \\"bop\\") AND MATCH(tags, \\"doowop\\") AND something.else >= 3087",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
@@ -161,7 +161,7 @@ describe('AlertRuleFromVisAction', () => {
       data: {
         query: 'FROM index | KEEP tags, something.else',
         thresholdValues: { 'something.else': 3087 },
-        splitValues: { tags: ['["shibbity", ""]'] },
+        splitValues: { tags: ['shibbity', ''] },
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -171,7 +171,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | KEEP tags, something.else
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE tags IN (\\"shibbity\\",\\"\\") AND something.else >= 3087",
+      | WHERE (tags == \\"shibbity\\" OR tags == \\"\\") AND something.else >= 3087",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",

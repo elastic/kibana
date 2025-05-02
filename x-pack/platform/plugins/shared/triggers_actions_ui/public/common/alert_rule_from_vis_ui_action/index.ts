@@ -144,9 +144,12 @@ export class AlertRuleFromVisAction implements Action<Context> {
             if (typeof v === 'string') {
               const parsed = JSON.parse(v);
               if (Array.isArray(parsed)) {
-                return `${escapeFieldName(fieldName)} IN (${parsed
-                  .map((multiVal) => formatStringForESQL(multiVal))
-                  .join(',')})`;
+                return parsed
+                  .map(
+                    (multiVal) =>
+                      `MATCH(${escapeFieldName(fieldName)}, ${formatStringForESQL(multiVal)})`
+                  )
+                  .join(' AND ');
               }
             }
           } catch {
