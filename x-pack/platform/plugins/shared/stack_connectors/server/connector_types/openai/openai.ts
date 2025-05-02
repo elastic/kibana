@@ -62,42 +62,32 @@ import https from 'https';
 function formatPEMContent(pemContent: string): string {
   if (!pemContent) return pemContent;
 
-  // First normalize any spaces after headers and before footers to newlines
-  const normalizedContent = pemContent
-    .replace(/-----BEGIN\s+(\w+)\s+-----\s+/g, '-----BEGIN $1-----\n')
-    .replace(/\s+-----END\s+(\w+)\s+-----/g, '\n-----END $1-----')
-    .replace(/\s+/g, '\n');  // Convert any remaining spaces to newlines
+  // First, normalize the input by replacing any multiple spaces with single spaces
+  const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
 
-  // Split on newlines to handle the content
-  const parts = normalizedContent.split('\n').filter(part => part.trim() !== '');
-  
-  // Find header and footer
-  const headerIndex = parts.findIndex(part => part.startsWith('-----BEGIN'));
-  const footerIndex = parts.findIndex(part => part.startsWith('-----END'));
-  
-  if (headerIndex === -1 || footerIndex === -1) return pemContent;
-  
-  // Get header and footer
-  const header = parts[headerIndex];
-  const footer = parts[footerIndex];
-  
-  // Join all content parts between header and footer, remove any remaining spaces
-  const content = parts.slice(headerIndex + 1, footerIndex).join('').replace(/\s+/g, '');
-  
-  // Insert line breaks every 64 characters
+  // Extract the header and footer
+  const headerMatch = normalizedContent.match(/-----BEGIN\s+(\w+)\s+-----/);
+  const footerMatch = normalizedContent.match(/-----END\s+(\w+)\s+-----/);
+
+  if (!headerMatch || !footerMatch) {
+    return pemContent; // Return original if we can't find proper headers/footers
+  }
+
+  const header = headerMatch[0];
+  const footer = footerMatch[0];
+  const type = headerMatch[1];
+
+  // Extract the base64 content between header and footer
+  const content = normalizedContent
+    .slice(header.length, normalizedContent.indexOf(footer))
+    .trim()
+    .replace(/\s+/g, ''); // Remove all spaces from content
+
+  // Format the content with 64 characters per line
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
-  
-  // Assemble the final PEM with strict formatting
-  const lines = [
-    header + '\n',  // Ensure newline after header
-    formattedContent,
-    '\n' + footer   // Ensure newline before footer
-  ];
-  
-  // Join with newlines and ensure strict PEM format
-  return lines.join('')
-    .replace(/\n+/g, '\n')  // Remove duplicate newlines
-    .trim();  // Remove any leading/trailing whitespace
+
+  // Assemble the final PEM with proper formatting
+  return `${header}\n${formattedContent}\n${footer}`;
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
