@@ -249,15 +249,15 @@
           "label": "getCloudSecurityPostureMisconfigurationFlyout",
           "description": [],
           "signature": [
-            "() => { Component: React.FC<",
+            "() => { Component: React.FC<((Record<string, unknown> & BaseFlyoutProps & NonPreviewModeProps) | (Record<string, unknown> & BaseFlyoutProps & PreviewModeProps)) & { children?: ((props: ",
             {
               "pluginId": "@kbn/cloud-security-posture",
               "scope": "public",
               "docId": "kibKbnCloudSecurityPosturePluginApi",
-              "section": "def-public.FindingMisconfigurationFlyoutProps",
-              "text": "FindingMisconfigurationFlyoutProps"
+              "section": "def-public.FindingMisconfigurationFlyoutContentProps",
+              "text": "FindingMisconfigurationFlyoutContentProps"
             },
-            ">; Header: React.FC<",
+            ") => React.ReactNode) | undefined; }>; Header: React.FC<",
             {
               "pluginId": "@kbn/cloud-security-posture",
               "scope": "public",
