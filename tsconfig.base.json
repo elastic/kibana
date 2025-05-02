@@ -1076,6 +1076,8 @@
       "@kbn/import-resolver/*": ["src/platform/packages/private/kbn-import-resolver/*"],
       "@kbn/index-adapter": ["x-pack/solutions/security/packages/index-adapter"],
       "@kbn/index-adapter/*": ["x-pack/solutions/security/packages/index-adapter/*"],
+      "@kbn/index-editor": ["src/platform/packages/private/kbn-index-editor"],
+      "@kbn/index-editor/*": ["src/platform/packages/private/kbn-index-editor/*"],
       "@kbn/index-lifecycle-management-common-shared": ["x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared"],
       "@kbn/index-lifecycle-management-common-shared/*": ["x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/*"],
       "@kbn/index-lifecycle-management-plugin": ["x-pack/platform/plugins/private/index_lifecycle_management"],

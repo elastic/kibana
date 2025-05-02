@@ -5842,6 +5842,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/index-editor@link:src/platform/packages/private/kbn-index-editor":
+  version "0.0.0"
+  uid ""
+
 "@kbn/index-lifecycle-management-common-shared@link:x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared":
   version "0.0.0"
   uid ""

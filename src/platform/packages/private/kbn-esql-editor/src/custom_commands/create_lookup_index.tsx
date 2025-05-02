@@ -12,7 +12,7 @@ import { monaco } from '@kbn/monaco';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
+import { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLEditorDeps } from '../types';
@@ -50,7 +50,7 @@ export function appendIndexToJoinCommand(
   return lines.join('\n');
 }
 
-export const useCreateLookupIndexCommand = (
+export const useLookupIndexCommand = (
   editor: monaco.editor.IStandaloneCodeEditor,
   query: AggregateQuery,
   onIndexCreated: (resultQuery: string) => void
@@ -76,43 +76,11 @@ export const useCreateLookupIndexCommand = (
   const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
 
   monaco.editor.registerCommand('esql.lookup_index.create', async (_, initialIndexName) => {
-    await uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
-      onUploadComplete,
-      autoCreateDataView: false,
+    await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
       initialIndexName,
-      indexSettings: {
-        'index.mode': 'lookup',
-      },
-      flyoutContent: {
-        showFileSummary: true,
-        showFileContentPreview: true,
-        title: i18n.translate('esqlEditor.lookupJoin.title', {
-          defaultMessage: 'Create lookup index',
-        }),
-        description: (
-          <FormattedMessage
-            id="esqlEditor.lookupJoin.description"
-            defaultMessage={
-              'Lookup indices can be created by uploading data from a file, below, or through the {docUrl}.'
-            }
-            values={{
-              docUrl: (
-                <EuiLink
-                  href={lookupIndexDocsUrl}
-                  target="_blank"
-                  rel="noopener nofollow noreferrer"
-                  data-test-subj="lookupIndexDocLink"
-                >
-                  <FormattedMessage
-                    id="esqlEditor.lookupJoin.docUrl"
-                    defaultMessage={'Elasticsearch API'}
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
-      },
-    } as OpenFileUploadLiteContext);
+      onUploadComplete,
+      onClose: () => {},
+      onSave: () => {},
+    } as EditLookupIndexContentContext);
   });
 };

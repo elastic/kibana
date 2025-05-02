@@ -7,4 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useLookupIndexCommand as useCreateLookupIndexCommand } from './create_lookup_index';
+export {
+  createEditLookupIndexContentAction,
+  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER,
+  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
+  ACTION_EDIT_LOOKUP_INDEX,
+} from './src/ui_action';
+export type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from './src/types';

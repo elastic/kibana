@@ -7,4 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useLookupIndexCommand as useCreateLookupIndexCommand } from './create_lookup_index';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+
+export interface EditLookupIndexContentContext {
+  indexName?: string;
+  onSave?: () => void;
+  onClose?: () => void;
+}
+
+export interface EditLookupIndexFlyoutDeps {
+  coreStart: CoreStart;
+  share: SharePluginStart;
+  data: DataPublicPluginStart;
+}

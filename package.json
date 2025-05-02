@@ -588,6 +588,7 @@
     "@kbn/iframe-embedded-plugin": "link:x-pack/test/functional_embedded/plugins/iframe_embedded",
     "@kbn/image-embeddable-plugin": "link:src/platform/plugins/private/image_embeddable",
     "@kbn/index-adapter": "link:x-pack/solutions/security/packages/index-adapter",
+    "@kbn/index-editor": "link:src/platform/packages/private/kbn-index-editor",
     "@kbn/index-lifecycle-management-common-shared": "link:x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared",
     "@kbn/index-lifecycle-management-plugin": "link:x-pack/platform/plugins/private/index_lifecycle_management",
     "@kbn/index-management-plugin": "link:x-pack/platform/plugins/shared/index_management",
