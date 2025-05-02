@@ -48,16 +48,14 @@ const rruleCommon = schema.object({
       schema.literal(6),
     ])
   ),
-  interval: schema.maybe(
-    schema.number({
-      validate: (interval: number) => {
-        if (!Number.isInteger(interval)) {
-          return 'rRule interval must be an integer greater than 0';
-        }
-      },
-      min: 1,
-    })
-  ),
+  interval: schema.number({
+    validate: (interval: number) => {
+      if (!Number.isInteger(interval)) {
+        return 'rRule interval must be an integer greater than 0';
+      }
+    },
+    min: 1,
+  }),
   tzid: schema.string({ validate: validateTimezone, defaultValue: 'UTC' }),
 });
 
