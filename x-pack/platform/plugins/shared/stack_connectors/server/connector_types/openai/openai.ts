@@ -327,6 +327,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(`PKI OpenAI Response (runApi): ${JSON.stringify(response)}`);
         return response as RunActionResponse;
       } catch (error) {
+        this.logger.error(`OpenAI API Error: ${error.message}`);
+        this.logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(
             `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`
