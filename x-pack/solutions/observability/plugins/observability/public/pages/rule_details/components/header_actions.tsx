@@ -124,7 +124,7 @@ export function HeaderActions({
   }
 
   const disableRuleOption = {
-    'data-test-subj': 'snoozeRuleButton',
+    'data-test-subj': 'disableRuleButton',
     onClick: onDisableModalOpen,
     name: i18n.translate('xpack.observability.ruleDetails.disableRule', {
       defaultMessage: 'Disable',
@@ -132,7 +132,7 @@ export function HeaderActions({
   };
 
   const enableRuleOption = {
-    'data-test-subj': 'enableButton',
+    'data-test-subj': 'enableRuleButton',
     onClick: handleEnableRule,
     name: i18n.translate('xpack.observability.ruleDetails.enableRule', {
       defaultMessage: 'Enable',
@@ -146,7 +146,7 @@ export function HeaderActions({
       items: [
         ...[rule.enabled ? disableRuleOption : enableRuleOption],
         {
-          'data-test-subj': 'runButton',
+          'data-test-subj': 'runRuleButton',
           onClick: handleRunRule,
           name: i18n.translate('xpack.observability.ruleDetails.runRule', {
             defaultMessage: 'Run',
@@ -164,7 +164,7 @@ export function HeaderActions({
         },
         {
           icon: 'pencil',
-          'data-test-subj': 'editButton',
+          'data-test-subj': 'editRuleButton',
           onClick: handleEditRule,
           name: i18n.translate('xpack.observability.ruleDetails.editRule', {
             defaultMessage: 'Edit',
@@ -172,7 +172,7 @@ export function HeaderActions({
         },
         {
           icon: 'trash',
-          'data-test-subj': 'deleteButton',
+          'data-test-subj': 'deleteRuleButton',
           className: 'collapsedItemActions__deleteButton',
           onClick: handleRemoveRule,
           name: i18n.translate('xpack.observability.ruleDetails.deleteRule', {
