@@ -325,7 +325,7 @@ $$$observability-apm-critical-path$$$`observability:apmEnableCriticalPath`
 :   When enabled, displays the critical path of a trace.
 
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
-:   [preview] When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
+:   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
 $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServices`
 :   Limit the number of services in a given service group.
@@ -389,9 +389,6 @@ $$$observability-profiling-aws-cost-discount-rate$$$`observability:profilingAWSC
 
 $$$observability-profiling-azure-cost-discount-rate$$$`observability:profilingAzureCostDiscountRate`
 :   If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
-
-$$$observability-profiling-use-topNFunctions-from-stacktraces$$$`observability:profilingFetchTopNFunctionsFromStacktraces`
-:   Switch to fetch the TopN Functions from the Stacktraces API.
 
 $$$observability-profiling-cost-per-vcpu-per-hour$$$`observability:profilingCostPervCPUPerHour`
 :   Default Hourly Cost per CPU Core for machines not on AWS or Azure.
