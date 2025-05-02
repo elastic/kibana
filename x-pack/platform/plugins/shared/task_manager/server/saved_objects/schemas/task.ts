@@ -75,3 +75,16 @@ export const taskSchemaV4 = taskSchemaV3.extends({
     ])
   ),
 });
+
+export const taskSchemaV5 = taskSchemaV4.extends({
+  schedule: schema.maybe(
+    schema.oneOf([
+      schema.object({
+        interval: schema.string({ validate: validateDuration }),
+      }),
+      schema.object({
+        rrule: rruleSchedule,
+      }),
+    ])
+  ),
+});
