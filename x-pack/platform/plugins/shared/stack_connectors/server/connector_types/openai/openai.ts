@@ -64,11 +64,12 @@ function formatPEMContent(pemContent: string): string {
 
   // First normalize any spaces after headers and before footers to newlines
   const normalizedContent = pemContent
-    .replace(/-----BEGIN\s+(\w+)\s+-----\s+/, '-----BEGIN $1-----\n')
-    .replace(/\s+-----END\s+(\w+)\s+-----/, '\n-----END $1-----');
+    .replace(/-----BEGIN\s+(\w+)\s+-----\s+/g, '-----BEGIN $1-----\n')
+    .replace(/\s+-----END\s+(\w+)\s+-----/g, '\n-----END $1-----')
+    .replace(/\s+/g, '\n');  // Convert any remaining spaces to newlines
 
   // Split on newlines to handle the content
-  const parts = normalizedContent.split('\n');
+  const parts = normalizedContent.split('\n').filter(part => part.trim() !== '');
   
   // Find header and footer
   const headerIndex = parts.findIndex(part => part.startsWith('-----BEGIN'));
