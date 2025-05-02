@@ -62,19 +62,24 @@ import https from 'https';
 function formatPEMContent(pemContent: string): string {
   if (!pemContent) return pemContent;
 
-  // Remove all whitespace and split into lines
-  const lines = pemContent.split(/[\r\n]+/).map(line => line.trim()).filter(Boolean);
-
-  if (lines.length < 2) return pemContent;
-
-  const header = lines[0];
-  const footer = lines[lines.length - 1];
-  // Join all content lines, remove all whitespace (including spaces)
-  const content = lines.slice(1, -1).join('').replace(/\s+/g, '');
-
+  // First split on spaces to handle UI's conversion of line breaks
+  const parts = pemContent.split(/\s+/);
+  
+  // Find header and footer
+  const headerIndex = parts.findIndex(part => part.startsWith('-----BEGIN'));
+  const footerIndex = parts.findIndex(part => part.startsWith('-----END'));
+  
+  if (headerIndex === -1 || footerIndex === -1) return pemContent;
+  
+  const header = parts[headerIndex];
+  const footer = parts[footerIndex];
+  
+  // Join all content parts between header and footer, remove any remaining spaces
+  const content = parts.slice(headerIndex + 1, footerIndex).join('').replace(/\s+/g, '');
+  
   // Insert line breaks every 64 characters
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
-
+  
   return `${header}\n${formattedContent}\n${footer}`;
 }
 
