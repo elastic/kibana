@@ -71,11 +71,12 @@ function formatPEMContent(pemContent: string): string {
   
   if (headerIndex === -1 || footerIndex === -1) return pemContent;
   
-  const header = parts[headerIndex];
-  const footer = parts[footerIndex];
+  // Reconstruct header and footer properly
+  const header = parts.slice(headerIndex, headerIndex + 2).join(' ');
+  const footer = parts.slice(footerIndex, footerIndex + 2).join(' ');
   
   // Join all content parts between header and footer, remove any remaining spaces
-  const content = parts.slice(headerIndex + 1, footerIndex).join('').replace(/\s+/g, '');
+  const content = parts.slice(headerIndex + 2, footerIndex).join('').replace(/\s+/g, '');
   
   // Insert line breaks every 64 characters
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
