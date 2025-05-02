@@ -185,9 +185,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug('Private key content being passed to HTTPS agent:');
         this.logger.debug(keyPEM);
 
+        // Create the HTTPS agent with the PEM content as a Buffer
         const httpsAgent = new https.Agent({
-          cert: Buffer.from(certPEM),
-          key: Buffer.from(keyPEM),
+          cert: Buffer.from(certPEM, 'utf8'),
+          key: Buffer.from(keyPEM, 'utf8'),
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
             this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
