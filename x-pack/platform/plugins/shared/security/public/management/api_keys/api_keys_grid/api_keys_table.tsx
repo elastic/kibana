@@ -398,7 +398,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           aria-label={i18n.translate(
             'xpack.security.accountManagement.apiKeyBadge.personalAriaLabel',
             {
-              defaultMessage: 'Personal Filter',
+              defaultMessage: 'Filter personal API keys',
             }
           )}
         >
@@ -424,7 +424,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           aria-label={i18n.translate(
             'xpack.security.accountManagement.apiKeyBadge.crossClusterAriaLabel',
             {
-              defaultMessage: 'Cross-Cluster Filter',
+              defaultMessage: 'Filter cross-cluster API keys',
             }
           )}
         >
@@ -449,7 +449,7 @@ export const TypesFilterButton: FunctionComponent<CustomComponentProps> = ({ que
           aria-label={i18n.translate(
             'xpack.security.accountManagement.apiKeyBadge.managedAriaLabel',
             {
-              defaultMessage: 'Managed Filter',
+              defaultMessage: 'Filter managed API keys',
             }
           )}
         >
