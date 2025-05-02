@@ -7454,6 +7454,42 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getUntrackModal",
+          "type": "Function",
+          "tags": [],
+          "label": "getUntrackModal",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "UntrackAlertsModalProps",
+            ") => React.ReactElement<",
+            "UntrackAlertsModalProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getUntrackModal.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "UntrackAlertsModalProps"
+              ],
+              "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesSettingsLink",
           "type": "Function",
           "tags": [],
@@ -7466,6 +7502,77 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleHelpers",
+          "type": "Function",
+          "tags": [],
+          "label": "getRuleHelpers",
+          "description": [],
+          "signature": [
+            "(rule: ",
+            {
+              "pluginId": "triggersActionsUi",
+              "scope": "public",
+              "docId": "kibTriggersActionsUiPluginApi",
+              "section": "def-public.Rule",
+              "text": "Rule"
+            },
+            "<",
+            {
+              "pluginId": "@kbn/alerting-types",
+              "scope": "common",
+              "docId": "kibKbnAlertingTypesPluginApi",
+              "section": "def-common.RuleTypeParams",
+              "text": "RuleTypeParams"
+            },
+            ">) => { isRuleSnoozed: boolean; getNextRuleSnoozeSchedule: { duration: number; rRule: ",
+            {
+              "pluginId": "@kbn/alerting-types",
+              "scope": "common",
+              "docId": "kibKbnAlertingTypesPluginApi",
+              "section": "def-common.RRuleParams",
+              "text": "RRuleParams"
+            },
+            "; id?: string | undefined; skipRecurrences?: string[] | undefined; } | null; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleHelpers.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "rule",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "triggersActionsUi",
+                  "scope": "public",
+                  "docId": "kibTriggersActionsUiPluginApi",
+                  "section": "def-public.Rule",
+                  "text": "Rule"
+                },
+                "<",
+                {
+                  "pluginId": "@kbn/alerting-types",
+                  "scope": "common",
+                  "docId": "kibKbnAlertingTypesPluginApi",
+                  "section": "def-common.RuleTypeParams",
+                  "text": "RuleTypeParams"
+                },
+                ">"
+              ],
+              "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         },
         {
