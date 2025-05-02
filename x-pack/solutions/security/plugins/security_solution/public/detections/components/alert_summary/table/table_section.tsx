@@ -21,7 +21,6 @@ import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { GroupedAlertsTable } from '../../alerts_table/alerts_grouping';
 import { groupStatsAggregations } from './group_stats_aggregations';
-import { useUserData } from '../../user_info';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export const GROUPED_TABLE_TEST_ID = 'alert-summary-grouped-table';
@@ -66,8 +65,6 @@ export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSec
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
   const filters = useDeepEqualSelector(getGlobalFiltersSelector);
 
-  const [{ hasIndexWrite, hasIndexMaintenance }] = useUserData();
-
   const accordionExtraActionGroupStats = useMemo(
     () => ({
       aggregations: groupStatsAggregations,
@@ -98,8 +95,6 @@ export const TableSection = memo(({ dataView, packages, ruleResponse }: TableSec
           from={from}
           globalFilters={filters}
           globalQuery={globalQuery}
-          hasIndexMaintenance={hasIndexMaintenance ?? false}
-          hasIndexWrite={hasIndexWrite ?? false}
           loading={false}
           renderChildComponent={renderChildComponent}
           runtimeMappings={runtimeMappings}

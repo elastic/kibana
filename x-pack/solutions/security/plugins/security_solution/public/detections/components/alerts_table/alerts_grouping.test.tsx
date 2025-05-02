@@ -131,8 +131,6 @@ const testProps: AlertsTableComponentProps = {
     query: 'query',
     language: 'language',
   },
-  hasIndexMaintenance: true,
-  hasIndexWrite: true,
   loading: false,
   renderChildComponent,
   runtimeMappings: {},

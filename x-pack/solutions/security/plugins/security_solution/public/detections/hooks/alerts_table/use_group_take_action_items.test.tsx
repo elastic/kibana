@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { waitFor, renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { useGroupTakeActionsItems } from '.';
+import { TestProviders } from '../../../common/mock';
+import { useGroupTakeActionsItems } from './use_group_take_action_items';
 
 describe('useGroupTakeActionsItems', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
