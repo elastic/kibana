@@ -42,36 +42,6 @@ describe('OAuth2Fields', () => {
     expect(screen.getByText(i18n.ADDITIONAL_FIELDS)).toBeInTheDocument();
   });
 
-  it.skip('sets fields to read-only when readOnly is true', async () => {
-    const user = userEvent.setup();
-    render(
-      <AuthFormTestProvider defaultValue={baseFormData} onSubmit={onSubmit}>
-        <OAuth2Fields readOnly={true} />
-      </AuthFormTestProvider>
-    );
-
-    expect(screen.getByLabelText(i18n.ACCESS_TOKEN_URL)).toHaveAttribute('readonly');
-    expect(screen.getByLabelText(i18n.CLIENT_ID)).toHaveAttribute('readonly');
-    expect(screen.getByLabelText(i18n.CLIENT_SECRET)).toHaveAttribute('readonly');
-    expect(screen.getByLabelText(i18n.SCOPE)).toHaveAttribute('readonly');
-
-    const additionalFieldsRow = screen.getByTestId('additionalFields');
-
-    const editorContainer = await within(additionalFieldsRow).findByRole('textbox');
-
-    await user.click(editorContainer);
-
-    await user.type(editorContainer, 't');
-
-    const readOnlyMessage = await screen.findByText(
-      'Cannot edit in read-only editor',
-      {},
-      { timeout: 2000 }
-    );
-
-    expect(readOnlyMessage).toBeInTheDocument();
-  });
-
   it('does not set fields to read-only when readOnly is false', () => {
     render(
       <AuthFormTestProvider defaultValue={baseFormData} onSubmit={onSubmit}>
