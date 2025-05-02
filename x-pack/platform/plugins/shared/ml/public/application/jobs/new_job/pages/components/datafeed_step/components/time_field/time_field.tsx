@@ -19,8 +19,8 @@ export const TimeField: FC = () => {
   const jobCreator = jc as AdvancedJobCreator;
   const { dateFields } = useNewJobCapsService();
   const [timeFieldName, setTimeFieldName] = useState(jobCreator.timeFieldName);
-  const timeFieldTitleId = useGeneratedHtmlId({
-    prefix: 'timeFieldTitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'timeField',
   });
   useEffect(() => {
     jobCreator.timeFieldName = timeFieldName;
@@ -34,12 +34,12 @@ export const TimeField: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description titleId={timeFieldTitleId}>
+    <Description titleId={titleId}>
       <TimeFieldSelect
         fields={dateFields}
         changeHandler={setTimeFieldName}
         selectedField={timeFieldName}
-        timeFieldTitleId={timeFieldTitleId}
+        timeFieldTitleId={titleId}
       />
     </Description>
   );

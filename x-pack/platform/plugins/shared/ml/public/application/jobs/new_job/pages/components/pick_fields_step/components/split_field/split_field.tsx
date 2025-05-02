@@ -22,8 +22,8 @@ export const SplitFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
   const newJobCapsService = useNewJobCapsService();
-  const splitFieldSelectTitleId = useGeneratedHtmlId({
-    prefix: 'splitFieldSelectTitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'splitFieldSelector',
   });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
@@ -58,14 +58,14 @@ export const SplitFieldSelector: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description titleId={splitFieldSelectTitleId}>
+    <Description titleId={titleId}>
       <SplitFieldSelect
         fields={categoryFields}
         changeHandler={setSplitField}
         selectedField={splitField}
         isClearable={true}
         testSubject="mlSplitFieldSelect"
-        titleId={splitFieldSelectTitleId}
+        titleId={titleId}
       />
     </Description>
   );

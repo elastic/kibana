@@ -22,8 +22,8 @@ export const ScrollSizeInput: FC = () => {
 
   const { datafeeds } = getNewJobDefaults();
   const scrollSizeDefault = datafeeds.scroll_size !== undefined ? `${datafeeds.scroll_size}` : '';
-  const scrollSizeTitleId = useGeneratedHtmlId({
-    prefix: 'scrollSizeTitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'scrollSizeInput',
   });
   useEffect(() => {
     jobCreator.scrollSize = scrollSizeString === '' ? null : +scrollSizeString;
@@ -42,7 +42,7 @@ export const ScrollSizeInput: FC = () => {
   }, [jobValidatorUpdated]);
 
   return (
-    <Description validation={validation} titleId={scrollSizeTitleId}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldNumber
         min={0}
         placeholder={scrollSizeDefault}
@@ -50,7 +50,7 @@ export const ScrollSizeInput: FC = () => {
         onChange={(e) => setScrollSize(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputScrollSize"
-        aria-labelledby={scrollSizeTitleId}
+        aria-labelledby={titleId}
       />
     </Description>
   );

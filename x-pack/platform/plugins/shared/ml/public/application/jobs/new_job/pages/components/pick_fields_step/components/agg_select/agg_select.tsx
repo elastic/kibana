@@ -37,8 +37,8 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(createLabel);
   const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
-  const aggregationSelectTitleId = useGeneratedHtmlId({
-    prefix: 'aggregationSelecttitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'aggSelect',
   });
   const options: DropDownLabel[] = useMemo(
     () => {
@@ -97,7 +97,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   return (
     <>
       <EuiTitle size="xs">
-        <h3 id={aggregationSelectTitleId}>
+        <h3 id={titleId}>
           {i18n.translate('xpack.ml.newJob.wizard.aggSelect.title', {
             defaultMessage: 'Select an aggregation',
           })}
@@ -117,7 +117,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
           onChange={changeHandler}
           isClearable={false}
           isInvalid={validation.valid === false}
-          titleId={aggregationSelectTitleId}
+          titleId={titleId}
         />
       </EuiFormRow>
       <EuiSpacer size="s" />

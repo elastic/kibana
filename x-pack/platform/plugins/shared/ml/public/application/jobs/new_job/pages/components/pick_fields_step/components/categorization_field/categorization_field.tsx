@@ -28,8 +28,8 @@ export const CategorizationField: FC = () => {
   );
   const isCategorizationJob = isCategorizationJobCreator(jobCreator);
 
-  const categorizationFieldTitleId = useGeneratedHtmlId({
-    prefix: 'categorizationFieldTitle',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'categorizationField',
   });
 
   useEffect(() => {
@@ -46,12 +46,12 @@ export const CategorizationField: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description titleId={categorizationFieldTitleId} isOptional={isCategorizationJob === false}>
+    <Description titleId={titleId} isOptional={isCategorizationJob === false}>
       <CategorizationFieldSelect
         fields={catFields}
         changeHandler={setCategorizationFieldName}
         selectedField={categorizationFieldName}
-        titleId={categorizationFieldTitleId}
+        titleId={titleId}
       />
     </Description>
   );

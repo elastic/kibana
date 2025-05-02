@@ -20,8 +20,8 @@ export const FrequencyInput: FC = () => {
   const { value: frequency, setValue: setFrequency } = useStringifiedValue(jobCreator.frequency);
 
   const [defaultFrequency, setDefaultFrequency] = useState(createDefaultFrequency());
-  const frequencyInputId = useGeneratedHtmlId({
-    prefix: 'frequencyInputId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'frequencyInput',
   });
   useEffect(() => {
     jobCreator.frequency = frequency === '' ? null : frequency;
@@ -48,14 +48,14 @@ export const FrequencyInput: FC = () => {
   }
 
   return (
-    <Description validation={validation} titleId={frequencyInputId}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldText
         value={frequency}
         placeholder={defaultFrequency}
         onChange={(e) => setFrequency(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputFrequency"
-        aria-labelledby={frequencyInputId}
+        aria-labelledby={titleId}
       />
     </Description>
   );

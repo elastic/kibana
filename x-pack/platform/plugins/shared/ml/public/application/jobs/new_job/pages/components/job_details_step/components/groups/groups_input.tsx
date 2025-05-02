@@ -25,7 +25,7 @@ export const GroupsInput: FC = () => {
     useContext(JobCreatorContext);
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
   const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
-  const jobGroupsTitleId = useGeneratedHtmlId({ prefix: 'jobGroupsTitleId' });
+  const titleId = useGeneratedHtmlId({ prefix: 'groupsInput' });
 
   const validation = useMemo(() => {
     const valid =
@@ -85,7 +85,7 @@ export const GroupsInput: FC = () => {
   }
 
   return (
-    <Description validation={validation} titleId={jobGroupsTitleId}>
+    <Description validation={validation} titleId={titleId}>
       <EuiComboBox
         placeholder={i18n.translate(
           'xpack.ml.newJob.wizard.jobDetailsStep.jobGroupSelect.placeholder',
@@ -100,7 +100,7 @@ export const GroupsInput: FC = () => {
         isClearable={true}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardComboBoxJobGroups"
-        aria-labelledby={jobGroupsTitleId}
+        aria-labelledby={titleId}
       />
     </Description>
   );

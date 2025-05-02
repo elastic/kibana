@@ -24,8 +24,8 @@ export const Influencers: FC = () => {
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = useNewJobCapsService();
   const [influencers, setInfluencers] = useState([...jobCreator.influencers]);
-  const influencersTitleId = useGeneratedHtmlId({
-    prefix: 'influencersTitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'influencers',
   });
   useEffect(() => {
     jobCreator.removeAllInfluencers();
@@ -40,12 +40,12 @@ export const Influencers: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description titleId={influencersTitleId}>
+    <Description titleId={titleId}>
       <InfluencersSelect
         fields={fields}
         changeHandler={setInfluencers}
         selectedInfluencers={influencers}
-        titleId={influencersTitleId}
+        titleId={titleId}
       />
     </Description>
   );

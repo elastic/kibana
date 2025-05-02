@@ -33,8 +33,8 @@ export const SummaryCountField: FC = () => {
   const [summaryCountFieldName, setSummaryCountFieldName] = useState(
     jobCreator.summaryCountFieldName
   );
-  const summaryCountFieldTitleId = useGeneratedHtmlId({
-    prefix: 'summaryCountFieldTitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'summaryCountField',
   });
   const [validation, setValidation] = useState(jobValidator.summaryCountField);
   useEffect(() => {
@@ -54,12 +54,12 @@ export const SummaryCountField: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description validation={validation} titleId={summaryCountFieldTitleId}>
+    <Description validation={validation} titleId={titleId}>
       <SummaryCountFieldSelect
         fields={fields}
         changeHandler={setSummaryCountFieldName}
         selectedField={summaryCountFieldName}
-        titleId={summaryCountFieldTitleId}
+        titleId={titleId}
       />
     </Description>
   );

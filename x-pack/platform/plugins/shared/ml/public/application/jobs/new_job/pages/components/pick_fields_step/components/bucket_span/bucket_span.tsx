@@ -25,8 +25,8 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
   const [validation, setValidation] = useState(jobValidator.bucketSpan);
   const [estimating, setEstimating] = useState(false);
-  const bucketSpanTitleId = useGeneratedHtmlId({
-    prefix: 'bucketSpanTitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'bucketSpan',
   });
 
   useEffect(() => {
@@ -51,11 +51,11 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   }, [estimating]);
 
   return (
-    <Description validation={validation} titleId={bucketSpanTitleId}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <BucketSpanInput
-            titleId={bucketSpanTitleId}
+            titleId={titleId}
             setBucketSpan={setBucketSpan}
             // @ts-expect-error bucketSpan is of type `estypes.Duration`
             bucketSpan={bucketSpan}

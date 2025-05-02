@@ -15,7 +15,7 @@ export const JobIdInput: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [jobId, setJobId] = useState(jobCreator.jobId);
-  const jobIdTitleId = useGeneratedHtmlId({ prefix: 'jobIdTitleId' });
+  const titleId = useGeneratedHtmlId({ prefix: 'jobIdInput' });
 
   const validation = useMemo(() => {
     const isEmptyId = jobId === '';
@@ -41,13 +41,13 @@ export const JobIdInput: FC = () => {
   }, [jobId]);
 
   return (
-    <Description validation={validation} titleId={jobIdTitleId}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldText
         value={jobId}
         onChange={(e) => setJobId(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputJobId"
-        aria-labelledby={jobIdTitleId}
+        aria-labelledby={titleId}
       />
     </Description>
   );

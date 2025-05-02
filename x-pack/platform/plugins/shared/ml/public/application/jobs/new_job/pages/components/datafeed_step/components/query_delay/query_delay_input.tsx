@@ -18,8 +18,8 @@ export const QueryDelayInput: FC = () => {
     useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.queryDelay);
   const { value: queryDelay, setValue: setQueryDelay } = useStringifiedValue(jobCreator.queryDelay);
-  const queryDelayTitleId = useGeneratedHtmlId({
-    prefix: 'queryDelayTitleId',
+  const titleId = useGeneratedHtmlId({
+    prefix: 'queryDelayInput',
   });
   useEffect(() => {
     jobCreator.queryDelay = queryDelay === '' ? null : queryDelay;
@@ -38,14 +38,14 @@ export const QueryDelayInput: FC = () => {
   }, [jobValidatorUpdated]);
 
   return (
-    <Description validation={validation} titleId={queryDelayTitleId}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFieldText
         value={queryDelay}
         placeholder={DEFAULT_QUERY_DELAY}
         onChange={(e) => setQueryDelay(e.target.value)}
         isInvalid={validation.valid === false}
         data-test-subj="mlJobWizardInputQueryDelay"
-        aria-labelledby={queryDelayTitleId}
+        aria-labelledby={titleId}
       />
     </Description>
   );
