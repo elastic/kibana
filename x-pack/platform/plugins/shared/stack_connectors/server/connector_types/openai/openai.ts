@@ -62,14 +62,17 @@ import https from 'https';
 function formatPEMContent(pemContent: string): string {
   if (!pemContent) return pemContent;
 
+  // First, normalize any existing newlines to \n
+  let normalizedContent = pemContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
   // Extract the type from the header (CERTIFICATE or PRIVATE KEY)
-  const headerMatch = pemContent.match(/-----BEGIN\s+(\w+)\s+-----/);
+  const headerMatch = normalizedContent.match(/-----BEGIN\s+(\w+)\s+-----/);
   if (!headerMatch) return pemContent;
 
   const type = headerMatch[1];
   
   // Extract just the base64 content, removing all whitespace
-  const base64Content = pemContent
+  const base64Content = normalizedContent
     .replace(/-----BEGIN\s+\w+\s+-----/, '') // Remove header
     .replace(/-----END\s+\w+\s+-----/, '')   // Remove footer
     .replace(/\s+/g, '');                    // Remove all whitespace
@@ -78,13 +81,17 @@ function formatPEMContent(pemContent: string): string {
   const formattedContent = base64Content.replace(/(.{64})/g, '$1\n').trim();
 
   // Build the final PEM with proper headers and newlines
-  const result = `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----`;
+  const result = `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----\n`;
 
   // Debug log the exact content
-  console.log('Formatted PEM content:');
+  console.log('Original PEM content:');
+  console.log(pemContent);
+  console.log('Normalized PEM content:');
+  console.log(normalizedContent);
+  console.log('Final PEM content:');
   console.log(result);
-  console.log('Newlines in content:', result.includes('\n'));
-  console.log('Spaces in content:', result.includes(' '));
+  console.log('Newlines in result:', result.includes('\n'));
+  console.log('Spaces in result:', result.includes(' '));
 
   return result;
 }
