@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { EntityType } from '../../../../../common/entity_analytics/types';

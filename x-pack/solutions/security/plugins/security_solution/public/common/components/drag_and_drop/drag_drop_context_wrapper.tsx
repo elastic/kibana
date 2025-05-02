@@ -9,7 +9,7 @@ import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import type { DragStart, DropResult } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { Dispatch } from 'redux-v4';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';

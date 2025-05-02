@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {

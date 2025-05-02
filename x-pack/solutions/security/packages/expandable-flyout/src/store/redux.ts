@@ -6,8 +6,8 @@
  */
 
 import { createContext } from 'react';
-import type { ReactReduxContextValue } from 'react-redux';
-import { createDispatchHook, createSelectorHook } from 'react-redux';
+import type { ReactReduxContextValue } from 'react-redux-v7';
+import { createDispatchHook, createSelectorHook } from 'react-redux-v7';
 import { configureStore } from 'redux-toolkit-v1';
 import { createSelector } from 'reselect-v4';
 import { panelsReducer, uiReducer } from './reducers';

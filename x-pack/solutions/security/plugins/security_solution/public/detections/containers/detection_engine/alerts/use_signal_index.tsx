@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 
 import { signalIndexOutdatedSelector } from '../../../../data_view_manager/redux/selectors';
 import { useSignalIndexName } from '../../../../data_view_manager/hooks/use_signal_index_name';

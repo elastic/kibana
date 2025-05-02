@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
 import type { State } from '../../../../common/store';

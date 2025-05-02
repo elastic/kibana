@@ -7,7 +7,7 @@
 
 import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { ReduxDispatchProps, ReduxStateProps, OwnProps } from './feature_edit_tools';
 import { FeatureEditTools } from './feature_edit_tools';
 import { updateEditShape } from '../../../../actions';

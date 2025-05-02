@@ -7,7 +7,7 @@
 
 import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { TileMetaFeature, TileError } from '../../../../common/descriptor_types';
 import { setTileState } from '../../../actions';
 import { getLayerList } from '../../../selectors/map_selectors';

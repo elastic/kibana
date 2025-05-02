@@ -14,7 +14,7 @@ import {
   EuiSelect,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { CreatedByFilterDropdown } from './created_by_filter_dropdown';
 import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID } from './test_ids';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { ThunkDispatch } from 'redux-thunk-v2';
 import type { AnyAction } from 'redux-v4';
 import type { KibanaExecutionContext } from '@kbn/core/public';

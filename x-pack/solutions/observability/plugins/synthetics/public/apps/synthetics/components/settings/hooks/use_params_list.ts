@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getGlobalParamAction, selectGlobalParamState } from '../../../state/global_params';
 
 export const useParamsList = () => {

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector, useStore } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   UnifiedDataTableProps,

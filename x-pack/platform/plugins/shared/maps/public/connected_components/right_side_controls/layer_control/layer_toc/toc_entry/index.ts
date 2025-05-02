@@ -7,7 +7,7 @@
 
 import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
 import { TOCEntry } from './toc_entry';
 import type { MapStoreState } from '../../../../../reducers/store';

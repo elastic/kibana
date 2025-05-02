@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { get, isEmpty } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { Dispatch } from 'redux-v4';
 import type { TimeRangeKinds } from '../../store/inputs/constants';
 import { InputsModelId } from '../../store/inputs/constants';

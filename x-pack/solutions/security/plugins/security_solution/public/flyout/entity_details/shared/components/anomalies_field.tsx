@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import type { EntityAnomalies } from './observed_entity/types';
 import { AnomalyScores } from '../../../../common/components/ml/score/anomaly_scores';

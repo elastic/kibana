@@ -15,7 +15,7 @@ import { from, type Subscription } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';

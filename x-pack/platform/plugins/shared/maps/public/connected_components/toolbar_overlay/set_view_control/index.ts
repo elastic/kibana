@@ -7,7 +7,7 @@
 
 import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk-v2';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import { SetViewControl } from './set_view_control';
 import { setGotoWithCenter } from '../../../actions';
 import { getMapZoom, getMapCenter, getMapSettings } from '../../../selectors/map_selectors';

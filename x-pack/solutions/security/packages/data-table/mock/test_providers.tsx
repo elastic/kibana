@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import type { Store } from 'redux-v4';
 import { createStore as createReduxStore } from 'redux-v4';
 import { ThemeProvider } from 'styled-components';

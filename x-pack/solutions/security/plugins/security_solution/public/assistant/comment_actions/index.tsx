@@ -9,7 +9,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
 import { useAssistantAvailability } from '../use_assistant_availability';

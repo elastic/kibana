@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { Dispatch } from 'redux-v4';
 import type { Action } from 'redux-actions';
 // @ts-expect-error untyped local

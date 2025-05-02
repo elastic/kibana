@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { Subject } from 'rxjs';
 import type { Store } from 'redux-v4';

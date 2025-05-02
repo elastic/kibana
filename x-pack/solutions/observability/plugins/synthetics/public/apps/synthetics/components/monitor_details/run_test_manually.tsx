@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { NoPermissionsTooltip } from '../common/components/permissions';

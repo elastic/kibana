@@ -6,7 +6,7 @@
  */
 
 import React, { PureComponent, Fragment, type ReactNode, type SyntheticEvent } from 'react';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { AnyAction } from 'redux';
 import type { ThunkDispatch } from 'redux-thunk';
 import { i18n } from '@kbn/i18n';

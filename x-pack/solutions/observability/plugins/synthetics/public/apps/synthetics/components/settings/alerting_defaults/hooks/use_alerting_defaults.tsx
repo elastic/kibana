@@ -6,7 +6,7 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import React, { useEffect } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
