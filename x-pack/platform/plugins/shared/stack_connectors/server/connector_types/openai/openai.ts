@@ -62,38 +62,23 @@ import https from 'https';
 function formatPEMContent(pemContent: string): string {
   if (!pemContent) return pemContent;
 
-  // First, normalize the input by replacing any multiple spaces with single spaces
-  const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
+  // Extract the type from the header (CERTIFICATE or PRIVATE KEY)
+  const headerMatch = pemContent.match(/-----BEGIN\s+(\w+)\s+-----/);
+  if (!headerMatch) return pemContent;
 
-  // Extract the header and footer, ensuring we capture the exact format
-  const headerMatch = normalizedContent.match(/-----BEGIN\s+(\w+)\s+-----/);
-  const footerMatch = normalizedContent.match(/-----END\s+(\w+)\s+-----/);
-
-  if (!headerMatch || !footerMatch) {
-    return pemContent; // Return original if we can't find proper headers/footers
-  }
-
-  // Get the header and footer without any trailing spaces
-  const header = headerMatch[0].trim();
-  const footer = footerMatch[0].trim();
-
-  // Extract the base64 content between header and footer, removing any spaces
-  const content = normalizedContent
-    .slice(header.length, normalizedContent.indexOf(footer))
-    .trim()
-    .replace(/\s+/g, ''); // Remove all spaces from content
-
-  // Format the content with 64 characters per line
-  const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
-
-  // Assemble the final PEM with proper formatting
-  // Ensure newline after header and before footer
-  const result = `${header}\n${formattedContent}\n${footer}`;
+  const type = headerMatch[1];
   
-  // Log the formatted result for debugging
-  console.log('Formatted PEM content:', result);
-  
-  return result;
+  // Extract just the base64 content, removing all whitespace
+  const base64Content = pemContent
+    .replace(/-----BEGIN\s+\w+\s+-----/, '') // Remove header
+    .replace(/-----END\s+\w+\s+-----/, '')   // Remove footer
+    .replace(/\s+/g, '');                    // Remove all whitespace
+
+  // Format the base64 content with 64 characters per line
+  const formattedContent = base64Content.replace(/(.{64})/g, '$1\n').trim();
+
+  // Build the final PEM with proper headers and newlines
+  return `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----`;
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
