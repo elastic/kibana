@@ -126,7 +126,6 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
   transformParams: TransformEsToRuleParams,
   isSystemAction: (connectorId: string) => boolean
 ): RuleDomain<Params> => {
-  console.log('es rule', esRule);
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
   const {
@@ -171,13 +170,11 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       omitGeneratedValues,
     });
 
-  console.log('es rule artifacts', esRule.artifacts);
   const ruleDomainArtifacts = transformRawArtifactsToDomainArtifacts(
     id,
     esRule.artifacts,
     references
   );
-  console.log('rule domain artifacts', ruleDomainArtifacts);
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
     ruleType,

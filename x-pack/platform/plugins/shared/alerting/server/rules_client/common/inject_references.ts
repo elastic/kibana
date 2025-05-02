@@ -84,11 +84,9 @@ export function injectReferencesIntoArtifacts(
   artifacts?: RawRule['artifacts'],
   references?: SavedObjectReference[]
 ): Required<RuleDomain['artifacts']> {
-  console.log('artifact param', artifacts);
   if (!artifacts) {
     return { dashboards: [], investigation_guide: { blob: '' } };
   }
-  console.log('after initial block')
   return {
     ...artifacts,
     investigation_guide: {
