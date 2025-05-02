@@ -2465,31 +2465,6 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.ContentPack",
-        "type": "Interface",
-        "tags": [],
-        "label": "ContentPack",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.ContentPack.content",
-            "type": "string",
-            "tags": [],
-            "label": "content",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.DateProcessorConfig",
         "type": "Interface",
         "tags": [],
@@ -6825,37 +6800,6 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.contentPackSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "contentPackSchema",
-        "description": [],
-        "signature": [
-          "Zod.ZodType<",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ContentPack",
-            "text": "ContentPack"
-          },
-          ", Zod.ZodTypeDef, ",
-          {
-            "pluginId": "@kbn/streams-schema",
-            "scope": "common",
-            "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ContentPack",
-            "text": "ContentPack"
-          },
-          ">"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.elasticsearchAssetsSchema",
         "type": "Object",
         "tags": [],
@@ -7746,6 +7690,37 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/record_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.routingDefinitionListSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "routingDefinitionListSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RoutingDefinition",
+            "text": "RoutingDefinition"
+          },
+          "[], Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.RoutingDefinition",
+            "text": "RoutingDefinition"
+          },
+          "[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/routing/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

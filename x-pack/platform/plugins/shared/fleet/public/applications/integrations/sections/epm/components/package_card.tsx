@@ -60,6 +60,7 @@ export function PackageCard({
   isUpdateAvailable,
   showLabels = true,
   showInstallationStatus,
+  showCompressedInstallationStatus,
   extraLabelsBadges,
   isQuickstart = false,
   installStatus,
@@ -68,11 +69,14 @@ export function PackageCard({
   titleLineClamp,
   descriptionLineClamp,
   maxCardHeight,
+  minCardHeight,
+  showDescription = true,
+  showReleaseBadge = true,
 }: PackageCardProps) {
   const theme = useEuiTheme();
 
   let releaseBadge: React.ReactNode | null = null;
-  if (release && release !== 'ga') {
+  if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
@@ -220,7 +224,7 @@ export function PackageCard({
               ${getLineClampStyles(titleLineClamp)}
             }
 
-            min-height: 127px;
+            min-height: ${minCardHeight ? `${minCardHeight}px` : '127px'};
             border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
             max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
             overflow: ${maxCardHeight ? 'hidden' : null};
@@ -230,7 +234,7 @@ export function PackageCard({
           layout="horizontal"
           title={title || ''}
           titleSize="xs"
-          description={description}
+          description={showDescription ? description : ''}
           hasBorder
           icon={
             <CardIcon
@@ -238,7 +242,7 @@ export function PackageCard({
               packageName={name}
               integrationName={integration}
               version={version}
-              size="xl"
+              size={showDescription ? 'xl' : 'xxl'}
             />
           }
           onClick={onClickProp ?? onCardClick}
@@ -254,6 +258,7 @@ export function PackageCard({
             <InstallationStatus
               installStatus={installStatus}
               showInstallationStatus={showInstallationStatus}
+              compressed={showCompressedInstallationStatus}
             />
           </EuiFlexGroup>
         </EuiCard>

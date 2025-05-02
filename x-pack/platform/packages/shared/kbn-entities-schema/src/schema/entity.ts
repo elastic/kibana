@@ -10,13 +10,18 @@ import { arrayOfStringsSchema } from './common';
 
 export const entityBaseSchema = z.object({
   id: z.string(),
-  type: z.string(),
+  type: z.optional(z.string()),
   identity_fields: z.union([arrayOfStringsSchema, z.string()]),
   display_name: z.string(),
   metrics: z.optional(z.record(z.string(), z.number())),
   definition_version: z.string(),
   schema_version: z.string(),
   definition_id: z.string(),
+  EngineMetadata: z.optional(
+    z.object({
+      Type: z.string(),
+    })
+  ),
 });
 
 export interface MetadataRecord {

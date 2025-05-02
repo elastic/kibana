@@ -535,7 +535,7 @@
         "tags": [],
         "label": "getCurrentVirtualVersion",
         "description": [
-          "\nReturns the current virtual version for the given type.\nIt will either be the latest model version if the type\nalready switched to using them (switchToModelVersionAt is set),\nor the latest migration version for the type otherwise."
+          "\nReturns the current virtual version for the given type.\nIt will either be the latest model version or the latest\nmigration version for the type if model versions have not been declared."
         ],
         "signature": [
           "(type: ",

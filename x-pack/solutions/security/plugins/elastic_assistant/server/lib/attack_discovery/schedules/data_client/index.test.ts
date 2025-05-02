@@ -24,12 +24,66 @@ describe('AttackDiscoveryScheduleDataClient', () => {
   });
 
   describe('findSchedules', () => {
-    it('should call `rulesClient.find` with the correct filter', async () => {
+    it('should call `rulesClient.find` with the correct rule type', async () => {
       const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
       await scheduleDataClient.findSchedules();
 
       expect(scheduleDataClientParams.rulesClient.find).toHaveBeenCalledWith({
-        options: { filter: `alert.attributes.alertTypeId: attack-discovery` },
+        options: {
+          page: 1,
+          ruleTypeIds: ['attack-discovery'],
+        },
+      });
+    });
+
+    it('should call `rulesClient.find` with the correct `page`', async () => {
+      const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+      await scheduleDataClient.findSchedules({ page: 10 });
+
+      expect(scheduleDataClientParams.rulesClient.find).toHaveBeenCalledWith({
+        options: {
+          page: 11,
+          ruleTypeIds: ['attack-discovery'],
+        },
+      });
+    });
+
+    it('should call `rulesClient.find` with the correct `perPage`', async () => {
+      const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+      await scheduleDataClient.findSchedules({ perPage: 23 });
+
+      expect(scheduleDataClientParams.rulesClient.find).toHaveBeenCalledWith({
+        options: {
+          page: 1,
+          perPage: 23,
+          ruleTypeIds: ['attack-discovery'],
+        },
+      });
+    });
+
+    it('should call `rulesClient.find` with the correct `sortField`', async () => {
+      const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+      await scheduleDataClient.findSchedules({ sort: { sortField: 'name' } });
+
+      expect(scheduleDataClientParams.rulesClient.find).toHaveBeenCalledWith({
+        options: {
+          page: 1,
+          sortField: 'name',
+          ruleTypeIds: ['attack-discovery'],
+        },
+      });
+    });
+
+    it('should call `rulesClient.find` with the correct `sortDirection`', async () => {
+      const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+      await scheduleDataClient.findSchedules({ sort: { sortDirection: 'desc' } });
+
+      expect(scheduleDataClientParams.rulesClient.find).toHaveBeenCalledWith({
+        options: {
+          page: 1,
+          sortOrder: 'desc',
+          ruleTypeIds: ['attack-discovery'],
+        },
       });
     });
   });

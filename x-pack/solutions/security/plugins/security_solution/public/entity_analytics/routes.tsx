@@ -6,12 +6,9 @@
  */
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-
-import { SpyRoute } from '../common/utils/route/spy_routes';
+import { Redirect } from 'react-router-dom';
 import { NotFoundPage } from '../app/404';
-
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import {
   ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
@@ -26,12 +23,9 @@ import { EntityStoreManagementPage } from './pages/entity_store_management_page'
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 
-const EntityAnalyticsManagementTelemetry = () => (
+const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsManagement}>
-      <EntityAnalyticsManagementPage />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsManagement} />
-    </TrackApplicationView>
+    <EntityAnalyticsManagementPage />
   </PluginTemplateWrapper>
 );
 
@@ -41,7 +35,7 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
       <Route
         path={ENTITY_ANALYTICS_MANAGEMENT_PATH}
         exact
-        component={EntityAnalyticsManagementTelemetry}
+        component={EntityAnalyticsManagementWrapper}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -49,22 +43,21 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
 });
 EntityAnalyticsManagementContainer.displayName = 'EntityAnalyticsManagementContainer';
 
-const EntityAnalyticsAssetClassificationTelemetry = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsAssetClassification}>
-      <EntityStoreManagementPage />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsAssetClassification} />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
-);
-
 const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH}
         exact
-        component={EntityAnalyticsAssetClassificationTelemetry}
+        render={({ location }) => (
+          <Redirect
+            to={{
+              ...location,
+              pathname: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+              search: location.search,
+            }}
+          />
+        )}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -74,12 +67,9 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
 EntityAnalyticsAssetClassificationContainer.displayName =
   'EntityAnalyticsAssetClassificationContainer';
 
-const EntityAnalyticsEntityStoreTelemetry = () => (
+const EntityAnalyticsEntityStoreWrapper = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsEntityStoreManagement}>
-      <EntityStoreManagementPage />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsEntityStoreManagement} />
-    </TrackApplicationView>
+    <EntityStoreManagementPage />
   </PluginTemplateWrapper>
 );
 
@@ -89,7 +79,7 @@ const EntityAnalyticsEntityStoreContainer: React.FC = React.memo(() => {
       <Route
         path={ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH}
         exact
-        component={EntityAnalyticsEntityStoreTelemetry}
+        component={EntityAnalyticsEntityStoreWrapper}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -98,23 +88,16 @@ const EntityAnalyticsEntityStoreContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsEntityStoreContainer.displayName = 'EntityAnalyticsEntityStoreContainer';
 
-const EntityAnalyticsLandingTelemetry = () => (
+const EntityAnalyticsLandingWrapper = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsLanding}>
-      <EntityAnalyticsLandingPage />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsLanding} />
-    </TrackApplicationView>
+    <EntityAnalyticsLandingPage />
   </PluginTemplateWrapper>
 );
 
 const EntityAnalyticsLandingContainer: React.FC = React.memo(() => {
   return (
     <Routes>
-      <Route
-        path={ENTITY_ANALYTICS_LANDING_PATH}
-        exact
-        component={EntityAnalyticsLandingTelemetry}
-      />
+      <Route path={ENTITY_ANALYTICS_LANDING_PATH} exact component={EntityAnalyticsLandingWrapper} />
       <Route component={NotFoundPage} />
     </Routes>
   );
@@ -122,12 +105,9 @@ const EntityAnalyticsLandingContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsLandingContainer.displayName = 'EntityAnalyticsLandingContainer';
 
-const EntityAnalyticsPrivilegedUserMonitoringTelemetry = () => (
+const EntityAnalyticsPrivilegedUserMonitoringWrapper = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.privilegedUserMonitoring}>
-      <EntityAnalyticsPrivilegedUserMonitoringPage />
-      <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
-    </TrackApplicationView>
+    <EntityAnalyticsPrivilegedUserMonitoringPage />
   </PluginTemplateWrapper>
 );
 
@@ -137,7 +117,7 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
       <Route
         path={ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH}
         exact
-        component={EntityAnalyticsPrivilegedUserMonitoringTelemetry}
+        component={EntityAnalyticsPrivilegedUserMonitoringWrapper}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -150,7 +130,13 @@ EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
-    component: EntityAnalyticsManagementContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsManagementContainer,
+      SecurityPageName.entityAnalyticsManagement,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
   {
     path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
@@ -158,14 +144,32 @@ export const routes = [
   },
   {
     path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-    component: EntityAnalyticsEntityStoreContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsEntityStoreContainer,
+      SecurityPageName.entityAnalyticsEntityStoreManagement,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
   {
     path: ENTITY_ANALYTICS_LANDING_PATH,
-    component: EntityAnalyticsLandingContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsLandingContainer,
+      SecurityPageName.entityAnalyticsLanding,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
   {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-    component: EntityAnalyticsPrivilegedUserMonitoringContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsPrivilegedUserMonitoringContainer,
+      SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
 ];

@@ -58,6 +58,12 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('fRoM *,-.*', []);
             await expectErrors('fRoM .secret_index', []);
             await expectErrors('from my-index', []);
+
+            await expectErrors('FROM index, missingIndex*', []);
+            await expectErrors('FROM index, lol*catz', []);
+            await expectErrors('FROM index*, lol*catz', []);
+            await expectErrors('FROM missingIndex*, index', []);
+            await expectErrors('FROM missingIndex*, missingIndex2*, index', []);
           });
 
           test('errors on trailing comma', async () => {
@@ -95,6 +101,17 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors(`FROM indexes*`, ['Unknown index [indexes*]']);
             await expectErrors('from numberField', ['Unknown index [numberField]']);
             await expectErrors('FROM policy', ['Unknown index [policy]']);
+
+            await expectErrors('FROM index, missingIndex', ['Unknown index [missingIndex]']);
+            await expectErrors('FROM missingIndex, index', ['Unknown index [missingIndex]']);
+            await expectErrors('FROM *missingIndex, missingIndex2, index', [
+              'Unknown index [missingIndex2]',
+            ]);
+            await expectErrors('FROM missingIndex*', ['Unknown index [missingIndex*]']);
+            await expectErrors('FROM *missingIndex, missing*Index2', [
+              'Unknown index [*missingIndex]',
+              'Unknown index [missing*Index2]',
+            ]);
           });
         });
 

@@ -96,7 +96,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
         if (!experimentalDataView.isPersisted()) {
           return kibana.notifications.toasts.addError(
-            new Error('Persting timelines with adhoc data views is not allowed'),
+            new Error('Persisting timelines with adhoc data views is not allowed'),
             {
               title: 'Error persisting timeline',
             }
