@@ -349,7 +349,6 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
-  CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
@@ -672,9 +671,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Creates a new migration and returns the corresponding migration_id
+   * Creates a new rule migration and returns the corresponding migration_id
    */
-  async createRuleMigration(props: CreateRuleMigrationProps) {
+  async createRuleMigration() {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
@@ -683,12 +682,11 @@ For detailed information on Kibana actions and alerting, and additional API call
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
-        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Adds original vendor rules to an already existing migration.
+   * Adds original vendor rules to an already existing migration. Can be called multiple times to add more rules
    */
   async createRuleMigrationRules(props: CreateRuleMigrationRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigrationRules`);
@@ -1550,7 +1548,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieves the rule documents stored in the system given the rule migration id
+   * Retrieves the the list of rules included in a migration given the migration id
    */
   async getRuleMigrationRules(props: GetRuleMigrationRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationRules`);
@@ -2374,7 +2372,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates rules migrations attributes
+   * Updates rules migrations data or last execution params for a single migration
    */
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
@@ -2474,9 +2472,6 @@ export interface CreateAssetCriticalityRecordProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
-}
-export interface CreateRuleMigrationProps {
-  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;

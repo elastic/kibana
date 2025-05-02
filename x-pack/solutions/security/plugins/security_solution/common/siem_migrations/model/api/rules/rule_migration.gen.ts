@@ -35,13 +35,6 @@ import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { ConnectorId, LangSmithOptions } from '../../common.gen';
 
-/**
- * The object describing the properties and settings that should be assigned to the migration
- */
-export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
-export const CreateRuleMigrationRequestBody = RuleMigration;
-export type CreateRuleMigrationRequestBodyInput = z.input<typeof CreateRuleMigrationRequestBody>;
-
 export type CreateRuleMigrationResponse = z.infer<typeof CreateRuleMigrationResponse>;
 export const CreateRuleMigrationResponse = z.object({
   /**
