@@ -171,7 +171,12 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
     <>
       {configFormSchema.map(({ id, ...restConfigSchema }, index) => (
         <React.Fragment key={`config.${id}`}>
-          <FormRow id={`config.${id}`} {...restConfigSchema} readOnly={readOnly} />
+          <FormRow
+            euiFieldProps={{ 'aria-invalid': isEdit }}
+            id={`config.${id}`}
+            {...restConfigSchema}
+            readOnly={readOnly}
+          />
           {index !== configFormSchema.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}
@@ -193,6 +198,7 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
       {secretsFormSchema.map(({ id, ...restSecretsSchema }, index) => (
         <React.Fragment key={`secrets.${id}`}>
           <FormRow
+            euiFieldProps={{ 'aria-invalid': isEdit }}
             id={`secrets.${id}`}
             key={`secrets.${id}`}
             {...restSecretsSchema}
@@ -203,7 +209,12 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
       ))}
       {configFormSchemaAfterSecrets.map(({ id, ...restConfigSchemaAfterSecrets }, index) => (
         <React.Fragment key={`config.${id}`}>
-          <FormRow id={`config.${id}`} {...restConfigSchemaAfterSecrets} readOnly={readOnly} />
+          <FormRow
+            euiFieldProps={{ 'aria-invalid': isEdit }}
+            id={`config.${id}`}
+            {...restConfigSchemaAfterSecrets}
+            readOnly={readOnly}
+          />
           {index !== configFormSchemaAfterSecrets.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}

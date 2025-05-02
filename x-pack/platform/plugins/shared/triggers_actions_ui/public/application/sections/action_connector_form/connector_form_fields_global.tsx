@@ -45,6 +45,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
       <UseField path="actionTypeId" component={HiddenField} />
       <UseField path="isDeprecated" component={HiddenField} />
       <UseField
+        aria-invalid="true"
         path="name"
         config={nameConfig}
         component={Field}
