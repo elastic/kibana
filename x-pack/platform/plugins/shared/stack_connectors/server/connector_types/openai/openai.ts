@@ -62,8 +62,13 @@ import https from 'https';
 function formatPEMContent(pemContent: string): string {
   if (!pemContent) return pemContent;
 
-  // First split on spaces to handle UI's conversion of line breaks
-  const parts = pemContent.split(/\s+/);
+  // First normalize any spaces after headers and before footers to newlines
+  const normalizedContent = pemContent
+    .replace(/-----BEGIN\s+(\w+)\s+-----\s+/, '-----BEGIN $1-----\n')
+    .replace(/\s+-----END\s+(\w+)\s+-----/, '\n-----END $1-----');
+
+  // Split on newlines to handle the content
+  const parts = normalizedContent.split('\n');
   
   // Find header and footer
   const headerIndex = parts.findIndex(part => part.startsWith('-----BEGIN'));
@@ -71,41 +76,25 @@ function formatPEMContent(pemContent: string): string {
   
   if (headerIndex === -1 || footerIndex === -1) return pemContent;
   
-  // Reconstruct header and footer properly
-  let header = parts[headerIndex];
-  let footer = parts[footerIndex];
-  
-  // Handle multi-part headers/footers (e.g., "-----BEGIN PRIVATE KEY-----")
-  if (header === '-----BEGIN' && parts[headerIndex + 1]) {
-    header = `${header} ${parts[headerIndex + 1]}`;
-    if (parts[headerIndex + 2] && parts[headerIndex + 2] !== '-----') {
-      header = `${header} ${parts[headerIndex + 2]}`;
-    }
-  }
-  if (footer === '-----END' && parts[footerIndex + 1]) {
-    footer = `${footer} ${parts[footerIndex + 1]}`;
-    if (parts[footerIndex + 2] && parts[footerIndex + 2] !== '-----') {
-      footer = `${footer} ${parts[footerIndex + 2]}`;
-    }
-  }
+  // Get header and footer
+  const header = parts[headerIndex];
+  const footer = parts[footerIndex];
   
   // Join all content parts between header and footer, remove any remaining spaces
-  const content = parts.slice(headerIndex + 3, footerIndex).join('').replace(/\s+/g, '');
+  const content = parts.slice(headerIndex + 1, footerIndex).join('').replace(/\s+/g, '');
   
   // Insert line breaks every 64 characters
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
   
   // Assemble the final PEM with strict formatting
   const lines = [
-    header,  // Header without newline
+    header,
     formattedContent,
-    footer   // Footer without newline
+    footer
   ];
   
   // Join with newlines and ensure strict PEM format
   return lines.join('\n')
-    .replace(/^-----BEGIN\s+(\w+)\s+-----\s*/, '-----BEGIN $1-----\n')  // Fix header format
-    .replace(/\s*-----END\s+(\w+)\s+-----$/, '\n-----END $1-----')  // Fix footer format
     .replace(/\n+/g, '\n')  // Remove duplicate newlines
     .trim();  // Remove any leading/trailing whitespace
 }
