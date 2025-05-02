@@ -11,6 +11,7 @@ import {
   PostEvaluateBody,
 } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import os from 'os';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../scripts/genai/vault/manage_secrets';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -73,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Run Evaluations', () => {
-      const buildNumber = process.env.BUILDKITE_BUILD_NUMBER;
+      const buildNumber = process.env.BUILDKITE_BUILD_NUMBER || os.hostname();
       const config = getSecurityGenAIConfigFromEnvVar();
       const defaultEvalPayload: PostEvaluateBody = {
         runName: `Eval Automation${buildNumber ? ' - ' + buildNumber : ''}`,

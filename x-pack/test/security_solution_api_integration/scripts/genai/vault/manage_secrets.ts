@@ -12,6 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 
 // Environment variable set within BuildKite and read from in FTR tests
+// CI env vars are set by .buildkite/scripts/common/setup_job_env.sh
 const KIBANA_SECURITY_GEN_AI_CONFIG = 'KIBANA_SECURITY_GEN_AI_CONFIG';
 
 // Vault paths
@@ -89,18 +90,31 @@ export const retrieveConfigFromVault = async (vault: VaultType = 'siem-team') =>
 };
 
 /**
- * Returns command for manually writing secrets from `config.json` to vault. Run this command and share with
- * @kibana-ops via https://p.elstc.co to make updating secrets easier. Alternatively, have @kibana-ops run the following:
+ * Returns command for manually working with secrets from `config.json`.
+ * Format can be either 'vault-write' (for vault command) or 'env-var' (for environment variable).
+ * Run this command and share with @kibana-ops via https://p.elstc.co to make updating secrets easier, or for pasting
+ * custom configs into the BuildKite pipeline: https://buildkite.com/elastic/kibana-ess-security-solution-gen-ai-evals
+
+ * Alternatively, have @kibana-ops run the following to update the secrets for CI:
  *
  * node retrieve_secrets.js --vault siem-team
  * node upload_secrets.js --vault ci-prod
  *
+ * @param format - The format of the command to return ('vault-write' or 'env-var')
+ * @param vault - The vault to use (only applicable for 'vault-write' format)
  */
-export const getVaultWriteCommand = async () => {
+export const getCommand = async (
+  format: 'vault-write' | 'env-var' = 'vault-write',
+  vault: VaultType = 'ci-prod'
+) => {
   const config = await readFile(SECURITY_GEN_AI_CONFIG_FILE, 'utf-8');
   const asB64 = Buffer.from(config).toString('base64');
 
-  return `vault write ${getVaultPath('ci-prod')} ${SECURITY_GEN_AI_CONFIG_FIELD}=${asB64}`;
+  if (format === 'vault-write') {
+    return `vault write ${getVaultPath(vault)} ${SECURITY_GEN_AI_CONFIG_FIELD}=${asB64}`;
+  } else {
+    return `${KIBANA_SECURITY_GEN_AI_CONFIG}=${asB64}`;
+  }
 };
 
 /**
@@ -130,23 +144,6 @@ export const uploadConfigToVault = async (vault: VaultType = 'siem-team') => {
     SECURITY_GEN_AI_CONFIG_FILE,
     SECURITY_GEN_AI_CONFIG_FIELD
   );
-};
-
-/**
- * FOR LOCAL USE ONLY! Export config from `siem-team` vault to env var before manually running evaluations.
- * CI env vars are set by .buildkite/scripts/common/setup_job_env.sh
- */
-export const exportToEnvVar = async () => {
-  const { stdout: config } = await execa(
-    'vault',
-    ['read', `-field=${SECURITY_GEN_AI_CONFIG_FIELD}`, getVaultPath('siem-team')],
-    {
-      cwd: REPO_ROOT,
-      buffer: true,
-    }
-  );
-
-  process.env[KIBANA_SECURITY_GEN_AI_CONFIG] = config;
 };
 
 /**

@@ -8,33 +8,43 @@ Most pre-requisites for running the evaluations are managed for you. Connector/L
 > In discussion with @elastic/kibana-operations it was preferred to use the ci-prod vault for which we do not have access. so they are also mirrored to the `secrets.elastic.co` vault which can be modified via manage_secrets.ts and surrounding scripts so we can self-manage to a degree.
 
 ### To Run Locally:
+
+All commands can be run from security test root:
+
+```
+cd x-pack/test/security_solution_api_integration
+```
+
 Ensure you are authenticated with vault for Connector + LangSmith creds:
 
 > See [internal docs](https://github.com/elastic/infra/blob/master/docs/vault/README.md#login-with-your-okta) for setup/login instructions.
 
-Fetch Connectors and LangSmith creds:
+Fetch config, which includes Connectors and LangSmith creds:
 
 ```
-cd x-pack/test/security_solution_api_integration
 node scripts/genai/vault/retrieve_secrets  
 ```
 
-Navigate to api integration directory, load the env vars, and start server:
+Load the env vars, and start server:
 ```
-cd x-pack/test/security_solution_api_integration
 export KIBANA_SECURITY_GEN_AI_CONFIG=$(base64 -w 0 < scripts/genai/vault/config.json)
 yarn genai_evals:server:ess
 ```
 
 Then in another terminal, load vars and run the tests:
 ```
-cd x-pack/test/security_solution_api_integration
 export KIBANA_SECURITY_GEN_AI_CONFIG=$(base64 -w 0 < scripts/genai/vault/config.json)
 yarn genai_evals:runner:ess
 ```
 
 ### To manually run on BuildKite:
-Navigate to [BuildKite](https://buildkite.com/elastic/kibana-ess-security-solution-gen-ai-evals) and run `ftr-security-solution-gen-ai-evaluations` pipeline.
+Navigate to [BuildKite](https://buildkite.com/elastic/kibana-ess-security-solution-gen-ai-evals) and run `ftr-security-solution-gen-ai-evaluations` pipeline. If you want to run with a custom config, first modify `x-pack/test/security_solution_api_integration/scripts/genai/vault/config.json` and then run:
+
+```
+ node scripts/genai/vault/get_command --format env-var 
+```
+
+which can then be pasted into `Environment Variables` section of the BuildKite pipeline. This is helpful for running evals just against a specific model or to change the evaluator model.
 
 ### To manually run on BuildKite for specific PR:
 Add `ci:security-genai-run-evals` label to PR
@@ -55,7 +65,7 @@ Modify `x-pack/test/security_solution_api_integration/scripts/genai/vault/config
 Then, run the following command to upload the secrets back to the `siem-team` vault:
 
 ```
-node upload_secrets.js --vault siem-team
+node upload_secrets --vault siem-team
 ```
 
 Then finally, you must contact @elastic/kibana-operations and have them upload the secrets to the `ci-prod` vault. For this you can either have them run the following commands:
@@ -68,5 +78,5 @@ node upload_secrets.js --vault ci-prod
 Or you can get the raw write command and share it with them via https://p.elstc.co to make updating secrets a little easier:
 
 ```
-node scripts/genai/vault/get_vault_write_command
+node scripts/genai/vault/get_command --format vault-write --vault ci-prod
 ```
