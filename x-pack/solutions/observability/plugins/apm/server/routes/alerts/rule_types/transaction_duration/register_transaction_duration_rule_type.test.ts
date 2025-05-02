@@ -378,16 +378,6 @@ describe('registerTransactionDurationRuleType', () => {
           'http://localhost:5601/eyr/app/observability/alerts/'
         ),
         environment: 'All',
-        grouping: {
-          service: {
-            environment: 'ENVIRONMENT_ALL',
-            name: 'opbeans-java',
-          },
-          transaction: {
-            type: 'request',
-            name: 'tx-java',
-          },
-        },
         interval: '5 mins',
         reason:
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: All, type: request, name: tx-java. Alert when > 3.0 s.',
