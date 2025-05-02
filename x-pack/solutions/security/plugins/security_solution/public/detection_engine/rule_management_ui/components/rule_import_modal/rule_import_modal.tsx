@@ -19,7 +19,7 @@ import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { useToasts } from '../../../../common/lib/kibana';
-import * as i18nCommon from '../../../common/translations';
+import * as i18nCommon from '../../../../detections/pages/detection_engine/rules/translations';
 import * as i18n from './translations';
 
 interface RuleImportModalProps {
