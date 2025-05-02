@@ -68,4 +68,5 @@ export interface EmbeddableSetup {
 
 export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
+  preloadEmbeddableChunks: (ids: string[]) => Promise<void>;
 }

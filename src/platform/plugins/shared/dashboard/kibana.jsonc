@@ -26,7 +26,8 @@
       "uiActions",
       "urlForwarding",
       "presentationUtil",
-      "unifiedSearch"
+      "unifiedSearch",
+      "presentationPanel",
     ],
     "optionalPlugins": [
       "home",

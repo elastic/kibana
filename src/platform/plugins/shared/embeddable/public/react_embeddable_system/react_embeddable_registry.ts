@@ -59,3 +59,10 @@ export const getReactEmbeddableFactory = async <
     );
   return registry[key]();
 };
+
+export async function preloadEmbeddableChunks(ids: string[]) {
+  Promise.all(
+    ids
+      .map(id => getReactEmbeddableFactory(id))
+  );
+}

@@ -30,6 +30,7 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import type { DashboardStartDependencies } from '../plugin';
+import { PresentationPanelStart } from '@kbn/presentation-panel-plugin/public';
 
 export let coreServices: CoreStart;
 export let contentManagementService: ContentManagementPublicStart;
@@ -40,6 +41,7 @@ export let fieldFormatService: FieldFormatsStart;
 export let navigationService: NavigationPublicPluginStart;
 export let noDataPageService: NoDataPagePluginStart | undefined;
 export let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
+export let presentationPanelService: PresentationPanelStart;
 export let lensService: LensPublicStart | undefined;
 export let presentationUtilService: PresentationUtilPluginStart;
 export let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
@@ -63,6 +65,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   navigationService = deps.navigation;
   noDataPageService = deps.noDataPage;
   observabilityAssistantService = deps.observabilityAIAssistant;
+  presentationPanelService = deps.presentationPanel;
   lensService = deps.lens;
   presentationUtilService = deps.presentationUtil;
   savedObjectsTaggingService = deps.savedObjectsTaggingOss;

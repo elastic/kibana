@@ -103,13 +103,17 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   // get dashboard Api
   // --------------------------------------------------------------------------------------
+  const initialState = {
+    ...combinedSessionState,
+    ...overrideState,
+  };
+  /*await embeddableService.preloadEmbeddableChunks(
+    uniq(Object.values(initialState.panels).map((panel) => panel.type))
+  );*/
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
-    initialState: {
-      ...combinedSessionState,
-      ...overrideState,
-    },
+    initialState,
     initialPanelsRuntimeState,
     savedObjectResult,
     savedObjectId,

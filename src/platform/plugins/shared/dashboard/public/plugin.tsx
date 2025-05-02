@@ -78,6 +78,7 @@ import { setKibanaServices, untilPluginStartServicesReady } from './services/kib
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import type { ConfigSchema } from '../server/config';
+import type { PresentationPanelStart } from '@kbn/presentation-panel-plugin/public';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -117,6 +118,7 @@ export interface DashboardStartDependencies {
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  presentationPanel: PresentationPanelStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -230,14 +232,19 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
+        const start = performance.now();
+        const [coreStart, { embeddable, presentationPanel }] = await core.getStartServices();
         const [{ mountApp }] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
           import('./dashboard_renderer/dashboard_module'),
+          presentationPanel.preloadPresentationPanelChunks(),
+          embeddable.preloadEmbeddableChunks(['control_group', 'lens']),
           untilPluginStartServicesReady(),
         ]);
+        const stop = performance.now();
+        const duration = stop - start;
+        console.log('mount Promise.all', duration);
         appMounted();
-
-        const [coreStart] = await core.getStartServices();
 
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,

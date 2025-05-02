@@ -16,12 +16,14 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { setKibanaServices } from './kibana_services';
 import { registerActions } from './panel_actions/register_actions';
+import { CONTEXT_MENU_TRIGGER, PANEL_BADGE_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from './panel_actions';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationPanelSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PresentationPanelStart {}
+export interface PresentationPanelStart {
+  preloadPresentationPanelChunks: () => Promise<void>
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationPanelSetupDependencies {}
@@ -57,7 +59,11 @@ export class PresentationPanelPlugin
   ): PresentationPanelStart {
     setKibanaServices(coreStart, startPlugins);
     registerActions();
-    return {};
+    return {
+      preloadPresentationPanelChunks: async () => {
+        import('./panel_component/panel_module');
+      }
+    };
   }
 
   public stop() {}
