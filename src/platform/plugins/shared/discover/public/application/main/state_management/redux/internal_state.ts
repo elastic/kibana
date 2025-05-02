@@ -193,11 +193,16 @@ export interface InternalStateThunkDependencies {
   urlStateStorage: IKbnUrlStateStorage;
 }
 
+const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
+
 export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
   const store = configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({ thunk: { extraArgument: options } }),
+      getDefaultMiddleware({
+        thunk: { extraArgument: options },
+        serializableCheck: !IS_JEST_ENVIRONMENT,
+      }),
   });
 
   // TEMPORARY: Create initial default tab

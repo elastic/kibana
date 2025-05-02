@@ -547,6 +547,7 @@ src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-unified-histogram @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-ux-logs-team
@@ -703,7 +704,6 @@ src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/ui_actions @elastic/appex-sharedux
 src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
-src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations

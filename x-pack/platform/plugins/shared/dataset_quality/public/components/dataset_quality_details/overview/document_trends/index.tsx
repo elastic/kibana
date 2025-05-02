@@ -24,7 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';
 import {
   discoverAriaText,
