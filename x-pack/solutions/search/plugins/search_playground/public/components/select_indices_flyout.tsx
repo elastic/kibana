@@ -27,7 +27,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import { PLAYGROUND_MAX_SELECTED_INDICES_COUNT } from '../../common';
 import { getIndicesWithNoSourceFields } from '../utils/create_query';
 import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -74,11 +73,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
     disabledSave: boolean;
     emptyIndices: string[];
   } => {
-    if (
-      isFieldsLoading ||
-      selectedTempIndices.length === 0 ||
-      selectedTempIndices.length > PLAYGROUND_MAX_SELECTED_INDICES_COUNT
-    ) {
+    if (isFieldsLoading || selectedTempIndices.length === 0) {
       return {
         disabledSave: true,
         emptyIndices: [],
@@ -170,39 +165,15 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
               <EuiSpacer />
               {search}
               <EuiSpacer size="s" />
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <FormattedMessage
-                      id="xpack.searchPlayground.setupPage.addDataSource.flyout.selectedCount"
-                      defaultMessage="{selectedCount} selected"
-                      values={{
-                        selectedCount: selectedTempIndices.length,
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {selectedTempIndices.length === PLAYGROUND_MAX_SELECTED_INDICES_COUNT ? (
-                    <EuiText color="success" size="s">
-                      <FormattedMessage
-                        id="xpack.searchPlayground.setupPage.addDataSource.flyout.maxAllowSelected.label"
-                        defaultMessage="Maximum selected"
-                      />
-                    </EuiText>
-                  ) : (
-                    <EuiText size="s">
-                      <FormattedMessage
-                        id="xpack.searchPlayground.setupPage.addDataSource.flyout.maxAllowIndices.label"
-                        defaultMessage="Maximum {maxIndices} allowed"
-                        values={{
-                          maxIndices: PLAYGROUND_MAX_SELECTED_INDICES_COUNT,
-                        }}
-                      />
-                    </EuiText>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.searchPlayground.setupPage.addDataSource.flyout.selectedCount"
+                  defaultMessage="{selectedCount} selected"
+                  values={{
+                    selectedCount: selectedTempIndices.length,
+                  }}
+                />
+              </EuiText>
             </EuiFlyoutHeader>
             <EuiSpacer size="xs" />
             {list}

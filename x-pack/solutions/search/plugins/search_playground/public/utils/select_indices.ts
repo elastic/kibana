@@ -8,8 +8,6 @@
 import type React from 'react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import { PLAYGROUND_MAX_SELECTED_INDICES_COUNT } from '../../common';
-
 export const handleSelectOptions =
   (
     currentSelectedIndices: string[],
@@ -36,6 +34,5 @@ export const handleSelectOptions =
     const updatedSelectedIndices: string[] = Array.from(
       new Set([...filteredSelectedIndices, ...selectedIndices])
     );
-    if (updatedSelectedIndices.length > PLAYGROUND_MAX_SELECTED_INDICES_COUNT) return;
     setSelectedTempIndices(updatedSelectedIndices);
   };

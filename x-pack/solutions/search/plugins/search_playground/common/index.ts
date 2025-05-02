@@ -34,5 +34,3 @@ export enum ROUTE_VERSIONS {
 }
 
 export const PLAYGROUND_SAVED_OBJECT_TYPE = 'search_playground';
-
-export const PLAYGROUND_MAX_SELECTED_INDICES_COUNT = 5;
