@@ -6,7 +6,7 @@
  */
 
 import { AnyAction } from 'redux-v4';
-import { ThunkDispatch } from 'redux-thunk';
+import { ThunkDispatch } from 'redux-thunk-v2';
 import { connect } from 'react-redux';
 import { TileMetaFeature, TileError } from '../../../../common/descriptor_types';
 import { setTileState } from '../../../actions';

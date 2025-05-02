@@ -6,7 +6,7 @@
  */
 
 import { AnyAction } from 'redux-v4';
-import { ThunkDispatch } from 'redux-thunk';
+import { ThunkDispatch } from 'redux-thunk-v2';
 import { connect } from 'react-redux';
 import type { Query } from '@kbn/es-query';
 import { FilterEditor } from './filter_editor';

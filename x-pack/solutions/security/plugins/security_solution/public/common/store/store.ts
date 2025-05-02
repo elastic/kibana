@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import thunk from 'redux-thunk';
+import thunk from 'redux-thunk-v2';
 import type {
   Action,
   Store,

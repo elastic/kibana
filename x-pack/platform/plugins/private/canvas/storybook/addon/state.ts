@@ -6,7 +6,7 @@
  */
 
 import { applyMiddleware, Dispatch, Store } from 'redux-v4';
-import thunkMiddleware from 'redux-thunk';
+import thunkMiddleware from 'redux-thunk-v2';
 import { addons } from '@storybook/manager-api';
 import { diff } from 'jsondiffpatch';
 import { isFunction } from 'lodash';
