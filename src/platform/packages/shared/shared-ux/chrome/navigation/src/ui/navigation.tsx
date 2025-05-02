@@ -45,6 +45,134 @@ export interface Props {
   dataTestSubj?: string;
 }
 
+const Sessions: FC = () => {
+  return (
+    <>
+      <NavigationSectionUI
+        navNode={{
+          id: 'logs',
+          title: 'Logs',
+          path: 'logs',
+          defaultIsCollapsed: false,
+          children: [
+            {
+              id: 'logs',
+              title: 'All logs',
+              href: '/kbn/app/r/s/Bjf27',
+              path: 'Logs',
+            },
+
+            { id: 'ex', title: 'Exception events', href: '/kbn/app/r/s/8HTHi', path: '' },
+            { id: 'ff', title: 'Feature flag events', href: '/kbn/app/r/s/vdLAY', path: '' },
+          ],
+        }}
+      />
+      <NavigationSectionUI
+        navNode={{
+          id: 'traces',
+          path: 'traces',
+          title: 'Traces',
+          defaultIsCollapsed: false,
+          children: [
+            {
+              id: 'all-traces',
+              title: 'All Traces',
+              href: '/kbn/app/r/s/JpTUb',
+              path: '',
+            },
+            {
+              id: 'db-traces',
+              title: 'Database spans',
+              href: '/kbn/app/r/s/yelvr',
+              path: '',
+            },
+            {
+              id: 'http-traces',
+              title: 'HTTP spans',
+              href: '/kbn/app/r/s/Xz01f',
+              path: '',
+            },
+            {
+              id: 'messaging-traces',
+              title: 'Messaging spans',
+              href: '/kbn/app/r/s/C5bno',
+              path: '',
+            },
+            {
+              id: 'rpc-traces',
+              title: 'RPC spans',
+              href: '/kbn/app/r/s/YZqVY',
+              path: '',
+            },
+          ],
+        }}
+      />
+      <NavigationSectionUI
+        navNode={{
+          id: 'profiles',
+          title: 'Profiles',
+          defaultIsCollapsed: false,
+          path: 'profiles',
+          children: [
+            {
+              id: 'profiles-all',
+              title: 'All profiling events',
+              href: '/kbn/app/r/s/5iIYP',
+              path: '',
+            },
+          ],
+        }}
+      />
+      <NavigationSectionUI
+        navNode={{
+          id: 'entities',
+          title: 'Entities',
+          defaultIsCollapsed: false,
+          path: 'entities',
+          children: [
+            {
+              id: 'entity-services',
+              title: 'Services',
+              href: '/kbn/app/r/s/PNANw',
+              path: '',
+            },
+            {
+              id: 'entity-hosts',
+              title: 'Hosts',
+              href: '/kbn/app/r/s/OqChX',
+              path: '',
+            },
+            {
+              id: 'entity-process',
+              title: 'Processes',
+              href: '/kbn/app/r/s/jtL9J',
+              path: '',
+            },
+            {
+              id: 'entity-container',
+              title: 'Containers',
+              href: '/kbn/app/r/s/WnWvC',
+              path: '',
+            },
+            {
+              id: 'entity-order',
+              title: 'Orders',
+              href: '/kbn/app/r/s/oJhrG',
+              path: '',
+            },
+            {
+              id: 'entity-product',
+              title: 'Products',
+              href: '/kbn/app/r/s/r67U0',
+              path: '',
+            },
+          ],
+        }}
+      />
+    </>
+  );
+};
+
 const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
   const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
     useNavigationService();
@@ -70,6 +198,9 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
           return <RecentlyAccessed {...navNode} key={`recentlyAccessed-${i}`} />;
         }
 
+        if ((navNode as any).type === 'sessions') {
+          return <Sessions />;
+        }
         if (navNode.sideNavStatus === 'hidden') {
           return null;
         }

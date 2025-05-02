@@ -30,9 +30,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         isCollapsible: false,
         breadcrumbStatus: 'hidden',
         children: [
-          {
-            link: 'observability-overview',
-          },
+          // {
+          //   link: 'observability-overview',
+          // },
           {
             title: i18n.translate('xpack.observability.obltNav.discover', {
               defaultMessage: 'Discover',
@@ -63,12 +63,12 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
           {
             link: 'slo',
           },
-          {
-            link: 'observabilityAIAssistant',
-            title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
-              defaultMessage: 'AI Assistant',
-            }),
-          },
+          // {
+          //   link: 'observabilityAIAssistant',
+          //   title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
+          //     defaultMessage: 'AI Assistant',
+          //   }),
+          // },
           {
             link: 'inventory',
             spaceBefore: 'm',
@@ -88,240 +88,244 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 },
               ]
             : []),
-          {
-            id: 'apm',
-            title: i18n.translate('xpack.observability.obltNav.applications', {
-              defaultMessage: 'Applications',
-            }),
-            renderAs: 'panelOpener',
-            children: [
-              {
-                children: [
-                  {
-                    link: 'apm:services',
-                    getIsActive: ({ pathNameSerialized }) => {
-                      const regex = /app\/apm\/.*service.*/;
-                      return regex.test(pathNameSerialized);
-                    },
-                  },
-                  {
-                    link: 'apm:traces',
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
-                    },
-                  },
-                  {
-                    link: 'apm:dependencies',
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
-                    },
-                  },
-                  {
-                    link: 'ux',
-                    title: i18n.translate('xpack.observability.obltNav.apm.ux', {
-                      defaultMessage: 'User experience',
-                    }),
-                  },
-                ],
-              },
-              {
-                id: 'synthetics',
-                title: i18n.translate('xpack.observability.obltNav.apm.syntheticsGroupTitle', {
-                  defaultMessage: 'Synthetics',
-                }),
-                children: [
-                  {
-                    link: 'synthetics',
-                    title: i18n.translate('xpack.observability.obltNav.apm.synthetics.monitors', {
-                      defaultMessage: 'Monitors',
-                    }),
-                  },
-                  {
-                    link: 'synthetics:certificates',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.apm.synthetics.tlsCertificates',
-                      {
-                        defaultMessage: 'TLS certificates',
-                      }
-                    ),
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            id: 'metrics',
-            title: i18n.translate('xpack.observability.obltNav.infrastructure', {
-              defaultMessage: 'Infrastructure',
-            }),
-            renderAs: 'panelOpener',
-            children: [
-              {
-                children: [
-                  {
-                    link: 'metrics:inventory',
-                    title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure Inventory',
-                    }),
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
-                    },
-                  },
-                  {
-                    link: 'metrics:hosts',
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
-                    },
-                  },
-                  {
-                    link: 'metrics:metrics-explorer',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.infrastructure.metricsExplorer',
-                      {
-                        defaultMessage: 'Metrics explorer',
-                      }
-                    ),
-                  },
-                ],
-              },
-              {
-                id: 'profiling',
-                title: i18n.translate(
-                  'xpack.observability.obltNav.infrastructure.universalProfiling',
-                  {
-                    defaultMessage: 'Universal profiling',
-                  }
-                ),
-                children: [
-                  {
-                    link: 'profiling:stacktraces',
-                  },
-                  {
-                    link: 'profiling:flamegraphs',
-                  },
-                  {
-                    link: 'profiling:functions',
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            id: 'machine_learning-landing',
-            renderAs: 'panelOpener',
-            title: i18n.translate('xpack.observability.obltNav.machineLearning', {
-              defaultMessage: 'Machine learning',
-            }),
-            children: [
-              {
-                children: [
-                  {
-                    link: 'ml:overview',
-                  },
-                  {
-                    link: 'ml:dataVisualizer',
-                  },
-                ],
-              },
-              {
-                id: 'category-anomaly_detection',
-                title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
-                  defaultMessage: 'Anomaly detection',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:anomalyExplorer',
-                  },
-                  {
-                    link: 'ml:singleMetricViewer',
-                  },
-                ],
-              },
-              {
-                id: 'category-data_frame analytics',
-                title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
-                  defaultMessage: 'Data frame analytics',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:resultExplorer',
-                  },
-                  {
-                    link: 'ml:analyticsMap',
-                  },
-                ],
-              },
-              {
-                id: 'category-aiops_labs',
-                title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
-                  defaultMessage: 'Aiops labs',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:logRateAnalysis',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.aiops_labs.log_rate_analysis',
-                      {
-                        defaultMessage: 'Log rate analysis',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:logPatternAnalysis',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.aiops_labs.log_pattern_analysis',
-                      {
-                        defaultMessage: 'Log pattern analysis',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:changePointDetections',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.aiops_labs.change_point_detection',
-                      {
-                        defaultMessage: 'Change point detection',
-                      }
-                    ),
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            id: 'otherTools',
-            title: i18n.translate('xpack.observability.obltNav.otherTools', {
-              defaultMessage: 'Other tools',
-            }),
-            renderAs: 'panelOpener',
-            children: [
-              {
-                link: 'logs:anomalies',
-                title: i18n.translate('xpack.observability.obltNav.otherTools.logsAnomalies', {
-                  defaultMessage: 'Logs anomalies',
-                }),
-              },
-              {
-                link: 'logs:log-categories',
-                title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
-                  defaultMessage: 'Logs categories',
-                }),
-              },
-              { link: 'maps' },
-              { link: 'canvas' },
-              { link: 'graph' },
-              {
-                link: 'visualize',
-                title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
-                  defaultMessage: 'Visualize library',
-                }),
-              },
-            ],
-          },
+          // {
+          //   id: 'apm',
+          //   title: i18n.translate('xpack.observability.obltNav.applications', {
+          //     defaultMessage: 'Applications',
+          //   }),
+          //   renderAs: 'panelOpener',
+          //   children: [
+          //     {
+          //       children: [
+          //         {
+          //           link: 'apm:services',
+          //           getIsActive: ({ pathNameSerialized }) => {
+          //             const regex = /app\/apm\/.*service.*/;
+          //             return regex.test(pathNameSerialized);
+          //           },
+          //         },
+          //         {
+          //           link: 'apm:traces',
+          //           getIsActive: ({ pathNameSerialized, prepend }) => {
+          //             return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+          //           },
+          //         },
+          //         {
+          //           link: 'apm:dependencies',
+          //           getIsActive: ({ pathNameSerialized, prepend }) => {
+          //             return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+          //           },
+          //         },
+          //         {
+          //           link: 'ux',
+          //           title: i18n.translate('xpack.observability.obltNav.apm.ux', {
+          //             defaultMessage: 'User experience',
+          //           }),
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       id: 'synthetics',
+          //       title: i18n.translate('xpack.observability.obltNav.apm.syntheticsGroupTitle', {
+          //         defaultMessage: 'Synthetics',
+          //       }),
+          //       children: [
+          //         {
+          //           link: 'synthetics',
+          //           title: i18n.translate('xpack.observability.obltNav.apm.synthetics.monitors', {
+          //             defaultMessage: 'Monitors',
+          //           }),
+          //         },
+          //         {
+          //           link: 'synthetics:certificates',
+          //           title: i18n.translate(
+          //             'xpack.observability.obltNav.apm.synthetics.tlsCertificates',
+          //             {
+          //               defaultMessage: 'TLS certificates',
+          //             }
+          //           ),
+          //         },
+          //       ],
+          //     },
+          //   ],
+          // },
+          // {
+          //   id: 'metrics',
+          //   title: i18n.translate('xpack.observability.obltNav.infrastructure', {
+          //     defaultMessage: 'Infrastructure',
+          //   }),
+          //   renderAs: 'panelOpener',
+          //   children: [
+          //     {
+          //       children: [
+          //         {
+          //           link: 'metrics:inventory',
+          //           title: i18n.translate('xpack.observability.infrastructure.inventory', {
+          //             defaultMessage: 'Infrastructure Inventory',
+          //           }),
+          //           getIsActive: ({ pathNameSerialized, prepend }) => {
+          //             return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+          //           },
+          //         },
+          //         {
+          //           link: 'metrics:hosts',
+          //           getIsActive: ({ pathNameSerialized, prepend }) => {
+          //             return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+          //           },
+          //         },
+          //         {
+          //           link: 'metrics:metrics-explorer',
+          //           title: i18n.translate(
+          //             'xpack.observability.obltNav.infrastructure.metricsExplorer',
+          //             {
+          //               defaultMessage: 'Metrics explorer',
+          //             }
+          //           ),
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       id: 'profiling',
+          //       title: i18n.translate(
+          //         'xpack.observability.obltNav.infrastructure.universalProfiling',
+          //         {
+          //           defaultMessage: 'Universal profiling',
+          //         }
+          //       ),
+          //       children: [
+          //         {
+          //           link: 'profiling:stacktraces',
+          //         },
+          //         {
+          //           link: 'profiling:flamegraphs',
+          //         },
+          //         {
+          //           link: 'profiling:functions',
+          //         },
+          //       ],
+          //     },
+          //   ],
+          // },
+          // {
+          //   id: 'machine_learning-landing',
+          //   renderAs: 'panelOpener',
+          //   title: i18n.translate('xpack.observability.obltNav.machineLearning', {
+          //     defaultMessage: 'Machine learning',
+          //   }),
+          //   children: [
+          //     {
+          //       children: [
+          //         {
+          //           link: 'ml:overview',
+          //         },
+          //         {
+          //           link: 'ml:dataVisualizer',
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       id: 'category-anomaly_detection',
+          //       title: i18n.translate('xpack.observability.obltNav.ml.anomaly_detection', {
+          //         defaultMessage: 'Anomaly detection',
+          //       }),
+          //       breadcrumbStatus: 'hidden',
+          //       children: [
+          //         {
+          //           link: 'ml:anomalyExplorer',
+          //         },
+          //         {
+          //           link: 'ml:singleMetricViewer',
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       id: 'category-data_frame analytics',
+          //       title: i18n.translate('xpack.observability.obltNav.ml.data_frame_analytics', {
+          //         defaultMessage: 'Data frame analytics',
+          //       }),
+          //       breadcrumbStatus: 'hidden',
+          //       children: [
+          //         {
+          //           link: 'ml:resultExplorer',
+          //         },
+          //         {
+          //           link: 'ml:analyticsMap',
+          //         },
+          //       ],
+          //     },
+          //     {
+          //       id: 'category-aiops_labs',
+          //       title: i18n.translate('xpack.observability.obltNav.ml.aiops_labs', {
+          //         defaultMessage: 'Aiops labs',
+          //       }),
+          //       breadcrumbStatus: 'hidden',
+          //       children: [
+          //         {
+          //           link: 'ml:logRateAnalysis',
+          //           title: i18n.translate(
+          //             'xpack.observability.obltNav.ml.aiops_labs.log_rate_analysis',
+          //             {
+          //               defaultMessage: 'Log rate analysis',
+          //             }
+          //           ),
+          //         },
+          //         {
+          //           link: 'ml:logPatternAnalysis',
+          //           title: i18n.translate(
+          //             'xpack.observability.obltNav.ml.aiops_labs.log_pattern_analysis',
+          //             {
+          //               defaultMessage: 'Log pattern analysis',
+          //             }
+          //           ),
+          //         },
+          //         {
+          //           link: 'ml:changePointDetections',
+          //           title: i18n.translate(
+          //             'xpack.observability.obltNav.ml.aiops_labs.change_point_detection',
+          //             {
+          //               defaultMessage: 'Change point detection',
+          //             }
+          //           ),
+          //         },
+          //       ],
+          //     },
+          //   ],
+          // },
+          // {
+          //   id: 'otherTools',
+          //   title: i18n.translate('xpack.observability.obltNav.otherTools', {
+          //     defaultMessage: 'Other tools',
+          //   }),
+          //   renderAs: 'panelOpener',
+          //   children: [
+          //     {
+          //       link: 'logs:anomalies',
+          //       title: i18n.translate('xpack.observability.obltNav.otherTools.logsAnomalies', {
+          //         defaultMessage: 'Logs anomalies',
+          //       }),
+          //     },
+          //     {
+          //       link: 'logs:log-categories',
+          //       title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
+          //         defaultMessage: 'Logs categories',
+          //       }),
+          //     },
+          //     { link: 'maps' },
+          //     { link: 'canvas' },
+          //     { link: 'graph' },
+          //     {
+          //       link: 'visualize',
+          //       title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
+          //         defaultMessage: 'Visualize library',
+          //       }),
+          //     },
+          //   ],
+          // },
         ],
+      },
+      {
+        title: 'Sessions',
+        type: 'sessions',
       },
     ],
     footer: [
