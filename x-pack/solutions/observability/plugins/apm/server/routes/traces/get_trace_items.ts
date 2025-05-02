@@ -16,6 +16,7 @@ import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { APMConfig } from '../..';
 import {
   AGENT_NAME,
+  AT_TIMESTAMP,
   CHILD_ID,
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -273,7 +274,7 @@ async function getTraceDocsPerPage({
 
   const requiredFields = asMutableArray([
     AGENT_NAME,
-    TIMESTAMP_US,
+    AT_TIMESTAMP,
     TRACE_ID,
     SERVICE_NAME,
     PROCESSOR_EVENT,
@@ -294,6 +295,7 @@ async function getTraceDocsPerPage({
   ] as const);
 
   const optionalFields = asMutableArray([
+    TIMESTAMP_US,
     PARENT_ID,
     SERVICE_ENVIRONMENT,
     EVENT_OUTCOME,
@@ -371,6 +373,9 @@ async function getTraceDocsPerPage({
           processor: {
             event: 'span',
           },
+          timestamp: {
+            us: spanEvent.timestamp?.us ?? new Date(spanEvent['@timestamp']).getTime() * 1000,
+          },
           span: {
             ...spanEvent.span,
             composite: spanEvent.span.composite
@@ -392,6 +397,9 @@ async function getTraceDocsPerPage({
         ...txEvent,
         processor: {
           event: 'transaction',
+        },
+        timestamp: {
+          us: txEvent.timestamp?.us ?? new Date(txEvent['@timestamp']).getTime() * 1000,
         },
         span: {
           ...txEvent.span,
