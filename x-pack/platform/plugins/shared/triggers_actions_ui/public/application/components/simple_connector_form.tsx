@@ -15,6 +15,10 @@ import {
 import { FIELD_TYPES, getUseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { i18n } from '@kbn/i18n';
+import {
+  ValidationError,
+  ValidationFunc,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export interface CommonFieldSchema {
   id: string;
@@ -28,6 +32,9 @@ export interface CommonFieldSchema {
 export interface ConfigFieldSchema extends CommonFieldSchema {
   isUrlField?: boolean;
   defaultValue?: string | string[];
+  customValidator?: (
+    message: string
+  ) => (...args: Parameters<ValidationFunc>) => ValidationError | undefined;
 }
 
 export interface SecretsFieldSchema extends CommonFieldSchema {
@@ -40,11 +47,9 @@ interface SimpleConnectorFormProps {
   configFormSchema: ConfigFieldSchema[];
   secretsFormSchema: SecretsFieldSchema[];
   configFormSchemaAfterSecrets?: ConfigFieldSchema[];
-  allowDomainWithoutDots?: boolean;
 }
 
-type FormRowProps = ConfigFieldSchema &
-  SecretsFieldSchema & { readOnly: boolean; allowDomainWithoutDots?: boolean };
+type FormRowProps = ConfigFieldSchema & SecretsFieldSchema & { readOnly: boolean };
 
 const UseTextField = getUseField({ component: Field });
 const UseComboBoxField = getUseField({ component: ComboBoxField });
@@ -56,14 +61,16 @@ const getFieldConfig = ({
   isUrlField = false,
   defaultValue,
   type,
-  allowDomainWithoutDots = false,
+  customValidator,
 }: {
   label: string;
   isRequired?: boolean;
   isUrlField?: boolean;
   defaultValue?: string | string[];
   type?: keyof typeof FIELD_TYPES;
-  allowDomainWithoutDots: boolean;
+  customValidator?: (
+    message: string
+  ) => (...args: Parameters<ValidationFunc>) => ValidationError | undefined;
 }) => ({
   label,
   validations: [
@@ -82,7 +89,7 @@ const getFieldConfig = ({
           },
         ]
       : []),
-    ...(isUrlField
+    ...(isUrlField && !customValidator
       ? [
           {
             validator: urlField(
@@ -91,8 +98,21 @@ const getFieldConfig = ({
                 {
                   defaultMessage: 'Invalid URL',
                 }
-              ),
-              allowDomainWithoutDots
+              )
+            ),
+          },
+        ]
+      : []),
+    ...(isUrlField && customValidator
+      ? [
+          {
+            validator: customValidator(
+              i18n.translate(
+                'xpack.triggersActionsUI.sections.actionConnectorForm.error.invalidURL',
+                {
+                  defaultMessage: 'Invalid URL',
+                }
+              )
             ),
           },
         ]
@@ -123,7 +143,7 @@ const FormRow: React.FC<FormRowProps> = ({
   defaultValue,
   euiFieldProps = {},
   type,
-  allowDomainWithoutDots = false,
+  customValidator,
 }) => {
   const dataTestSub = `${id}-input`;
   const UseField = getComponentByType(type);
@@ -140,7 +160,7 @@ const FormRow: React.FC<FormRowProps> = ({
                 defaultValue,
                 type,
                 isRequired,
-                allowDomainWithoutDots,
+                customValidator,
               })}
               helpText={helpText}
               componentProps={{
@@ -155,7 +175,12 @@ const FormRow: React.FC<FormRowProps> = ({
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({ label, type, isRequired, allowDomainWithoutDots })}
+              config={getFieldConfig({
+                label,
+                type,
+                isRequired,
+                customValidator,
+              })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{
@@ -179,18 +204,12 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
   configFormSchema,
   secretsFormSchema,
   configFormSchemaAfterSecrets = [],
-  allowDomainWithoutDots = false,
 }) => {
   return (
     <>
       {configFormSchema.map(({ id, ...restConfigSchema }, index) => (
         <React.Fragment key={`config.${id}`}>
-          <FormRow
-            id={`config.${id}`}
-            {...restConfigSchema}
-            readOnly={readOnly}
-            allowDomainWithoutDots={allowDomainWithoutDots}
-          />
+          <FormRow id={`config.${id}`} {...restConfigSchema} readOnly={readOnly} />
           {index !== configFormSchema.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}
@@ -216,19 +235,13 @@ const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
             key={`secrets.${id}`}
             {...restSecretsSchema}
             readOnly={readOnly}
-            allowDomainWithoutDots={allowDomainWithoutDots}
           />
           {index !== secretsFormSchema.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}
       {configFormSchemaAfterSecrets.map(({ id, ...restConfigSchemaAfterSecrets }, index) => (
         <React.Fragment key={`config.${id}`}>
-          <FormRow
-            id={`config.${id}`}
-            {...restConfigSchemaAfterSecrets}
-            readOnly={readOnly}
-            allowDomainWithoutDots={allowDomainWithoutDots}
-          />
+          <FormRow id={`config.${id}`} {...restConfigSchemaAfterSecrets} readOnly={readOnly} />
           {index !== configFormSchemaAfterSecrets.length ? <EuiSpacer size="m" /> : null}
         </React.Fragment>
       ))}
