@@ -577,6 +577,15 @@ generalLayoutNavTree.footer = correctPaths(
 
 export const GeneralLayoutStructure = (args: NavigationServices) => {
   const services = storybookMock.getServices(args);
+  services.activeNodes$ = of([
+    [
+      { id: '', path: 'example_project' },
+      { id: '', path: 'example_project.root-section1' },
+      { id: '', path: 'example_project.root-section1.item03' },
+      { id: '', path: 'example_project.root-section1.item03.child-section4' },
+      { id: '', path: 'example_project.root-section1.item03.child-section4.sub3' },
+    ],
+  ]);
 
   return (
     <NavigationWrapper>
