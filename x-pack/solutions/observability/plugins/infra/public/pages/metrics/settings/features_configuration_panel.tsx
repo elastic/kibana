@@ -16,7 +16,6 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import type { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { usePluginConfig } from '../../../containers/plugin_config_context';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
@@ -27,20 +26,12 @@ const FieldRow = withSuspense(LazyFieldRow);
 type Props = Pick<
   ReturnType<typeof useEditableSettings>,
   'handleFieldChange' | 'fields' | 'unsavedChanges'
-> & {
-  readOnly: boolean;
-};
+>;
 
-export function FeaturesConfigurationPanel({
-  readOnly,
-  handleFieldChange,
-  fields,
-  unsavedChanges,
-}: Props) {
+export function FeaturesConfigurationPanel({ handleFieldChange, fields, unsavedChanges }: Props) {
   const {
     services: { docLinks, notifications },
   } = useKibanaContextForPlugin();
-  const { featureFlags } = usePluginConfig();
 
   // We don't validate the user input on these settings
   const settingsValidationResponse: ValueValidation = {
@@ -66,14 +57,12 @@ export function FeaturesConfigurationPanel({
           validateChange: async () => settingsValidationResponse,
         }}
       >
-        {featureFlags.profilingEnabled && (
-          <FieldRow
-            field={fields[enableInfrastructureProfilingIntegration]}
-            isSavingEnabled={true}
-            onFieldChange={handleFieldChange}
-            unsavedChange={unsavedChanges[enableInfrastructureProfilingIntegration]}
-          />
-        )}
+        <FieldRow
+          field={fields[enableInfrastructureProfilingIntegration]}
+          isSavingEnabled={true}
+          onFieldChange={handleFieldChange}
+          unsavedChange={unsavedChanges[enableInfrastructureProfilingIntegration]}
+        />
       </FieldRowProvider>
     </EuiForm>
   );
