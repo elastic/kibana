@@ -20,6 +20,7 @@ export const INTERNAL_ROUTES = {
   JOBS: {
     COUNT: prefixInternalPath + '/jobs/count',
     LIST: prefixInternalPath + '/jobs/list',
+    LIST_SCHEDULED: prefixInternalPath + '/jobs/list_scheduled',
     INFO_PREFIX: prefixInternalPath + '/jobs/info', // docId is added to the final path
     DELETE_PREFIX: prefixInternalPath + '/jobs/delete', // docId is added to the final path
     DOWNLOAD_PREFIX: prefixInternalPath + '/jobs/download', // docId is added to the final path

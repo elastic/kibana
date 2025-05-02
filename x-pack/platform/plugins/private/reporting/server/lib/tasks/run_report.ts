@@ -444,111 +444,111 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           jobId = jId;
           report = preparedReport;
 
-          if (!isLastAttempt) {
-            this.opts.reporting.trackReport(jobId);
-          }
+          // if (!isLastAttempt) {
+          //   this.opts.reporting.trackReport(jobId);
+          // }
 
-          if (!report || !task) {
-            this.opts.reporting.untrackReport(jobId);
+          // if (!report || !task) {
+          //   this.opts.reporting.untrackReport(jobId);
 
-            if (isLastAttempt) {
-              errorLogger(this.logger, `Job ${jobId} failed too many times. Exiting...`);
-              return;
-            }
+          //   if (isLastAttempt) {
+          //     errorLogger(this.logger, `Job ${jobId} failed too many times. Exiting...`);
+          //     return;
+          //   }
 
-            const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
-            errorLogger(this.logger, errorMessage);
+          //   const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
+          //   errorLogger(this.logger, errorMessage);
 
-            // Throw so Task manager can clean up the failed task
-            throw new Error(errorMessage);
-          }
+          //   // Throw so Task manager can clean up the failed task
+          //   throw new Error(errorMessage);
+          // }
 
-          const { jobtype: jobType, attempts } = report;
-          const logger = this.logger.get(jobId);
+          // const { jobtype: jobType, attempts } = report;
+          // const logger = this.logger.get(jobId);
 
-          const maxAttempts = this.getMaxAttempts();
-          if (maxAttempts) {
-            logger.debug(
-              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
-            );
-          } else {
-            logger.debug(`Starting ${jobType} report ${jobId}.`);
-          }
+          // const maxAttempts = this.getMaxAttempts();
+          // if (maxAttempts) {
+          //   logger.debug(
+          //     `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
+          //   );
+          // } else {
+          //   logger.debug(`Starting ${jobType} report ${jobId}.`);
+          // }
 
-          logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+          // logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
 
-          const eventLog = this.opts.reporting.getEventLogger(
-            new Report({ ...task, _id: task.id, _index: task.index })
-          );
+          // const eventLog = this.opts.reporting.getEventLogger(
+          //   new Report({ ...task, _id: task.id, _index: task.index })
+          // );
 
-          try {
-            const jobContentEncoding = this.getJobContentEncoding(jobType);
-            const stream = await getContentStream(
-              this.opts.reporting,
-              {
-                id: report._id,
-                index: report._index,
-                if_primary_term: report._primary_term,
-                if_seq_no: report._seq_no,
-              },
-              {
-                encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
-              }
-            );
-            eventLog.logExecutionStart();
+          // try {
+          //   const jobContentEncoding = this.getJobContentEncoding(jobType);
+          //   const stream = await getContentStream(
+          //     this.opts.reporting,
+          //     {
+          //       id: report._id,
+          //       index: report._index,
+          //       if_primary_term: report._primary_term,
+          //       if_seq_no: report._seq_no,
+          //     },
+          //     {
+          //       encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
+          //     }
+          //   );
+          //   eventLog.logExecutionStart();
 
-            const output = await Promise.race<TaskRunResult>([
-              this.performJob({
-                task,
-                fakeRequest,
-                taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                cancellationToken,
-                stream,
-              }),
-              this.throwIfKibanaShutsDown(),
-            ]);
+          //   const output = await Promise.race<TaskRunResult>([
+          //     this.performJob({
+          //       task,
+          //       fakeRequest,
+          //       taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+          //       cancellationToken,
+          //       stream,
+          //     }),
+          //     this.throwIfKibanaShutsDown(),
+          //   ]);
 
-            stream.end();
+          //   stream.end();
 
-            logger.debug(`Begin waiting for the stream's pending callbacks...`);
-            await finishedWithNoPendingCallbacks(stream);
-            logger.info(`The stream's pending callbacks have completed.`);
+          //   logger.debug(`Begin waiting for the stream's pending callbacks...`);
+          //   await finishedWithNoPendingCallbacks(stream);
+          //   logger.info(`The stream's pending callbacks have completed.`);
 
-            report._seq_no = stream.getSeqNo()!;
-            report._primary_term = stream.getPrimaryTerm()!;
+          //   report._seq_no = stream.getSeqNo()!;
+          //   report._primary_term = stream.getPrimaryTerm()!;
 
-            eventLog.logExecutionComplete({
-              ...(output.metrics ?? {}),
-              byteSize: stream.bytesWritten,
-            });
+          //   eventLog.logExecutionComplete({
+          //     ...(output.metrics ?? {}),
+          //     byteSize: stream.bytesWritten,
+          //   });
 
-            if (output) {
-              logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
-              // Update the job status to "completed"
-              report = await this.completeJob(report, {
-                ...output,
-                size: stream.bytesWritten,
-              });
-            }
+          //   if (output) {
+          //     logger.debug(`Job output size: ${stream.bytesWritten} bytes.`);
+          //     // Update the job status to "completed"
+          //     report = await this.completeJob(report, {
+          //       ...output,
+          //       size: stream.bytesWritten,
+          //     });
+          //   }
 
-            // untrack the report for concurrency awareness
-            logger.debug(`Stopping ${jobId}.`);
-          } catch (failedToExecuteErr) {
-            eventLog.logError(failedToExecuteErr);
+          //   // untrack the report for concurrency awareness
+          //   logger.debug(`Stopping ${jobId}.`);
+          // } catch (failedToExecuteErr) {
+          //   eventLog.logError(failedToExecuteErr);
 
-            await this.saveExecutionError(report, failedToExecuteErr).catch((failedToSaveError) => {
-              errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
-            });
+          //   await this.saveExecutionError(report, failedToExecuteErr).catch((failedToSaveError) => {
+          //     errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
+          //   });
 
-            cancellationToken.cancel();
+          //   cancellationToken.cancel();
 
-            const error = mapToReportingError(failedToExecuteErr);
+          //   const error = mapToReportingError(failedToExecuteErr);
 
-            throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
-          } finally {
-            this.opts.reporting.untrackReport(jobId);
-            logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
-          }
+          //   throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
+          // } finally {
+          //   this.opts.reporting.untrackReport(jobId);
+          //   logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+          // }
         },
 
         /*

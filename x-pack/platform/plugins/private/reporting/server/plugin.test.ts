@@ -183,21 +183,33 @@ describe('Reporting Plugin', () => {
   });
 
   describe('features registration', () => {
-    it('does not register Kibana reporting feature in traditional build flavour', async () => {
+    it('registers Kibana manage scheduled reporting feature in traditional build flavour', async () => {
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).not.toHaveBeenCalled();
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        id: 'manageReporting',
+        name: 'Manage Scheduled Reports',
+        description: 'View and manage scheduled reports for all users in this space.',
+        category: DEFAULT_APP_CATEGORIES.management,
+        scope: ['spaces', 'security'],
+        app: [],
+        privileges: {
+          all: { savedObject: { all: ['scheduled_report'], read: [] }, ui: ['show'] },
+          read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+        },
+      });
       expect(featuresSetup.enableReportingUiCapabilities).toHaveBeenCalledTimes(1);
     });
 
-    it('registers Kibana reporting feature in serverless build flavour', async () => {
+    it('registers additional Kibana reporting feature in serverless build flavour', async () => {
       const serverlessInitContext = coreMock.createPluginInitializerContext(configSchema);
       // Force type-cast to convert `ReadOnly<PackageInfo>` to mutable `PackageInfo`.
       (serverlessInitContext.env.packageInfo as PackageInfo).buildFlavor = 'serverless';
       plugin = new ReportingPlugin(serverlessInitContext);
 
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
-      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(2);
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenNthCalledWith(2, {
         id: 'reporting',
         name: 'Reporting',
         category: DEFAULT_APP_CATEGORIES.management,

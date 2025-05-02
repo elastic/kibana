@@ -21,7 +21,7 @@ import type {
   PngScreenshotOptions as BasePngScreenshotOptions,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -64,6 +64,7 @@ export interface ReportingStartDeps {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
+  security?: SecurityPluginStart;
   screenshotting?: ScreenshottingStart;
 }
 
