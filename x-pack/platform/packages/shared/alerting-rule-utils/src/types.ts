@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-export interface ActionDocument {
-  ruleId: string;
-  ruleName: string;
-  ruleParams: string;
-  spaceId: string;
-  tags: string;
-  alertId: string;
-  alertActionGroup: string;
-  grouping: string;
+export interface Group {
+  field: string;
+  value: string;
+}
+
+export interface FieldsObject {
+  [x: string]: any;
 }

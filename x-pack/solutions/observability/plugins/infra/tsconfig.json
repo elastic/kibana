@@ -121,7 +121,8 @@
     "@kbn/traced-es-client",
     "@kbn/fields-metadata-plugin",
     "@kbn/deeplinks-analytics",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/object-utils"
   ],
   "exclude": ["target/**/*"]
 }

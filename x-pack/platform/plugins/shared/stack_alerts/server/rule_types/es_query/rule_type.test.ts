@@ -88,6 +88,10 @@ describe('ruleType', () => {
             "name": "link",
             "usesPublicBaseUrl": true,
           },
+          Object {
+            "description": "The object containing groups that are reporting data",
+            "name": "grouping",
+          },
         ],
         "params": Array [
           Object {
