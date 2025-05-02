@@ -95,17 +95,17 @@ function formatPEMContent(pemContent: string): string {
   // Insert line breaks every 64 characters
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
   
-  // Assemble the final PEM with explicit line breaks
+  // Assemble the final PEM with strict formatting
   const lines = [
-    header + '\n',  // Ensure newline after header
+    header,  // No newline after header
     formattedContent,
-    '\n' + footer   // Ensure newline before footer
+    footer   // No newline before footer
   ];
   
-  // Join with newlines and ensure no extra spaces
-  return lines.join('')
-    .replace(/^-----BEGIN\s+(\w+)\s+-----(\s+)/, '-----BEGIN $1-----\n')  // Fix header format
-    .replace(/(\s+)-----END\s+(\w+)\s+-----$/, '\n-----END $2-----')  // Fix footer format
+  // Join with newlines and ensure strict PEM format
+  return lines.join('\n')
+    .replace(/^-----BEGIN\s+(\w+)\s+-----\s*/, '-----BEGIN $1-----\n')  // Fix header format
+    .replace(/\s*-----END\s+(\w+)\s+-----$/, '\n-----END $1-----')  // Fix footer format
     .replace(/\n+/g, '\n')  // Remove duplicate newlines
     .trim();  // Remove any leading/trailing whitespace
 }
