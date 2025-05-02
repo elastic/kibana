@@ -195,6 +195,7 @@ export function TableSortSelect({
     <EuiFilterButton
       iconType="arrowDown"
       iconSide="right"
+      isSelected={isPopoverOpen}
       onClick={togglePopOver}
       data-test-subj="tableSortSelectBtn"
       grow

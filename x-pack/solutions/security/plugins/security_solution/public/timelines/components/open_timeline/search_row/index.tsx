@@ -79,6 +79,8 @@ export const SearchRow = React.memo<Props>(
               <>
                 <EuiFilterButton
                   data-test-subj="only-favorites-toggle"
+                  isToggle
+                  isSelected={onlyFavorites}
                   hasActiveFilters={onlyFavorites}
                   onClick={onToggleOnlyFavorites}
                   numFilters={favoriteCount ?? undefined}

@@ -49,7 +49,7 @@ export function FieldTypeFilter({
       {...buttonProps}
       data-test-subj="toggleFieldFilterButton"
       iconType="arrowDown"
-      isSelected={fieldTypesValue.length > 0}
+      isSelected={isPopoverOpen}
       numFilters={0}
       hasActiveFilters={fieldTypesValue.length > 0}
       numActiveFilters={fieldTypesValue.length}
