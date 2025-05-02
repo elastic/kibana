@@ -82,6 +82,7 @@ export interface FleetConfigType {
         max?: string;
       };
       excludePackages: string[];
+      searchAiLakePackageAllowlistEnabled: boolean;
     };
   };
   createArtifactsBulkBatchSize?: number;

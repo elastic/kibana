@@ -261,6 +261,7 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.boolean({ defaultValue: false }),
           },
           {
             defaultValue: {
@@ -271,6 +272,7 @@ export const config: PluginConfigDescriptor = {
                 min: REGISTRY_SPEC_MIN_VERSION,
                 max: REGISTRY_SPEC_MAX_VERSION,
               },
+              searchAiLakePackageAllowlistEnabled: false,
             },
           }
         ),
