@@ -23,6 +23,7 @@ export const IntegrationsCardGridTabs: RenderChildrenType = ({
   const { isAgentRequired, activeIntegrations } = checkCompleteMetadata;
 
   const list = useIntegrationCardList({
+    activeIntegrations,
     integrationsList: allowedIntegrations,
     featuredCardIds: selectedTabResult.selectedTab?.featuredCardIds,
   });

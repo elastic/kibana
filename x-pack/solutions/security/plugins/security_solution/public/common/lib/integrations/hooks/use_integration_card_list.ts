@@ -7,6 +7,7 @@
 import { useMemo } from 'react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import { useNavigation } from '../../kibana';
 import { APP_INTEGRATIONS_PATH, ONBOARDING_PATH } from '../../../../../common/constants';
 
@@ -33,12 +34,14 @@ const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCard
 };
 
 const getFilteredCards = ({
+  activeIntegrations,
   featuredCardIds,
   getAppUrl,
   integrationsList,
   navigateTo,
   trackLinkClick,
 }: {
+  activeIntegrations: GetInstalledPackagesResponse['items'];
   featuredCardIds?: string[];
   getAppUrl: GetAppUrl;
   integrationsList: IntegrationCardItem[];
@@ -47,6 +50,7 @@ const getFilteredCards = ({
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
     addSecuritySpecificProps({
+      activeIntegrations,
       navigateTo,
       getAppUrl,
       card,
@@ -64,11 +68,13 @@ const getFilteredCards = ({
 };
 
 export const addSecuritySpecificProps = ({
+  activeIntegrations,
   navigateTo,
   getAppUrl,
   card,
   trackLinkClick,
 }: {
+  activeIntegrations: GetInstalledPackagesResponse['items'];
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
@@ -81,7 +87,7 @@ export const addSecuritySpecificProps = ({
     card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
       ? addPathParamToUrl(card.url, ONBOARDING_PATH)
       : card.url;
-
+  const isActive = activeIntegrations.some((integration) => integration.name === card.name);
   return {
     ...card,
     titleLineClamp: CARD_TITLE_LINE_CLAMP,
@@ -89,6 +95,7 @@ export const addSecuritySpecificProps = ({
     maxCardHeight: MAX_CARD_HEIGHT_IN_PX,
     showInstallationStatus: true,
     url,
+    hasDataStreams: isActive,
     onCardClick: () => {
       const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
       trackLinkClick?.(trackId);
@@ -109,9 +116,11 @@ export const addSecuritySpecificProps = ({
 
 export const useIntegrationCardList = ({
   integrationsList,
+  activeIntegrations,
   featuredCardIds,
 }: {
   integrationsList: IntegrationCardItem[];
+  activeIntegrations: GetInstalledPackagesResponse['items'];
   featuredCardIds?: string[] | undefined;
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
@@ -122,13 +131,14 @@ export const useIntegrationCardList = ({
   const { featuredCards, integrationCards } = useMemo(
     () =>
       getFilteredCards({
+        activeIntegrations,
         navigateTo,
         getAppUrl,
         integrationsList,
         featuredCardIds,
         trackLinkClick,
       }),
-    [navigateTo, getAppUrl, integrationsList, featuredCardIds, trackLinkClick]
+    [activeIntegrations, navigateTo, getAppUrl, integrationsList, featuredCardIds, trackLinkClick]
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {

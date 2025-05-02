@@ -30,12 +30,13 @@ const IntegrationsCardGridTabs: RenderChildrenType = ({
   checkCompleteMetadata = DEFAULT_CHECK_COMPLETE_METADATA,
   selectedTabResult,
 }) => {
-  const { available: list } = useEnhancedIntegrationCards(allowedIntegrations, {
+  const { activeIntegrations, isAgentRequired } = checkCompleteMetadata;
+
+  const { available: list } = useEnhancedIntegrationCards(allowedIntegrations, activeIntegrations, {
     showInstallationStatus: true,
     showCompressedInstallationStatus: true,
     returnPath: ONBOARDING_PATH,
   });
-  const { activeIntegrations, isAgentRequired } = checkCompleteMetadata;
   const installedIntegrationsCount = activeIntegrations?.length ?? 0;
   return (
     <IntegrationsCardGridTabsComponent

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+
+import { userEvent } from '@testing-library/user-event';
 
 import { installationStatuses } from '../../../../../../common/constants';
 
@@ -67,6 +69,16 @@ describe('shouldShowInstallationStatus', () => {
       })
     ).toEqual(true);
   });
+
+  it('returns true when showInstallationStatus is true and isActive is true', () => {
+    expect(
+      shouldShowInstallationStatus({
+        installStatus: installationStatuses.InstallFailed,
+        showInstallationStatus: true,
+        isActive: true,
+      })
+    ).toEqual(true);
+  });
 });
 
 describe('InstallationStatus', () => {
@@ -81,34 +93,34 @@ describe('InstallationStatus', () => {
   });
 
   it('renders the Installed status correctly', () => {
-    render(
+    const { getByText } = render(
       <InstallationStatus
         installStatus={installationStatuses.Installed}
         showInstallationStatus={true}
       />
     );
-    expect(screen.getByText('Installed')).toBeInTheDocument();
+    expect(getByText('Installed')).toBeInTheDocument();
   });
 
   it('renders the Active status correctly', () => {
-    render(
+    const { getByText } = render(
       <InstallationStatus
         installStatus={installationStatuses.Installed}
         showInstallationStatus={true}
         hasDataStreams={true}
       />
     );
-    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(getByText('Active')).toBeInTheDocument();
   });
 
   it('renders the Install Failed status correctly', () => {
-    render(
+    const { getByText } = render(
       <InstallationStatus
         installStatus={installationStatuses.InstallFailed}
         showInstallationStatus={true}
       />
     );
-    expect(screen.getByText('Installed')).toBeInTheDocument();
+    expect(getByText('Installed')).toBeInTheDocument();
   });
 
   it('renders null when installStatus is null or undefined', () => {
@@ -123,8 +135,8 @@ describe('InstallationStatus', () => {
     expect(undefinedContainer.firstChild).toBeNull();
   });
 
-  it('applies the correct styles for the component', () => {
-    const { getByTestId } = render(
+  it('applies the correct installed styles for the component', async () => {
+    const { getByTestId, getByText } = render(
       <InstallationStatus
         installStatus={installationStatuses.Installed}
         showInstallationStatus={true}
@@ -133,8 +145,70 @@ describe('InstallationStatus', () => {
 
     const spacer = getByTestId('installation-status-spacer');
     const callout = getByTestId('installation-status-callout');
+    const calloutText = getByText('Installed');
 
     expect(spacer).toHaveStyle('background: #FFFFFF');
     expect(callout).toHaveTextContent('Installed');
+
+    userEvent.hover(calloutText);
+
+    await waitFor(() => {
+      const tooltip = getByTestId('installed-tooltip');
+      expect(tooltip).toBeInTheDocument();
+    });
+  });
+
+  it('applies the correct active styles for the component', async () => {
+    const { getByTestId } = render(
+      <InstallationStatus
+        installStatus={installationStatuses.Installed}
+        showInstallationStatus={true}
+        hasDataStreams={true}
+      />
+    );
+
+    const spacer = getByTestId('installation-status-spacer');
+    const callout = getByTestId('installation-status-callout');
+
+    expect(spacer).toHaveStyle('background: #FFFFFF');
+    expect(callout).toHaveTextContent('Active');
+  });
+
+  it('applies the compressed installed styles for the component', async () => {
+    const { getByTestId } = render(
+      <InstallationStatus
+        installStatus={installationStatuses.Installed}
+        showInstallationStatus={true}
+        compressed={true}
+      />
+    );
+
+    const icon = getByTestId('compressed-installed-icon');
+
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveAttribute('data-euiicon-type', 'warningFilled');
+
+    userEvent.hover(icon);
+
+    await waitFor(() => {
+      const tooltip = getByTestId('compressed-installed-tooltip');
+      expect(tooltip).toBeInTheDocument();
+    });
+  });
+
+  it('applies the compressed active styles for the component', async () => {
+    const { getByTestId } = render(
+      <InstallationStatus
+        installStatus={installationStatuses.Installed}
+        showInstallationStatus={true}
+        compressed={true}
+        hasDataStreams={true}
+      />
+    );
+
+    const icon = getByTestId('compressed-active-icon');
+
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveAttribute('data-euiicon-type', 'checkInCircleFilled');
   });
 });

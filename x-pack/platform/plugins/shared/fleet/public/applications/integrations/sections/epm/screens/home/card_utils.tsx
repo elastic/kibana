@@ -146,10 +146,6 @@ export const mapToCard = ({
     cardResult.installStatus = item.installationInfo?.install_status;
   }
 
-  if (item.data_streams?.length > 0) {
-    cardResult.hasDataStreams = true;
-  }
-
   return cardResult;
 };
 

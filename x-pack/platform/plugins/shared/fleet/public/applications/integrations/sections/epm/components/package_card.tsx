@@ -74,7 +74,6 @@ export function PackageCard({
   hasDataStreams,
 }: PackageCardProps) {
   const theme = useEuiTheme();
-
   let releaseBadge: React.ReactNode | null = null;
   if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
@@ -217,7 +216,7 @@ export function PackageCard({
                 ? shouldShowInstallationStatus({
                     installStatus,
                     showInstallationStatus,
-                    hasDataStreams,
+                    isActive: hasDataStreams,
                   })
                   ? getLineClampStyles(1) // Show only one line of description if installation status is shown
                   : getLineClampStyles(descriptionLineClamp)
@@ -263,6 +262,7 @@ export function PackageCard({
               installStatus={installStatus}
               showInstallationStatus={showInstallationStatus}
               compressed={showCompressedInstallationStatus}
+              hasDataStreams={hasDataStreams}
             />
           </EuiFlexGroup>
         </EuiCard>

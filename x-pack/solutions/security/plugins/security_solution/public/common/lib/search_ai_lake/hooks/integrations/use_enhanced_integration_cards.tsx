@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, EuiBadge } from '@elastic/eui';
 import { installationStatuses, type IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import { CONFIGURATIONS_PATH } from '../../../../../../common/constants';
 import { IntegrationsFacets } from '../../../../../configurations/constants';
 import { RETURN_APP_ID, RETURN_PATH } from './constants';
@@ -17,6 +18,7 @@ export interface EnhancedCardOptions {
   showInstallationStatus?: boolean;
   showCompressedInstallationStatus?: boolean;
   returnPath?: string;
+  hasDataStreams?: boolean;
 }
 
 export const FEATURED_INTEGRATION_SORT_ORDER = [
@@ -68,6 +70,7 @@ export const applyCategoryBadgeAndStyling = (
         ] as React.ReactNode[])
       : [],
     maxCardHeight: INTEGRATION_CARD_MAX_HEIGHT_PX,
+    hasDataStreams: options?.hasDataStreams,
   };
 };
 
@@ -82,6 +85,7 @@ const applyCustomDisplayOrder = (
 
 export const useEnhancedIntegrationCards = (
   integrationsList: IntegrationCardItem[],
+  activeIntegrations: GetInstalledPackagesResponse['items'],
   options?: EnhancedCardOptions
 ): { available: IntegrationCardItem[]; installed: IntegrationCardItem[] } => {
   const sorted = applyCustomDisplayOrder(integrationsList);
@@ -89,9 +93,16 @@ export const useEnhancedIntegrationCards = (
   const available = useMemo(
     () =>
       sorted.map((card) =>
-        applyCategoryBadgeAndStyling(card, IntegrationsFacets.available, options)
+        applyCategoryBadgeAndStyling(card, IntegrationsFacets.available, {
+          ...options,
+          hasDataStreams: activeIntegrations.find(
+            (activeIntegration) => activeIntegration.name === card.name
+          )
+            ? true
+            : false,
+        })
       ),
-    [sorted, options]
+    [sorted, options, activeIntegrations]
   );
 
   const installed = useMemo(
