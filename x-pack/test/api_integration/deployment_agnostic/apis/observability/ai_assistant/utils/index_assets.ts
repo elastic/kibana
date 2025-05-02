@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
-import { getResourceName } from '@kbn/observability-ai-assistant-plugin/server/service';
+import {
+  getResourceName,
+  resourceNames,
+} from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 
@@ -52,4 +55,12 @@ export async function restoreIndexAssets(
 ) {
   await deleteIndexAssets(es);
   await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+}
+
+export async function getComponentTemplate(es: Client) {
+  const res = await es.cluster.getComponentTemplate({
+    name: resourceNames.componentTemplate.kb,
+  });
+
+  return res.component_templates[0];
 }

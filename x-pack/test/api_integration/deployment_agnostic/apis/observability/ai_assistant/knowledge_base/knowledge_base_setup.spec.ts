@@ -9,19 +9,27 @@ import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server/service/knowledge_base_service/get_inference_id_from_write_index';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { restoreIndexAssets } from '../utils/index_assets';
+import { getComponentTemplate, restoreIndexAssets } from '../utils/index_assets';
 import {
   TINY_ELSER_INFERENCE_ID,
+  TINY_ELSER_MODEL_ID,
   createTinyElserInferenceEndpoint,
   deleteInferenceEndpoint,
   deployTinyElserAndSetupKb,
+  importModel,
+  deleteModel,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../utils/model_and_inference';
-import { getConcreteWriteIndexFromAlias, waitForKnowledgeBaseReady } from '../utils/knowledge_base';
+import {
+  getConcreteWriteIndexFromAlias,
+  waitForKnowledgeBaseReady,
+  setupKnowledgeBase,
+} from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
+  const ml = getService('ml');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
@@ -98,6 +106,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(body.nextInferenceId).to.be(TINY_ELSER_INFERENCE_ID);
           await expectWriteIndexName(`${resourceNames.writeIndexAlias.kb}-000001`);
         });
+      });
+    });
+
+    describe('when installing a custom inference endpoint', function () {
+      const customInferenceId = 'my_custom_inference_id';
+
+      before(async () => {
+        await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+        await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
+        await createTinyElserInferenceEndpoint(getService, {
+          inferenceId: customInferenceId,
+        });
+        await setupKnowledgeBase(observabilityAIAssistantAPIClient, customInferenceId);
+        await waitForKnowledgeBaseReady(getService);
+      });
+
+      after(async () => {
+        await deleteModel(getService, { modelId: TINY_ELSER_MODEL_ID });
+        await deleteInferenceEndpoint(getService, { inferenceId: customInferenceId });
+      });
+
+      it('has correct semantic_text mapping in component template', async () => {
+        const res = await getComponentTemplate(es);
+        const semanticTextMapping = res.component_template.template.mappings?.properties
+          ?.semantic_text as { inference_id: string };
+
+        expect(semanticTextMapping.inference_id).to.be(customInferenceId);
       });
     });
 
