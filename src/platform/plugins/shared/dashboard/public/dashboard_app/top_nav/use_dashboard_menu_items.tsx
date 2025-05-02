@@ -268,11 +268,11 @@ export const useDashboardMenuItems = ({
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
-      ? [
+      ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
           hasExportIntegration ? menuItems.export : null,
           menuItems.share,
-        ].filter(Boolean)
+        ].filter(Boolean) as TopNavMenuData[])
       : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
@@ -303,12 +303,13 @@ export const useDashboardMenuItems = ({
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = shareService
-      ? [
+      ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
           hasExportIntegration ? menuItems.export : null,
           menuItems.share,
-        ].filter(Boolean)
+        ].filter(Boolean) as TopNavMenuData[])
       : [];
+
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {

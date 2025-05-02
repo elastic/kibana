@@ -41,7 +41,6 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
 
 export const reportingPDFExportProvider = ({
   apiClient,
-  license,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
@@ -144,7 +143,11 @@ export const reportingPDFExportProvider = ({
     shareType: 'integration',
     groupId: 'export',
     config: getShareMenuItems,
-    prerequisiteCheck({ capabilities, objectType }) {
+    prerequisiteCheck({ license, capabilities, objectType }) {
+      if (!license) {
+        return false;
+      }
+
       let isSupportedType: boolean;
 
       if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {
@@ -183,7 +186,6 @@ export const reportingPDFExportProvider = ({
 
 export const reportingPNGExportProvider = ({
   apiClient,
-  license,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
@@ -284,7 +286,11 @@ export const reportingPNGExportProvider = ({
     groupId: 'export',
     id: 'imageReports',
     config: getShareMenuItems,
-    prerequisiteCheck({ capabilities, objectType }) {
+    prerequisiteCheck({ license, capabilities, objectType }) {
+      if (!license) {
+        return false;
+      }
+
       let isSupportedType: boolean;
 
       if (!(isSupportedType = supportedObjectTypes.includes(objectType))) {

@@ -10,6 +10,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { Capabilities, ToastsSetup } from '@kbn/core/public';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { EuiIconProps } from '@elastic/eui';
@@ -22,6 +23,7 @@ export interface ShareRegistryApiStart {
   capabilities: Capabilities;
   urlService: BrowserUrlService;
   anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+  getLicense: () => ILicense | undefined;
 }
 
 type ShareActionConfigArgs = ShareContext &
@@ -66,6 +68,7 @@ type ShareImplementationFactory<
       prerequisiteCheck?: (args: {
         capabilities: Capabilities;
         objectType: ShareContext['objectType'];
+        license?: ILicense;
       }) => boolean;
     }
   : {

@@ -19,6 +19,7 @@ describe('ShareActionsRegistry', () => {
       getState: jest.fn(),
     }),
     capabilities: { navLinks: {}, management: {}, catalogue: {} },
+    getLicense: jest.fn(),
   };
 
   describe('registerShareIntegration', () => {

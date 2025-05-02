@@ -8,6 +8,7 @@
  */
 
 import { ApplicationStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import type {
   BrowserUrlService,
   ShareContext,
@@ -25,6 +26,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
   private urlService?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
   private capabilities?: ApplicationStart['capabilities'];
+  private getLicense?: () => ILicense | undefined;
 
   private readonly globalMarker: string = '*';
 
@@ -51,10 +53,16 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     };
   }
 
-  start({ urlService, anonymousAccessServiceProvider, capabilities }: ShareRegistryApiStart) {
+  start({
+    urlService,
+    anonymousAccessServiceProvider,
+    capabilities,
+    getLicense,
+  }: ShareRegistryApiStart) {
     this.urlService = urlService;
     this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
     this.capabilities = capabilities;
+    this.getLicense = getLicense;
 
     return {
       availableIntegrations: this.availableIntegrations.bind(this),
@@ -145,7 +153,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
    * Returns all share actions that are available for the given object type.
    */
   private availableIntegrations(objectType: string, groupId?: string): ShareActionIntents[] {
-    if (!this.capabilities) {
+    if (!this.capabilities || !this.getLicense) {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
 
@@ -161,6 +169,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
       if (share.shareType === 'integration' && share.prerequisiteCheck) {
         return share.prerequisiteCheck({
           capabilities: this.capabilities!,
+          license: this.getLicense!(),
           objectType,
         });
       }

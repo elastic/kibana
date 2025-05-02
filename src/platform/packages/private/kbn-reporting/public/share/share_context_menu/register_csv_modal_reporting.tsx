@@ -21,7 +21,6 @@ import { checkLicense } from '../..';
 
 export const reportingCsvExportProvider = ({
   apiClient,
-  license,
   startServices$,
 }: ExportModalShareOpts): ExportShare => {
   const getShareMenuItems = ({
@@ -153,7 +152,11 @@ export const reportingCsvExportProvider = ({
     id: 'csvReportsModal',
     groupId: 'export',
     config: getShareMenuItems,
-    prerequisiteCheck: ({ capabilities }) => {
+    prerequisiteCheck: ({ license, capabilities }) => {
+      if (!license) {
+        return false;
+      }
+
       const licenseCheck = checkLicense(license.check('reporting', 'basic'));
 
       const licenseHasCsvReporting = licenseCheck.showLinks;
