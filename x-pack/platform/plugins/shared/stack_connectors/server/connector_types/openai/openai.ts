@@ -95,7 +95,8 @@ function formatPEMContent(pemContent: string): string {
   // Insert line breaks every 64 characters
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
   
-  return `${header}\n${formattedContent}\n${footer}`;
+  // Ensure no spaces after header or before footer
+  return `${header}\n${formattedContent}\n${footer}`.replace(/\s+\n/g, '\n').replace(/\n\s+/g, '\n');
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
