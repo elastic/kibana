@@ -40,7 +40,6 @@
     "@kbn/palettes",
     "@kbn/alerts-ui-shared",
     "@kbn/ui-actions-browser",
-    "@kbn/visualization-utils",
   ],
   "exclude": [
     "target/**/*",

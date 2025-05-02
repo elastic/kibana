@@ -76,7 +76,6 @@
     "@kbn/react-hooks",
     "@kbn/presentation-panel-plugin",
     "@kbn/ui-actions-browser",
-    "@kbn/visualization-utils"
   ],
   "exclude": ["target/**/*"]
 }
