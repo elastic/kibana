@@ -88,7 +88,7 @@ export function injectReferencesIntoArtifacts(
   if (!artifacts) {
     return { dashboards: [], investigation_guide: { blob: '' } };
   }
-  console.log('after initial block')
+  console.log('after initial block');
   return {
     ...artifacts,
     investigation_guide: {
