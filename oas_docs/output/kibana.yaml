@@ -45471,16 +45471,16 @@ paths:
                   field: field2
               delete:
                 ids:
-                  - field1
-                  - field2
+                  - field5
+                  - field6
                 query: 'field: field1'
               update:
                 - allowed: true
                   anonymized: false
-                  id: field1
+                  id: field8
                 - allowed: false
                   anonymized: true
-                  id: field2
+                  id: field9
             schema:
               type: object
               properties:
@@ -45535,8 +45535,8 @@ paths:
                         anonymized: false
                         createdAt: '2023-10-31T12:00:00Z'
                         createdBy: user1
-                        field: field1
-                        id: field1
+                        field: field8
+                        id: field8
                         namespace: default
                         timestamp: '2023-10-31T12:00:00Z'
                         updatedAt: '2023-10-31T12:00:00Z'
@@ -46118,6 +46118,7 @@ paths:
       operationId: ReadKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
+          example: kb12345
           in: path
           name: resource
           schema:
@@ -46130,16 +46131,28 @@ paths:
                 type: object
                 properties:
                   elser_exists:
+                    description: Indicates if the ELSER model exists for the KnowledgeBase.
+                    example: true
                     type: boolean
                   is_setup_available:
+                    description: Indicates if the setup process is available for the KnowledgeBase.
+                    example: true
                     type: boolean
                   is_setup_in_progress:
+                    description: Indicates if the setup process is currently in progress.
+                    example: false
                     type: boolean
                   product_documentation_status:
+                    description: The status of the product documentation in the KnowledgeBase.
+                    example: complete
                     type: string
                   security_labs_exists:
+                    description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+                    example: true
                     type: boolean
                   user_data_exists:
+                    description: Indicates if user data exists in the KnowledgeBase.
+                    example: false
                     type: boolean
           description: Indicates a successful call.
         '400':
@@ -46149,10 +46162,16 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short description of the error.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed error message.
+                    example: Invalid resource ID provided.
                     type: string
                   statusCode:
+                    description: The HTTP status code of the error.
+                    example: 400
                     type: number
           description: Generic Error
       summary: Read a KnowledgeBase
@@ -46163,17 +46182,20 @@ paths:
       operationId: CreateKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
+          example: kb12345
           in: path
           name: resource
           schema:
             type: string
-        - description: Optional ELSER modelId to use when setting up the Knowledge Base
+        - description: Optional ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+          example: elser-model-001
           in: query
           name: modelId
           required: false
           schema:
             type: string
-        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+          example: true
           in: query
           name: ignoreSecurityLabs
           required: false
@@ -46194,10 +46216,16 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short description of the error.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed error message.
+                    example: Invalid resource ID provided.
                     type: string
                   statusCode:
+                    description: The HTTP status code of the error.
+                    example: 400
                     type: number
           description: Generic Error
       summary: Create a KnowledgeBase
@@ -46210,6 +46238,13 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              content: To reset your password, go to the settings page and click 'Reset Password'.
+              tags:
+                - password
+                - reset
+                - help
+              title: How to reset a password
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps'
         required: true
@@ -46217,21 +46252,32 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                content: To reset your password, go to the settings page and click 'Reset Password'.
+                id: '12345'
+                tags:
+                  - password
+                  - reset
+                  - help
+                title: How to reset a password
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           description: Successful request returning Knowledge Base Entries
         '400':
           content:
             application/json:
+              example:
+                error: Invalid input
+                message: The 'title' field is required.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as invalid input or missing required fields.
       summary: Create a Knowledge Base Entry
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
-      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs
+      description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs.
       operationId: PerformKnowledgeBaseEntryBulkAction
       requestBody:
         content:
@@ -46240,6 +46286,10 @@ paths:
               type: object
               properties:
                 create:
+                  description: List of Knowledge Base Entries to create.
+                  example:
+                    - content: This is the content of the new entry.
+                      title: New Entry
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps'
                   type: array
@@ -46247,15 +46297,25 @@ paths:
                   type: object
                   properties:
                     ids:
-                      description: Array of Knowledge base Entry IDs
+                      description: Array of Knowledge Base Entry IDs.
+                      example:
+                        - '123'
+                        - '456'
+                        - '789'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: Query to filter Knowledge Base Entries
+                      description: Query to filter Knowledge Base Entries.
+                      example: status:active AND category:technology
                       type: string
                 update:
+                  description: List of Knowledge Base Entries to update.
+                  example:
+                    - content: Updated content.
+                      id: '123'
+                      title: Updated Entry
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
                   type: array
@@ -46280,45 +46340,54 @@ paths:
       description: Finds Knowledge Base Entries that match the given query.
       operationId: FindKnowledgeBaseEntries
       parameters:
-        - in: query
+        - description: A list of fields to include in the response. If not provided, all fields will be included.
+          in: query
           name: fields
           required: false
           schema:
+            example:
+              - title
+              - created_at
             items:
               type: string
             type: array
-        - description: Search query
+        - description: Search query to filter Knowledge Base Entries by specific criteria.
           in: query
           name: filter
           required: false
           schema:
+            example: error handling
             type: string
-        - description: Field to sort by
+        - description: Field to sort the Knowledge Base Entries by.
           in: query
           name: sort_field
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField'
-        - description: Sort order
+            example: created_at
+        - description: Sort order for the results, either ascending or descending.
           in: query
           name: sort_order
           required: false
           schema:
             $ref: '#/components/schemas/Security_AI_Assistant_API_SortOrder'
-        - description: Page number
+            example: asc
+        - description: Page number for paginated results. Defaults to 1.
           in: query
           name: page
           required: false
           schema:
             default: 1
+            example: 2
             minimum: 1
             type: integer
-        - description: Knowledge Base Entries per page
+        - description: Number of Knowledge Base Entries to return per page. Defaults to 20.
           in: query
           name: per_page
           required: false
           schema:
             default: 20
+            example: 10
             minimum: 0
             type: integer
       responses:
@@ -46329,21 +46398,28 @@ paths:
                 type: object
                 properties:
                   data:
+                    description: The list of Knowledge Base Entries for the current page.
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
                     type: array
                   page:
+                    description: The current page number.
+                    example: 1
                     type: integer
                   perPage:
+                    description: The number of Knowledge Base Entries returned per page.
+                    example: 20
                     type: integer
                   total:
+                    description: The total number of Knowledge Base Entries available.
+                    example: 100
                     type: integer
                 required:
                   - page
                   - perPage
                   - total
                   - data
-          description: Successful response
+          description: Successful response containing the paginated Knowledge Base Entries.
         '400':
           content:
             application/json:
@@ -46351,21 +46427,28 @@ paths:
                 type: object
                 properties:
                   error:
+                    description: A short description of the error.
+                    example: Bad Request
                     type: string
                   message:
+                    description: A detailed message explaining the error.
+                    example: 'Invalid query parameter: sort_order'
                     type: string
                   statusCode:
+                    description: The HTTP status code of the error.
+                    example: 400
                     type: number
-          description: Generic Error
+          description: Generic Error indicating an issue with the request.
       summary: Finds Knowledge Base Entries that match the given query.
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/knowledge_base/entries/{id}:
     delete:
-      description: Deletes a single Knowledge Base Entry using the `id` field
+      description: Delete a Knowledge Base Entry by its unique `id`.
       operationId: DeleteKnowledgeBaseEntry
       parameters:
-        - description: The Knowledge Base Entry's `id` value
+        - description: The unique identifier (`id`) of the Knowledge Base Entry to delete.
+          example: '12345'
           in: path
           name: id
           required: true
@@ -46375,23 +46458,30 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                id: '12345'
+                message: Knowledge Base Entry successfully deleted.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_DeleteResponseFields'
-          description: Successful request returning the deleted Knowledge Base Entry's ID
+          description: Successful request returning the `id` of the deleted Knowledge Base Entry.
         '400':
           content:
             application/json:
+              example:
+                error: Not Found
+                message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as an invalid `id` or the entry not being found.
       summary: Deletes a single Knowledge Base Entry using the `id` field
       tags:
         - Security AI Assistant API
     get:
-      description: Read a Knowledge Base Entry
+      description: Retrieve a Knowledge Base Entry by its unique `id`.
       operationId: ReadKnowledgeBaseEntry
       parameters:
-        - description: The Knowledge Base Entry's `id` value.
+        - description: The unique identifier (`id`) of the Knowledge Base Entry to retrieve.
+          example: '12345'
           in: path
           name: id
           required: true
@@ -46401,23 +46491,35 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                content: To reset your password, go to the settings page and click 'Reset Password'.
+                id: '12345'
+                tags:
+                  - password
+                  - reset
+                  - help
+                title: How to reset a password
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
-          description: Successful request returning a Knowledge Base Entry
+          description: Successful request returning the requested Knowledge Base Entry.
         '400':
           content:
             application/json:
+              example:
+                error: Not Found
+                message: No Knowledge Base Entry found with the provided `id`.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as an invalid `id` or the entry not being found.
       summary: Read a Knowledge Base Entry
       tags:
         - Security AI Assistant API
     put:
-      description: Update a Knowledge Base Entry
+      description: Update an existing Knowledge Base Entry by its unique `id`.
       operationId: UpdateKnowledgeBaseEntry
       parameters:
-        - description: The Knowledge Base Entry's `id` value
+        - description: The unique identifier (`id`) of the Knowledge Base Entry to update.
+          example: '12345'
           in: path
           name: id
           required: true
@@ -46426,6 +46528,14 @@ paths:
       requestBody:
         content:
           application/json:
+            example:
+              content: To reset your password, go to the settings page, click 'Reset Password', and follow the instructions.
+              tags:
+                - password
+                - reset
+                - help
+                - update
+              title: How to reset a password (updated)
             schema:
               $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps'
         required: true
@@ -46433,15 +46543,27 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                content: To reset your password, go to the settings page, click 'Reset Password', and follow the instructions.
+                id: '12345'
+                tags:
+                  - password
+                  - reset
+                  - help
+                  - update
+                title: How to reset a password (updated)
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
-          description: Successful request returning the updated Knowledge Base Entry
+          description: Successful request returning the updated Knowledge Base Entry.
         '400':
           content:
             application/json:
+              example:
+                error: Invalid input
+                message: The 'content' field cannot be empty.
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryErrorSchema'
-          description: Generic Error
+          description: A generic error occurred, such as invalid input or the entry not being found.
       summary: Update a Knowledge Base Entry
       tags:
         - Security AI Assistant API
@@ -66228,13 +66350,16 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -66253,13 +66378,16 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -66274,7 +66402,8 @@ components:
       type: object
       properties:
         required:
-          description: Whether this resource should always be included, defaults to false
+          description: Whether this resource should always be included, defaults to false.
+          example: false
           type: boolean
         vector:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Vector'
@@ -66284,15 +66413,18 @@ components:
         kbResource:
           $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResource'
         source:
-          description: Source document name or filepath
+          description: Source document name or filepath.
+          example: /documents/example.txt
           type: string
         text:
-          description: Knowledge Base Entry content
+          description: Knowledge Base Entry content.
+          example: This is the content of the document.
           type: string
         type:
-          description: Entry type
+          description: Entry type.
           enum:
             - document
+          example: document
           type: string
       required:
         - type
@@ -66308,15 +66440,18 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -66379,11 +66514,13 @@ components:
       example: created_at
       type: string
     Security_AI_Assistant_API_FindKnowledgeBaseEntriesSortField:
+      description: Fields available for sorting Knowledge Base Entries.
       enum:
         - created_at
         - is_default
         - title
         - updated_at
+      example: title
       type: string
     Security_AI_Assistant_API_FindPromptsSortField:
       description: Field by which to sort the prompts.
@@ -66399,13 +66536,16 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -66424,13 +66564,16 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -66447,7 +66590,10 @@ components:
         inputSchema:
           $ref: '#/components/schemas/Security_AI_Assistant_API_InputSchema'
         outputFields:
-          description: Fields to extract from the query result, defaults to all fields if not provided or empty
+          description: Fields to extract from the query result, defaults to all fields if not provided or empty.
+          example:
+            - title
+            - author
           items:
             type: string
           type: array
@@ -66455,21 +66601,26 @@ components:
       type: object
       properties:
         description:
-          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description
+          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.
+          example: Query this index for general knowledge base content.
           type: string
         field:
-          description: Field to query for Knowledge Base content
+          description: Field to query for Knowledge Base content.
+          example: content
           type: string
         index:
-          description: Index or Data Stream to query for Knowledge Base content
+          description: Index or Data Stream to query for Knowledge Base content.
+          example: knowledge_base_index
           type: string
         queryDescription:
-          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema
+          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.
+          example: Search for documents containing the specified keywords.
           type: string
         type:
-          description: Entry type
+          description: Entry type.
           enum:
             - index
+          example: index
           type: string
       required:
         - type
@@ -66486,15 +66637,18 @@ components:
         - type: object
           properties:
             global:
-              description: Whether this Knowledge Base Entry is global, defaults to false
+              description: Whether this Knowledge Base Entry is global, defaults to false.
+              example: false
               type: boolean
             id:
               $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
             name:
-              description: Name of the Knowledge Base Entry
+              description: Name of the Knowledge Base Entry.
+              example: Example Entry
               type: string
             namespace:
-              description: Kibana Space, defaults to 'default' space
+              description: Kibana Space, defaults to 'default' space.
+              example: default
               type: string
             users:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -66505,18 +66659,21 @@ components:
             - id
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
     Security_AI_Assistant_API_InputSchema:
-      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
+      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval.
       items:
         type: object
         properties:
           description:
-            description: Description of the field
+            description: Description of the field.
+            example: The title of the document.
             type: string
           fieldName:
-            description: Name of the field
+            description: Name of the field.
+            example: title
             type: string
           fieldType:
-            description: Type of the field
+            description: Type of the field.
+            example: string
             type: string
         required:
           - fieldName
@@ -66524,6 +66681,7 @@ components:
           - description
       type: array
     Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason:
+      description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
         - KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
       type: string
@@ -66531,8 +66689,12 @@ components:
       type: object
       properties:
         id:
+          description: ID of the skipped Knowledge Base Entry.
+          example: '123'
           type: string
         name:
+          description: Name of the skipped Knowledge Base Entry.
+          example: Skipped Entry
           type: string
         skip_reason:
           $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipReason'
@@ -66546,6 +66708,14 @@ components:
           type: object
           properties:
             errors:
+              description: List of errors encountered during the bulk action.
+              example:
+                - err_code: UPDATE_FAILED
+                  knowledgeBaseEntries:
+                    - id: '456'
+                      name: Error Entry
+                  message: Failed to update entry.
+                  statusCode: 400
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_NormalizedKnowledgeBaseEntryError'
               type: array
@@ -66557,12 +66727,20 @@ components:
             - results
             - summary
         knowledgeBaseEntriesCount:
+          description: Total number of Knowledge Base Entries processed.
+          example: 8
           type: integer
         message:
+          description: Message describing the result of the bulk action.
+          example: Bulk action completed successfully.
           type: string
         statusCode:
+          description: HTTP status code of the response.
+          example: 200
           type: integer
         success:
+          description: Indicates whether the bulk action was successful.
+          example: true
           type: boolean
       required:
         - attributes
@@ -66570,18 +66748,36 @@ components:
       type: object
       properties:
         created:
+          description: List of Knowledge Base Entries that were successfully created.
+          example:
+            - content: This is the content of the new entry.
+              id: '456'
+              title: New Entry
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           type: array
         deleted:
+          description: List of IDs of Knowledge Base Entries that were successfully deleted.
+          example:
+            - '789'
           items:
             type: string
           type: array
         skipped:
+          description: List of Knowledge Base Entries that were skipped during the bulk action.
+          example:
+            - id: '123'
+              name: Skipped Entry
+              skip_reason: KNOWLEDGE_BASE_ENTRY_NOT_MODIFIED
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryBulkActionSkipResult'
           type: array
         updated:
+          description: List of Knowledge Base Entries that were successfully updated.
+          example:
+            - content: Updated content.
+              id: '123'
+              title: Updated Entry
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
           type: array
@@ -66594,12 +66790,20 @@ components:
       type: object
       properties:
         failed:
+          description: Number of Knowledge Base Entries that failed during the bulk action.
+          example: 2
           type: integer
         skipped:
+          description: Number of Knowledge Base Entries that were skipped during the bulk action.
+          example: 1
           type: integer
         succeeded:
+          description: Number of Knowledge Base Entries that were successfully processed during the bulk action.
+          example: 5
           type: integer
         total:
+          description: Total number of Knowledge Base Entries involved in the bulk action.
+          example: 8
           type: integer
       required:
         - failed
@@ -66639,8 +66843,12 @@ components:
       type: object
       properties:
         id:
+          description: ID of the Knowledge Base Entry that encountered an error.
+          example: '456'
           type: string
         name:
+          description: Name of the Knowledge Base Entry that encountered an error.
+          example: Error Entry
           type: string
       required:
         - id
@@ -66649,10 +66857,16 @@ components:
       type: object
       properties:
         error:
+          description: Error type or category.
+          example: Not Found
           type: string
         message:
+          description: Detailed error message.
+          example: The requested Knowledge Base Entry was not found.
           type: string
         statusCode:
+          description: HTTP status code of the error.
+          example: 404
           type: number
       required:
         - statusCode
@@ -66677,10 +66891,11 @@ components:
       discriminator:
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseResource:
-      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
         - security_labs
         - user
+      example: security_labs
       type: string
     Security_AI_Assistant_API_KnowledgeBaseResponse:
       description: AI assistant KnowledgeBase.
@@ -66688,6 +66903,7 @@ components:
       properties:
         success:
           description: Identify the success of the method execution.
+          example: true
           type: boolean
     Security_AI_Assistant_API_Message:
       description: AI assistant conversation message.
@@ -66774,14 +66990,21 @@ components:
       type: object
       properties:
         err_code:
+          description: Specific error code for the issue.
+          example: UPDATE_FAILED
           type: string
         knowledgeBaseEntries:
+          description: List of Knowledge Base Entries that encountered the error.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryDetailsInError'
           type: array
         message:
+          description: Error message describing the issue.
+          example: Failed to update entry.
           type: string
         statusCode:
+          description: HTTP status code associated with the error.
+          example: 400
           type: integer
       required:
         - message
@@ -67089,18 +67312,22 @@ components:
       type: object
       properties:
         createdAt:
-          description: Time the Knowledge Base Entry was created
+          description: Time the Knowledge Base Entry was created.
+          example: '2023-01-01T12:00:00Z'
           type: string
         createdBy:
-          description: User who created the Knowledge Base Entry
+          description: User who created the Knowledge Base Entry.
+          example: admin
           type: string
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
         updatedAt:
-          description: Time the Knowledge Base Entry was last updated
+          description: Time the Knowledge Base Entry was last updated.
+          example: '2023-01-02T12:00:00Z'
           type: string
         updatedBy:
-          description: User who last updated the Knowledge Base Entry
+          description: User who last updated the Knowledge Base Entry.
+          example: editor
           type: string
       required:
         - id
@@ -67167,16 +67394,20 @@ components:
           description: User name
           type: string
     Security_AI_Assistant_API_Vector:
-      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
+      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings.
       type: object
       properties:
         modelId:
-          description: ID of the model used to create the embeddings
+          description: ID of the model used to create the embeddings.
+          example: bert-base-uncased
           type: string
         tokens:
           additionalProperties:
             type: number
-          description: Tokens with their corresponding values
+          description: Tokens with their corresponding values.
+          example:
+            token1: 0.123
+            token2: 0.456
           type: object
       required:
         - modelId
