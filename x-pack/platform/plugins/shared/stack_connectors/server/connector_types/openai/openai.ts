@@ -78,7 +78,15 @@ function formatPEMContent(pemContent: string): string {
   const formattedContent = base64Content.replace(/(.{64})/g, '$1\n').trim();
 
   // Build the final PEM with proper headers and newlines
-  return `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----`;
+  const result = `-----BEGIN ${type}-----\n${formattedContent}\n-----END ${type}-----`;
+
+  // Debug log the exact content
+  console.log('Formatted PEM content:');
+  console.log(result);
+  console.log('Newlines in content:', result.includes('\n'));
+  console.log('Spaces in content:', result.includes(' '));
+
+  return result;
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
@@ -178,8 +186,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(keyPEM);
 
         const httpsAgent = new https.Agent({
-          cert: certPEM,
-          key: keyPEM,
+          cert: Buffer.from(certPEM),
+          key: Buffer.from(keyPEM),
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
             this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
