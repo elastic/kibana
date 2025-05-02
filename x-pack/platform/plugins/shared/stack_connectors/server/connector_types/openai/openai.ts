@@ -95,8 +95,15 @@ function formatPEMContent(pemContent: string): string {
   // Insert line breaks every 64 characters
   const formattedContent = content.replace(/(.{64})/g, '$1\n').trim();
   
-  // Return the formatted PEM with proper line breaks
-  return `${header}\n${formattedContent}\n${footer}`;
+  // Assemble the final PEM with explicit line breaks
+  const lines = [
+    header,
+    formattedContent,
+    footer
+  ];
+  
+  // Join with newlines and ensure no extra spaces
+  return lines.join('\n');
 }
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
