@@ -26,7 +26,7 @@ export const generateCustomLogsYml = ({
   esHost: string[];
   logfileId: string;
 }) => {
-  const customConfigYaml = load(customConfigurations ?? '');
+  const customConfigYaml = load(customConfigurations ?? '') as Record<string, unknown>;
   const processors = [
     {
       add_fields: {
