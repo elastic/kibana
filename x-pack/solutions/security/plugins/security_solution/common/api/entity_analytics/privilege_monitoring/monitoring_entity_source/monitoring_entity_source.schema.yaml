@@ -101,10 +101,14 @@ components:
             type: object
             required: [field, value]
             properties:
-              field:
-                type: string
-              value:
-                type: string                
+              fields:
+                type: array
+                items:
+                  type: string
+              values:
+                type: array
+                items:
+                  type: string                
         filter:
           type: object
 
@@ -125,6 +129,7 @@ components:
           type: boolean
         matchers:
           type: array
+          required: [field, value]
           items:
             type: object
             properties:

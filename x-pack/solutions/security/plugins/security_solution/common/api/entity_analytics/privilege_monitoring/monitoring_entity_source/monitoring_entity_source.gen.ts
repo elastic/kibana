@@ -29,8 +29,8 @@ export const MonitoringEntitySourceDescriptor = z.object({
   matchers: z
     .array(
       z.object({
-        field: z.string(),
-        value: z.string(),
+        fields: z.array(z.string()).optional(),
+        values: z.array(z.string()).optional(),
       })
     )
     .optional(),
