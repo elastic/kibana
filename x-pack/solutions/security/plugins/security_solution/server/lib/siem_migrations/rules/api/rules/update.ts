@@ -61,9 +61,6 @@ export const registerSiemRuleMigrationsUpdateRulesRoute = (
               const transformedRuleToUpdate = rulesToUpdate.map(
                 transformToInternalUpdateRuleMigrationData
               );
-
-              logger.warn(`update rules ${JSON.stringify(transformedRuleToUpdate, null, 2)}`);
-
               await ruleMigrationsClient.data.rules.update(transformedRuleToUpdate);
 
               return res.ok({ body: { updated: true } });

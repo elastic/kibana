@@ -33,14 +33,18 @@ export const registerSiemRuleMigrationsRoutes = (
   config: ConfigType,
   logger: Logger
 ) => {
+  /** Rules Migrations */
   registerSiemRuleMigrationsCreateRoute(router, logger);
   registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsDeleteRoute(router, logger);
+  /** *******/
+
   /** Rules */
   registerSiemRuleMigrationsCreateRulesRoute(router, logger);
   registerSiemRuleMigrationsGetRulesRoute(router, logger);
   registerSiemRuleMigrationsUpdateRulesRoute(router, logger);
   /** *******/
+
   /** Tasks **/
   registerSiemRuleMigrationsStatsAllRoute(router, logger);
   registerSiemRuleMigrationsPrebuiltRulesRoute(router, logger);
@@ -51,11 +55,14 @@ export const registerSiemRuleMigrationsRoutes = (
   /** *******/
 
   registerSiemRuleMigrationsInstallRoute(router, logger);
+
   registerSiemRuleMigrationsIntegrationsRoute(router, logger);
 
+  /** Resources */
   registerSiemRuleMigrationsResourceUpsertRoute(router, logger);
   registerSiemRuleMigrationsResourceGetRoute(router, logger);
   registerSiemRuleMigrationsResourceGetMissingRoute(router, logger);
+  /** *******/
 
   registerSiemRuleMigrationsGetMissingPrivilegesRoute(router, logger);
 

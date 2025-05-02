@@ -115,6 +115,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
 
       expect(result).toBeUndefined();
     });
+
     test('should throw an error if an error occurs', async () => {
       const id = 'testId';
       (

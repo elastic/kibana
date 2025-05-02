@@ -46,21 +46,13 @@ paths:
 
   /internal/siem_migrations/rules:
     put:
-      summary: Creates a new migration and returns the corresponding migration_id
+      summary: Creates a new rule migration
       operationId: "CreateRuleMigration"
       x-codegen-enabled: true
       x-internal: true
-      description: Creates a new migration and returns the corresponding migration_id
+      description: Creates a new rule migration and returns the corresponding migration_id
       tags:
         - SIEM Rule Migrations
-      requestBody:
-        required: true
-        description: Payload specifying migration properties
-        content:
-          application/json:
-            schema:
-              description: The object describing the properties and settings that should be assigned to the migration
-              $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigration'
       responses:
         200:
           description: The migration was created successfully and migrationId is returned
@@ -78,11 +70,11 @@ paths:
   ## Specific rule migration APIs
   /internal/siem_migrations/rules/{migration_id}:
     patch:
-      summary: Updates migration data or settings
+      summary: Updates rule migration data or last execution params
       operationId: UpdateRuleMigration
       x-codegen-enabled: true
       x-internal: true
-      description: Updates rules migrations attributes
+      description: Updates rules migrations data or last execution params for a single migration
       tags:
         - SIEM Rule Migrations
       parameters:
@@ -152,7 +144,7 @@ paths:
       operationId: CreateRuleMigrationRules
       x-codegen-enabled: true
       x-internal: true
-      description: Adds original vendor rules to an already existing migration.
+      description: Adds original vendor rules to an already existing migration. Can be called multiple times to add more rules
       tags:
         - SIEM Rule Migrations
       parameters:
@@ -178,7 +170,7 @@ paths:
       operationId: GetRuleMigrationRules
       x-codegen-enabled: true
       x-internal: true
-      description: Retrieves the rule documents stored in the system given the rule migration id
+      description: Retrieves the the list of rules included in a migration given the migration id
       tags:
         - SIEM Rule Migrations
       parameters:
@@ -514,7 +506,6 @@ paths:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/PrebuiltRuleVersion'
 
   # Rule migration resources APIs
-
   /internal/siem_migrations/rules/{migration_id}/resources:
     post:
       summary: Creates or updates rule migration resources for a migration

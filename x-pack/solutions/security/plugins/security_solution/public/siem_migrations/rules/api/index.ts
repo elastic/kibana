@@ -8,7 +8,6 @@
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import type { UpdateRuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { SIEM_MIGRATIONS_PATH } from '../../../../common/constants';
 import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -27,6 +26,7 @@ import {
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
   SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
+  SIEM_RULE_MIGRATION_RULES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
@@ -86,7 +86,7 @@ export interface CreateRuleMigrationParams {
 export const createRuleMigration = async ({
   signal,
 }: CreateRuleMigrationParams): Promise<CreateRuleMigrationResponse> => {
-  return KibanaServices.get().http.put<CreateRuleMigrationResponse>(SIEM_MIGRATIONS_PATH, {
+  return KibanaServices.get().http.put<CreateRuleMigrationResponse>(SIEM_RULE_MIGRATIONS_PATH, {
     version: '1',
     signal,
   });
@@ -108,7 +108,7 @@ export const addRulesToMigration = async ({
   signal,
 }: AddRulesToMigrationParams): Promise<AddRulesToMigrationParams> => {
   return KibanaServices.get().http.post(
-    replaceParams(SIEM_RULE_MIGRATIONS_PATH, { migration_id: migrationId }),
+    replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );
 };

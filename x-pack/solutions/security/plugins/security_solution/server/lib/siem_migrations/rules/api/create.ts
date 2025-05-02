@@ -26,6 +26,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
     .addVersion(
       {
         version: '1',
+        // no request body or params to validate
         validate: false,
       },
       withLicense(

@@ -55,11 +55,7 @@ export const registerSiemRuleMigrationsGetRoute = (
           }
 
           return res.ok({
-            body: {
-              id: storedMigration.id,
-              created_by: storedMigration.created_by,
-              created_at: storedMigration.created_at,
-            },
+            body: storedMigration,
           });
         } catch (error) {
           logger.error(error);

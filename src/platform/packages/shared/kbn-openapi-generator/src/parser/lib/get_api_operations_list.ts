@@ -63,7 +63,6 @@ export function getApiOperationsList(parsedSchema: OpenApiDocument): NormalizedO
         // We don't use $ref in responses or request bodies currently, so we
         // throw an error if we encounter one to narrow down the types. The
         // support might be added in the future if needed.
-
         if ('$ref' in operation.responses?.['200']) {
           throw new Error(
             `Cannot generate response for ${method} ${path}: $ref in response is not supported`

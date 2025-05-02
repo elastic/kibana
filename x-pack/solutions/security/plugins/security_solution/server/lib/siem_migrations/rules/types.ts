@@ -13,6 +13,7 @@ import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
+  RuleMigration,
   RuleMigrationRule,
   RuleMigrationTranslationResult,
   UpdateRuleMigrationRule,
@@ -22,14 +23,7 @@ import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_cl
 
 export type Stored<T extends object> = T & { id: string };
 
-export interface SiemMigration {
-  /** The moment the migration was created */
-  created_at: string;
-  /** The profile id of the user who created the migration */
-  created_by: string;
-}
-export type StoredSiemMigration = Stored<SiemMigration>;
-
+export type StoredSiemMigration = Stored<RuleMigration>;
 export type StoredRuleMigration = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 

@@ -56,7 +56,7 @@ export const registerSiemRuleMigrationsDeleteRoute = (
             return res.ok();
           } catch (error) {
             logger.error(error);
-            await siemMigrationAuditLogger.logGetMigration({
+            await siemMigrationAuditLogger.logDeleteMigration({
               migrationId,
               error,
             });

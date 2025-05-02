@@ -45,7 +45,6 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
         withExistingMigration(
           async (context, req, res): Promise<IKibanaResponse<RuleMigrationRule>> => {
             const { migration_id: migrationId } = req.params;
-            logger.warn(`Adding rules to migration : ${migrationId}`);
             const originalRules = req.body;
             const rulesCount = originalRules.length;
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
