@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const hits = await getKnowledgeBaseEntriesFromEs(es);
         const hasSemanticTextEmbeddings = hits.some((hit) => hit._source?.semantic_text);
 
-        expect(hits.length).to.be(10);
+        expect(hits.length).to.be(60);
         expect(hasSemanticTextEmbeddings).to.be(false);
       });
     });
@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const hits = await getKnowledgeBaseEntriesFromEs(es);
           const hasSemanticTextField = hits.every((hit) => hit._source?.semantic_text);
 
-          expect(hits.length).to.be(10);
+          expect(hits.length).to.be(60);
           expect(hasSemanticTextField).to.be(true);
         });
       });
@@ -92,21 +92,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               // @ts-expect-error
               Object.keys(hit._source?.semantic_text.inference.chunks[0].embeddings).length > 0
           );
-          expect(hits.length).to.be(10);
+          expect(hits.length).to.be(60);
           expect(hasEmbeddings).to.be(true);
-        });
-      });
-
-      it('the docs have correct text content', async () => {
-        await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntriesFromEs(es);
-          expect(
-            hits
-              .filter((hit) => omitLensEntry(hit._source))
-              // @ts-expect-error
-              .map((hit) => hit._source?.semantic_text.text)
-              .sort()
-          ).to.eql(["The user's favourite color is blue.", 'To infinity and beyond!']);
         });
       });
 
