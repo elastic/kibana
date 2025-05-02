@@ -115,7 +115,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           headerRef.style.transform = `translate(${activeRowEvent.translate.left}px, ${activeRowEvent.translate.top}px)`;
         } else {
           setIsActive(false);
-          headerRef.style.position = 'relative';
+          headerRef.style.position = ``;
           headerRef.style.width = ``;
           headerRef.style.top = ``;
           headerRef.style.left = ``;
@@ -174,6 +174,13 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [gridLayoutStateManager, sectionId]);
 
+  const setRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      gridLayoutStateManager.headerRefs.current[sectionId] = element;
+    },
+    [gridLayoutStateManager, sectionId]
+  );
+
   return (
     <>
       <EuiFlexGroup
@@ -188,9 +195,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           ).isCollapsed,
         })}
         data-test-subj={`kbnGridSectionHeader-${sectionId}`}
-        ref={(element: HTMLDivElement | null) => {
-          gridLayoutStateManager.headerRefs.current[sectionId] = element;
-        }}
+        ref={setRef}
       >
         <GridSectionTitle
           sectionId={sectionId}

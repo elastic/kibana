@@ -244,10 +244,16 @@ export const commitAction = ({ activePanel$, panelRefs }: GridLayoutStateManager
   });
 };
 
-export const cancelAction = ({ activePanel$, gridLayout$ }: GridLayoutStateManager) => {
+export const cancelAction = ({ activePanel$, gridLayout$, panelRefs }: GridLayoutStateManager) => {
+  const event = activePanel$.getValue();
   activePanel$.next(undefined);
   if (startingLayout) {
     gridLayout$.next(startingLayout);
     startingLayout = undefined;
   }
+  if (!event) return;
+  panelRefs.current[event.id]?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
 };

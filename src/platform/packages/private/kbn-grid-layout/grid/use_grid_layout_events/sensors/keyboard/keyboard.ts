@@ -29,13 +29,6 @@ const preventDefault = (e: Event) => e.preventDefault();
 const disableScroll = () => window.addEventListener('wheel', preventDefault, { passive: false });
 const enableScroll = () => window.removeEventListener('wheel', preventDefault);
 
-const scrollToActiveElement = (shouldScrollToEnd: boolean) => {
-  document.activeElement?.scrollIntoView({
-    behavior: 'smooth',
-    block: shouldScrollToEnd ? 'end' : 'start',
-  });
-};
-
 const handleStart = (e: UserKeyboardEvent, onStart: EventHandler, onBlur?: EventHandler) => {
   e.stopPropagation();
   e.preventDefault();
@@ -60,13 +53,11 @@ const handleEnd = (e: UserKeyboardEvent, onEnd: EventHandler, shouldScrollToEnd:
   e.preventDefault();
   enableScroll();
   onEnd(e);
-  scrollToActiveElement(shouldScrollToEnd);
 };
 
 const handleCancel = (e: UserKeyboardEvent, onCancel: EventHandler, shouldScrollToEnd: boolean) => {
   enableScroll();
   onCancel(e);
-  scrollToActiveElement(shouldScrollToEnd);
 };
 
 export const startKeyboardInteraction = ({

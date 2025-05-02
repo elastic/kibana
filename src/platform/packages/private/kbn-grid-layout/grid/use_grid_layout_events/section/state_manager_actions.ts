@@ -51,12 +51,22 @@ export const commitAction = ({ activeRowEvent$, headerRefs }: GridLayoutStateMan
   });
 };
 
-export const cancelAction = ({ activeRowEvent$, gridLayout$ }: GridLayoutStateManager) => {
+export const cancelAction = ({
+  activeRowEvent$,
+  gridLayout$,
+  headerRefs,
+}: GridLayoutStateManager) => {
+  const event = activeRowEvent$.getValue();
   activeRowEvent$.next(undefined);
   if (startingLayout) {
     gridLayout$.next(startingLayout);
     startingLayout = undefined;
   }
+  if (!event) return;
+  headerRefs.current[event.id]?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
 };
 
 export const moveAction = (
@@ -219,7 +229,6 @@ export const moveAction = (
     if (!deepEqual(currentLayout, finalLayout))
       gridLayoutStateManager.gridLayout$.next(finalLayout);
   }
-  console.log(currentPointer.clientX, startingPointer.clientX);
   // update the dragged element
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
