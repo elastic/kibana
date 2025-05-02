@@ -19,9 +19,10 @@ import {
   MessageConversion,
   PidConversion,
   DateConversion,
+  ErrorConversion,
 } from './conversions';
 
-const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
+const DEFAULT_PATTERN = `[%date][%level][%logger] %message %error`;
 
 export const patternSchema = schema.string({
   maxLength: 1000,
@@ -43,6 +44,7 @@ const conversions: Conversion[] = [
   MetaConversion,
   PidConversion,
   DateConversion,
+  ErrorConversion,
 ];
 
 /**
