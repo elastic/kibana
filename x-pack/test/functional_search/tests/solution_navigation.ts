@@ -241,9 +241,14 @@ export default function searchSolutionNavigation({
 
     it('renders only expected items', async () => {
       await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
       await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
+
+      await solutionNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
+      await solutionNavigation.sidenav.expectSectionOpen(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
 
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
@@ -265,6 +270,7 @@ export default function searchSolutionNavigation({
         'otherTools',
         'maps',
         'graph',
+        'search_project_nav_footer',
         'project_settings_project_nav',
         'management:trained_models',
         'stack_management',
