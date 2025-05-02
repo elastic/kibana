@@ -5,25 +5,22 @@
  * 2.0.
  */
 import {
-  EuiTable,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiTableHeaderCell,
   EuiMarkdownFormat,
   EuiSpacer,
+  EuiTable,
+  EuiTableHeaderCell,
+  EuiTableRow,
+  EuiTableRowCell,
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { CustomCodeBlock } from '../../../../assistant/get_comments/custom_codeblock/custom_code_block';
-import { customCodeBlockLanguagePlugin } from '../../../../assistant/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
+import { CustomCodeBlock } from '../../../assistant/get_comments/custom_codeblock/custom_code_block';
+import { customCodeBlockLanguagePlugin } from '../../../assistant/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
 
-interface Props {
-  content: string;
-  ['data-test-subj']?: string;
-}
+export const MESSAGE_TEXT_TEST_ID = 'ai-for-soc-alert-flyout-message-text';
 
 const getPluginDependencies = () => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -34,17 +31,13 @@ const getPluginDependencies = () => {
 
   processingPlugins[1][1].components = {
     ...components,
-    contentReference: () => {
-      return null;
-    },
-    customCodeBlock: (props) => {
-      return (
-        <>
-          <CustomCodeBlock value={props.value} lang={props.lang} />
-          <EuiSpacer size="m" />
-        </>
-      );
-    },
+    contentReference: () => null,
+    customCodeBlock: (props) => (
+      <>
+        <CustomCodeBlock value={props.value} lang={props.lang} />
+        <EuiSpacer size="m" />
+      </>
+    ),
     table: (props) => (
       <>
         <EuiTable {...props} />
@@ -72,9 +65,22 @@ const getPluginDependencies = () => {
   };
 };
 
-// to be used for alert summary. For AI Assistant, use `x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/stream/message_text.tsx`
-// This component does not handle rendering of any content references, does not supply a loading cursor, and does not augmentMessageCodeBlocks
-export function MessageText({ content, 'data-test-subj': dataTestSubj }: Props) {
+export interface MessageTextProps {
+  /**
+   * Value to render within the EuiMarkdownFormat
+   */
+  content: string;
+  /**
+   * For testing
+   */
+  ['data-test-subj']?: string;
+}
+
+/**
+ * To be used for alert summary. For AI Assistant, use `x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/stream/message_text.tsx`
+ * This component does not handle rendering of any content references, does not supply a loading cursor, and does not augmentMessageCodeBlocks
+ */
+export function MessageText({ content, 'data-test-subj': dataTestSubj }: MessageTextProps) {
   const containerCss = css`
     overflow-wrap: anywhere;
   `;
@@ -84,7 +90,7 @@ export function MessageText({ content, 'data-test-subj': dataTestSubj }: Props) 
   return (
     <EuiText css={containerCss} data-test-subj={dataTestSubj}>
       <EuiMarkdownFormat
-        data-test-subj={'messageText'}
+        data-test-subj={MESSAGE_TEXT_TEST_ID}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
         textSize="s"
