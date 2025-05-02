@@ -94,7 +94,7 @@ const solutionNodesFormatter = (
     // Process security links
     const appLink = normalizedLinks[node.id as SecurityPageName];
     if (appLink) {
-      const deepLink = formatDeepLink(appLink);
+      const deepLink = formatDeepLink(appLink, node);
       if (node.children) {
         const childrenLinks = solutionNodesFormatter(node.children, normalizedLinks);
         if (childrenLinks.length > 0) {
@@ -114,9 +114,9 @@ const solutionNodesFormatter = (
   return deepLinks;
 };
 
-const formatDeepLink = (appLink: LinkItem): AppDeepLink => {
+const formatDeepLink = (appLink: LinkItem, node: NodeDefinition): AppDeepLink => {
   const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
-  if (!appLink.globalSearchDisabled) {
+  if (!appLink.globalSearchDisabled && node.sideNavStatus !== 'hidden') {
     visibleIn.add('globalSearch');
   }
   if (!appLink.sideNavDisabled) {

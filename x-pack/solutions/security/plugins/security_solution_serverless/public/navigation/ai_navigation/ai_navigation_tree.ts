@@ -61,6 +61,14 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
                 {
                   id: SecurityPageName.configurationsBasicRules,
                   link: securityLink(SecurityPageName.configurationsBasicRules),
+                  children: [
+                    {
+                      id: SecurityPageName.rules,
+                      link: securityLink(SecurityPageName.rules),
+                      breadcrumbStatus: 'hidden',
+                      sideNavStatus: 'hidden',
+                    },
+                  ],
                 },
                 {
                   id: SecurityPageName.configurationsAiSettings,
