@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-export const mockTrackLinkClick = jest.fn();
+import { INTEGRATION_TABS } from '../../configs/integration_tabs_configs';
+
+export const mockReportLinkClick = jest.fn();
 
 export const telemetry = {
-  trackLinkClick: mockTrackLinkClick,
+  reportLinkClick: mockReportLinkClick,
 };
 export const mockTelemetry = jest.fn(() => telemetry);
 
 export const integrationContext = {
   spaceId: 'default',
   telemetry: mockTelemetry(),
+  integrationTabs: INTEGRATION_TABS,
 };
 export const mockIntegrationContext = jest.fn(() => integrationContext);
