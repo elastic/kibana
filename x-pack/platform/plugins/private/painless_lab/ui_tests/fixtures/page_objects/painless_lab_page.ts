@@ -50,11 +50,11 @@ export class PainlessLab {
   }
 
   async getFlyoutRequestBody() {
-    return this.page.testSubj.locator('painlessLabFlyoutRequest').innerText();
+    return this.page.locator('div[aria-labelledby="request"] code').innerText();
   }
 
   async getFlyoutResponseBody() {
-    const flyoutResponse = this.page.testSubj.locator('painlessLabFlyoutResponse');
+    const flyoutResponse = this.page.locator('div[aria-labelledby="response"] code');
     await flyoutResponse.waitFor({ state: 'visible' });
     return flyoutResponse.innerText();
   }
