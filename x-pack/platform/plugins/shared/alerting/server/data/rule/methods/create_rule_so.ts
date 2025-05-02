@@ -21,13 +21,10 @@ export interface CreateRuleSoParams {
 
 export const createRuleSo = async (params: CreateRuleSoParams): Promise<SavedObject<RawRule>> => {
   const { savedObjectsClient, ruleAttributes, savedObjectsCreateOptions } = params;
-  console.log('rule attributes', ruleAttributes);
 
-  const SO = await savedObjectsClient.create(
+  return savedObjectsClient.create(
     RULE_SAVED_OBJECT_TYPE,
     ruleAttributes,
     savedObjectsCreateOptions
   );
-  console.log('SO', SO);
-  return SO;
 };
