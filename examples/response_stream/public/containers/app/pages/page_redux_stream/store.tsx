@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, type PropsWithChildren } from 'react';
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import { Provider } from 'react-redux';
 
 import { streamSlice } from '@kbn/ml-response-stream/client';

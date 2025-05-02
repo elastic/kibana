@@ -12,7 +12,7 @@ import {
   type Action,
   type Dispatch,
   type MiddlewareAPI,
-} from '@reduxjs/toolkit';
+} from 'redux-toolkit-v1';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
 import type { LensState, LensStoreDeps } from '@kbn/lens-common';

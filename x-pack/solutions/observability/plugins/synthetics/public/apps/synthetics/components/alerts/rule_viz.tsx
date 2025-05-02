@@ -22,7 +22,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from 'redux-toolkit-v1';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { RuleMonitorsTable } from './rule_monitors_table';
 import { apiService } from '../../../../utils/api_service';

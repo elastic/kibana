@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, type FC, type PropsWithChildren } from 'react';
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import { Provider } from 'react-redux';
 import useMount from 'react-use/lib/useMount';
 

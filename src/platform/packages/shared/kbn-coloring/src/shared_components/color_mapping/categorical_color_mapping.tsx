@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { type EnhancedStore, configureStore } from '@reduxjs/toolkit';
+import { type EnhancedStore, configureStore } from 'redux-toolkit-v1';
 import { isEqual } from 'lodash';
 import type { KbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';

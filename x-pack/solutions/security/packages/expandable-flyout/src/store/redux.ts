@@ -8,7 +8,7 @@
 import { createContext } from 'react';
 import type { ReactReduxContextValue } from 'react-redux';
 import { createDispatchHook, createSelectorHook } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from 'redux-toolkit-v1';
 import { createSelector } from 'reselect';
 import { panelsReducer, uiReducer } from './reducers';
 import type { State } from './state';

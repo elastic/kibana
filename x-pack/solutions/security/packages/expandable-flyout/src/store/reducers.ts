@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import deepEqual from 'react-fast-compare';
 import {
   changePushVsOverlayAction,

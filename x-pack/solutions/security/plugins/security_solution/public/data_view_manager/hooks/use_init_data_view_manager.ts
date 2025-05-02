@@ -7,11 +7,11 @@
 
 import { useDispatch } from 'react-redux';
 import { useCallback, useEffect } from 'react';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import {
   addListener as originalAddListener,
   removeListener as originalRemoveListener,
-} from '@reduxjs/toolkit';
+} from 'redux-toolkit-v1';
 import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../common/constants';
 import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';

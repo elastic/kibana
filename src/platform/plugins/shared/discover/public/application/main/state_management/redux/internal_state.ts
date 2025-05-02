@@ -25,7 +25,7 @@ import {
   createListenerMiddleware,
   createAction,
   isAnyOf,
-} from '@reduxjs/toolkit';
+} from 'redux-toolkit-v1';
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
