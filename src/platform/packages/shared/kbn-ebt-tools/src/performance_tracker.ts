@@ -166,7 +166,7 @@ interface GetMeanFromMeasuresOptions {
  * @param createPerformanceMeasures - Whether to create performance measures.
  * @returns The mean duration of the performance measures between the two marks.
  */
-export const getMeanFromMeasures = ({
+export const getMeanFromPerformanceMeasures = ({
   type,
   startMark,
   endMark,

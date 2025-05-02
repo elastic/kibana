@@ -16,7 +16,7 @@ import {
   getPerformanceTrackersByType,
   getPerformanceTrackersGroupedById,
   clearPerformanceTrackersByType,
-  getMeanFromMeasures,
+  getMeanFromPerformanceMeasures,
   findMarkerByNamePostfix,
 } from './performance_tracker';
 
@@ -188,7 +188,7 @@ describe('Performance Tracker', () => {
     });
   });
 
-  describe('getMeanFromMeasures', () => {
+  describe('getMeanFromPerformanceMeasures', () => {
     it('calculates the mean duration between start and end marks', () => {
       const mockMarks = [
         { name: 'Panel:test1:preRender', startTime: 100, detail: { id: 'id1' } },
@@ -199,7 +199,7 @@ describe('Performance Tracker', () => {
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
 
-      const result = getMeanFromMeasures({
+      const result = getMeanFromPerformanceMeasures({
         type: PERFORMANCE_TRACKER_TYPES.PANEL,
         startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
         endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
@@ -228,7 +228,7 @@ describe('Performance Tracker', () => {
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
 
-      const result = getMeanFromMeasures({
+      const result = getMeanFromPerformanceMeasures({
         type: PERFORMANCE_TRACKER_TYPES.PANEL,
         startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
         endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
@@ -249,7 +249,7 @@ describe('Performance Tracker', () => {
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
 
-      const result = getMeanFromMeasures({
+      const result = getMeanFromPerformanceMeasures({
         type: PERFORMANCE_TRACKER_TYPES.PANEL,
         startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
         endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
@@ -269,7 +269,7 @@ describe('Performance Tracker', () => {
     it('returns 0 when no valid measurements are found', () => {
       mockGetEntriesByType.mockReturnValue([]);
 
-      const result = getMeanFromMeasures({
+      const result = getMeanFromPerformanceMeasures({
         type: PERFORMANCE_TRACKER_TYPES.PANEL,
         startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
         endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
@@ -287,7 +287,7 @@ describe('Performance Tracker', () => {
 
       mockGetEntriesByType.mockReturnValue(mockMarks);
 
-      getMeanFromMeasures({
+      getMeanFromPerformanceMeasures({
         type: PERFORMANCE_TRACKER_TYPES.PANEL,
         startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
         endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,

@@ -14,7 +14,7 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import {
   clearPerformanceTrackersByType,
-  getMeanFromMeasures,
+  getMeanFromPerformanceMeasures,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
@@ -130,13 +130,13 @@ function reportPerformanceMetrics({
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
 
-  const meanPanelPrerender = getMeanFromMeasures({
+  const meanPanelPrerender = getMeanFromPerformanceMeasures({
     type: PERFORMANCE_TRACKER_TYPES.PANEL,
     startMark: PERFORMANCE_TRACKER_MARKS.PRE_RENDER,
     endMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
   });
 
-  const meanPanelRenderComplete = getMeanFromMeasures({
+  const meanPanelRenderComplete = getMeanFromPerformanceMeasures({
     type: PERFORMANCE_TRACKER_TYPES.PANEL,
     startMark: PERFORMANCE_TRACKER_MARKS.RENDER_START,
     endMark: PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE,
