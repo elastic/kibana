@@ -22,13 +22,13 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install
 # Setup the Node.js toolchain for the architectures we want to support
 node_repositories(
   node_repositories = {
-    "22.13.1-darwin_amd64": ("node-v22.13.1-darwin-x64.tar.gz", "node-v22.13.1-darwin-x64", "6fdcc8412d434664238b0651ebd5ad55d15a08598ff42dcb6d9cf1d434a6c4be"),
-    "22.13.1-darwin_arm64": ("node-v22.13.1-darwin-arm64.tar.gz", "node-v22.13.1-darwin-arm64", "97483ff4361d239a56d038c6335767a56a291e78c10f07446f463f05d9d19b89"),
-    "22.13.1-linux_arm64": ("node-v22.13.1-linux-arm64.tar.xz", "node-v22.13.1-linux-arm64", "3a117f2ac4c2a1504400f75b275640ec685723bb7717ffecf1d443e437c96fd9"),
-    "22.13.1-linux_amd64": ("node-v22.13.1-linux-x64.tar.xz", "node-v22.13.1-linux-x64", "d268cbd8c718fff460cbb6d0f649a2612e1a58d5fbb108e2d1fc68e9f1d0fab3"),
-    "22.13.1-windows_amd64": ("node-v22.13.1-win-x64.zip", "node-v22.13.1-win-x64", "398a61e250a5584a62a5959e2f69f5d597fc83f1a5ebe3ed8fff29ba39d55f14"),
+    "22.15.0-darwin_amd64": ("node-v22.15.0-darwin-x64.tar.gz", "node-v22.15.0-darwin-x64", "f7f42bee60d602783d3a842f0a02a2ecd9cb9d7f6f3088686c79295b0222facf"),
+    "22.15.0-darwin_arm64": ("node-v22.15.0-darwin-arm64.tar.gz", "node-v22.15.0-darwin-arm64", "92eb58f54d172ed9dee320b8450f1390db629d4262c936d5c074b25a110fed02"),
+    "22.15.0-linux_arm64": ("node-v22.15.0-linux-arm64.tar.xz", "node-v22.15.0-linux-arm64", "8ce9e7f62a4646ed95d89e3f97de6067bbb2078de962b3cc9fbfa57b8729d315"),
+    "22.15.0-linux_amd64": ("node-v22.15.0-linux-x64.tar.xz", "node-v22.15.0-linux-x64", "a936576d21f0cf13b1d9b92d747283757c077dae67438aab16bab5bd37ee1e3a"),
+    "22.15.0-windows_amd64": ("node-v22.15.0-win-x64.zip", "node-v22.15.0-win-x64", "06067d4f0d463f90ed803d5eca5b039a05dec5d70fc7b7cc254803a59bd0e27c"),
   },
-  node_version = "22.13.1",
+  node_version = "22.15.0",
   node_urls = [
     "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-glibc-217/dist/v{version}/{filename}",
   ],
