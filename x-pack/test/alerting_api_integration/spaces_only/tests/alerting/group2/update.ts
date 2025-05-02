@@ -502,6 +502,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           muteAll: false,

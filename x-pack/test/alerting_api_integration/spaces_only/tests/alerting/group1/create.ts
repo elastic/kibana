@@ -820,6 +820,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           throttle: '1m',
