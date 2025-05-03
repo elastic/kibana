@@ -117,7 +117,7 @@
         "label": "LazyPackageCard",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, showCompressedInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, descriptionLineClamp, maxCardHeight, showDescription, showReleaseBadge, }: ",
+          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, showCompressedInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, descriptionLineClamp, maxCardHeight, minCardHeight, showDescription, showReleaseBadge, }: ",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -1827,6 +1827,20 @@
             "type": "number",
             "tags": [],
             "label": "maxCardHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/home/card_utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.IntegrationCardItem.minCardHeight",
+            "type": "number",
+            "tags": [],
+            "label": "minCardHeight",
             "description": [],
             "signature": [
               "number | undefined"

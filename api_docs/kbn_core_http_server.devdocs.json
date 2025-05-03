@@ -8565,6 +8565,10 @@
                 "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
               },
               {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -15543,6 +15547,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
               {
@@ -15652,10 +15660,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/enable.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
               {
                 "plugin": "securitySolution",

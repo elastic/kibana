@@ -3817,11 +3817,11 @@
         "signature": [
           "UnifiedHistogramCustomizationId & Pick<",
           {
-            "pluginId": "unifiedHistogram",
+            "pluginId": "@kbn/unified-histogram",
             "scope": "public",
-            "docId": "kibUnifiedHistogramPluginApi",
-            "section": "def-public.UnifiedHistogramContainerProps",
-            "text": "UnifiedHistogramContainerProps"
+            "docId": "kibKbnUnifiedHistogramPluginApi",
+            "section": "def-public.UseUnifiedHistogramProps",
+            "text": "UseUnifiedHistogramProps"
           },
           ", \"onBrushEnd\" | \"withDefaultActions\" | \"disabledActions\" | \"onFilter\">"
         ],

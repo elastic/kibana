@@ -2570,6 +2570,23 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getEndpointService",
+            "type": "Function",
+            "tags": [],
+            "label": "getEndpointService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "EndpointAppContextService"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getConfig",
             "type": "Function",
             "tags": [],
