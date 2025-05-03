@@ -162,7 +162,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -3483,7 +3484,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -3510,7 +3512,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -4427,6 +4430,24 @@
       "enabled": true
     },
     {
+      "groupName": "Kibana ES|QL Highlighting",
+      "matchDepNames": [
+        "@elastic/monaco-esql"
+      ],
+      "reviewers": [
+        "team:kibana-esql"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:ESQL",
+        "release_note:skip",
+        "backport:version"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "re2js",
       "matchDepNames": [
         "re2js"
@@ -4563,9 +4584,9 @@
       "enabled": true
     },
     {
-      "groupName": "node-libs-browser",
+      "groupName": "node-stdlib-browser",
       "matchDepNames": [
-        "node-libs-browser"
+        "node-stdlib-browser"
       ],
       "reviewers": [
         "team:kibana-operations"
