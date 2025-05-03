@@ -706,6 +706,7 @@ src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
+src/platform/plugins/shared/unused_urls_cleanup @elastic/appex-sharedux
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
 src/platform/test

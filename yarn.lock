@@ -7819,6 +7819,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unused-urls-cleanup@link:src/platform/plugins/shared/unused_urls_cleanup":
+  version "0.0.0"
+  uid ""
+
 "@kbn/upgrade-assistant-plugin@link:x-pack/platform/plugins/private/upgrade_assistant":
   version "0.0.0"
   uid ""

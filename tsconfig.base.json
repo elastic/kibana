@@ -2062,6 +2062,8 @@
       "@kbn/unsaved-changes-badge/*": ["src/platform/packages/private/kbn-unsaved-changes-badge/*"],
       "@kbn/unsaved-changes-prompt": ["src/platform/packages/shared/kbn-unsaved-changes-prompt"],
       "@kbn/unsaved-changes-prompt/*": ["src/platform/packages/shared/kbn-unsaved-changes-prompt/*"],
+      "@kbn/unused-urls-cleanup": ["src/platform/plugins/shared/unused_urls_cleanup"],
+      "@kbn/unused-urls-cleanup/*": ["src/platform/plugins/shared/unused_urls_cleanup/*"],
       "@kbn/upgrade-assistant": ["x-pack/platform/packages/private/upgrade-assistant"],
       "@kbn/upgrade-assistant/*": ["x-pack/platform/packages/private/upgrade-assistant/*"],
       "@kbn/upgrade-assistant-plugin": ["x-pack/platform/plugins/private/upgrade_assistant"],

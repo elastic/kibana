@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { DEFAULT_MAX_AGE } from '@kbn/unused-urls-cleanup/server/constants';
+
+export const configSchema = schema.object({
+  maxAge: schema.string({
+    // TODO: Possibly disable this for new installations
+    defaultValue: DEFAULT_MAX_AGE,
+    validate: (value) => {
+      const rangeRegex = /\d+[yMwdhms]/;
+      if (!rangeRegex.test(value)) {
+        return `Invalid value: ${value}. Expected format: <number><unit>, where unit is one of y, M, w, d, h, m, s.`;
+      }
+    },
+  }),
+});
+
+export type UnusedUrlsCleanupPluginConfig = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<UnusedUrlsCleanupPluginConfig> = {
+  schema: configSchema,
+};

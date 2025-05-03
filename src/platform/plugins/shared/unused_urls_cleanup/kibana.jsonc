@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/unused-urls-cleanup",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Background task responsible for deleting saved objects of type 'url' which are unused.",
+  "plugin": {
+    "id": "unusedUrlsCleanup",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": [
+      "taskManager"
+    ],
+    "configPath": "unused_urls_cleanup",
+  }
+}
+
+
