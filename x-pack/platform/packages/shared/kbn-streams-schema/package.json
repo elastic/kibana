@@ -3,5 +3,10 @@
   "description": "Streams Zod schema definition and common models shared between public and server.",
   "private": true,
   "version": "1.0.0",
-  "license": "Elastic License 2.0"
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "prebuild:antlr4": "brew bundle --file=./scripts/antlr4_tools/brewfile",
+    "build:antlr4": "npm run build:antlr4:ottl",
+    "build:antlr4:ottl": "antlr -Dlanguage=TypeScript src/ottl/antlr/ottl.g4"
+  }
 }
