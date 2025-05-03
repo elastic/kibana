@@ -14,6 +14,8 @@ import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistan
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import { SCORE_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/score_suggestions';
+import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -200,9 +202,10 @@ export class LlmProxy {
   }: { from?: number; to?: number } = {}) {
     let relevantFields: RelevantField[] = [];
     const simulator = this.interceptWithFunctionRequest({
-      name: 'select_relevant_fields',
-      // @ts-expect-error
-      when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+      name: SELECT_RELEVANT_FIELDS_NAME,
+      when: (requestBody) =>
+        // @ts-expect-error
+        requestBody.tool_choice?.function?.name === SELECT_RELEVANT_FIELDS_NAME,
       arguments: (requestBody) => {
         const messageWithFieldIds = last(requestBody.messages);
         const matches = (messageWithFieldIds?.content as string).match(/\{[\s\S]*?\}/g)!;
@@ -227,9 +230,9 @@ export class LlmProxy {
     let documents: KnowledgeBaseDocument[] = [];
 
     const simulator = this.interceptWithFunctionRequest({
-      name: 'score',
+      name: SCORE_FUNCTION_NAME,
       // @ts-expect-error
-      when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
+      when: (requestBody) => requestBody.tool_choice?.function?.name === SCORE_FUNCTION_NAME,
       arguments: (requestBody) => {
         const lastMessage = last(requestBody.messages)?.content as string;
         log.info(`lastMessage: ${lastMessage}`); // TODO: remove this line. Debugging only
