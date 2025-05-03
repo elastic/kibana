@@ -231,7 +231,8 @@ export class LlmProxy {
       // @ts-expect-error
       when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
       arguments: (requestBody) => {
-        documents = extractDocumentsFromMessage(last(requestBody.messages)?.content as string, log);
+        const lastMessage = last(requestBody.messages)?.content as string;
+        documents = extractDocumentsFromMessage(lastMessage, log);
         const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
 
         return JSON.stringify({ scores });

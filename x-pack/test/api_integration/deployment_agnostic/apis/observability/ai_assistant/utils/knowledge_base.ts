@@ -75,6 +75,7 @@ export async function addSampleDocsToInternalKb(
   sampleDocs: Array<Instruction & { title: string }>
 ) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const es = getService('es');
 
   await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
@@ -84,6 +85,9 @@ export async function addSampleDocsToInternalKb(
       },
     },
   });
+
+  // refresh the index to make sure the documents are searchable
+  await es.indices.refresh({ index: resourceNames.indexPatterns.kb });
 }
 
 export async function addSampleDocsToCustomIndex(
