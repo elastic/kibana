@@ -2159,7 +2159,7 @@
                   "UseEuiTheme",
                   "<{}>"
                 ],
-                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/esql_theme.ts",
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/theme.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
