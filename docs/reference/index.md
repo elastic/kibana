@@ -5,8 +5,6 @@ applies_to:
 ---
 # Kibana
 
-% TO-DO: Add links to "What is Kibana?"%
-
 This section contains reference information for Kibana apps and {{serverless-full}} management features, including:
 
 * Settings
@@ -15,3 +13,5 @@ This section contains reference information for Kibana apps and {{serverless-ful
 * Plugins
 * Command line tools
 * Osquery fields and packs
+
+Refer to [Install Kibana](docs-content://deploy-manage/deploy/self-managed/install-kibana.md) for an overview and setup instructions.
