@@ -8,33 +8,29 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Status } from '../../../../../common/api/detection_engine';
-import type { inputsModel } from '../../../../common/store';
-import { inputsSelectors } from '../../../../common/store';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { AlertWorkflowStatus } from '../../../../common/types';
-import { APM_USER_INTERACTIONS } from '../../../../common/lib/apm/constants';
-import { updateAlertStatus } from '../../../../common/components/toolbar/bulk_actions/update_alerts';
+import type { GroupTakeActionItems } from '../../components/alerts_table/types';
+import type { Status } from '../../../../common/api/detection_engine';
+import type { inputsModel } from '../../../common/store';
+import { inputsSelectors } from '../../../common/store';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import type { AlertWorkflowStatus } from '../../../common/types';
+import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import {
   BULK_ACTION_ACKNOWLEDGED_SELECTED,
   BULK_ACTION_CLOSE_SELECTED,
   BULK_ACTION_OPEN_SELECTED,
-} from '../../../../common/components/toolbar/bulk_actions/translations';
+} from '../../../common/components/toolbar/bulk_actions/translations';
 import {
   UPDATE_ALERT_STATUS_FAILED,
   UPDATE_ALERT_STATUS_FAILED_DETAILED,
-} from '../../../../common/translations';
-import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+} from '../../../common/translations';
+import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../common/types';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from '../translations';
-import { AlertsEventTypes, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
-import type { StartServices } from '../../../../types';
-
-export interface TakeActionsProps {
-  currentStatus?: Status[];
-  showAlertStatusActions?: boolean;
-}
+import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/telemetry';
+import type { StartServices } from '../../../types';
 
 const getTelemetryEvent = {
   groupedAlertsTakeAction: ({
@@ -48,20 +44,37 @@ const getTelemetryEvent = {
   }) => `alerts_table_${tableId}_group-${groupNumber}_mark-${status}`,
 };
 
+export interface UseGroupTakeActionsItemsParams {
+  /**
+   * Optional property to allow filtering the options in the dropdown depending on the current alert statuses
+   */
+  currentStatus?: Status[];
+  /**
+   * If true, will show all the action items
+   */
+  showAlertStatusActions?: boolean;
+}
+
+/**
+ * Hook returning a set of action items to be accessed when users click on the Take actions button displayed at the grouping alerts table group level.
+ * Currently the action returned are: mark as opened, mark as acknowledged or mark as closed.
+ * The hook is used in the alerts page, the rule details page and the entity analytics top risk score section.
+ */
 export const useGroupTakeActionsItems = ({
   currentStatus,
   showAlertStatusActions = true,
-}: TakeActionsProps) => {
+}: UseGroupTakeActionsItemsParams): GroupTakeActionItems => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
-  const refetchQuery = useCallback(() => {
-    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  }, [globalQueries]);
   const {
     services: { telemetry },
   } = useKibana<StartServices>();
+
+  const refetchQuery = useCallback(() => {
+    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  }, [globalQueries]);
 
   const reportAlertsGroupingTakeActionClick = useCallback(
     (params: {
@@ -73,20 +86,6 @@ export const useGroupTakeActionsItems = ({
       telemetry.reportEvent(AlertsEventTypes.AlertsGroupingTakeAction, params);
     },
     [telemetry]
-  );
-
-  const onUpdateSuccess = useCallback(
-    (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
-      refetchQuery();
-    },
-    [refetchQuery]
-  );
-
-  const onUpdateFailure = useCallback(
-    (newStatus: AlertWorkflowStatus, error: Error) => {
-      refetchQuery();
-    },
-    [refetchQuery]
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
@@ -111,11 +110,9 @@ export const useGroupTakeActionsItems = ({
         }
         addSuccess({ title });
       }
-      if (onUpdateSuccess) {
-        onUpdateSuccess(updated, conflicts, newStatus);
-      }
+      refetchQuery();
     },
-    [addSuccess, addWarning, onUpdateSuccess]
+    [addSuccess, addWarning, refetchQuery]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
@@ -132,11 +129,9 @@ export const useGroupTakeActionsItems = ({
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
       addError(error.message, { title });
-      if (onUpdateFailure) {
-        onUpdateFailure(newStatus, error);
-      }
+      refetchQuery();
     },
-    [addError, onUpdateFailure]
+    [addError, refetchQuery]
   );
 
   const onClickUpdate = useCallback(
@@ -189,20 +184,15 @@ export const useGroupTakeActionsItems = ({
     ]
   );
 
-  return useMemo(() => {
-    const getActionItems = ({
-      query,
-      tableId,
-      groupNumber,
-      selectedGroup,
-    }: {
-      query?: string;
-      tableId: string;
-      groupNumber: number;
-      selectedGroup: string;
-    }) => {
-      const actionItems: JSX.Element[] = [];
-      if (showAlertStatusActions) {
+  return useMemo(
+    (): GroupTakeActionItems =>
+      ({ query, tableId, groupNumber, selectedGroup }) => {
+        const actionItems: JSX.Element[] = [];
+
+        if (!showAlertStatusActions) {
+          return actionItems;
+        }
+
         if (currentStatus && currentStatus.length === 1) {
           const singleStatus = currentStatus[0];
           if (singleStatus !== FILTER_OPEN) {
@@ -288,10 +278,9 @@ export const useGroupTakeActionsItems = ({
             )
           );
         }
-      }
-      return actionItems;
-    };
 
-    return getActionItems;
-  }, [currentStatus, onClickUpdate, showAlertStatusActions]);
+        return actionItems;
+      },
+    [currentStatus, onClickUpdate, showAlertStatusActions]
+  );
 };
