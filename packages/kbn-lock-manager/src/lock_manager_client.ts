@@ -256,6 +256,19 @@ export class LockManager {
   }
 }
 
+export async function getLock({
+  esClient,
+  logger,
+  lockId,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  lockId: LockId;
+}): Promise<LockDocument | undefined> {
+  const lockManager = new LockManager(lockId, esClient, logger);
+  return lockManager.get();
+}
+
 export async function withLock<T>(
   {
     esClient,

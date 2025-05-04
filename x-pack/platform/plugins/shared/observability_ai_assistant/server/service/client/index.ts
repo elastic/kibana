@@ -705,6 +705,7 @@ export class ObservabilityAIAssistantClient {
     });
 
     waitForKbModel({
+      core: this.dependencies.core,
       esClient,
       logger,
       config: this.dependencies.config,
@@ -745,6 +746,7 @@ export class ObservabilityAIAssistantClient {
 
   warmupKbModel = (inferenceId: string) => {
     return waitForKbModel({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,

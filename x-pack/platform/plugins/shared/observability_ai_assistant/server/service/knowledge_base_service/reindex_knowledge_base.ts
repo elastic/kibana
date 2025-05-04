@@ -214,3 +214,22 @@ async function waitForReIndexTaskToComplete({
     { forever: true, maxTimeout: 10000 }
   );
 }
+
+export async function isReIndexInProgress({
+  esClient,
+  logger,
+  core,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+}) {
+  const lmService = new LockManagerService(core, logger);
+
+  const [lock, activeReindexingTask] = await Promise.all([
+    lmService.getLock(KB_REINDEXING_LOCK_ID),
+    getActiveReindexingTaskId(esClient),
+  ]);
+
+  return lock !== undefined || activeReindexingTask !== undefined;
+}

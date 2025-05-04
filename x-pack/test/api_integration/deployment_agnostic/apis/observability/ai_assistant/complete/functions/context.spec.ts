@@ -28,6 +28,7 @@ import {
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
+import { deleteIndexAssets } from '../../utils/index_assets';
 
 const screenContexts = [
   {
@@ -83,6 +84,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: llmProxy.getPort(),
       });
+      await deleteIndexAssets(es);
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
@@ -157,11 +159,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const extractedDocs = await getDocuments();
           const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
           const actualTexts = extractedDocs.map((doc) => doc.text).sort();
-
-          log.info('extractedDocs', JSON.stringify(extractedDocs, null, 2)); // TODO: remove
-          log.info('expectedTexts', JSON.stringify(expectedTexts, null, 2)); // TODO: remove
-          log.info('actualTexts', JSON.stringify(actualTexts, null, 2)); // TODO: remove
-
           expect(actualTexts).to.eql(expectedTexts);
         });
       });

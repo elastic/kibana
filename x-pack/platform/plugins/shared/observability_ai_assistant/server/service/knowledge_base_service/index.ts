@@ -490,6 +490,7 @@ export class KnowledgeBaseService {
 
   getModelStatus = async () => {
     return getKbModelStatus({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,

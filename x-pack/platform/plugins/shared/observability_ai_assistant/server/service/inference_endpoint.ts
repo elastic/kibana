@@ -15,9 +15,15 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
+import { CoreSetup } from '@kbn/core/server';
 import { KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
-import { getInferenceIdFromWriteIndex } from './knowledge_base_service/get_inference_id_from_write_index';
+import {
+  getConcreteWriteIndex,
+  getInferenceIdFromWriteIndex,
+} from './knowledge_base_service/get_inference_id_from_write_index';
+import { isReIndexInProgress } from './knowledge_base_service/reindex_knowledge_base';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 
 const SUPPORTED_TASK_TYPES = ['sparse_embedding', 'text_embedding'];
 
@@ -79,11 +85,13 @@ export function isInferenceEndpointMissingOrUnavailable(error: Error) {
 }
 
 export async function getKbModelStatus({
+  core,
   esClient,
   logger,
   config,
   inferenceId,
 }: {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
@@ -94,23 +102,30 @@ export async function getKbModelStatus({
   modelStats?: MlTrainedModelStats;
   errorMessage?: string;
   kbState: KnowledgeBaseState;
-  inferenceId?: string;
+  currentInferenceId: string | undefined;
+  concreteWriteIndex: string | undefined;
+  isReIndexing: boolean;
 }> {
   const enabled = config.enableKnowledgeBase;
+  const concreteWriteIndex = await getConcreteWriteIndex(esClient);
+  const isReIndexing = await isReIndexInProgress({ esClient, logger, core });
 
+  const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => undefined);
   if (!inferenceId) {
-    try {
-      inferenceId = await getInferenceIdFromWriteIndex(esClient);
-      logger.debug(`Using existing inference id "${inferenceId}" from write index`);
-    } catch (error) {
-      logger.error(`Inference id not found: ${error.message}`);
-
+    if (!currentInferenceId) {
+      logger.error('Inference id not provided and not found in write index');
       return {
         enabled,
-        errorMessage: error.message,
+        errorMessage: 'Inference id not found',
         kbState: KnowledgeBaseState.NOT_INSTALLED,
+        currentInferenceId,
+        concreteWriteIndex,
+        isReIndexing,
       };
     }
+
+    logger.debug(`Using current inference id "${currentInferenceId}" from write index`);
+    inferenceId = currentInferenceId;
   }
 
   let endpoint: InferenceInferenceEndpointInfo;
@@ -125,7 +140,14 @@ export async function getKbModelStatus({
     }
     logger.error(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
 
-    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
+    return {
+      enabled,
+      errorMessage: error.message,
+      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      currentInferenceId,
+      concreteWriteIndex,
+      isReIndexing,
+    };
   }
 
   const modelId = endpoint?.service_settings?.model_id;
@@ -145,6 +167,9 @@ export async function getKbModelStatus({
       endpoint,
       errorMessage: error.message,
       kbState: KnowledgeBaseState.NOT_INSTALLED,
+      currentInferenceId,
+      concreteWriteIndex,
+      isReIndexing,
     };
   }
 
@@ -186,15 +211,20 @@ export async function getKbModelStatus({
     enabled,
     modelStats,
     kbState,
+    currentInferenceId,
+    concreteWriteIndex,
+    isReIndexing,
   };
 }
 
 export async function waitForKbModel({
+  core,
   esClient,
   logger,
   config,
   inferenceId,
 }: {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
@@ -206,7 +236,7 @@ export async function waitForKbModel({
 
   return pRetry(
     async () => {
-      const { kbState } = await getKbModelStatus({ esClient, logger, config, inferenceId });
+      const { kbState } = await getKbModelStatus({ core, esClient, logger, config, inferenceId });
 
       if (kbState !== KnowledgeBaseState.READY) {
         logger.debug('Knowledge base model is not yet ready. Retrying...');

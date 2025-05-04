@@ -243,7 +243,7 @@ export class LlmProxy {
       when: (requestBody) => requestBody.tool_choice?.function?.name === SCORE_FUNCTION_NAME,
       arguments: (requestBody) => {
         const lastMessage = last(requestBody.messages)?.content as string;
-        log.info(`lastMessage: ${lastMessage}`); // TODO: remove this line. Debugging only
+        log.debug(`interceptScoreToolChoice: ${lastMessage}`);
         documents = extractDocumentsFromMessage(lastMessage, log);
         const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
 

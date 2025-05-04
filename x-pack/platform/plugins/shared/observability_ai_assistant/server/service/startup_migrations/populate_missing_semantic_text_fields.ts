@@ -32,17 +32,19 @@ export async function populateMissingSemanticTextFieldWithLock({
 }) {
   const lmService = new LockManagerService(core, logger);
   await lmService.withLock(POPULATE_MISSING_SEMANTIC_TEXT_FIELDS_LOCK_ID, async () =>
-    populateMissingSemanticTextFieldRecursively({ esClient, logger, config })
+    populateMissingSemanticTextFieldRecursively({ core, esClient, logger, config })
   );
 }
 
 // Ensures that every doc has populated the `semantic_text` field.
 // It retrieves entries without the field, updates them in batches, and continues until no entries remain.
 async function populateMissingSemanticTextFieldRecursively({
+  core,
   esClient,
   logger,
   config,
 }: {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
@@ -75,7 +77,7 @@ async function populateMissingSemanticTextFieldRecursively({
   }
 
   const inferenceId = await getInferenceIdFromWriteIndex(esClient);
-  await waitForKbModel({ esClient, logger, config, inferenceId });
+  await waitForKbModel({ core, esClient, logger, config, inferenceId });
 
   const indicesWithOutdatedEntries = uniq(response.hits.hits.map((hit) => hit._index));
   logger.debug(
@@ -106,5 +108,5 @@ async function populateMissingSemanticTextFieldRecursively({
   logger.debug(`Updated ${promises.length} entries`);
 
   await sleep(100);
-  await populateMissingSemanticTextFieldRecursively({ esClient, logger, config });
+  await populateMissingSemanticTextFieldRecursively({ core, esClient, logger, config });
 }

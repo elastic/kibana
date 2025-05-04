@@ -7,7 +7,20 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingSemanticTextProperty } from '@elastic/elasticsearch/lib/api/types';
+import { first } from 'lodash';
 import { resourceNames } from '..';
+
+export async function getConcreteWriteIndex(esClient: { asInternalUser: ElasticsearchClient }) {
+  try {
+    const res = await esClient.asInternalUser.indices.getAlias({
+      name: resourceNames.writeIndexAlias.kb,
+    });
+
+    return first(Object.keys(res));
+  } catch (error) {
+    return;
+  }
+}
 
 export async function getInferenceIdFromWriteIndex(esClient: {
   asInternalUser: ElasticsearchClient;

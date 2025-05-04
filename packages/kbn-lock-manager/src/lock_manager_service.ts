@@ -8,7 +8,7 @@
  */
 
 import { CoreSetup, Logger } from '@kbn/core/server';
-import { LockId, withLock } from './lock_manager_client';
+import { LockId, withLock, getLock } from './lock_manager_client';
 
 export class LockManagerService {
   constructor(private readonly coreSetup: CoreSetup<any>, private readonly logger: Logger) {}
@@ -38,5 +38,13 @@ export class LockManagerService {
     const logger = this.logger.get('lock-manager');
 
     return withLock<T>({ esClient, logger, lockId, metadata }, callback);
+  }
+
+  async getLock(lockId: LockId) {
+    const [coreStart] = await this.coreSetup.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const logger = this.logger.get('lock-manager');
+
+    return getLock({ esClient, logger, lockId });
   }
 }

@@ -13,6 +13,7 @@ import {
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import pRetry from 'p-retry';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -37,6 +38,9 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
     modelStats?: Partial<MlTrainedModelStats>;
     kbState: KnowledgeBaseState;
+    currentInferenceId: string | undefined;
+    concreteWriteIndex: string | undefined;
+    isReIndexing: boolean;
   }> => {
     const client = await service.getClient({ request });
     return client.getKnowledgeBaseStatus();
@@ -296,19 +300,23 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     }
 
     const limiter = pLimit(5);
-
     const promises = resources.params.body.entries.map(async (entry) => {
       return limiter(async () => {
-        return client.addKnowledgeBaseEntry({
-          entry: {
-            confidence: 'high',
-            is_correction: false,
-            public: true,
-            labels: {},
-            role: KnowledgeBaseEntryRole.UserEntry,
-            ...entry,
+        return pRetry(
+          () => {
+            return client.addKnowledgeBaseEntry({
+              entry: {
+                confidence: 'high',
+                is_correction: false,
+                public: true,
+                labels: {},
+                role: KnowledgeBaseEntryRole.UserEntry,
+                ...entry,
+              },
+            });
           },
-        });
+          { retries: 10 }
+        );
       });
     });
 
