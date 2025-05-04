@@ -183,6 +183,7 @@
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
     "@kbn/lock-manager",
-    "@kbn/test-suites-xpack-platform",
+    "@kbn/alerts-ui-shared",
+    "@kbn/test-suites-xpack-platform"
   ]
 }
