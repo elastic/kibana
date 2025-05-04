@@ -141,7 +141,9 @@ export class LlmProxy {
           )}`
         );
         if (this.interceptors.length > 0) {
-          throw new Error(`Interceptors were not called: ${unsettledInterceptors}`);
+          throw new Error(
+            `Interceptors were not called: ${unsettledInterceptors.map((name) => `\n - ${name}`)}`
+          );
         }
       },
       { retries: 5, maxTimeout: 1000 }
@@ -180,22 +182,26 @@ export class LlmProxy {
     when?: RequestInterceptor['when'];
     interceptorName?: string;
   }) {
-    // @ts-expect-error
-    return this.intercept(interceptorName ?? `Function request: "${name}"`, when, (body) => {
-      return {
-        content: '',
-        tool_calls: [
-          {
-            function: {
-              name,
-              arguments: argumentsCallback(body),
+    return this.intercept(
+      interceptorName ?? `interceptWithFunctionRequest: "${name}"`,
+      when,
+      // @ts-expect-error
+      (body) => {
+        return {
+          content: '',
+          tool_calls: [
+            {
+              function: {
+                name,
+                arguments: argumentsCallback(body),
+              },
+              index: 0,
+              id: `call_${uuidv4()}`,
             },
-            index: 0,
-            id: `call_${uuidv4()}`,
-          },
-        ],
-      };
-    }).completeAfterIntercept();
+          ],
+        };
+      }
+    ).completeAfterIntercept();
   }
 
   interceptSelectRelevantFieldsToolChoice({
