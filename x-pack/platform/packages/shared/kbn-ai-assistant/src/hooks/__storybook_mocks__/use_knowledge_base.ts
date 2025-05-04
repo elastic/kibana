@@ -20,6 +20,9 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       value: {
         kbState: KnowledgeBaseState.NOT_INSTALLED,
         enabled: true,
+        concreteWriteIndex: undefined,
+        currentInferenceId: undefined,
+        isReIndexing: false,
       },
     },
     warmupModel: async () => {},
