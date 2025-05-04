@@ -3167,7 +3167,7 @@
             "label": "artifacts",
             "description": [],
             "signature": [
-              "Readonly<{ dashboards?: Readonly<{} & { id: string; }>[] | undefined; } & {}> | undefined"
+              "Readonly<{ dashboards?: Readonly<{} & { id: string; }>[] | undefined; investigation_guide?: Readonly<{} & { blob: string; }> | undefined; } & {}> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -6829,6 +6829,20 @@
                 "text": "Dashboard"
               },
               "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Artifacts.investigation_guide",
+            "type": "Object",
+            "tags": [],
+            "label": "investigation_guide",
+            "description": [],
+            "signature": [
+              "{ blob: string; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -11927,6 +11941,85 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-common.alertMappings.properties.artifacts",
+                "type": "Object",
+                "tags": [],
+                "label": "artifacts",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "alerting",
+                    "id": "def-common.alertMappings.properties.artifacts.properties",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "properties",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "alerting",
+                        "id": "def-common.alertMappings.properties.artifacts.properties.investigation_guide",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "investigation_guide",
+                        "description": [],
+                        "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "alerting",
+                            "id": "def-common.alertMappings.properties.artifacts.properties.investigation_guide.properties",
+                            "type": "Object",
+                            "tags": [],
+                            "label": "properties",
+                            "description": [],
+                            "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                            "deprecated": false,
+                            "trackAdoption": false,
+                            "children": [
+                              {
+                                "parentPluginId": "alerting",
+                                "id": "def-common.alertMappings.properties.artifacts.properties.investigation_guide.properties.blob",
+                                "type": "Object",
+                                "tags": [],
+                                "label": "blob",
+                                "description": [],
+                                "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                                "deprecated": false,
+                                "trackAdoption": false,
+                                "children": [
+                                  {
+                                    "parentPluginId": "alerting",
+                                    "id": "def-common.alertMappings.properties.artifacts.properties.investigation_guide.properties.blob.type",
+                                    "type": "string",
+                                    "tags": [],
+                                    "label": "type",
+                                    "description": [],
+                                    "signature": [
+                                      "\"text\""
+                                    ],
+                                    "path": "x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts",
+                                    "deprecated": false,
+                                    "trackAdoption": false
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
               {
                 "parentPluginId": "alerting",
                 "id": "def-common.alertMappings.properties.enabled",
