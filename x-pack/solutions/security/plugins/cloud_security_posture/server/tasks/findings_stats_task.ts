@@ -53,7 +53,8 @@ export async function scheduleFindingsStatsTask(
       id: CSPM_FINDINGS_STATS_TASK_ID,
       taskType: CSPM_FINDINGS_STATS_TASK_TYPE,
       schedule: {
-        interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
+        // interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
+        interval: `30s`,
       },
       state: emptyState,
       params: {},
