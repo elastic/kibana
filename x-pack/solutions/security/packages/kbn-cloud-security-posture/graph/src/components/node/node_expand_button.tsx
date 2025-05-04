@@ -25,10 +25,13 @@ export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps
     setIsToggled(false);
   }, []);
 
-  const onClickHandler = (e: React.MouseEvent<HTMLElement>) => {
-    setIsToggled((currIsToggled) => !currIsToggled);
-    onClick?.(e, unToggleCallback);
-  };
+  const onClickHandler = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      setIsToggled((currIsToggled) => !currIsToggled);
+      onClick?.(e, unToggleCallback);
+    },
+    [onClick, unToggleCallback]
+  );
 
   return (
     <StyledNodeExpandButton x={x} y={y} className={isToggled ? 'toggled' : undefined}>
