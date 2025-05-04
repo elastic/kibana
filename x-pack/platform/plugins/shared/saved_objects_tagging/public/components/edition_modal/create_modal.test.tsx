@@ -16,7 +16,7 @@ import { duplicateTagNameErrorMessage, managedTagConflictMessage } from './utils
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
-  useGeneratedHtmlId: jest.fn(() => 'mockedId'), // Mock the generated id
+  useGeneratedHtmlId: jest.fn(() => 'mockedId'),
 }));
 
 describe('create modal', () => {
