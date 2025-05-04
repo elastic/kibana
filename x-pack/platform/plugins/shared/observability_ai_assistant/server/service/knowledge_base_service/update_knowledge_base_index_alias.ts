@@ -12,22 +12,22 @@ import { resourceNames } from '..';
 export async function updateKnowledgeBaseWriteIndexAlias({
   esClient,
   logger,
-  index,
+  nextWriteIndexName,
+  currentWriteIndexName,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  index: string;
+  nextWriteIndexName: string;
+  currentWriteIndexName: string;
 }) {
-  logger.debug(`Updating write index alias to "${index}"`);
+  logger.debug(
+    `Updating write index alias from "${currentWriteIndexName}" to "${nextWriteIndexName}"`
+  );
+  const alias = resourceNames.writeIndexAlias.kb;
   await esClient.asInternalUser.indices.updateAliases({
     actions: [
-      {
-        add: {
-          index,
-          alias: resourceNames.writeIndexAlias.kb,
-          is_write_index: true,
-        },
-      },
+      { remove: { index: currentWriteIndexName, alias } },
+      { add: { index: nextWriteIndexName, alias, is_write_index: true } },
     ],
   });
 }

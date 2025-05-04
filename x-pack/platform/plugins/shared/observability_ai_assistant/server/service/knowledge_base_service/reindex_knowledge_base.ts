@@ -109,6 +109,14 @@ async function reIndexKnowledgeBase({
     wait_for_completion: false,
   });
 
+  // Point write index alias to the new index
+  await updateKnowledgeBaseWriteIndexAlias({
+    esClient,
+    logger,
+    nextWriteIndexName,
+    currentWriteIndexName,
+  });
+
   const taskId = reindexResponse.task?.toString();
   if (taskId) {
     await waitForReIndexTaskToComplete({ esClient, taskId, logger });
@@ -119,9 +127,6 @@ async function reIndexKnowledgeBase({
   // Delete original index
   logger.debug(`Deleting write index "${currentWriteIndexName}"`);
   await esClient.asInternalUser.indices.delete({ index: currentWriteIndexName });
-
-  // Point write index alias to the new index
-  await updateKnowledgeBaseWriteIndexAlias({ esClient, logger, index: nextWriteIndexName });
 }
 
 async function getCurrentWriteIndexName(esClient: { asInternalUser: ElasticsearchClient }) {
@@ -230,6 +235,9 @@ export async function isReIndexInProgress({
     lmService.getLock(KB_REINDEXING_LOCK_ID),
     getActiveReindexingTaskId(esClient),
   ]);
+
+  logger.debug(`Lock: ${!!lock}`);
+  logger.debug(`ES re-indexing task: ${!!activeReindexingTask}`);
 
   return lock !== undefined || activeReindexingTask !== undefined;
 }
