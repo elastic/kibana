@@ -26,7 +26,6 @@ import { VisualizationEmbeddable } from '../visualization_actions/visualization_
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { NO_BREAKDOWN_STACK_BY_VALUE } from '../events_tab/histogram_configurations';
-import { getTotalCountFromTables } from '../visualization_actions/get_total_count_from_tables';
 
 export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &
   MatrixHistogramConfigs & {
@@ -105,10 +104,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [title, selectedStackByOption]
   );
   const { tables } = useVisualizationResponse({ visualizationId });
-  const visualizationTotalCount: number | undefined = useMemo(
-    () => getTotalCountFromTables(tables),
-    [tables]
-  );
+  const visualizationTotalCount: number | undefined = tables && tables.meta.statistics.totalCount;
 
   const subtitleWithCounts: string | undefined = useMemo(() => {
     if (isInitialLoading) {

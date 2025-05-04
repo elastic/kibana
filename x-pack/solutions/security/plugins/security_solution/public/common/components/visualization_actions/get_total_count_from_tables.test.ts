@@ -5,36 +5,13 @@
  * 2.0.
  */
 
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
-
 import { getTotalCountFromTables } from './get_total_count_from_tables';
-
-const createDataTables = ({ repeatTimes = 1 } = {}): TablesAdapter['tables'] => {
-  return {
-    ...Array.from({ length: repeatTimes }, (_, i) => ({
-      [`layer-id-${i}`]: {
-        meta: {
-          statistics: {
-            totalCount: 10,
-          },
-        },
-      },
-    })).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
-  } as unknown as TablesAdapter['tables'];
-};
+import { useVisualizationResponseMock } from './use_visualization_response.mock';
 
 describe('getTotalCountFromTables', () => {
-  describe('when tablesAdapter is undefined', () => {
-    it('returns undefined', () => {
-      const result = getTotalCountFromTables();
-      expect(result).toBeUndefined();
-    });
-  });
-
-  describe('when tables is present', () => {
-    it('returns the total count from all layers', () => {
-      const result = getTotalCountFromTables(createDataTables({ repeatTimes: 2 }));
-      expect(result).toEqual(20);
-    });
+  it('returns the total count from all layers', () => {
+    const visualizationResponse = useVisualizationResponseMock.buildOkResponse({ tableCount: 3 });
+    const result = getTotalCountFromTables(visualizationResponse.tables.tables);
+    expect(result).toEqual(3);
   });
 });

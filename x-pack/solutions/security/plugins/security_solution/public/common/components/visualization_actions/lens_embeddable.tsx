@@ -129,7 +129,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   } = useInspect({
     inputId: inputsModelId,
     isDisabled: loading,
-    multiple: tables != null && Object.keys(tables).length > 1,
+    multiple: tables != null && Object.keys(tables.tables).length > 1,
     queryId: id,
   });
 

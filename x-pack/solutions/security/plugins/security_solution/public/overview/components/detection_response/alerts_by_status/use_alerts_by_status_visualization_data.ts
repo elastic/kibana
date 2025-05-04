@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getTotalCountFromTables } from '../../../../common/components/visualization_actions/get_total_count_from_tables';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
 
@@ -26,10 +25,12 @@ export const useAlertsByStatusVisualizationData = () => {
     visualizationId: closedAlertsVisualizationId,
   });
 
-  const visualizationOpenAlertsData = getTotalCountFromTables(openAlertsTables) ?? 0;
+  const visualizationOpenAlertsData =
+    (openAlertsTables && openAlertsTables.meta.statistics.totalCount) ?? 0;
   const visualizationAcknowledgedAlertsData =
-    getTotalCountFromTables(acknowledgedAlertsTables) ?? 0;
-  const visualizationClosedAlertsData = getTotalCountFromTables(closedAlertsTables) ?? 0;
+    (acknowledgedAlertsTables && acknowledgedAlertsTables.meta.statistics.totalCount) ?? 0;
+  const visualizationClosedAlertsData =
+    (closedAlertsTables && closedAlertsTables.meta.statistics.totalCount) ?? 0;
 
   const visualizationTotalAlertsData =
     visualizationOpenAlertsData +

@@ -8,9 +8,9 @@
 import type { Dispatch } from 'redux';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import type { InputsModelId } from './constants';
 import type { URL_PARAM_KEY } from '../../hooks/use_url_state';
+import type { VisualizationTablesWithMeta } from '../../types';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
@@ -60,7 +60,7 @@ export interface GlobalGenericQuery {
   selectedInspectIndex: number;
   invalidKqlQuery?: Error;
   searchSessionId?: string;
-  tables?: TablesAdapter['tables'];
+  tables?: VisualizationTablesWithMeta;
 }
 
 export interface GlobalKqlQuery extends GlobalGenericQuery {

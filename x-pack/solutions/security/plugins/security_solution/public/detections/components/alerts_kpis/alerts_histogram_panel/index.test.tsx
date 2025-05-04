@@ -11,7 +11,6 @@ import { mount } from 'enzyme';
 // Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
 import 'jest-styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import { SecurityPageName } from '../../../../app/types';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -20,6 +19,8 @@ import { VisualizationEmbeddable } from '../../../../common/components/visualiza
 
 import { AlertsHistogramPanel } from '.';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { useVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
+import type { UseVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -89,19 +90,11 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
   ...jest.requireActual(
     '../../../../common/components/visualization_actions/use_visualization_response'
   ),
-  useVisualizationResponse: jest.fn<ReturnType<typeof useVisualizationResponse>, []>(() => ({
-    searchSessionId: 'search-session-id',
-    loading: false,
-    tables: {
-      'layer-id-0': {
-        meta: {
-          statistics: {
-            totalCount: 999,
-          },
-        },
-      } as unknown as Datatable,
-    },
-  })),
+  useVisualizationResponse: jest
+    .requireActual(
+      '../../../../common/components/visualization_actions/use_visualization_response.mock'
+    )
+    .useVisualizationResponseMock.create(),
 }));
 
 const mockSetIsExpanded = jest.fn();
@@ -117,9 +110,7 @@ const defaultProps = {
 };
 const mockSetToggle = jest.fn();
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
-const mockUseVisualizationResponse = useVisualizationResponse as jest.MockedFunction<
-  typeof useVisualizationResponse
->;
+const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
 describe('AlertsHistogramPanel', () => {
   beforeEach(() => {
@@ -502,9 +493,7 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('header-section-subtitle')).toHaveTextContent(
-        'Showing: 999 alerts'
-      );
+      expect(screen.getByTestId('header-section-subtitle')).toHaveTextContent('Showing: 1 alert');
     });
 
     it('renders LensEmbeddable', () => {
@@ -531,19 +520,9 @@ describe('AlertsHistogramPanel', () => {
     });
 
     it('should render correct subtitle with empty string', () => {
-      mockUseVisualizationResponse.mockReturnValue({
-        searchSessionId: 'search-session-id',
-        loading: false,
-        tables: {
-          'layer-id-0': {
-            meta: {
-              statistics: {
-                totalCount: 0,
-              },
-            },
-          } as unknown as Datatable,
-        },
-      });
+      mockUseVisualizationResponse.mockReturnValue(
+        useVisualizationResponseMock.buildEmptyOkResponse()
+      );
 
       render(
         <TestProviders>

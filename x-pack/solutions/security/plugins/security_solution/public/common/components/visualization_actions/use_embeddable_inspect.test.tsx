@@ -79,7 +79,14 @@ describe('useEmbeddableInspect', () => {
           requests: [JSON.stringify({ body: mockRequests[0].json, index: [''] }, null, 2)],
           responses: [JSON.stringify(mockRequests[0].response.json.rawResponse, null, 2)],
           isLoading: false,
-          tables: mockTablesAdapter.tables,
+          tables: {
+            tables: mockTablesAdapter.tables,
+            meta: {
+              statistics: {
+                totalCount: mockTablesAdapter.tables.table1.meta.statistics.totalCount,
+              },
+            },
+          },
         });
       });
     });

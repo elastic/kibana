@@ -17,8 +17,8 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import type { EuiThemeComputed } from '@elastic/eui';
+import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -74,11 +74,26 @@ export interface VisualizationActionsProps {
   casesAttachmentMetadata?: LensProps['metadata'];
 }
 
+export interface VisualizationTablesWithMeta {
+  tables: TablesAdapter['tables'];
+  meta: {
+    statistics: {
+      totalCount: number;
+    };
+  };
+}
+
+export interface UseVisualizationResponseResponse {
+  searchSessionId?: string;
+  tables?: VisualizationTablesWithMeta;
+  loading: boolean;
+}
+
 export interface EmbeddableData {
   requests: string[];
   responses: string[];
   isLoading: boolean;
-  tables?: TablesAdapter['tables'];
+  tables?: VisualizationTablesWithMeta;
 }
 
 export type OnEmbeddableLoaded = (data: EmbeddableData) => void;

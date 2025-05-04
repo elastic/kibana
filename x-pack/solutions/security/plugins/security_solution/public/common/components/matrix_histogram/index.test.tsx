@@ -13,8 +13,9 @@ import { MatrixHistogram } from '.';
 import { TestProviders } from '../../mock';
 import { getDnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
+import type { UseVisualizationResponseMock } from '../visualization_actions/use_visualization_response.mock';
+import { useVisualizationResponseMock } from '../visualization_actions/use_visualization_response.mock';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 
 jest.mock('../../containers/query_toggle');
 
@@ -27,24 +28,12 @@ jest.mock('../../hooks/use_experimental_features', () => ({
 
 jest.mock('../visualization_actions/use_visualization_response', () => ({
   ...jest.requireActual('../visualization_actions/use_visualization_response'),
-  useVisualizationResponse: jest.fn<ReturnType<typeof useVisualizationResponse>, []>(() => ({
-    searchSessionId: 'search-session-id',
-    loading: false,
-    tables: {
-      'layer-id-0': {
-        meta: {
-          statistics: {
-            totalCount: 999,
-          },
-        },
-      } as unknown as Datatable,
-    },
-  })),
+  useVisualizationResponse: jest
+    .requireActual('../visualization_actions/use_visualization_response.mock')
+    .useVisualizationResponseMock.create(),
 }));
 
-const useVisualizationResponseMocked = useVisualizationResponse as jest.MockedFunction<
-  typeof useVisualizationResponse
->;
+const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
 const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
 
@@ -114,15 +103,13 @@ describe('Matrix Histogram Component', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('Showing: 999 events');
+      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('Showing: 1 events');
     });
 
     test('it should not render subtitle when subtitle is function and no tables are present', () => {
-      useVisualizationResponseMocked.mockReturnValue({
-        searchSessionId: 'search-session-id',
-        loading: false,
-        tables: undefined,
-      });
+      mockUseVisualizationResponse.mockReturnValue(
+        useVisualizationResponseMock.buildLoadingResponse()
+      );
 
       render(
         <TestProviders>

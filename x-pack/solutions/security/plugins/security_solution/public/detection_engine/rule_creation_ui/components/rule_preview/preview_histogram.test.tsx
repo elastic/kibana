@@ -11,7 +11,6 @@ import moment from 'moment';
 import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { render, waitFor } from '@testing-library/react';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
@@ -25,6 +24,8 @@ import { mockEventViewerResponse } from '../../../../common/components/events_vi
 import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
 import type { TransformColumnsProps } from '../../../../common/components/control_columns';
 import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
+import type { UseVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
+import { useVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 
 jest.mock('../../../../common/components/control_columns', () => ({
   transformControlColumns: (props: TransformColumnsProps) => [],
@@ -45,20 +46,10 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
     '../../../../common/components/visualization_actions/use_visualization_response'
   ),
   useVisualizationResponse: jest
-    .fn<ReturnType<typeof useVisualizationResponse>, []>()
-    .mockReturnValue({
-      searchSessionId: 'test-search-session-id',
-      loading: false,
-      tables: {
-        'layer-id-0': {
-          meta: {
-            statistics: {
-              totalCount: 1,
-            },
-          },
-        } as unknown as Datatable,
-      },
-    }),
+    .requireActual(
+      '../../../../common/components/visualization_actions/use_visualization_response.mock'
+    )
+    .useVisualizationResponseMock.create(),
 }));
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
@@ -66,9 +57,7 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useEnableExperimental: jest.fn(() => jest.fn()),
 }));
 const mockVisualizationEmbeddable = VisualizationEmbeddable as unknown as jest.Mock;
-const mockUseVisualizationResponse = useVisualizationResponse as unknown as jest.MockedFunction<
-  typeof useVisualizationResponse
->;
+const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../../timelines/components/fields_browser', () => ({
@@ -208,19 +197,10 @@ describe('PreviewHistogram', () => {
           totalCount: 0,
         },
       ]);
-      mockUseVisualizationResponse.mockReturnValue({
-        searchSessionId: 'test-search-session-id',
-        loading: false,
-        tables: {
-          'layer-id-0': {
-            meta: {
-              statistics: {
-                totalCount: 0,
-              },
-            },
-          } as unknown as Datatable,
-        },
-      });
+
+      mockUseVisualizationResponse.mockReturnValue(
+        useVisualizationResponseMock.buildEmptyOkResponse()
+      );
 
       render(
         <TestProviders store={store}>

@@ -15,12 +15,48 @@ import * as inputActions from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { useVisualizationResponseMock } from './use_visualization_response.mock';
+import type { VisualizationTablesWithMeta } from './types';
 
 jest.mock('./lens_embeddable');
 jest.mock('../page/use_refetch_by_session');
 
-const mockSearchSessionId = 'mockSearchSessionId';
+const mockSearchSessionId = 'searchSessionId';
+const mockTables: VisualizationTablesWithMeta = {
+  tables: {
+    'layer-id-0': {
+      type: 'datatable' as const,
+      columns: [
+        {
+          id: 'column-id-0',
+          name: `Column Name 0`,
+          meta: {
+            type: 'string',
+            params: {
+              id: 'string',
+            },
+          },
+        },
+      ],
+      rows: [
+        {
+          'column-id-0': `Row 0 (Layer 0)`,
+        },
+      ],
+      meta: {
+        statistics: {
+          totalCount: 1,
+        },
+      },
+    },
+  },
+  meta: {
+    statistics: {
+      totalCount: 1,
+    },
+  },
+};
+
 const mockRefetchByRestartingSession = jest.fn();
 const mockRefetchByDeletingSession = jest.fn();
 
@@ -96,6 +132,8 @@ describe('VisualizationEmbeddable', () => {
   });
 
   describe('when data exists and no there is no searchSessionId', () => {
+    const noSearchSessionIdOkResponseMock =
+      useVisualizationResponseMock.buildNoSearchSessionIdOkResponse();
     const mockState = {
       ...mockGlobalState,
       inputs: {
@@ -116,15 +154,7 @@ describe('VisualizationEmbeddable', () => {
               selectedInspectIndex: 0,
               searchSessionId: undefined,
               refetch: jest.fn(),
-              tables: {
-                'layer-id-0': {
-                  meta: {
-                    statistics: {
-                      totalCount: 999,
-                    },
-                  },
-                } as unknown as Datatable,
-              },
+              tables: mockTables,
             },
           ],
         },

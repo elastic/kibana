@@ -10,6 +10,7 @@ import { useCallback } from 'react';
 import type { EmbeddableData, OnEmbeddableLoaded, Request } from './types';
 
 import { getRequestsAndResponses } from './utils';
+import { getTotalCountFromTables } from './get_total_count_from_tables';
 
 export const useEmbeddableInspect = (onEmbeddableLoad?: OnEmbeddableLoaded) => {
   const setInspectData = useCallback<NonNullable<LensEmbeddableInput['onLoad']>>(
@@ -38,10 +39,20 @@ export const useEmbeddableInspect = (onEmbeddableLoad?: OnEmbeddableLoaded) => {
       };
 
       // during error response, tables.tables == {}
-      // so are not including it in the embeddableData
-      // to align with no data state
+      // so we only add tables if they exist to normalize no data scenario
+      //
+      // additionally, we introduce a total count to the meta object
+      // in the same structure as it's present in each individual table data
       if (adapters.tables && Object.keys(adapters.tables.tables).length > 0) {
-        embeddableData.tables = adapters.tables.tables;
+        const { tables } = adapters.tables;
+        embeddableData.tables = {
+          tables,
+          meta: {
+            statistics: {
+              totalCount: getTotalCountFromTables(tables),
+            },
+          },
+        };
       }
 
       onEmbeddableLoad(embeddableData);

@@ -10,9 +10,10 @@ import React from 'react';
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useVisualizationResponse } from './use_visualization_response';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { useVisualizationResponseMock } from './use_visualization_response.mock';
 
 describe('useVisualizationResponse', () => {
+  const mockedOkResponse = useVisualizationResponseMock.buildOkResponse();
   const mockState = {
     ...mockGlobalState,
     inputs: {
@@ -29,19 +30,11 @@ describe('useVisualizationResponse', () => {
               ],
             },
             isInspected: false,
-            loading: false,
+            loading: mockedOkResponse.loading,
             selectedInspectIndex: 0,
-            searchSessionId: 'search-session-id',
+            searchSessionId: mockedOkResponse.searchSessionId,
             refetch: jest.fn(),
-            tables: {
-              'layer-id-0': {
-                meta: {
-                  statistics: {
-                    totalCount: 999,
-                  },
-                },
-              } as Datatable,
-            },
+            tables: mockedOkResponse.tables,
           },
         ],
       },
@@ -59,18 +52,6 @@ describe('useVisualizationResponse', () => {
         <TestProviders store={mockStore}>{children}</TestProviders>
       ),
     });
-    expect(result.current).toEqual({
-      searchSessionId: 'search-session-id',
-      loading: false,
-      tables: {
-        'layer-id-0': {
-          meta: {
-            statistics: {
-              totalCount: 999,
-            },
-          },
-        },
-      },
-    });
+    expect(result.current).toEqual(mockedOkResponse);
   });
 });

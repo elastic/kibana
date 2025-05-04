@@ -9,8 +9,13 @@ import { useMemo } from 'react';
 
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
+import type { UseVisualizationResponseResponse } from './types';
 
-export const useVisualizationResponse = ({ visualizationId }: { visualizationId: string }) => {
+export const useVisualizationResponse = ({
+  visualizationId,
+}: {
+  visualizationId: string;
+}): UseVisualizationResponseResponse => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const { loading, tables, searchSessionId } = useDeepEqualSelector((state) =>
     getGlobalQuery(state, visualizationId)

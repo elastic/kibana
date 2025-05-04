@@ -21,7 +21,6 @@ import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useVisualizationResponse } from './use_visualization_response';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { getTotalCountFromTables } from './get_total_count_from_tables';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
@@ -52,8 +51,11 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-  const { tables: visualizationTables } = useVisualizationResponse({ visualizationId: id });
-  const visualizationTablesTotalCount = getTotalCountFromTables(visualizationTables);
+  const { tables: visualizationTables } = useVisualizationResponse({
+    visualizationId: id,
+  });
+  const visualizationTablesTotalCount: number | undefined =
+    visualizationTables && visualizationTables.meta.statistics.totalCount;
   const dataExists = visualizationTablesTotalCount != null && visualizationTablesTotalCount > 0;
   const donutTextWrapperStyles = dataExists
     ? css`
@@ -99,18 +101,16 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   useEffect(() => {
     // This handles initial mount and refetch when (alert) indices not found
     if (!searchSessionId) {
-      setTimeout(() => {
-        dispatch(
-          inputsActions.setQuery({
-            inputId,
-            id,
-            searchSessionId: session.current.start(),
-            refetch: dataExists ? refetchByRestartingSession : refetchByDeletingSession,
-            loading: false,
-            inspect: null,
-          })
-        );
-      }, 200);
+      dispatch(
+        inputsActions.setQuery({
+          inputId,
+          id,
+          searchSessionId: session.current.start(),
+          refetch: dataExists ? refetchByRestartingSession : refetchByDeletingSession,
+          loading: false,
+          inspect: null,
+        })
+      );
     }
   }, [
     dispatch,

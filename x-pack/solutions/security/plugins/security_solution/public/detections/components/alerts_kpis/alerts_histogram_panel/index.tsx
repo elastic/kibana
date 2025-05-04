@@ -41,7 +41,6 @@ import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
-import { getTotalCountFromTables } from '../../../../common/components/visualization_actions/get_total_count_from_tables';
 import { SHOWING_ALERTS } from './translations';
 
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
@@ -158,7 +157,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       visualizationId,
     });
 
-    const totalTableCount = useMemo(() => getTotalCountFromTables(tables), [tables]);
+    const totalTableCount = tables && tables.meta.statistics.totalCount;
 
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
