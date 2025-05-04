@@ -7,13 +7,17 @@
 
 import { Logger } from '@kbn/core/server';
 import { InferenceTracingPhoenixExportConfig } from '@kbn/inference-common';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { ReadableSpan } from '@opentelemetry/sdk-trace-node';
 import { memoize } from 'lodash';
+import {
+  SEMRESATTRS_PROJECT_NAME,
+  SemanticConventions,
+} from '@arizeai/openinference-semantic-conventions';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
-import { GenAISemanticConventions } from '../types';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from '../types';
 import { getChatSpan } from './get_chat_span';
 import { getExecuteToolSpan } from './get_execute_tool_span';
+import { PhoenixProtoExporter } from './phoenix_otlp_exporter';
 
 export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
@@ -25,9 +29,9 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
       ...(config.api_key ? { Authorization: `Bearer ${config.api_key}` } : {}),
     };
 
-    const exporter = new OTLPTraceExporter({
-      url: `${config.base_url}`,
+    const exporter = new PhoenixProtoExporter({
       headers,
+      url: `${config.base_url}/v1/traces`,
     });
 
     super(exporter, config.scheduled_delay);
@@ -62,6 +66,10 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
 
   processInferenceSpan(span: ReadableSpan): ReadableSpan {
     const operationName = span.attributes[GenAISemanticConventions.GenAIOperationName];
+    span.resource.attributes[SEMRESATTRS_PROJECT_NAME] = this.config.project_name ?? 'default';
+    span.attributes[SemanticConventions.OPENINFERENCE_SPAN_KIND] =
+      span.attributes[ElasticGenAIAttributes.InferenceSpanKind];
+
     if (operationName === 'chat') {
       span = getChatSpan(span);
     } else if (operationName === 'execute_tool') {

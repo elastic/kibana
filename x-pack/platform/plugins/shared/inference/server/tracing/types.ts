@@ -24,6 +24,12 @@ export enum GenAISemanticConventions {
   GenAIChoice = 'gen_ai.choice',
 }
 
+export enum ElasticGenAIAttributes {
+  ToolDescription = 'elastic.tool.description',
+  ToolParameters = 'elastic.tool.parameters',
+  InferenceSpanKind = 'elastic.inference.span.kind',
+}
+
 export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIUsageCost]?: number;
   [GenAISemanticConventions.GenAIUsageInputTokens]?: number;
@@ -37,6 +43,9 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIToolName]?: string;
   'input.value'?: any;
   'output.value'?: any;
+  [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'LLM' | 'TOOL';
+  [ElasticGenAIAttributes.ToolDescription]?: string;
+  [ElasticGenAIAttributes.ToolParameters]?: string;
 }
 
 interface GenAISemConvEvent<

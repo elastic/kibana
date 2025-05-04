@@ -24,6 +24,7 @@ import { withInferenceSpan } from './with_inference_span';
 import {
   AssistantMessageEvent,
   ChoiceEvent,
+  ElasticGenAIAttributes,
   GenAISemConvAttributes,
   GenAISemanticConventions,
   MessageEvent,
@@ -133,12 +134,12 @@ function mapAssistantResponse({
  */
 export function withChatCompleteSpan<T extends ChatCompleteCompositeResponse<ToolOptions, boolean>>(
   options: InferenceGenerationOptions,
-  cb: () => T
+  cb: (span?: Span) => T
 ): T;
 
 export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
-  cb: () => ChatCompleteCompositeResponse<ToolOptions, boolean>
+  cb: (span?: Span) => ChatCompleteCompositeResponse<ToolOptions, boolean>
 ): ChatCompleteCompositeResponse<ToolOptions, boolean> {
   const { system, messages, model, provider, ...attributes } = options;
 
@@ -149,6 +150,7 @@ export function withChatCompleteSpan(
       [GenAISemanticConventions.GenAIOperationName]: 'chat',
       [GenAISemanticConventions.GenAIResponseModel]: model ?? 'unknown',
       [GenAISemanticConventions.GenAISystem]: provider ?? 'unknown',
+      [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
     },
     (span) => {
       if (!span) {

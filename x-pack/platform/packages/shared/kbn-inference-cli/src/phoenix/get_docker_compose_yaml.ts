@@ -9,10 +9,10 @@ export function getDockerComposeYaml({
   ports,
   env,
 }: {
-  ports: { phoenix: number; phoenixGrpc: number };
+  ports: { phoenix: number };
   env: Record<string, any>;
 }) {
-  const { phoenix, phoenixGrpc } = ports;
+  const { phoenix } = ports;
 
   return `
 services:
@@ -20,7 +20,6 @@ services:
     image: arizephoenix/phoenix:latest # Must be greater than 4.0 version to work
     ports:
       - ${phoenix}:6006 # PHOENIX_PORT
-      - ${phoenixGrpc}:4317 # PHOENIX_GRPC_PORT
     environment:
       - PHOENIX_WORKING_DIR=/mnt/data
       - PHOENIX_HOST=${env.PHOENIX_HOST}

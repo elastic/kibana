@@ -30,7 +30,7 @@ export const configSchema = schema.object({
           }),
           schema.object({
             phoenix: schema.object({
-              base_url: schema.uri(),
+              base_url: schema.string(),
               public_url: schema.maybe(schema.uri()),
               project_name: schema.maybe(schema.string()),
               api_key: schema.maybe(schema.string()),

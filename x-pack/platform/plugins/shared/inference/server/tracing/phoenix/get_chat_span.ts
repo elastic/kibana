@@ -23,7 +23,6 @@ import {
   MESSAGE_TOOL_CALL_ID,
   MimeType,
   OUTPUT_VALUE,
-  OpenInferenceSpanKind,
   SemanticConventions,
   TOOL_CALL_FUNCTION_ARGUMENTS_JSON,
   TOOL_CALL_FUNCTION_NAME,
@@ -41,7 +40,6 @@ export function getChatSpan(span: ReadableSpan) {
     (event) => event.name !== GenAISemanticConventions.GenAIChoice
   );
 
-  span.attributes[SemanticConventions.OPENINFERENCE_SPAN_KIND] = OpenInferenceSpanKind.LLM;
   span.attributes[LLM_MODEL_NAME] = span.attributes[GenAISemanticConventions.GenAIResponseModel];
 
   span.attributes[INPUT_MIME_TYPE] = MimeType.JSON;

@@ -6,7 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { noop } from 'lodash';
+
+const noop = <T = unknown>(): T => {
+  return undefined as T;
+};
 
 /**
  * Safely parses a JSON string. If the string cannot be parsed, for instance
@@ -20,10 +23,10 @@ import { noop } from 'lodash';
  *                      function.
  * @returns             The parsed object, or `undefined` if an error occurs.
  */
-export function safeJsonParse(
+export function safeJsonParse<T = unknown>(
   value: string,
-  handleError: (error: Error) => void = noop
-): string | void {
+  handleError: (error: Error) => T = noop
+): T {
   try {
     return JSON.parse(value);
   } catch (error) {

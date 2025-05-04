@@ -17,7 +17,6 @@ import { untilContainerReady } from '../util/until_container_ready';
 import { getDockerComposeYaml } from './get_docker_compose_yaml';
 
 const PHOENIX_PORT = '6006';
-const PHOENIX_GRPC_PORT = '4317';
 const PHOENIX_HOST = '0.0.0.0';
 const PHOENIX_ENABLE_AUTH = false;
 const PHOENIX_SECRET = '';
@@ -45,7 +44,6 @@ export async function ensurePhoenix({ log, signal }: { log: ToolingLog; signal: 
   const env = mapValues(
     {
       PHOENIX_PORT,
-      PHOENIX_GRPC_PORT,
       PHOENIX_HOST,
       PHOENIX_ENABLE_AUTH,
       PHOENIX_SECRET,
@@ -63,7 +61,6 @@ export async function ensurePhoenix({ log, signal }: { log: ToolingLog; signal: 
     await getDockerComposeYaml({
       ports: {
         phoenix: Number(env.PHOENIX_PORT),
-        phoenixGrpc: Number(env.PHOENIX_GRPC_PORT),
       },
       env,
     })
@@ -98,7 +95,7 @@ export async function ensurePhoenix({ log, signal }: { log: ToolingLog; signal: 
       const lines = [
         `telemetry.enabled: true`,
         `telemetry.tracing.enabled: true`,
-        `xpack.inference.tracing.exporter.phoenix.base_url: "http://${env.PHOENIX_HOST}:${env.PHOENIX_GRPC_PORT}"`,
+        `xpack.inference.tracing.exporter.phoenix.base_url: "http://${env.PHOENIX_HOST}:${env.PHOENIX_PORT}"`,
         `xpack.inference.tracing.exporter.phoenix.public_url: "http://${env.PHOENIX_HOST}:${env.PHOENIX_PORT}"`,
         ...(env.PHOENIX_SECRET
           ? [`xpack.inference.tracing.exporter.phoenix.secret: "${env.PHOENIX_SECRET}"`]

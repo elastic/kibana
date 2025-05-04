@@ -9,7 +9,7 @@ import { Span } from '@opentelemetry/api';
 import { isPromise } from 'util/types';
 import { safeJsonStringify } from '@kbn/std';
 import { withInferenceSpan } from './with_inference_span';
-import { GenAISemanticConventions } from './types';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from './types';
 
 /**
  * Wrapper around {@link withInferenceSpan} that sets the right attributes for a execute_tool operation span.
@@ -17,21 +17,23 @@ import { GenAISemanticConventions } from './types';
  * @param cb
  */
 export function withExecuteToolSpan<T>(
-  options: string | { name: string; toolCallId?: string; input?: unknown },
+  options: string | { name: string; description?: string; toolCallId?: string; input?: unknown },
   cb: (span?: Span) => T
 ): T {
-  const { name, toolCallId, input } =
+  const { name, description, toolCallId, input } =
     typeof options === 'string'
-      ? { name: options, toolCallId: undefined, input: undefined }
+      ? { name: options, description: undefined, toolCallId: undefined, input: undefined }
       : options;
 
   return withInferenceSpan(
     {
-      name: 'execute_tool',
+      name: `execute_tool ${name}`,
       [GenAISemanticConventions.GenAIToolName]: name,
       [GenAISemanticConventions.GenAIOperationName]: 'execute_tool',
       [GenAISemanticConventions.GenAIToolCallId]: toolCallId,
-      'input.value': input,
+      [ElasticGenAIAttributes.InferenceSpanKind]: 'TOOL',
+      [ElasticGenAIAttributes.ToolDescription]: description,
+      [ElasticGenAIAttributes.ToolParameters]: safeJsonStringify(input),
     },
     (span) => {
       if (!span) {

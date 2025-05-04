@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { noop } from 'lodash';
+const noop = (): string | undefined => {
+  return undefined;
+};
 
 /**
  * Safely stringifies a value to JSON. If the value cannot be stringified,
@@ -24,8 +26,8 @@ import { noop } from 'lodash';
  */
 export function safeJsonStringify(
   value: unknown,
-  handleError: (error: Error) => void = noop
-): string | void {
+  handleError: (error: Error) => string | undefined = noop
+): string | undefined {
   try {
     return JSON.stringify(value);
   } catch (error) {
