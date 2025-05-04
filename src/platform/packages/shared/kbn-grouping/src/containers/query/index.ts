@@ -67,7 +67,13 @@ export const getGroupingQuery = ({
         script: {
           source:
             // when size()==0 or size() > MAX_RUNTIME_FIELD_SIZE, emits a uniqueValue as the value to represent this group
-            `def groupValues = doc[params['selectedGroup']]; int count = groupValues.size(); if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }` +
+            `def groupValues = [];
+if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+  groupValues = doc[params['selectedGroup']];
+}  
+int count = groupValues.size();
+if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
+` +
             /*
              * condition to decide between joining values or flattening based on shouldFlattenMultiValueField and groupByField parameters
              * if shouldFlattenMultiValueField is true, and the selectedGroup field is an array, then emit each value in the array
@@ -81,8 +87,8 @@ export const getGroupingQuery = ({
              * We will format into a proper array in parseGroupingQuery
              */
             (shouldFlattenMultiValueField
-              ? ` else { for (int i = 0; i < count && i < ${MAX_RUNTIME_FIELD_SIZE}; i++) { emit(groupValues[i]); } }`
-              : " else { emit(groupValues.join(params['uniqueValue']))}"),
+              ? `else { for (int i = 0; i < count && i < ${MAX_RUNTIME_FIELD_SIZE}; i++) { emit(groupValues[i]); } }`
+              : "else { emit(groupValues.join(params['uniqueValue']))}"),
           params: {
             selectedGroup: groupByField,
             uniqueValue,

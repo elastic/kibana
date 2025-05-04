@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_RUNTIME_FIELD_SIZE } from '@kbn/grouping/src';
 import { mockAlertSearchResponse } from '../../alerts_kpis/alerts_treemap_panel/alerts_treemap/lib/mocks/mock_alert_search_response';
 
 export const getQuery = (
@@ -96,8 +97,13 @@ export const getQuery = (
     groupByField: {
       type: 'keyword',
       script: {
-        source:
-          "def groupValues = doc[params['selectedGroup']]; int count = groupValues.size(); if (count == 0 || count > 100 ) { emit(params['uniqueValue']); } else { emit(groupValues.join(params['uniqueValue']))}",
+        source: `def groupValues = [];
+if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+  groupValues = doc[params['selectedGroup']];
+}  
+int count = groupValues.size();
+if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
+else { emit(groupValues.join(params['uniqueValue']))}`,
         params: {
           selectedGroup,
           uniqueValue,
