@@ -116,8 +116,6 @@ function logRouteError(
 
   if (errorStatusCode >= 500) {
     logger.error(errorMessage);
-  } else if (errorStatusCode < 500 && errorStatusCode >= 400) {
-    logger.warn(errorMessage);
   } else {
     logger.debug(errorMessage);
   }
