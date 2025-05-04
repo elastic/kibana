@@ -38,7 +38,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     void proxy.interceptTitle(expectedTitle);
-    void proxy.interceptConversation(expectedResponse);
+    void proxy.interceptWithResponse(expectedResponse);
 
     await testSubjects.setValue(ui.pages.conversations.chatInput, 'Hello');
     await testSubjects.pressEnter(ui.pages.conversations.chatInput);

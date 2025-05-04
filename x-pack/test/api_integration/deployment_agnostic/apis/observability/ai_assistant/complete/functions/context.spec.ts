@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       ({ getDocuments } = llmProxy.interceptScoreToolChoice(log));
 
-      void llmProxy.interceptConversation('Your favourite color is blue.');
+      void llmProxy.interceptWithResponse('Your favourite color is blue.');
 
       ({ messageAddedEvents } = await chatComplete({
         userPrompt,

@@ -198,7 +198,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               before(async () => {
                 void proxy.interceptTitle(expectedTitle);
-                void proxy.interceptConversation(expectedResponse);
+                void proxy.interceptWithResponse(expectedResponse);
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                 await testSubjects.pressEnter(ui.pages.conversations.chatInput);
@@ -270,7 +270,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               describe('and adding another prompt', () => {
                 before(async () => {
-                  void proxy.interceptConversation('My second response');
+                  void proxy.interceptWithResponse('My second response');
 
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
@@ -354,7 +354,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               describe('and sending another prompt', () => {
                 before(async () => {
-                  void proxy.interceptConversation(
+                  void proxy.interceptWithResponse(
                     'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
                   );
 

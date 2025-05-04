@@ -274,7 +274,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(status).to.be(200);
 
         void proxy.interceptTitle('This is a conversation title');
-        void proxy.interceptConversation('I, the LLM, hear you!');
+        void proxy.interceptWithResponse('I, the LLM, hear you!');
 
         const messages: Message[] = [
           {
@@ -440,7 +440,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('includes private KB instructions in the system message sent to the LLM', async () => {
-        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+        const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
         const messages: Message[] = [
           {
             '@timestamp': new Date().toISOString(),

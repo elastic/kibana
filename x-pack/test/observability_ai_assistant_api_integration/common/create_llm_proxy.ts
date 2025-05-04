@@ -151,7 +151,7 @@ export class LlmProxy {
     });
   }
 
-  interceptConversation(
+  interceptWithResponse(
     msg: string | string[],
     {
       name,
@@ -160,7 +160,9 @@ export class LlmProxy {
     } = {}
   ) {
     return this.intercept(
-      `Conversation: "${name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`}"`,
+      `interceptWithResponse: "${
+        name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`
+      }"`,
       // @ts-expect-error
       (body) => body.tool_choice?.function?.name === undefined,
       msg

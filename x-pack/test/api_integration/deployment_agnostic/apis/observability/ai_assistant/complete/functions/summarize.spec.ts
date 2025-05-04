@@ -39,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       // intercept the LLM request and return a fixed response
-      void proxy.interceptConversation('Hello from LLM Proxy');
+      void proxy.interceptWithResponse('Hello from LLM Proxy');
 
       await invokeChatCompleteWithFunctionRequest({
         connectorId,
