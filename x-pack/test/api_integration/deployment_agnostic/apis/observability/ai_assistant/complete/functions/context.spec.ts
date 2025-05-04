@@ -28,7 +28,7 @@ import {
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
-import { deleteIndexAssets } from '../../utils/index_assets';
+import { restoreIndexAssets } from '../../utils/index_assets';
 
 const screenContexts = [
   {
@@ -84,7 +84,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: llmProxy.getPort(),
       });
-      await deleteIndexAssets(es);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 

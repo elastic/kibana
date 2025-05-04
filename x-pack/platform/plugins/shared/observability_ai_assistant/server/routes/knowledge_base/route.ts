@@ -321,6 +321,10 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
     });
 
     await Promise.all(promises);
+
+    resources.logger.info(
+      `Imported ${resources.params.body.entries.length} knowledge base entries`
+    );
   },
 });
 
