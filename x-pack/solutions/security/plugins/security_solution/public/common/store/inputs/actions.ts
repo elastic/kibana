@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InspectQuery, Refetch, RefetchKql } from './model';
 import type { InputsModelId } from './constants';
-import type { VisualizationTablesWithMeta } from '../../types';
+import type { VisualizationTablesWithMeta } from '../../components/visualization_actions/types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/inputs');
 

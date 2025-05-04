@@ -15,7 +15,6 @@ import * as inputActions from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
-import { useVisualizationResponseMock } from './use_visualization_response.mock';
 import type { VisualizationTablesWithMeta } from './types';
 
 jest.mock('./lens_embeddable');
@@ -132,8 +131,6 @@ describe('VisualizationEmbeddable', () => {
   });
 
   describe('when data exists and no there is no searchSessionId', () => {
-    const noSearchSessionIdOkResponseMock =
-      useVisualizationResponseMock.buildNoSearchSessionIdOkResponse();
     const mockState = {
       ...mockGlobalState,
       inputs: {
