@@ -6,12 +6,11 @@
  */
 
 import {
-  IngestStreamGetResponse,
+  Streams,
   isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
-  isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import React, { ReactNode } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -48,7 +47,7 @@ export function RetentionMetadata({
   isLoadingStats,
   statsError,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
@@ -120,7 +119,7 @@ export function RetentionMetadata({
       {i18n.translate('xpack.streams.streamDetailLifecycle.inheritedFrom', {
         defaultMessage: 'Inherited from',
       })}{' '}
-      {isWiredStreamGetResponse(definition) ? (
+      {Streams.WiredStream.GetResponse.is(definition) ? (
         <EuiLink
           data-test-subj="streamsAppRetentionMetadataLink"
           target="_blank"
