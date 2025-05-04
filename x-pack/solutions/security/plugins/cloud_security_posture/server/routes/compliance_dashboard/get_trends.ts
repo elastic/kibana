@@ -46,18 +46,6 @@ export type Trends = Array<{
   clusters: Record<string, Stats>;
   benchmarks: Record<string, Stats>;
 }>;
-
-// export interface ScoreTrendAggregateResponse {
-//   by_namespace: Array<{
-//     namespace: string; // e.g., "default"
-//     totalFindings: number; // Sum of total_findings from all docs
-//     totalFailed: number;   // Sum of failed_findings from all docs
-//     totalPassed: number;   // Sum of passed_findings from all docs
-//     postureScore: number;  // (totalPassed / totalFindings) * 100
-//     documents: ScoreTrendDoc[]; // Raw documents from the "hits"
-//   }>;
-// }
-
 export interface ScoreTrendAggregateResponse {
   by_namespace: {
     buckets: Array<{
