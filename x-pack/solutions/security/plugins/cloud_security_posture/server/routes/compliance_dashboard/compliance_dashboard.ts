@@ -158,8 +158,6 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
 
         try {
           const esClient = cspContext.esClient.asCurrentUser;
-          // const response = await esClient.security.getUserPrivileges();
-          // console.log(JSON.stringify(response, null, 2));
           const encryptedSoClient = cspContext.encryptedSavedObjects;
           const filteredRules = await getMutedRulesFilterQuery(encryptedSoClient);
 

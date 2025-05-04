@@ -53,8 +53,7 @@ export async function scheduleFindingsStatsTask(
       id: CSPM_FINDINGS_STATS_TASK_ID,
       taskType: CSPM_FINDINGS_STATS_TASK_TYPE,
       schedule: {
-        // interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
-        interval: `30s`,
+        interval: `${CSPM_FINDINGS_STATS_INTERVAL}m`,
       },
       state: emptyState,
       params: {},
@@ -224,6 +223,16 @@ const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest =
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
     bool: {
+      must: [
+        {
+          range: {
+            '@timestamp': {
+              gte: 'now-1d',
+              lte: 'now',
+            },
+          },
+        },
+      ],
       must_not: filteredRules,
     },
   },

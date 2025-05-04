@@ -6,14 +6,11 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  CSPM_FINDINGS_STATS_INTERVAL,
-} from '../../../common/constants';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types_old';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 interface FindingsDetails {
   total_findings: number;
@@ -55,29 +52,12 @@ export interface ScoreTrendAggregateResponse {
         hits: {
           hits: Array<{
             _source: {
-              total_findings: number;
               '@timestamp': string;
-              score_by_cluster_id: Record<
-                string,
-                {
-                  total_findings: number;
-                  passed_findings: number;
-                  failed_findings: number;
-                }
-              >;
-              score_by_benchmark_id: Record<
-                string,
-                Record<
-                  string,
-                  {
-                    total_findings: number;
-                    passed_findings: number;
-                    failed_findings: number;
-                  }
-                >
-              >;
+              total_findings: number;
               passed_findings: number;
               failed_findings: number;
+              score_by_cluster_id: ScoreByClusterId;
+              score_by_benchmark_id: ScoreByBenchmarkId;
             };
           }>;
         };
@@ -87,8 +67,6 @@ export interface ScoreTrendAggregateResponse {
 }
 export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate): SearchRequest => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  // Amount of samples of the last 24 hours (accounting that we take a sample every 5 minutes)
-  // size: (24 * 60) / CSPM_FINDINGS_STATS_INTERVAL,
   size: 0,
   sort: '@timestamp:desc',
   query: {
@@ -112,13 +90,12 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate): SearchReq
   aggs: {
     by_namespace: {
       terms: {
-        field: 'namespace', // Use the `.keyword` field for exact matches
-        // size: 100, // Adjust this size based on the number of namespaces expected
+        field: 'namespace',
       },
       aggs: {
         all_scores: {
           top_hits: {
-            // size: 1000, // Adjust this size to include all documents for each namespace
+            size: 100, // size: 100, // Maximum top hits result window is 100 which represents > 8 hours of scores samples (CSPM_FINDINGS_STATS_INTERVAL)
             sort: [{ '@timestamp': { order: 'desc' } }],
             _source: {
               includes: [
@@ -192,14 +169,11 @@ export const getTrends = async (
     const trendsQueryResult = await esClient.search<unknown, ScoreTrendAggregateResponse>(
       getTrendsQuery(policyTemplate)
     );
-    // const trendsQueryResult = await esClient.search<unknown, unknown>(
-    //   getTrendsQuery(policyTemplate)
-    // );
-    console.log(JSON.stringify(trendsQueryResult, null, 2));
-    if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
+    if (!trendsQueryResult.aggregations?.by_namespace?.buckets)
+      throw new Error('missing trend results from score index');
 
     const scoreTrendDocs =
-      trendsQueryResult.aggregations?.by_namespace?.buckets?.map((bucket) => {
+      trendsQueryResult.aggregations.by_namespace.buckets.map((bucket) => {
         const namespace = bucket.key;
         const documents = bucket.all_scores?.hits?.hits?.map((hit) => hit._source) || [];
         return { [namespace]: { documents } };
@@ -212,10 +186,7 @@ export const getTrends = async (
       })
     );
 
-    console.log('-------------------------');
-    console.log(JSON.stringify(result, null, 2));
-    result['default'] = result['default'] || [];
-    return formatTrends(result['default']);
+    return formatTrends(result.default); // Return the trends for the default namespace until namespace support will be visible to users.
   } catch (err) {
     logger.error(`Failed to fetch trendlines data ${err.message}`);
     logger.error(err);
