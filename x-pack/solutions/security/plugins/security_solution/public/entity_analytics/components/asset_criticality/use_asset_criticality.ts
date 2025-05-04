@@ -84,12 +84,6 @@ export const useAssetCriticalityData = ({
         });
       }
 
-      console.log({
-        idField: params.idField,
-        idValue: params.idValue,
-        criticalityLevel: params.criticalityLevel,
-        refresh: 'wait_for',
-      });
       return createAssetCriticality({
         idField: params.idField,
         idValue: params.idValue,

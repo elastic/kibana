@@ -7,6 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useDocumentDetailsContext } from '../../document_details/shared/context';
+import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import {
   LeftPanelHeader,
@@ -77,14 +79,20 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
   } = params;
-
+  const { scopeId } = useDocumentDetailsContext();
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const source = getGenericEntity.data?._source;
 
   const tabs: LeftPanelTabsType = useMemo(() => {
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
-        ? [getInsightsInputTab({ name: value, fieldName: field })]
+        ? [
+            getInsightsInputTab({
+              name: value,
+              fieldName: field as EntityIdentifierFields.generic,
+              scopeId,
+            }),
+          ]
         : [];
 
     const fieldsTableTab = getFieldsTableTab({
@@ -94,12 +102,13 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
 
     return [fieldsTableTab, ...insightsTab];
   }, [
-    getGenericEntity.data,
-    field,
-    value,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    value,
+    field,
+    scopeId,
+    source,
   ]);
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(params, tabs);

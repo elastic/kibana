@@ -7,7 +7,6 @@
 
 import React, { useEffect } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   GENERIC_ENTITY_FLYOUT_OPENED,
@@ -52,7 +51,6 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
 }
 
 export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => {
-  const { openLeftPanel } = useExpandableFlyoutApi();
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!getGenericEntity.data?._source?.entity.id,
@@ -60,14 +58,21 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
     // @ts-ignore since this query is only enabled when the entity.id exists, we can safely assume that idValue won't be undefined
     idValue: getGenericEntity.data?._source?.entity.id,
   });
+  const { scopeId } = useDocumentDetailsContext();
+
+  const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
+    field: 'entity.id',
+    value: getGenericEntity.data?._source?.entity.id || '',
+    panelTab: 'fields',
+    entityDocId,
+    scopeId,
+  });
 
   useEffect(() => {
     if (getGenericEntity.data?._id) {
       uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, GENERIC_ENTITY_FLYOUT_OPENED);
     }
   }, [getGenericEntity.data?._id]);
-
-  const { scopeId } = useDocumentDetailsContext();
 
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
@@ -113,14 +118,6 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
 
   const source = getGenericEntity.data._source;
   const entity = getGenericEntity.data._source.entity;
-
-  const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    field: 'entity.id',
-    value: source?.entity.id,
-    panelTab: 'fields',
-    entityDocId,
-    scopeId,
-  });
 
   return (
     <>
