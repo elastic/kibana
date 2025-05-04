@@ -6,18 +6,16 @@
  */
 
 import { ModelValidation, joinValidation } from './validation/model_validation';
-import { base as nBase } from './base';
+import { BaseStream } from './base';
 import { GroupStream as nGroupStream } from './group';
-import { ingest as nIngest } from './ingest';
+import { IngestStream } from './ingest';
 import { UnwiredStream as nUnwiredStream } from './ingest/unwired';
 import { WiredStream as nWiredStream } from './ingest/wired';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
 export namespace Streams {
-  export import base = nBase;
-
-  export import ingest = nIngest;
+  export import ingest = IngestStream;
 
   export import WiredStream = nWiredStream;
   export import UnwiredStream = nUnwiredStream;
@@ -31,14 +29,13 @@ export namespace Streams {
     export type UpsertRequest = ingest.all.UpsertRequest | GroupStream.UpsertRequest;
   }
 
-  export const all: ModelValidation<base.Model, all.Model> = joinValidation(base, [
+  export const all: ModelValidation<BaseStream.Model, all.Model> = joinValidation(BaseStream, [
     ingest.all,
     GroupStream,
   ]);
 }
 
-Streams.base = nBase;
-Streams.ingest = nIngest;
+Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
 Streams.UnwiredStream = nUnwiredStream;
 Streams.GroupStream = nGroupStream;

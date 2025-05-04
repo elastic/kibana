@@ -937,7 +937,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             class="euiPagination__item"
           >
             <button
-              aria-current="true"
+              aria-current="page"
               aria-label="Page 1 of 5"
               class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
               data-test-subj="pagination-button-0"

@@ -24,7 +24,7 @@ describe('WiredStream', () => {
           },
         },
       },
-    ] satisfies WiredStream.Definition[])('is valid', (val) => {
+    ] satisfies WiredStream.Definition[])('is valid %s', (val) => {
       expect(WiredStream.Definition.is(val)).toBe(true);
       expect(WiredStream.Definition.right.parse(val)).toEqual(val);
     });
@@ -69,7 +69,7 @@ describe('WiredStream', () => {
           },
         },
       },
-    ])('is not valid', (val) => {
+    ])('is not valid %s', (val) => {
       expect(WiredStream.Definition.is(val as any)).toBe(false);
     });
   });
@@ -105,7 +105,7 @@ describe('WiredStream', () => {
         dashboards: [],
         queries: [],
       },
-    ] satisfies WiredStream.GetResponse[])('is valid', (val) => {
+    ] satisfies WiredStream.GetResponse[])('is valid %s', (val) => {
       expect(WiredStream.GetResponse.is(val)).toBe(true);
       expect(WiredStream.GetResponse.right.parse(val)).toEqual(val);
     });

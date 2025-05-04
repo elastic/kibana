@@ -19,9 +19,8 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
     obj.forEach((value) => {
       getFlattenedKeys(value, parentKey, keys);
     });
-  } else {
-    keys.add(parentKey);
   }
+  keys.add(parentKey);
   return keys;
 }
 
@@ -34,8 +33,8 @@ function parseStrict<TSchema extends z.Schema>(
     return next;
   }
 
-  const allInputKeys = Array.from(getFlattenedKeys(input.data).values());
-  const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>).values());
+  const allInputKeys = Array.from(getFlattenedKeys(input.data));
+  const allOutputKeys = Array.from(getFlattenedKeys(next.value as Record<string, any>));
 
   const excessKeys = difference(allInputKeys, allOutputKeys);
 
@@ -52,9 +51,32 @@ function parseStrict<TSchema extends z.Schema>(
 }
 
 export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
-  return new Proxy(schema, {
-    apply: (target, thisArg, args) => {
-      return parseStrict(schema, args[0]);
+  // We really only want to override _parse, but:
+  // - it should not have the same identity as the wrapped schema
+  // - all methods should be bound to the original schema
+  // if we use { ..., _parse: overrideParse } it won't work because Zod
+  // explicitly binds all properties in the constructor.
+  // so what we do is:
+  // - get the prototype of the schema
+  // - wrap the schema in a proxy
+  // - if there's a function being accessed, return one that is bound
+  // to the proxy receiver
+  // - if _parse is being accessed, override with our parseStrict fn
+  const proto = Object.getPrototypeOf(schema);
+  const proxy = new Proxy(schema, {
+    get(target, accessor, receiver) {
+      if (accessor === '_parse') {
+        return parseStrict.bind(null, schema);
+      }
+
+      const original = Reflect.getOwnPropertyDescriptor(target, accessor)?.value;
+
+      if (typeof original === 'function') {
+        return proto[accessor].bind(receiver);
+      }
+
+      return Reflect.get(target, accessor, receiver);
     },
   });
+  return proxy;
 }

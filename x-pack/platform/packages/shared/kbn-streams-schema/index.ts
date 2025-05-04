@@ -42,7 +42,7 @@ export {
   processorDefinitionSchema,
 } from './src/models/ingest/processors';
 
-export { type RoutingDefinition } from './src/models/ingest/routing';
+export { type RoutingDefinition, routingDefinitionListSchema } from './src/models/ingest/routing';
 
 export { type ContentPack, contentPackSchema } from './src/content';
 
@@ -84,15 +84,9 @@ export {
   type StreamQuery,
   type StreamQueryKql,
   upsertStreamQueryRequestSchema,
-  streamQuerySchema,
   streamQueryKqlSchema,
+  streamQuerySchema,
 } from './src/queries';
-
-export type {
-  SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsResponse,
-} from './src/api/significant_events/api';
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
@@ -133,3 +127,9 @@ export {
 } from './src/conditions';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
+
+export type {
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+  SignificantEventsResponse,
+} from './src/api/significant_events/api';

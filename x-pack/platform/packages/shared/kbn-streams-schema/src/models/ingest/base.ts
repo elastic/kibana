@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { base } from '../base';
+import { ModelValidation, modelValidation } from '../validation/model_validation';
+import { Validation, validation } from '../validation/validation';
 import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
-import { OmitName } from '../core';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import { BaseStream } from '../base';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -44,37 +43,41 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
 );
 
 /* eslint-disable @typescript-eslint/no-namespace */
-export namespace ingestBase {
-  export interface Definition extends base.Definition {
+export namespace IngestBaseStream {
+  export interface Definition extends BaseStream.Definition {
     ingest: IngestBase;
   }
 
-  export interface Source extends base.Source, ingestBase.Definition {}
+  export type Source<
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+  > = BaseStream.Source<TDefinition>;
 
-  export interface GetResponse extends base.GetResponse {
-    stream: Definition;
+  export interface GetResponse<
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+  > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
   }
 
-  export interface UpsertRequest extends base.UpsertRequest {
-    stream: OmitName<Definition>;
-  }
+  export type UpsertRequest<
+    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+  > = BaseStream.UpsertRequest<TDefinition>;
 
   export interface Model {
-    Definition: ingestBase.Definition;
-    Source: ingestBase.Source;
-    GetResponse: ingestBase.GetResponse;
-    UpsertRequest: ingestBase.UpsertRequest;
+    Definition: IngestBaseStream.Definition;
+    Source: IngestBaseStream.Source;
+    GetResponse: IngestBaseStream.GetResponse;
+    UpsertRequest: IngestBaseStream.UpsertRequest;
   }
 }
 
-export const ingestBase: ModelValidation<base.Model, ingestBase.Model> = modelValidation(base, {
-  Source: z.object({}),
-  Definition: z.object({
-    ingest: IngestBase.right,
-  }),
-  GetResponse: z.object({
-    privileges: ingestStreamPrivilegesSchema,
-  }),
-  UpsertRequest: z.object({}),
-});
+export const IngestBaseStream: ModelValidation<BaseStream.Model, IngestBaseStream.Model> =
+  modelValidation(BaseStream, {
+    Source: z.object({}),
+    Definition: z.object({
+      ingest: IngestBase.right,
+    }),
+    GetResponse: z.object({
+      privileges: ingestStreamPrivilegesSchema,
+    }),
+    UpsertRequest: z.object({}),
+  });

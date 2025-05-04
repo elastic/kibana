@@ -13,6 +13,7 @@ import {
   getConditionFields,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { WrongStreamTypeError } from '../../../../lib/streams/errors/wrong_stream_type_error';
 import {
@@ -29,9 +30,7 @@ export const sampleStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -111,9 +110,7 @@ export const unmanagedAssetDetailsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

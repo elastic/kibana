@@ -5,16 +5,15 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { IngestBase, ingestBase } from './base';
+import { IngestBase, IngestBaseStream } from './base';
 import {
   UnwiredIngestStreamEffectiveLifecycle,
   unwiredIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';
-import { base } from '../base';
 import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
-import { OmitName } from '../core';
 import { Validation, validation } from '../validation/validation';
 import { ModelValidation, modelValidation } from '../validation/model_validation';
+import { BaseStream } from '../base';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -34,22 +33,19 @@ export const UnwiredIngest: Validation<IngestBase, UnwiredIngest> = validation(
 );
 
 export namespace UnwiredStream {
-  export interface Definition extends ingestBase.Definition {
+  export interface Definition extends IngestBaseStream.Definition {
     ingest: UnwiredIngest;
   }
 
-  export interface Source extends base.Source, UnwiredStream.Definition {}
+  export type Source = IngestBaseStream.Source<UnwiredStream.Definition>;
 
-  export interface GetResponse extends ingestBase.GetResponse {
-    stream: Definition;
+  export interface GetResponse extends IngestBaseStream.GetResponse<Definition> {
     elasticsearch_assets?: ElasticsearchAssets;
     data_stream_exists: boolean;
     effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
   }
 
-  export interface UpsertRequest extends ingestBase.UpsertRequest {
-    stream: OmitName<Definition>;
-  }
+  export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
 
   export interface Model {
     Definition: UnwiredStream.Definition;
@@ -59,24 +55,22 @@ export namespace UnwiredStream {
   }
 }
 
-export const UnwiredStream: ModelValidation<base.Model, UnwiredStream.Model> = modelValidation(
-  base,
-  {
+export const UnwiredStream: ModelValidation<BaseStream.Model, UnwiredStream.Model> =
+  modelValidation(BaseStream, {
     Definition: z.intersection(
-      ingestBase.Definition.right,
+      IngestBaseStream.Definition.right,
       z.object({
         ingest: IngestUnwired,
       })
     ),
-    Source: z.intersection(ingestBase.Source.right, z.object({})),
+    Source: z.intersection(IngestBaseStream.Source.right, z.object({})),
     GetResponse: z.intersection(
-      ingestBase.GetResponse.right,
+      IngestBaseStream.GetResponse.right,
       z.object({
         elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
         data_stream_exists: z.boolean(),
         effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
       })
     ),
-    UpsertRequest: z.intersection(ingestBase.UpsertRequest.right, z.object({})),
-  }
-);
+    UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
+  });

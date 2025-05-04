@@ -22,6 +22,7 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import { Observable, map, from as rxjsFrom } from 'rxjs';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import {
   GeneratedSignificantEventQuery,
@@ -262,9 +263,7 @@ const readSignificantEventsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ params, request, getScopedClients }): Promise<SignificantEventsGetResponse> => {

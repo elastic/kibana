@@ -9,6 +9,7 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { estypes } from '@elastic/elasticsearch';
 import { Streams, UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
@@ -26,9 +27,7 @@ export const listStreamsRoute = createServerRoute({
   params: z.object({}),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
@@ -65,9 +64,7 @@ export const streamDetailRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -117,9 +114,7 @@ export const resolveIndexRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

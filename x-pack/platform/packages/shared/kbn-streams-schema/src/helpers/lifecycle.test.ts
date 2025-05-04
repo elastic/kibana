@@ -56,35 +56,6 @@ describe('Lifecycle helpers', () => {
         dsl: { data_retention: '1d' },
       });
     });
-
-    // it('returns undefined if no lifecycle defined in the chain', () => {
-    //   createMockWiredStream('one.two.three', { inherit: {} });
-    //   const definition = createMockWiredStream('one.two.three', { inherit: {} });
-    //   const ancestors = [
-    //     createMockWiredStream('one.two', { inherit: {} }),
-    //     createMockWiredStream('one', { disabled: {} }),
-    //     {
-    //       name: 'one.two',
-
-    //       ingest: { lifecycle: { inherit: {} } },
-    //       wired: { fields: {}, routing: [] },
-    //       processing: [],
-    //     },
-    //     {
-    //       name: 'one',
-    //       ingest: { lifecycle: { disabled: {} } },
-    //       wired: { fields: {}, routing: [] },
-    //       processing: [],
-    //     },
-    //   ] as WiredStreamDefinition[];
-
-    //   const lifecycle = findInheritedLifecycle(definition, ancestors);
-
-    //   expect(lifecycle).toEqual({
-    //     from: 'one',
-    //     disabled: {},
-    //   });
-    // });
   });
 
   describe('findInheritingStreams', () => {

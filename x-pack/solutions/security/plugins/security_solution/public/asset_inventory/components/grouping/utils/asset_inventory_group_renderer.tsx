@@ -106,7 +106,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
                     `}
                     title={bucket.entityType?.buckets?.[0]?.key as string}
                   >
-                    {getGroupPanelTitle('entityType')}
+                    {getGroupPanelTitle()}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -121,7 +121,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {cloudProvider && (
             <EuiFlexItem grow={0}>
-              <CloudProviderIcon cloudProvider={cloudProvider} />
+              <CloudProviderIcon size="xl" cloudProvider={cloudProvider} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
@@ -141,12 +141,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle('source')}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {bucket.source?.buckets?.[0]?.key}
-                </EuiText>
+                <EuiText size="s">{getGroupPanelTitle()}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

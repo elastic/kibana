@@ -90,7 +90,7 @@ pageLoadAssetSize:
   lens: 76079
   licenseManagement: 41817
   licensing: 29004
-  links: 8000
+  links: 8200
   lists: 22900
   logsDataAccess: 16759
   logsShared: 281060
@@ -168,7 +168,6 @@ pageLoadAssetSize:
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
-  unifiedHistogram: 19928
   unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000

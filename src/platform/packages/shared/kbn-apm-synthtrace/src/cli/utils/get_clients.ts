@@ -47,16 +47,16 @@ export async function getClients({
     kibanaClient: options.kibana,
   });
 
-  const version = packageVersion;
+  let version = packageVersion;
 
-  // if (!version) {
-  //   version = await apmKibanaClient.fetchLatestApmPackageVersion();
-  //   if (!skipBootstrap) {
-  //     await apmKibanaClient.installApmPackage(version);
-  //   }
-  // } else if (version === 'latest') {
-  //   version = await apmKibanaClient.fetchLatestApmPackageVersion();
-  // }
+  if (!version) {
+    version = await apmKibanaClient.fetchLatestApmPackageVersion();
+    if (!skipBootstrap) {
+      await apmKibanaClient.installApmPackage(version);
+    }
+  } else if (version === 'latest') {
+    version = await apmKibanaClient.fetchLatestApmPackageVersion();
+  }
 
   logger.debug(`Using package version: ${version}`);
 

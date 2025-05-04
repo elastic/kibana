@@ -5,14 +5,12 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { IngestBase, ingestBase } from './base';
-import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { base } from '../base';
+import { IngestBase, IngestBaseStream } from './base';
+import { RoutingDefinition, routingDefinitionListSchema } from './routing';
 import {
   WiredIngestStreamEffectiveLifecycle,
   wiredIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';
-import { OmitName } from '../core';
 import {
   FieldDefinition,
   InheritedFieldDefinition,
@@ -21,6 +19,7 @@ import {
 } from '../../fields';
 import { Validation, validation } from '../validation/validation';
 import { ModelValidation, modelValidation } from '../validation/model_validation';
+import { BaseStream } from '../base';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -34,7 +33,7 @@ interface IngestWired {
 const IngestWired: z.Schema<IngestWired> = z.object({
   wired: z.object({
     fields: fieldDefinitionSchema,
-    routing: z.array(routingDefinitionSchema),
+    routing: routingDefinitionListSchema,
   }),
 });
 
@@ -53,37 +52,37 @@ export namespace WiredStream {
     UpsertRequest: WiredStream.UpsertRequest;
   }
 
-  export interface Definition extends ingestBase.Definition {
+  export interface Definition extends IngestBaseStream.Definition {
     ingest: WiredIngest;
   }
 
-  export interface Source extends base.Source, WiredStream.Definition {}
+  export type Source = IngestBaseStream.Source<WiredStream.Definition>;
 
-  export interface GetResponse extends ingestBase.GetResponse {
-    stream: Definition;
+  export interface GetResponse extends IngestBaseStream.GetResponse<Definition> {
     inherited_fields: InheritedFieldDefinition;
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
   }
 
-  export interface UpsertRequest extends ingestBase.UpsertRequest {
-    stream: OmitName<Definition>;
-  }
+  export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
 }
 
-export const WiredStream: ModelValidation<base.Model, WiredStream.Model> = modelValidation(base, {
-  Definition: z.intersection(
-    ingestBase.Definition.right,
-    z.object({
-      ingest: IngestWired,
-    })
-  ),
-  Source: z.intersection(ingestBase.Definition.right, z.object({})),
-  GetResponse: z.intersection(
-    ingestBase.GetResponse.right,
-    z.object({
-      inherited_fields: inheritedFieldDefinitionSchema,
-      effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
-    })
-  ),
-  UpsertRequest: z.intersection(ingestBase.UpsertRequest.right, z.object({})),
-});
+export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> = modelValidation(
+  BaseStream,
+  {
+    Definition: z.intersection(
+      IngestBaseStream.Definition.right,
+      z.object({
+        ingest: IngestWired,
+      })
+    ),
+    Source: z.intersection(IngestBaseStream.Definition.right, z.object({})),
+    GetResponse: z.intersection(
+      IngestBaseStream.GetResponse.right,
+      z.object({
+        inherited_fields: inheritedFieldDefinitionSchema,
+        effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+      })
+    ),
+    UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
+  }
+);

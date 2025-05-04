@@ -7,6 +7,8 @@
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 
@@ -99,7 +101,7 @@ describe('Paginated Table Component', () => {
       expect(screen.getByTestId('numberedPagination')).toBeInTheDocument();
 
       const firstButton = screen.getByTestId('pagination-button-0');
-      expect(firstButton).toHaveAttribute('aria-current', 'true');
+      expect(firstButton).toHaveAttribute('aria-current', 'page');
       expect(firstButton).toHaveAttribute('aria-label', 'Page 1 of 10');
     });
 
@@ -177,7 +179,7 @@ describe('Paginated Table Component', () => {
     test('should update the page when the activePage is changed from redux', async () => {
       const { rerender } = renderComponent({ activePage: 3 });
       const beforeActiveButton = screen.getByTestId('pagination-button-3');
-      expect(beforeActiveButton).toHaveAttribute('aria-current', 'true');
+      expect(beforeActiveButton).toHaveAttribute('aria-current', 'page');
       expect(beforeActiveButton).toHaveAttribute('aria-label', 'Page 4 of 10');
 
       rerender(
@@ -188,7 +190,7 @@ describe('Paginated Table Component', () => {
 
       await waitFor(() => {
         const afterActiveButton = screen.getByTestId('pagination-button-0');
-        expect(afterActiveButton).toHaveAttribute('aria-current', 'true');
+        expect(afterActiveButton).toHaveAttribute('aria-current', 'page');
         expect(afterActiveButton).toHaveAttribute('aria-label', 'Page 1 of 10');
       });
     });
