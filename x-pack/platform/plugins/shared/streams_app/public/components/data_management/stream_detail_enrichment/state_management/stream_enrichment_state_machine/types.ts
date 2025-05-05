@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { TimeState } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -29,11 +29,11 @@ export interface StreamEnrichmentServiceDependencies {
 }
 
 export interface StreamEnrichmentInput {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }
 
 export interface StreamEnrichmentContextType {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];
   simulatorRef?: SimulationActorRef;
@@ -41,7 +41,7 @@ export interface StreamEnrichmentContextType {
 
 export type StreamEnrichmentEvent =
   | ProcessorToParentEvent
-  | { type: 'stream.received'; definition: IngestStreamGetResponse }
+  | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
   | { type: 'stream.reset' }
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
