@@ -27,6 +27,7 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-user-profile-browser",
     "@kbn/datemath",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*",

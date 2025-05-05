@@ -13,6 +13,9 @@
     "server": true,
     "requiredBundles": [
       "kibanaUtils"
-    ]
+    ],
+    // "requiredPlugins": [
+    //   "taskManager"
+    // ], < causes a circular dependency
   }
 }

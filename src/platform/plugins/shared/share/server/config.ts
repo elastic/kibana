@@ -15,6 +15,16 @@ export const configSchema = schema.object({
       defaultValue: false,
     }),
   }),
+  urlExpiryDuration: schema.maybe(
+    schema.string({
+      validate: (value) => {
+        const rangeRegex = /\d+[yMwdhms]/;
+        if (!rangeRegex.test(value)) {
+          return `Invalid value: ${value}. Expected format: <number><unit>, where unit is one of y, M, w, d, h, m, s.`;
+        }
+      },
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
