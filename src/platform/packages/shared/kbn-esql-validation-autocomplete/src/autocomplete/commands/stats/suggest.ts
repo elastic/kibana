@@ -185,9 +185,10 @@ function suggestColumns(
     },
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
       // field<suggest>
-      const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
-      finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
-
+      const finalSuggestions = [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+      ];
       return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
         ...s,
         filterText: fragment,
