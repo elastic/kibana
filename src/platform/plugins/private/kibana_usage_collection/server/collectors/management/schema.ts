@@ -591,10 +591,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmServiceInventoryOptimizedSorting': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmTraceExplorerTab': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
