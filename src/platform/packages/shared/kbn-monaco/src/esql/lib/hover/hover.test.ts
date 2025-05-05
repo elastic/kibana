@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../monaco_imports';
-import { getHoverItem } from './hover';
 import {
   ESQLRealField,
   getFunctionDefinition,
@@ -17,6 +15,8 @@ import {
 import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { monaco } from '../../../monaco_imports';
+import { getHoverItem } from './hover';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
@@ -113,11 +113,6 @@ describe('hover', () => {
     ],
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) => {
-    const token: monaco.CancellationToken = {
-      isCancellationRequested: false,
-      onCancellationRequested: () => ({ dispose: () => {} }),
-    };
-
     const { model, position } = createModelAndPosition(statement, triggerString);
     const testFn = only ? test.only : skip ? test.skip : test;
     const expected = contentFn(triggerString);
@@ -128,7 +123,7 @@ describe('hover', () => {
       })=> ["${expected.join('","')}"]`,
       async () => {
         const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
-        const { contents } = await getHoverItem(model, position, token, callbackMocks);
+        const { contents } = await getHoverItem(model, position, callbackMocks);
         expect(contents.map(({ value }) => value)).toEqual(expected);
       }
     );

@@ -11,6 +11,7 @@ import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cance
 import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
+import { postAttackDiscoveryBulkRoute } from './attack_discovery/post/post_attack_discovery_bulk';
 import { ElasticAssistantPluginRouter } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
@@ -56,11 +57,11 @@ import type { ConfigSchema } from '../config_schema';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  config?: ConfigSchema
+  config: ConfigSchema
 ) => {
   /** PUBLIC */
   // Chat
-  chatCompleteRoute(router);
+  chatCompleteRoute(router, config);
 
   /** INTERNAL */
   // Capabilities
@@ -93,7 +94,7 @@ export const registerRoutes = (
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
-  postActionsConnectorExecuteRoute(router);
+  postActionsConnectorExecuteRoute(router, config);
 
   // Evaluate
   getEvaluateRoute(router);
@@ -109,6 +110,7 @@ export const registerRoutes = (
 
   // Attack Discovery
   findAttackDiscoveriesRoute(router);
+  postAttackDiscoveryBulkRoute(router);
   getAttackDiscoveryGenerationsRoute(router);
   postAttackDiscoveryGenerationsDismissRoute(router);
   getAttackDiscoveryRoute(router);

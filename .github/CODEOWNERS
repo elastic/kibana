@@ -596,6 +596,7 @@ x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
+packages/kbn-lock-manager @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
@@ -1578,6 +1579,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/painless_lab/ui_tests # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/filebeat @elastic/appex-qa

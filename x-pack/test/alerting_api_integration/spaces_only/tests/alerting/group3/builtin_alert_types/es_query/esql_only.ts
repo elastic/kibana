@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_URL, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -34,6 +34,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     esTestIndexToolOutput,
     esTestIndexToolDataStream,
     createEsDocumentsInGroups,
+    createGroupedEsDocumentsInGroups,
     removeAllAADDocs,
     getAllAADDocs,
   } = getRuleServices(getService);
@@ -69,20 +70,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     it('runs correctly: threshold on ungrouped hit count < >', async () => {
       // write documents from now to the future end date in groups
-      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery:
-          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
+        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) by group | where c < 0',
       });
       await createRule({
         name: 'always fire',
         esqlQuery:
-          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
+          'from .kibana-alerting-test-data | stats c = count(date) by group | where c > -1',
       });
 
       const docs = await waitForDocs(2);
-      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
@@ -91,23 +90,158 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        expect(message).to.match(messagePattern);
+        expect(message).to.be(`Document count is 3 in the last 30s. Alert when greater than 0.`);
         expect(hits).not.to.be.empty();
       }
 
       const aadDocs = await getAllAADDocs(1);
 
       const alertDoc = aadDocs.body.hits.hits[0]._source;
-      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      expect(alertDoc[ALERT_REASON]).to.be(
+        'Document count is 3 in the last 30s. Alert when greater than 0.'
+      );
       expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
       expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
       expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
       const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
       expect(value).greaterThan(0);
       expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
-      expect(alertDoc['host.name']).to.eql(['host-1']);
-      expect(alertDoc['host.hostname']).to.eql(['host-1']);
-      expect(alertDoc['host.id']).to.eql(['1']);
+    });
+
+    it('runs correctly: threshold on grouped hit with stats...by', async () => {
+      // write documents from now to the future end date in groups
+      await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'never fire',
+        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) by group | where c < 0',
+        groupBy: 'row',
+      });
+      await createRule({
+        name: 'always fire',
+        esqlQuery:
+          'from .kibana-alerting-test-data | stats c = count(date) by group | where c > -1',
+        groupBy: 'row',
+      });
+
+      const docs = await waitForDocs(6);
+      const titlePattern = /rule 'always fire' matched query for group group-\d/;
+      const messagePattern =
+        /Document count is 1 in the last 30s for group-\d. Alert when greater than 0./;
+      const conditionPattern = /Query matched documents for group "group-\d"/;
+
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.match(titlePattern);
+        expect(message).to.match(messagePattern);
+        expect(hits).not.to.be.empty();
+      }
+
+      const aadDocs = await getAllAADDocs(3, ALERT_INSTANCE_ID);
+      for (let i = 0; i < aadDocs.body.hits.hits.length; i++) {
+        const alertDoc = aadDocs.body.hits.hits[i]._source;
+        expect(alertDoc[ALERT_INSTANCE_ID]).to.be(`group-${i}`);
+        expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
+        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+        expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
+        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
+        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+        expect(value).to.be(1);
+        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      }
+    });
+
+    it('runs correctly: threshold on grouped hit with METADATA _id', async () => {
+      // write documents from now to the future end date in groups
+      await createGroupedEsDocumentsInGroups(1, endDate);
+      await createRule({
+        name: 'never fire',
+        esqlQuery: 'from .kibana-alerting-test-data METADATA _id | KEEP group, _id | limit 0',
+        groupBy: 'row',
+      });
+      await createRule({
+        name: 'always fire',
+        esqlQuery: 'from .kibana-alerting-test-data METADATA _id | keep group, _id | limit 10',
+        groupBy: 'row',
+      });
+
+      const docs = await waitForDocs(4);
+      const titlePattern =
+        /rule 'always fire' matched query for group [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
+      const messagePattern =
+        /Document count is 1 in the last 30s for [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}. Alert when greater than 0./;
+      const conditionPattern =
+        /Query matched documents for group "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"/;
+      const idPattern =
+        /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
+
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.match(titlePattern);
+        expect(message).to.match(messagePattern);
+        expect(hits).not.to.be.empty();
+      }
+
+      const aadDocs = await getAllAADDocs(2);
+      for (let i = 0; i < aadDocs.body.hits.hits.length; i++) {
+        const alertDoc = aadDocs.body.hits.hits[i]._source;
+        expect(alertDoc[ALERT_INSTANCE_ID]).to.match(idPattern);
+        expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
+        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+        expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
+        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
+        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+        expect(value).to.be(1);
+        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      }
+    });
+
+    it('runs correctly: threshold on grouped hit with all columns', async () => {
+      // write documents from now to the future end date in groups
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'never fire',
+        esqlQuery: 'from .kibana-alerting-test-data | limit 0',
+        groupBy: 'row',
+      });
+      await createRule({
+        name: 'always fire',
+        esqlQuery: 'from .kibana-alerting-test-data',
+        groupBy: 'row',
+      });
+
+      const docs = await waitForDocs(6);
+      const titlePattern = /rule 'always fire' matched query for group .*/;
+      const messagePattern =
+        /Document count is 1 in the last 30s for .*\. Alert when greater than 0\./;
+      const conditionPattern = /Query matched documents for group ".*"/;
+
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+        expect(name).to.be('always fire');
+        expect(title).to.match(titlePattern);
+        expect(message).to.match(messagePattern);
+        expect(hits).not.to.be.empty();
+      }
+
+      const aadDocs = await getAllAADDocs(3);
+      for (let i = 0; i < aadDocs.body.hits.hits.length; i++) {
+        const alertDoc = aadDocs.body.hits.hits[i]._source;
+        expect(alertDoc['kibana.alert.title']).to.match(titlePattern);
+        expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+        expect(alertDoc['kibana.alert.evaluation.conditions']).to.match(conditionPattern);
+        expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
+        const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+        expect(value).to.be(1);
+        expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      }
     });
 
     it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
@@ -202,6 +336,44 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredMessage).to.match(
         /Document count is \d+ in the last 6s. Alert when greater than 0./
       );
+    });
+
+    it('runs correctly and populates source data', async () => {
+      await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
+      await createRule({
+        name: 'never fire',
+        esqlQuery:
+          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
+      });
+      await createRule({
+        name: 'always fire',
+        esqlQuery:
+          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
+      });
+
+      const docs = await waitForDocs(2);
+      const messagePattern = /Document count is \d+ in the last 30s. Alert when greater than 0./;
+
+      for (let i = 0; i < docs.length; i++) {
+        const doc = docs[i];
+        const { hits } = doc._source;
+        const { name, title, message } = doc._source.params;
+
+        expect(name).to.be('always fire');
+        expect(title).to.be(`rule 'always fire' matched query`);
+        expect(message).to.match(messagePattern);
+        expect(hits).not.to.be.empty();
+      }
+
+      const aadDocs = await getAllAADDocs(1);
+
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      expect(alertDoc['host.name']).to.eql(['host-1']);
+      expect(alertDoc['host.hostname']).to.eql(['host-1']);
+      expect(alertDoc['host.id']).to.eql(['1']);
     });
 
     it('runs correctly over a data stream: threshold on hit count < >', async () => {

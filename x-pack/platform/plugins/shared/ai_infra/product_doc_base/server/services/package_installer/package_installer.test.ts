@@ -125,6 +125,7 @@ describe('PackageInstaller', () => {
 
       expect(populateIndexMock).toHaveBeenCalledTimes(1);
       expect(populateIndexMock).toHaveBeenCalledWith({
+        elserInferenceId: defaultInferenceEndpoints.ELSER,
         indexName,
         archive: zipArchive,
         manifestVersion: TEST_FORMAT_VERSION,

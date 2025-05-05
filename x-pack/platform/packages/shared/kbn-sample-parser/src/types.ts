@@ -7,5 +7,6 @@
 
 export interface LoghubParser {
   getTimestamp: (logLine: string) => number;
+  getFakeMetadata: (logLine: string) => Record<string, unknown>;
   replaceTimestamp: (logLine: string, timestamp: number) => string;
 }

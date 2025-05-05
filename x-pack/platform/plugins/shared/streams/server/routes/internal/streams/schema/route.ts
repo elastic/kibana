@@ -5,12 +5,9 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import {
-  SampleDocument,
-  fieldDefinitionConfigSchema,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
@@ -24,9 +21,7 @@ export const unmappedFieldsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -66,7 +61,7 @@ export const unmappedFieldsRoute = createServerRoute({
     // Mapped fields from the stream's definition and inherited from ancestors
     const mappedFields = new Set<string>();
 
-    if (isWiredStreamDefinition(streamDefinition)) {
+    if (Streams.WiredStream.Definition.is(streamDefinition)) {
       Object.keys(streamDefinition.ingest.wired.fields).forEach((name) => mappedFields.add(name));
     }
 
@@ -91,9 +86,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
