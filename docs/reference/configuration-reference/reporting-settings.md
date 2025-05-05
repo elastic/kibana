@@ -26,7 +26,7 @@ If a setting is applicable to {{ecloud}} Hosted environments, its name is follow
 
 ## Enable reporting [general-reporting-settings]
 
-$$$xpack-enable-reporting$$$`xpack.reporting.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$xpack-enable-reporting$$$`xpack.reporting.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   When `true`, enables the {{report-features}}. Set this to `false` to disable {{report-features}} entirely. The default is `true`.
 
 ::::{note}
@@ -44,7 +44,7 @@ By default, an encryption key is generated for the {{report-features}} each time
 
 If you are load balancing across multiple {{kib}} instances, each instance needs to have the same reporting encryption key. Otherwise, report generation fails if a report is queued through one instance, and another instance picks up the job from the report queue. The instance that picks up the job is unable to decrypt the reporting job metadata.
 
-$$$xpack-reporting-encryptionKey$$$ `xpack.reporting.encryptionKey` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$xpack-reporting-encryptionKey$$$ `xpack.reporting.encryptionKey` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The static encryption key for reporting. Use an alphanumeric text string that is at least 32 characters. By default, {{kib}} generates a random key when it starts, which causes pending reports to fail after restart. Configure `xpack.reporting.encryptionKey` to preserve the same key across multiple restarts and multiple {{kib}} instances.
 
 ```yaml
@@ -61,7 +61,7 @@ Reporting privileges are configured with [{{kib}} application privileges](docs-c
 
 Reporting generates reports on the {{kib}} server as background tasks, and jobs are coordinated using documents in {{es}}. Depending on how often you generate reports and the overall number of reports, you might need to change the following settings.
 
-`xpack.reporting.capture.maxAttempts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.reporting.capture.maxAttempts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   If capturing a report fails for any reason, {{kib}} will re-queue the report job for retry, as many times as this setting. Defaults to `3`.
 
 `xpack.reporting.queue.indexInterval`
@@ -78,7 +78,7 @@ Running multiple instances of {{kib}} in a cluster for load balancing of reporti
 `xpack.reporting.queue.pollInterval`
 :   Specifies the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as a number of milliseconds. Defaults to `3s`.
 
-$$$xpack-reporting-q-timeout$$$ `xpack.reporting.queue.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$xpack-reporting-q-timeout$$$ `xpack.reporting.queue.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   [How long](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) each worker has to produce a report. If your machine is slow or under heavy load, you might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked as a failure and no download will be available. Can be specified as a number of milliseconds. Defaults to `4m`.
 
 
@@ -96,13 +96,13 @@ To generate PDF and PNG files, Reporting uses an internal "screenshotting" plugi
 
 The following settings control the capturing process.
 
-`xpack.screenshotting.capture.timeouts.openUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.screenshotting.capture.timeouts.openUrl` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for the "Loading…​" screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
-`xpack.screenshotting.capture.timeouts.waitForElements` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.screenshotting.capture.timeouts.waitForElements` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
-`xpack.screenshotting.capture.timeouts.renderComplete` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.screenshotting.capture.timeouts.renderComplete` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specify the [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `2m`.
 
 ::::{note}
@@ -231,11 +231,11 @@ Reporting parameters can be adjusted to overcome some of these limiting scenario
 
 ::::
 
-`xpack.reporting.csv.maxConcurrentShardRequests` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.reporting.csv.maxConcurrentShardRequests` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Sets the maximum number of concurrent shard requests that each sub-search request executes per node during Kibana CSV export. Defaults to `5`. This setting is available in 8.12.0 and later versions in {{ecloud}}.
 % TBD: Is this setting applicable only to Elastic Cloud?
 
-$$$xpack-reporting-csv$$$ `xpack.reporting.csv.maxSizeBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$xpack-reporting-csv$$$ `xpack.reporting.csv.maxSizeBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The maximum [byte size](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#byte-units) of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
 
 `xpack.reporting.csv.scroll.size`
