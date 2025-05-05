@@ -184,7 +184,7 @@ export function getMsFromIntervalESLiteral(interval: string | undefined): number
     return;
   }
   const { value, unit } = parseInterval(interval, false);
-  if (value == null || value === '' || unit == null) {
+  if (value == null || unit == null) {
     return;
   }
   if (!validUnits.has(unit)) {
@@ -193,5 +193,7 @@ export function getMsFromIntervalESLiteral(interval: string | undefined): number
   const validUnit = unit === 'q' ? 'y' : unit;
   // translate the quarter notation into 1/4 * year
   const validValue = unit === 'q' ? parseInt(String(value), 10) * 0.25 : value;
-  return moment.duration(validValue, validUnit as unitOfTime.Base).asMilliseconds();
+  return moment
+    .duration(validValue === '' ? 1 : validValue, validUnit as unitOfTime.Base)
+    .asMilliseconds();
 }

@@ -66,7 +66,8 @@ describe('context variables', () => {
         { interval: '1', value: undefined },
         { interval: '1x', value: undefined },
         { interval: '1ss', value: undefined },
-        { interval: 's', value: undefined },
+        // short notation (e.g. selecting "Second" in the UI)
+        { interval: 's', value: { value: 1, unit: 'second' } },
       ])(
         'should inherit the $interval interval from the date histogram column if defined',
         ({ interval, value }) => {

@@ -79,8 +79,16 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
     if (!timeRange) {
       return 0;
     }
+
     if (args.override != null) {
-      return args.override;
+      // compute the smallest possible interval ES can use
+      const lowerBoundInterval = calcAutoIntervalNear(
+        // this is the max number of buckets ES can compute
+        1440,
+        getTimeRangeAsNumber(timeRange, now)
+      ).asMilliseconds();
+      // try to guess the same ES bucket size if the override is too small
+      return lowerBoundInterval < args.override ? args.override : lowerBoundInterval;
     }
     return args.targetBars
       ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
