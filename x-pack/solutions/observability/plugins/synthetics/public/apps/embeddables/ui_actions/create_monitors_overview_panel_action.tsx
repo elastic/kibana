@@ -41,6 +41,7 @@ export function createMonitorsOverviewPanelAction(
             defaultMessage: 'Create monitors overview',
           }
         ),
+        type: SYNTHETICS_MONITORS_EMBEDDABLE,
       });
       try {
         embeddable.addNewPanel({
