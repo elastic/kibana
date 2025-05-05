@@ -95,6 +95,31 @@ const mlLinks = [
   MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP,
 ];
 
+const linkedPagesAssertions = {
+  alert_summary: () => {
+    cy.getByTestSubjContains('alert-summary-landing-page-prompt').should('exist');
+  },
+  attack_discovery: () => {
+    cy.getByTestSubjContains('attackDiscoveryPageTitle').should('contain', 'Attack discovery');
+  },
+  cases: () => {
+    cy.getByTestSubjContains('header-page-title').should('contain', 'Cases');
+  },
+  configurations: () => {
+    cy.url().should('include', `/configurations/integrations`);
+    cy.get('.euiTab').then((tabs) => {
+      const tabNames = Array.from(tabs).map((tab) => tab.innerText);
+      expect(tabNames).to.deep.equal(['Integrations', 'Rules', 'AI settings']);
+    });
+  },
+  discover: () => {
+    cy.getByTestSubjContains('discoverSavedSearchTitle').should(
+      'contain',
+      'Discover - Search not yet saved'
+    );
+  },
+};
+
 describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
@@ -126,31 +151,8 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
         cy.url().should('include', `/${link}`);
         cy.getByTestSubjContains(`nav-item-id-${link}`).click();
 
-        if (link === 'alert_summary') {
-          cy.getByTestSubjContains('alert-summary-landing-page-prompt');
-        }
-
-        if (link === 'attack_discovery') {
-          cy.getByTestSubjContains('attackDiscoveryPageTitle').contains('Attack discovery');
-        }
-
-        if (link === 'cases') {
-          cy.getByTestSubjContains('header-page-title').contains('Cases');
-        }
-
-        if (link === 'configurations') {
-          cy.url().should('include', `/${link}/integrations`);
-          cy.get('.euiTab').then((tabs) => {
-            const tabNames = Array.from(tabs).map((tab) => tab.innerText);
-            expect(tabNames).to.deep.equal(['Integrations', 'Rules', 'AI settings']);
-          });
-        }
-
-        if (link === 'discover') {
-          cy.getByTestSubjContains('discoverSavedSearchTitle').contains(
-            'Discover - Search not yet saved'
-          );
-        }
+        // Assert that the page contains the expected content
+        linkedPagesAssertions[link]();
       });
     });
   });
@@ -170,7 +172,7 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
       upSellLinks.forEach((link) => {
         cy.visit(link);
         cy.url().should('include', link);
-        cy.get('.euiTitle').contains('Do more with Security');
+        cy.get('.euiTitle').should('contain', 'Do more with Security');
       });
     });
 
@@ -178,7 +180,7 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
       privilegeRequiredLinks.forEach((link) => {
         cy.visit(link);
         cy.url().should('include', link);
-        cy.getByTestSubjContains('noPrivilegesPage');
+        cy.getByTestSubjContains('noPrivilegesPage').should('exist');
       });
     });
 
@@ -186,7 +188,7 @@ describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
       mlLinks.forEach((link) => {
         cy.visit(link);
         cy.url().should('include', link);
-        cy.getByTestSubjContains('mlAccessDenied');
+        cy.getByTestSubjContains('mlAccessDenied').should('exist');
       });
     });
   });
