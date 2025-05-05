@@ -12,7 +12,7 @@ interface CompilerContext {
   tmpVarCounter: number;
 }
 
-export function compile(statement: AST.Statement): IngestProcessorContainer[] {
+export function compileOTTL(statement: AST.Statement): IngestProcessorContainer[] {
   const processors: IngestProcessorContainer[] = [];
   const context: CompilerContext = { tmpVarCounter: 0 };
   // Traverse the AST in post-order to compile OTTL to processors.

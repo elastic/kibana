@@ -9,6 +9,7 @@ import {
   DateProcessorConfig,
   DissectProcessorConfig,
   GrokProcessorConfig,
+  OTTLProcessorConfig,
   ProcessorDefinition,
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
@@ -31,7 +32,9 @@ export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
 
 export type DateFormState = DateProcessorConfig & { type: 'date' };
 
-export type SpecialisedFormState = GrokFormState | DissectFormState | DateFormState;
+export type OTTLFormState = OTTLProcessorConfig & { type: 'ottl' };
+
+export type SpecialisedFormState = GrokFormState | DissectFormState | DateFormState | OTTLFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 

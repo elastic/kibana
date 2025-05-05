@@ -7,7 +7,7 @@
 
 /* eslint-disable no-console */
 
-import { compile } from './compiler';
+import { compileOTTL } from './compiler';
 import { parseOttl } from './parser';
 
 describe('OTTL Parser', () => {
@@ -39,7 +39,7 @@ describe('OTTL Parser', () => {
     console.log(JSON.stringify(result1, null, 2));
     console.log(ottlExample1);
     // console.log(result1.ast!.editor.arguments[0].value.fields[0].keys); // Should print "user.id"
-    console.log(JSON.stringify(compile(result1.ast!), null, 2));
+    console.log(JSON.stringify(compileOTTL(result1.ast!), null, 2));
     // if (result1.errors.length > 0) console.error('Errors:', result1.errors);
 
     // console.log('\n--- Example 6 ---');

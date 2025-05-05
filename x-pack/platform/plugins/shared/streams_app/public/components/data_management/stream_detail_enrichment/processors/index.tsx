@@ -53,6 +53,7 @@ import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { OTTLProcessorForm } from './ottl';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -189,6 +190,7 @@ export function AddProcessorPanel() {
             {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
+            {type === 'ottl' && <OTTLProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
@@ -392,6 +394,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
             <EuiSpacer size="m" />
             {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
+            {type === 'ottl' && <OTTLProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />

@@ -7,3 +7,6 @@
 
 export * from './src/models';
 export * from './src/helpers';
+
+export { parseOttl } from './src/ottl/parser';
+export { compileOTTL } from './src/ottl/compiler';

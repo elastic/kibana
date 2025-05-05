@@ -156,6 +156,7 @@ export const simulateProcessing = async ({
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
+  console.log(JSON.stringify(pipelineSimulationBody, null, 2));
   const ingestSimulationBody = prepareIngestSimulationBody(simulationData, streamIndex, params);
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
@@ -616,8 +617,13 @@ const computeSimulationDocDiff = (
       flattenObjectNestedLast(nextDoc.value)
     );
 
-    const addedFields = Object.keys(flattenObjectNestedLast(added));
-    const updatedFields = Object.keys(flattenObjectNestedLast(updated));
+    const addedFields = Object.keys(flattenObjectNestedLast(added)).filter(
+      // TODO - this should work smarter, but I don't want to spend time on it right now
+      (field) => !field.startsWith('tmp_')
+    );
+    const updatedFields = Object.keys(flattenObjectNestedLast(updated)).filter(
+      (field) => !field.startsWith('tmp_')
+    );
 
     // Sort list to have deterministic list of results
     const processorDetectedFields = [...addedFields, ...updatedFields].sort().map((name) => ({

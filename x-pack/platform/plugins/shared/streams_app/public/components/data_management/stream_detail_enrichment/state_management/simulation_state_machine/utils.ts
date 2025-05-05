@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { Condition, FieldDefinition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
+import {
+  Condition,
+  FieldDefinition,
+  UnaryOperator,
+  getProcessorConfig,
+  parseOttl,
+} from '@kbn/streams-schema';
 import { isEmpty, uniq } from 'lodash';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
@@ -36,7 +42,23 @@ export function composeSamplingCondition(
 }
 
 export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors.map((processor) => getProcessorConfig(processor).field.trim()).filter(Boolean);
+  return processors
+    .map((processor) => {
+      const config = getProcessorConfig(processor);
+      if ('field' in config) {
+        return config.field.trim();
+      }
+      if ('statement' in config) {
+        const statement = config.statement;
+        const parsedStatement = parseOttl(statement);
+        // TODO - this should be much smarter, but I don't want to spend too much time on it
+        if (parsedStatement.ast && statement.includes('body.text')) {
+          return 'body.text';
+        }
+      }
+      return undefined;
+    })
+    .filter((x) => Boolean(x)) as string[];
 }
 
 export function getTableColumns(

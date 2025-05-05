@@ -25,6 +25,29 @@ const processorBaseSchema = z.object({
   ignore_failure: z.optional(z.boolean()),
 });
 
+/* OTTL processor */
+
+export interface OTTLProcessorConfig extends ProcessorBase {
+  statement: string;
+  ignore_failure?: boolean;
+  tag?: string;
+  on_failure?: Array<Record<string, unknown>>;
+}
+export interface OTTLProcessorDefinition {
+  ottl: OTTLProcessorConfig;
+}
+
+export const ottlProcessorDefinitionSchema = z.strictObject({
+  ottl: z.intersection(
+    processorBaseSchema,
+    z.object({
+      statement: NonEmptyString,
+      tag: z.optional(z.string()),
+      on_failure: z.optional(z.array(z.record(z.unknown()))),
+    })
+  ),
+}) satisfies z.Schema<OTTLProcessorDefinition>;
+
 /**
  * Grok processor
  */
@@ -294,6 +317,7 @@ export type ProcessorDefinition =
   | GeoIpProcessorDefinition
   | RenameProcessorDefinition
   | SetProcessorDefinition
+  | OTTLProcessorDefinition
   | UrlDecodeProcessorDefinition
   | UserAgentProcessorDefinition;
 
@@ -319,6 +343,7 @@ export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union
   setProcessorDefinitionSchema,
   urlDecodeProcessorDefinitionSchema,
   userAgentProcessorDefinitionSchema,
+  ottlProcessorDefinitionSchema,
 ]);
 
 export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithId> = z.union([
@@ -331,11 +356,17 @@ export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithI
   setProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   urlDecodeProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   userAgentProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  ottlProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
 ]);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(
   processorDefinitionSchema,
   grokProcessorDefinitionSchema
+);
+
+export const isOttlProcessorDefinition = createIsNarrowSchema(
+  processorDefinitionSchema,
+  ottlProcessorDefinitionSchema
 );
 
 export const isDissectProcessorDefinition = createIsNarrowSchema(

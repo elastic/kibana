@@ -23,6 +23,7 @@ import {
   ProcessorFormState,
   WithUIAttributes,
   DateFormState,
+  OTTLFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -109,6 +110,12 @@ const defaultGrokProcessorFormState: (sampleDocs: FlattenRecord[]) => GrokFormSt
   if: ALWAYS_CONDITION,
 });
 
+const defaultOttlProcessorFormState: () => OTTLFormState = () => ({
+  type: 'ottl',
+  statement: '',
+  if: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -123,6 +130,7 @@ const defaultProcessorFormStateByType: Record<
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
+  ottl: defaultOttlProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -142,6 +150,15 @@ export const getFormStateFrom = (
       ...grok,
       type: 'grok',
       patterns: grok.patterns.map((pattern) => ({ value: pattern })),
+    });
+  }
+
+  if (isOTTLProcessor(processor)) {
+    const { ottl } = processor;
+
+    return structuredClone({
+      ...ottl,
+      type: 'ottl',
     });
   }
 
@@ -203,6 +220,20 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
     };
   }
 
+  if (formState.type === 'ottl') {
+    const { statement, tag, ignore_failure, on_failure } = formState;
+
+    return {
+      ottl: {
+        if: formState.if,
+        statement,
+        tag,
+        ignore_failure,
+        on_failure,
+      },
+    };
+  }
+
   if (formState.type === 'date') {
     const { field, formats, locale, ignore_failure, target_field, timezone, output_format } =
       formState;
@@ -240,6 +271,7 @@ const createProcessorGuardByType =
 export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
 export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isOTTLProcessor = createProcessorGuardByType('ottl');
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(

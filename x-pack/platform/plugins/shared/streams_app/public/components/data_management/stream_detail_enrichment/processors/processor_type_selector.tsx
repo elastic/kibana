@@ -85,6 +85,16 @@ const availableProcessors: TAvailableProcessors = {
       />
     ),
   },
+  ottl: {
+    type: 'ottl',
+    inputDisplay: 'OTTL',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.ottlHelpText"
+        defaultMessage="Uses OTTL to transform a document."
+      />
+    ),
+  },
   dissect: {
     type: 'dissect',
     inputDisplay: 'Dissect',
