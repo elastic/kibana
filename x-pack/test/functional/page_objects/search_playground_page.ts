@@ -26,7 +26,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     await testSubjects.click('addDataSourcesButton');
     await testSubjects.existOrFail('selectIndicesFlyout');
     await findService.clickByCssSelector(`li[title="${indexName}"]`);
-    await testSubjects.click('saveButton');
+    await testSubjects.clickWhenNotDisabled('saveButton');
   };
 
   const SESSION_KEY = 'search_playground_session';
