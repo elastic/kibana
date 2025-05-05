@@ -9,12 +9,11 @@ import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import { orderBy, size, toPairs } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { clearKnowledgeBase, getKnowledgeBaseEntriesFromEs } from '../utils/knowledge_base';
 import {
-  clearKnowledgeBase,
-  deleteKnowledgeBaseModel,
-  getKnowledgeBaseEntries,
-  setupKnowledgeBase,
-} from '../utils/knowledge_base';
+  teardownTinyElserModelAndInferenceEndpoint,
+  deployTinyElserAndSetupKb,
+} from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
@@ -47,11 +46,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Knowledge base', function () {
     before(async () => {
-      await setupKnowledgeBase(getService);
+      await deployTinyElserAndSetupKb(getService);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 
@@ -79,7 +78,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('generates sparse embeddings', async () => {
-        const hits = await getKnowledgeBaseEntries(es);
+        const hits = await getKnowledgeBaseEntriesFromEs(es);
         const embeddings =
           hits[0]._source?._inference_fields?.semantic_text?.inference.chunks.semantic_text[0]
             .embeddings;
@@ -163,16 +162,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('when sorting ', () => {
-        const ascendingOrder = ['my_doc_a', 'my_doc_b', 'my_doc_c'];
-
         it('allows sorting ascending', async () => {
           const entries = await getEntries({ sortBy: 'title', sortDirection: 'asc' });
-          expect(entries.map(({ id }) => id)).to.eql(ascendingOrder);
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_a', 'my_doc_b', 'my_doc_c']);
         });
 
         it('allows sorting descending', async () => {
           const entries = await getEntries({ sortBy: 'title', sortDirection: 'desc' });
-          expect(entries.map(({ id }) => id)).to.eql([...ascendingOrder].reverse());
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_c', 'my_doc_b', 'my_doc_a']);
         });
       });
 

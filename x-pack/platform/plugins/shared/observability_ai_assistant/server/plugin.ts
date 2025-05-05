@@ -31,9 +31,7 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { populateMissingSemanticTextFieldMigration } from './service/startup_migrations/populate_missing_semantic_text_field_migration';
-import { updateExistingIndexAssets } from './service/startup_migrations/create_or_update_index_assets';
-
+import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -130,19 +128,12 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-    updateExistingIndexAssets({ logger: this.logger, core })
-      .then(() =>
-        populateMissingSemanticTextFieldMigration({
-          core,
-          logger: this.logger,
-          config: this.config,
-        })
-      )
-      .catch((e) =>
-        this.logger.error(
-          `Error during knowledge base migration in AI Assistant plugin startup: ${e.message}`
-        )
-      );
+
+    runStartupMigrations({
+      core,
+      logger: this.logger,
+      config: this.config,
+    }).catch((e) => this.logger.error(`Error while running startup migrations: ${e.message}`));
 
     service.register(registerFunctions);
 

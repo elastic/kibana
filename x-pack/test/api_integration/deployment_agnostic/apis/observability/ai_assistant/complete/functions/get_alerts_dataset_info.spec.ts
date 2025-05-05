@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
       });
 
-      void llmProxy.interceptConversation(
+      void llmProxy.interceptWithResponse(
         `You have active alerts for the past 10 days. Back to work!`
       );
 

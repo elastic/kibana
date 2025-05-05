@@ -28,7 +28,7 @@ import {
 } from '@kbn/lock-manager/src/setup_lock_manager_index';
 
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { getLoggerMock } from '../utils/logger';
+import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
