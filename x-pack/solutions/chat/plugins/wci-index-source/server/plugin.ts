@@ -47,7 +47,7 @@ export class WCIIndexSourcePlugin
       router,
     });
 
-    workchatApp.integrations.register(
+    workchatApp.integration.register(
       getIndexSourceIntegrationDefinition({
         core,
         logger: this.logger,
