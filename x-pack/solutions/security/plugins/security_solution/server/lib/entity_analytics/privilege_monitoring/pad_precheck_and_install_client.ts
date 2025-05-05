@@ -21,10 +21,9 @@ import {
 
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
-// import { getMlClient, MlAuditLogger } from '@kbn/ml-plugin/server/lib/ml_client';
-// import type { MlClient } from '@kbn/ml-plugin/server/lib/ml_client';
-// import type { MLSavedObjectService } from '@kbn/ml-plugin/server/saved_objects';
-// x-pack/platform/plugins/shared/ml/server/lib/ml_client/index.ts
+import fetch from 'node-fetch';
+
+const authHeader = `Basic ${Buffer.from('***:***').toString('base64')}`;
 interface PadPrecheckAndInstallClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -46,6 +45,28 @@ export class PadPrecheckAndInstallClient {
     this.esClient = opts.clusterClient.asCurrentUser;
     this.soClient = opts.soClient;
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async kibanaFetch(path: string, method: string, body?: any, internal?: boolean) {
+    const headers: Record<string, string> = {
+      'kbn-xsrf': 'true',
+      Authorization: authHeader,
+      'Content-Type': 'application/json',
+    };
+
+    if (internal) {
+      headers['elastic-api-version'] = '1';
+      headers['x-elastic-internal-origin'] = 'kibana';
+    }
+
+    const response = await fetch(`http://localhost:5601${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    const data = await response.json();
+    return data;
+  }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
     this.opts.logger[level](
@@ -66,9 +87,45 @@ export class PadPrecheckAndInstallClient {
       throw err;
     }
   }
+  private async fetchMlModule(moduleId: string) {
+    try {
+      const response = await this.kibanaFetch(
+        `/internal/ml/modules/get_module/${moduleId}`,
+        'GET',
+        undefined,
+        true
+      );
+      return response;
+    } catch (error) {
+      this.log('error', `Failed to fetch ML module ${moduleId}: ${error}`);
+      throw error;
+    }
+  }
+
+  private async setupMlModule(moduleId: string) {
+    const mlModuleSetupResponse = await this.kibanaFetch(
+      `/internal/ml/modules/setup/${moduleId}`,
+      'POST',
+      {
+        indexPatternName:
+          'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all',
+        useDedicatedIndex: false,
+        startDatafeed: true,
+        start: Date.now() - 30 * 24 * 60 * 60 * 1000, // 30 days ago
+        end: Date.now(),
+      },
+      true
+    );
+    this.log('debug', `ML module setup response: ${JSON.stringify(mlModuleSetupResponse)}`);
+    this.installationStatus.ml_module_setup = {
+      status: 'success',
+      response: mlModuleSetupResponse,
+    };
+  }
 
   private async fetchMlJobs(jobPrefix: string) {
-    // const allJobs = await this.esClient.ml.getJobs();
+    const allJobs = await this.esClient.ml.getJobs();
+    // console.log(allJobs);
     const stats = await this.esClient.ml.getJobStats({ job_id: `${jobPrefix}*` });
 
     return stats.jobs.map((job) => ({
@@ -139,27 +196,6 @@ export class PadPrecheckAndInstallClient {
       this.log('info', '[VERIFIED] Ingest pipeline does not exist');
       return { exists: false, alreadyHasProcessor: false, processors: [] };
     }
-  }
-
-  private async setupMlJob() {
-    const mlModuleSetupResponse = await this.esClient.transport.request({
-      method: 'POST',
-      path: '/_ml/modules/setup',
-      body: {
-        module_id: 'pad-ml',
-        prefix: 'pad_',
-        index_pattern_name:
-          'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all',
-        useDedicatedIndex: true,
-        start: 'now-1h',
-        end: 'now',
-      },
-    });
-    this.log('debug', `ML module setup response: ${JSON.stringify(mlModuleSetupResponse)}`);
-    this.installationStatus.ml_module_setup = {
-      status: 'success',
-      response: mlModuleSetupResponse,
-    };
   }
 
   private async checkAndUpdateComponentTemplateMappings() {
@@ -364,71 +400,73 @@ export class PadPrecheckAndInstallClient {
     await this.installPadIntegration();
 
     // ############### INGEST PIPELINE #####################
-    this.log('debug', 'Checking if PAD ingest pipeline present or not..');
-    const pipelineName = 'logs-endpoint.events.process@custom';
-    const { exists, alreadyHasProcessor, processors } = await this.isIngestPipelinePresent(
-      pipelineName
-    );
+    // this.log('debug', 'Checking if PAD ingest pipeline present or not..');
+    // const pipelineName = 'logs-endpoint.events.process@custom';
+    // const { exists, alreadyHasProcessor, processors } = await this.isIngestPipelinePresent(
+    //   pipelineName
+    // );
 
-    if (!exists) {
-      this.log('warn', `Pipeline ${pipelineName} does not exist. Cannot update.`);
-    }
+    // if (!exists) {
+    //   this.log('warn', `Pipeline ${pipelineName} does not exist. Cannot update.`);
+    // }
 
-    if (alreadyHasProcessor) {
-      this.log('info', `Pipeline ${pipelineName} already has ml_pad processor. No update needed.`);
-    }
+    // if (alreadyHasProcessor) {
+    //   this.log('info', `Pipeline ${pipelineName} already has ml_pad processor. No update needed.`);
+    // }
 
-    const mlPadProcessorName = `${this.packageVersion}-ml_pad_ingest_pipeline`;
+    // const mlPadProcessorName = `${this.packageVersion}-ml_pad_ingest_pipeline`;
 
-    const updatedProcessors = [
-      ...processors,
-      {
-        pipeline: {
-          name: mlPadProcessorName,
-          on_failure: [
-            {
-              set: {
-                field: '_ingest.error',
-                value: 'Failed to execute ml_pad_ingest_pipeline',
-              },
-            },
-          ],
-        },
-      },
-    ];
+    // const updatedProcessors = [
+    //   ...processors,
+    //   {
+    //     pipeline: {
+    //       name: mlPadProcessorName,
+    //       on_failure: [
+    //         {
+    //           set: {
+    //             field: '_ingest.error',
+    //             value: 'Failed to execute ml_pad_ingest_pipeline',
+    //           },
+    //         },
+    //       ],
+    //     },
+    //   },
+    // ];
 
-    await this.esClient.ingest.putPipeline({
-      id: pipelineName,
-      description: 'Custom pipeline for PAD integration',
-      processors: updatedProcessors,
-    });
+    // await this.esClient.ingest.putPipeline({
+    //   id: pipelineName,
+    //   description: 'Custom pipeline for PAD integration',
+    //   processors: updatedProcessors,
+    // });
 
-    this.log('info', `Pipeline ${pipelineName} updated with ml_pad processor.`);
+    // this.log('info', `Pipeline ${pipelineName} updated with ml_pad processor.`);
 
     // ############### COMPONENT TEMPLATE MAPPINGS #####################
-    await this.checkAndUpdateComponentTemplateMappings();
+    // await this.checkAndUpdateComponentTemplateMappings();
 
     // ############### ROLLOVER INDEX #####################
-    await this.rollOverIndex();
+    // await this.rollOverIndex();
 
     // ############### TRANSFORM STATUS #####################
-    await this.checkHealthOfTransform();
+    // await this.checkHealthOfTransform();
 
     // ############### DATA VIEW #####################
-    await this.checkandUpdateDataViews();
+    // await this.checkandUpdateDataViews();
 
     // ############### ML JOBS #####################
-    try {
-      await this.setupMlJob();
-      const mlJobs = await this.fetchMlJobs('pad');
-      this.installationStatus.ml_jobs = {
-        count: mlJobs.length,
-        jobs: mlJobs,
-      };
-    } catch (err) {
-      this.log('error', `Failed fetching ML jobs: ${err.message}`);
-      this.installationStatus.ml_jobs = { error: err.message };
-    }
+    // try {
+    //     const mlModule = await this.fetchMlModule('pad-ml');
+    //     this.log('debug', `ML module fetch response: ${JSON.stringify(mlModule)}`);
+    //     await this.setupMlModule('pad-ml');
+    //     const mlJobs = await this.fetchMlJobs('pad');
+    //     this.installationStatus.ml_jobs = {
+    //         count: mlJobs.length,
+    //         jobs: mlJobs,
+    //     };
+    //     } catch (err) {
+    //     this.log('error', `Failed fetching ML jobs: ${err.message}`);
+    //     this.installationStatus.ml_jobs = { error: err.message };
+    //     }
 
     return this.installationStatus;
   }
