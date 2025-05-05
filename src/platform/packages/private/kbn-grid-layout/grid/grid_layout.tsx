@@ -24,6 +24,7 @@ import {
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { getPanelKeysInOrder } from './utils/resolve_grid_section';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -116,7 +117,8 @@ export const GridLayout = ({
           /** Panels */
           if (section.isMainSection || !section.isCollapsed) {
             let maxRow = -Infinity;
-            Object.values(section.panels).forEach((panel) => {
+            getPanelKeysInOrder(section.panels).forEach((panelId) => {
+              const panel = section.panels[panelId];
               maxRow = Math.max(maxRow, panel.row + panel.height);
               currentElementsInOrder.push({
                 type: 'panel',
@@ -137,6 +139,7 @@ export const GridLayout = ({
           }
           gridTemplateString += `[end-${section.id}] `;
         });
+
       setElementsInOrder(currentElementsInOrder);
       gridTemplateString = gridTemplateString.replaceAll('] [', ' ');
       if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridTemplateString;
