@@ -131,7 +131,64 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             readOnly={readOnly}
             configFormSchema={[
               ...otherOpenAiConfig,
-              ...(hasPKI ? pkiConfig : [])
+              ...(hasPKI ? pkiConfig.map(field => {
+                const fieldConfig: FieldConfig<string | string[] | undefined, FormData> = {
+                  label: field.label,
+                  helpText: field.helpText,
+                  defaultValue: field.defaultValue,
+                  type: field.type,
+                  validations: [
+                    {
+                      validator: ((data) => {
+                        const { value, formData } = data;
+                        if (
+                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                          !(formData.certificateFile || formData.certificateData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_CERTIFICATE,
+                          };
+                        }
+                        if (
+                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                          !(formData.privateKeyFile || formData.privateKeyData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_PRIVATE_KEY,
+                          };
+                        }
+                        // Ensure certificateData and privateKeyData are strings
+                        if (formData.certificateData && typeof formData.certificateData !== 'string') {
+                          return {
+                            message: 'Certificate data must be a string',
+                          };
+                        }
+                        if (formData.privateKeyData && typeof formData.privateKeyData !== 'string') {
+                          return {
+                            message: 'Private key data must be a string',
+                          };
+                        }
+                        // Ensure PEM format for raw data
+                        if (formData.certificateData && !formData.certificateData.includes('-----BEGIN CERTIFICATE-----')) {
+                          return {
+                            message: 'Certificate data must be PEM-encoded',
+                          };
+                        }
+                        if (formData.privateKeyData && !formData.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')) {
+                          return {
+                            message: 'Private key data must be PEM-encoded',
+                          };
+                        }
+                        return undefined;
+                      }) as ValidationFunc<FormData, string, string | string[] | undefined>,
+                    },
+                  ],
+                };
+                return {
+                  ...field,
+                  ...fieldConfig,
+                } as ConfigFieldSchema;
+              }) : [])
             ]}
             secretsFormSchema={otherOpenAiSecrets}
           />
