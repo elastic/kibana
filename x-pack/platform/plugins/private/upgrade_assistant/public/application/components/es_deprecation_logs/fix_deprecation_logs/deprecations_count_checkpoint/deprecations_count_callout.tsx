@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
-import moment from 'moment-timezone';
+import React, { FunctionComponent } from 'react';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiButton, EuiSkeletonText } from '@elastic/eui';
+import { EuiCallOut, EuiSkeletonText, EuiButton } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
-import { uiMetricService, UIM_RESET_LOGS_COUNTER_CLICK } from '../../../../lib/ui_metric';
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (
@@ -40,34 +37,17 @@ const i18nTexts = {
   retryButton: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.retryButton', {
     defaultMessage: 'Try again',
   }),
-  resetCounterButton: i18n.translate(
-    'xpack.upgradeAssistant.overview.verifyChanges.resetCounterButton',
-    {
-      defaultMessage: 'Reset counter',
-    }
-  ),
-  errorToastTitle: i18n.translate('xpack.upgradeAssistant.overview.verifyChanges.errorToastTitle', {
-    defaultMessage: 'Could not delete deprecation logs cache',
-  }),
 };
 
 interface Props {
   checkpoint: string;
-  setCheckpoint: (value: string) => void;
 }
 
-export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
-  checkpoint,
-  setCheckpoint,
-}) => {
-  const [isDeletingCache, setIsDeletingCache] = useState(false);
+export const DeprecationsCountCallout: FunctionComponent<Props> = ({ checkpoint }) => {
   const {
-    services: {
-      api,
-      core: { notifications },
-    },
+    services: { api },
   } = useAppContext();
-  const { data, error, isLoading, resendRequest, isInitialRequest } =
+  const { data, error, isLoading, isInitialRequest, resendRequest } =
     api.getDeprecationLogsCount(checkpoint);
 
   const logsCount = data?.count || 0;
@@ -75,24 +55,6 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const calloutTint = hasLogs ? 'warning' : 'success';
   const calloutIcon = hasLogs ? 'warning' : 'check';
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
-
-  const onResetClick = async () => {
-    setIsDeletingCache(true);
-    const { error: deleteLogsCacheError } = await api.deleteDeprecationLogsCache();
-    setIsDeletingCache(false);
-
-    if (deleteLogsCacheError) {
-      notifications.toasts.addDanger({
-        title: i18nTexts.errorToastTitle,
-        text: deleteLogsCacheError.message.toString(),
-      });
-      return;
-    }
-
-    const now = moment().toISOString();
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_RESET_LOGS_COUNTER_CLICK);
-    setCheckpoint(now);
-  };
 
   if (isInitialRequest && isLoading) {
     return <EuiSkeletonText lines={6} />;
@@ -122,16 +84,6 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       color={calloutTint}
       iconType={calloutIcon}
       data-test-subj={calloutTestId}
-    >
-      <p>{i18nTexts.calloutBody}</p>
-      <EuiButton
-        color={calloutTint}
-        onClick={onResetClick}
-        isLoading={isDeletingCache || isLoading}
-        data-test-subj="resetLastStoredDate"
-      >
-        {i18nTexts.resetCounterButton}
-      </EuiButton>
-    </EuiCallOut>
+    />
   );
 };
