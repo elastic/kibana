@@ -29,7 +29,10 @@
     "@kbn/core-plugins-server",
     "@kbn/product-doc-base-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/ml-plugin"
+    "@kbn/ml-plugin",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities"
   ],
   "exclude": [
     "target/**/*"

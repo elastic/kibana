@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         await chatComplete({
           userPrompt: USER_PROMPT,
@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           when: () => true,
         });
 
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_PROMPT,
