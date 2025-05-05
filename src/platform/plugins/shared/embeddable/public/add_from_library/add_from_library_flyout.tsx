@@ -82,7 +82,6 @@ export const AddFromLibraryFlyout = ({
       // - Should this scroll behavior be replaced with an existing helper, like `scrollToPanelId` from `useDashboardApi()`?
       // - Is there a better way to handle timing or async detection of the new panel being rendered before scrolling?
 
-
       // Wrapped in try-catch to ensure that adding the panel completes successfully.
       try {
         libraryType.onAdd(container, savedObject);
