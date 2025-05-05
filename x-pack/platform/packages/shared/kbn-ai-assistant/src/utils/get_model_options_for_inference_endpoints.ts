@@ -59,6 +59,9 @@ const e5LargeDescription = i18n.translate(
   }
 );
 
+const ELSER_IN_EIS_INFERENCE_ID = '.elser-v2-elastic';
+const E5_LARGE_IN_EIS_INFERENCE_ID = '.multilingual-e5-large-elastic'; // TODO: verify the inference ID once it's created in EIS
+
 const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
@@ -67,7 +70,7 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
     title: elserTitle,
     description: elserDescription,
   },
-  '.elser-v2-elastic': {
+  [ELSER_IN_EIS_INFERENCE_ID]: {
     title: elserTitle,
     description: elserDescription,
   },
@@ -75,7 +78,7 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
     title: e5SmallTitle,
     description: e5SmallDescription,
   },
-  '.multilingual-e5-large-elasticsearch': {
+  [E5_LARGE_IN_EIS_INFERENCE_ID]: {
     title: e5LargeTitle,
     description: e5LargeDescription,
   },
@@ -86,22 +89,25 @@ export const getModelOptionsForInferenceEndpoints = ({
 }: {
   endpoints: InferenceAPIConfigResponse[];
 }): ModelOptionsData[] => {
-  // TODO: add logic to show the EIS models if EIS is enabled, if not show the other models
-  const preConfiguredEndpoints = endpoints
-    .map((endpoint) => {
-      const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id];
+  const hasElserEIS = endpoints.some((ep) => ep.inference_id === ELSER_IN_EIS_INFERENCE_ID);
 
-      if (!meta) {
-        return undefined;
+  return endpoints
+    .filter((endpoint) => {
+      // if ELSER exists in EIS, skip the other ELSER model
+      if (endpoint.inference_id === '.elser-2-elasticsearch' && hasElserEIS) {
+        return false;
       }
+
+      // Only include preconfigured endpoints and skip custom endpoints
+      return Boolean(PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]);
+    })
+    .map((endpoint) => {
+      const meta = PRECONFIGURED_INFERENCE_ENDPOINT_METADATA[endpoint.inference_id]!;
 
       return {
         key: endpoint.inference_id,
         label: meta.title,
         description: meta.description,
       };
-    })
-    .filter(Boolean) as ModelOptionsData[];
-
-  return preConfiguredEndpoints;
+    });
 };
