@@ -32,7 +32,7 @@ import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
-import type { IndexPattern, IndexPatternMap } from '../../types';
+import type { IndexPattern, IndexPatternMap, VisualizationDimensionGroupConfig } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
 import { getSamplingValue } from './utils';
@@ -74,6 +74,7 @@ function getExpressionForLayer(
   featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
+  visualizationGroups: VisualizationDimensionGroupConfig[],
   searchSessionId?: string,
   forceDSL?: boolean
 ): ExpressionAstExpression | null {
@@ -156,7 +157,7 @@ function getExpressionForLayer(
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference' || def.input === 'managedReference') {
         expressions.push(
-          ...def.toExpression(layer, colId, indexPattern, {
+          ...def.toExpression(layer, colId, indexPattern, visualizationGroups, {
             dateRange,
             now: nowInstant,
             targetBars: histogramBarsTarget,
@@ -557,6 +558,7 @@ export function toExpression(
   featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
+  visualizationGroups: VisualizationDimensionGroupConfig[],
   searchSessionId?: string,
   forceDSL?: boolean
 ) {
@@ -568,6 +570,7 @@ export function toExpression(
       featureFlags,
       dateRange,
       nowInstant,
+      visualizationGroups,
       searchSessionId,
       forceDSL
     );

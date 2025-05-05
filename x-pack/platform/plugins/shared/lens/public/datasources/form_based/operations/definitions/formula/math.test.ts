@@ -153,7 +153,8 @@ describe('math operation', () => {
       const expression = mathOperation.toExpression(
         createLayerWithMathColumn(tinymathAst),
         'myColumnId',
-        {} as IndexPattern
+        {} as IndexPattern,
+        []
       );
 
       expect(expression).toEqual([
@@ -234,7 +235,8 @@ describe('math operation', () => {
       const expression = mathOperation.toExpression(
         createLayerWithMathColumn(tinymathAst),
         'myColumnId',
-        {} as IndexPattern
+        {} as IndexPattern,
+        []
       );
 
       expect(expression).toEqual([
@@ -290,7 +292,8 @@ describe('math operation', () => {
       const expression = mathOperation.toExpression(
         createLayerWithMathColumn(tinymathAst),
         'myColumnId',
-        {} as IndexPattern
+        {} as IndexPattern,
+        []
       );
 
       expect(expression).toEqual([
@@ -335,7 +338,8 @@ describe('math operation', () => {
       const expression = mathOperation.toExpression(
         createLayerWithMathColumn(tinymathAst),
         'myColumnId',
-        {} as IndexPattern
+        {} as IndexPattern,
+        []
       );
 
       expect(expression).toEqual([
@@ -419,7 +423,8 @@ describe('math operation', () => {
       const expression = mathOperation.toExpression(
         createLayerWithMathColumn(tinymathAst),
         'myColumnId',
-        {} as IndexPattern
+        {} as IndexPattern,
+        []
       );
 
       expect(expression).toEqual([

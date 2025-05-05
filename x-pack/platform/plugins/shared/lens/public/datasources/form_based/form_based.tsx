@@ -459,6 +459,7 @@ export function getFormBasedDatasource({
       indexPatterns,
       dateRange,
       nowInstant,
+      visualizationGroups,
       searchSessionId,
       forceDSL
     ) =>
@@ -470,6 +471,7 @@ export function getFormBasedDatasource({
         featureFlags,
         dateRange,
         nowInstant,
+        visualizationGroups,
         searchSessionId,
         forceDSL
       ),

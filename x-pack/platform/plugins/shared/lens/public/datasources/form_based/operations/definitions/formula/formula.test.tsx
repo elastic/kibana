@@ -936,7 +936,8 @@ describe('[Lens] formula', () => {
               },
             },
             'col2',
-            indexPattern
+            indexPattern,
+            []
           )
         ).toEqual([
           expect.objectContaining({
@@ -970,7 +971,8 @@ describe('[Lens] formula', () => {
               },
             },
             'col2',
-            indexPattern
+            indexPattern,
+            []
           )
         ).toEqual([
           expect.objectContaining({
@@ -1003,7 +1005,8 @@ describe('[Lens] formula', () => {
               },
             },
             'col2',
-            indexPattern
+            indexPattern,
+            []
           )
         ).toEqual([
           expect.objectContaining({

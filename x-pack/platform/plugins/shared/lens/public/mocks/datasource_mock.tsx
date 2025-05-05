@@ -45,7 +45,8 @@ export function createMockDatasource(
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => {}),
     toExpression: jest.fn(
-      (_frame, _state, _indexPatterns, dateRange, nowInstant) => 'datasource_expression'
+      (_frame, _state, _indexPatterns, dateRange, nowInstant, visualizationGroups) =>
+        'datasource_expression'
     ),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),

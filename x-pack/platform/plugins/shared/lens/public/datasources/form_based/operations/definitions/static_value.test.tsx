@@ -199,7 +199,8 @@ describe('static_value', () => {
           staticValueOperation.toExpression(
             getLayerWithStaticValue(value),
             'col2',
-            createMockedIndexPattern()
+            createMockedIndexPattern(),
+            []
           )
         ).toEqual([
           {
@@ -221,7 +222,8 @@ describe('static_value', () => {
           staticValueOperation.toExpression(
             getLayerWithStaticValue(value),
             'col2',
-            createMockedIndexPattern()
+            createMockedIndexPattern(),
+            []
           )
         ).toEqual([
           {

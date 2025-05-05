@@ -435,6 +435,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
     nowInstant: Date,
+    visualizationGroups: VisualizationDimensionGroupConfig[],
     searchSessionId?: string,
     forceDSL?: boolean
   ) => ExpressionAstExpression | string | null;
@@ -781,14 +782,20 @@ export interface OperationDescriptor extends Operation {
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   state: T;
 }
 
-export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProps<T> & {
-  setState: (newState: T) => void;
-  onChangeIndexPattern: (indexPatternId: string) => void;
-};
+type VisualizationConfigPropsWithFullFrame<T = unknown> = Omit<
+  VisualizationConfigProps<T>,
+  'frame'
+> & { frame: FramePublicAPI };
+
+export type VisualizationLayerWidgetProps<T = unknown> =
+  VisualizationConfigPropsWithFullFrame<T> & {
+    setState: (newState: T) => void;
+    onChangeIndexPattern: (indexPatternId: string) => void;
+  };
 
 export type VisualizationLayerHeaderContentProps<T = unknown> = VisualizationLayerWidgetProps<T>;
 
@@ -798,21 +805,23 @@ export interface VisualizationToolbarProps<T = unknown> {
   state: T;
 }
 
-export type VisualizationLayerSettingsProps<T = unknown> = VisualizationConfigProps<T> & {
-  setState(newState: T | ((currState: T) => T)): void;
-  panelRef: MutableRefObject<HTMLDivElement | null>;
-};
+export type VisualizationLayerSettingsProps<T = unknown> =
+  VisualizationConfigPropsWithFullFrame<T> & {
+    setState(newState: T | ((currState: T) => T)): void;
+    panelRef: MutableRefObject<HTMLDivElement | null>;
+  };
 
-export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
-  groupId: string;
-  accessor: string;
-  datasource: DatasourcePublicAPI | undefined;
-  setState(newState: T | ((currState: T) => T)): void;
-  addLayer: (layerType: LayerType) => void;
-  removeLayer: (layerId: string) => void;
-  panelRef: MutableRefObject<HTMLDivElement | null>;
-  isInlineEditing?: boolean;
-};
+export type VisualizationDimensionEditorProps<T = unknown> =
+  VisualizationConfigPropsWithFullFrame<T> & {
+    groupId: string;
+    accessor: string;
+    datasource: DatasourcePublicAPI | undefined;
+    setState(newState: T | ((currState: T) => T)): void;
+    addLayer: (layerType: LayerType) => void;
+    removeLayer: (layerId: string) => void;
+    panelRef: MutableRefObject<HTMLDivElement | null>;
+    isInlineEditing?: boolean;
+  };
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
@@ -1250,7 +1259,9 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /**
    * Allows the visualization to announce whether or not it has any settings to show
    */
-  hasLayerSettings?: (props: VisualizationConfigProps<T>) => Record<'data' | 'appearance', boolean>;
+  hasLayerSettings?: (
+    props: VisualizationConfigPropsWithFullFrame<T>
+  ) => Record<'data' | 'appearance', boolean>;
 
   LayerSettingsComponent?: (
     props: VisualizationLayerSettingsProps<T> & { section: 'data' | 'appearance' }

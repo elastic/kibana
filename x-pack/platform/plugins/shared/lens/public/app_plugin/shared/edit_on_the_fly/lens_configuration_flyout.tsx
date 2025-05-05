@@ -221,6 +221,16 @@ export function LensEditConfigurationFlyout({
 
   const editorContainer = useRef(null);
 
+  const getVisualizationGroups = useCallback(
+    (layerId: string) =>
+      activeVisualization.getConfiguration({
+        layerId,
+        frame: framePublicAPI,
+        state: datasourceStates[datasourceId].state,
+      }).groups,
+    [activeVisualization, datasourceId, datasourceStates, framePublicAPI]
+  );
+
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
       return false;
@@ -244,23 +254,25 @@ export function LensEditConfigurationFlyout({
           indexPatterns: framePublicAPI.dataViews.indexPatterns,
           dateRange: framePublicAPI.dateRange,
           nowInstant: startDependencies.data.nowProvider.get(),
+          getVisualizationGroups,
           searchSessionId,
         })
       );
     }
   }, [
     attributesChanged,
+    visualization.state,
+    visualization.activeId,
+    getUserMessages,
     activeVisualization,
     datasourceMap,
     datasourceStates,
+    framePublicAPI.datasourceLayers,
     framePublicAPI.dataViews.indexPatterns,
     framePublicAPI.dateRange,
-    framePublicAPI.datasourceLayers,
-    searchSessionId,
     startDependencies.data.nowProvider,
-    visualization.activeId,
-    visualization.state,
-    getUserMessages,
+    getVisualizationGroups,
+    searchSessionId,
   ]);
 
   const onKeyDown = (e: KeyboardEvent) => {

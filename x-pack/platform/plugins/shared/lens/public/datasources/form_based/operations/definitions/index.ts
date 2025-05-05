@@ -57,6 +57,7 @@ import type {
   OperationMetadata,
   ParamEditorCustomProps,
   UserMessage,
+  VisualizationDimensionGroupConfig,
 } from '../../../../types';
 import type {
   BaseIndexPatternColumn,
@@ -693,6 +694,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     layer: FormBasedLayer,
     columnId: string,
     indexPattern: IndexPattern,
+    visualizationGroups: VisualizationDimensionGroupConfig[],
     context?: { dateRange?: DateRange; now?: Date; targetBars?: number }
   ) => ExpressionAstFunction[];
   /**

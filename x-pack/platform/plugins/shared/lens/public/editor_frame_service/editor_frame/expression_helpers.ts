@@ -7,7 +7,13 @@
 import { Ast, fromExpression } from '@kbn/interpreter';
 import type { DateRange } from '../../../common/types';
 import { DatasourceStates } from '../../state_management';
-import type { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
+import type {
+  Visualization,
+  DatasourceMap,
+  DatasourceLayers,
+  IndexPatternMap,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
@@ -15,6 +21,7 @@ export function getDatasourceExpressionsByLayers(
   indexPatterns: IndexPatternMap,
   dateRange: DateRange,
   nowInstant: Date,
+  getVisualizationGroups: (layerId: string) => VisualizationDimensionGroupConfig[],
   searchSessionId?: string,
   forceDSL?: boolean
 ): null | Record<string, Ast> {
@@ -35,6 +42,7 @@ export function getDatasourceExpressionsByLayers(
         indexPatterns,
         dateRange,
         nowInstant,
+        getVisualizationGroups(layerId),
         searchSessionId,
         forceDSL
       );
@@ -68,6 +76,7 @@ export function buildExpression({
   indexPatterns,
   dateRange,
   nowInstant,
+  getVisualizationGroups,
   searchSessionId,
   forceDSL,
 }: {
@@ -79,6 +88,7 @@ export function buildExpression({
   datasourceStates: DatasourceStates;
   datasourceLayers: DatasourceLayers;
   indexPatterns: IndexPatternMap;
+  getVisualizationGroups: (layerId: string) => VisualizationDimensionGroupConfig[];
   searchSessionId?: string;
   dateRange: DateRange;
   nowInstant: Date;
@@ -96,6 +106,7 @@ export function buildExpression({
     indexPatterns,
     dateRange,
     nowInstant,
+    getVisualizationGroups,
     searchSessionId,
     forceDSL
   );

@@ -82,6 +82,7 @@ import {
   DatasourceStates,
   DataViewsState,
   selectExecutionContextSearch,
+  selectActiveData,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
 import {
@@ -169,6 +170,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
+  const activeData = useLensSelector((state) => selectActiveData(state));
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
@@ -318,6 +320,19 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [getUserMessages]
   );
 
+  const getVisualizationGroups = useCallback(
+    (layerId: string) =>
+      activeVisualization?.getConfiguration({
+        layerId,
+        frame: {
+          datasourceLayers,
+          activeData,
+        },
+        state: activeDatasourceId ? datasourceStates[activeDatasourceId]?.state : {},
+      }).groups ?? [],
+    [activeData, activeDatasourceId, activeVisualization, datasourceLayers, datasourceStates]
+  );
+
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
     // shouldn't build expression if there is any type of error other than an expression build error
@@ -333,6 +348,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           indexPatterns: dataViews.indexPatterns,
           dateRange: framePublicAPI.dateRange,
           nowInstant: plugins.data.nowProvider.get(),
+          getVisualizationGroups,
           searchSessionId,
           forceDSL: framePublicAPI.forceDSL,
         });
@@ -382,6 +398,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     framePublicAPI.dateRange,
     framePublicAPI.forceDSL,
     plugins.data.nowProvider,
+    getVisualizationGroups,
     searchSessionId,
     addUserMessages,
   ]);

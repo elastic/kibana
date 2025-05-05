@@ -27,6 +27,7 @@ import {
   FramePublicAPI,
   OperationDescriptor,
   UserMessage,
+  VisualizationDimensionGroupConfig,
 } from '../../types';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
@@ -61,6 +62,7 @@ jest.mock('./dimension_panel/reference_editor', () => ({
 }));
 
 const nowInstant = new Date();
+const visualizationGroups: VisualizationDimensionGroupConfig[] = [];
 
 const fieldsOne = [
   {
@@ -380,6 +382,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         )
       ).toEqual(null);
@@ -412,6 +415,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         )
       ).toEqual({
@@ -419,7 +423,7 @@ describe('IndexPattern Data Source', () => {
           {
             function: 'createTable',
             type: 'function',
-            arguments: { ids: [], names: [], rowCount: [1] },
+            arguments: { ids: visualizationGroups, names: visualizationGroups, rowCount: [1] },
           },
           {
             arguments: { expression: [''], id: ['col1'], name: ['Formula'] },
@@ -468,6 +472,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         )
       ).toMatchInlineSnapshot(`
@@ -662,6 +667,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
@@ -704,6 +710,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
@@ -918,6 +925,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
@@ -989,6 +997,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
@@ -1120,6 +1129,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
@@ -1192,6 +1202,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
@@ -1250,6 +1261,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
@@ -1305,6 +1317,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
@@ -1351,6 +1364,7 @@ describe('IndexPattern Data Source', () => {
         indexPatterns,
         dateRange,
         nowInstant,
+        visualizationGroups,
         'testing-seed'
       ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
@@ -1415,6 +1429,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         );
 
@@ -1490,6 +1505,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         ) as Ast;
 
@@ -1561,6 +1577,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         ) as Ast;
 
@@ -1673,6 +1690,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
@@ -1713,6 +1731,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         ) as Ast;
 
@@ -1807,6 +1826,7 @@ describe('IndexPattern Data Source', () => {
           indexPatterns,
           dateRange,
           nowInstant,
+          visualizationGroups,
           'testing-seed'
         ) as Ast;
         const chainLength = ast.chain.length;
@@ -3858,7 +3878,7 @@ describe('IndexPattern Data Source', () => {
         FormBasedDatasource.initializeDimension!(state, 'first', indexPatterns, {
           columnId: 'newStatic',
           groupId: 'a',
-          visualizationGroups: [],
+          visualizationGroups,
         })
       ).toBe(state);
     });
@@ -3887,7 +3907,7 @@ describe('IndexPattern Data Source', () => {
           columnId: 'newStatic',
           groupId: 'a',
           staticValue: 0, // use a falsy value to check also this corner case
-          visualizationGroups: [],
+          visualizationGroups,
         })
       ).toEqual({
         ...state,
@@ -3939,7 +3959,7 @@ describe('IndexPattern Data Source', () => {
           columnId: 'newTime',
           groupId: 'a',
           autoTimeField: true,
-          visualizationGroups: [],
+          visualizationGroups,
         })
       ).toEqual({
         ...state,
@@ -4037,7 +4057,7 @@ describe('IndexPattern Data Source', () => {
         },
         links,
         indexPatterns,
-        getDimensionGroups: () => [],
+        getDimensionGroups: () => visualizationGroups,
       });
 
       expect(newState).toMatchInlineSnapshot(`
@@ -4170,7 +4190,7 @@ describe('IndexPattern Data Source', () => {
         },
         links,
         indexPatterns,
-        getDimensionGroups: () => [],
+        getDimensionGroups: () => visualizationGroups,
       });
 
       expect(

@@ -737,7 +737,10 @@ function getPreviewExpression(
       datasourceStates,
       frame.dataViews.indexPatterns,
       frame.dateRange,
-      nowProvider.get()
+      nowProvider.get(),
+      (layerId: string) =>
+        visualization.getConfiguration({ layerId, frame, state: visualizableState.datasourceState })
+          .groups
     );
 
     return visualization.toPreviewExpression(

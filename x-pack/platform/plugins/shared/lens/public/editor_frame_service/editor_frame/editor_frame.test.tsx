@@ -224,7 +224,8 @@ describe('editor_frame', () => {
         })
       );
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
+      // multiple calls due to some expression gen code that rely on it
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -276,7 +277,8 @@ describe('editor_frame', () => {
 
       setDatasourceState('newState');
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      // some expression rely on it as dependency
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({

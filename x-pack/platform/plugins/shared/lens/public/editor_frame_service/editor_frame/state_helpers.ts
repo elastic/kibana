@@ -462,6 +462,12 @@ export async function persistedStateToExpression(
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
       forceDSL: services.forceDSL,
       nowInstant: services.nowProvider.get(),
+      getVisualizationGroups: (layerId: string) =>
+        visualization.getConfiguration({
+          layerId,
+          frame: { datasourceLayers, activeData: {} },
+          state: datasourceStates[datasourceId]?.state,
+        }).groups,
     }),
     activeVisualizationState,
     activeDatasourceState: datasourceStates[datasourceId]?.state,

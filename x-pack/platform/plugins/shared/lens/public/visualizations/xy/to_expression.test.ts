@@ -64,7 +64,8 @@ describe('#toExpression', () => {
       'first',
       frame.dataViews.indexPatterns,
       frame.dateRange,
-      new Date()
+      new Date(),
+      []
     ) ?? {
       type: 'expression',
       chain: [],
