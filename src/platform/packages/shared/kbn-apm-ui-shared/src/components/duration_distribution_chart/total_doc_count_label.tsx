@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '../../enums';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 
 interface Props {
   eventType: ProcessorEvent.transaction | ProcessorEvent.span;

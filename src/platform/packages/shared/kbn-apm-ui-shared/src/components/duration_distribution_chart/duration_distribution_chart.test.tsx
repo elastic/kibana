@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HistogramItem } from '@kbn/apm-types-shared';
 import { replaceHistogramZerosWithMinimumDomainValue } from '.';
-import { HistogramItem } from '../../typings';
 
 describe('TransactionDistributionChart', () => {
   describe('replaceHistogramZerosWithMinimumDomainValue', () => {

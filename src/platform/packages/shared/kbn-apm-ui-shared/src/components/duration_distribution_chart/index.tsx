@@ -33,9 +33,8 @@ import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { type HistogramItem, ProcessorEvent } from '@kbn/apm-types-shared';
 import { ChartContainer } from './chart_container';
-import { ProcessorEvent } from '../../enums';
-import { HistogramItem } from '../../typings';
 import { getDurationFormatter } from '../../utils';
 import { useChartThemes } from '../../hooks/use_chart_theme';
 

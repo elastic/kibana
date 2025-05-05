@@ -8,7 +8,5 @@
  */
 
 export * from './src/components';
-export * from './src/enums';
 export * from './src/hooks';
-export * from './src/typings';
 export * from './src/utils';

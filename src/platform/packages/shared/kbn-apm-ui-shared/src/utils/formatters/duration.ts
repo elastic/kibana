@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { memoize, isFinite } from 'lodash';
+import type { Maybe } from '@kbn/apm-types-shared';
 import { asDecimalOrInteger, asInteger, NOT_AVAILABLE_LABEL } from './numeric';
-import { Maybe } from '../../typings';
 
 type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
 type DurationTimeUnit = TimeUnit | 'microseconds';
