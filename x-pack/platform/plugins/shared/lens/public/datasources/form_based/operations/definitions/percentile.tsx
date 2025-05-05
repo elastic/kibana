@@ -18,6 +18,7 @@ import {
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { Formatters } from '@formatjs/intl/node_modules/intl-messageformat/src/formatters';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -52,11 +53,26 @@ function ofName(
   timeShift: string | undefined,
   reducedTimeRange: string | undefined
 ) {
+  const formatters: Formatters = {
+    getNumberFormat: (locale, opts) =>
+      new Intl.NumberFormat(locale, {
+        ...opts,
+        maximumFractionDigits: 4,
+      }),
+    getDateTimeFormat: (locale, opts) => new Intl.DateTimeFormat(locale, opts),
+    getPluralRules: (locale, opts) =>
+      new Intl.PluralRules(locale, {
+        ...opts,
+        maximumFractionDigits: 4,
+      }),
+  };
+
   return adjustTimeScaleLabelSuffix(
     i18n.translate('xpack.lens.indexPattern.percentileOf', {
       defaultMessage:
         '{percentile, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} percentile of {name}',
       values: { name, percentile },
+      formatters,
     }),
     undefined,
     undefined,
