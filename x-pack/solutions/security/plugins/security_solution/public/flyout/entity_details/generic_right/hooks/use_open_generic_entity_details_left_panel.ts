@@ -8,47 +8,22 @@
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { SyntheticEvent } from 'react';
 import type { CloudPostureEntityIdentifier } from '../../../../cloud_security_posture/components/entity_insight';
-import {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
-} from '../../shared/components/left_panel/left_panel_header';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { GenericEntityDetailsPanelKey } from '../../generic_details_left';
-
-const navigationOptions = {
-  fields: {
-    tab: EntityDetailsLeftPanelTab.FIELDS_TABLE,
-  },
-  alerts: {
-    tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-    subTab: CspInsightLeftPanelSubTab.ALERTS,
-  },
-  misconfigurations: {
-    tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-    subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-  },
-  vulnerabilities: {
-    tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-    subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
-  },
-};
 
 export const useOpenGenericEntityDetailsLeftPanel = ({
   field,
   value,
   entityDocId,
   scopeId,
-  panelTab,
 }: {
   field: CloudPostureEntityIdentifier;
   value: string;
   entityDocId: string;
   scopeId: string;
-  panelTab: keyof typeof navigationOptions;
 }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -65,8 +40,7 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,
   });
 
-  const openGenericEntityDetails = (path?: SyntheticEvent) => {
-    console.log(path);
+  const openGenericEntityDetails = (path: { tab: string; subTab?: string }) => {
     return openLeftPanel({
       id: GenericEntityDetailsPanelKey,
       params: {
@@ -78,7 +52,7 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
         hasMisconfigurationFindings,
         hasVulnerabilitiesFindings,
         hasNonClosedAlerts,
-        path: path || navigationOptions[panelTab],
+        path,
       },
     });
   };

@@ -8,5 +8,6 @@
 export const GENERIC_FLYOUT_STORAGE_KEYS = {
   OVERVIEW_FIELDS_SECTION: 'generic_entity_flyout:overview:fields_section',
   OVERVIEW_FIELDS_TABLE_PINS: 'generic_entity_flyout:overview:fields_table_pins',
-  OVERVIEW_INSIGHTS_SECTION: 'generic_entity_flyout:overview:insights_section',
+  // TODO: Asset Inventory - add insight section expand state local storage support
+  // OVERVIEW_INSIGHTS_SECTION: 'generic_entity_flyout:overview:insights_section',
 };

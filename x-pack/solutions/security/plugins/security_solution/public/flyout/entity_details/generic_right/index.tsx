@@ -14,6 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -62,10 +63,13 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
     field: 'entity.id',
     value: getGenericEntity.data?._source?.entity.id || '',
-    panelTab: 'fields',
     entityDocId,
     scopeId,
   });
+
+  const expandDetails = () => {
+    openGenericEntityDetails({ tab: EntityDetailsLeftPanelTab.FIELDS_TABLE });
+  };
 
   useEffect(() => {
     if (getGenericEntity.data?._id) {
@@ -120,7 +124,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={openGenericEntityDetails} />
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
       <GenericEntityFlyoutHeader entity={entity} source={source} />
       <GenericEntityFlyoutContent source={source} entityDocId={entityDocId} scopeId={scopeId} />
     </>

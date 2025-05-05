@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
-import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
@@ -21,7 +20,7 @@ import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 interface GenericEntityFlyoutContentProps {
-  source: GenericEntityRecord;
+  source: Record<string, unknown>;
   entityDocId: string;
   scopeId: string;
 }
@@ -41,7 +40,7 @@ export const GenericEntityFlyoutContent = ({
     panelTab: 'fields',
   });
 
-  const openDetailsPanel = (path: { tab: string; subTab: string }) => {
+  const openDetailsPanel = (path: { tab: string; subT }) => {
     return openGenericEntityDetails(path);
   };
 
@@ -49,11 +48,6 @@ export const GenericEntityFlyoutContent = ({
     title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
     defaultValue: true,
   });
-
-  // const insightsSectionExpandedState = useExpandSection({
-  //   title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_INSIGHTS_SECTION,
-  //   defaultValue: true,
-  // });
 
   const { pinnedFields } = usePinnedFields(GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS);
 
