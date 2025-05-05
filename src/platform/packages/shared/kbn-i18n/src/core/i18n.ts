@@ -122,7 +122,9 @@ export interface TranslateArguments {
    * any attributes
    */
   ignoreTag?: boolean;
-
+  /**
+   * Custom formatters to override the default intl formatters
+   */
   formatters?: Formatters;
 }
 
@@ -134,7 +136,7 @@ export interface TranslateArguments {
  * @param [options.defaultMessage] - will be used unless translation was successful
  * @param [options.description] - message description, used by translators and other devs to understand the message context.
  * @param [options.ignoreTag] - Whether to treat HTML/XML tags as string literal instead of parsing them as tag token. When this is false we only allow simple tags without any attributes
- * @param [options.formatters] - will be used as intl formatters
+ * @param [options.formatters] - Custom formatters to override the default intl formatters
  */
 export function translate(
   id: string,
