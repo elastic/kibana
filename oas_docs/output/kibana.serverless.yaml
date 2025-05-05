@@ -955,6 +955,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -1787,7 +1796,17 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2332,6 +2351,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3040,7 +3068,17 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3346,6 +3384,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -4749,6 +4796,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string

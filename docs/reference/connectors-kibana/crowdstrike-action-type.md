@@ -15,14 +15,13 @@ The CrowdStrike connector communicates with CrowdStrike Management Console via R
 
 To use this connector, you must have authority to run {{endpoint-sec}} connectors, which is an **{{connectors-feature}}** sub-feature privilege. Refer to [{{kib}} privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md).
 
-
 ## Create connectors in {{kib}} [define-crowdstrike-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
 
 :::{image} ../images/crowdstrike-connector.png
-:screenshot:
 :alt: CrowdStrike connector
+:screenshot:
 :::
 
 ### Connector configuration [crowdstrike-connector-configuration]
@@ -38,7 +37,6 @@ CrowdStrike client ID
 Client secret
 :   The CrowdStrike API client secret to authenticate the client ID.
 
-
 ## Test connectors [crowdstrike-action-configuration]
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
@@ -52,3 +50,4 @@ The CrowdStrike action has the following configuration properties:
 
 Agent IDs
 :   Get details about one or more CrowdStrike agent IDs.
+
