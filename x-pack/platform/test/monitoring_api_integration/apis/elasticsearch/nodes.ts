@@ -19,7 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const testRunner = getTestRunner({
     testName: 'Nodes',
-    archiveRoot: 'x-pack/test/monitoring_api_integration/archives/elasticsearch/single_node',
+    archiveRoot:
+      'x-pack/platform/test/monitoring_api_integration/archives/elasticsearch/single_node',
     getService,
   });
 

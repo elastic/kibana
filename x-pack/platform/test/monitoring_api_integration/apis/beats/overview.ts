@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const testRunner = getTestRunner({
     testName: 'Overview',
-    archiveRoot: 'x-pack/test/monitoring_api_integration/archives/beats',
+    archiveRoot: 'x-pack/platform/test/monitoring_api_integration/archives/beats',
     getService,
   });
 
