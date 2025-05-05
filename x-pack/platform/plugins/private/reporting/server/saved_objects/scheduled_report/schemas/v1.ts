@@ -17,7 +17,7 @@ const rawLayoutIdSchema = schema.oneOf([
 export const rawNotificationSchema = schema.object({
   email: schema.maybe(
     schema.object({
-      to: schema.arrayOf(schema.string()),
+      to: schema.arrayOf(schema.string(), { minSize: 1 }),
     })
   ),
 });

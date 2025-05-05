@@ -18,6 +18,7 @@ import {
   savedObjectsClientMock,
   statusServiceMock,
 } from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -40,6 +41,12 @@ export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
 ): ReportingInternalSetup => {
   return {
+    actions: {
+      ...actionsMock.createSetup(),
+      getActionsConfigurationUtilities: jest.fn().mockReturnValue({
+        validateEmailAddresses: jest.fn(),
+      }),
+    },
     encryptedSavedObjects: encryptedSavedObjectsMock.createSetup({ canEncrypt: true }),
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },

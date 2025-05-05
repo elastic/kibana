@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/actions-plugin",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/discover-plugin",

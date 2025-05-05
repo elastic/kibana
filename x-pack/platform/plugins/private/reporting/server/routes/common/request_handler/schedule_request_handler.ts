@@ -8,11 +8,15 @@
 import moment from 'moment';
 
 import { schema } from '@kbn/config-schema';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import { isEmpty, omit } from 'lodash';
 import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
+import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
-import { ScheduledReportType, ScheduledReportingJobResponse } from '../../../types';
+import {
+  ScheduledReportApiJSON,
+  ScheduledReportType,
+  ScheduledReportingJobResponse,
+} from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RequestHandler, RequestParams } from './request_handler';
 import { transformRawScheduledReportToReport } from './lib';
@@ -60,8 +64,29 @@ export class ScheduleRequestHandler extends RequestHandler<
     return schedule;
   }
 
+  public getNotification(): RawNotification | undefined {
+    const { reporting, req, res } = this.opts;
+
+    const { notification } = req.body;
+    if (isEmpty(notification) || isEmpty(notification.email)) {
+      return undefined;
+    }
+
+    if (notification && notification.email && notification.email.to) {
+      const invalidEmails = reporting.validateNotificationEmails(notification.email.to);
+      if (invalidEmails) {
+        throw res.customError({
+          statusCode: 400,
+          body: `Invalid email address(es): ${invalidEmails}`,
+        });
+      }
+    }
+
+    return notification;
+  }
+
   public async enqueueJob(params: RequestParams) {
-    const { exportTypeId, jobParams, schedule } = params;
+    const { exportTypeId, jobParams, schedule, notification } = params;
     const { reporting, logger, req, user } = this.opts;
 
     const soClient = await reporting.getSoClient(req);
@@ -90,6 +115,7 @@ export class ScheduleRequestHandler extends RequestHandler<
         objectType: jobParams.objectType,
       },
       migrationVersion: version,
+      ...(notification ? { notification } : {}),
       title: job.title,
       payload: JSON.stringify(omit(payload, 'forceNow')),
       schedule: schedule!,
