@@ -10,8 +10,6 @@ export const maxSuggestions = 'observability:maxSuggestions';
 export const enableComparisonByDefault = 'observability:enableComparisonByDefault';
 export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvironment';
 export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
-export const apmServiceInventoryOptimizedSorting =
-  'observability:apmServiceInventoryOptimizedSorting';
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
 export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
@@ -21,14 +19,12 @@ export const enableInfrastructureProfilingIntegration =
 export const enableInfrastructureAssetCustomDashboards =
   'observability:enableInfrastructureAssetCustomDashboards';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
-export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const entityCentricExperience = 'observability:entityCentricExperience';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
-export const enableCriticalPath = 'observability:apmEnableCriticalPath';
 export const apmEnableServiceMetrics = 'observability:apmEnableServiceMetrics';
 export const apmEnableContinuousRollups = 'observability:apmEnableContinuousRollups';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
