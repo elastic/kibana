@@ -828,6 +828,8 @@ x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generati
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/kbn-genai-utils-common @elastic/obs-knowledge-team
+x-pack/platform/packages/shared/kbn-genai-utils-server @elastic/obs-knowledge-team
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
