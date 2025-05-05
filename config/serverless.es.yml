@@ -42,68 +42,16 @@ xpack.fleet.internal.registry.excludePackages: [
   'elastic_connectors',
 ]
 
-## Fine-tune the search solution feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
+## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
-  dashboard:
-    privileges:
-      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
-      all.composedOf:
-        - feature: "maps"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
-      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
-      read.composedOf:
-        - feature: "maps"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
-    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
-    subFeatures.privileges:
-      download_csv_report.disabled: true
-      generate_report.disabled: true
-      store_search_session.disabled: true
-      url_create:
-        disabled: true
-        includeIn: "read"
-  dashboard_v2:
-    ### Dashboards feature is moved from Analytics category to the Search one.
-    category: "enterpriseSearch"
-    privileges:
-      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
-      all.composedOf:
-        - feature: "maps_v2"
-          privileges: [ "all" ]
-        - feature: "visualize_v2"
-          privileges: [ "all" ]
-      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
-      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
-      read.composedOf:
-        - feature: "maps_v2"
-          privileges: [ "read" ]
-        - feature: "visualize_v2"
-          privileges: [ "read" ]
-    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
-    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
-    subFeatures.privileges:
-      download_csv_report.disabled: true
-      generate_report.disabled: true
-      store_search_session.disabled: true
-      url_create:
-        disabled: true
-        includeIn: "read"
-
+  ### Dashboards feature is moved from Analytics category to the Search one.
+  dashboard_v2.category: "enterpriseSearch"
   ### Dev Tools feature is moved from Analytics category to the Search one.
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the Search one.
   discover_v2.category: "enterpriseSearch"
-  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
-
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
   stackAlerts:
     name: "Alerts"
@@ -112,15 +60,6 @@ xpack.features.overrides:
   observabilityAIAssistant:
     name: "AI Assistant"
     category: "enterpriseSearch"
-
-  ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  visualize:
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
-  visualize_v2:
-    hidden: true
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search

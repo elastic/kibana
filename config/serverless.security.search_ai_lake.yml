@@ -36,9 +36,40 @@ xpack.features.overrides:
   siem.description: null
   siemV2.description: null
   securitySolutionSiemMigrations.hidden: true
-#  maps_v2.hidden: true
-#  dashboard_v2.hidden: true
 
+## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
+  dashboard:
+    privileges:
+      ## Setting to empty array so the values from serverless.yml or serverless.security.yml are overwritten
+      all.composedOf: []
+      read.composedOf: []
+  dashboard_v2:
+    privileges:
+      ## Setting to empty array so the values from serverless.yml or serverless.security.yml are overwritten
+      all.composedOf: []
+      read.composedOf: []
+  siemV2:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+
+  siem:
+    privileges:
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "savedQueryManagement"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "savedQueryManagement"
+          privileges: [ "read" ]
 # Custom integrations/fleet settings
 xpack.fleet.agentless.isDefault: true
 xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'

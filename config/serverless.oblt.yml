@@ -10,7 +10,7 @@ xpack.infra.enabled: true
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
 
-## Fine-tune the observability solution feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
+## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Applications feature privileges are fine-tuned to grant access to Logs, and Observability apps.
   apm:
@@ -29,56 +29,8 @@ xpack.features.overrides:
           privileges: [ "read" ]
         - feature: "observability"
           privileges: [ "read" ]
-  dashboard:
-    privileges:
-      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
-      all.composedOf:
-        - feature: "maps"
-          privileges: [ "all" ]
-        - feature: "visualize"
-          privileges: [ "all" ]
-      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
-      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
-      read.composedOf:
-        - feature: "maps"
-          privileges: [ "read" ]
-        - feature: "visualize"
-          privileges: [ "read" ]
-    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
-    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
-    subFeatures.privileges:
-      download_csv_report.disabled: true
-      generate_report.disabled: true
-      store_search_session.disabled: true
-      url_create:
-        disabled: true
-        includeIn: "read"
-  dashboard_v2:
-    category: "observability"
-    privileges:
-      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
-      all.composedOf:
-        - feature: "maps_v2"
-          privileges: [ "all" ]
-        - feature: "visualize_v2"
-          privileges: [ "all" ]
-      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
-      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
-      read.composedOf:
-        - feature: "maps_v2"
-          privileges: [ "read" ]
-        - feature: "visualize_v2"
-          privileges: [ "read" ]
-    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
-    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
-    subFeatures.privileges:
-      download_csv_report.disabled: true
-      generate_report.disabled: true
-      store_search_session.disabled: true
-      url_create:
-        disabled: true
-        includeIn: "read"
   ### Dashboards feature should be moved from Analytics category to the Observability one.
+  dashboard_v2.category: "observability"
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover:
@@ -132,8 +84,6 @@ xpack.features.overrides:
           privileges: [ "read" ]
   ### Logs feature is hidden in Role management since it's automatically granted by either Infrastructure, or Applications features.
   logs.hidden: true
-  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps_v2.hidden: true
   ### Machine Learning feature should be moved from Analytics category to the Observability one and renamed to `AI Ops`.
   ml:
     category: "observability"
@@ -167,14 +117,7 @@ xpack.features.overrides:
       read.composedOf:
         - feature: "observability"
           privileges: [ "read" ]
-  ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  visualize:
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
-  visualize_v2:
-    hidden: true
-    ### The short URL sub-feature privilege should be always granted.
-    subFeatures.privileges.url_create.includeIn: "read"
+
 ## Enable the slo plugin
 xpack.slo.enabled: true
 
